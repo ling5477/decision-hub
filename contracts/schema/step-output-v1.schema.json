@@ -1,0 +1,30 @@
+{
+  "$id": "schema://step-output/v1",
+  "type": "object",
+  "required": [
+    "summary",
+    "claims",
+    "citations",
+    "proposed_actions",
+    "confidence"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string"
+    },
+    "claims": {
+      "type": "array"
+    },
+    "citations": {
+      "type": "array"
+    },
+    "proposed_actions": {
+      "type": "array"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  }
+}

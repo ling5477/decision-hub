@@ -1,0 +1,9 @@
+id: case-001
+title: "证据不足应 DEFER"
+input:
+  question: "是否应在 v1 使用 gRPC 作为模块通信？"
+  context: "v1 为模块化单体"
+expected:
+  decision.type: "DEFER"
+  gates:
+    EvidenceSufficiency: "FAIL"

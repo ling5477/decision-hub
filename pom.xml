@@ -1,0 +1,27 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.guidinglight</groupId>
+  <artifactId>decision-hub</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>dh-bom</module>
+    <module>dh-common</module>
+    <module>dh-observability</module>
+
+    <module>dh-domain</module>
+    <module>dh-usecase</module>
+    <module>dh-ledger</module>
+    <module>dh-providers</module>
+    <module>dh-memory</module>
+    <module>dh-knowledge</module>
+    <module>dh-infra</module>
+
+    <module>dh-api</module>
+    <module>dh-app</module>
+  </modules>
+</project>
