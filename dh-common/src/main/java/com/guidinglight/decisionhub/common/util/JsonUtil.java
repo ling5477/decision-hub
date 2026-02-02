@@ -5,9 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public final class JsonUtil {
   private static final ObjectMapper MAPPER = new ObjectMapper();
+
   private JsonUtil() {}
+
   public static String toJson(Object obj) {
-    try { return MAPPER.writeValueAsString(obj); }
-    catch (JsonProcessingException e) { throw new IllegalArgumentException("json serialize failed", e); }
+    try {
+      return MAPPER.writeValueAsString(obj);
+    } catch (JsonProcessingException e) {
+      throw new IllegalArgumentException("json serialize failed", e);
+    }
   }
 }

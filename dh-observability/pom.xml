@@ -11,8 +11,5 @@
   </parent>
 
   <artifactId>dh-observability</artifactId>
-<dependencies>
-  <!-- 仅提供资源配置文件：logback-spring.xml 等 -->
-</dependencies>
 
 </project>

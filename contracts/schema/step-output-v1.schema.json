@@ -13,13 +13,22 @@
       "type": "string"
     },
     "claims": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "citations": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "proposed_actions": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "confidence": {
       "type": "number",

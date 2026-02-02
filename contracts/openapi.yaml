@@ -2,4 +2,27 @@ openapi: 3.0.3
 info:
   title: decision-hub
   version: 0.1.0
-paths: {}
+paths:
+  /_ping:
+    get:
+      summary: ping
+      responses:
+        '200':
+          description: ok
+  /runs:
+    post:
+      summary: create run (skeleton)
+      responses:
+        '200':
+          description: ok
+  /runs/{runId}:
+    get:
+      summary: get run (skeleton)
+      parameters:
+        - in: path
+          name: runId
+          schema: { type: string }
+          required: true
+      responses:
+        '200':
+          description: ok

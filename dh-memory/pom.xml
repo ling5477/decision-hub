@@ -11,5 +11,12 @@
   </parent>
 
   <artifactId>dh-memory</artifactId>
+<dependencies>
+  <dependency>
+    <groupId>com.guidinglight</groupId>
+    <artifactId>dh-common</artifactId>
+    <version>${project.version}</version>
+  </dependency>
+</dependencies>
 
 </project>

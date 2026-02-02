@@ -12,6 +12,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Map;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -22,8 +24,19 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(ex.getHttpStatus()).body(body);
   }
 
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ApiResponse<Object>> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
+    String traceId = traceId(req, null);
+    Map<String, Object> detail = Map.of(
+        "errors", ex.getBindingResult().getFieldErrors().stream()
+            .map(fe -> Map.of("field", fe.getField(), "message", fe.getDefaultMessage()))
+            .toList()
+    );
+    ApiResponse<Object> body = ApiResponse.fail(CommonErrorCodes.BAD_REQUEST.code(), "Validation failed", traceId, detail);
+    return ResponseEntity.status(CommonErrorCodes.BAD_REQUEST.httpStatus()).body(body);
+  }
+
   @ExceptionHandler({
-      MethodArgumentNotValidException.class,
       MissingServletRequestParameterException.class,
       IllegalArgumentException.class
   })

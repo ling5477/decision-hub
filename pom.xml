@@ -21,6 +21,13 @@
     <module>dh-knowledge</module>
     <module>dh-infra</module>
 
+    <module>dh-security</module>
+    <module>dh-connector</module>
+    <module>dh-eval</module>
+    <module>dh-scheduler</module>
+    <module>dh-config</module>
+    <module>dh-sdk</module>
+
     <module>dh-api</module>
     <module>dh-app</module>
   </modules>

@@ -11,5 +11,32 @@
   </parent>
 
   <artifactId>dh-usecase</artifactId>
+<dependencies>
+  <dependency>
+    <groupId>com.guidinglight</groupId>
+    <artifactId>dh-common</artifactId>
+    <version>${project.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>com.guidinglight</groupId>
+    <artifactId>dh-domain</artifactId>
+    <version>${project.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>com.guidinglight</groupId>
+    <artifactId>dh-ledger</artifactId>
+    <version>${project.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>com.guidinglight</groupId>
+    <artifactId>dh-providers</artifactId>
+    <version>${project.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>com.guidinglight</groupId>
+    <artifactId>dh-knowledge</artifactId>
+    <version>${project.version}</version>
+  </dependency>
+</dependencies>
 
 </project>

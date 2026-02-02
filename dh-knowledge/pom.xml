@@ -11,5 +11,17 @@
   </parent>
 
   <artifactId>dh-knowledge</artifactId>
+<dependencies>
+  <dependency>
+    <groupId>com.guidinglight</groupId>
+    <artifactId>dh-common</artifactId>
+    <version>${project.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>com.guidinglight</groupId>
+    <artifactId>dh-connector</artifactId>
+    <version>${project.version}</version>
+  </dependency>
+</dependencies>
 
 </project>

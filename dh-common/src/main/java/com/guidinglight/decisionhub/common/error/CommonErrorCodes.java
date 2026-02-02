@@ -20,7 +20,18 @@ public enum CommonErrorCodes implements ErrorCode {
     this.httpStatus = httpStatus;
   }
 
-  @Override public String code() { return code; }
-  @Override public String message() { return message; }
-  @Override public int httpStatus() { return httpStatus; }
+  @Override
+  public String code() {
+    return code;
+  }
+
+  @Override
+  public String message() {
+    return message;
+  }
+
+  @Override
+  public int httpStatus() {
+    return httpStatus;
+  }
 }

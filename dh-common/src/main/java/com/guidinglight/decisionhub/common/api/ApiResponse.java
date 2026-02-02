@@ -18,18 +18,23 @@ public final class ApiResponse<T> {
     this.ts = System.currentTimeMillis();
   }
 
+  public static <T> ApiResponse<T> ok(T data) {
+    return ok(data, null, null);
+  }
+
   public static <T> ApiResponse<T> ok(T data, String traceId) {
+    return ok(data, traceId, null);
+  }
+
+  public static <T> ApiResponse<T> ok(T data, String traceId, Object detail) {
     ApiResponse<T> r = new ApiResponse<>();
     r.success = true;
     r.code = "OK";
     r.message = "OK";
     r.data = data;
     r.traceId = traceId;
+    r.detail = detail;
     return r;
-  }
-
-  public static <T> ApiResponse<T> ok(T data) {
-    return ok(data, null);
   }
 
   public static <T> ApiResponse<T> fail(String code, String message, String traceId, Object detail) {
