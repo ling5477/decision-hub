@@ -1,0 +1,38 @@
+version: 1.0.0
+default_pass_threshold: 0.6
+
+evaluators:
+  - name: constraint
+    type: rule
+    enabled: true
+    pass_threshold: 1.0
+    params:
+      violations_limit: 3
+      supported_keys:
+        - language
+        - no_web
+        - output_format
+        - must_include
+        - must_not_include
+
+  - name: completeness
+    type: rule
+    enabled: true
+    pass_threshold: 0.6
+    params:
+      patterns:
+        checklist: ["-", "*", "1.", "2.", "✅", "•"]
+        prioritization: ["必须", "建议", "可选", "优先级", "P0", "P1"]
+        actionable_next: ["下一步", "建议先", "可以直接", "落地", "执行"]
+
+  - name: consistency
+    type: rule
+    enabled: true
+    pass_threshold: 0.6
+    params:
+      lang:
+        cjk_ratio_threshold: 0.25
+      trace_keys:
+        - web.run
+        - mcp
+        - skills

@@ -1,0 +1,61 @@
+*** a/dh-domain/src/main/java/com/guidinglight/decisionhub/domain/run/Run.java
+--- b/dh-domain/src/main/java/com/guidinglight/decisionhub/domain/run/Run.java
+@@
+ public class Run {
+@@
+   private final String question;
+   private final Map<String, Object> configSnapshot;
++
++  /**
++   * v1：DecisionRecord（全量执行档案）建议直接挂在 Run 上，便于复盘/回放/回归测试。
++   * 落库时建议作为 JSON（MySQL JSON / LONGTEXT）。
++   */
++  private Map<String, Object> decisionRecord;
+@@
+   public Run(String tenantId, String question, Map<String, Object> configSnapshot, Instant now) {
+-    this(IdGenerator.newId(), tenantId, RunStatus.DRAFT, question, configSnapshot, now, now);
++    this(IdGenerator.newId(), tenantId, RunStatus.DRAFT, question, configSnapshot, null, now, now);
+   }
+ 
+   private Run(
+       String runId,
+       String tenantId,
+       RunStatus status,
+       String question,
+       Map<String, Object> configSnapshot,
++      Map<String, Object> decisionRecord,
+       Instant createdAt,
+       Instant updatedAt) {
+@@
+     this.status = status;
+     this.question = question;
+     this.configSnapshot = configSnapshot == null ? Map.of() : configSnapshot;
++    this.decisionRecord = decisionRecord;
+     this.createdAt = createdAt;
+     this.updatedAt = updatedAt;
+   }
+@@
+   public static Run rehydrate(
+       String runId,
+       String tenantId,
+       RunStatus status,
+       String question,
+       Map<String, Object> configSnapshot,
++      Map<String, Object> decisionRecord,
+       Instant createdAt,
+       Instant updatedAt) {
+-    return new Run(runId, tenantId, status, question, configSnapshot, createdAt, updatedAt);
++    return new Run(runId, tenantId, status, question, configSnapshot, decisionRecord, createdAt, updatedAt);
+   }
++
++  public Map<String, Object> getDecisionRecord() { return decisionRecord; }
++  public void setDecisionRecord(Map<String, Object> decisionRecord, Instant now) {
++    this.decisionRecord = decisionRecord;
++    this.updatedAt = now;
++  }
+@@
+   public Map<String, Object> getConfigSnapshot() { return configSnapshot; }
+   public List<RunStep> getSteps() { return Collections.unmodifiableList(steps); }
+   public Instant getCreatedAt() { return createdAt; }
+   public Instant getUpdatedAt() { return updatedAt; }
+ }

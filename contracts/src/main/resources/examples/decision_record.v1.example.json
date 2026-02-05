@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0.0",
+  "decision_id": "01HSZ2Y8K0R5C3J7X9VY9H2P3A",
+  "attempt": 1,
+  "created_at": "2026-02-05T15:40:00+08:00",
+  "status": "DONE",
+  "tags": [
+    "multi-model",
+    "decision-hub",
+    "v1"
+  ],
+  "input_context": {
+    "user_prompt": "这个系统现在还有什么需要准备的东西吗",
+    "constraints": {
+      "language": "zh-CN",
+      "no_web": false,
+      "output_format": "markdown"
+    },
+    "environment": {
+      "project": "decision-hub",
+      "timezone": "Asia/Shanghai"
+    },
+    "context_refs": []
+  },
+  "model_runs": [
+    {
+      "run_id": "run_gpt_001",
+      "model_name": "gpt-5.2-thinking",
+      "provider": "openai",
+      "status": "SUCCEEDED",
+      "started_at": "2026-02-05T15:40:01+08:00",
+      "finished_at": "2026-02-05T15:40:02+08:00",
+      "latency_ms": 980,
+      "prompt_snapshot": {
+        "system": "…",
+        "developer": "…",
+        "user": "…",
+        "tools": [],
+        "temperature": 0.7,
+        "top_p": 1
+      },
+      "raw_output": {
+        "text": "…（模型原始输出）"
+      },
+      "usage": {
+        "input_tokens": 1200,
+        "output_tokens": 650,
+        "total_tokens": 1850,
+        "cost_usd": 0.032
+      },
+      "tool_traces": [],
+      "errors": []
+    }
+  ],
+  "eval_results": [
+    {
+      "evaluator": "constraint",
+      "target": {
+        "type": "model_run",
+        "ref": "run_gpt_001"
+      },
+      "score": 1.0,
+      "passed": true,
+      "reason": "无硬约束违反",
+      "metrics": {
+        "violations": 0,
+        "items": []
+      }
+    },
+    {
+      "evaluator": "consistency",
+      "target": {
+        "type": "model_run",
+        "ref": "run_gpt_001"
+      },
+      "score": 1.0,
+      "passed": true,
+      "reason": "语言与声明一致",
+      "metrics": {
+        "lang.cjk_ratio": 0.55,
+        "conflicts": []
+      }
+    },
+    {
+      "evaluator": "completeness",
+      "target": {
+        "type": "model_run",
+        "ref": "run_gpt_001"
+      },
+      "score": 0.7,
+      "passed": true,
+      "reason": "包含清单与下一步建议",
+      "metrics": {
+        "hit.checklist": true,
+        "hit.prioritization": false,
+        "hit.actionable_next": true,
+        "hit_count": 2
+      }
+    }
+  ],
+  "final_decision": {
+    "strategy": {
+      "type": "rule_based",
+      "params": {
+        "rule": "pick_only"
+      }
+    },
+    "selected": {
+      "type": "model_run",
+      "ref": "run_gpt_001"
+    },
+    "confidence": 0.72,
+    "output": {
+      "text": "…（最终输出）",
+      "format": "markdown"
+    },
+    "warnings": []
+  },
+  "audit": {
+    "trace_id": "trace_abc",
+    "session_id": "sess_001",
+    "user_id": "u_anon"
+  }
+}

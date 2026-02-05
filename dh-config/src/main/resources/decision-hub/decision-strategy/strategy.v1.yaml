@@ -1,0 +1,57 @@
+version: 1.0.0
+
+gate:
+  require_passed:
+    - constraint
+    - consistency
+
+quality_score:
+  formula: "0.50*completeness + 0.30*consistency + 0.20*constraint"
+  min_quality: 0.60
+
+strategies:
+  majority_vote:
+    enabled: true
+    params:
+      vote_key: "normalized_answer_hash"
+      tie_breaker: "highest_quality"
+      min_votes: 2
+
+  weighted_vote:
+    enabled: true
+    params:
+      model_weights:
+        gpt-5.2-thinking: 0.40
+        gemini-2.x: 0.30
+        grok-x: 0.30
+      tie_breaker: "highest_quality"
+
+  rule_based:
+    enabled: true
+    params:
+      rules:
+        - if: "best_quality >= 0.85"
+          then: "pick_best_quality"
+        - if: "candidate_count == 1"
+          then: "pick_only"
+        - if: "otherwise"
+          then: "fallback_to_weighted_vote"
+
+  hybrid:
+    enabled: true
+    params:
+      order:
+        - rule_based
+        - weighted_vote
+        - majority_vote
+
+fallback:
+  when_no_candidates:
+    action: "regenerate"
+    params:
+      reason: "all_failed_gate"
+      max_retries: 1
+  when_low_quality:
+    action: "ask_human"
+    params:
+      reason: "min_quality_not_met"

@@ -1,0 +1,71 @@
+*** a/dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/run/RunService.java
+--- b/dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/run/RunService.java
+@@
+ public class RunService {
+@@
+   public Run create(String tenantId, String question, Map<String, Object> configSnapshot) {
+     Run run = new Run(tenantId, question, configSnapshot, TimeProvider.now());
++    // v1：decision_id = run_id，初始化 DecisionRecord（全量可复盘档案）
++    run.setDecisionRecord(
++        com.guidinglight.decisionhub.usecase.run.support.DecisionRecordV1Factory.init(run),
++        TimeProvider.now()
++    );
+     runRepository.save(run);
+@@
+     return run;
+   }
+ 
++  /**
++   * v1：把 X/Y/Z/W 接入 Run 生命周期。
++   * 说明：这里给的是“编排骨架”。实际模型调用/评估器/策略执行建议放到专门的 Executor 类里，避免 RunService 过胖。
++   */
++  public Run start(String runId) {
++    Run run = get(runId);
++
++    run.start(TimeProvider.now());
++    runRepository.save(run);
++    eventStore.append(new LedgerEvent(
++        IdGenerator.newId(),
++        run.getRunId(),
++        run.getTenantId(),
++        LedgerEventType.RUN_STARTED,
++        TimeProvider.now(),
++        Map.of("runId", run.getRunId())
++    ));
++
++    try {
++      // TODO: 1) 调用模型并写入 model_runs[]
++      // TODO: 2) 执行 evaluators（constraint/consistency/completeness）并写入 eval_results[]
++      // TODO: 3) 执行策略（hybrid）写入 final_decision，并发出 DECISION_FINALIZED 事件
++
++      // v1：若你暂时没有执行链路，可先标记成功（但建议至少写入 final_decision 占位）
++      run.succeed(TimeProvider.now());
++      runRepository.save(run);
++      eventStore.append(new LedgerEvent(
++          IdGenerator.newId(),
++          run.getRunId(),
++          run.getTenantId(),
++          LedgerEventType.DECISION_FINALIZED,
++          TimeProvider.now(),
++          Map.of("runId", run.getRunId())
++      ));
++      return run;
++    } catch (Exception ex) {
++      run.fail(TimeProvider.now());
++      runRepository.save(run);
++      eventStore.append(new LedgerEvent(
++          IdGenerator.newId(),
++          run.getRunId(),
++          run.getTenantId(),
++          LedgerEventType.RUN_FAILED,
++          TimeProvider.now(),
++          Map.of("runId", run.getRunId(), "error", ex.getMessage())
++      ));
++      throw ex;
++    }
++  }
++
+   public Run get(String runId) {
+     return runRepository.findById(runId).orElseThrow();
+   }
+ }

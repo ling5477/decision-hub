@@ -1,0 +1,16 @@
+id: GC-0001
+input:
+  user_prompt: "这个系统现在还有什么需要准备的东西吗"
+  constraints:
+    language: "zh-CN"
+    output_format: "markdown"
+expect:
+  must_include:
+    - "P0"
+    - "落盘"
+  must_not_include:
+    - "无法"
+  min_quality: 0.6
+  require_passed:
+    - constraint
+    - consistency
