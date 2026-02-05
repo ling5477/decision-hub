@@ -4,8 +4,8 @@
 格式：
 <type>(<scope>): <subject>
 
-可选：
-<type>(<scope>): <subject> [plan:<planId>] [run:<runId>]
+可选（计划/运行关联）：
+<type>(<scope>): <subject> [plan:<planId>] <subject> <subject>[run:<runId>] <subject>
 
 ### type 取值（固定集合）
 - feat：新增功能
@@ -28,9 +28,9 @@
 - 50 字以内
 
 示例：
-- feat(dh-usecase): 新增 RunCreate 门面与最小实现 [plan:2026-02-04_M1_run_gate_mockprovider]
-- test(dh-eval): 增加 run_create_001 golden 用例并绑定 verify [plan:2026-02-04_M1_run_gate_mockprovider]
-- fix(dh-common): 修复全局异常处理返回码不一致 [plan:2026-02-06_M2_persistence_ledger]
+- feat(dh-usecase): 新增 RunCreate 门面与最小实现 `[plan:2026-02-04_M1_run_gate_mockprovider]`
+- test(dh-eval): 增加 run_create_001 golden 用例并绑定 verify `[plan:2026-02-04_M1_run_gate_mockprovider]`
+- fix(dh-common): 修复全局异常处理返回码不一致 `[plan:2026-02-06_M2_persistence_ledger]`
 
 ## 2. 必须关联计划
 凡是实现/修复类提交（feat/fix/refactor/perf/test/build/ci），必须在 commit message 或 PR 描述中关联 planId：
