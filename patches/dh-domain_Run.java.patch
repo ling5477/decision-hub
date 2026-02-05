@@ -1,0 +1,41 @@
+*** a/dh-domain/src/main/java/com/guidinglight/decisionhub/domain/run/Run.java
+--- b/dh-domain/src/main/java/com/guidinglight/decisionhub/domain/run/Run.java
+@@
+ public class Run {
+@@
+   private final String question;
+   private final Map<String, Object> configSnapshot;
++
++  /**
++   * v1：DecisionRecord（全量执行档案）。
++   * 用于记录：model_runs / eval_results / final_decision 等，便于复盘与回放。
++   * 持久化层建议增加 JSON/LONGTEXT 列 decision_record_json。
++   */
++  private Map<String, Object> decisionRecord;
+@@
+   private Run(
+       String runId,
+       String tenantId,
+       RunStatus status,
+       String question,
+       Map<String, Object> configSnapshot,
+       Instant createdAt,
+       Instant updatedAt) {
+@@
+     this.question = question;
+     this.configSnapshot = configSnapshot == null ? Map.of() : configSnapshot;
++    this.decisionRecord = null;
+     this.createdAt = createdAt;
+     this.updatedAt = updatedAt;
+   }
+@@
+   public Map<String, Object> getConfigSnapshot() { return configSnapshot; }
++  public Map<String, Object> getDecisionRecord() { return decisionRecord; }
++  public void setDecisionRecord(Map<String, Object> decisionRecord, Instant now) {
++    this.decisionRecord = decisionRecord;
++    this.updatedAt = now;
++  }
+   public List<RunStep> getSteps() { return Collections.unmodifiableList(steps); }
+   public Instant getCreatedAt() { return createdAt; }
+   public Instant getUpdatedAt() { return updatedAt; }
+ }
