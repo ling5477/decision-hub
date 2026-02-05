@@ -1,0 +1,4 @@
+version = "1.0"
+[[rule]] match="rm -rf /" decision="forbid" reason="禁止高危删除"
+[[rule]] match="Remove-Item -Recurse -Force C:\\" decision="forbid" reason="禁止删除系统目录"
+[[rule]] match="docker system prune -a" decision="prompt" reason="可能删除大量镜像/缓存"

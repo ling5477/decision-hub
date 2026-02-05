@@ -1,5 +1,13 @@
 {
-  "decision": {
-    "type": "DEFER"
+  "caseId": "case-001",
+  "operation": "RUN_CREATE",
+  "expect": {
+    "assertList": [
+      {
+        "path": "$.decision.type",
+        "op": "EQ",
+        "value": "DEFER"
+      }
+    ]
   }
 }

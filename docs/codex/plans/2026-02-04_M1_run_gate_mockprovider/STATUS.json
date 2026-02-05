@@ -1,0 +1,49 @@
+{
+  "milestone": "M1",
+  "planId": "2026-02-04_M1_run_gate_mockprovider",
+  "state": "ACTIVE",
+  "currentStep": 1,
+  "steps": [
+    {
+      "idx": 1,
+      "title": "契约确认（contracts 如需）",
+      "status": "TODO",
+      "evidence": []
+    },
+    {
+      "idx": 2,
+      "title": "新增 golden 用例",
+      "status": "TODO",
+      "evidence": []
+    },
+    {
+      "idx": 3,
+      "title": "实现 dh-usecase Facade 最小闭环",
+      "status": "TODO",
+      "evidence": []
+    },
+    {
+      "idx": 4,
+      "title": "实现 dh-eval Golden runner + Maven 绑定 verify",
+      "status": "TODO",
+      "evidence": []
+    },
+    {
+      "idx": 5,
+      "title": "引入 Checkstyle + verify.ps1",
+      "status": "TODO",
+      "evidence": []
+    },
+    {
+      "idx": 6,
+      "title": "verify 全通过 + 变更记录",
+      "status": "TODO",
+      "evidence": []
+    }
+  ],
+  "lastVerify": {
+    "time": null,
+    "result": "UNKNOWN",
+    "summary": ""
+  }
+}

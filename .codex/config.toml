@@ -1,0 +1,6 @@
+[defaults]
+language = "zh-CN"
+
+[mcp]
+required = ["intellij-mcp"]
+optional = ["openaiDeveloperDocs"]

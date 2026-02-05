@@ -1,0 +1,25 @@
+{
+  "caseId": "run_create_001",
+  "title": "创建 Run 并返回 runId",
+  "operation": "RUN_CREATE",
+  "input": {
+    "tenantId": "t1",
+    "topic": "decision hub v1",
+    "options": {
+      "roleTemplateId": "software_arch_review_v1"
+    }
+  },
+  "expect": {
+    "assertList": [
+      {
+        "path": "$.runId",
+        "op": "NOT_EMPTY"
+      },
+      {
+        "path": "$.status",
+        "op": "EQ",
+        "value": "CREATED"
+      }
+    ]
+  }
+}
