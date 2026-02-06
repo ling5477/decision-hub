@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/decision_hub
-    username: decision_hub
-    password: decision_hub
+    username: postgres
+    password: 123456
   data:
     redis:
       url: redis://localhost:6379

@@ -4,7 +4,7 @@ server:
 spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/decision_hub}
-    username: ${DB_USER:root}
+    username: ${DB_USER:postgres}
     password: ${DB_PASS:123456}
   jpa:
     open-in-view: false
