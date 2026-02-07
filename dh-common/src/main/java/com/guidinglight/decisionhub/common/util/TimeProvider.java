@@ -16,7 +16,7 @@ public final class TimeProvider {
     return now().toEpochMilli();
   }
 
-  public static void useClock(Clock c) {
+  public static void useClock(final Clock c) {
     clock = c;
   }
 }

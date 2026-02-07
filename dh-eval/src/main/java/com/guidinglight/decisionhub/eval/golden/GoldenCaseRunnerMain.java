@@ -6,6 +6,8 @@ import com.guidinglight.decisionhub.usecase.facade.DecisionHubFacade;
 import com.guidinglight.decisionhub.usecase.facade.dto.RunCreateCommand;
 import com.guidinglight.decisionhub.usecase.facade.dto.RunCreateResult;
 import com.guidinglight.decisionhub.usecase.facade.impl.DecisionHubFacadeImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,41 +26,61 @@ import java.util.stream.Stream;
  */
 public final class GoldenCaseRunnerMain {
 
+    private static final Logger log = LoggerFactory.getLogger(GoldenCaseRunnerMain.class);
+
     private GoldenCaseRunnerMain() {}
 
-    public static void main(String[] args) throws Exception {
-        String repoRoot = System.getProperty("repo.root", ".");
-        String casesDir = System.getProperty("golden.cases.dir", Path.of(repoRoot, "golden_cases").toString());
+    public static void main(final String[] args) {
+        try {
+            run();
+        } catch (final RuntimeException e) {
+            // 兜底：避免静默失败
+            log.error("[GOLDEN] runner crashed: {}", safeMsg(e), e);
+            System.exit(2);
+        }
+    }
+
+    private static void run() {
+        final String repoRoot = System.getProperty("repo.root", ".");
+        final String casesDir =
+                System.getProperty("golden.cases.dir", Path.of(repoRoot, "golden_cases").toString());
 
         // 只扫描 run 目录，避免把 expected/ 等非用例 JSON 当成用例处理
-        Path runDir = Path.of(casesDir, "run");
+        final Path runDir = Path.of(casesDir, "run");
         if (!Files.exists(runDir)) {
-            System.err.println("[GOLDEN] run dir not found: " + runDir.toAbsolutePath());
+            log.error("[GOLDEN] run dir not found: {}", runDir.toAbsolutePath());
             System.exit(2);
             return;
         }
 
-        List<Path> caseFiles = listJsonFiles(runDir);
+        final List<Path> caseFiles = listJsonFiles(runDir);
         if (caseFiles.isEmpty()) {
-            System.err.println("[GOLDEN] no case files found under: " + runDir.toAbsolutePath());
+            log.error("[GOLDEN] no case files found under: {}", runDir.toAbsolutePath());
             System.exit(2);
             return;
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        DecisionHubFacade facade = new DecisionHubFacadeImpl();
+        final ObjectMapper mapper = new ObjectMapper();
+        final DecisionHubFacade facade = new DecisionHubFacadeImpl();
 
         int failedCases = 0;
 
-        for (Path f : caseFiles) {
-            JsonNode node = mapper.readTree(f.toFile());
+        for (final Path f : caseFiles) {
+            final JsonNode node;
+            try {
+                node = mapper.readTree(f.toFile());
+            } catch (final Exception e) {
+                log.error("[GOLDEN] failed to read json file={}, err={}", f, safeMsg(e), e);
+                failedCases++;
+                continue;
+            }
 
-            String caseId = textOrNull(node, "caseId");
-            String title = textOrNull(node, "title");
-            String op = node.path("operation").asText("");
+            final String caseId = textOrNull(node, "caseId");
+            final String title = textOrNull(node, "title");
+            final String op = node.path("operation").asText("");
 
             // 用例级别的失败收集：保证 PASS/FAIL 打印准确
-            List<String> caseErrors = new ArrayList<>();
+            final List<String> caseErrors = new ArrayList<>();
 
             if (!"RUN_CREATE".equals(op)) {
                 caseErrors.add("unknown operation: '" + op + "'");
@@ -79,28 +101,30 @@ public final class GoldenCaseRunnerMain {
                 continue;
             }
 
-            RunCreateCommand cmd;
+            final RunCreateCommand cmd;
             try {
                 cmd = mapper.treeToValue(cmdNode, RunCreateCommand.class);
-            } catch (Exception e) {
-                caseErrors.add("failed to parse command: " + e.getClass().getSimpleName() + ": " + safeMsg(e));
+            } catch (final Exception e) {
+                caseErrors.add(
+                        "failed to parse command: " + e.getClass().getSimpleName() + ": " + safeMsg(e));
                 printCaseResult(f, caseId, title, op, caseErrors);
                 failedCases++;
                 continue;
             }
 
-            RunCreateResult res;
+            final RunCreateResult res;
             try {
                 res = facade.createRun(cmd);
-            } catch (Exception e) {
-                caseErrors.add("facade.createRun threw: " + e.getClass().getSimpleName() + ": " + safeMsg(e));
+            } catch (final Exception e) {
+                caseErrors.add(
+                        "facade.createRun threw: " + e.getClass().getSimpleName() + ": " + safeMsg(e));
                 printCaseResult(f, caseId, title, op, caseErrors);
                 failedCases++;
                 continue;
             }
 
             // asserts
-            JsonNode assertList = node.path("expect").path("assertList");
+            final JsonNode assertList = node.path("expect").path("assertList");
             if (!assertList.isArray()) {
                 caseErrors.add("expect.assertList must be an array");
                 printCaseResult(f, caseId, title, op, caseErrors);
@@ -108,16 +132,18 @@ public final class GoldenCaseRunnerMain {
                 continue;
             }
 
-            for (JsonNode a : assertList) {
-                String path = a.path("path").asText("");
-                String aop = a.path("op").asText("");
-                JsonNode valNode = a.get("value"); // 允许不存在（如 NOT_EMPTY）
-                String expected = (valNode == null || valNode.isNull()) ? null : valNode.asText();
+            for (final JsonNode a : assertList) {
+                final String path = a.path("path").asText("");
+                final String aop = a.path("op").asText("");
+                final JsonNode valNode = a.get("value"); // 允许不存在（如 NOT_EMPTY）
+                final String expected =
+                        (valNode == null || valNode.isNull()) ? null : valNode.asText();
 
                 // 目前只实现最小断言集，后续可扩展为 JSONPath 引擎
                 if ("$.runId".equals(path) && "NOT_EMPTY".equals(aop)) {
                     if (res.getRunId() == null || res.getRunId().isBlank()) {
-                        caseErrors.add("assert failed: $.runId NOT_EMPTY, actual=" + String.valueOf(res.getRunId()));
+                        caseErrors.add(
+                                "assert failed: $.runId NOT_EMPTY, actual=" + String.valueOf(res.getRunId()));
                     }
                     continue;
                 }
@@ -126,7 +152,11 @@ public final class GoldenCaseRunnerMain {
                     if (expected == null) {
                         caseErrors.add("assert invalid: $.status EQ requires 'value'");
                     } else if (res.getStatus() == null || !expected.equals(res.getStatus())) {
-                        caseErrors.add("assert failed: $.status EQ " + expected + ", actual=" + String.valueOf(res.getStatus()));
+                        caseErrors.add(
+                                "assert failed: $.status EQ "
+                                        + expected
+                                        + ", actual="
+                                        + String.valueOf(res.getStatus()));
                     }
                     continue;
                 }
@@ -141,44 +171,58 @@ public final class GoldenCaseRunnerMain {
         }
 
         if (failedCases > 0) {
-            System.err.println("[GOLDEN] FAILED cases=" + failedCases);
+            log.error("[GOLDEN] FAILED cases={}", failedCases);
             System.exit(2);
         } else {
-            System.out.println("[GOLDEN] ALL PASS cases=" + caseFiles.size());
+            log.info("[GOLDEN] ALL PASS cases={}", caseFiles.size());
         }
     }
 
-    private static List<Path> listJsonFiles(Path dir) throws Exception {
+    private static List<Path> listJsonFiles(final Path dir) {
         try (Stream<Path> s = Files.walk(dir)) {
             return s.filter(Files::isRegularFile)
                     .filter(p -> p.getFileName().toString().toLowerCase().endsWith(".json"))
                     .sorted(Comparator.comparing(p -> p.getFileName().toString()))
                     .toList();
+        } catch (final Exception e) {
+            // 此处属于环境/IO问题，视为用例加载失败
+            log.error("[GOLDEN] list json files failed, dir={}, err={}", dir, safeMsg(e), e);
+            return List.of();
         }
     }
 
-    private static void printCaseResult(Path file, String caseId, String title, String op, List<String> errors) {
-        String idPart = (caseId == null || caseId.isBlank()) ? "" : (" caseId=" + caseId);
-        String titlePart = (title == null || title.isBlank()) ? "" : (" title=" + title);
+    private static void printCaseResult(
+            final Path file,
+            final String caseId,
+            final String title,
+            final String op,
+            final List<String> errors) {
+
+        final String idPart = (caseId == null || caseId.isBlank()) ? "" : (" caseId=" + caseId);
+        final String titlePart = (title == null || title.isBlank()) ? "" : (" title=" + title);
+
         if (errors == null || errors.isEmpty()) {
-            System.out.println("[GOLDEN] PASS op=" + op + idPart + titlePart + " file=" + file);
+            log.info("[GOLDEN] PASS op={}{}{} file={}", op, idPart, titlePart, file);
             return;
         }
-        System.err.println("[GOLDEN] FAIL op=" + op + idPart + titlePart + " file=" + file);
-        for (String e : errors) {
-            System.err.println("         - " + e);
+
+        log.error("[GOLDEN] FAIL op={}{}{} file={}", op, idPart, titlePart, file);
+        for (final String e : errors) {
+            log.error("         - {}", e);
         }
     }
 
-    private static String textOrNull(JsonNode node, String field) {
-        JsonNode v = node.get(field);
-        if (v == null || v.isNull()) return null;
-        String s = v.asText();
+    private static String textOrNull(final JsonNode node, final String field) {
+        final JsonNode v = node.get(field);
+        if (v == null || v.isNull()) {
+            return null;
+        }
+        final String s = v.asText();
         return (s == null || s.isBlank()) ? null : s;
     }
 
-    private static String safeMsg(Throwable t) {
-        String m = t.getMessage();
+    private static String safeMsg(final Throwable t) {
+        final String m = t.getMessage();
         return (m == null) ? "" : m;
     }
 }

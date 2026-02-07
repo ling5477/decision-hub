@@ -18,15 +18,15 @@ public final class ApiResponse<T> {
     this.ts = System.currentTimeMillis();
   }
 
-  public static <T> ApiResponse<T> ok(T data) {
+  public static <T> ApiResponse<T> ok(final T data) {
     return ok(data, null, null);
   }
 
-  public static <T> ApiResponse<T> ok(T data, String traceId) {
+  public static <T> ApiResponse<T> ok(final T data, final String traceId) {
     return ok(data, traceId, null);
   }
 
-  public static <T> ApiResponse<T> ok(T data, String traceId, Object detail) {
+  public static <T> ApiResponse<T> ok(final T data, final String traceId, final Object detail) {
     ApiResponse<T> r = new ApiResponse<>();
     r.success = true;
     r.code = "OK";
@@ -37,7 +37,7 @@ public final class ApiResponse<T> {
     return r;
   }
 
-  public static <T> ApiResponse<T> fail(String code, String message, String traceId, Object detail) {
+  public static <T> ApiResponse<T> fail(final String code, final String message, final String traceId, final Object detail) {
     ApiResponse<T> r = new ApiResponse<>();
     r.success = false;
     r.code = code;

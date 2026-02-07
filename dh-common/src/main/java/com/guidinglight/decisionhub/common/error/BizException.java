@@ -7,7 +7,7 @@ public class BizException extends RuntimeException {
   private final Object detail;
   private final String traceId;
 
-  public BizException(ErrorCode ec, String message, Object detail, String traceId) {
+  public BizException(final ErrorCode ec, final String message, final Object detail, final String traceId) {
     super(message);
     this.httpStatus = ec.httpStatus();
     this.code = ec.code();
@@ -15,7 +15,7 @@ public class BizException extends RuntimeException {
     this.traceId = traceId;
   }
 
-  public BizException(ErrorCode ec) {
+  public BizException(final ErrorCode ec) {
     this(ec, ec.message(), null, null);
   }
 

@@ -1,28 +1,86 @@
 <?xml version="1.0"?>
-<!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
         "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
 <module name="Checker">
+
+  <!-- ========================= -->
+  <!-- 基础配置（冻结版） -->
+  <!-- ========================= -->
   <property name="charset" value="UTF-8"/>
   <property name="severity" value="error"/>
 
+  <!-- 排除生成代码 -->
+  <property name="fileExtensions" value="java"/>
+
+  <module name="SuppressionFilter">
+    <property name="file" value="${config_loc}/checkstyle-suppressions.xml"/>
+    <property name="optional" value="true"/>
+  </module>
+
+  <!-- ========================= -->
+  <!-- 文件级检查 -->
+  <!-- ========================= -->
+  <module name="FileTabCharacter"/>
+
+  <module name="LineLength">
+    <!-- 不限制行长度，交给 google-java-format -->
+    <property name="max" value="9999"/>
+  </module>
+
+  <!-- ========================= -->
+  <!-- Java AST 级检查 -->
+  <!-- ========================= -->
   <module name="TreeWalker">
 
-    <!-- ✅ JavadocType：10.20.0 仍使用 scope/excludeScope（不要用 accessModifiers） -->
-    <module name="JavadocType">
-      <property name="scope" value="protected"/>
-      <property name="excludeScope" value="private"/>
+    <!--- 命名规范 - -->
+    <module name="PackageName"/>
+    <module name="TypeName"/>
+    <module name="MethodName"/>
+    <module name="MemberName"/>
+    <module name="ParameterName"/>
+    <module name="LocalVariableName"/>
+
+    <!--- import 规则（不和 Spotless 冲突） - -->
+    <module name="AvoidStarImport"/>
+    <module name="UnusedImports"/>
+
+    <!--- 代码质量 / 可维护性 - -->
+    <module name="EmptyBlock">
+      <property name="option" value="TEXT"/>
     </module>
 
-    <!-- ✅ JavadocMethod：使用 accessModifiers（scope 在新版本里已不适用） -->
-    <module name="JavadocMethod">
-      <property name="accessModifiers" value="public,protected"/>
+    <module name="EqualsHashCode"/>
+
+    <module name="NeedBraces"/>
+
+    <module name="SimplifyBooleanExpression"/>
+    <module name="SimplifyBooleanReturn"/>
+
+    <!--- 危险 / 不推荐用法 - -->
+    <module name="IllegalImport">
+      <property name="illegalPkgs"
+                value="sun,com.sun"/>
     </module>
 
-    <!-- ✅ JavadocVariable：10.20.0 仍使用 scope/excludeScope（accessModifiers 要到 10.22.0 才引入） -->
-    <module name="JavadocVariable">
-      <property name="scope" value="protected"/>
-      <property name="excludeScope" value="private"/>
+    <module name="IllegalThrows">
+      <property name="illegalClassNames"
+                value="java.lang.Exception,java.lang.Throwable"/>
     </module>
+
+    <!-- - Spring / 企业项目常见约束 - -->
+    <!-- 禁止使用 System.out / System.err -->
+    <module name="Regexp">
+      <property name="format" value="System\.(out|err)\."/>
+      <property name="illegalPattern" value="true"/>
+      <property name="message"
+                value="禁止使用 System.out/System.err，请使用日志框架"/>
+    </module>
+
+    <!--- 结构性约束（轻量） - -->
+    <module name="FinalClass"/>
+    <module name="FinalParameters"/>
 
   </module>
 </module>

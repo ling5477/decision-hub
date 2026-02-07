@@ -8,7 +8,7 @@ public final class JsonUtil {
 
   private JsonUtil() {}
 
-  public static String toJson(Object obj) {
+  public static String toJson(final Object obj) {
     try {
       return MAPPER.writeValueAsString(obj);
     } catch (JsonProcessingException e) {

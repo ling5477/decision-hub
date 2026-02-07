@@ -21,21 +21,17 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <flyway.version>12.0.0</flyway.version>
     <archunit.version>1.3.0</archunit.version>
     <testcontainers.version>1.20.4</testcontainers.version>
-    <spotless.version>2.45.0</spotless.version>
+    <spotless.version>3.1.0</spotless.version>
+    <googleJavaFormat.version>1.28.0</googleJavaFormat.version>
     <checkstyle.version>10.20.0</checkstyle.version>
+    <checkstyle.plugin.version>3.3.1</checkstyle.plugin.version>
     <jackson.version>2.17.2</jackson.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.flywaydb</groupId>
-        <artifactId>flyway-core</artifactId>
-        <version>${flyway.version}</version>
-      </dependency>
       <dependency>
         <groupId>com.tngtech.archunit</groupId>
         <artifactId>archunit-junit5</artifactId>
@@ -125,44 +121,57 @@
       <id>quality</id>
       <build>
         <plugins>
+
+          <!-- ========== Checkstyle（你已有的话可保留原配置） ========== -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
-            <version>3.3.1</version>
+            <version>${checkstyle.plugin.version}</version>
+
             <configuration>
+              <!-- 主配置文件 -->
               <configLocation>${maven.multiModuleProjectDirectory}/config/checkstyle/checkstyle.xml</configLocation>
+
+              <!-- ✅ 冻结版关键：把 Maven 路径注入给 Checkstyle -->
+              <propertyExpansion>
+                config_loc=${maven.multiModuleProjectDirectory}/config/checkstyle
+              </propertyExpansion>
+
               <consoleOutput>true</consoleOutput>
               <failsOnError>true</failsOnError>
+              <skipExec>true</skipExec>
             </configuration>
+
             <executions>
               <execution>
                 <id>checkstyle</id>
                 <phase>validate</phase>
-                <goals><goal>check</goal></goals>
+                <goals>
+                  <goal>check</goal>
+                </goals>
               </execution>
             </executions>
           </plugin>
 
+          <!-- ========== Spotless（冻结版 Final） ========== -->
+          <!-- Spotless：只托管版本 + 默认 formatter 配置 -->
           <plugin>
             <groupId>com.diffplug.spotless</groupId>
             <artifactId>spotless-maven-plugin</artifactId>
             <version>${spotless.version}</version>
             <configuration>
               <java>
-                <googleJavaFormat/>
+                <googleJavaFormat>
+                  <version>${googleJavaFormat.version}</version>
+                </googleJavaFormat>
                 <removeUnusedImports/>
               </java>
             </configuration>
-            <executions>
-              <execution>
-                <id>spotless</id>
-                <phase>validate</phase>
-                <goals><goal>check</goal></goals>
-              </execution>
-            </executions>
           </plugin>
+
         </plugins>
       </build>
     </profile>
   </profiles>
+
 </project>

@@ -14,7 +14,7 @@ public enum CommonErrorCodes implements ErrorCode {
   private final String message;
   private final int httpStatus;
 
-  CommonErrorCodes(String code, String message, int httpStatus) {
+  CommonErrorCodes(final String code, final String message, final int httpStatus) {
     this.code = code;
     this.message = message;
     this.httpStatus = httpStatus;
