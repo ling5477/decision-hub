@@ -2,12 +2,10 @@ $ErrorActionPreference = "Stop"
 
 # ===== Encoding Hardening (UTF-8) =====
 try { & chcp 65001 > $null } catch { }
-
 $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
 $OutputEncoding = $utf8NoBom
 [Console]::OutputEncoding = $utf8NoBom
 # ===== Encoding Hardening End =====
-
 
 $startTime = Get-Date
 Write-Host "== Decision Hub Verify =="
@@ -31,16 +29,20 @@ try {
   # Fast-fail guards for Codex workflow files
   Assert-NoBom "AGENTS.md"
   Assert-NoBom "docs/codex/WORK_ORDER.md"
-  Assert-NoBom "docs/codex/PLAN_QUEUE.json"
-  Assert-NoBom "docs/codex/PLAN_CURRENT_POINTER.json"
-  Assert-JsonParsable "docs/codex/PLAN_QUEUE.json"
-  Assert-JsonParsable "docs/codex/PLAN_CURRENT_POINTER.json"
-  # NOTE: activePlanId may change; STATUS parse is best-effort
-  $ptr = (Get-Content -Raw -Encoding UTF8 "docs/codex/PLAN_CURRENT_POINTER.json" | ConvertFrom-Json)
-  if ($ptr.activePlanId) {
-    $statusPath = "docs/codex/plans/{0}/STATUS.json" -f $ptr.activePlanId
-    Assert-NoBom $statusPath
-    Assert-JsonParsable $statusPath
+
+  # v3: minimal workflow guard (authoritative)
+  $activeStatus = "docs/codex/plans/_active/STATUS.json"
+  Assert-NoBom $activeStatus
+  Assert-JsonParsable $activeStatus
+
+  # v3: queue/pointer are informational only (non-blocking)
+  foreach ($p in @("docs/codex/PLAN_QUEUE.json", "docs/codex/PLAN_CURRENT_POINTER.json")) {
+    try {
+      Assert-NoBom $p
+      Assert-JsonParsable $p
+    } catch {
+      Write-Warning ("Non-blocking workflow file issue: {0} -> {1}" -f $p, $_.Exception.Message)
+    }
   }
 
   mvn verify

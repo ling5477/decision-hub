@@ -1,0 +1,13 @@
+{
+  "caseId": "case-002",
+  "operation": "RUN_CREATE",
+  "expect": {
+    "assertList": [
+      {
+        "path": "$.decision.type",
+        "op": "EQ",
+        "value": "APPROVE"
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+id: case-002
+title: "证据充分可推进则 APPROVE"
+input:
+  question: "是否在 v1 将模块间通信统一为 HTTP API？"
+  context: "v1 为模块化单体，接口边界与运维能力已明确"
+expected:
+  decision.type: "APPROVE"
+  gates:
+    EvidenceSufficiency: "PASS"
+

@@ -35,12 +35,15 @@
 
 ## Codex 执行协议（强制）
 - **唯一权威**：执行与推进规则以 `docs/codex/WORK_ORDER.md` 为准（本文件不重复定义细节）。
-- **启动必读**：按 `WORK_ORDER.md` 指定顺序读取计划/指针/状态文件，然后再决定下一步。
-- **落盘优先**：涉及实现/修改时，计划与进度必须落盘到 `docs/codex/plans/<activePlanId>/`（PLAN.md + STATUS.json）。
+- **启动必读（最小集合）**：仅需读取 `WORK_ORDER.md` 与 `docs/codex/plans/_active/STATUS.json`（可选再读 `PLAN.md`）即可决定下一步。
+- **落盘优先**：涉及实现/修改时，计划与进度必须落盘到 `docs/codex/plans/_active/`（`PLAN.md` + `STATUS.json`）。
 - **验证门禁**：`taskType=delivery` 必须执行 `scripts/verify.ps1` 并回填 `STATUS.json:lastVerify`；变更摘要写入 `docs/codex/CHANGE_NOTES.md`。
+- **队列/指针降级**：`docs/codex/PLAN_QUEUE.json` 与 `docs/codex/PLAN_CURRENT_POINTER.json` 仅用于人类排期/追溯，不作为 Codex 决策必读与门禁依赖。
 - **MCP 使用**：优先使用 IntelliJ MCP 做语义重构；如 MCP 不可用必须降级为最小改动 + 可验证变更（禁止盲目全局替换）。
+- **PR 模板**：`.github/PULL_REQUEST_TEMPLATE.md` 仅用于 PR 描述模板，不作为 Codex 运行门禁；开 PR/合并前按模板补齐 activePlanId、verify 摘要与测试勾选。
 
 ## 日志规范
+
 
 - 📘 [日志规范（Final）](docs/logging-spec-final.md)
 - 禁止 `System.out / System.err`
