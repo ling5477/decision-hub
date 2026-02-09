@@ -11,12 +11,12 @@
 > 可选（计划 / 运行关联）：
 >
 > ```
-> <type>(<scope>): [plan:<planId>] [run:<runId>] <subject>
+> <type>(<scope>): [plan:<activePlanId>] [run:<runId>] <subject>
 > ```
 >
 > > 说明：
 > >
-> > - `[plan:<planId>]`：关联执行计划（可选）
+> > - `[plan:<activePlanId>]`：关联执行计划（可选）
 > > - `[run:<runId>]`：关联运行实例（可选）
 > > - 以上两个标记为**纯文本语义标记**，不是链接，占位符仅用于追踪与审计
 >
@@ -81,12 +81,12 @@
 > ## 6. 必须关联计划（强制）
 >
 > 凡是 **实现 / 修复 / 结构调整类提交**（包括但不限于 `feat / fix / refactor / perf / test / build / ci`），
-> **必须在 commit message 或 PR 描述中关联 planId**。
+> **必须在 commit message 或 PR 描述中关联 activePlanId**。
 >
-> - planId 来源：
+> - activePlanId**** 来源：
 >
 > ```
-> docs/codex/plans/<planId>/PLAN.md
+> docs/codex/plans/<activePlanId>/PLAN.md
 > ```
 >
 > ------

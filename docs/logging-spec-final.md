@@ -1,10 +1,10 @@
 # Decision-Hub 日志规范（Final）
 
 ## 1. 目标与原则
-1) **可观测性优先**：日志用于排障、审计、指标归因、链路追踪。  
-2) **结构化优先**：优先键值对参数化日志，避免字符串拼接。  
-3) **低噪音**：减少无意义 INFO；错误必须给出上下文。  
-4) **可关联**：通过 traceId / runId / planId 等串联日志。  
+1) **可观测性优先**：日志用于排障、审计、指标归因、链路追踪。
+2) **结构化优先**：优先键值对参数化日志，避免字符串拼接。
+3) **低噪音**：减少无意义 INFO；错误必须给出上下文。
+4) **可关联**：通过 traceId / runId / activePlanId 等串联日志。
 5) **安全合规**：禁止输出敏感信息（token/密码/密钥/隐私）。
 
 ## 2. 技术选型与依赖边界
@@ -66,12 +66,12 @@ log.error("[GOLDEN] FAIL op={} caseId={} file={}", op, caseId, file);
 ```java
 final long start = System.nanoTime();
 try {
-  final RunCreateResult res = facade.createRun(cmd);
+final RunCreateResult res = facade.createRun(cmd);
   log.info("[RUN] createRun success runId={} durationMs={}",
-      res.getRunId(), (System.nanoTime()-start)/1_000_000);
-} catch (final Exception e) {
-  log.error("[RUN] createRun failed traceId={} durationMs={}",
-      MDC.get("traceId"), (System.nanoTime()-start)/1_000_000, e);
-  throw e;
+           res.getRunId(), (System.nanoTime()-start)/1_000_000);
+        } catch (final Exception e) {
+        log.error("[RUN] createRun failed traceId={} durationMs={}",
+                  MDC.get("traceId"), (System.nanoTime()-start)/1_000_000, e);
+        throw e;
 }
 ```

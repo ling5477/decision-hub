@@ -1,14 +1,8 @@
-# Codex 执行协议（decision-hub）
+# docs/codex/agents.md（已弃用）
 
-目标：让 Codex 依据本仓库 contracts/docs/golden_cases 实现功能，避免上下文漂移。
+本文件曾用于记录 Codex 执行约束，但目前已 **合并收敛** 为：
 
-## 规则
-1) 先读 docs/dev_guide.md + contracts/README.md + golden_cases/README.md
-2) 任何新增 API：先更新 contracts/openapi.yaml，再实现 Controller
-3) 任何新增输出结构：先更新 contracts/schema，再实现序列化对象
-4) 任何破坏性修改：必须新增/更新 golden_cases
-5) 变更必须通过：mvn -DskipTests clean package
+- 项目入口规则：`/AGENTS.md`
+- 唯一权威执行规则：`docs/codex/WORK_ORDER.md`
 
-## 输出要求
-- 输出改动文件清单
-- 说明是否触及：contracts / schema / golden_cases
+为避免多处重复导致规则冲突/空转，本文件不再维护。若你在历史链接中访问到本文件，请以 `AGENTS.md` 与 `WORK_ORDER.md` 为准。

@@ -1,6 +1,6 @@
 ## 背景 / 目标
-- 关联计划：docs/codex/plans/<planId>/PLAN.md
-- planId：
+- 关联计划：docs/codex/plans/<activePlanId>/PLAN.md
+- activePlanId：
 - milestone：
 
 ## 变更概述

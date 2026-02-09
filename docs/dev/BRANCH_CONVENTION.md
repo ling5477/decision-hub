@@ -1,7 +1,7 @@
 # 分支命名规范（强制）
 
 格式：
-<type>/<planId>__<short-desc>
+<type>/<activePlanId>__<short-desc>
 
 type：
 - feat / fix / refactor / perf / docs / chore / test

@@ -16,7 +16,7 @@
 
 ## 编码风格与命名约定
 - Java 21；Spring Boot 3.5.x。
-- 使用 Spotless（Google Java Format，2 空格缩进）与 Checkstyle（配置见 `dh-bom/checkstyle/checkstyle.xml`）。
+- 使用 Spotless（Google Java Format，2 空格缩进）与 Checkstyle（配置见 `config/checkstyle/checkstyle.xml`）。
 - 包名以 `com.guidinglight.decisionhub` 为前缀；类名 `PascalCase`。
 - 测试类以 `*Test` 结尾；Flyway 迁移命名 `V{版本}__{描述}.sql`。
 
@@ -34,27 +34,20 @@
 - 所有外部输入需校验，避免 SQL/路径/命令注入。
 
 ## Codex 执行协议（强制）
-- 每次开始任务前必须依序读取：
-  1) docs/codex/WORK_ORDER.md（里程碑与范围）
-  2) docs/codex/PLAN_QUEUE.json（未完成计划列表）
-  3) docs/codex/PLAN_CURRENT_POINTER.json（当前计划指针）
-  4) 当前计划目录：docs/codex/plans/<planId>/STATUS.json 与 PLAN.md
-- 任何编码任务必须先输出计划，并将计划落盘到当前计划目录的 PLAN.md（禁止只在对话里输出）。
-- 只允许从 STATUS.json 的“第一个未完成步骤”继续执行，禁止跳步。
-- 每完成一步必须更新 STATUS.json（状态、evidence 文件列表、lastVerify）。
-- 每次任务结束必须执行 scripts/verify.ps1，并把结果写入：
-  - docs/codex/plans/<planId>/STATUS.json 的 lastVerify
-  - docs/codex/CHANGE_NOTES.md
+- **唯一权威**：执行与推进规则以 `docs/codex/WORK_ORDER.md` 为准（本文件不重复定义细节）。
+- **启动必读**：按 `WORK_ORDER.md` 指定顺序读取计划/指针/状态文件，然后再决定下一步。
+- **落盘优先**：涉及实现/修改时，计划与进度必须落盘到 `docs/codex/plans/<activePlanId>/`（PLAN.md + STATUS.json）。
+- **验证门禁**：`taskType=delivery` 必须执行 `scripts/verify.ps1` 并回填 `STATUS.json:lastVerify`；变更摘要写入 `docs/codex/CHANGE_NOTES.md`。
+- **MCP 使用**：优先使用 IntelliJ MCP 做语义重构；如 MCP 不可用必须降级为最小改动 + 可验证变更（禁止盲目全局替换）。
 
-## 计划归档与进度追踪（强制）
-- 计划正文永久保留：docs/codex/plans/<planId>/PLAN.md（不得覆盖历史计划）
-- 进度状态文件：docs/codex/plans/<planId>/STATUS.json（允许更新，用于记录 DONE/TODO/IN_PROGRESS）
-- 当前计划指针：docs/codex/PLAN_CURRENT_POINTER.json（允许覆盖，仅作为最新计划入口）
-- 计划队列：docs/codex/PLAN_QUEUE.json
-  - active：未完成计划列表（启动只读取 active）
-  - done：已完成计划列表（用于复盘与审计）
+## 日志规范
+
+- 📘 [日志规范（Final）](docs/logging-spec-final.md)
+- 禁止 `System.out / System.err`
+- 必须使用 `SLF4J Logger`
+- 日志需携带关键上下文（traceId / runId / caseId 等）
 
 ## 注释与命名规范（本项目强制，强化版）
 - 注释要求：所有 public/protected 的类、接口、枚举、字段、方法必须有清晰注释；关键 private 方法若承载业务规则也必须注释。
 - 命名要求：变量/方法/类/枚举命名必须贴近业务原意、可读、可搜索，不允许随意简写或无语义命名。
-- 重命名/迁移/批量改引用：必须优先使用 IntelliJ IDEA MCP 的语义重构能力，禁止纯文本全局替换导致漏改引用。
+- 重命名/迁移/批量改引用：优先使用 IntelliJ IDEA MCP 做语义重构；若 MCP 不可用，必须采用保守降级（小步修改 + 搜索/编译/测试验证），禁止盲目全局替换。

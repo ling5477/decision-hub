@@ -1,6 +1,6 @@
-<type>(<scope>): <subject> [plan:<planId>]
+<type>(<scope>): <subject> [plan:<activePlanId>]
 
 # type: feat|fix|refactor|perf|test|docs|chore|build|ci|revert
 # scope: dh-app|dh-usecase|dh-domain|dh-common|dh-infra|dh-provider|dh-gate|dh-run|dh-ledger|dh-memory|dh-eval|docs|scripts
 # subject: 简体中文，动词开头，50 字以内
-# planId: docs/codex/plans/<planId>
+# activePlanId: docs/codex/plans/<activePlanId>

@@ -12,9 +12,25 @@ paths:
   /runs:
     post:
       summary: create run (skeleton)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunCreateRequest'
       responses:
         '200':
           description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunCreateResponse'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /runs/{runId}:
     get:
       summary: get run (skeleton)
@@ -26,3 +42,82 @@ paths:
       responses:
         '200':
           description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunDetailResponse'
+        '404':
+          description: run not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    RunCreateRequest:
+      type: object
+      required:
+        - tenantId
+        - question
+      properties:
+        tenantId:
+          type: string
+          description: tenant identity
+        userId:
+          type: string
+          description: optional user identity
+        question:
+          type: string
+          description: decision question text
+        config:
+          type: object
+          additionalProperties: true
+          description: optional run-time config snapshot
+    RunCreateResponse:
+      type: object
+      required:
+        - runId
+        - status
+      properties:
+        runId:
+          type: string
+        status:
+          type: string
+          example: CREATED
+    RunDetailResponse:
+      type: object
+      required:
+        - runId
+        - tenantId
+        - status
+      properties:
+        runId:
+          type: string
+        tenantId:
+          type: string
+        userId:
+          type: string
+        question:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        configSnapshot:
+          type: object
+          additionalProperties: true
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
