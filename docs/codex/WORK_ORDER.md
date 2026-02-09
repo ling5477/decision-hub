@@ -54,6 +54,7 @@
     3) `pwsh ./scripts/verify.ps1`
     4) 更新 `_active/STATUS.json`（evidence + lastVerify）
     5) 输出 `git diff --stat`
+- 任何“执行失败/工具限制”必须附带：命令行 + 退出码 + 关键报错行；否则视为未执行（空转）。
 
 ## 任务类型与验证门禁（强制）
 - `taskType=delivery`：存在代码/配置/契约变更，必须运行 `scripts/verify.ps1`（本质 `mvn verify`），并回填 `STATUS.json.lastVerify`：
