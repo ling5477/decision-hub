@@ -1,4 +1,4 @@
-package com.guidinglight.decisionhub;
+package com.guidinglight.decisionhub.config;
 
 import com.guidinglight.decisionhub.providers.MockProvider;
 import com.guidinglight.decisionhub.providers.ModelProvider;

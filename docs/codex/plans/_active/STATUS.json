@@ -65,14 +65,14 @@
                   }
               ],
     "lastVerify":  {
-                       "time":  "2026-02-09T15:24:16Z",
+                       "time":  "2026-02-10T11:24:08Z",
                        "result":  "FAIL",
-                       "summary":  "scripts/verify.ps1 failed: BOM detected in docs/codex/plans/_active/STATUS.json",
+                       "summary":  "scripts/verify.ps1 failed: dh-app PostgresContainerSmokeTest failed: Could not find a valid Docker environment (Testcontainers)",
                        "failedAtStep":  "verify",
-                       "errorCode":  "BOM_DETECTED",
-                       "nextAction":  "Re-save STATUS.json as UTF-8 without BOM then rerun scripts/verify.ps1"
+                       "errorCode":  "DOCKER_UNAVAILABLE",
+                       "nextAction":  "Option A: auto-skip when Docker not available; or install/start Docker Desktop then rerun verify"
                    },
     "taskType":  "delivery",
     "activeStepIdx":  4,
-    "updatedAt":  "2026-02-09T15:24:16Z"
+    "updatedAt":  "2026-02-10T11:24:08Z"
 }

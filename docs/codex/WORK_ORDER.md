@@ -61,6 +61,7 @@
     - `result`：`PASS | FAIL`
     - `summary`：关键摘要（模块/测试范围/失败摘要等）
 - `taskType=analysis-only`：无仓库文件变更，可跳过 verify，但必须回填 `lastVerify.result=SKIPPED` 与原因，并保证不改动文件。
+- `updatedAt` / `lastVerify.time` 必须使用 UTC：yyyy-MM-dd'T'HH:mm:ss'Z'（例：2026-02-10T03:24:08Z）
 
 ## 反空转护栏（强制）
 - 若在同一 `activeStepIdx` 上连续 2 次执行没有产生任何文件变更或没有更新 `STATUS.json` 的 evidence，则必须：
