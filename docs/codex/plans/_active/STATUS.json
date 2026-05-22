@@ -1,75 +1,78 @@
 {
-  "milestone": "M1",
-  "activePlanId": "2026-02-04_M1_run_gate_mockprovider",
-  "state": "ACTIVE",
-  "steps": [
-    {
-      "idx": 1,
-      "title": "合同确认（contracts 如需）",
-      "status": "DONE",
-      "evidence": [
-        "docs/codex/WORK_ORDER.md",
-        "docs/codex/TASK_TEMPLATE.md",
-        "docs/codex/VERIFY.md"
-      ]
-    },
-    {
-      "idx": 2,
-      "title": "新增 golden 用例",
-      "status": "DONE",
-      "evidence": [
-        "golden_cases/case-002.yaml",
-        "golden_cases/expected/case-002.json",
-        "commit: 89545bd95700e4ce8541b9315eb7f4dcac96daaa"
-      ]
-    },
-    {
-      "idx": 3,
-      "title": "实现 dh-usecase Facade 最小闭环",
-      "status": "DONE",
-      "evidence": [
-        "dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/facade/impl/DecisionHubFacadeImpl.java",
-        "dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/facade/impl/DecisionHubFacadeImplTest.java",
-        "commit: 89545bd95700e4ce8541b9315eb7f4dcac96daaa"
-      ]
-    },
-    {
-      "idx": 4,
-      "title": "实现 dh-eval Golden runner + Maven 绑定 verify",
-      "status": "TODO",
-      "evidence": []
-    },
-    {
-      "idx": 5,
-      "title": "引入 Checkstyle + verify.ps1",
-      "status": "TODO",
-      "evidence": []
-    },
-    {
-      "idx": 6,
-      "title": "verify 全通过 + 变更记录",
-      "status": "TODO",
-      "evidence": []
-    },
-    {
-      "idx": 7,
-      "title": "修复配置规则文件问题（编码/密钥/Checkstyle 入口）",
-      "status": "TODO",
-      "evidence": [
-        "docs/codex/plans/2026-02-04_M1_run_gate_mockprovider/PLAN.md",
-        "commit: 89545bd95700e4ce8541b9315eb7f4dcac96daaa"
-      ]
-    }
-  ],
-  "lastVerify": {
-    "time": "2026-02-10T00:14:50+08:00",
-    "result": "PENDING",
-    "summary": "Commit 89545bd... 已落盘修复并提交；需重新运行 pwsh ./scripts/verify.ps1 回填 PASS/FAIL。",
-    "failedAtStep": "verify",
-    "errorCode": "VERIFY_NOT_RERUN",
-    "nextAction": "Run: pwsh ./scripts/verify.ps1 ; then update lastVerify.time/result/summary accordingly."
-  },
-  "taskType": "delivery",
-  "activeStepIdx": 4,
-  "updatedAt": "2026-02-10T00:14:50+08:00"
+    "milestone":  "M1",
+    "activePlanId":  "2026-02-04_M1_run_gate_mockprovider",
+    "state":  "ACTIVE",
+    "steps":  [
+                  {
+                      "idx":  1,
+                      "title":  "合同确认（contracts 如需）",
+                      "status":  "DONE",
+                      "evidence":  [
+                                       "docs/codex/WORK_ORDER.md",
+                                       "docs/codex/TASK_TEMPLATE.md",
+                                       "docs/codex/VERIFY.md"
+                                   ]
+                  },
+                  {
+                      "idx":  2,
+                      "title":  "新增 golden 用例",
+                      "status":  "DONE",
+                      "evidence":  [
+                                       "golden_cases/case-002.yaml",
+                                       "golden_cases/expected/case-002.json"
+                                   ]
+                  },
+                  {
+                      "idx":  3,
+                      "title":  "实现 dh-usecase Facade 最小闭环",
+                      "status":  "DONE",
+                      "evidence":  [
+                                       "dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/facade/impl/DecisionHubFacadeImpl.java",
+                                       "dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/facade/impl/DecisionHubFacadeImplTest.java"
+                                   ]
+                  },
+                  {
+                      "idx":  4,
+                      "title":  "实现 dh-eval Golden runner + Maven 绑定 verify",
+                      "status":  "TODO",
+                      "evidence":  [
+
+                                   ]
+                  },
+                  {
+                      "idx":  5,
+                      "title":  "引入 Checkstyle + verify.ps1",
+                      "status":  "TODO",
+                      "evidence":  [
+
+                                   ]
+                  },
+                  {
+                      "idx":  6,
+                      "title":  "verify 全通过 + 变更记录",
+                      "status":  "TODO",
+                      "evidence":  [
+
+                                   ]
+                  },
+                  {
+                      "idx":  7,
+                      "title":  "修复配置规则文件问题（编码/密钥/Checkstyle 入口）",
+                      "status":  "TODO",
+                      "evidence":  [
+                                       "docs/codex/plans/2026-02-04_M1_run_gate_mockprovider/PLAN.md"
+                                   ]
+                  }
+              ],
+    "lastVerify":  {
+                       "time":  "2026-02-09T15:24:16Z",
+                       "result":  "FAIL",
+                       "summary":  "scripts/verify.ps1 failed: BOM detected in docs/codex/plans/_active/STATUS.json",
+                       "failedAtStep":  "verify",
+                       "errorCode":  "BOM_DETECTED",
+                       "nextAction":  "Re-save STATUS.json as UTF-8 without BOM then rerun scripts/verify.ps1"
+                   },
+    "taskType":  "delivery",
+    "activeStepIdx":  4,
+    "updatedAt":  "2026-02-09T15:24:16Z"
 }

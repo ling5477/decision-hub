@@ -1,6 +1,0 @@
-[defaults]
-language = "zh-CN"
-
-[mcp]
-# 为避免环境差异导致阻塞/空转：MCP 统一按可选能力探测 + 降级策略处理
-optional = ["intellij-mcp", "openaiDeveloperDocs"]
