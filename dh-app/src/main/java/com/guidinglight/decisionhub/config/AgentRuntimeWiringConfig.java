@@ -42,6 +42,21 @@ import com.guidinglight.decisionhub.usecase.agent.ResearchRunCommandService;
 import com.guidinglight.decisionhub.usecase.agent.ResearchRunQueryService;
 import com.guidinglight.decisionhub.usecase.agent.ResearchRunRepository;
 import com.guidinglight.decisionhub.usecase.agent.StrategyCandidateRepository;
+import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackContractValidator;
+import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackEventHandler;
+import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackEventTypeRouter;
+import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionService;
+import com.guidinglight.decisionhub.usecase.agent.feedback.handler.BacktestResultReadyHandler;
+import com.guidinglight.decisionhub.usecase.agent.feedback.handler.PaperRunAlertRaisedHandler;
+import com.guidinglight.decisionhub.usecase.agent.feedback.handler.PaperRunCreatedHandler;
+import com.guidinglight.decisionhub.usecase.agent.feedback.handler.PaperRunDailyReportGeneratedHandler;
+import com.guidinglight.decisionhub.usecase.agent.feedback.handler.PaperRunRecoveryEventRecordedHandler;
+import com.guidinglight.decisionhub.usecase.agent.feedback.handler.PaperRunStabilityCheckCompletedHandler;
+import com.guidinglight.decisionhub.usecase.agent.feedback.handler.PaperRunStartedHandler;
+import com.guidinglight.decisionhub.usecase.agent.feedback.handler.PaperRunStoppedHandler;
+import com.guidinglight.decisionhub.usecase.agent.feedback.impl.DefaultNqFeedbackContractValidator;
+import com.guidinglight.decisionhub.usecase.agent.feedback.impl.DefaultNqFeedbackEventTypeRouter;
+import com.guidinglight.decisionhub.usecase.agent.feedback.impl.DefaultNqFeedbackIngestionService;
 import com.guidinglight.decisionhub.usecase.agent.impl.DefaultAgentTaskPlanner;
 import com.guidinglight.decisionhub.usecase.agent.impl.DefaultCandidateGenerationService;
 import com.guidinglight.decisionhub.usecase.agent.impl.DefaultCandidateReviewService;
@@ -56,6 +71,8 @@ import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryJudgeDecision
 import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryNqFeedbackEventRepository;
 import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryResearchRunRepository;
 import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryStrategyCandidateRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -231,5 +248,105 @@ public class AgentRuntimeWiringConfig {
       final NqFeedbackEventRepository feedbackEventRepository,
       final ExperienceFeedbackService experienceFeedbackService) {
     return new DefaultNqIntegrationUseCase(feedbackEventRepository, experienceFeedbackService);
+  }
+
+  // ===== Stage2-PoC-B2: NQ feedback ingestion =====
+
+  @Bean
+  public ObjectMapper nqFeedbackObjectMapper() {
+    return new ObjectMapper();
+  }
+
+  @Bean
+  public NqFeedbackContractValidator nqFeedbackContractValidator(
+      final ResearchRunRepository researchRunRepository,
+      final ObjectMapper nqFeedbackObjectMapper) {
+    return new DefaultNqFeedbackContractValidator(researchRunRepository, nqFeedbackObjectMapper);
+  }
+
+  @Bean
+  public NqFeedbackEventHandler paperRunCreatedHandler(
+      final ExperienceFeedbackService experienceFeedbackService,
+      final NqFeedbackEventRepository feedbackEventRepository,
+      final ObjectMapper nqFeedbackObjectMapper) {
+    return new PaperRunCreatedHandler(
+        experienceFeedbackService, feedbackEventRepository, nqFeedbackObjectMapper);
+  }
+
+  @Bean
+  public NqFeedbackEventHandler paperRunStartedHandler(
+      final ExperienceFeedbackService experienceFeedbackService,
+      final NqFeedbackEventRepository feedbackEventRepository,
+      final ObjectMapper nqFeedbackObjectMapper) {
+    return new PaperRunStartedHandler(
+        experienceFeedbackService, feedbackEventRepository, nqFeedbackObjectMapper);
+  }
+
+  @Bean
+  public NqFeedbackEventHandler paperRunStoppedHandler(
+      final ExperienceFeedbackService experienceFeedbackService,
+      final NqFeedbackEventRepository feedbackEventRepository,
+      final ObjectMapper nqFeedbackObjectMapper) {
+    return new PaperRunStoppedHandler(
+        experienceFeedbackService, feedbackEventRepository, nqFeedbackObjectMapper);
+  }
+
+  @Bean
+  public NqFeedbackEventHandler paperRunDailyReportGeneratedHandler(
+      final ExperienceFeedbackService experienceFeedbackService,
+      final NqFeedbackEventRepository feedbackEventRepository,
+      final ObjectMapper nqFeedbackObjectMapper) {
+    return new PaperRunDailyReportGeneratedHandler(
+        experienceFeedbackService, feedbackEventRepository, nqFeedbackObjectMapper);
+  }
+
+  @Bean
+  public NqFeedbackEventHandler paperRunAlertRaisedHandler(
+      final ExperienceFeedbackService experienceFeedbackService,
+      final NqFeedbackEventRepository feedbackEventRepository,
+      final ObjectMapper nqFeedbackObjectMapper) {
+    return new PaperRunAlertRaisedHandler(
+        experienceFeedbackService, feedbackEventRepository, nqFeedbackObjectMapper);
+  }
+
+  @Bean
+  public NqFeedbackEventHandler paperRunRecoveryEventRecordedHandler(
+      final ExperienceFeedbackService experienceFeedbackService,
+      final NqFeedbackEventRepository feedbackEventRepository,
+      final ObjectMapper nqFeedbackObjectMapper) {
+    return new PaperRunRecoveryEventRecordedHandler(
+        experienceFeedbackService, feedbackEventRepository, nqFeedbackObjectMapper);
+  }
+
+  @Bean
+  public NqFeedbackEventHandler paperRunStabilityCheckCompletedHandler(
+      final ExperienceFeedbackService experienceFeedbackService,
+      final NqFeedbackEventRepository feedbackEventRepository,
+      final ObjectMapper nqFeedbackObjectMapper) {
+    return new PaperRunStabilityCheckCompletedHandler(
+        experienceFeedbackService, feedbackEventRepository, nqFeedbackObjectMapper);
+  }
+
+  @Bean
+  public NqFeedbackEventHandler backtestResultReadyHandler(
+      final ExperienceFeedbackService experienceFeedbackService,
+      final NqFeedbackEventRepository feedbackEventRepository,
+      final ObjectMapper nqFeedbackObjectMapper) {
+    return new BacktestResultReadyHandler(
+        experienceFeedbackService, feedbackEventRepository, nqFeedbackObjectMapper);
+  }
+
+  @Bean
+  public NqFeedbackEventTypeRouter nqFeedbackEventTypeRouter(
+      final List<NqFeedbackEventHandler> handlers) {
+    return new DefaultNqFeedbackEventTypeRouter(handlers);
+  }
+
+  @Bean
+  public NqFeedbackIngestionService nqFeedbackIngestionService(
+      final NqFeedbackContractValidator validator,
+      final NqFeedbackEventRepository repository,
+      final NqFeedbackEventTypeRouter router) {
+    return new DefaultNqFeedbackIngestionService(validator, repository, router);
   }
 }

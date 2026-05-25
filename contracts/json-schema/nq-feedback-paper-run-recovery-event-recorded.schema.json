@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/nq-feedback-paper-run-recovery-event-recorded.schema.json",
+  "title": "PaperRunRecoveryEventRecordedPayload",
+  "description": "Stage2-PoC-B1：PAPER_RUN_RECOVERY_EVENT_RECORDED payload。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["paperRunId", "recoveryEventId", "recoveryReason", "recoveredAt", "rawPayloadJson"],
+  "properties": {
+    "paperRunId":      { "type": "string", "minLength": 1 },
+    "recoveryEventId": { "type": "string", "minLength": 1 },
+    "recoveryReason":  { "type": "string", "minLength": 1 },
+    "recoveredAt":     { "type": "string", "format": "date-time" },
+    "rawPayloadJson":  { "type": "string" }
+  }
+}

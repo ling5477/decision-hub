@@ -123,3 +123,316 @@ components:
           type: string
         message:
           type: string
+
+    # ===== Stage2-PoC-B1: NQ feedback envelope + 8 payload schemas =====
+    # Spec source of truth: contracts/json-schema/nq-feedback-envelope.schema.json
+    NqFeedbackEventType:
+      type: string
+      description: 'Stage2-PoC-B1: 8 种 NQ -> DH 正式事件类型'
+      enum:
+        - PAPER_RUN_CREATED
+        - PAPER_RUN_STARTED
+        - PAPER_RUN_STOPPED
+        - PAPER_RUN_DAILY_REPORT_GENERATED
+        - PAPER_RUN_ALERT_RAISED
+        - PAPER_RUN_RECOVERY_EVENT_RECORDED
+        - PAPER_RUN_STABILITY_CHECK_COMPLETED
+        - BACKTEST_RESULT_READY
+    NqFeedbackEnvelope:
+      type: object
+      description: 'Stage2-PoC-B1: NQ -> DH 回流事件统一信封'
+      required:
+        - eventId
+        - eventType
+        - occurredAt
+        - sourceSystem
+        - sourceJobId
+        - traceId
+        - requestId
+        - correlationId
+        - schemaVersion
+        - payloadJson
+      properties:
+        eventId:       { type: string }
+        eventType:     { $ref: '#/components/schemas/NqFeedbackEventType' }
+        occurredAt:    { type: string, format: date-time }
+        sourceSystem:  { type: string, enum: ['nexus-quant'] }
+        sourceJobId:   { type: string }
+        traceId:       { type: string }
+        requestId:     { type: string }
+        correlationId: { type: string }
+        schemaVersion: { type: string, example: '1.0.0' }
+        payloadJson:   { type: string, description: 'raw payload JSON string preserved as-is' }
+        receivedAt:    { type: string, format: date-time }
+    AlertLevel:
+      type: string
+      enum: [INFO, WARN, ERROR, CRITICAL]
+    StabilityCheckResult:
+      type: string
+      enum: [STABLE, UNSTABLE, INCONCLUSIVE]
+    BacktestVerdict:
+      type: string
+      enum: [PASS, FAIL, MARGINAL]
+    PaperRunCreatedPayload:
+      type: object
+      required: [paperRunId, candidateId, strategyName, requestedBy, createdAt, rawPayloadJson]
+      properties:
+        paperRunId:     { type: string }
+        candidateId:    { type: string }
+        strategyName:   { type: string }
+        requestedBy:    { type: string }
+        createdAt:      { type: string, format: date-time }
+        configHash:     { type: string, nullable: true }
+        rawPayloadJson: { type: string }
+    PaperRunStartedPayload:
+      type: object
+      required: [paperRunId, startedAt, mode, rawPayloadJson]
+      properties:
+        paperRunId:     { type: string }
+        startedAt:      { type: string, format: date-time }
+        mode:           { type: string }
+        rawPayloadJson: { type: string }
+    PaperRunStoppedPayload:
+      type: object
+      required: [paperRunId, stoppedAt, reason, rawPayloadJson]
+      properties:
+        paperRunId:     { type: string }
+        stoppedAt:      { type: string, format: date-time }
+        reason:         { type: string }
+        rawPayloadJson: { type: string }
+    PaperRunDailyReportGeneratedPayload:
+      type: object
+      required: [paperRunId, reportId, reportDate, rawPayloadJson]
+      properties:
+        paperRunId:     { type: string }
+        reportId:       { type: string }
+        reportDate:     { type: string, format: date }
+        realizedPnl:    { type: number, nullable: true }
+        maxDrawdown:    { type: number, nullable: true }
+        winRate:        { type: number, nullable: true, minimum: 0.0, maximum: 1.0 }
+        rawPayloadJson: { type: string }
+    PaperRunAlertRaisedPayload:
+      type: object
+      required: [paperRunId, alertId, alertLevel, alertCode, message, raisedAt, rawPayloadJson]
+      properties:
+        paperRunId:     { type: string }
+        alertId:        { type: string }
+        alertLevel:     { $ref: '#/components/schemas/AlertLevel' }
+        alertCode:      { type: string }
+        message:        { type: string }
+        raisedAt:       { type: string, format: date-time }
+        rawPayloadJson: { type: string }
+    PaperRunRecoveryEventRecordedPayload:
+      type: object
+      required: [paperRunId, recoveryEventId, recoveryReason, recoveredAt, rawPayloadJson]
+      properties:
+        paperRunId:      { type: string }
+        recoveryEventId: { type: string }
+        recoveryReason:  { type: string }
+        recoveredAt:     { type: string, format: date-time }
+        rawPayloadJson:  { type: string }
+    PaperRunStabilityCheckCompletedPayload:
+      type: object
+      required: [paperRunId, checkId, result, summary, completedAt, rawPayloadJson]
+      properties:
+        paperRunId:     { type: string }
+        checkId:        { type: string }
+        result:         { $ref: '#/components/schemas/StabilityCheckResult' }
+        summary:        { type: string }
+        completedAt:    { type: string, format: date-time }
+        rawPayloadJson: { type: string }
+    BacktestResultReadyPayload:
+      type: object
+      required: [backtestId, requestId, candidateId, periodStart, periodEnd, verdict, readyAt, rawPayloadJson]
+      properties:
+        backtestId:     { type: string }
+        requestId:      { type: string }
+        candidateId:    { type: string }
+        sharpeRatio:    { type: number, nullable: true }
+        maxDrawdown:    { type: number, nullable: true }
+        annualReturn:   { type: number, nullable: true }
+        winRate:        { type: number, nullable: true, minimum: 0.0, maximum: 1.0 }
+        profitFactor:   { type: number, nullable: true }
+        periodStart:    { type: string, format: date }
+        periodEnd:      { type: string, format: date }
+        verdict:        { $ref: '#/components/schemas/BacktestVerdict' }
+        readyAt:        { type: string, format: date-time }
+        rawPayloadJson: { type: string }
+
+    # ===== Stage2-PoC-B1: DH -> NQ backtest request 契约 =====
+    DhBacktestRequestStatus:
+      type: string
+      enum: [DRAFT, QUEUED, ACCEPTED, REJECTED, RESULT_READY, FAILED]
+    BacktestFrequency:
+      type: string
+      enum: [DAILY, HOURLY, MINUTE]
+    DhBacktestRequest:
+      type: object
+      required:
+        - requestId
+        - traceId
+        - candidateId
+        - strategyName
+        - strategyVersion
+        - strategyParametersJson
+        - startDate
+        - endDate
+        - initialCapital
+        - symbols
+        - frequency
+        - requestedBy
+        - requestedAt
+        - status
+      properties:
+        requestId:              { type: string }
+        traceId:                { type: string }
+        candidateId:            { type: string }
+        strategyName:           { type: string }
+        strategyVersion:        { type: string }
+        strategyParametersJson: { type: string }
+        entryRulesRef:          { type: string, nullable: true }
+        exitRulesRef:           { type: string, nullable: true }
+        startDate:              { type: string, format: date }
+        endDate:                { type: string, format: date }
+        initialCapital:         { type: number, exclusiveMinimum: 0 }
+        symbols:
+          type: array
+          minItems: 1
+          items: { type: string }
+        frequency:   { $ref: '#/components/schemas/BacktestFrequency' }
+        requestedBy: { type: string }
+        requestedAt: { type: string, format: date-time }
+        status:      { $ref: '#/components/schemas/DhBacktestRequestStatus' }
+    DhBacktestRequestAccepted:
+      type: object
+      required: [requestId, jobId, status, acceptedAt]
+      properties:
+        requestId:  { type: string }
+        jobId:      { type: string }
+        status:     { type: string, enum: [QUEUED, ACCEPTED] }
+        acceptedAt: { type: string, format: date-time }
+    DhBacktestResultSnapshot:
+      type: object
+      required: [resultId, requestId, traceId, candidateId, periodStart, periodEnd, verdict, recordedAt, rawPayloadJson]
+      properties:
+        resultId:       { type: string }
+        requestId:      { type: string }
+        traceId:        { type: string }
+        candidateId:    { type: string }
+        sharpeRatio:    { type: number, nullable: true }
+        maxDrawdown:    { type: number, nullable: true }
+        annualReturn:   { type: number, nullable: true }
+        winRate:        { type: number, nullable: true, minimum: 0.0, maximum: 1.0 }
+        profitFactor:   { type: number, nullable: true }
+        periodStart:    { type: string, format: date }
+        periodEnd:      { type: string, format: date }
+        verdict:        { $ref: '#/components/schemas/BacktestVerdict' }
+        recordedAt:     { type: string, format: date-time }
+        rawPayloadJson: { type: string }
+
+    # ===== Stage2-PoC-B1: 工具 artifact 契约 =====
+    ForecastTarget:
+      type: string
+      enum: [PRICE, VOLATILITY, DIRECTION, VOLUME]
+    ForecastHorizon:
+      type: string
+      enum: [D1, D5, D20, D60]
+    ForecastArtifactStatus:
+      type: string
+      enum: [COMPLETED, PENDING, FAILED, TIMEOUT]
+    ForecastPoint:
+      type: object
+      required: [date, value, confidence]
+      properties:
+        date:       { type: string, format: date }
+        value:      { type: number }
+        confidence: { type: number, minimum: 0.0, maximum: 1.0 }
+    ForecastArtifact:
+      type: object
+      required: [artifactId, traceId, symbol, horizon, target, predictions, generatedAt, status, rawPayloadJson]
+      properties:
+        artifactId:     { type: string }
+        traceId:        { type: string }
+        symbol:         { type: string }
+        horizon:        { $ref: '#/components/schemas/ForecastHorizon' }
+        target:         { $ref: '#/components/schemas/ForecastTarget' }
+        predictions:
+          type: array
+          items: { $ref: '#/components/schemas/ForecastPoint' }
+        modelVersion:   { type: string, nullable: true }
+        generatedAt:    { type: string, format: date-time }
+        status:         { $ref: '#/components/schemas/ForecastArtifactStatus' }
+        rawPayloadJson: { type: string }
+    MarketDataSource:
+      type: string
+      enum: [GLOBAL_STOCK_DATA, INTERNAL_CACHE, FAKE]
+    MarketSnapshotStatus:
+      type: string
+      enum: [COMPLETED, PENDING, FAILED]
+    ExternalMarketSnapshot:
+      type: object
+      required:
+        - snapshotId
+        - traceId
+        - symbols
+        - source
+        - rangeStart
+        - rangeEnd
+        - fetchedAt
+        - dataJson
+        - status
+        - rawPayloadJson
+      properties:
+        snapshotId: { type: string }
+        traceId:    { type: string }
+        symbols:
+          type: array
+          minItems: 1
+          items: { type: string }
+        source:         { $ref: '#/components/schemas/MarketDataSource' }
+        rangeStart:     { type: string, format: date }
+        rangeEnd:       { type: string, format: date }
+        fetchedAt:      { type: string, format: date-time }
+        dataJson:       { type: string }
+        sourceVersion:  { type: string, nullable: true }
+        status:         { $ref: '#/components/schemas/MarketSnapshotStatus' }
+        rawPayloadJson: { type: string }
+    ReflectionType:
+      type: string
+      enum: [STEP_REFLECTION, AGENT_REFLECTION, RUN_RETROSPECTIVE]
+    ReflectionEntry:
+      type: object
+      required: [reflectionId, runId, traceId, stepIndex, agentRole, type, content, createdAt]
+      properties:
+        reflectionId: { type: string }
+        runId:        { type: string }
+        traceId:      { type: string }
+        stepIndex:    { type: integer, minimum: 0 }
+        agentRole:    { type: string }
+        type:         { $ref: '#/components/schemas/ReflectionType' }
+        content:      { type: string }
+        createdAt:    { type: string, format: date-time }
+        payloadJson:  { type: string, nullable: true }
+    CheckpointType:
+      type: string
+      enum:
+        - CANDIDATE_FROZEN
+        - JUDGE_DECISION
+        - PIVOT_TRIGGERED
+        - ABORT_TRIGGERED
+        - BACKTEST_REQUESTED
+    CheckpointStatus:
+      type: string
+      enum: [DRAFT, RECORDED, DISCARDED]
+    CheckpointEntry:
+      type: object
+      required: [checkpointId, runId, traceId, checkpointIndex, type, status, snapshotJson, createdAt]
+      properties:
+        checkpointId:    { type: string }
+        runId:           { type: string }
+        traceId:         { type: string }
+        checkpointIndex: { type: integer, minimum: 0 }
+        type:            { $ref: '#/components/schemas/CheckpointType' }
+        status:          { $ref: '#/components/schemas/CheckpointStatus' }
+        snapshotJson:    { type: string }
+        createdAt:       { type: string, format: date-time }

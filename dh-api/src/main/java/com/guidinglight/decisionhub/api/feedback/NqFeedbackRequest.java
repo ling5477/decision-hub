@@ -10,7 +10,11 @@ import java.util.Map;
  * Stage1：接收 NQ 回流事件的请求体。
  *
  * <p>对应工单 4.6：POST /api/ai/feedback/nq。
+ *
+ * @deprecated Stage2-PoC-B2：HTTP 边界已切换到 {@link NqFeedbackEnvelopeRequest}（正式 envelope 契约）。 本类保留仅为 Stage1
+ *     兼容编译，不再被 {@code NqFeedbackController} 引用，下一个 Batch 计划移除。
  */
+@Deprecated(since = "Stage2-PoC-B2", forRemoval = true)
 public final class NqFeedbackRequest {
 
   @NotBlank(message = "runId must not be blank")

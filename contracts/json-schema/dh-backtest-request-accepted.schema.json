@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/dh-backtest-request-accepted.schema.json",
+  "title": "DhBacktestRequestAccepted",
+  "description": "Stage2-PoC-B1：NQ 接受 DH 回测请求后的响应。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["requestId", "jobId", "status", "acceptedAt"],
+  "properties": {
+    "requestId":  { "type": "string", "minLength": 1 },
+    "jobId":      { "type": "string", "minLength": 1 },
+    "status":     { "type": "string", "enum": ["QUEUED", "ACCEPTED"] },
+    "acceptedAt": { "type": "string", "format": "date-time" }
+  }
+}

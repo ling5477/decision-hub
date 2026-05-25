@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/nq-feedback-paper-run-daily-report-generated.schema.json",
+  "title": "PaperRunDailyReportGeneratedPayload",
+  "description": "Stage2-PoC-B1：PAPER_RUN_DAILY_REPORT_GENERATED payload。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["paperRunId", "reportId", "reportDate", "rawPayloadJson"],
+  "properties": {
+    "paperRunId":     { "type": "string", "minLength": 1 },
+    "reportId":       { "type": "string", "minLength": 1 },
+    "reportDate":     { "type": "string", "format": "date" },
+    "realizedPnl":    { "type": ["number", "null"] },
+    "maxDrawdown":    { "type": ["number", "null"] },
+    "winRate":        { "type": ["number", "null"], "minimum": 0.0, "maximum": 1.0 },
+    "rawPayloadJson": { "type": "string" }
+  }
+}

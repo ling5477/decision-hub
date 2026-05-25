@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/checkpoint-entry.schema.json",
+  "title": "CheckpointEntry",
+  "description": "Stage2-PoC-B1：checkpoint 冗余快照，过程证据。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "checkpointId",
+    "runId",
+    "traceId",
+    "checkpointIndex",
+    "type",
+    "status",
+    "snapshotJson",
+    "createdAt"
+  ],
+  "properties": {
+    "checkpointId":    { "type": "string", "minLength": 1 },
+    "runId":           { "type": "string", "minLength": 1 },
+    "traceId":         { "type": "string", "minLength": 1 },
+    "checkpointIndex": { "type": "integer", "minimum": 0 },
+    "type": {
+      "type": "string",
+      "enum": [
+        "CANDIDATE_FROZEN",
+        "JUDGE_DECISION",
+        "PIVOT_TRIGGERED",
+        "ABORT_TRIGGERED",
+        "BACKTEST_REQUESTED"
+      ]
+    },
+    "status":       { "type": "string", "enum": ["DRAFT", "RECORDED", "DISCARDED"] },
+    "snapshotJson": { "type": "string" },
+    "createdAt":    { "type": "string", "format": "date-time" }
+  }
+}

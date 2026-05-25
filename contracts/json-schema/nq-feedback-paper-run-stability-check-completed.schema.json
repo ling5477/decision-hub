@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/nq-feedback-paper-run-stability-check-completed.schema.json",
+  "title": "PaperRunStabilityCheckCompletedPayload",
+  "description": "Stage2-PoC-B1：PAPER_RUN_STABILITY_CHECK_COMPLETED payload。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["paperRunId", "checkId", "result", "summary", "completedAt", "rawPayloadJson"],
+  "properties": {
+    "paperRunId":     { "type": "string", "minLength": 1 },
+    "checkId":        { "type": "string", "minLength": 1 },
+    "result":         { "type": "string", "enum": ["STABLE", "UNSTABLE", "INCONCLUSIVE"] },
+    "summary":        { "type": "string", "minLength": 1 },
+    "completedAt":    { "type": "string", "format": "date-time" },
+    "rawPayloadJson": { "type": "string" }
+  }
+}

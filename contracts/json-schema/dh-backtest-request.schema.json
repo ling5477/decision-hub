@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/dh-backtest-request.schema.json",
+  "title": "DhBacktestRequest",
+  "description": "Stage2-PoC-B1：DH -> NQ 回测请求契约。DH 仅请求 NQ 执行正式回测能力，不代表交易指令。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "traceId",
+    "candidateId",
+    "strategyName",
+    "strategyVersion",
+    "strategyParametersJson",
+    "startDate",
+    "endDate",
+    "initialCapital",
+    "symbols",
+    "frequency",
+    "requestedBy",
+    "requestedAt",
+    "status"
+  ],
+  "properties": {
+    "requestId":              { "type": "string", "minLength": 1 },
+    "traceId":                { "type": "string", "minLength": 1 },
+    "candidateId":            { "type": "string", "minLength": 1 },
+    "strategyName":           { "type": "string", "minLength": 1 },
+    "strategyVersion":        { "type": "string", "minLength": 1 },
+    "strategyParametersJson": { "type": "string" },
+    "entryRulesRef":          { "type": ["string", "null"] },
+    "exitRulesRef":           { "type": ["string", "null"] },
+    "startDate":              { "type": "string", "format": "date" },
+    "endDate":                { "type": "string", "format": "date" },
+    "initialCapital":         { "type": "number", "exclusiveMinimum": 0 },
+    "symbols": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "frequency":   { "type": "string", "enum": ["DAILY", "HOURLY", "MINUTE"] },
+    "requestedBy": { "type": "string", "minLength": 1 },
+    "requestedAt": { "type": "string", "format": "date-time" },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "QUEUED", "ACCEPTED", "REJECTED", "RESULT_READY", "FAILED"]
+    }
+  }
+}

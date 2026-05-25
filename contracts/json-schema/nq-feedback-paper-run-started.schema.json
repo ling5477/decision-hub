@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/nq-feedback-paper-run-started.schema.json",
+  "title": "PaperRunStartedPayload",
+  "description": "Stage2-PoC-B1：PAPER_RUN_STARTED payload。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["paperRunId", "startedAt", "mode", "rawPayloadJson"],
+  "properties": {
+    "paperRunId":     { "type": "string", "minLength": 1 },
+    "startedAt":      { "type": "string", "format": "date-time" },
+    "mode":           { "type": "string", "minLength": 1 },
+    "rawPayloadJson": { "type": "string" }
+  }
+}

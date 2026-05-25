@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/reflection-entry.schema.json",
+  "title": "ReflectionEntry",
+  "description": "Stage2-PoC-B1：reflection 过程证据，JudgeDecision 仍是唯一最终出口。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reflectionId",
+    "runId",
+    "traceId",
+    "stepIndex",
+    "agentRole",
+    "type",
+    "content",
+    "createdAt"
+  ],
+  "properties": {
+    "reflectionId": { "type": "string", "minLength": 1 },
+    "runId":        { "type": "string", "minLength": 1 },
+    "traceId":      { "type": "string", "minLength": 1 },
+    "stepIndex":    { "type": "integer", "minimum": 0 },
+    "agentRole":    { "type": "string", "minLength": 1 },
+    "type":         { "type": "string", "enum": ["STEP_REFLECTION", "AGENT_REFLECTION", "RUN_RETROSPECTIVE"] },
+    "content":      { "type": "string", "minLength": 1 },
+    "createdAt":    { "type": "string", "format": "date-time" },
+    "payloadJson":  { "type": ["string", "null"] }
+  }
+}

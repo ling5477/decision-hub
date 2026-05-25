@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/nq-feedback-paper-run-alert-raised.schema.json",
+  "title": "PaperRunAlertRaisedPayload",
+  "description": "Stage2-PoC-B1：PAPER_RUN_ALERT_RAISED payload。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["paperRunId", "alertId", "alertLevel", "alertCode", "message", "raisedAt", "rawPayloadJson"],
+  "properties": {
+    "paperRunId":     { "type": "string", "minLength": 1 },
+    "alertId":        { "type": "string", "minLength": 1 },
+    "alertLevel":     { "type": "string", "enum": ["INFO", "WARN", "ERROR", "CRITICAL"] },
+    "alertCode":      { "type": "string", "minLength": 1 },
+    "message":        { "type": "string", "minLength": 1 },
+    "raisedAt":       { "type": "string", "format": "date-time" },
+    "rawPayloadJson": { "type": "string" }
+  }
+}

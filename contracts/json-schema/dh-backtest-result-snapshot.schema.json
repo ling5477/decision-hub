@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/dh-backtest-result-snapshot.schema.json",
+  "title": "DhBacktestResultSnapshot",
+  "description": "Stage2-PoC-B1：NQ 回测结果在 DH 侧的领域快照。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "resultId",
+    "requestId",
+    "traceId",
+    "candidateId",
+    "periodStart",
+    "periodEnd",
+    "verdict",
+    "recordedAt",
+    "rawPayloadJson"
+  ],
+  "properties": {
+    "resultId":       { "type": "string", "minLength": 1 },
+    "requestId":      { "type": "string", "minLength": 1 },
+    "traceId":        { "type": "string", "minLength": 1 },
+    "candidateId":    { "type": "string", "minLength": 1 },
+    "sharpeRatio":    { "type": ["number", "null"] },
+    "maxDrawdown":    { "type": ["number", "null"] },
+    "annualReturn":   { "type": ["number", "null"] },
+    "winRate":        { "type": ["number", "null"], "minimum": 0.0, "maximum": 1.0 },
+    "profitFactor":   { "type": ["number", "null"] },
+    "periodStart":    { "type": "string", "format": "date" },
+    "periodEnd":      { "type": "string", "format": "date" },
+    "verdict":        { "type": "string", "enum": ["PASS", "FAIL", "MARGINAL"] },
+    "recordedAt":     { "type": "string", "format": "date-time" },
+    "rawPayloadJson": { "type": "string" }
+  }
+}

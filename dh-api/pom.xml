@@ -31,6 +31,13 @@
     <artifactId>dh-usecase</artifactId>
     <version>${project.version}</version>
   </dependency>
+
+  <!-- Stage2-PoC-B2: WebMvc 入口测试需要 MockMvc + Jackson -->
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+  </dependency>
 </dependencies>
 
 </project>

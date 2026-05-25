@@ -17,6 +17,12 @@
     <artifactId>dh-common</artifactId>
     <version>${project.version}</version>
   </dependency>
+  <!-- JUnit 5 (Stage2-PoC-B1: domain 模型契约单元测试) -->
+  <dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter</artifactId>
+    <scope>test</scope>
+  </dependency>
 </dependencies>
 
 </project>

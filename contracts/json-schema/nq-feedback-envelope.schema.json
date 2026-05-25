@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/nq-feedback-envelope.schema.json",
+  "title": "NqFeedbackEnvelope",
+  "description": "Stage2-PoC-B1：NQ -> DH 回流事件统一信封。eventId 用于幂等；traceId 关联 ResearchRun。payloadJson 必须保留原始 JSON 字符串。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "eventType",
+    "occurredAt",
+    "sourceSystem",
+    "sourceJobId",
+    "traceId",
+    "requestId",
+    "correlationId",
+    "schemaVersion",
+    "payloadJson"
+  ],
+  "properties": {
+    "eventId":       { "type": "string", "minLength": 1 },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "PAPER_RUN_CREATED",
+        "PAPER_RUN_STARTED",
+        "PAPER_RUN_STOPPED",
+        "PAPER_RUN_DAILY_REPORT_GENERATED",
+        "PAPER_RUN_ALERT_RAISED",
+        "PAPER_RUN_RECOVERY_EVENT_RECORDED",
+        "PAPER_RUN_STABILITY_CHECK_COMPLETED",
+        "BACKTEST_RESULT_READY"
+      ]
+    },
+    "occurredAt":    { "type": "string", "format": "date-time" },
+    "sourceSystem":  { "type": "string", "const": "nexus-quant" },
+    "sourceJobId":   { "type": "string", "minLength": 1 },
+    "traceId":       { "type": "string", "minLength": 1 },
+    "requestId":     { "type": "string", "minLength": 1 },
+    "correlationId": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "payloadJson":   { "type": "string", "description": "raw payload JSON string preserved as-is" },
+    "receivedAt":    { "type": "string", "format": "date-time" }
+  }
+}

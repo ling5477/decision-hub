@@ -1,7 +1,7 @@
 # Decision Hub Current Docs
 
-> Current stage: Stage2-PoC PLAN completed
-> Next stage:    Stage2-PoC WO
+> Current stage: Stage2-PoC-B2 IMPLEMENT completed
+> Next stage:    Stage2-PoC-B3 IMPLEMENT
 > Source of truth: docs/current
 
 ## 1. 当前定位
@@ -67,7 +67,7 @@ Stage1-FREEZE（docs/current 快照冻结到 docs/gates/dh-stage1/）
 下一步只允许进入：
 
 ```text
-Stage2-PoC：NQ 真实事件回流接通 + Kronos/global-stock-data 工具接口预留
+Stage2-PoC-B3 IMPLEMENT：dh-connector Forecast / Research Adapter 接口预留 + Fake 实现
 ```
 
 ## 4. 当前不允许做
