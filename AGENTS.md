@@ -78,12 +78,12 @@ docs/current/TESTING.md
 ## 4. 当前阶段
 
 ```text
-Current stage: Stage2-PoC FREEZE completed
-Next stage:    Stage3-PLAN
+Current stage: Stage3-PLAN completed
+Next stage:    Stage3-WO
 Source of truth: docs/current
 ```
 
-下一步只能进入 Stage3-PLAN，且只允许做 NQ 真实 feedback / backtest request 联调规划，不允许直接实现 Stage3 功能、不允许修改 NQ 交易核心、不允许接实盘自动交易。
+下一步只能进入 Stage3-WO，按 docs/current/STAGE3_WORK_ORDER.md 拆 4 个 Batch 实施。每个 Batch 都必须保证：不修改 NQ 仓库、不接实盘、不自动下单、不绕过 NQ 风控、不重写 NQ 回测核心、不引入 TradingAgents Python、mvn test 全绿。
 
 ## 5. 硬边界
 

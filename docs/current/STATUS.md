@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: Stage2-PoC FREEZE completed
-> Next stage:    Stage3-PLAN
+> Current stage: Stage3-PLAN completed
+> Next stage:    Stage3-WO
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -52,6 +52,15 @@ Stage2-PoC FREEZE       2026-05-26 完成冻结：
                           （Verdict: GO，Next: Stage3-PLAN）
                         - 6 份当前文档状态推进到 "Stage2-PoC FREEZE completed / Next: Stage3-PLAN"
                         - 无 Java 业务代码变更；无 NQ 仓库变更；无 Stage3 新功能
+Stage3-PLAN              2026-05-26 完成规划文档（仅 PLAN，不写代码、不动 NQ）：
+                        - 新增 docs/current/STAGE3_PLAN.md（主索引、目标、范围、风险、验收）
+                        - 新增 docs/current/STAGE3_NQ_TO_DH_FEEDBACK_PLAN.md（出站事件链路）
+                        - 新增 docs/current/STAGE3_DH_TO_NQ_BACKTEST_PLAN.md（入站回测请求）
+                        - 新增 docs/current/STAGE3_CONTRACT_PLAN.md（契约 / status / errorCode / version）
+                        - 新增 docs/current/STAGE3_TEST_PLAN.md（单测 / 联调 / 幂等 / 重试 / 边界）
+                        - 新增 docs/current/STAGE3_WORK_ORDER.md（4 个 Batch IMPLEMENT 草案）
+                        - 6 份状态文档同步到 "Stage3-PLAN completed / Next: Stage3-WO"
+                        - 零 Java 业务代码改动；零 NQ 仓库改动；零 Stage3 实现代码
 ```
 
 ## 3. 当前阶段边界
@@ -68,20 +77,21 @@ Stage2-PoC FREEZE       2026-05-26 完成冻结：
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（Stage3-PLAN）
+## 4. 下一阶段（Stage3-WO）
 
 ```text
-Stage3-PLAN 仅做规划，不允许直接实现：
-- 仅做 NQ 真实 feedback / backtest request 联调规划
-- 不允许直接实现 Stage3 功能
-- 不允许修改 NQ 交易核心
-- 不允许接实盘自动交易
+按 docs/current/STAGE3_WORK_ORDER.md 拆批实施：
+- Batch 1  Contract Alignment           （仅 DH 仓库内补经验沉淀；不联调；不动 NQ）
+- Batch 2  NQ Feedback Outbox PLAN/IMPL （NQ 仓库实现；本仓库只对齐契约 + 写 SPEC 文档）
+- Batch 3  DH Backtest Request Adapter  （DH 仓库新增 builder + 出站客户端，默认 Fake）
+- Batch 4  End-to-End Contract Test     （staging + CI Docker；不接实盘）
 
-Stage3-PLAN 之后再考虑（不属于 Stage3-PLAN 本身）：
-- 在装好 Docker 的 CI 环境中跑 PostgresContainerSmokeTest（V3 schema + JDBC 仓储）
-- 对接 NQ 团队真实 ingest endpoint（保持只读、回放安全）
-- 灰度切换 decisionhub.stage2.jdbc.enabled=true，验证 InMemory → JDBC 平滑切换
-- dh-memory 5 个 Store 的 JDBC 替换归后续持久化阶段
+每个 Batch 严格遵守：
+- 不修改 NQ 仓库
+- 不接真实下单 / 不绕风控 / 不重写回测核心
+- 不建设前端
+- 不引入 TradingAgents Python / Kronos / global-stock-data 真实接入
+- mvn test 全绿
 ```
 
 ## 5. 当前风险

@@ -1,7 +1,7 @@
 # Decision Hub Current Docs
 
-> Current stage: Stage2-PoC FREEZE completed
-> Next stage:    Stage3-PLAN
+> Current stage: Stage3-PLAN completed
+> Next stage:    Stage3-WO
 > Source of truth: docs/current
 
 ## 1. 当前定位
@@ -63,21 +63,18 @@ Stage1 (Boundary Freeze + Agent Runtime Skeleton)
 Stage1-CLOSE（旧链路 @Deprecated + 文档单源 + ArchUnit 兜底）
 Stage1-FREEZE（docs/current 快照冻结到 docs/gates/dh-stage1/）
 Stage2-PoC-B1 / B2 / B3 / B4 / B5 IMPLEMENT
-Stage2-PoC VERIFY（2026-05-26，BUILD SUCCESS / 122 tests / ArchUnit 10/10；
-                   契约文档不一致修正；Verdict: GO，详见
-                   docs/current/STAGE2_POC_VERIFY_REPORT.md）
-Stage2-PoC FREEZE（2026-05-26，docs/current 完整快照冻结到
-                   docs/gates/dh-stage2-poc/；状态三处对齐到 Next: Stage3-PLAN）
+Stage2-PoC VERIFY（2026-05-26，BUILD SUCCESS / 122 tests / ArchUnit 10/10；Verdict: GO）
+Stage2-PoC FREEZE（2026-05-26，docs/current 快照冻结到 docs/gates/dh-stage2-poc/）
+Stage3-PLAN（2026-05-26，新增 6 份 STAGE3_*.md 规划文档：PLAN / NQ→DH feedback /
+             DH→NQ backtest / Contract / Test / Work Order）
 ```
 
 下一步只允许进入：
 
 ```text
-Stage3-PLAN：仅做 NQ 真实 feedback / backtest request 联调规划。
-             不允许直接实现 Stage3 功能；
-             不允许修改 NQ 交易核心；
-             不允许接实盘自动交易。
-             Stage2-PoC 快照已冻结到 docs/gates/dh-stage2-poc/，不得修改。
+Stage3-WO：按 docs/current/STAGE3_WORK_ORDER.md 启动 4 个 Batch IMPLEMENT。
+           严格禁止：修改 NQ 仓库 / 接实盘 / 自动下单 / 绕风控 / 重写 NQ 回测核心 /
+                   引入 TradingAgents Python / 接真实 Kronos / 接真实 global-stock-data。
 ```
 
 ## 4. 当前不允许做

@@ -924,3 +924,42 @@ docs/current/TESTING.md         追加 FREEZE 验收记录
 进入 Stage3-PLAN：仅做 NQ 真实 feedback / backtest request 联调规划；
 不允许直接实现 Stage3 功能；不允许修改 NQ 交易核心；不允许接实盘自动交易。
 
+## 2026-05-26 Stage3-PLAN
+
+只做 PLAN 文档，不写 Java 业务代码、不修改 NQ 仓库、不接任何真实外部系统。
+
+### 已完成
+
+```text
+新增 6 份 Stage3 规划文档：
+  docs/current/STAGE3_PLAN.md                       Stage3 主索引（目标 / 范围 / 风险 / 验收）
+  docs/current/STAGE3_NQ_TO_DH_FEEDBACK_PLAN.md     NQ -> DH feedback 出站事件链路规划
+  docs/current/STAGE3_DH_TO_NQ_BACKTEST_PLAN.md     DH -> NQ backtest request 入站链路规划
+  docs/current/STAGE3_CONTRACT_PLAN.md              端到端契约（status / errorCode / version / 4 字段规则）
+  docs/current/STAGE3_TEST_PLAN.md                  测试策略（DH 单测 / NQ 契约 / 联调 / 幂等 / 重试 / 边界）
+  docs/current/STAGE3_WORK_ORDER.md                 4 个 IMPLEMENT Batch 工单草案 + Codex 提示词
+
+6 份状态文档同步到 "Stage3-PLAN completed / Next: Stage3-WO"：
+  README.md / AGENTS.md / docs/current/README.md / STATUS.md / WORKLOG.md（本段）/ TESTING.md
+
+mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false BUILD SUCCESS
+（122 tests 全绿，作为 PLAN 文档阶段的回归基线）
+```
+
+### 严格边界（本阶段未违反）
+
+```text
+不修改任何 Java 业务代码           不修改 NQ 仓库
+不接真实 NQ API                   不接真实 Kronos
+不接真实 global-stock-data         不引入 TradingAgents Python
+不实现真实下单                     不绕过 NQ 风控
+不重写 NQ 回测核心                 不建设前端
+不实现 Stage3 功能                 不修改 contracts/openapi.yaml 语义
+不修改 Flyway migration 语义       不新增 NqFeedbackEventType
+```
+
+### 下一步
+
+进入 Stage3-WO：按 docs/current/STAGE3_WORK_ORDER.md 启动 Stage3-Batch1 IMPLEMENT
+（Contract Alignment：DH 仓库内补 8 个 Handler 经验沉淀；不联调；不动 NQ）。
+

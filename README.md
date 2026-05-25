@@ -9,8 +9,8 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-Current stage: Stage2-PoC FREEZE completed
-Next stage:    Stage3-PLAN
+Current stage: Stage3-PLAN completed
+Next stage:    Stage3-WO
 Source of truth: docs/current
 ```
 
@@ -65,11 +65,12 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-Stage3-PLAN：仅做 NQ 真实 feedback / backtest request 联调规划。
-             不允许直接实现 Stage3 功能；
-             不允许修改 NQ 交易核心；
-             不允许接实盘自动交易。
-             Stage2-PoC 快照已冻结到 docs/gates/dh-stage2-poc/，不得修改。
+Stage3-WO：按 docs/current/STAGE3_WORK_ORDER.md 拆 4 个 Batch 启动 IMPLEMENT：
+           - Batch 1 Contract Alignment
+           - Batch 2 NQ Feedback Outbox PLAN/IMPL
+           - Batch 3 DH Backtest Request Adapter
+           - Batch 4 End-to-End Contract Test
+           严格禁止：修改 NQ 仓库 / 接实盘 / 自动下单 / 绕风控 / 重写回测核心。
 ```
 
 ## 构建与验证

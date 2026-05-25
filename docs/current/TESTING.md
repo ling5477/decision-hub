@@ -18,6 +18,9 @@ Stage2-PoC FREEZE       2026-05-26 完成：docs/current 快照冻结到
                         docs/gates/dh-stage2-poc/；FREEZE 前最终验收 mvn test
                         BUILD SUCCESS / 122 tests / ArchUnit 10/10；
                         无 Java 业务代码改动；下一阶段进入 Stage3-PLAN
+Stage3-PLAN              2026-05-26 完成：仅文档规划，新增 6 份 STAGE3_*.md；
+                        无 Java 业务代码改动；mvn test 作为回归基线 BUILD SUCCESS / 122 tests
+                        / ArchUnit 10/10；下一阶段进入 Stage3-WO
 ```
 
 最近一次 `mvn test` 见 §3。
@@ -376,4 +379,18 @@ Batch 1 范围 (零 Controller/Service/Repository/JDBC/WiringConfig 改动)：
            "Current stage: Stage2-PoC FREEZE completed / Next stage: Stage3-PLAN"
 本次改动   仅文档；零 Java 业务代码变更；零 NQ 仓库变更；无 Stage3 功能
 准入决定   进入 Stage3-PLAN（仅规划 NQ 真实联调，不实现）
+```
+
+## 9. 2026-05-26 Stage3-PLAN 回归记录
+
+```text
+日期       2026-05-26
+阶段       Stage3-PLAN (文档规划阶段，无 Java 业务代码改动)
+命令       mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false
+结果       BUILD SUCCESS / 122 tests / 0 failures / 0 errors / 0 skipped
+           - ArchUnit 10/10 PASS
+本次改动   仅新增 6 份 STAGE3_*.md 规划文档 + 6 份状态文档 bump；零 Java 业务代码改动
+本次范围   仅 PLAN：不接真实 NQ / Kronos / global-stock-data；不引入 TradingAgents Python；
+           不实现下单 / 风控旁路 / 实盘 / 前端；不修改 NQ 仓库
+准入决定   进入 Stage3-WO（按 STAGE3_WORK_ORDER.md 拆批实施）
 ```
