@@ -78,12 +78,12 @@ docs/current/TESTING.md
 ## 4. 当前阶段
 
 ```text
-Current stage: Stage2-PoC-B5 IMPLEMENT completed
-Next stage:    Stage2-PoC VERIFY
+Current stage: Stage2-PoC FREEZE completed
+Next stage:    Stage3-PLAN
 Source of truth: docs/current
 ```
 
-下一步只能进入 Stage2-PoC VERIFY，不允许夹带交易执行能力。
+下一步只能进入 Stage3-PLAN，且只允许做 NQ 真实 feedback / backtest request 联调规划，不允许直接实现 Stage3 功能、不允许修改 NQ 交易核心、不允许接实盘自动交易。
 
 ## 5. 硬边界
 

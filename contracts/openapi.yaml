@@ -61,7 +61,9 @@ paths:
       summary: 'Stage2-PoC-B2: NQ -> DH 正式回流事件 ingest'
       description: |
         接收 NQ 端推送的 NqFeedbackEnvelope；按 eventId 做幂等去重，重放视作命中。
-        校验失败返回 400；幂等命中返回 200 + duplicate=true。
+        - 首次接收：返回 202 + NqFeedbackAcceptedResponse（outcome=ACCEPTED）
+        - 幂等命中：返回 202 + NqFeedbackAcceptedResponse（outcome=DUPLICATE）
+        - 校验失败：返回 400 + NqFeedbackErrorResponse
       requestBody:
         required: true
         content:
@@ -69,22 +71,18 @@ paths:
             schema:
               $ref: '#/components/schemas/NqFeedbackEnvelope'
       responses:
-        '200':
-          description: accepted or duplicate
+        '202':
+          description: accepted (first receipt) or duplicate (idempotent replay)
           content:
             application/json:
               schema:
-                type: object
-                required: [eventId, duplicate]
-                properties:
-                  eventId:   { type: string }
-                  duplicate: { type: boolean }
+                $ref: '#/components/schemas/NqFeedbackAcceptedResponse'
         '400':
           description: invalid envelope or payload
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/NqFeedbackErrorResponse'
 
   # ===== Stage2-PoC-B3 / B4 planned endpoints (controllers 留 Batch 后续 / Stage2 VERIFY) =====
   # Schemas (ForecastArtifact / ExternalMarketSnapshot / ReflectionEntry / CheckpointEntry) 已在 components 落地。
@@ -204,6 +202,27 @@ components:
         schemaVersion: { type: string, example: '1.0.0' }
         payloadJson:   { type: string, description: 'raw payload JSON string preserved as-is' }
         receivedAt:    { type: string, format: date-time }
+    NqFeedbackAcceptedResponse:
+      type: object
+      description: 'Stage2-PoC-B2: NQ feedback 接收响应（HTTP 202）。首次接收 outcome=ACCEPTED，幂等重放 outcome=DUPLICATE。'
+      required: [eventId, status, outcome]
+      properties:
+        eventId:       { type: string }
+        status:        { type: string, description: '统一保留原 status 字符串，首次与重放语义一致' }
+        outcome:       { type: string, enum: [ACCEPTED, DUPLICATE] }
+        traceId:       { type: string, nullable: true }
+        correlationId: { type: string, nullable: true }
+    NqFeedbackErrorResponse:
+      type: object
+      description: 'Stage2-PoC-B2: NQ feedback 拒绝响应（HTTP 400）。errorCode 取 UNKNOWN_EVENT_TYPE / INVALID_SCHEMA / UNKNOWN_TRACE。'
+      required: [error]
+      properties:
+        error:         { type: string, description: '固定为 INVALID_REQUEST' }
+        errorCode:     { type: string, nullable: true, enum: [UNKNOWN_EVENT_TYPE, INVALID_SCHEMA, UNKNOWN_TRACE] }
+        message:       { type: string, nullable: true }
+        eventId:       { type: string, nullable: true }
+        traceId:       { type: string, nullable: true }
+        correlationId: { type: string, nullable: true }
     AlertLevel:
       type: string
       enum: [INFO, WARN, ERROR, CRITICAL]

@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: Stage2-PoC FREEZE completed
-> Next stage:    Stage3-PLAN
+> Current stage: Stage2-PoC VERIFY completed
+> Next stage:    Stage2-PoC FREEZE
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -46,12 +46,6 @@ Stage2-PoC VERIFY       2026-05-26 冻结前验证：mvn test BUILD SUCCESS / 12
                         - docs/current/DB_SCHEMA.md 修正 V2 文件名为 V2__dh_agent_runtime.sql
                         - docs/current/API.md 把已实现的 7 条 research-runs 端点移入 "已实现端点"
                         - 生成 docs/current/STAGE2_POC_VERIFY_REPORT.md (Verdict: GO)
-Stage2-PoC FREEZE       2026-05-26 完成冻结：
-                        - docs/current 完整快照拷贝到 docs/gates/dh-stage2-poc/
-                        - docs/gates/dh-stage2-poc/README.md 顶部含冻结声明
-                          （Verdict: GO，Next: Stage3-PLAN）
-                        - 6 份当前文档状态推进到 "Stage2-PoC FREEZE completed / Next: Stage3-PLAN"
-                        - 无 Java 业务代码变更；无 NQ 仓库变更；无 Stage3 新功能
 ```
 
 ## 3. 当前阶段边界
@@ -68,20 +62,17 @@ Stage2-PoC FREEZE       2026-05-26 完成冻结：
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（Stage3-PLAN）
+## 4. 下一阶段（Stage2-PoC FREEZE）
 
 ```text
-Stage3-PLAN 仅做规划，不允许直接实现：
-- 仅做 NQ 真实 feedback / backtest request 联调规划
-- 不允许直接实现 Stage3 功能
-- 不允许修改 NQ 交易核心
-- 不允许接实盘自动交易
-
-Stage3-PLAN 之后再考虑（不属于 Stage3-PLAN 本身）：
-- 在装好 Docker 的 CI 环境中跑 PostgresContainerSmokeTest（V3 schema + JDBC 仓储）
-- 对接 NQ 团队真实 ingest endpoint（保持只读、回放安全）
-- 灰度切换 decisionhub.stage2.jdbc.enabled=true，验证 InMemory → JDBC 平滑切换
-- dh-memory 5 个 Store 的 JDBC 替换归后续持久化阶段
+按 docs/current/STAGE2_POC_VERIFY_REPORT.md §10 操作清单实施：
+- 将 docs/current 完整拷贝到 docs/gates/dh-stage2-poc/ 并锁定
+- 状态推进到 "Stage2-PoC FREEZE completed / Next: Stage3 PLAN"
+- FREEZE 完成后再执行：
+  - 在装好 Docker 的 CI 环境中跑 PostgresContainerSmokeTest（V3 schema + JDBC 仓储）
+  - 对接 NQ 团队真实 ingest endpoint（保持只读、回放安全）
+  - 灰度切换 decisionhub.stage2.jdbc.enabled=true，验证 InMemory → JDBC 平滑切换
+- dh-memory 5 个 Store 的 JDBC 替换仍归 Stage3 完整持久化，本阶段不触动
 ```
 
 ## 5. 当前风险

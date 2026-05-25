@@ -14,10 +14,6 @@ Stage2-PoC-B5 IMPLEMENT V3 migration + 5 个 Stage2 JDBC 仓储 + Stage2JdbcWiri
 Stage2-PoC VERIFY       2026-05-26 BUILD SUCCESS / 122 tests / ArchUnit 10/10；
                         硬边界扫描全 PASS；契约/文档不一致项已修正；
                         Verdict: GO，允许进入 Stage2-PoC FREEZE
-Stage2-PoC FREEZE       2026-05-26 完成：docs/current 快照冻结到
-                        docs/gates/dh-stage2-poc/；FREEZE 前最终验收 mvn test
-                        BUILD SUCCESS / 122 tests / ArchUnit 10/10；
-                        无 Java 业务代码改动；下一阶段进入 Stage3-PLAN
 ```
 
 最近一次 `mvn test` 见 §3。
@@ -359,21 +355,4 @@ Batch 1 范围 (零 Controller/Service/Repository/JDBC/WiringConfig 改动)：
            - OpenAPI 中 /api/ai/research-runs 端点未落 OpenAPI，列入 Stage3 文档补丁
 准入决定   GO，允许进入 Stage2-PoC FREEZE
 报告       docs/current/STAGE2_POC_VERIFY_REPORT.md
-```
-
-## 8. 2026-05-26 Stage2-PoC FREEZE 验收记录
-
-```text
-日期       2026-05-26
-阶段       Stage2-PoC FREEZE (冻结前最终验收)
-命令       mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false
-结果       BUILD SUCCESS
-           - 总计 122 tests / 0 failures / 0 errors / 0 skipped
-           - ArchUnit 10/10 PASS
-冻结目录   docs/gates/dh-stage2-poc/ （已创建，含冻结声明 README.md）
-文档同步   README.md / AGENTS.md / docs/current/README.md / STATUS.md
-           / WORKLOG.md / TESTING.md 全部对齐：
-           "Current stage: Stage2-PoC FREEZE completed / Next stage: Stage3-PLAN"
-本次改动   仅文档；零 Java 业务代码变更；零 NQ 仓库变更；无 Stage3 功能
-准入决定   进入 Stage3-PLAN（仅规划 NQ 真实联调，不实现）
 ```
