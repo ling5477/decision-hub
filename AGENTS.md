@@ -1,60 +1,194 @@
-# Repository Guidelines
+# Decision Hub Agent Guidelines
 
-## 项目结构与模块组织
-- 根目录为多模块 Maven 工程。`dh-app/` 为 Spring Boot 入口模块，其他 `dh-*` 模块按领域/分层拆分。
-- 契约与协议：`contracts/`（OpenAPI、JSON Schema、事件协议）。
-- 文档与用例：`docs/`（ADR/规范），`golden_cases/`（回归用例骨架）。
-- 运维与本地依赖：`ops/`（`docker-compose.yml`）。
-- 代码与资源：`dh-*/src/main/java`、`dh-app/src/main/resources`；数据库迁移在 `dh-app/src/main/resources/db/migration/`（例：`V1__init.sql`）。
+本仓库是 Decision Hub。任何 Agent、Codex、人工改动都必须按本文件执行。
 
-## 构建、测试与本地运行
-- `mvn -DskipTests clean package`：全量构建并跳过测试。
-- `mvn -pl dh-app -am spring-boot:run`：启动应用并自动构建依赖模块。
-- `mvn test` 或 `mvn -pl dh-app -am test`：运行单元/集成测试。
-- `mvn -Pquality validate`：运行 Checkstyle + Spotless 规范检查。
-- `docker compose -f ops/docker-compose.yml up -d`：启动本地依赖（以 compose 配置为准）。
+## 1. 项目定位
 
-## 编码风格与命名约定
-- Java 21；Spring Boot 3.5.x。
-- 使用 Spotless（Google Java Format，2 空格缩进）与 Checkstyle（配置见 `dh-bom/checkstyle/checkstyle.xml`）。
-- 包名以 `com.guidinglight.decisionhub` 为前缀；类名 `PascalCase`。
-- 测试类以 `*Test` 结尾；Flyway 迁移命名 `V{版本}__{描述}.sql`。
+Decision Hub 是 NexusQuant 的 AI Agent 决策能力层，不是交易执行系统。
 
-## 测试指南
-- 测试框架：JUnit 5 + Spring Boot Test；集成测试使用 Testcontainers（需要 Docker）。
-- 架构约束：ArchUnit；测试放在 `src/test/java`。
-- 覆盖率未设定硬指标；新增功能需至少包含单元测试或集成测试。
+DH 负责：
 
-## 提交与 PR 指南
-- Git 历史仅包含 `init dev`/`Initial commit`，尚无固定规范；请使用简洁命令式摘要（例：`Add ledger repository`）。
-- PR 需包含：变更说明、关联 issue（如有）、测试命令与结果。涉及接口需同步更新 `contracts/`，涉及数据库需提供迁移脚本与回滚说明。
+```text
+Agent 编排
+候选方案生成
+多路径探索
+历史反馈强化
+策略评分
+冲突仲裁
+报告生成
+辅助决策
+```
 
-## 安全与配置
-- 禁止提交密钥；配置集中在 `dh-app/src/main/resources/application*.yml`，敏感值通过环境变量或安全配置注入。
-- 所有外部输入需校验，避免 SQL/路径/命令注入。
+NQ 负责：
 
-## Codex 执行协议（强制）
-- 每次开始任务前必须依序读取：
-  1) docs/codex/WORK_ORDER.md（里程碑与范围）
-  2) docs/codex/PLAN_QUEUE.json（未完成计划列表）
-  3) docs/codex/PLAN_CURRENT_POINTER.json（当前计划指针）
-  4) 当前计划目录：docs/codex/plans/<planId>/STATUS.json 与 PLAN.md
-- 任何编码任务必须先输出计划，并将计划落盘到当前计划目录的 PLAN.md（禁止只在对话里输出）。
-- 只允许从 STATUS.json 的“第一个未完成步骤”继续执行，禁止跳步。
-- 每完成一步必须更新 STATUS.json（状态、evidence 文件列表、lastVerify）。
-- 每次任务结束必须执行 scripts/verify.ps1，并把结果写入：
-  - docs/codex/plans/<planId>/STATUS.json 的 lastVerify
-  - docs/codex/CHANGE_NOTES.md
+```text
+交易核心
+账户与资产
+订单状态机
+风控链路
+正式回测
+模拟盘/实盘执行
+审计与复盘
+```
 
-## 计划归档与进度追踪（强制）
-- 计划正文永久保留：docs/codex/plans/<planId>/PLAN.md（不得覆盖历史计划）
-- 进度状态文件：docs/codex/plans/<planId>/STATUS.json（允许更新，用于记录 DONE/TODO/IN_PROGRESS）
-- 当前计划指针：docs/codex/PLAN_CURRENT_POINTER.json（允许覆盖，仅作为最新计划入口）
-- 计划队列：docs/codex/PLAN_QUEUE.json
-  - active：未完成计划列表（启动只读取 active）
-  - done：已完成计划列表（用于复盘与审计）
+## 2. 当前事实源
 
-## 注释与命名规范（本项目强制，强化版）
-- 注释要求：所有 public/protected 的类、接口、枚举、字段、方法必须有清晰注释；关键 private 方法若承载业务规则也必须注释。
-- 命名要求：变量/方法/类/枚举命名必须贴近业务原意、可读、可搜索，不允许随意简写或无语义命名。
-- 重命名/迁移/批量改引用：必须优先使用 IntelliJ IDEA MCP 的语义重构能力，禁止纯文本全局替换导致漏改引用。
+开工前必须优先读取：
+
+```text
+README.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/ROADMAP.md
+docs/current/WORKFLOW.md
+docs/current/WORK_ORDER.md
+```
+
+涉及 DH/NQ 集成时，还必须读取：
+
+```text
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/DH_REFACTOR_STAGE1_WORK_ORDER.md
+```
+
+`docs/current` 是唯一当前事实源。
+
+`docs/codex` 只保留历史计划与辅助执行区，不得覆盖 `docs/current` 的当前结论。
+
+## 3. 标准工作流
+
+DH 采用与 NQ 一致的阶段化流程：
+
+```text
+PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
+```
+
+禁止跳过 VERIFY 标记完成。
+
+禁止把临时补丁说明写入根 README。
+
+阶段推进后必须更新：
+
+```text
+docs/current/STATUS.md
+docs/current/WORKLOG.md
+docs/current/TESTING.md
+```
+
+## 4. 当前阶段
+
+```text
+Current stage: DH-REFIT-1-PLAN completed
+Next stage: DH-REFIT-1-WO
+Source of truth: docs/current
+```
+
+下一步只能做 Agent Runtime Skeleton 的第一批实现，不允许夹带交易执行能力。
+
+## 5. 硬边界
+
+```text
+DH 不迁入 NQ
+DH 不直接下单
+DH 不绕过 NQ 风控
+DH 不替代 NQ 订单状态机
+DH 不重写 NQ 回测核心
+DH 不建设完整第二套前端
+DH 不成为交易事实源
+```
+
+## 6. 允许改动范围
+
+DH-REFIT-1-WO 允许改：
+
+```text
+dh-domain
+dh-usecase
+dh-memory
+dh-eval
+dh-connector
+dh-api
+dh-app
+dh-infra
+docs/current
+contracts
+golden_cases
+```
+
+当前阶段不允许改：
+
+```text
+NQ 仓库
+实盘执行链路
+订单状态机
+风控核心
+正式回测核心
+NQ Console 正式页面
+```
+
+## 7. 构建与验证
+
+最低验证：
+
+```bash
+mvn test
+```
+
+质量检查：
+
+```bash
+mvn -Pquality validate
+```
+
+应用启动：
+
+```bash
+mvn -pl dh-app -am spring-boot:run
+```
+
+验证结果必须写入：
+
+```text
+docs/current/TESTING.md
+```
+
+实现记录必须写入：
+
+```text
+docs/current/WORKLOG.md
+```
+
+## 8. 代码与命名规范
+
+```text
+Java 21
+Spring Boot 3.5.x
+包名前缀 com.guidinglight.decisionhub
+测试类以 *Test 结尾
+Flyway 迁移命名 V{版本}__{描述}.sql
+```
+
+public/protected 的类、接口、枚举、字段、方法必须有清晰注释。
+
+关键 private 方法如果承载业务规则，也必须注释。
+
+变量、方法、类、枚举命名必须贴近业务原意、可读、可搜索。
+
+## 9. Agent 输出要求
+
+```text
+所有 Agent 输出必须结构化
+所有关键对象必须有 traceId
+所有 NQ feedback 必须保存原始 payload
+最终策略建议必须经过 JudgeDecision
+```
+
+禁止单个 Agent 直接输出最终交易决策。
+
+## 10. 安全与配置
+
+禁止提交密钥。
+
+敏感值必须通过环境变量或安全配置注入。
+
+所有外部输入必须校验，避免 SQL、路径、命令注入。
