@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: Stage2-PoC-B2 IMPLEMENT completed
-> Next stage:    Stage2-PoC-B3 IMPLEMENT
+> Current stage: Stage2-PoC-B3 IMPLEMENT completed
+> Next stage:    Stage2-PoC-B4 IMPLEMENT
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -27,6 +27,7 @@ Stage2-PoC PLAN         规划 NQ 事件契约 + Kronos/global-stock-data 接口
 Stage2-PoC WO           5 个 Batch 拆解：契约+领域 / NQ Ingestion / Tool Ports / Reflection-Planner / JDBC+Tests+Docs
 Stage2-PoC-B1 IMPLEMENT 领域模型 + JSON Schema + OpenAPI components 落地，零 Controller/Service/Repository/JDBC/WiringConfig 改动
 Stage2-PoC-B2 IMPLEMENT NQ feedback ingestion 正式契约：envelope DTO + Validator + Router + 8 个 Handler + 幂等 + WebMvc 入口
+Stage2-PoC-B3 IMPLEMENT dh-connector Forecast / Research Adapter 端口预留 + Fake / InMemory 实现 + 3 个测试类全绿
 ```
 
 ## 3. 当前阶段边界
@@ -42,15 +43,15 @@ Stage2-PoC-B2 IMPLEMENT NQ feedback ingestion 正式契约：envelope DTO + Vali
 不把 Kronos / TradingAgents / global-stock-data 直接复制进 DH/NQ
 ```
 
-## 4. 下一阶段（Stage2-PoC-B3 IMPLEMENT）
+## 4. 下一阶段（Stage2-PoC-B4 IMPLEMENT）
 
-按 docs/current/STAGE2_POC_WORK_ORDER.md §Batch 3 实施：
+按 docs/current/STAGE2_POC_WORK_ORDER.md §Batch 4 实施：
 
 ```text
-Batch 3  Forecast / Research Adapter Interfaces：
-         dh-connector/tools/ForecastToolPort + Fake +
-         dh-connector/research/ResearchDataAdapter + Fake + ResearchSnapshotStore +
-         rawPayloadJson 留档 + status 枚举留口（不实现真实 HTTP / Python 调用）
+Batch 4  Reflection / Checkpoint / Dynamic Planner：
+         dh-usecase planner Resolver/Registry + 4 个 StrategyHandler +
+         ReflectionCheckpointService + 默认 regime->strategy 映射 +
+         写入规则（JudgeDecision 仍是唯一最终出口）
 ```
 
 ## 5. 当前风险

@@ -78,12 +78,12 @@ docs/current/TESTING.md
 ## 4. 当前阶段
 
 ```text
-Current stage: Stage2-PoC-B2 IMPLEMENT completed
-Next stage:    Stage2-PoC-B3 IMPLEMENT
+Current stage: Stage2-PoC-B3 IMPLEMENT completed
+Next stage:    Stage2-PoC-B4 IMPLEMENT
 Source of truth: docs/current
 ```
 
-下一步只能进入 Stage2-PoC-B3 IMPLEMENT，不允许夹带交易执行能力。
+下一步只能进入 Stage2-PoC-B4 IMPLEMENT，不允许夹带交易执行能力。
 
 ## 5. 硬边界
 

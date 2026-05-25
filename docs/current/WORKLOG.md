@@ -480,3 +480,104 @@ dh-app ArchitectureTest 5/5 保持通过
 ### 下一步
 
 进入 Stage2-PoC-B3 IMPLEMENT：dh-connector Forecast / Research Adapter 接口预留 + Fake 实现。
+
+---
+
+## 2026-05-25 Stage2-PoC-B3 IMPLEMENT
+
+### 已完成
+
+```text
+dh-connector (新增 8 个文件)
+  tools/
+    ForecastRequest                  (traceId/symbol/horizon/target；symbol 非空 + horizon/target 非空检查)
+    ForecastToolPort                 (Stage2 同步占位端口；rawPayloadJson 非空契约)
+  tools/fake/
+    FakeForecastToolAdapter          (deterministic mock：固定 generatedAt / FAKE_MODEL_VERSION /
+                                      2 个 ForecastPoint；rawPayloadJson 写 mock JSON；
+                                      symbol/horizon 非法时 IllegalArgumentException)
+  research/
+    MarketSnapshotRequest            (traceId/symbols/source/rangeStart/rangeEnd/dataTypes；
+                                      symbols 非空 + rangeEnd>=rangeStart 校验)
+    ResearchDataAdapter              (Stage2 同步占位端口；rawPayloadJson 非空契约)
+    ResearchSnapshotStore            (save / findById / findByTraceId / findBySymbolAndDateRange)
+  research/fake/
+    FakeResearchDataAdapter          (deterministic mock：固定 fetchedAt / FAKE_SOURCE_VERSION；
+                                      dataTypes 空 -> dataJson="{}"；rawPayloadJson 写 mock JSON)
+    InMemoryResearchSnapshotStore    (ConcurrentHashMap<snapshotId,…> +
+                                      二级索引 traceId -> snapshotId set)
+
+dh-connector (修改 1 个文件)
+  pom.xml                            加 junit-jupiter (test scope)
+
+dh-connector 测试 (新增 3 个文件，9 个 cases 全绿)
+  tools/fake/FakeForecastToolAdapterTest          3 cases
+    ①  happy path -> COMPLETED + 非空 rawPayloadJson + deterministic artifactId
+    ②  symbol 为空 / blank -> IllegalArgumentException
+    ③  horizon 为空 -> IllegalArgumentException
+  research/fake/FakeResearchDataAdapterTest       4 cases
+    ①  happy path -> COMPLETED + 非空 rawPayloadJson + deterministic snapshotId
+    ②  symbols 为空 -> IllegalArgumentException
+    ③  rangeStart > rangeEnd -> IllegalArgumentException
+    ④  空 dataTypes -> dataJson="{}" + COMPLETED + 非空 rawPayloadJson
+  research/fake/InMemoryResearchSnapshotStoreTest 2 cases
+    ①  save -> findById / findByTraceId 命中；null/missing 返回 empty
+    ②  findBySymbolAndDateRange 命中/未命中（多 symbol + 日期 overlap）+ start>end 抛错
+
+docs/current/STATUS.md / WORKLOG.md / TESTING.md / README.md / AGENTS.md
+  状态切到 Stage2-PoC-B3 IMPLEMENT completed / Next: Stage2-PoC-B4 IMPLEMENT
+```
+
+### Raw Payload 留档（强制 6 条）
+
+```text
+1. FakeForecastToolAdapter 返回的 ForecastArtifact.rawPayloadJson 必填，
+   写 {"source":"fake-forecast","symbol":"…","horizon":"…","target":"…"}。
+2. FakeResearchDataAdapter 返回的 ExternalMarketSnapshot.rawPayloadJson 必填，
+   写 {"source":"fake-research","symbols":[…],"dataTypes":[…],"rangeStart":"…","rangeEnd":"…"}。
+3. Fake 不允许空字符串；空 dataTypes 时 dataJson 退化为 "{}"。
+4. 数据库列 raw_payload_json TEXT NOT NULL，由 Batch 5 落地。
+5. 真实接入失败时，未来适配器 fallback 必须把异常摘要写入 rawPayloadJson。
+6. 不允许把敏感凭据写入 rawPayloadJson（Fake 已遵守，无任何 token 字段）。
+```
+
+### Timeout / Cache / Retry 后置设计（与 WO §Batch 3.6 一致）
+
+```text
+Stage2 不实现 timeout / cache / retry，仅以 javadoc + status 枚举做接口预留：
+  ForecastArtifactStatus { COMPLETED, PENDING, FAILED, TIMEOUT }
+  MarketSnapshotStatus   { COMPLETED, PENDING, FAILED }
+
+后置接入计划（不在本 WO 内实现）：
+  - ForecastToolPort 真实化时，由适配器层通过 Resilience4j 实现 timeout/circuit-breaker/retry。
+  - ResearchDataAdapter 真实化时，由适配器层加入磁盘缓存（snapshotId 命中复用）。
+  - 接口签名不变，因此 Stage2 的 Fake 与未来真实实现可平滑替换。
+```
+
+### 未做（B3 严格边界）
+
+```text
+未修改 dh-domain（复用 Batch 1 ForecastArtifact / ExternalMarketSnapshot）
+未修改 NQ 仓库
+未接真实 Kronos / global-stock-data / NQ API
+未引入 Resilience4j / Caffeine / HTTP 客户端
+未引入 JDBC（Batch 5 才落地 JDBC ResearchSnapshotStore）
+未写 WiringConfig
+未引入 TradingAgents Python 代码
+未做前端
+未引入新的 ArchUnit 规则（Batch 5 一次性处理）
+```
+
+### 验收
+
+```text
+mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false  BUILD SUCCESS
+dh-connector Batch 3 新增 9 个 cases 全部通过
+Batch 1 / Batch 2 测试保持全绿
+Stage1 闭环测试保持通过
+dh-app ArchitectureTest 5/5 保持通过
+```
+
+### 下一步
+
+进入 Stage2-PoC-B4 IMPLEMENT：Reflection / Checkpoint / Dynamic Planner。

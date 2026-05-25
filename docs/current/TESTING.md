@@ -5,6 +5,9 @@
 ```text
 Stage1                  代码 + 闭环测试已落地
 Stage1-CLOSE            旧链路 @Deprecated + 文档单源 + ArchUnit 4 条新规则
+Stage2-PoC-B1 IMPLEMENT 领域模型 + JSON Schema + OpenAPI components 落地
+Stage2-PoC-B2 IMPLEMENT NQ feedback ingestion envelope/Validator/Router/8 Handler/幂等/WebMvc
+Stage2-PoC-B3 IMPLEMENT dh-connector Forecast / Research Adapter 接口预留 + Fake 实现
 ```
 
 最近一次 `mvn test` 见 §3。
@@ -31,7 +34,43 @@ mvn -Pquality validate
 mvn -pl dh-app -am spring-boot:run
 ```
 
-## 3. 最近一次验收结果（2026-05-25 Stage2-PoC-B2 IMPLEMENT）
+## 3. 最近一次验收结果（2026-05-25 Stage2-PoC-B3 IMPLEMENT）
+
+```text
+日期：2026-05-25
+阶段：Stage2-PoC-B3 IMPLEMENT
+命令：mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false
+结果：BUILD SUCCESS
+
+通过的关键测试：
+  Batch 3 新增（dh-connector）
+    - FakeForecastToolAdapterTest               3/3   通过（happy path + symbol 空 + horizon 空）
+    - FakeResearchDataAdapterTest               4/4   通过（happy path + symbols 空 + start>end + 空 dataTypes）
+    - InMemoryResearchSnapshotStoreTest         2/2   通过（save+findById/findByTraceId、findBySymbolAndDateRange 命中/未命中）
+
+  Batch 1 / Batch 2 回归保持全绿（与上一轮一致）
+    - dh-domain    Batch 1 35/35
+    - dh-usecase   Batch 2 15/15
+    - dh-api       Batch 2 WebMvc 7/7
+
+  Stage1 回归
+    - ResearchRunStage1ClosedLoopTest           1/1   通过
+    - DecisionHubFacadeImplTest                 1/1   通过（旧链路冒烟）
+    - ArchitectureTest                          5/5   通过
+
+跳过：
+  - PostgresContainerSmokeTest                  因当前环境无 Docker，按命令显式排除
+
+Batch 3 范围（零真实外部服务调用 / 零 NQ 仓库改动 / 零 JDBC / 零 dh-domain 改动 / 零 WiringConfig 改动）：
+  - dh-connector 新增类     8 个
+      tools/ForecastRequest, tools/ForecastToolPort, tools/fake/FakeForecastToolAdapter
+      research/MarketSnapshotRequest, research/ResearchDataAdapter, research/ResearchSnapshotStore
+      research/fake/FakeResearchDataAdapter, research/fake/InMemoryResearchSnapshotStore
+  - dh-connector 新增测试   3 个 (9 cases 全绿)
+  - dh-connector pom.xml    加 junit-jupiter (test scope)
+```
+
+## 4. 历史验收：2026-05-25 Stage2-PoC-B2 IMPLEMENT
 
 ```text
 日期：2026-05-25
@@ -65,14 +104,6 @@ mvn -pl dh-app -am spring-boot:run
 
 跳过：
   - PostgresContainerSmokeTest                  因当前环境无 Docker，按命令显式排除
-
-Batch 2 范围（零 JDBC / 零 NQ 仓库 / 零真实外部服务调用）：
-  - dh-usecase 新增类     17 个（接口 4 + 值对象/枚举 5 + impl 3 + handler 9）
-  - dh-usecase 修改类      2 个（repo 接口 + InMemory 实现）
-  - dh-api     新增类      3 个（envelope/accepted/error DTO）
-  - dh-api     修改类      2 个（Controller 升级 + 旧 DTO @Deprecated）
-  - dh-app     修改类      1 个（AgentRuntimeWiringConfig 装配 12 个新 bean）
-  - dh-api/pom.xml         加 spring-boot-starter-test (test scope)
 ```
 
 ## 4. 历史验收：2026-05-25 Stage2-PoC-B1 IMPLEMENT

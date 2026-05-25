@@ -22,6 +22,12 @@
     <artifactId>dh-domain</artifactId>
     <version>${project.version}</version>
   </dependency>
+  <!-- JUnit 5 (Stage2-PoC-B3: Fake adapter / InMemory store 单元测试) -->
+  <dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter</artifactId>
+    <scope>test</scope>
+  </dependency>
 </dependencies>
 
 </project>
