@@ -1,25 +1,96 @@
-# dh-domain 补丁（为 Run 增加 decisionRecord）
+# Decision Hub
 
-你遇到的编译错误：
-- 无法解析 Run.getDecisionRecord / setDecisionRecord
+Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 
-原因：之前的 FULL_BUNDLE 没有包含 dh-domain 模块的改动。
+它负责 Agent 编排、候选方案生成、多路径探索、历史反馈强化、策略评分、冲突仲裁、报告生成和辅助决策。
 
-## 方式 1：git apply（推荐）
-在仓库根目录执行：
-    git apply patches/dh-domain_Run.java.patch
+它不负责交易核心、订单状态机、风控执行、正式回测内核、模拟盘/实盘执行、账本审计和交易事实沉淀。这些能力由 NexusQuant 承担。
 
-前提：你的 Run.java 路径为：
-    dh-domain/src/main/java/com/guidinglight/decisionhub/domain/run/Run.java
+## 当前阶段
 
-若你的模块名/路径不同，把 patch 文件里的路径改成真实路径即可。
+```text
+Current stage: DH-REFIT-1-PLAN completed
+Next stage: DH-REFIT-1-WO
+Source of truth: docs/current
+```
 
-## 方式 2：直接覆盖文件
-用本包的：
-    dh-domain/src/main/java/com/guidinglight/decisionhub/domain/run/Run.java
-覆盖你仓库中的同路径文件。
+## 文档入口
 
-## 后续（正式持久化）
-为了重启/读库不丢 decisionRecord：建议在 run 表增加列：
-- decision_record_json (JSON/LONGTEXT)
-并在 rehydrate 时一并装载（后续我也能给你完整持久化补丁）。
+当前事实源：
+
+```text
+docs/current/README.md
+```
+
+开工前必须读取：
+
+```text
+AGENTS.md
+docs/current/STATUS.md
+docs/current/ROADMAP.md
+docs/current/WORKFLOW.md
+docs/current/WORK_ORDER.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/DH_REFACTOR_STAGE1_WORK_ORDER.md
+```
+
+## 文档结构
+
+```text
+docs/current/      当前事实源
+docs/gates/        历史阶段快照
+docs/codex/        历史计划与辅助执行区
+contracts/         对外协议、Schema、事件契约
+golden_cases/      黄金样例与回归用例
+```
+
+## 当前工程边界
+
+```text
+DH 不迁入 NQ
+DH 不直接下单
+DH 不绕过 NQ 风控
+DH 不替代 NQ 订单状态机
+DH 不重写 NQ 回测核心
+DH 不建设完整第二套前端
+```
+
+## 标准工作流
+
+```text
+PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
+```
+
+当前下一步只能进入：
+
+```text
+DH-REFIT-1-WO
+```
+
+## 构建与验证
+
+```bash
+mvn test
+```
+
+质量检查：
+
+```bash
+mvn -Pquality validate
+```
+
+应用启动：
+
+```bash
+mvn -pl dh-app -am spring-boot:run
+```
+
+## DH 与 NQ 的关系
+
+```text
+NQ Console -> DH API -> Agent Runtime / Judge / Memory / NQ Adapter
+NQ Console -> NQ API -> Backtest / Risk / Paper / Live / Audit
+NQ -> DH Feedback -> Experience / Pheromone
+```
+
+DH 输出结构化建议和报告，NQ 执行正式交易能力。
