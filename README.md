@@ -9,8 +9,8 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-Current stage: Stage2-PoC-B3 IMPLEMENT completed
-Next stage:    Stage2-PoC-B4 IMPLEMENT
+Current stage: Stage2-PoC-B4 IMPLEMENT completed
+Next stage:    Stage2-PoC-B5 IMPLEMENT
 Source of truth: docs/current
 ```
 
@@ -65,7 +65,7 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-Stage2-PoC-B3 IMPLEMENT：dh-connector Forecast / Research Adapter 接口预留 + Fake 实现
+Stage2-PoC-B5 IMPLEMENT：JDBC + Tests + Docs（V3 迁移脚本 + 9 个 JDBC 仓储 + ArchUnit 新规则 + OpenAPI/装配收口）
 ```
 
 ## 构建与验证

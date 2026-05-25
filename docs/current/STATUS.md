@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: Stage2-PoC-B3 IMPLEMENT completed
-> Next stage:    Stage2-PoC-B4 IMPLEMENT
+> Current stage: Stage2-PoC-B4 IMPLEMENT completed
+> Next stage:    Stage2-PoC-B5 IMPLEMENT
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -28,6 +28,11 @@ Stage2-PoC WO           5 个 Batch 拆解：契约+领域 / NQ Ingestion / Tool
 Stage2-PoC-B1 IMPLEMENT 领域模型 + JSON Schema + OpenAPI components 落地，零 Controller/Service/Repository/JDBC/WiringConfig 改动
 Stage2-PoC-B2 IMPLEMENT NQ feedback ingestion 正式契约：envelope DTO + Validator + Router + 8 个 Handler + 幂等 + WebMvc 入口
 Stage2-PoC-B3 IMPLEMENT dh-connector Forecast / Research Adapter 端口预留 + Fake / InMemory 实现 + 3 个测试类全绿
+Stage2-PoC-B4 IMPLEMENT Reflection / Checkpoint / Dynamic Planner：
+                        PlannerStrategy + Resolver/Registry + 4 个 StrategyHandler +
+                        DynamicAgentTaskPlanner + ReflectionCheckpointService +
+                        Reflection/Checkpoint InMemory 仓储 + 4 个测试类（28 cases 全绿）；
+                        JudgeDecision 仍是唯一最终出口；零 LLM/Python/graph scheduler/dh-domain 改动
 ```
 
 ## 3. 当前阶段边界
@@ -41,24 +46,29 @@ Stage2-PoC-B3 IMPLEMENT dh-connector Forecast / Research Adapter 端口预留 + 
 不建设第二套完整前端
 不引入 BCO/ACO/GWO 等重型数学优化器
 不把 Kronos / TradingAgents / global-stock-data 直接复制进 DH/NQ
+不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（Stage2-PoC-B4 IMPLEMENT）
+## 4. 下一阶段（Stage2-PoC-B5 IMPLEMENT）
 
-按 docs/current/STAGE2_POC_WORK_ORDER.md §Batch 4 实施：
+按 docs/current/STAGE2_POC_WORK_ORDER.md §Batch 5 实施：
 
 ```text
-Batch 4  Reflection / Checkpoint / Dynamic Planner：
-         dh-usecase planner Resolver/Registry + 4 个 StrategyHandler +
-         ReflectionCheckpointService + 默认 regime->strategy 映射 +
-         写入规则（JudgeDecision 仍是唯一最终出口）
+Batch 5  JDBC + Tests + Docs：
+         V3 Flyway 迁移脚本（4 张新表 + 2 张 ALTER）+
+         6 个 InMemory 仓储替换为 JDBC + 4 个 Stage2 新 JDBC 仓储 +
+         ArchUnit 新增 5 条规则 + ApplicationContextLoadsTest 装配 + OpenAPI/Controllers 收口
 ```
 
 ## 5. 当前风险
 
 ```text
-ArchUnit 当前只新增 4 条规则；未来若引入 Stage2 新包仍需补规则。
-所有 InMemory 仓储进程重启即丢；Stage2 必须在持久化升级完成后再灰度对外。
+ArchUnit 当前只有 5 条规则；Batch 5 需补 5 条新规则覆盖 connector.tools / connector.research /
+domain.tool / usecase.agent.planner / usecase.agent.feedback。
+所有 InMemory 仓储进程重启即丢；Stage2 必须在 Batch 5 持久化升级完成后再灰度对外。
 NQ 端 /api/ai/* endpoint 不存在；Stage2 启动前需先与 NQ 团队达成事件契约。
-TradingAgents 思想只能"借鉴"，禁止整体复制；Stage2 PR 必须显式声明吸收清单。
+TradingAgents 思想只能"借鉴"，禁止整体复制；Batch 4 仅落 Reflection/Checkpoint + 4 strategy handler，
+无 LLM / Python / graph scheduler。
+PlannerStrategy / MarketRegime 当前不放在 dh-domain（Batch 4 的"不修改 dh-domain"约束），
+Batch 5 评估是否补回 domain 枚举与 ArchUnit 规则。
 ```

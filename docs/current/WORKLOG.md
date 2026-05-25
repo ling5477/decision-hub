@@ -581,3 +581,146 @@ dh-app ArchitectureTest 5/5 保持通过
 ### 下一步
 
 进入 Stage2-PoC-B4 IMPLEMENT：Reflection / Checkpoint / Dynamic Planner。
+
+---
+
+## 2026-05-25 Stage2-PoC-B4 IMPLEMENT
+
+### 已完成
+
+```text
+dh-usecase (新增 12 个文件)
+  agent/planner/
+    PlannerStrategy                       (enum: DEFAULT / BULL_FOCUSED / BEAR_FOCUSED / VOLATILE_DIVERSIFIED；
+                                           Stage2-PoC-B4 边界下放在 dh-usecase，避免改动 dh-domain)
+    PlannerStrategyResolver               (接口：PlannerStrategy resolve(ResearchRun))
+    PlannerStrategyRegistry               (EnumMap-backed；缺 DEFAULT 抛 IAE；重复注册抛 IAE；
+                                           handlerFor(null/未知 strategy) 回退 DEFAULT)
+    DynamicAgentTaskPlanner               (实现 AgentTaskPlanner：resolver.resolve -> registry.handlerFor ->
+                                           handler.buildTask(run, TimeProvider.now()))
+  agent/planner/impl/
+    DefaultPlannerStrategyResolver        (1. payloadJson.plannerStrategy 显式覆盖（valueOf 失败回退到 regime）；
+                                           2. payloadJson.marketRegime 关键字匹配：
+                                              volatile / high_volatility 优先于 bull / bear，
+                                              使 "bullish but volatile" -> VOLATILE_DIVERSIFIED；
+                                           3. 未命中默认 DEFAULT；零 LLM 依赖)
+  agent/planner/strategy/
+    PlannerStrategyHandler                (接口：strategy() + buildTask(ResearchRun, Instant))
+    DefaultPlannerStrategyHandler         (Stage1 6 节点 DAG：SCOUT/ANALYST/STRATEGY/
+                                           RISK_REVIEWER/STRATEGY_REVIEWER/JUDGE；
+                                           payload tag plannerStrategy=DEFAULT + planSchemaVersion=stage2-b4-v1)
+    BullFocusedPlannerStrategyHandler     (SCOUT -> ANALYST -> STRATEGY(primary+secondary) ->
+                                           STRATEGY_REVIEWER -> JUDGE；6 节点)
+    BearFocusedPlannerStrategyHandler     (SCOUT -> ANALYST -> STRATEGY ->
+                                           RISK_REVIEWER(primary+secondary) -> JUDGE；6 节点)
+    VolatileDiversifiedPlannerStrategyHandler
+                                          (LEADER -> SCOUT -> ANALYST -> STRATEGY ->
+                                           (RISK_REVIEWER + STRATEGY_REVIEWER) -> JUDGE；7 节点)
+  agent/
+    ReflectionEntryRepository             (端口：save / listByRun)
+    CheckpointEntryRepository             (端口：save / listByRun)
+    ReflectionCheckpointService           (接口：recordReflection / recordCheckpoint /
+                                           listReflections / listCheckpoints)
+  agent/inmemory/
+    InMemoryReflectionEntryRepository     (ConcurrentHashMap<runId, List>；按 stepIndex 排序返回)
+    InMemoryCheckpointEntryRepository     (ConcurrentHashMap<runId, List>；按 checkpointIndex 排序返回)
+  agent/impl/
+    DefaultReflectionCheckpointService    (调用 ReflectionEntry.of / CheckpointEntry.of，
+                                           id=IdGenerator.newId()，createdAt=TimeProvider.now()；
+                                           ABORT checkpoint + reflection 不替代 JudgeDecision)
+
+dh-usecase 测试 (新增 4 个文件，28 个 cases 全绿)
+  agent/planner/PlannerStrategyResolverTest         9 cases
+    ①  null run -> DEFAULT
+    ②  空 payload -> DEFAULT
+    ③  unknown regime 字符串 -> DEFAULT
+    ④  bullish/BULL/mid-cap bull cycle -> BULL_FOCUSED
+    ⑤  bearish/Bear market -> BEAR_FOCUSED
+    ⑥  volatile / high_volatility -> VOLATILE_DIVERSIFIED
+    ⑦  "bullish but volatile" -> VOLATILE_DIVERSIFIED（volatile 关键字优先级高于 bull/bear）
+    ⑧  显式 plannerStrategy 覆盖 regime
+    ⑨  非法显式 plannerStrategy -> 回退到 regime
+  agent/planner/PlannerStrategyRegistryTest         5 cases
+    ①  注册表缺少 DEFAULT handler -> IllegalArgumentException
+    ②  重复 strategy 注册 -> IllegalArgumentException
+    ③  handlerFor 返回已注册 handler
+    ④  缺失 strategy -> 回退 DEFAULT
+    ⑤  4 种 strategy 各自 buildTask 非空 + JUDGE 出现
+  agent/planner/DynamicAgentTaskPlannerTest         7 cases
+    ①  DEFAULT regime -> DefaultPlannerStrategyHandler 输出 6 节点
+    ②  bull regime -> BullFocused 路径 (STRATEGY x2)
+    ③  bear regime -> BearFocused 路径 (RISK_REVIEWER x2)
+    ④  volatile regime -> VolatileDiversified 7 节点 (LEADER 在前)
+    ⑤  显式 plannerStrategy 覆盖 regime
+    ⑥  registry 缺失 strategy -> 回退 DEFAULT
+    ⑦  每种 strategy 都保留 JUDGE 终点
+  agent/reflection/ReflectionCheckpointServiceTest  7 cases
+    ①  recordReflection 持久化命中
+    ②  listReflections 按 stepIndex 排序
+    ③  stepIndex<0 -> IllegalArgumentException
+    ④  recordCheckpoint 持久化命中
+    ⑤  snapshotJson null -> NullPointerException
+    ⑥  ABORT checkpoint + reflection 仍不替代 JudgeDecision (JudgeDecision 仍是唯一终点)
+    ⑦  未知 runId -> 空集合
+
+docs/current/STATUS.md / WORKLOG.md / TESTING.md / README.md / AGENTS.md / docs/current/README.md
+  状态切到 Stage2-PoC-B4 IMPLEMENT completed / Next: Stage2-PoC-B5 IMPLEMENT
+```
+
+### Planner 行为表（与 WO §Batch 4.3 一致）
+
+```text
+marketRegime 包含 "bullish" / "bull"                  -> BULL_FOCUSED
+marketRegime 包含 "bearish" / "bear"                  -> BEAR_FOCUSED
+marketRegime 包含 "volatile" / "high_volatility"      -> VOLATILE_DIVERSIFIED（优先级高于 bull/bear）
+其它或字段缺失                                          -> DEFAULT
+payload.plannerStrategy 显式合法值                     -> 覆盖 regime
+payload.plannerStrategy 非法值                         -> 回退到 regime 关键字匹配
+registry.handlerFor(未注册 strategy 或 null)            -> DEFAULT
+```
+
+### JudgeDecision 仍为唯一终点（与 WO §Batch 4.4 一致）
+
+```text
+所有 4 个 StrategyHandler 在任务图末尾必须挂 JUDGE 节点（buildTask 测试覆盖）
+ReflectionEntry / CheckpointEntry 只是过程证据，不携带最终决策
+ABORT 类型 CheckpointEntry / RUN 级 ReflectionEntry 都不替代 JudgeDecision
+```
+
+### 不在 dh-domain 落 PlannerStrategy（B4 边界 trade-off）
+
+```text
+原 WO 把 PlannerStrategy 枚举挂在 dh-domain/agent/；
+B4 边界要求"不修改 dh-domain"，故 PlannerStrategy 暂放在 dh-usecase/agent/planner/。
+Batch 5 评估是否补回 dh-domain 枚举并配套 ArchUnit 规则。
+```
+
+### 未做（B4 严格边界）
+
+```text
+未引入 LLM client / Python / graph scheduler / 复杂 agent graph runtime
+未引入 TradingAgents Python 代码
+未修改 dh-domain（复用 Batch 1 ReflectionEntry / CheckpointEntry / AgentTask / TaskNode）
+未修改 NQ 仓库
+未接真实 NQ API / Kronos / global-stock-data
+未引入 JDBC（Batch 5 才落地 JDBC reflection / checkpoint 仓储）
+未写 WiringConfig（Stage1 闭环测试仍直连 DefaultAgentTaskPlanner；
+                   DynamicAgentTaskPlanner 装配延后到 Batch 5）
+未做前端
+未引入新的 ArchUnit 规则（Batch 5 一次性处理）
+```
+
+### 验收
+
+```text
+mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false  BUILD SUCCESS
+dh-usecase Batch 4 新增 28 个 cases 全部通过
+Batch 1 / Batch 2 / Batch 3 测试保持全绿
+Stage1 闭环测试保持通过（DefaultAgentTaskPlanner 直连未被破坏）
+dh-app ArchitectureTest 5/5 保持通过
+```
+
+### 下一步
+
+进入 Stage2-PoC-B5 IMPLEMENT：JDBC + Tests + Docs（V3 迁移脚本 + 9 个 JDBC 仓储 + ArchUnit 新规则 +
+OpenAPI/装配收口）。

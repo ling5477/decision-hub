@@ -1,7 +1,7 @@
 # Decision Hub Current Docs
 
-> Current stage: Stage2-PoC-B3 IMPLEMENT completed
-> Next stage:    Stage2-PoC-B4 IMPLEMENT
+> Current stage: Stage2-PoC-B4 IMPLEMENT completed
+> Next stage:    Stage2-PoC-B5 IMPLEMENT
 > Source of truth: docs/current
 
 ## 1. 当前定位
@@ -62,12 +62,13 @@ DH-REFIT-1-PLAN（文档结构对齐）
 Stage1 (Boundary Freeze + Agent Runtime Skeleton)
 Stage1-CLOSE（旧链路 @Deprecated + 文档单源 + ArchUnit 兜底）
 Stage1-FREEZE（docs/current 快照冻结到 docs/gates/dh-stage1/）
+Stage2-PoC-B1 / B2 / B3 / B4 IMPLEMENT
 ```
 
 下一步只允许进入：
 
 ```text
-Stage2-PoC-B3 IMPLEMENT：dh-connector Forecast / Research Adapter 接口预留 + Fake 实现
+Stage2-PoC-B5 IMPLEMENT：JDBC + Tests + Docs（V3 迁移脚本 + 9 个 JDBC 仓储 + ArchUnit 新规则 + OpenAPI/装配收口）
 ```
 
 ## 4. 当前不允许做

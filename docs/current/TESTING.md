@@ -8,6 +8,7 @@ Stage1-CLOSE            旧链路 @Deprecated + 文档单源 + ArchUnit 4 条新
 Stage2-PoC-B1 IMPLEMENT 领域模型 + JSON Schema + OpenAPI components 落地
 Stage2-PoC-B2 IMPLEMENT NQ feedback ingestion envelope/Validator/Router/8 Handler/幂等/WebMvc
 Stage2-PoC-B3 IMPLEMENT dh-connector Forecast / Research Adapter 接口预留 + Fake 实现
+Stage2-PoC-B4 IMPLEMENT Reflection / Checkpoint / Dynamic Planner + 4 个 StrategyHandler + 内存仓储 + 4 个测试
 ```
 
 最近一次 `mvn test` 见 §3。
@@ -34,7 +35,54 @@ mvn -Pquality validate
 mvn -pl dh-app -am spring-boot:run
 ```
 
-## 3. 最近一次验收结果（2026-05-25 Stage2-PoC-B3 IMPLEMENT）
+## 3. 最近一次验收结果（2026-05-25 Stage2-PoC-B4 IMPLEMENT）
+
+```text
+日期：2026-05-25
+阶段：Stage2-PoC-B4 IMPLEMENT
+命令：mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false
+结果：BUILD SUCCESS
+
+通过的关键测试：
+  Batch 4 新增（dh-usecase）
+    - PlannerStrategyResolverTest               9/9   通过（DEFAULT 兜底 + bull/bear/volatile 关键字 + volatile 优先 + 显式 plannerStrategy 覆盖 regime + 非法 strategy 回退）
+    - PlannerStrategyRegistryTest               5/5   通过（缺失 DEFAULT 拒绝 + 重复注册拒绝 + 注册查 handler + 缺失 strategy 回退 DEFAULT + 各 handler 产出非空任务图）
+    - DynamicAgentTaskPlannerTest               7/7   通过（DEFAULT/BULL/BEAR/VOLATILE handler 选择 + 显式 plannerStrategy 覆盖 + registry 缺失回退 DEFAULT + 每种策略保留 JUDGE 终点）
+    - ReflectionCheckpointServiceTest           7/7   通过（写入/排序/校验 stepIndex/必填 snapshotJson/ABORT 不替代 JudgeDecision/未知 runId 空集）
+
+  Batch 3 / Batch 2 / Batch 1 回归保持全绿
+    - dh-domain    Batch 1 35/35
+    - dh-connector Batch 3 9/9
+    - dh-usecase   Batch 2 + B4 28/28（feedback 15 + planner/reflection 28 等共 28 个 B4 用例 + 历史用例）
+    - dh-api       Batch 2 WebMvc 7/7
+
+  Stage1 回归
+    - ResearchRunStage1ClosedLoopTest           1/1   通过（DefaultAgentTaskPlanner 仍直连，Stage1 行为不变）
+    - DecisionHubFacadeImplTest                 1/1   通过（旧链路冒烟）
+    - ArchitectureTest                          5/5   通过
+
+跳过：
+  - PostgresContainerSmokeTest                  因当前环境无 Docker，按命令显式排除
+
+Batch 4 范围（零 NQ 仓库改动 / 零真实外部服务调用 / 零 dh-domain 改动 / 零 JDBC / 零前端 / 零 LLM / 零 TradingAgents Python 代码）：
+  - dh-usecase 新增类       12 个
+      agent/planner/PlannerStrategy
+      agent/planner/PlannerStrategyResolver
+      agent/planner/PlannerStrategyRegistry
+      agent/planner/DynamicAgentTaskPlanner
+      agent/planner/impl/DefaultPlannerStrategyResolver
+      agent/planner/strategy/PlannerStrategyHandler
+      agent/planner/strategy/DefaultPlannerStrategyHandler
+      agent/planner/strategy/BullFocusedPlannerStrategyHandler
+      agent/planner/strategy/BearFocusedPlannerStrategyHandler
+      agent/planner/strategy/VolatileDiversifiedPlannerStrategyHandler
+      agent/ReflectionCheckpointService + impl/DefaultReflectionCheckpointService
+      agent/ReflectionEntryRepository + CheckpointEntryRepository
+      agent/inmemory/InMemoryReflectionEntryRepository + InMemoryCheckpointEntryRepository
+  - dh-usecase 新增测试     4 个（28 cases 全绿）
+```
+
+## 4. 历史验收：2026-05-25 Stage2-PoC-B3 IMPLEMENT
 
 ```text
 日期：2026-05-25
