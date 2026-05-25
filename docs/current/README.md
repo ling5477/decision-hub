@@ -1,7 +1,7 @@
 # Decision Hub Current Docs
 
-> Current stage: DH-REFIT-1-PLAN completed
-> Next stage: DH-REFIT-1-WO
+> Current stage: Stage2-PoC PLAN completed
+> Next stage:    Stage2-PoC WO
 > Source of truth: docs/current
 
 ## 1. 当前定位
@@ -43,7 +43,8 @@ docs/current/ROADMAP.md
 docs/current/WORKFLOW.md
 docs/current/WORK_ORDER.md
 docs/current/DH_NQ_INTEGRATION.md
-docs/current/DH_REFACTOR_STAGE1_WORK_ORDER.md
+docs/current/DH_REFACTOR_STAGE1_STATUS.md
+docs/current/STAGE1_CLOSE_WORKLOG.md
 ```
 
 ## 3. 当前工作流
@@ -57,13 +58,16 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前已完成：
 
 ```text
-DH-REFIT-1-PLAN
+DH-REFIT-1-PLAN（文档结构对齐）
+Stage1 (Boundary Freeze + Agent Runtime Skeleton)
+Stage1-CLOSE（旧链路 @Deprecated + 文档单源 + ArchUnit 兜底）
+Stage1-FREEZE（docs/current 快照冻结到 docs/gates/dh-stage1/）
 ```
 
 下一步只允许进入：
 
 ```text
-DH-REFIT-1-WO
+Stage2-PoC：NQ 真实事件回流接通 + Kronos/global-stock-data 工具接口预留
 ```
 
 ## 4. 当前不允许做
@@ -84,7 +88,7 @@ DH-REFIT-1-WO
 ```text
 docs/current/      当前事实源
 docs/gates/        历史冻结快照
-docs/codex/        历史计划与辅助执行区
+docs/codex/        当前活跃计划 + 历史归档
 contracts/         外部协议、OpenAPI、JSON Schema、事件协议
 golden_cases/      回归用例与黄金样例
 ```

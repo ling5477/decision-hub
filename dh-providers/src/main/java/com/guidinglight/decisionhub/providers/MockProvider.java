@@ -3,6 +3,8 @@ package com.guidinglight.decisionhub.providers;
 import java.time.Duration;
 import java.util.Map;
 
+/** @deprecated Stage1-CLOSE：旧 MockProvider；不再装配进 AgentRuntimeWiringConfig。 */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class MockProvider implements ModelProvider {
 
   @Override

@@ -3,6 +3,8 @@ package com.guidinglight.decisionhub.usecase.contract;
 import java.util.HashMap;
 import java.util.Map;
 
+/** @deprecated Stage1-CLOSE：旧 Evaluator 输出 DTO。 */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class EvalResult {
     private String evaluator;
     private TargetRef target;

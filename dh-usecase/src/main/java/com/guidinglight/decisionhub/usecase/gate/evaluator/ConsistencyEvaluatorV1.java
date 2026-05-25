@@ -6,7 +6,10 @@ import java.util.*;
  * v1 规则版：ConsistencyEvaluator
  * - 语言一致（cjk_ratio）
  * - 声明一致：若文本中声称使用 web/mcp/skills，则必须在 tool_traces 中找到对应痕迹（否则冲突）
+ *
+ * @deprecated Stage1-CLOSE：旧 Gate 评估器。
  */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class ConsistencyEvaluatorV1 {
 
     @SuppressWarnings("unchecked")

@@ -5,7 +5,10 @@ import java.util.*;
 /**
  * v1 规则版：CompletenessEvaluator
  * - checklist / prioritization / actionable_next 命中计分（3/2/1/0）
+ *
+ * @deprecated Stage1-CLOSE：旧 Gate 评估器；新链路使用 dh-eval 的规则 scorer。
  */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class CompletenessEvaluatorV1 {
 
     public Result evaluate(Map<String, Object> decisionRecord, String runId) {

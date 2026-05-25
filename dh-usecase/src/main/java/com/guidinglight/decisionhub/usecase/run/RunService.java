@@ -25,7 +25,11 @@ import java.util.*;
  *
  * 说明：
  * - 这里的 provider 调用是串行的（最小可用）。你后续可在 executor 层并行化。
+ *
+ * @deprecated Stage1-CLOSE：旧多模型平台运行编排服务。新链路使用
+ *     {@link com.guidinglight.decisionhub.usecase.agent.ResearchRunCommandService}（含 plan→generate→review→judge）。
  */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class RunService {
 
   private final RunRepository runRepository;

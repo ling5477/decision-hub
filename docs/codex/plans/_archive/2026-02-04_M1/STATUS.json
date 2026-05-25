@@ -1,0 +1,76 @@
+{
+  "milestone": "M1",
+  "activePlanId": "2026-02-04_M1_run_gate_mockprovider",
+  "state": "ARCHIVED",
+  "archivedAt": "2026-05-25T00:00:00Z",
+  "archivedReason": "Superseded by Stage1 (Boundary Freeze + Agent Runtime Skeleton) and Stage1-CLOSE. The legacy multi-model platform path this plan tracked (DecisionHubFacade, golden runner, MockProvider) has been @Deprecated and replaced by the agent runtime skeleton under domain.research/agent/candidate/judge/experience/feedback + usecase.agent + memory.agent + eval.agent + connector.nq. Steps 4-7 were never executed and are intentionally left as historical record.",
+  "steps": [
+    {
+      "idx": 1,
+      "title": "合同确认（contracts 如需）",
+      "status": "DONE",
+      "evidence": [
+        "docs/codex/WORK_ORDER.md",
+        "docs/codex/TASK_TEMPLATE.md",
+        "docs/codex/VERIFY.md"
+      ]
+    },
+    {
+      "idx": 2,
+      "title": "新增 golden 用例",
+      "status": "DONE",
+      "evidence": [
+        "golden_cases/case-002.yaml",
+        "golden_cases/expected/case-002.json"
+      ]
+    },
+    {
+      "idx": 3,
+      "title": "实现 dh-usecase Facade 最小闭环",
+      "status": "DONE",
+      "evidence": [
+        "dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/facade/impl/DecisionHubFacadeImpl.java",
+        "dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/facade/impl/DecisionHubFacadeImplTest.java"
+      ]
+    },
+    {
+      "idx": 4,
+      "title": "实现 dh-eval Golden runner + Maven 绑定 verify",
+      "status": "OBSOLETE",
+      "supersededBy": "Stage1 dh-eval.agent.rule.* + ResearchRunStage1ClosedLoopTest",
+      "evidence": []
+    },
+    {
+      "idx": 5,
+      "title": "引入 Checkstyle + verify.ps1",
+      "status": "OBSOLETE",
+      "supersededBy": "config/checkstyle/checkstyle.xml 已在根 pom 启用；verify.ps1 留给 Stage2 重新评估",
+      "evidence": []
+    },
+    {
+      "idx": 6,
+      "title": "verify 全通过 + 变更记录",
+      "status": "OBSOLETE",
+      "supersededBy": "Stage1-CLOSE 验收记录见 docs/current/TESTING.md §3",
+      "evidence": []
+    },
+    {
+      "idx": 7,
+      "title": "修复配置规则文件问题（编码/密钥/Checkstyle 入口）",
+      "status": "OBSOLETE",
+      "supersededBy": "Stage1-CLOSE 已对 STATUS.json/README/STATUS/ROADMAP/WORKLOG/WORK_ORDER/TESTING 做单源同步",
+      "evidence": []
+    }
+  ],
+  "lastVerify": {
+    "time": "2026-02-09T15:24:16Z",
+    "result": "FAIL",
+    "summary": "scripts/verify.ps1 failed: BOM detected in docs/codex/plans/_active/STATUS.json",
+    "failedAtStep": "verify",
+    "errorCode": "BOM_DETECTED",
+    "nextAction": "Archived without further fixes; plan superseded by Stage1."
+  },
+  "taskType": "delivery",
+  "activeStepIdx": 4,
+  "updatedAt": "2026-02-09T15:24:16Z"
+}

@@ -10,7 +10,10 @@ import java.util.*;
  * v1：DecisionRecord 初始化工厂
  *
  * 冻结要点：decision_id = run_id（强烈建议），便于全链路追踪与回放。
+ *
+ * @deprecated Stage1-CLOSE：旧多模型平台 DecisionRecord 工厂。
  */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public final class DecisionRecordV1Factory {
     private DecisionRecordV1Factory() {}
 

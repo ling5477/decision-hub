@@ -1,0 +1,846 @@
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective settings
+[WARNING] Unrecognised tag: 'profiles' (position: START_TAG seen ...<!-- java\u7248\u672c --> \n\t<profiles>... @227:12)  @ D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml, line 227, column 12
+[WARNING] 
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dh-bom                                                             [pom]
+[INFO] dh-common                                                          [jar]
+[INFO] dh-observability                                                   [jar]
+[INFO] dh-domain                                                          [jar]
+[INFO] dh-ledger                                                          [jar]
+[INFO] dh-providers                                                       [jar]
+[INFO] dh-connector                                                       [jar]
+[INFO] dh-knowledge                                                       [jar]
+[INFO] dh-memory                                                          [jar]
+[INFO] dh-usecase                                                         [jar]
+[INFO] dh-infra                                                           [jar]
+[INFO] dh-security                                                        [jar]
+[INFO] dh-eval                                                            [jar]
+[INFO] dh-scheduler                                                       [jar]
+[INFO] dh-config                                                          [jar]
+[INFO] dh-sdk                                                             [jar]
+[INFO] dh-api                                                             [jar]
+[INFO] dh-app                                                             [jar]
+[INFO] decision-hub                                                       [pom]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/cyclonedx/maven-metadata.xml
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/jooq/maven-metadata.xml
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/flywaydb/maven-metadata.xml
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/io/github/git-commit-id/maven-metadata.xml
+Progress (1): 256 BProgress (2): 256 B | 244 B                           Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/cyclonedx/maven-metadata.xml (244 B at 157 B/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/jetbrains/kotlin/maven-metadata.xml
+Progress (2): 256 B | 376 B[WARNING] Could not validate integrity of download from https://maven.aliyun.com/repository/public/io/github/git-commit-id/maven-metadata.xml
+org.eclipse.aether.transfer.ChecksumFailureException: Checksum validation failed, no checksums available
+    at org.eclipse.aether.internal.impl.AbstractChecksumPolicy.onNoMoreChecksums (AbstractChecksumPolicy.java:63)
+    at org.eclipse.aether.connector.basic.ChecksumValidator.validate (ChecksumValidator.java:112)
+    at org.eclipse.aether.connector.basic.BasicRepositoryConnector$GetTaskRunner.runTask (BasicRepositoryConnector.java:462)
+    at org.eclipse.aether.connector.basic.BasicRepositoryConnector$TaskRunner.run (BasicRepositoryConnector.java:392)
+    at org.eclipse.aether.util.concurrency.RunnableErrorForwarder.lambda$wrap$0 (RunnableErrorForwarder.java:66)
+    at org.eclipse.aether.connector.basic.BasicRepositoryConnector.get (BasicRepositoryConnector.java:212)
+    at org.eclipse.aether.internal.impl.DefaultMetadataResolver$ResolveTask.run (DefaultMetadataResolver.java:556)
+    at org.eclipse.aether.util.concurrency.RunnableErrorForwarder.lambda$wrap$0 (RunnableErrorForwarder.java:66)
+    at java.util.concurrent.ThreadPoolExecutor.runWorker (ThreadPoolExecutor.java:1144)
+    at java.util.concurrent.ThreadPoolExecutor$Worker.run (ThreadPoolExecutor.java:642)
+    at java.lang.Thread.run (Thread.java:1583)
+                           [WARNING] Checksum validation failed, no checksums available from aliyun-maven for https://maven.aliyun.com/repository/public/io/github/git-commit-id/maven-metadata.xml
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/io/github/git-commit-id/maven-metadata.xml (256 B at 151 B/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/liquibase/maven-metadata.xml
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/jetbrains/kotlin/maven-metadata.xml (376 B at 2.3 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/graalvm/buildtools/maven-metadata.xml
+Progress (1): 395 B                   Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/liquibase/maven-metadata.xml (395 B at 3.5 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/springframework/boot/maven-metadata.xml
+Progress (1): 250 B                   Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/springframework/boot/maven-metadata.xml (250 B at 2.2 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/plugins/maven-metadata.xml
+Progress (1): 0.4/10 kBProgress (1): 10 kB    Progress (2): 10 kB | 243 B                           Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/plugins/maven-metadata.xml (10 kB at 72 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/mojo/maven-metadata.xml
+Progress (2): 243 B | 4.8/21 kBProgress (2): 243 B | 21 kB                               Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/graalvm/buildtools/maven-metadata.xml (243 B at 588 B/s)
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/mojo/maven-metadata.xml (21 kB at 154 kB/s)
+Progress (1): 399 BProgress (2): 399 B | 235 B                           Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/jooq/maven-metadata.xml (399 B at 6 B/s)
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/flywaydb/maven-metadata.xml (235 B at 3 B/s)
+[INFO] 
+[INFO] ----------------------< com.guidinglight:dh-bom >-----------------------
+[INFO] Building dh-bom 1.0.0-SNAPSHOT                                    [1/19]
+[INFO]   from dh-bom\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.pom
+Progress (1): 4.8/18 kBProgress (1): 18 kB                       Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.pom (18 kB at 59 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.jar
+Progress (1): 7.2/208 kBProgress (1): 15/208 kB Progress (1): 32/208 kBProgress (1): 48/208 kBProgress (1): 64/208 kBProgress (1): 81/208 kBProgress (1): 97/208 kBProgress (1): 114/208 kBProgress (1): 130/208 kBProgress (1): 146/208 kBProgress (1): 163/208 kBProgress (1): 179/208 kBProgress (1): 196/208 kBProgress (1): 208 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.jar (208 kB at 1.1 MB/s)
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-bom ---
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-sink-api/2.0.0/doxia-sink-api-2.0.0.pom
+Progress (1): 0.4/1.4 kBProgress (1): 1.4 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-sink-api/2.0.0/doxia-sink-api-2.0.0.pom (1.4 kB at 14 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia/2.0.0/doxia-2.0.0.pom
+Progress (1): 7.2/17 kBProgress (1): 15/17 kB Progress (1): 17 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia/2.0.0/doxia-2.0.0.pom (17 kB at 187 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/junit/junit-bom/5.11.1/junit-bom-5.11.1.pom
+Progress (1): 5.6 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/junit/junit-bom/5.11.1/junit-bom-5.11.1.pom (5.6 kB at 69 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/reporting/maven-reporting-api/4.0.0/maven-reporting-api-4.0.0.pom
+Progress (1): 2.8 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/reporting/maven-reporting-api/4.0.0/maven-reporting-api-4.0.0.pom (2.8 kB at 24 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-shared-components/43/maven-shared-components-43.pom
+Progress (1): 3.8 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-shared-components/43/maven-shared-components-43.pom (3.8 kB at 35 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/reporting/maven-reporting-impl/4.0.0/maven-reporting-impl-4.0.0.pom
+Progress (1): 1.9/8.8 kBProgress (1): 8.8 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/reporting/maven-reporting-impl/4.0.0/maven-reporting-impl-4.0.0.pom (8.8 kB at 86 kB/s)
+[INFO] Artifact org.junit:junit-bom:pom:5.11.2 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+[INFO] Artifact org.junit:junit-bom:pom:5.11.2 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/junit/junit-bom/5.11.2/junit-bom-5.11.2.pom
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/junit/junit-bom/5.11.2/junit-bom-5.11.2.pom (0 B at 0 B/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-site-model/2.0.0/doxia-site-model-2.0.0.pom
+Progress (1): 5.8 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-site-model/2.0.0/doxia-site-model-2.0.0.pom (5.8 kB at 60 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-sitetools/2.0.0/doxia-sitetools-2.0.0.pom
+Progress (1): 7.2/12 kBProgress (1): 12 kB                       Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-sitetools/2.0.0/doxia-sitetools-2.0.0.pom (12 kB at 101 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M3/org.eclipse.sisu.plexus-0.9.0.M3.pom
+Progress (1): 7.3/17 kBProgress (1): 11/17 kB Progress (1): 17 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M3/org.eclipse.sisu.plexus-0.9.0.M3.pom (17 kB at 158 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/eclipse/sisu/sisu-inject/0.9.0.M3/sisu-inject-0.9.0.M3.pom
+Progress (1): 0.5/24 kBProgress (1): 17/24 kB Progress (1): 24 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/eclipse/sisu/sisu-inject/0.9.0.M3/sisu-inject-0.9.0.M3.pom (24 kB at 156 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.pom
+Progress (1): 1.9/20 kBProgress (1): 18/20 kB Progress (1): 20 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.pom (20 kB at 194 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-core/2.0.0/doxia-core-2.0.0.pom
+Progress (1): 3.3/3.9 kBProgress (1): 3.9 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-core/2.0.0/doxia-core-2.0.0.pom (3.9 kB at 41 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/commons-io/commons-io/2.17.0/commons-io-2.17.0.pom
+Progress (1): 7.2/20 kBProgress (1): 15/20 kB Progress (1): 20 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/commons-io/commons-io/2.17.0/commons-io-2.17.0.pom (20 kB at 68 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-parent/74/commons-parent-74.pom
+Progress (1): 7.2/78 kBProgress (1): 15/78 kB Progress (1): 32/78 kBProgress (1): 48/78 kBProgress (1): 64/78 kBProgress (1): 78 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-parent/74/commons-parent-74.pom (78 kB at 349 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-text/1.12.0/commons-text-1.12.0.pom
+Progress (1): 7.3/20 kBProgress (1): 15/20 kB Progress (1): 20 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-text/1.12.0/commons-text-1.12.0.pom (20 kB at 141 kB/s)
+[INFO] Artifact org.apache.commons:commons-parent:pom:73 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+[INFO] Artifact org.apache.commons:commons-parent:pom:73 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-parent/73/commons-parent-73.pom
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-parent/73/commons-parent-73.pom (0 B at 0 B/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-integration-tools/2.0.0/doxia-integration-tools-2.0.0.pom
+Progress (1): 1.9/7.8 kBProgress (1): 7.8 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-integration-tools/2.0.0/doxia-integration-tools-2.0.0.pom (7.8 kB at 88 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-site-renderer/2.0.0/doxia-site-renderer-2.0.0.pom
+Progress (1): 6.2/7.4 kBProgress (1): 7.4 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-site-renderer/2.0.0/doxia-site-renderer-2.0.0.pom (7.4 kB at 87 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-skin-model/2.0.0/doxia-skin-model-2.0.0.pom
+Progress (1): 3.0 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-skin-model/2.0.0/doxia-skin-model-2.0.0.pom (3.0 kB at 13 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-xhtml5/2.0.0/doxia-module-xhtml5-2.0.0.pom
+Progress (1): 1.9/2.9 kBProgress (1): 2.9 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-xhtml5/2.0.0/doxia-module-xhtml5-2.0.0.pom (2.9 kB at 30 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-modules/2.0.0/doxia-modules-2.0.0.pom
+Progress (1): 2.5 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-modules/2.0.0/doxia-modules-2.0.0.pom (2.5 kB at 32 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-velocity/2.2.0/plexus-velocity-2.2.0.pom
+Progress (1): 1.9/4.1 kBProgress (1): 4.1 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-velocity/2.2.0/plexus-velocity-2.2.0.pom (4.1 kB at 45 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus/19/plexus-19.pom
+Progress (1): 7.2/25 kBProgress (1): 15/25 kB Progress (1): 25 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus/19/plexus-19.pom (25 kB at 185 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-engine-core/2.4/velocity-engine-core-2.4.pom
+Progress (1): 7.2/12 kBProgress (1): 12 kB                       Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-engine-core/2.4/velocity-engine-core-2.4.pom (12 kB at 108 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-engine-parent/2.4/velocity-engine-parent-2.4.pom
+Progress (1): 1.9/9.5 kBProgress (1): 9.5 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-engine-parent/2.4/velocity-engine-parent-2.4.pom (9.5 kB at 67 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-master/7/velocity-master-7.pom
+Progress (1): 7.3/7.9 kBProgress (1): 7.9 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-master/7/velocity-master-7.pom (7.9 kB at 75 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/tools/velocity-tools-generic/3.1/velocity-tools-generic-3.1.pom
+Progress (1): 2.6 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/tools/velocity-tools-generic/3.1/velocity-tools-generic-3.1.pom (2.6 kB at 27 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/tools/velocity-tools-parent/3.1/velocity-tools-parent-3.1.pom
+Progress (1): 7.3/8.0 kBProgress (1): 8.0 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/tools/velocity-tools-parent/3.1/velocity-tools-parent-3.1.pom (8.0 kB at 78 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-master/4/velocity-master-4.pom
+Progress (1): 1.9/7.8 kBProgress (1): 7.8 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-master/4/velocity-master-4.pom (7.8 kB at 64 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-engine-core/2.3/velocity-engine-core-2.3.pom
+Progress (1): 7.3/10 kBProgress (1): 10 kB                       Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-engine-core/2.3/velocity-engine-core-2.3.pom (10 kB at 82 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-engine-parent/2.3/velocity-engine-parent-2.3.pom
+Progress (1): 1.9/14 kBProgress (1): 14 kB                       Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-engine-parent/2.3/velocity-engine-parent-2.3.pom (14 kB at 106 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-lang3/3.11/commons-lang3-3.11.pom
+Progress (1): 1.9/30 kBProgress (1): 18/30 kB Progress (1): 30 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-lang3/3.11/commons-lang3-3.11.pom (30 kB at 250 kB/s)
+[INFO] Artifact org.apache.commons:commons-parent:pom:51 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+[INFO] Artifact org.apache.commons:commons-parent:pom:51 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-parent/51/commons-parent-51.pom
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-parent/51/commons-parent-51.pom (0 B at 0 B/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-digester3/3.2/commons-digester3-3.2.pom
+Progress (1): 7.3/18 kBProgress (1): 16/18 kB Progress (1): 18 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-digester3/3.2/commons-digester3-3.2.pom (18 kB at 138 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/commons-beanutils/commons-beanutils/1.8.3/commons-beanutils-1.8.3.pom
+Progress (1): 7.3/11 kBProgress (1): 11 kB                       Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/commons-beanutils/commons-beanutils/1.8.3/commons-beanutils-1.8.3.pom (11 kB at 84 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-parent/14/commons-parent-14.pom
+Progress (1): 7.3/31 kBProgress (1): 15/31 kB Progress (1): 31 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-parent/14/commons-parent-14.pom (31 kB at 173 kB/s)
+[INFO] Artifact commons-logging:commons-logging:pom:1.1.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+[INFO] Artifact commons-logging:commons-logging:pom:1.1.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.pom
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.pom (0 B at 0 B/s)
+[INFO] Artifact org.apache.commons:commons-parent:pom:5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+[INFO] Artifact org.apache.commons:commons-parent:pom:5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-parent/5/commons-parent-5.pom
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-parent/5/commons-parent-5.pom (0 B at 0 B/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-lang3/3.10/commons-lang3-3.10.pom
+Progress (1): 1.9/31 kBProgress (1): 18/31 kB Progress (1): 31 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-lang3/3.10/commons-lang3-3.10.pom (31 kB at 97 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/com/github/cliftonlabs/json-simple/3.0.2/json-simple-3.0.2.pom
+Progress (1): 7.3/7.5 kBProgress (1): 7.5 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/com/github/cliftonlabs/json-simple/3.0.2/json-simple-3.0.2.pom (7.5 kB at 39 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-apt/2.0.0/doxia-module-apt-2.0.0.pom
+Progress (1): 2.9 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-apt/2.0.0/doxia-module-apt-2.0.0.pom (2.9 kB at 19 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-xdoc/2.0.0/doxia-module-xdoc-2.0.0.pom
+Progress (1): 1.9/5.4 kBProgress (1): 5.4 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-xdoc/2.0.0/doxia-module-xdoc-2.0.0.pom (5.4 kB at 51 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-archiver/4.10.0/plexus-archiver-4.10.0.pom
+Progress (1): 5.8 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-archiver/4.10.0/plexus-archiver-4.10.0.pom (5.8 kB at 27 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-io/3.5.0/plexus-io-3.5.0.pom
+Progress (1): 3.4/4.3 kBProgress (1): 4.3 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-io/3.5.0/plexus-io-3.5.0.pom (4.3 kB at 23 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/io/airlift/aircompressor/0.27/aircompressor-0.27.pom
+Progress (1): 1.9/5.8 kBProgress (1): 5.8 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/io/airlift/aircompressor/0.27/aircompressor-0.27.pom (5.8 kB at 54 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/io/airlift/airbase/112/airbase-112.pom
+Progress (1): 3.4/69 kBProgress (1): 20/69 kB Progress (1): 36/69 kBProgress (1): 53/69 kBProgress (1): 69 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/io/airlift/airbase/112/airbase-112.pom (69 kB at 510 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/junit/junit-bom/5.8.0-M1/junit-bom-5.8.0-M1.pom
+Progress (1): 5.7 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/junit/junit-bom/5.8.0-M1/junit-bom-5.8.0-M1.pom (5.7 kB at 69 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/com/github/luben/zstd-jni/1.5.6-3/zstd-jni-1.5.6-3.pom
+Progress (1): 2.0 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/com/github/luben/zstd-jni/1.5.6-3/zstd-jni-1.5.6-3.pom (2.0 kB at 19 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-io/3.5.1/plexus-io-3.5.1.pom
+Progress (1): 1.8/4.3 kBProgress (1): 4.3 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-io/3.5.1/plexus-io-3.5.1.pom (4.3 kB at 44 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-dependency-analyzer/1.15.0/maven-dependency-analyzer-1.15.0.pom
+Progress (1): 6.2/32 kBProgress (1): 23/32 kB Progress (1): 30/32 kBProgress (1): 32 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-dependency-analyzer/1.15.0/maven-dependency-analyzer-1.15.0.pom (32 kB at 229 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-dependency-tree/3.3.0/maven-dependency-tree-3.3.0.pom
+Progress (1): 3.4/7.0 kBProgress (1): 7.0 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-dependency-tree/3.3.0/maven-dependency-tree-3.3.0.pom (7.0 kB at 73 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.pom
+Progress (1): 1.9/11 kBProgress (1): 11 kB                       Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.pom (11 kB at 56 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-common-artifact-filters/3.1.0/maven-common-artifact-filters-3.1.0.pom
+Progress (1): 5.3 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-common-artifact-filters/3.1.0/maven-common-artifact-filters-3.1.0.pom (5.3 kB at 46 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-shared-components/33/maven-shared-components-33.pom
+Progress (1): 5.1 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-shared-components/33/maven-shared-components-33.pom (5.1 kB at 34 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-component-annotations/1.5.4/plexus-component-annotations-1.5.4.pom
+Progress (1): 815 B                   Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-component-annotations/1.5.4/plexus-component-annotations-1.5.4.pom (815 B at 6.8 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-containers/1.5.4/plexus-containers-1.5.4.pom
+Progress (1): 4.2 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-containers/1.5.4/plexus-containers-1.5.4.pom (4.2 kB at 43 kB/s)
+[INFO] Artifact org.codehaus.plexus:plexus:pom:2.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+[INFO] Artifact org.codehaus.plexus:plexus:pom:2.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus/2.0.5/plexus-2.0.5.pom
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus/2.0.5/plexus-2.0.5.pom (0 B at 0 B/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-shared-utils/3.1.0/maven-shared-utils-3.1.0.pom
+Progress (1): 5.0 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-shared-utils/3.1.0/maven-shared-utils-3.1.0.pom (5.0 kB at 28 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.pom
+Progress (1): 2.7 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.pom (2.7 kB at 22 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/slf4j/slf4j-parent/1.7.5/slf4j-parent-1.7.5.pom
+Progress (1): 7.3/12 kBProgress (1): 12 kB                       Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/slf4j/slf4j-parent/1.7.5/slf4j-parent-1.7.5.pom (12 kB at 41 kB/s)
+[INFO] Artifact commons-beanutils:commons-beanutils:jar:1.9.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+[INFO] Artifact org.apache.commons:commons-lang3:jar:3.17.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+[INFO] Artifact commons-beanutils:commons-beanutils:jar:1.9.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+[INFO] Artifact org.apache.commons:commons-lang3:jar:3.17.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-maven (https://maven.aliyun.com/repository/public, default, releases), apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)]
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-sink-api/2.0.0/doxia-sink-api-2.0.0.jar
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/reporting/maven-reporting-api/4.0.0/maven-reporting-api-4.0.0.jar
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/reporting/maven-reporting-impl/4.0.0/maven-reporting-impl-4.0.0.jar
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-site-model/2.0.0/doxia-site-model-2.0.0.jar
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-core/2.0.0/doxia-core-2.0.0.jar
+Progress (1): 4.8/11 kBProgress (1): 11 kB    Progress (2): 11 kB | 7.2/9.8 kBProgress (2): 11 kB | 9.8 kB    Progress (3): 11 kB | 9.8 kB | 1.8/21 kBProgress (4): 11 kB | 9.8 kB | 1.8/21 kB | 0.4/86 kBProgress (4): 11 kB | 9.8 kB | 18/21 kB | 0.4/86 kB Progress (4): 11 kB | 9.8 kB | 21 kB | 0.4/86 kB   Progress (4): 11 kB | 9.8 kB | 21 kB | 17/86 kB Progress (4): 11 kB | 9.8 kB | 21 kB | 33/86 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 50/86 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 66/86 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 82/86 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 86 kB                                               Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-site-model/2.0.0/doxia-site-model-2.0.0.jar (86 kB at 438 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-text/1.12.0/commons-text-1.12.0.jar
+Progress (4): 11 kB | 9.8 kB | 21 kB | 7.3/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 16/251 kB Progress (4): 11 kB | 9.8 kB | 21 kB | 32/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 48/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 65/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 81/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 97/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 114/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 130/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 146/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 163/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 179/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 196/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 212/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 228/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 245/251 kBProgress (4): 11 kB | 9.8 kB | 21 kB | 251 kB                                                 Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-text/1.12.0/commons-text-1.12.0.jar (251 kB at 649 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-integration-tools/2.0.0/doxia-integration-tools-2.0.0.jar
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-sink-api/2.0.0/doxia-sink-api-2.0.0.jar (11 kB at 29 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-site-renderer/2.0.0/doxia-site-renderer-2.0.0.jar
+Progress (3): 9.8 kB | 21 kB | 7.2/44 kBProgress (3): 9.8 kB | 21 kB | 15/44 kB Progress (3): 9.8 kB | 21 kB | 21/44 kBProgress (3): 9.8 kB | 21 kB | 37/44 kBProgress (3): 9.8 kB | 21 kB | 44 kB   Progress (4): 9.8 kB | 21 kB | 44 kB | 1.8/50 kBProgress (4): 9.8 kB | 21 kB | 44 kB | 18/50 kB Progress (4): 9.8 kB | 21 kB | 44 kB | 35/50 kBProgress (4): 9.8 kB | 21 kB | 44 kB | 50 kB                                               Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/reporting/maven-reporting-impl/4.0.0/maven-reporting-impl-4.0.0.jar (21 kB at 45 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-skin-model/2.0.0/doxia-skin-model-2.0.0.jar
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/reporting/maven-reporting-api/4.0.0/maven-reporting-api-4.0.0.jar (9.8 kB at 20 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-xhtml5/2.0.0/doxia-module-xhtml5-2.0.0.jar
+Progress (3): 44 kB | 50 kB | 7.3/17 kBProgress (3): 44 kB | 50 kB | 15/17 kB Progress (3): 44 kB | 50 kB | 17 kB   Progress (4): 44 kB | 50 kB | 17 kB | 7.2/16 kBProgress (4): 44 kB | 50 kB | 17 kB | 15/16 kB Progress (4): 44 kB | 50 kB | 17 kB | 16 kB                                              Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-integration-tools/2.0.0/doxia-integration-tools-2.0.0.jar (50 kB at 93 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-velocity/2.2.0/plexus-velocity-2.2.0.jar
+Progress (4): 44 kB | 17 kB | 16 kB | 4.8/5.7 kBProgress (4): 44 kB | 17 kB | 16 kB | 5.7 kB                                                Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-velocity/2.2.0/plexus-velocity-2.2.0.jar (5.7 kB at 7.4 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-engine-core/2.4/velocity-engine-core-2.4.jar
+Progress (4): 44 kB | 17 kB | 16 kB | 1.8/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 18/510 kB Progress (4): 44 kB | 17 kB | 16 kB | 35/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 51/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 67/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 84/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 100/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 117/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 132/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 148/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 152/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 165/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 177/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 186/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 192/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 196/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 199/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 200/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 202/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 205/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 208/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 211/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 214/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 216/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 219/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 222/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 225/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 228/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 231/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 234/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 238/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 241/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 243/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 246/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 249/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 252/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 254/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 257/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 260/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 263/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 266/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 269/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 272/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 275/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 278/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 281/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 284/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 287/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 289/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 292/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 295/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 298/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 301/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 304/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 307/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 316/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 323/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 329/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 335/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 339/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 343/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 348/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 352/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 357/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 361/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 365/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 382/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 387/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 398/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 408/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 418/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 430/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 441/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 454/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 471/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 484/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 491/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 494/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 497/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 503/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 506/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 508/510 kBProgress (4): 44 kB | 17 kB | 16 kB | 510 kB    Progress (5): 44 kB | 17 kB | 16 kB | 510 kB | 7.3/168 kBProgress (5): 44 kB | 17 kB | 16 kB | 510 kB | 15/168 kB Progress (5): 44 kB | 17 kB | 16 kB | 510 kB | 32/168 kB                                                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-skin-model/2.0.0/doxia-skin-model-2.0.0.jar (16 kB at 14 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/tools/velocity-tools-generic/3.1/velocity-tools-generic-3.1.jar
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-engine-core/2.4/velocity-engine-core-2.4.jar (510 kB at 430 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar
+Progress (3): 44 kB | 17 kB | 48/168 kBProgress (3): 44 kB | 17 kB | 64/168 kB                                       Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar (0 B at 0 B/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-digester3/3.2/commons-digester3-3.2.jar
+Progress (4): 44 kB | 17 kB | 64/168 kB | 1.9/217 kBProgress (4): 44 kB | 17 kB | 64/168 kB | 18/217 kB Progress (4): 44 kB | 17 kB | 64/168 kB | 35/217 kBProgress (4): 44 kB | 17 kB | 64/168 kB | 51/217 kBProgress (4): 44 kB | 17 kB | 64/168 kB | 52/217 kBProgress (4): 44 kB | 17 kB | 64/168 kB | 54/217 kBProgress (4): 44 kB | 17 kB | 64/168 kB | 57/217 kBProgress (4): 44 kB | 17 kB | 64/168 kB | 60/217 kBProgress (4): 44 kB | 17 kB | 64/168 kB | 63/217 kBProgress (4): 44 kB | 17 kB | 64/168 kB | 68/217 kBProgress (4): 44 kB | 17 kB | 64/168 kB | 79/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 79/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 82/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 85/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 88/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 90/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 92/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 97/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 100/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 106/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 107/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 110/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 117/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 125/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 132/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 135/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 139/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 144/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 151/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 154/217 kBProgress (4): 44 kB | 17 kB | 81/168 kB | 157/217 kBProgress (5): 44 kB | 17 kB | 81/168 kB | 157/217 kB | 1.9/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 157/217 kB | 1.9/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 160/217 kB | 1.9/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 164/217 kB | 1.9/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 165/217 kB | 1.9/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 171/217 kB | 1.9/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 171/217 kB | 18/242 kB Progress (5): 44 kB | 17 kB | 97/168 kB | 171/217 kB | 35/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 179/217 kB | 35/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 179/217 kB | 51/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 186/217 kB | 51/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 186/217 kB | 67/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 189/217 kB | 67/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 196/217 kB | 67/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 196/217 kB | 84/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 202/217 kB | 84/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 208/217 kB | 84/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 214/217 kB | 84/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 214/217 kB | 100/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 100/242 kB    Progress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 117/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 133/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 149/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 157/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 173/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 180/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 192/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 203/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 209/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 215/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 224/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 228/242 kBProgress (5): 44 kB | 17 kB | 97/168 kB | 217 kB | 242 kB                                                             Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-xhtml5/2.0.0/doxia-module-xhtml5-2.0.0.jar (17 kB at 13 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/com/github/cliftonlabs/json-simple/3.0.2/json-simple-3.0.2.jar
+Progress (5): 44 kB | 97/168 kB | 217 kB | 242 kB | 4.9/35 kBProgress (5): 44 kB | 97/168 kB | 217 kB | 242 kB | 21/35 kB Progress (5): 44 kB | 97/168 kB | 217 kB | 242 kB | 35 kB   Progress (5): 44 kB | 114/168 kB | 217 kB | 242 kB | 35 kBProgress (5): 44 kB | 130/168 kB | 217 kB | 242 kB | 35 kBProgress (5): 44 kB | 146/168 kB | 217 kB | 242 kB | 35 kBProgress (5): 44 kB | 163/168 kB | 217 kB | 242 kB | 35 kBProgress (5): 44 kB | 168 kB | 217 kB | 242 kB | 35 kB                                                          Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/tools/velocity-tools-generic/3.1/velocity-tools-generic-3.1.jar (217 kB at 145 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-apt/2.0.0/doxia-module-apt-2.0.0.jar
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-digester3/3.2/commons-digester3-3.2.jar (242 kB at 161 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-xdoc/2.0.0/doxia-module-xdoc-2.0.0.jar
+Progress (4): 44 kB | 168 kB | 35 kB | 7.2/35 kBProgress (4): 44 kB | 168 kB | 35 kB | 15/35 kB Progress (4): 44 kB | 168 kB | 35 kB | 32/35 kBProgress (4): 44 kB | 168 kB | 35 kB | 35 kB                                               Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-core/2.0.0/doxia-core-2.0.0.jar (168 kB at 98 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M3/org.eclipse.sisu.plexus-0.9.0.M3.jar
+Progress (4): 44 kB | 35 kB | 35 kB | 7.3/216 kBProgress (4): 44 kB | 35 kB | 35 kB | 16/216 kB Progress (4): 44 kB | 35 kB | 35 kB | 32/216 kBProgress (4): 44 kB | 35 kB | 35 kB | 48/216 kBProgress (4): 44 kB | 35 kB | 35 kB | 65/216 kBProgress (5): 44 kB | 35 kB | 35 kB | 65/216 kB | 7.3/54 kBProgress (5): 44 kB | 35 kB | 35 kB | 65/216 kB | 15/54 kB Progress (5): 44 kB | 35 kB | 35 kB | 81/216 kB | 15/54 kBProgress (5): 44 kB | 35 kB | 35 kB | 97/216 kB | 15/54 kBProgress (5): 44 kB | 35 kB | 35 kB | 114/216 kB | 15/54 kBProgress (5): 44 kB | 35 kB | 35 kB | 130/216 kB | 15/54 kBProgress (5): 44 kB | 35 kB | 35 kB | 130/216 kB | 32/54 kBProgress (5): 44 kB | 35 kB | 35 kB | 146/216 kB | 32/54 kBProgress (5): 44 kB | 35 kB | 35 kB | 146/216 kB | 48/54 kBProgress (5): 44 kB | 35 kB | 35 kB | 146/216 kB | 54 kB   Progress (5): 44 kB | 35 kB | 35 kB | 163/216 kB | 54 kBProgress (5): 44 kB | 35 kB | 35 kB | 179/216 kB | 54 kBProgress (5): 44 kB | 35 kB | 35 kB | 196/216 kB | 54 kBProgress (5): 44 kB | 35 kB | 35 kB | 212/216 kB | 54 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 54 kB                                                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-apt/2.0.0/doxia-module-apt-2.0.0.jar (54 kB at 27 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.jar
+Progress (5): 44 kB | 35 kB | 35 kB | 216 kB | 7.3/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 15/434 kB Progress (5): 44 kB | 35 kB | 35 kB | 216 kB | 32/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 48/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 65/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 81/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 97/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 114/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 130/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 146/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 163/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 179/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 192/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 208/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 212/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 229/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 236/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 252/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 268/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 285/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 285/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 302/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 318/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 334/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 351/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 367/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 374/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 391/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 407/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 423/434 kBProgress (5): 44 kB | 35 kB | 35 kB | 216 kB | 434 kB                                                         Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M3/org.eclipse.sisu.plexus-0.9.0.M3.jar (216 kB at 88 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-site-renderer/2.0.0/doxia-site-renderer-2.0.0.jar (44 kB at 18 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-archiver/4.10.0/plexus-archiver-4.10.0.jar
+Progress (4): 35 kB | 35 kB | 434 kB | 7.3/53 kBProgress (4): 35 kB | 35 kB | 434 kB | 15/53 kB Progress (4): 35 kB | 35 kB | 434 kB | 32/53 kBProgress (4): 35 kB | 35 kB | 434 kB | 48/53 kBProgress (4): 35 kB | 35 kB | 434 kB | 53 kB                                               Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.jar (434 kB at 157 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-compress/1.26.2/commons-compress-1.26.2.jar
+Progress (4): 35 kB | 35 kB | 53 kB | 7.3/225 kBProgress (4): 35 kB | 35 kB | 53 kB | 16/225 kB Progress (4): 35 kB | 35 kB | 53 kB | 32/225 kBProgress (4): 35 kB | 35 kB | 53 kB | 48/225 kBProgress (5): 35 kB | 35 kB | 53 kB | 48/225 kB | 0/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 48/225 kB | 0/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 48/225 kB | 0/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 48/225 kB | 0/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 48/225 kB | 0.1/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 48/225 kB | 0.1/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 65/225 kB | 0.1/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 65/225 kB | 0.1/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 65/225 kB | 0.1/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 81/225 kB | 0.1/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 81/225 kB | 0.1/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 81/225 kB | 0.1/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 81/225 kB | 0.2/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 81/225 kB | 0.2/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 81/225 kB | 0.2/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 97/225 kB | 0.2/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 97/225 kB | 0.2/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 97/225 kB | 0.2/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 97/225 kB | 0.2/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 97/225 kB | 0.3/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 97/225 kB | 0.3/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 97/225 kB | 0.3/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 97/225 kB | 0.3/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 97/225 kB | 0.3/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 97/225 kB | 0.3/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.3/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.4/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.4/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.4/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.4/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.4/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.4/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.5/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.5/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.5/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.5/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.5/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.5/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.6/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.6/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.6/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.6/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.6/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.6/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.7/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.7/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.7/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.7/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.7/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.7/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.8/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.8/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.8/1.1 MBProgress (5): 35 kB | 35 kB | 53 kB | 114/225 kB | 0.8/1.1 MB                                                             Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar (53 kB at 18 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/io/airlift/aircompressor/0.27/aircompressor-0.27.jar
+Progress (4): 35 kB | 35 kB | 114/225 kB | 0.8/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 0.8/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 0.9/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 0.9/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 0.9/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 0.9/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 0.9/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 0.9/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 0.9/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 1.0/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 1.0/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 1.0/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 1.0/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 1.0/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 1.0/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 1.1/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 1.1/1.1 MBProgress (4): 35 kB | 35 kB | 114/225 kB | 1.1 MB    Progress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 7.3/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 15/255 kB Progress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 32/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 48/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 65/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 81/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 97/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 114/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 130/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 146/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 163/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 179/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 196/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 212/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 228/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 245/255 kBProgress (5): 35 kB | 35 kB | 114/225 kB | 1.1 MB | 255 kB    Progress (5): 35 kB | 35 kB | 130/225 kB | 1.1 MB | 255 kBProgress (5): 35 kB | 35 kB | 146/225 kB | 1.1 MB | 255 kBProgress (5): 35 kB | 35 kB | 163/225 kB | 1.1 MB | 255 kBProgress (5): 35 kB | 35 kB | 179/225 kB | 1.1 MB | 255 kBProgress (5): 35 kB | 35 kB | 196/225 kB | 1.1 MB | 255 kBProgress (5): 35 kB | 35 kB | 212/225 kB | 1.1 MB | 255 kBProgress (5): 35 kB | 35 kB | 225 kB | 1.1 MB | 255 kB                                                          Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-compress/1.26.2/commons-compress-1.26.2.jar (1.1 MB at 351 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/com/github/luben/zstd-jni/1.5.6-3/zstd-jni-1.5.6-3.jar
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/io/airlift/aircompressor/0.27/aircompressor-0.27.jar (255 kB at 82 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar (0 B at 0 B/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.jar
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/com/github/cliftonlabs/json-simple/3.0.2/json-simple-3.0.2.jar (35 kB at 11 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-io/3.5.1/plexus-io-3.5.1.jar
+Progress (3): 35 kB | 225 kB | 7.3/94 kBProgress (3): 35 kB | 225 kB | 15/94 kB Progress (3): 35 kB | 225 kB | 32/94 kBProgress (3): 35 kB | 225 kB | 48/94 kBProgress (3): 35 kB | 225 kB | 65/94 kBProgress (3): 35 kB | 225 kB | 81/94 kBProgress (3): 35 kB | 225 kB | 94 kB   Progress (4): 35 kB | 225 kB | 94 kB | 3.3/80 kBProgress (4): 35 kB | 225 kB | 94 kB | 20/80 kB Progress (4): 35 kB | 225 kB | 94 kB | 36/80 kBProgress (4): 35 kB | 225 kB | 94 kB | 52/80 kBProgress (4): 35 kB | 225 kB | 94 kB | 69/80 kBProgress (4): 35 kB | 225 kB | 94 kB | 80 kB                                               Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-archiver/4.10.0/plexus-archiver-4.10.0.jar (225 kB at 70 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.jar
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-xdoc/2.0.0/doxia-module-xdoc-2.0.0.jar (35 kB at 11 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-dependency-analyzer/1.15.0/maven-dependency-analyzer-1.15.0.jar
+Progress (3): 94 kB | 80 kB | 1.9/12 kBProgress (3): 94 kB | 80 kB | 12 kB    Progress (4): 94 kB | 80 kB | 12 kB | 7.2/45 kBProgress (4): 94 kB | 80 kB | 12 kB | 15/45 kB Progress (4): 94 kB | 80 kB | 12 kB | 32/45 kBProgress (4): 94 kB | 80 kB | 12 kB | 45 kB   Progress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.1/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.1/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.1/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.1/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.1/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.1/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.2/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.2/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.2/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.2/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.2/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.2/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.3/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.3/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.3/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.3/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.3/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.3/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.4/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.4/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.4/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.4/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.4/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.4/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.5/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.5/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.5/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.5/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.5/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.5/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.6/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.6/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.6/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.6/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.6/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.6/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.7/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.7/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.7/6.7 MBProgress (5): 94 kB | 80 kB | 12 kB | 45 kB | 0.7/6.7 MB                                                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.jar (94 kB at 25 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-dependency-tree/3.3.0/maven-dependency-tree-3.3.0.jar
+Progress (4): 80 kB | 12 kB | 45 kB | 0.7/6.7 MBProgress (5): 80 kB | 12 kB | 45 kB | 0.7/6.7 MB | 7.3/43 kBProgress (5): 80 kB | 12 kB | 45 kB | 0.7/6.7 MB | 15/43 kB Progress (5): 80 kB | 12 kB | 45 kB | 0.7/6.7 MB | 15/43 kBProgress (5): 80 kB | 12 kB | 45 kB | 0.7/6.7 MB | 32/43 kBProgress (5): 80 kB | 12 kB | 45 kB | 0.8/6.7 MB | 32/43 kBProgress (5): 80 kB | 12 kB | 45 kB | 0.8/6.7 MB | 43 kB   Progress (5): 80 kB | 12 kB | 45 kB | 0.8/6.7 MB | 43 kBProgress (5): 80 kB | 12 kB | 45 kB | 0.8/6.7 MB | 43 kBProgress (5): 80 kB | 12 kB | 45 kB | 0.8/6.7 MB | 43 kBProgress (5): 80 kB | 12 kB | 45 kB | 0.8/6.7 MB | 43 kBProgress (5): 80 kB | 12 kB | 45 kB | 0.8/6.7 MB | 43 kBProgress (5): 80 kB | 12 kB | 45 kB | 0.9/6.7 MB | 43 kBProgress (5): 80 kB | 12 kB | 45 kB | 0.9/6.7 MB | 43 kB                                                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-io/3.5.1/plexus-io-3.5.1.jar (80 kB at 21 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.jar
+Progress (4): 12 kB | 45 kB | 0.9/6.7 MB | 43 kBProgress (4): 12 kB | 45 kB | 0.9/6.7 MB | 43 kBProgress (4): 12 kB | 45 kB | 0.9/6.7 MB | 43 kBProgress (4): 12 kB | 45 kB | 0.9/6.7 MB | 43 kBProgress (4): 12 kB | 45 kB | 0.9/6.7 MB | 43 kBProgress (4): 12 kB | 45 kB | 1.0/6.7 MB | 43 kBProgress (4): 12 kB | 45 kB | 1.0/6.7 MB | 43 kBProgress (4): 12 kB | 45 kB | 1.0/6.7 MB | 43 kBProgress (4): 12 kB | 45 kB | 1.0/6.7 MB | 43 kBProgress (5): 12 kB | 45 kB | 1.0/6.7 MB | 43 kB | 4.8/159 kBProgress (5): 12 kB | 45 kB | 1.0/6.7 MB | 43 kB | 21/159 kB Progress (5): 12 kB | 45 kB | 1.0/6.7 MB | 43 kB | 38/159 kBProgress (5): 12 kB | 45 kB | 1.0/6.7 MB | 43 kB | 54/159 kBProgress (5): 12 kB | 45 kB | 1.0/6.7 MB | 43 kB | 54/159 kBProgress (5): 12 kB | 45 kB | 1.0/6.7 MB | 43 kB | 54/159 kBProgress (5): 12 kB | 45 kB | 1.0/6.7 MB | 43 kB | 70/159 kBProgress (5): 12 kB | 45 kB | 1.0/6.7 MB | 43 kB | 87/159 kBProgress (5): 12 kB | 45 kB | 1.0/6.7 MB | 43 kB | 103/159 kBProgress (5): 12 kB | 45 kB | 1.0/6.7 MB | 43 kB | 119/159 kBProgress (5): 12 kB | 45 kB | 1.0/6.7 MB | 43 kB | 127/159 kBProgress (5): 12 kB | 45 kB | 1.0/6.7 MB | 43 kB | 133/159 kBProgress (5): 12 kB | 45 kB | 1.1/6.7 MB | 43 kB | 133/159 kBProgress (5): 12 kB | 45 kB | 1.1/6.7 MB | 43 kB | 133/159 kBProgress (5): 12 kB | 45 kB | 1.1/6.7 MB | 43 kB | 139/159 kBProgress (5): 12 kB | 45 kB | 1.1/6.7 MB | 43 kB | 156/159 kBProgress (5): 12 kB | 45 kB | 1.1/6.7 MB | 43 kB | 159 kB    Progress (5): 12 kB | 45 kB | 1.1/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.1/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.1/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.1/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.2/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.2/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.2/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.2/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.2/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.2/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.3/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.3/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.3/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.3/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.3/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.3/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.4/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.4/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.4/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.4/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.4/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.4/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.5/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.5/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.5/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.5/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.5/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.5/6.7 MB | 43 kB | 159 kBProgress (5): 12 kB | 45 kB | 1.6/6.7 MB | 43 kB | 159 kB                                                         Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.jar (159 kB at 38 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-component-annotations/2.0.0/plexus-component-annotations-2.0.0.jar
+Progress (4): 12 kB | 45 kB | 1.6/6.7 MB | 43 kBProgress (4): 12 kB | 45 kB | 1.6/6.7 MB | 43 kBProgress (4): 12 kB | 45 kB | 1.6/6.7 MB | 43 kBProgress (5): 12 kB | 45 kB | 1.6/6.7 MB | 43 kB | 1.9/4.2 kBProgress (5): 12 kB | 45 kB | 1.6/6.7 MB | 43 kB | 4.2 kB    Progress (5): 12 kB | 45 kB | 1.6/6.7 MB | 43 kB | 4.2 kBProgress (5): 12 kB | 45 kB | 1.6/6.7 MB | 43 kB | 4.2 kBProgress (5): 12 kB | 45 kB | 1.7/6.7 MB | 43 kB | 4.2 kBProgress (5): 12 kB | 45 kB | 1.7/6.7 MB | 43 kB | 4.2 kBProgress (5): 12 kB | 45 kB | 1.7/6.7 MB | 43 kB | 4.2 kBProgress (5): 12 kB | 45 kB | 1.7/6.7 MB | 43 kB | 4.2 kBProgress (5): 12 kB | 45 kB | 1.7/6.7 MB | 43 kB | 4.2 kBProgress (5): 12 kB | 45 kB | 1.7/6.7 MB | 43 kB | 4.2 kBProgress (5): 12 kB | 45 kB | 1.8/6.7 MB | 43 kB | 4.2 kB                                                         Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.jar (12 kB at 2.8 kB/s)
+Progress (4): 45 kB | 1.8/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 1.8/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 1.8/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 1.8/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 1.8/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 1.9/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 1.9/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 1.9/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 1.9/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 1.9/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 1.9/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 1.9/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 2.0/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 2.0/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 2.0/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 2.0/6.7 MB | 43 kB | 4.2 kBProgress (4): 45 kB | 2.0/6.7 MB | 43 kB | 4.2 kB                                                 Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-component-annotations/2.0.0/plexus-component-annotations-2.0.0.jar (4.2 kB at 952 B/s)
+Progress (3): 45 kB | 2.0/6.7 MB | 43 kBProgress (3): 45 kB | 2.1/6.7 MB | 43 kBProgress (3): 45 kB | 2.1/6.7 MB | 43 kBProgress (3): 45 kB | 2.1/6.7 MB | 43 kBProgress (3): 45 kB | 2.1/6.7 MB | 43 kBProgress (3): 45 kB | 2.1/6.7 MB | 43 kBProgress (3): 45 kB | 2.1/6.7 MB | 43 kBProgress (3): 45 kB | 2.2/6.7 MB | 43 kBProgress (3): 45 kB | 2.2/6.7 MB | 43 kBProgress (3): 45 kB | 2.2/6.7 MB | 43 kBProgress (3): 45 kB | 2.2/6.7 MB | 43 kBProgress (3): 45 kB | 2.2/6.7 MB | 43 kBProgress (3): 45 kB | 2.2/6.7 MB | 43 kBProgress (3): 45 kB | 2.3/6.7 MB | 43 kBProgress (3): 45 kB | 2.3/6.7 MB | 43 kBProgress (3): 45 kB | 2.3/6.7 MB | 43 kBProgress (3): 45 kB | 2.3/6.7 MB | 43 kBProgress (3): 45 kB | 2.3/6.7 MB | 43 kBProgress (3): 45 kB | 2.3/6.7 MB | 43 kBProgress (3): 45 kB | 2.4/6.7 MB | 43 kBProgress (3): 45 kB | 2.4/6.7 MB | 43 kBProgress (3): 45 kB | 2.4/6.7 MB | 43 kBProgress (3): 45 kB | 2.4/6.7 MB | 43 kBProgress (3): 45 kB | 2.4/6.7 MB | 43 kBProgress (3): 45 kB | 2.4/6.7 MB | 43 kBProgress (3): 45 kB | 2.5/6.7 MB | 43 kBProgress (3): 45 kB | 2.5/6.7 MB | 43 kBProgress (3): 45 kB | 2.5/6.7 MB | 43 kBProgress (3): 45 kB | 2.5/6.7 MB | 43 kBProgress (3): 45 kB | 2.5/6.7 MB | 43 kBProgress (3): 45 kB | 2.5/6.7 MB | 43 kBProgress (3): 45 kB | 2.6/6.7 MB | 43 kBProgress (3): 45 kB | 2.6/6.7 MB | 43 kBProgress (3): 45 kB | 2.6/6.7 MB | 43 kBProgress (3): 45 kB | 2.6/6.7 MB | 43 kBProgress (3): 45 kB | 2.6/6.7 MB | 43 kBProgress (3): 45 kB | 2.6/6.7 MB | 43 kBProgress (3): 45 kB | 2.7/6.7 MB | 43 kBProgress (3): 45 kB | 2.7/6.7 MB | 43 kBProgress (3): 45 kB | 2.7/6.7 MB | 43 kBProgress (3): 45 kB | 2.7/6.7 MB | 43 kBProgress (3): 45 kB | 2.7/6.7 MB | 43 kBProgress (3): 45 kB | 2.7/6.7 MB | 43 kBProgress (3): 45 kB | 2.8/6.7 MB | 43 kBProgress (3): 45 kB | 2.8/6.7 MB | 43 kBProgress (3): 45 kB | 2.8/6.7 MB | 43 kBProgress (3): 45 kB | 2.8/6.7 MB | 43 kBProgress (3): 45 kB | 2.8/6.7 MB | 43 kBProgress (3): 45 kB | 2.8/6.7 MB | 43 kBProgress (3): 45 kB | 2.8/6.7 MB | 43 kBProgress (3): 45 kB | 2.9/6.7 MB | 43 kBProgress (3): 45 kB | 2.9/6.7 MB | 43 kBProgress (3): 45 kB | 2.9/6.7 MB | 43 kBProgress (3): 45 kB | 2.9/6.7 MB | 43 kBProgress (3): 45 kB | 2.9/6.7 MB | 43 kBProgress (3): 45 kB | 2.9/6.7 MB | 43 kBProgress (3): 45 kB | 3.0/6.7 MB | 43 kBProgress (3): 45 kB | 3.0/6.7 MB | 43 kBProgress (3): 45 kB | 3.0/6.7 MB | 43 kBProgress (3): 45 kB | 3.0/6.7 MB | 43 kBProgress (3): 45 kB | 3.0/6.7 MB | 43 kBProgress (3): 45 kB | 3.0/6.7 MB | 43 kBProgress (3): 45 kB | 3.1/6.7 MB | 43 kBProgress (3): 45 kB | 3.1/6.7 MB | 43 kBProgress (3): 45 kB | 3.1/6.7 MB | 43 kBProgress (3): 45 kB | 3.1/6.7 MB | 43 kBProgress (3): 45 kB | 3.1/6.7 MB | 43 kBProgress (3): 45 kB | 3.1/6.7 MB | 43 kBProgress (3): 45 kB | 3.2/6.7 MB | 43 kBProgress (3): 45 kB | 3.2/6.7 MB | 43 kBProgress (3): 45 kB | 3.2/6.7 MB | 43 kBProgress (3): 45 kB | 3.2/6.7 MB | 43 kBProgress (3): 45 kB | 3.2/6.7 MB | 43 kBProgress (3): 45 kB | 3.2/6.7 MB | 43 kBProgress (3): 45 kB | 3.3/6.7 MB | 43 kBProgress (3): 45 kB | 3.3/6.7 MB | 43 kBProgress (3): 45 kB | 3.3/6.7 MB | 43 kBProgress (3): 45 kB | 3.3/6.7 MB | 43 kBProgress (3): 45 kB | 3.3/6.7 MB | 43 kBProgress (3): 45 kB | 3.3/6.7 MB | 43 kBProgress (3): 45 kB | 3.4/6.7 MB | 43 kBProgress (3): 45 kB | 3.4/6.7 MB | 43 kBProgress (3): 45 kB | 3.4/6.7 MB | 43 kBProgress (3): 45 kB | 3.4/6.7 MB | 43 kBProgress (3): 45 kB | 3.4/6.7 MB | 43 kBProgress (3): 45 kB | 3.4/6.7 MB | 43 kBProgress (3): 45 kB | 3.5/6.7 MB | 43 kBProgress (3): 45 kB | 3.5/6.7 MB | 43 kBProgress (3): 45 kB | 3.5/6.7 MB | 43 kBProgress (3): 45 kB | 3.5/6.7 MB | 43 kBProgress (3): 45 kB | 3.5/6.7 MB | 43 kBProgress (3): 45 kB | 3.5/6.7 MB | 43 kBProgress (3): 45 kB | 3.6/6.7 MB | 43 kBProgress (3): 45 kB | 3.6/6.7 MB | 43 kBProgress (3): 45 kB | 3.6/6.7 MB | 43 kBProgress (3): 45 kB | 3.6/6.7 MB | 43 kBProgress (3): 45 kB | 3.6/6.7 MB | 43 kBProgress (3): 45 kB | 3.6/6.7 MB | 43 kBProgress (3): 45 kB | 3.7/6.7 MB | 43 kBProgress (3): 45 kB | 3.7/6.7 MB | 43 kBProgress (3): 45 kB | 3.7/6.7 MB | 43 kBProgress (3): 45 kB | 3.7/6.7 MB | 43 kBProgress (3): 45 kB | 3.7/6.7 MB | 43 kBProgress (3): 45 kB | 3.7/6.7 MB | 43 kBProgress (3): 45 kB | 3.8/6.7 MB | 43 kBProgress (3): 45 kB | 3.8/6.7 MB | 43 kBProgress (3): 45 kB | 3.8/6.7 MB | 43 kBProgress (3): 45 kB | 3.8/6.7 MB | 43 kBProgress (3): 45 kB | 3.8/6.7 MB | 43 kBProgress (3): 45 kB | 3.8/6.7 MB | 43 kBProgress (3): 45 kB | 3.8/6.7 MB | 43 kBProgress (3): 45 kB | 3.9/6.7 MB | 43 kBProgress (3): 45 kB | 3.9/6.7 MB | 43 kBProgress (3): 45 kB | 3.9/6.7 MB | 43 kBProgress (3): 45 kB | 3.9/6.7 MB | 43 kBProgress (3): 45 kB | 3.9/6.7 MB | 43 kBProgress (3): 45 kB | 3.9/6.7 MB | 43 kBProgress (3): 45 kB | 4.0/6.7 MB | 43 kBProgress (3): 45 kB | 4.0/6.7 MB | 43 kBProgress (3): 45 kB | 4.0/6.7 MB | 43 kBProgress (3): 45 kB | 4.0/6.7 MB | 43 kBProgress (3): 45 kB | 4.0/6.7 MB | 43 kBProgress (3): 45 kB | 4.0/6.7 MB | 43 kBProgress (3): 45 kB | 4.1/6.7 MB | 43 kBProgress (3): 45 kB | 4.1/6.7 MB | 43 kBProgress (3): 45 kB | 4.1/6.7 MB | 43 kBProgress (3): 45 kB | 4.1/6.7 MB | 43 kBProgress (3): 45 kB | 4.1/6.7 MB | 43 kBProgress (3): 45 kB | 4.1/6.7 MB | 43 kBProgress (3): 45 kB | 4.2/6.7 MB | 43 kBProgress (3): 45 kB | 4.2/6.7 MB | 43 kBProgress (3): 45 kB | 4.2/6.7 MB | 43 kBProgress (3): 45 kB | 4.2/6.7 MB | 43 kBProgress (3): 45 kB | 4.2/6.7 MB | 43 kBProgress (3): 45 kB | 4.2/6.7 MB | 43 kBProgress (3): 45 kB | 4.3/6.7 MB | 43 kBProgress (3): 45 kB | 4.3/6.7 MB | 43 kBProgress (3): 45 kB | 4.3/6.7 MB | 43 kBProgress (3): 45 kB | 4.3/6.7 MB | 43 kBProgress (3): 45 kB | 4.3/6.7 MB | 43 kBProgress (3): 45 kB | 4.3/6.7 MB | 43 kBProgress (3): 45 kB | 4.4/6.7 MB | 43 kBProgress (3): 45 kB | 4.4/6.7 MB | 43 kBProgress (3): 45 kB | 4.4/6.7 MB | 43 kBProgress (3): 45 kB | 4.4/6.7 MB | 43 kBProgress (3): 45 kB | 4.4/6.7 MB | 43 kBProgress (3): 45 kB | 4.4/6.7 MB | 43 kBProgress (3): 45 kB | 4.5/6.7 MB | 43 kBProgress (3): 45 kB | 4.5/6.7 MB | 43 kBProgress (3): 45 kB | 4.5/6.7 MB | 43 kBProgress (3): 45 kB | 4.5/6.7 MB | 43 kBProgress (3): 45 kB | 4.5/6.7 MB | 43 kBProgress (3): 45 kB | 4.5/6.7 MB | 43 kBProgress (3): 45 kB | 4.6/6.7 MB | 43 kBProgress (3): 45 kB | 4.6/6.7 MB | 43 kBProgress (3): 45 kB | 4.6/6.7 MB | 43 kBProgress (3): 45 kB | 4.6/6.7 MB | 43 kBProgress (3): 45 kB | 4.6/6.7 MB | 43 kBProgress (3): 45 kB | 4.6/6.7 MB | 43 kBProgress (3): 45 kB | 4.7/6.7 MB | 43 kBProgress (3): 45 kB | 4.7/6.7 MB | 43 kBProgress (3): 45 kB | 4.7/6.7 MB | 43 kBProgress (3): 45 kB | 4.7/6.7 MB | 43 kBProgress (3): 45 kB | 4.7/6.7 MB | 43 kBProgress (3): 45 kB | 4.7/6.7 MB | 43 kBProgress (3): 45 kB | 4.8/6.7 MB | 43 kBProgress (3): 45 kB | 4.8/6.7 MB | 43 kBProgress (3): 45 kB | 4.8/6.7 MB | 43 kBProgress (3): 45 kB | 4.8/6.7 MB | 43 kBProgress (3): 45 kB | 4.8/6.7 MB | 43 kBProgress (3): 45 kB | 4.8/6.7 MB | 43 kBProgress (3): 45 kB | 4.8/6.7 MB | 43 kBProgress (3): 45 kB | 4.9/6.7 MB | 43 kBProgress (3): 45 kB | 4.9/6.7 MB | 43 kBProgress (3): 45 kB | 4.9/6.7 MB | 43 kBProgress (3): 45 kB | 4.9/6.7 MB | 43 kBProgress (3): 45 kB | 4.9/6.7 MB | 43 kBProgress (3): 45 kB | 4.9/6.7 MB | 43 kBProgress (3): 45 kB | 5.0/6.7 MB | 43 kBProgress (3): 45 kB | 5.0/6.7 MB | 43 kBProgress (3): 45 kB | 5.0/6.7 MB | 43 kBProgress (3): 45 kB | 5.0/6.7 MB | 43 kBProgress (3): 45 kB | 5.0/6.7 MB | 43 kBProgress (3): 45 kB | 5.0/6.7 MB | 43 kBProgress (3): 45 kB | 5.1/6.7 MB | 43 kBProgress (3): 45 kB | 5.1/6.7 MB | 43 kBProgress (3): 45 kB | 5.1/6.7 MB | 43 kBProgress (3): 45 kB | 5.1/6.7 MB | 43 kBProgress (3): 45 kB | 5.1/6.7 MB | 43 kBProgress (3): 45 kB | 5.1/6.7 MB | 43 kBProgress (3): 45 kB | 5.2/6.7 MB | 43 kBProgress (3): 45 kB | 5.2/6.7 MB | 43 kBProgress (3): 45 kB | 5.2/6.7 MB | 43 kBProgress (3): 45 kB | 5.2/6.7 MB | 43 kBProgress (3): 45 kB | 5.2/6.7 MB | 43 kBProgress (3): 45 kB | 5.2/6.7 MB | 43 kBProgress (3): 45 kB | 5.3/6.7 MB | 43 kBProgress (3): 45 kB | 5.3/6.7 MB | 43 kBProgress (3): 45 kB | 5.3/6.7 MB | 43 kBProgress (3): 45 kB | 5.3/6.7 MB | 43 kBProgress (3): 45 kB | 5.3/6.7 MB | 43 kBProgress (3): 45 kB | 5.3/6.7 MB | 43 kBProgress (3): 45 kB | 5.4/6.7 MB | 43 kBProgress (3): 45 kB | 5.4/6.7 MB | 43 kBProgress (3): 45 kB | 5.4/6.7 MB | 43 kBProgress (3): 45 kB | 5.4/6.7 MB | 43 kBProgress (3): 45 kB | 5.4/6.7 MB | 43 kBProgress (3): 45 kB | 5.4/6.7 MB | 43 kBProgress (3): 45 kB | 5.5/6.7 MB | 43 kBProgress (3): 45 kB | 5.5/6.7 MB | 43 kBProgress (3): 45 kB | 5.5/6.7 MB | 43 kBProgress (3): 45 kB | 5.5/6.7 MB | 43 kBProgress (3): 45 kB | 5.5/6.7 MB | 43 kBProgress (3): 45 kB | 5.5/6.7 MB | 43 kBProgress (3): 45 kB | 5.6/6.7 MB | 43 kBProgress (3): 45 kB | 5.6/6.7 MB | 43 kBProgress (3): 45 kB | 5.6/6.7 MB | 43 kBProgress (3): 45 kB | 5.6/6.7 MB | 43 kBProgress (3): 45 kB | 5.6/6.7 MB | 43 kBProgress (3): 45 kB | 5.6/6.7 MB | 43 kBProgress (3): 45 kB | 5.7/6.7 MB | 43 kBProgress (3): 45 kB | 5.7/6.7 MB | 43 kBProgress (3): 45 kB | 5.7/6.7 MB | 43 kBProgress (3): 45 kB | 5.7/6.7 MB | 43 kBProgress (3): 45 kB | 5.7/6.7 MB | 43 kBProgress (3): 45 kB | 5.7/6.7 MB | 43 kBProgress (3): 45 kB | 5.7/6.7 MB | 43 kBProgress (3): 45 kB | 5.8/6.7 MB | 43 kBProgress (3): 45 kB | 5.8/6.7 MB | 43 kBProgress (3): 45 kB | 5.8/6.7 MB | 43 kBProgress (3): 45 kB | 5.8/6.7 MB | 43 kBProgress (3): 45 kB | 5.8/6.7 MB | 43 kBProgress (3): 45 kB | 5.8/6.7 MB | 43 kBProgress (3): 45 kB | 5.9/6.7 MB | 43 kBProgress (3): 45 kB | 5.9/6.7 MB | 43 kBProgress (3): 45 kB | 5.9/6.7 MB | 43 kBProgress (3): 45 kB | 5.9/6.7 MB | 43 kBProgress (3): 45 kB | 5.9/6.7 MB | 43 kBProgress (3): 45 kB | 5.9/6.7 MB | 43 kBProgress (3): 45 kB | 6.0/6.7 MB | 43 kBProgress (3): 45 kB | 6.0/6.7 MB | 43 kBProgress (3): 45 kB | 6.0/6.7 MB | 43 kBProgress (3): 45 kB | 6.0/6.7 MB | 43 kBProgress (3): 45 kB | 6.0/6.7 MB | 43 kBProgress (3): 45 kB | 6.0/6.7 MB | 43 kBProgress (3): 45 kB | 6.1/6.7 MB | 43 kBProgress (3): 45 kB | 6.1/6.7 MB | 43 kBProgress (3): 45 kB | 6.1/6.7 MB | 43 kBProgress (3): 45 kB | 6.1/6.7 MB | 43 kBProgress (3): 45 kB | 6.1/6.7 MB | 43 kBProgress (3): 45 kB | 6.1/6.7 MB | 43 kBProgress (3): 45 kB | 6.2/6.7 MB | 43 kBProgress (3): 45 kB | 6.2/6.7 MB | 43 kBProgress (3): 45 kB | 6.2/6.7 MB | 43 kBProgress (3): 45 kB | 6.2/6.7 MB | 43 kBProgress (3): 45 kB | 6.2/6.7 MB | 43 kB                                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-dependency-analyzer/1.15.0/maven-dependency-analyzer-1.15.0.jar (45 kB at 6.9 kB/s)
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-dependency-tree/3.3.0/maven-dependency-tree-3.3.0.jar (43 kB at 6.5 kB/s)
+Progress (1): 6.2/6.7 MBProgress (1): 6.3/6.7 MBProgress (1): 6.3/6.7 MBProgress (1): 6.3/6.7 MBProgress (1): 6.3/6.7 MBProgress (1): 6.3/6.7 MBProgress (1): 6.3/6.7 MBProgress (1): 6.4/6.7 MBProgress (1): 6.4/6.7 MBProgress (1): 6.4/6.7 MBProgress (1): 6.4/6.7 MBProgress (1): 6.4/6.7 MBProgress (1): 6.4/6.7 MBProgress (1): 6.5/6.7 MBProgress (1): 6.5/6.7 MBProgress (1): 6.5/6.7 MBProgress (1): 6.5/6.7 MBProgress (1): 6.5/6.7 MBProgress (1): 6.5/6.7 MBProgress (1): 6.6/6.7 MBProgress (1): 6.6/6.7 MBProgress (1): 6.6/6.7 MBProgress (1): 6.6/6.7 MBProgress (1): 6.6/6.7 MBProgress (1): 6.6/6.7 MBProgress (1): 6.7 MB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/com/github/luben/zstd-jni/1.5.6-3/zstd-jni-1.5.6-3.jar (6.7 MB at 936 kB/s)
+[INFO] com.guidinglight:dh-bom:pom:1.0.0-SNAPSHOT
+[INFO] 
+[INFO] ---------------------< com.guidinglight:dh-common >---------------------
+[INFO] Building dh-common 1.0.0-SNAPSHOT                                 [2/19]
+[INFO]   from dh-common\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-common ---
+[INFO] com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT
+[INFO] +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO] \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO]    \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] 
+[INFO] -----------------< com.guidinglight:dh-observability >------------------
+[INFO] Building dh-observability 1.0.0-SNAPSHOT                          [3/19]
+[INFO]   from dh-observability\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-observability ---
+[INFO] com.guidinglight:dh-observability:jar:1.0.0-SNAPSHOT
+[INFO] 
+[INFO] ---------------------< com.guidinglight:dh-domain >---------------------
+[INFO] Building dh-domain 1.0.0-SNAPSHOT                                 [4/19]
+[INFO]   from dh-domain\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-domain ---
+[INFO] com.guidinglight:dh-domain:jar:1.0.0-SNAPSHOT
+[INFO] \- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO]    +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO]    \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO]       \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] 
+[INFO] ---------------------< com.guidinglight:dh-ledger >---------------------
+[INFO] Building dh-ledger 1.0.0-SNAPSHOT                                 [5/19]
+[INFO]   from dh-ledger\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-ledger ---
+[INFO] com.guidinglight:dh-ledger:jar:1.0.0-SNAPSHOT
+[INFO] \- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO]    +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO]    \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO]       \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] 
+[INFO] -------------------< com.guidinglight:dh-providers >--------------------
+[INFO] Building dh-providers 1.0.0-SNAPSHOT                              [6/19]
+[INFO]   from dh-providers\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-providers ---
+[INFO] com.guidinglight:dh-providers:jar:1.0.0-SNAPSHOT
+[INFO] \- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO]    +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO]    \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO]       \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] 
+[INFO] -------------------< com.guidinglight:dh-connector >--------------------
+[INFO] Building dh-connector 1.0.0-SNAPSHOT                              [7/19]
+[INFO]   from dh-connector\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-connector ---
+[INFO] com.guidinglight:dh-connector:jar:1.0.0-SNAPSHOT
+[INFO] +- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO] |  \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO] |     \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] \- com.guidinglight:dh-domain:jar:1.0.0-SNAPSHOT:compile
+[INFO] 
+[INFO] -------------------< com.guidinglight:dh-knowledge >--------------------
+[INFO] Building dh-knowledge 1.0.0-SNAPSHOT                              [8/19]
+[INFO]   from dh-knowledge\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-knowledge ---
+[INFO] com.guidinglight:dh-knowledge:jar:1.0.0-SNAPSHOT
+[INFO] +- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO] |  \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO] |     \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] \- com.guidinglight:dh-connector:jar:1.0.0-SNAPSHOT:compile
+[INFO]    \- com.guidinglight:dh-domain:jar:1.0.0-SNAPSHOT:compile
+[INFO] 
+[INFO] ---------------------< com.guidinglight:dh-memory >---------------------
+[INFO] Building dh-memory 1.0.0-SNAPSHOT                                 [9/19]
+[INFO]   from dh-memory\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-memory ---
+[INFO] com.guidinglight:dh-memory:jar:1.0.0-SNAPSHOT
+[INFO] +- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO] |  \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO] |     \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] \- com.guidinglight:dh-domain:jar:1.0.0-SNAPSHOT:compile
+[INFO] 
+[INFO] --------------------< com.guidinglight:dh-usecase >---------------------
+[INFO] Building dh-usecase 1.0.0-SNAPSHOT                               [10/19]
+[INFO]   from dh-usecase\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-usecase ---
+[INFO] com.guidinglight:dh-usecase:jar:1.0.0-SNAPSHOT
+[INFO] +- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO] |  \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO] |     \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] +- com.guidinglight:dh-domain:jar:1.0.0-SNAPSHOT:compile
+[INFO] +- com.guidinglight:dh-ledger:jar:1.0.0-SNAPSHOT:compile
+[INFO] +- com.guidinglight:dh-providers:jar:1.0.0-SNAPSHOT:compile
+[INFO] +- com.guidinglight:dh-knowledge:jar:1.0.0-SNAPSHOT:compile
+[INFO] +- com.guidinglight:dh-memory:jar:1.0.0-SNAPSHOT:compile
+[INFO] +- com.guidinglight:dh-connector:jar:1.0.0-SNAPSHOT:compile
+[INFO] \- org.junit.jupiter:junit-jupiter:jar:5.12.2:test
+[INFO]    +- org.junit.jupiter:junit-jupiter-api:jar:5.12.2:test
+[INFO]    |  +- org.opentest4j:opentest4j:jar:1.3.0:test
+[INFO]    |  +- org.junit.platform:junit-platform-commons:jar:1.12.2:test
+[INFO]    |  \- org.apiguardian:apiguardian-api:jar:1.1.2:test
+[INFO]    +- org.junit.jupiter:junit-jupiter-params:jar:5.12.2:test
+[INFO]    \- org.junit.jupiter:junit-jupiter-engine:jar:5.12.2:test
+[INFO]       \- org.junit.platform:junit-platform-engine:jar:1.12.2:test
+[INFO] 
+[INFO] ---------------------< com.guidinglight:dh-infra >----------------------
+[INFO] Building dh-infra 1.0.0-SNAPSHOT                                 [11/19]
+[INFO]   from dh-infra\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-infra ---
+[INFO] com.guidinglight:dh-infra:jar:1.0.0-SNAPSHOT
+[INFO] +- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO] |  \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO] |     \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] +- com.guidinglight:dh-domain:jar:1.0.0-SNAPSHOT:compile
+[INFO] +- com.guidinglight:dh-usecase:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.guidinglight:dh-providers:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.guidinglight:dh-knowledge:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.guidinglight:dh-memory:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  \- com.guidinglight:dh-connector:jar:1.0.0-SNAPSHOT:compile
+[INFO] +- com.guidinglight:dh-ledger:jar:1.0.0-SNAPSHOT:compile
+[INFO] \- org.springframework.boot:spring-boot-starter-data-jpa:jar:3.5.10:compile
+[INFO]    +- org.springframework.boot:spring-boot-starter:jar:3.5.10:compile
+[INFO]    |  +- org.springframework.boot:spring-boot:jar:3.5.10:compile
+[INFO]    |  +- org.springframework.boot:spring-boot-autoconfigure:jar:3.5.10:compile
+[INFO]    |  +- org.springframework.boot:spring-boot-starter-logging:jar:3.5.10:compile
+[INFO]    |  |  +- ch.qos.logback:logback-classic:jar:1.5.25:compile
+[INFO]    |  |  |  \- ch.qos.logback:logback-core:jar:1.5.25:compile
+[INFO]    |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.24.3:compile
+[INFO]    |  |  |  \- org.apache.logging.log4j:log4j-api:jar:2.24.3:compile
+[INFO]    |  |  \- org.slf4j:jul-to-slf4j:jar:2.0.17:compile
+[INFO]    |  +- jakarta.annotation:jakarta.annotation-api:jar:2.1.1:compile
+[INFO]    |  +- org.springframework:spring-core:jar:6.2.15:compile
+[INFO]    |  |  \- org.springframework:spring-jcl:jar:6.2.15:compile
+[INFO]    |  \- org.yaml:snakeyaml:jar:2.4:compile
+[INFO]    +- org.springframework.boot:spring-boot-starter-jdbc:jar:3.5.10:compile
+[INFO]    |  +- com.zaxxer:HikariCP:jar:6.3.3:compile
+[INFO]    |  \- org.springframework:spring-jdbc:jar:6.2.15:compile
+[INFO]    +- org.hibernate.orm:hibernate-core:jar:6.6.41.Final:compile
+[INFO]    |  +- jakarta.persistence:jakarta.persistence-api:jar:3.1.0:compile
+[INFO]    |  +- jakarta.transaction:jakarta.transaction-api:jar:2.0.1:compile
+[INFO]    |  +- org.jboss.logging:jboss-logging:jar:3.6.1.Final:runtime
+[INFO]    |  +- org.hibernate.common:hibernate-commons-annotations:jar:7.0.3.Final:runtime
+[INFO]    |  +- io.smallrye:jandex:jar:3.2.0:runtime
+[INFO]    |  +- com.fasterxml:classmate:jar:1.7.3:runtime
+[INFO]    |  +- net.bytebuddy:byte-buddy:jar:1.17.8:runtime
+[INFO]    |  +- jakarta.xml.bind:jakarta.xml.bind-api:jar:4.0.4:runtime
+[INFO]    |  |  \- jakarta.activation:jakarta.activation-api:jar:2.1.4:runtime
+[INFO]    |  +- org.glassfish.jaxb:jaxb-runtime:jar:4.0.6:runtime
+[INFO]    |  |  \- org.glassfish.jaxb:jaxb-core:jar:4.0.6:runtime
+[INFO]    |  |     +- org.eclipse.angus:angus-activation:jar:2.0.3:runtime
+[INFO]    |  |     +- org.glassfish.jaxb:txw2:jar:4.0.6:runtime
+[INFO]    |  |     \- com.sun.istack:istack-commons-runtime:jar:4.1.2:runtime
+[INFO]    |  +- jakarta.inject:jakarta.inject-api:jar:2.0.1:runtime
+[INFO]    |  \- org.antlr:antlr4-runtime:jar:4.13.0:compile
+[INFO]    +- org.springframework.data:spring-data-jpa:jar:3.5.8:compile
+[INFO]    |  +- org.springframework.data:spring-data-commons:jar:3.5.8:compile
+[INFO]    |  +- org.springframework:spring-orm:jar:6.2.15:compile
+[INFO]    |  +- org.springframework:spring-context:jar:6.2.15:compile
+[INFO]    |  |  +- org.springframework:spring-expression:jar:6.2.15:compile
+[INFO]    |  |  \- io.micrometer:micrometer-observation:jar:1.15.8:compile
+[INFO]    |  |     \- io.micrometer:micrometer-commons:jar:1.15.8:compile
+[INFO]    |  +- org.springframework:spring-aop:jar:6.2.15:compile
+[INFO]    |  +- org.springframework:spring-tx:jar:6.2.15:compile
+[INFO]    |  +- org.springframework:spring-beans:jar:6.2.15:compile
+[INFO]    |  \- org.slf4j:slf4j-api:jar:2.0.17:compile
+[INFO]    \- org.springframework:spring-aspects:jar:6.2.15:compile
+[INFO]       \- org.aspectj:aspectjweaver:jar:1.9.25.1:compile
+[INFO] 
+[INFO] --------------------< com.guidinglight:dh-security >--------------------
+[INFO] Building dh-security 1.0.0-SNAPSHOT                              [12/19]
+[INFO]   from dh-security\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-security ---
+[INFO] com.guidinglight:dh-security:jar:1.0.0-SNAPSHOT
+[INFO] \- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO]    +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO]    \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO]       \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] 
+[INFO] ----------------------< com.guidinglight:dh-eval >----------------------
+[INFO] Building dh-eval 1.0.0-SNAPSHOT                                  [13/19]
+[INFO]   from dh-eval\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-eval ---
+[INFO] com.guidinglight:dh-eval:jar:1.0.0-SNAPSHOT
+[INFO] +- com.guidinglight:dh-usecase:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.guidinglight:dh-ledger:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.guidinglight:dh-providers:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.guidinglight:dh-knowledge:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.guidinglight:dh-memory:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  \- com.guidinglight:dh-connector:jar:1.0.0-SNAPSHOT:compile
+[INFO] +- com.guidinglight:dh-domain:jar:1.0.0-SNAPSHOT:compile
+[INFO] +- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  \- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO] +- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO] |  \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] \- org.slf4j:slf4j-api:jar:2.0.17:compile
+[INFO] 
+[INFO] -------------------< com.guidinglight:dh-scheduler >--------------------
+[INFO] Building dh-scheduler 1.0.0-SNAPSHOT                             [14/19]
+[INFO]   from dh-scheduler\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-scheduler ---
+[INFO] com.guidinglight:dh-scheduler:jar:1.0.0-SNAPSHOT
+[INFO] \- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO]    +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO]    \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO]       \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] 
+[INFO] ---------------------< com.guidinglight:dh-config >---------------------
+[INFO] Building dh-config 1.0.0-SNAPSHOT                                [15/19]
+[INFO]   from dh-config\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-config ---
+[INFO] com.guidinglight:dh-config:jar:1.0.0-SNAPSHOT
+[INFO] \- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO]    +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO]    \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO]       \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] 
+[INFO] ----------------------< com.guidinglight:dh-sdk >-----------------------
+[INFO] Building dh-sdk 1.0.0-SNAPSHOT                                   [16/19]
+[INFO]   from dh-sdk\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-sdk ---
+[INFO] com.guidinglight:dh-sdk:jar:1.0.0-SNAPSHOT
+[INFO] \- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO]    +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO]    \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO]       \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] 
+[INFO] ----------------------< com.guidinglight:dh-api >-----------------------
+[INFO] Building dh-api 1.0.0-SNAPSHOT                                   [17/19]
+[INFO]   from dh-api\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-api ---
+[INFO] com.guidinglight:dh-api:jar:1.0.0-SNAPSHOT
+[INFO] +- org.springframework.boot:spring-boot-starter-web:jar:3.5.10:compile
+[INFO] |  +- org.springframework.boot:spring-boot-starter:jar:3.5.10:compile
+[INFO] |  |  +- org.springframework.boot:spring-boot:jar:3.5.10:compile
+[INFO] |  |  +- org.springframework.boot:spring-boot-autoconfigure:jar:3.5.10:compile
+[INFO] |  |  +- org.springframework.boot:spring-boot-starter-logging:jar:3.5.10:compile
+[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.25:compile
+[INFO] |  |  |  |  +- ch.qos.logback:logback-core:jar:1.5.25:compile
+[INFO] |  |  |  |  \- org.slf4j:slf4j-api:jar:2.0.17:compile
+[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.24.3:compile
+[INFO] |  |  |  |  \- org.apache.logging.log4j:log4j-api:jar:2.24.3:compile
+[INFO] |  |  |  \- org.slf4j:jul-to-slf4j:jar:2.0.17:compile
+[INFO] |  |  +- jakarta.annotation:jakarta.annotation-api:jar:2.1.1:compile
+[INFO] |  |  +- org.springframework:spring-core:jar:6.2.15:compile
+[INFO] |  |  |  \- org.springframework:spring-jcl:jar:6.2.15:compile
+[INFO] |  |  \- org.yaml:snakeyaml:jar:2.4:compile
+[INFO] |  +- org.springframework.boot:spring-boot-starter-json:jar:3.5.10:compile
+[INFO] |  |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.17.2:compile
+[INFO] |  |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.17.2:compile
+[INFO] |  |  \- com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.17.2:compile
+[INFO] |  +- org.springframework.boot:spring-boot-starter-tomcat:jar:3.5.10:compile
+[INFO] |  |  +- org.apache.tomcat.embed:tomcat-embed-core:jar:10.1.50:compile
+[INFO] |  |  \- org.apache.tomcat.embed:tomcat-embed-websocket:jar:10.1.50:compile
+[INFO] |  +- org.springframework:spring-web:jar:6.2.15:compile
+[INFO] |  |  +- org.springframework:spring-beans:jar:6.2.15:compile
+[INFO] |  |  \- io.micrometer:micrometer-observation:jar:1.15.8:compile
+[INFO] |  |     \- io.micrometer:micrometer-commons:jar:1.15.8:compile
+[INFO] |  \- org.springframework:spring-webmvc:jar:6.2.15:compile
+[INFO] |     +- org.springframework:spring-aop:jar:6.2.15:compile
+[INFO] |     +- org.springframework:spring-context:jar:6.2.15:compile
+[INFO] |     \- org.springframework:spring-expression:jar:6.2.15:compile
+[INFO] +- org.springframework.boot:spring-boot-starter-validation:jar:3.5.10:compile
+[INFO] |  +- org.apache.tomcat.embed:tomcat-embed-el:jar:10.1.50:compile
+[INFO] |  \- org.hibernate.validator:hibernate-validator:jar:8.0.3.Final:compile
+[INFO] |     +- jakarta.validation:jakarta.validation-api:jar:3.0.2:compile
+[INFO] |     +- org.jboss.logging:jboss-logging:jar:3.6.1.Final:compile
+[INFO] |     \- com.fasterxml:classmate:jar:1.7.3:compile
+[INFO] +- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO] |  \- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO] |     \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] \- com.guidinglight:dh-usecase:jar:1.0.0-SNAPSHOT:compile
+[INFO]    +- com.guidinglight:dh-domain:jar:1.0.0-SNAPSHOT:compile
+[INFO]    +- com.guidinglight:dh-ledger:jar:1.0.0-SNAPSHOT:compile
+[INFO]    +- com.guidinglight:dh-providers:jar:1.0.0-SNAPSHOT:compile
+[INFO]    +- com.guidinglight:dh-knowledge:jar:1.0.0-SNAPSHOT:compile
+[INFO]    +- com.guidinglight:dh-memory:jar:1.0.0-SNAPSHOT:compile
+[INFO]    \- com.guidinglight:dh-connector:jar:1.0.0-SNAPSHOT:compile
+[INFO] 
+[INFO] ----------------------< com.guidinglight:dh-app >-----------------------
+[INFO] Building dh-app 1.0.0-SNAPSHOT                                   [18/19]
+[INFO]   from dh-app\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:tree (default-cli) @ dh-app ---
+[INFO] com.guidinglight:dh-app:jar:1.0.0-SNAPSHOT
+[INFO] +- org.springframework.boot:spring-boot-starter-actuator:jar:3.5.10:compile
+[INFO] |  +- org.springframework.boot:spring-boot-starter:jar:3.5.10:compile
+[INFO] |  |  +- org.springframework.boot:spring-boot:jar:3.5.10:compile
+[INFO] |  |  +- org.springframework.boot:spring-boot-autoconfigure:jar:3.5.10:compile
+[INFO] |  |  +- org.springframework.boot:spring-boot-starter-logging:jar:3.5.10:compile
+[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.25:compile
+[INFO] |  |  |  |  \- ch.qos.logback:logback-core:jar:1.5.25:compile
+[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.24.3:compile
+[INFO] |  |  |  |  \- org.apache.logging.log4j:log4j-api:jar:2.24.3:compile
+[INFO] |  |  |  \- org.slf4j:jul-to-slf4j:jar:2.0.17:compile
+[INFO] |  |  +- jakarta.annotation:jakarta.annotation-api:jar:2.1.1:compile
+[INFO] |  |  \- org.yaml:snakeyaml:jar:2.4:compile
+[INFO] |  +- org.springframework.boot:spring-boot-actuator-autoconfigure:jar:3.5.10:compile
+[INFO] |  |  \- org.springframework.boot:spring-boot-actuator:jar:3.5.10:compile
+[INFO] |  +- io.micrometer:micrometer-observation:jar:1.15.8:compile
+[INFO] |  |  \- io.micrometer:micrometer-commons:jar:1.15.8:compile
+[INFO] |  \- io.micrometer:micrometer-jakarta9:jar:1.15.8:compile
+[INFO] +- io.micrometer:micrometer-registry-prometheus:jar:1.15.8:compile
+[INFO] |  +- io.micrometer:micrometer-core:jar:1.15.8:compile
+[INFO] |  |  +- org.hdrhistogram:HdrHistogram:jar:2.2.2:runtime
+[INFO] |  |  \- org.latencyutils:LatencyUtils:jar:2.0.3:runtime
+[INFO] |  +- io.prometheus:prometheus-metrics-core:jar:1.3.10:compile
+[INFO] |  |  +- io.prometheus:prometheus-metrics-model:jar:1.3.10:compile
+[INFO] |  |  \- io.prometheus:prometheus-metrics-config:jar:1.3.10:compile
+[INFO] |  +- io.prometheus:prometheus-metrics-tracer-common:jar:1.3.10:compile
+[INFO] |  \- io.prometheus:prometheus-metrics-exposition-formats:jar:1.3.10:runtime
+[INFO] |     \- io.prometheus:prometheus-metrics-exposition-textformats:jar:1.3.10:runtime
+[INFO] +- org.springframework.boot:spring-boot-starter-data-jpa:jar:3.5.10:compile
+[INFO] |  +- org.springframework.boot:spring-boot-starter-jdbc:jar:3.5.10:compile
+[INFO] |  |  +- com.zaxxer:HikariCP:jar:6.3.3:compile
+[INFO] |  |  \- org.springframework:spring-jdbc:jar:6.2.15:compile
+[INFO] |  +- org.hibernate.orm:hibernate-core:jar:6.6.41.Final:compile
+[INFO] |  |  +- jakarta.persistence:jakarta.persistence-api:jar:3.1.0:compile
+[INFO] |  |  +- jakarta.transaction:jakarta.transaction-api:jar:2.0.1:compile
+[INFO] |  |  +- org.jboss.logging:jboss-logging:jar:3.6.1.Final:compile
+[INFO] |  |  +- org.hibernate.common:hibernate-commons-annotations:jar:7.0.3.Final:runtime
+[INFO] |  |  +- io.smallrye:jandex:jar:3.2.0:runtime
+[INFO] |  |  +- com.fasterxml:classmate:jar:1.7.3:compile
+[INFO] |  |  +- net.bytebuddy:byte-buddy:jar:1.17.8:runtime
+[INFO] |  |  +- org.glassfish.jaxb:jaxb-runtime:jar:4.0.6:runtime
+[INFO] |  |  |  \- org.glassfish.jaxb:jaxb-core:jar:4.0.6:runtime
+[INFO] |  |  |     +- org.eclipse.angus:angus-activation:jar:2.0.3:runtime
+[INFO] |  |  |     +- org.glassfish.jaxb:txw2:jar:4.0.6:runtime
+[INFO] |  |  |     \- com.sun.istack:istack-commons-runtime:jar:4.1.2:runtime
+[INFO] |  |  +- jakarta.inject:jakarta.inject-api:jar:2.0.1:runtime
+[INFO] |  |  \- org.antlr:antlr4-runtime:jar:4.13.0:compile
+[INFO] |  +- org.springframework.data:spring-data-jpa:jar:3.5.8:compile
+[INFO] |  |  +- org.springframework.data:spring-data-commons:jar:3.5.8:compile
+[INFO] |  |  +- org.springframework:spring-orm:jar:6.2.15:compile
+[INFO] |  |  +- org.springframework:spring-context:jar:6.2.15:compile
+[INFO] |  |  |  \- org.springframework:spring-expression:jar:6.2.15:compile
+[INFO] |  |  +- org.springframework:spring-aop:jar:6.2.15:compile
+[INFO] |  |  +- org.springframework:spring-tx:jar:6.2.15:compile
+[INFO] |  |  \- org.springframework:spring-beans:jar:6.2.15:compile
+[INFO] |  \- org.springframework:spring-aspects:jar:6.2.15:compile
+[INFO] |     \- org.aspectj:aspectjweaver:jar:1.9.25.1:compile
+[INFO] +- org.postgresql:postgresql:jar:42.7.9:compile
+[INFO] |  \- org.checkerframework:checker-qual:jar:3.52.0:runtime
+[INFO] +- org.flywaydb:flyway-core:jar:11.7.2:compile
+[INFO] |  +- com.fasterxml.jackson.dataformat:jackson-dataformat-toml:jar:2.17.2:compile
+[INFO] |  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+[INFO] |  \- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.17.2:compile
+[INFO] |     \- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+[INFO] +- org.springframework.boot:spring-boot-starter-data-redis:jar:3.5.10:compile
+[INFO] |  +- io.lettuce:lettuce-core:jar:6.6.0.RELEASE:compile
+[INFO] |  |  +- redis.clients.authentication:redis-authx-core:jar:0.1.1-beta2:compile
+[INFO] |  |  +- io.netty:netty-common:jar:4.1.130.Final:compile
+[INFO] |  |  +- io.netty:netty-handler:jar:4.1.130.Final:compile
+[INFO] |  |  |  +- io.netty:netty-resolver:jar:4.1.130.Final:compile
+[INFO] |  |  |  +- io.netty:netty-buffer:jar:4.1.130.Final:compile
+[INFO] |  |  |  +- io.netty:netty-transport-native-unix-common:jar:4.1.130.Final:compile
+[INFO] |  |  |  \- io.netty:netty-codec:jar:4.1.130.Final:compile
+[INFO] |  |  +- io.netty:netty-transport:jar:4.1.130.Final:compile
+[INFO] |  |  \- io.projectreactor:reactor-core:jar:3.7.15:compile
+[INFO] |  |     \- org.reactivestreams:reactive-streams:jar:1.0.4:compile
+[INFO] |  \- org.springframework.data:spring-data-redis:jar:3.5.8:compile
+[INFO] |     +- org.springframework.data:spring-data-keyvalue:jar:3.5.8:compile
+[INFO] |     +- org.springframework:spring-oxm:jar:6.2.15:compile
+[INFO] |     \- org.springframework:spring-context-support:jar:6.2.15:compile
+[INFO] +- com.guidinglight:dh-api:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- org.springframework.boot:spring-boot-starter-web:jar:3.5.10:compile
+[INFO] |  |  +- org.springframework.boot:spring-boot-starter-json:jar:3.5.10:compile
+[INFO] |  |  |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.17.2:compile
+[INFO] |  |  |  \- com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.17.2:compile
+[INFO] |  |  +- org.springframework.boot:spring-boot-starter-tomcat:jar:3.5.10:compile
+[INFO] |  |  |  +- org.apache.tomcat.embed:tomcat-embed-core:jar:10.1.50:compile
+[INFO] |  |  |  \- org.apache.tomcat.embed:tomcat-embed-websocket:jar:10.1.50:compile
+[INFO] |  |  +- org.springframework:spring-web:jar:6.2.15:compile
+[INFO] |  |  \- org.springframework:spring-webmvc:jar:6.2.15:compile
+[INFO] |  +- org.springframework.boot:spring-boot-starter-validation:jar:3.5.10:compile
+[INFO] |  |  +- org.apache.tomcat.embed:tomcat-embed-el:jar:10.1.50:compile
+[INFO] |  |  \- org.hibernate.validator:hibernate-validator:jar:8.0.3.Final:compile
+[INFO] |  |     \- jakarta.validation:jakarta.validation-api:jar:3.0.2:compile
+[INFO] |  +- com.guidinglight:dh-common:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  \- com.guidinglight:dh-usecase:jar:1.0.0-SNAPSHOT:compile
+[INFO] |     +- com.guidinglight:dh-providers:jar:1.0.0-SNAPSHOT:compile
+[INFO] |     +- com.guidinglight:dh-knowledge:jar:1.0.0-SNAPSHOT:compile
+[INFO] |     +- com.guidinglight:dh-memory:jar:1.0.0-SNAPSHOT:compile
+[INFO] |     \- com.guidinglight:dh-connector:jar:1.0.0-SNAPSHOT:compile
+[INFO] +- com.guidinglight:dh-infra:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.guidinglight:dh-domain:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  \- com.guidinglight:dh-ledger:jar:1.0.0-SNAPSHOT:compile
+[INFO] +- com.guidinglight:dh-observability:jar:1.0.0-SNAPSHOT:compile
+[INFO] +- com.guidinglight:dh-eval:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+[INFO] |  \- org.slf4j:slf4j-api:jar:2.0.17:compile
+[INFO] +- org.springframework.boot:spring-boot-starter-test:jar:3.5.10:test
+[INFO] |  +- org.springframework.boot:spring-boot-test:jar:3.5.10:test
+[INFO] |  +- org.springframework.boot:spring-boot-test-autoconfigure:jar:3.5.10:test
+[INFO] |  +- com.jayway.jsonpath:json-path:jar:2.9.0:test
+[INFO] |  +- jakarta.xml.bind:jakarta.xml.bind-api:jar:4.0.4:runtime
+[INFO] |  |  \- jakarta.activation:jakarta.activation-api:jar:2.1.4:runtime
+[INFO] |  +- net.minidev:json-smart:jar:2.5.2:test
+[INFO] |  |  \- net.minidev:accessors-smart:jar:2.5.2:test
+[INFO] |  |     \- org.ow2.asm:asm:jar:9.7.1:test
+[INFO] |  +- org.assertj:assertj-core:jar:3.27.6:test
+[INFO] |  +- org.awaitility:awaitility:jar:4.2.2:test
+[INFO] |  +- org.hamcrest:hamcrest:jar:3.0:test
+[INFO] |  +- org.junit.jupiter:junit-jupiter:jar:5.12.2:test
+[INFO] |  |  +- org.junit.jupiter:junit-jupiter-api:jar:5.12.2:test
+[INFO] |  |  |  +- org.opentest4j:opentest4j:jar:1.3.0:test
+[INFO] |  |  |  +- org.junit.platform:junit-platform-commons:jar:1.12.2:test
+[INFO] |  |  |  \- org.apiguardian:apiguardian-api:jar:1.1.2:test
+[INFO] |  |  +- org.junit.jupiter:junit-jupiter-params:jar:5.12.2:test
+[INFO] |  |  \- org.junit.jupiter:junit-jupiter-engine:jar:5.12.2:test
+[INFO] |  |     \- org.junit.platform:junit-platform-engine:jar:1.12.2:test
+[INFO] |  +- org.mockito:mockito-core:jar:5.17.0:test
+[INFO] |  |  +- net.bytebuddy:byte-buddy-agent:jar:1.17.8:test
+[INFO] |  |  \- org.objenesis:objenesis:jar:3.3:test
+[INFO] |  +- org.mockito:mockito-junit-jupiter:jar:5.17.0:test
+[INFO] |  +- org.skyscreamer:jsonassert:jar:1.5.3:test
+[INFO] |  |  \- com.vaadin.external.google:android-json:jar:0.0.20131108.vaadin1:test
+[INFO] |  +- org.springframework:spring-core:jar:6.2.15:compile
+[INFO] |  |  \- org.springframework:spring-jcl:jar:6.2.15:compile
+[INFO] |  +- org.springframework:spring-test:jar:6.2.15:test
+[INFO] |  \- org.xmlunit:xmlunit-core:jar:2.10.4:test
+[INFO] +- com.tngtech.archunit:archunit-junit5:jar:1.3.0:test
+[INFO] |  +- com.tngtech.archunit:archunit-junit5-api:jar:1.3.0:test
+[INFO] |  |  \- com.tngtech.archunit:archunit:jar:1.3.0:test
+[INFO] |  \- com.tngtech.archunit:archunit-junit5-engine:jar:1.3.0:test
+[INFO] |     \- com.tngtech.archunit:archunit-junit5-engine-api:jar:1.3.0:test
+[INFO] +- org.testcontainers:junit-jupiter:jar:1.20.4:test
+[INFO] |  \- org.testcontainers:testcontainers:jar:1.20.4:test
+[INFO] |     +- junit:junit:jar:4.13.2:test
+[INFO] |     |  \- org.hamcrest:hamcrest-core:jar:3.0:test
+[INFO] |     +- org.apache.commons:commons-compress:jar:1.24.0:test
+[INFO] |     +- org.rnorth.duct-tape:duct-tape:jar:1.0.8:test
+[INFO] |     |  \- org.jetbrains:annotations:jar:17.0.0:test
+[INFO] |     +- com.github.docker-java:docker-java-api:jar:3.4.0:test
+[INFO] |     \- com.github.docker-java:docker-java-transport-zerodep:jar:3.4.0:test
+[INFO] |        +- com.github.docker-java:docker-java-transport:jar:3.4.0:test
+[INFO] |        \- net.java.dev.jna:jna:jar:5.13.0:test
+[INFO] \- org.testcontainers:postgresql:jar:1.20.4:test
+[INFO]    \- org.testcontainers:jdbc:jar:1.20.4:test
+[INFO]       \- org.testcontainers:database-commons:jar:1.20.4:test
+[INFO] 
+[INFO] -------------------< com.guidinglight:decision-hub >--------------------
+[INFO] Building decision-hub 1.0.0-SNAPSHOT                             [19/19]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.7.0:tree (default-cli) @ decision-hub ---
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-sink-api/1.12.0/doxia-sink-api-1.12.0.pom
+Progress (1): 1.5 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-sink-api/1.12.0/doxia-sink-api-1.12.0.pom (1.5 kB at 3.0 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia/1.12.0/doxia-1.12.0.pom
+Progress (1): 7.3/18 kBProgress (1): 9.2/18 kBProgress (1): 18 kB                       Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia/1.12.0/doxia-1.12.0.pom (18 kB at 34 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-logging-api/1.12.0/doxia-logging-api-1.12.0.pom
+Progress (1): 1.5 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-logging-api/1.12.0/doxia-logging-api-1.12.0.pom (1.5 kB at 2.5 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-dependency-analyzer/1.14.1/maven-dependency-analyzer-1.14.1.pom
+Progress (1): 3.4/6.4 kBProgress (1): 6.4 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-dependency-analyzer/1.14.1/maven-dependency-analyzer-1.14.1.pom (6.4 kB at 13 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/assertj/assertj-bom/3.25.3/assertj-bom-3.25.3.pom
+Progress (1): 1.9/3.7 kBProgress (1): 3.7 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/assertj/assertj-bom/3.25.3/assertj-bom-3.25.3.pom (3.7 kB at 7.6 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-common-artifact-filters/3.3.2/maven-common-artifact-filters-3.3.2.pom
+Progress (1): 5.3 kB                    Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-common-artifact-filters/3.3.2/maven-common-artifact-filters-3.3.2.pom (5.3 kB at 11 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-shared-components/37/maven-shared-components-37.pom
+Progress (1): 4.8/4.9 kBProgress (1): 4.9 kB                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-shared-components/37/maven-shared-components-37.pom (4.9 kB at 10 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/maven-parent/37/maven-parent-37.pom
+Progress (1): 3.4/46 kBProgress (1): 20/46 kB Progress (1): 36/46 kBProgress (1): 46 kB                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/maven-parent/37/maven-parent-37.pom (46 kB at 94 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-sink-api/1.12.0/doxia-sink-api-1.12.0.jar
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-logging-api/1.12.0/doxia-logging-api-1.12.0.jar
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/reporting/maven-reporting-api/3.1.1/maven-reporting-api-3.1.1.jar
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/reporting/maven-reporting-impl/3.2.0/maven-reporting-impl-3.2.0.jar
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-decoration-model/1.11.1/doxia-decoration-model-1.11.1.jar
+Progress (1): 1.9/60 kBProgress (1): 18/60 kB Progress (1): 35/60 kBProgress (2): 35/60 kB | 1.9/20 kBProgress (2): 35/60 kB | 18/20 kB Progress (2): 35/60 kB | 20 kB   Progress (2): 51/60 kB | 20 kBProgress (2): 53/60 kB | 20 kBProgress (2): 60 kB | 20 kB   Progress (3): 60 kB | 20 kB | 3.4/12 kBProgress (3): 60 kB | 20 kB | 12 kB    Progress (4): 60 kB | 20 kB | 12 kB | 3.4/11 kBProgress (4): 60 kB | 20 kB | 12 kB | 11 kB                                               Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-decoration-model/1.11.1/doxia-decoration-model-1.11.1.jar (60 kB at 478 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-core/1.11.1/doxia-core-1.11.1.jar
+Progress (4): 20 kB | 12 kB | 11 kB | 3.4/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 20/218 kB Progress (4): 20 kB | 12 kB | 11 kB | 36/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 53/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 69/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 85/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 102/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 118/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 134/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 151/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 167/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 184/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 200/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 216/218 kBProgress (4): 20 kB | 12 kB | 11 kB | 218 kB    Progress (5): 20 kB | 12 kB | 11 kB | 218 kB | 1.9/12 kBProgress (5): 20 kB | 12 kB | 11 kB | 218 kB | 12 kB                                                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-core/1.11.1/doxia-core-1.11.1.jar (218 kB at 793 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar
+Progress (5): 20 kB | 12 kB | 11 kB | 12 kB | 7.3/502 kBProgress (5): 20 kB | 12 kB | 11 kB | 12 kB | 11/502 kB                                                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-logging-api/1.12.0/doxia-logging-api-1.12.0.jar (12 kB at 36 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/httpcomponents/httpcore/4.4.14/httpcore-4.4.14.jar
+Progress (4): 20 kB | 11 kB | 12 kB | 27/502 kBProgress (4): 20 kB | 11 kB | 12 kB | 43/502 kBProgress (4): 20 kB | 11 kB | 12 kB | 60/502 kBProgress (4): 20 kB | 11 kB | 12 kB | 76/502 kBProgress (4): 20 kB | 11 kB | 12 kB | 93/502 kB                                               Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/reporting/maven-reporting-api/3.1.1/maven-reporting-api-3.1.1.jar (11 kB at 32 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-integration-tools/1.11.1/doxia-integration-tools-1.11.1.jar
+Progress (3): 20 kB | 12 kB | 109/502 kBProgress (3): 20 kB | 12 kB | 125/502 kBProgress (3): 20 kB | 12 kB | 142/502 kBProgress (3): 20 kB | 12 kB | 158/502 kBProgress (3): 20 kB | 12 kB | 175/502 kBProgress (3): 20 kB | 12 kB | 191/502 kBProgress (3): 20 kB | 12 kB | 207/502 kBProgress (3): 20 kB | 12 kB | 224/502 kBProgress (3): 20 kB | 12 kB | 240/502 kBProgress (3): 20 kB | 12 kB | 256/502 kBProgress (3): 20 kB | 12 kB | 273/502 kBProgress (3): 20 kB | 12 kB | 289/502 kBProgress (3): 20 kB | 12 kB | 306/502 kBProgress (3): 20 kB | 12 kB | 322/502 kBProgress (3): 20 kB | 12 kB | 338/502 kBProgress (3): 20 kB | 12 kB | 355/502 kBProgress (3): 20 kB | 12 kB | 371/502 kBProgress (3): 20 kB | 12 kB | 388/502 kB                                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/reporting/maven-reporting-impl/3.2.0/maven-reporting-impl-3.2.0.jar (20 kB at 59 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-site-renderer/1.11.1/doxia-site-renderer-1.11.1.jar
+Progress (2): 12 kB | 404/502 kBProgress (2): 12 kB | 420/502 kBProgress (2): 12 kB | 437/502 kBProgress (2): 12 kB | 453/502 kBProgress (2): 12 kB | 469/502 kBProgress (2): 12 kB | 486/502 kBProgress (2): 12 kB | 502 kB    Progress (3): 12 kB | 502 kB | 1.9/328 kBProgress (3): 12 kB | 502 kB | 18/328 kB Progress (3): 12 kB | 502 kB | 28/328 kBProgress (3): 12 kB | 502 kB | 45/328 kBProgress (3): 12 kB | 502 kB | 60/328 kBProgress (3): 12 kB | 502 kB | 77/328 kBProgress (3): 12 kB | 502 kB | 93/328 kBProgress (3): 12 kB | 502 kB | 109/328 kBProgress (3): 12 kB | 502 kB | 126/328 kBProgress (4): 12 kB | 502 kB | 126/328 kB | 7.3/47 kBProgress (4): 12 kB | 502 kB | 126/328 kB | 15/47 kB Progress (4): 12 kB | 502 kB | 126/328 kB | 32/47 kBProgress (4): 12 kB | 502 kB | 126/328 kB | 47 kB   Progress (4): 12 kB | 502 kB | 142/328 kB | 47 kBProgress (4): 12 kB | 502 kB | 159/328 kB | 47 kBProgress (4): 12 kB | 502 kB | 175/328 kB | 47 kBProgress (4): 12 kB | 502 kB | 191/328 kB | 47 kBProgress (4): 12 kB | 502 kB | 208/328 kB | 47 kBProgress (5): 12 kB | 502 kB | 208/328 kB | 47 kB | 6.3/65 kBProgress (5): 12 kB | 502 kB | 208/328 kB | 47 kB | 9.2/65 kBProgress (5): 12 kB | 502 kB | 208/328 kB | 47 kB | 14/65 kB Progress (5): 12 kB | 502 kB | 224/328 kB | 47 kB | 14/65 kBProgress (5): 12 kB | 502 kB | 224/328 kB | 47 kB | 30/65 kBProgress (5): 12 kB | 502 kB | 224/328 kB | 47 kB | 33/65 kBProgress (5): 12 kB | 502 kB | 241/328 kB | 47 kB | 33/65 kBProgress (5): 12 kB | 502 kB | 241/328 kB | 47 kB | 36/65 kBProgress (5): 12 kB | 502 kB | 241/328 kB | 47 kB | 41/65 kBProgress (5): 12 kB | 502 kB | 257/328 kB | 47 kB | 41/65 kBProgress (5): 12 kB | 502 kB | 257/328 kB | 47 kB | 58/65 kBProgress (5): 12 kB | 502 kB | 257/328 kB | 47 kB | 59/65 kBProgress (5): 12 kB | 502 kB | 273/328 kB | 47 kB | 59/65 kBProgress (5): 12 kB | 502 kB | 273/328 kB | 47 kB | 65/65 kBProgress (5): 12 kB | 502 kB | 273/328 kB | 47 kB | 65 kB   Progress (5): 12 kB | 502 kB | 290/328 kB | 47 kB | 65 kBProgress (5): 12 kB | 502 kB | 306/328 kB | 47 kB | 65 kBProgress (5): 12 kB | 502 kB | 322/328 kB | 47 kB | 65 kBProgress (5): 12 kB | 502 kB | 328 kB | 47 kB | 65 kB                                                         Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar (502 kB at 1.1 MB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-skin-model/1.11.1/doxia-skin-model-1.11.1.jar
+Progress (5): 12 kB | 328 kB | 47 kB | 65 kB | 1.9/16 kBProgress (5): 12 kB | 328 kB | 47 kB | 65 kB | 16 kB                                                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/httpcomponents/httpcore/4.4.14/httpcore-4.4.14.jar (328 kB at 684 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-xhtml/1.11.1/doxia-module-xhtml-1.11.1.jar
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-site-renderer/1.11.1/doxia-site-renderer-1.11.1.jar (65 kB at 135 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-xhtml5/1.11.1/doxia-module-xhtml5-1.11.1.jar
+Progress (4): 12 kB | 47 kB | 16 kB | 7.3/17 kBProgress (4): 12 kB | 47 kB | 16 kB | 16/17 kB Progress (4): 12 kB | 47 kB | 16 kB | 17 kB   Progress (5): 12 kB | 47 kB | 16 kB | 17 kB | 7.3/18 kBProgress (5): 12 kB | 47 kB | 16 kB | 17 kB | 16/18 kB Progress (5): 12 kB | 47 kB | 16 kB | 17 kB | 18 kB                                                      Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-sink-api/1.12.0/doxia-sink-api-1.12.0.jar (12 kB at 15 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-velocity/1.2/plexus-velocity-1.2.jar
+Progress (5): 47 kB | 16 kB | 17 kB | 18 kB | 1.9/8.1 kBProgress (5): 47 kB | 16 kB | 17 kB | 18 kB | 8.1 kB                                                        Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-xhtml/1.11.1/doxia-module-xhtml-1.11.1.jar (17 kB at 17 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity/1.7/velocity-1.7.jar
+Progress (5): 47 kB | 16 kB | 18 kB | 8.1 kB | 1.9/450 kBProgress (5): 47 kB | 16 kB | 18 kB | 8.1 kB | 18/450 kB                                                         Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-skin-model/1.11.1/doxia-skin-model-1.11.1.jar (16 kB at 16 kB/s)
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-module-xhtml5/1.11.1/doxia-module-xhtml5-1.11.1.jar (18 kB at 17 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/commons-lang/commons-lang/2.4/commons-lang-2.4.jar
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-tools/2.0/velocity-tools-2.0.jar
+Progress (3): 47 kB | 8.1 kB | 35/450 kBProgress (3): 47 kB | 8.1 kB | 51/450 kBProgress (3): 47 kB | 8.1 kB | 67/450 kBProgress (3): 47 kB | 8.1 kB | 84/450 kBProgress (3): 47 kB | 8.1 kB | 100/450 kBProgress (3): 47 kB | 8.1 kB | 117/450 kBProgress (3): 47 kB | 8.1 kB | 133/450 kBProgress (3): 47 kB | 8.1 kB | 149/450 kBProgress (3): 47 kB | 8.1 kB | 149/450 kBProgress (3): 47 kB | 8.1 kB | 154/450 kBProgress (3): 47 kB | 8.1 kB | 161/450 kBProgress (3): 47 kB | 8.1 kB | 164/450 kBProgress (3): 47 kB | 8.1 kB | 173/450 kBProgress (3): 47 kB | 8.1 kB | 184/450 kBProgress (3): 47 kB | 8.1 kB | 187/450 kBProgress (3): 47 kB | 8.1 kB | 196/450 kBProgress (3): 47 kB | 8.1 kB | 199/450 kBProgress (3): 47 kB | 8.1 kB | 208/450 kBProgress (3): 47 kB | 8.1 kB | 211/450 kBProgress (3): 47 kB | 8.1 kB | 219/450 kBProgress (3): 47 kB | 8.1 kB | 222/450 kBProgress (3): 47 kB | 8.1 kB | 231/450 kBProgress (3): 47 kB | 8.1 kB | 234/450 kBProgress (3): 47 kB | 8.1 kB | 243/450 kBProgress (3): 47 kB | 8.1 kB | 246/450 kBProgress (3): 47 kB | 8.1 kB | 255/450 kBProgress (3): 47 kB | 8.1 kB | 257/450 kBProgress (3): 47 kB | 8.1 kB | 266/450 kBProgress (3): 47 kB | 8.1 kB | 272/450 kBProgress (3): 47 kB | 8.1 kB | 278/450 kBProgress (3): 47 kB | 8.1 kB | 281/450 kBProgress (3): 47 kB | 8.1 kB | 290/450 kBProgress (3): 47 kB | 8.1 kB | 295/450 kBProgress (3): 47 kB | 8.1 kB | 301/450 kBProgress (3): 47 kB | 8.1 kB | 304/450 kBProgress (3): 47 kB | 8.1 kB | 313/450 kBProgress (3): 47 kB | 8.1 kB | 316/450 kBProgress (3): 47 kB | 8.1 kB | 325/450 kBProgress (3): 47 kB | 8.1 kB | 328/450 kBProgress (3): 47 kB | 8.1 kB | 336/450 kBProgress (3): 47 kB | 8.1 kB | 339/450 kBProgress (3): 47 kB | 8.1 kB | 348/450 kBProgress (3): 47 kB | 8.1 kB | 351/450 kBProgress (3): 47 kB | 8.1 kB | 360/450 kBProgress (3): 47 kB | 8.1 kB | 363/450 kBProgress (3): 47 kB | 8.1 kB | 371/450 kBProgress (3): 47 kB | 8.1 kB | 383/450 kBProgress (3): 47 kB | 8.1 kB | 387/450 kBProgress (3): 47 kB | 8.1 kB | 389/450 kBProgress (3): 47 kB | 8.1 kB | 393/450 kBProgress (3): 47 kB | 8.1 kB | 396/450 kBProgress (3): 47 kB | 8.1 kB | 405/450 kBProgress (4): 47 kB | 8.1 kB | 405/450 kB | 7.3/262 kBProgress (4): 47 kB | 8.1 kB | 408/450 kB | 7.3/262 kBProgress (4): 47 kB | 8.1 kB | 408/450 kB | 16/262 kB Progress (4): 47 kB | 8.1 kB | 417/450 kB | 16/262 kBProgress (4): 47 kB | 8.1 kB | 419/450 kB | 16/262 kBProgress (4): 47 kB | 8.1 kB | 427/450 kB | 16/262 kBProgress (4): 47 kB | 8.1 kB | 430/450 kB | 16/262 kBProgress (4): 47 kB | 8.1 kB | 430/450 kB | 32/262 kBProgress (4): 47 kB | 8.1 kB | 430/450 kB | 48/262 kBProgress (4): 47 kB | 8.1 kB | 430/450 kB | 65/262 kBProgress (4): 47 kB | 8.1 kB | 430/450 kB | 81/262 kBProgress (4): 47 kB | 8.1 kB | 430/450 kB | 97/262 kBProgress (4): 47 kB | 8.1 kB | 430/450 kB | 114/262 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 114/262 kB | 1.9/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 130/262 kB | 1.9/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 130/262 kB | 18/347 kB Progress (5): 47 kB | 8.1 kB | 430/450 kB | 146/262 kB | 18/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 146/262 kB | 35/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 163/262 kB | 35/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 179/262 kB | 35/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 179/262 kB | 51/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 196/262 kB | 51/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 196/262 kB | 67/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 212/262 kB | 67/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 212/262 kB | 84/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 228/262 kB | 84/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 228/262 kB | 100/347 kBProgress (5): 47 kB | 8.1 kB | 430/450 kB | 245/262 kB | 100/347 kBProgress (5): 47 kB | 8.1 kB | 438/450 kB | 245/262 kB | 100/347 kBProgress (5): 47 kB | 8.1 kB | 438/450 kB | 261/262 kB | 100/347 kBProgress (5): 47 kB | 8.1 kB | 438/450 kB | 262 kB | 100/347 kB    Progress (5): 47 kB | 8.1 kB | 438/450 kB | 262 kB | 117/347 kBProgress (5): 47 kB | 8.1 kB | 438/450 kB | 262 kB | 133/347 kBProgress (5): 47 kB | 8.1 kB | 438/450 kB | 262 kB | 149/347 kBProgress (5): 47 kB | 8.1 kB | 438/450 kB | 262 kB | 166/347 kBProgress (5): 47 kB | 8.1 kB | 441/450 kB | 262 kB | 166/347 kBProgress (5): 47 kB | 8.1 kB | 444/450 kB | 262 kB | 166/347 kBProgress (5): 47 kB | 8.1 kB | 449/450 kB | 262 kB | 166/347 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 166/347 kB    Progress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 182/347 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 199/347 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 215/347 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 231/347 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 248/347 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 264/347 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 280/347 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 297/347 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 313/347 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 330/347 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 346/347 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 262 kB | 347 kB                                                           Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/commons-lang/commons-lang/2.4/commons-lang-2.4.jar (262 kB at 223 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/commons-digester/commons-digester/1.8/commons-digester-1.8.jar
+Progress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 0.5/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 17/144 kB Progress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 22/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 39/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 50/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 66/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 68/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 79/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 87/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 90/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 92/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 95/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 98/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 101/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 104/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 106/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 110/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 122/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 138/144 kBProgress (5): 47 kB | 8.1 kB | 450 kB | 347 kB | 144 kB                                                           Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/codehaus/plexus/plexus-velocity/1.2/plexus-velocity-1.2.jar (8.1 kB at 6.5 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/commons-chain/commons-chain/1.1/commons-chain-1.1.jar
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity/1.7/velocity-1.7.jar (450 kB at 360 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/dom4j/dom4j/1.1/dom4j-1.1.jar
+Progress (4): 47 kB | 347 kB | 144 kB | 7.3/90 kBProgress (4): 47 kB | 347 kB | 144 kB | 15/90 kB Progress (4): 47 kB | 347 kB | 144 kB | 32/90 kB                                                Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/velocity/velocity-tools/2.0/velocity-tools-2.0.jar (347 kB at 267 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-dependency-analyzer/1.14.1/maven-dependency-analyzer-1.14.1.jar
+Progress (3): 47 kB | 144 kB | 48/90 kBProgress (3): 47 kB | 144 kB | 65/90 kBProgress (3): 47 kB | 144 kB | 81/90 kBProgress (3): 47 kB | 144 kB | 90 kB   Progress (4): 47 kB | 144 kB | 90 kB | 1.9/42 kBProgress (4): 47 kB | 144 kB | 90 kB | 18/42 kB Progress (4): 47 kB | 144 kB | 90 kB | 35/42 kBProgress (4): 47 kB | 144 kB | 90 kB | 42 kB   Progress (5): 47 kB | 144 kB | 90 kB | 42 kB | 6.3/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 23/457 kB Progress (5): 47 kB | 144 kB | 90 kB | 42 kB | 24/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 37/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 49/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 65/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 72/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 82/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 87/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 90/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 100/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 116/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 133/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 149/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 165/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 182/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 198/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 214/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 231/457 kBProgress (5): 47 kB | 144 kB | 90 kB | 42 kB | 247/457 kB                                                         Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/commons-chain/commons-chain/1.1/commons-chain-1.1.jar (90 kB at 60 kB/s)
+Downloading from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-common-artifact-filters/3.3.2/maven-common-artifact-filters-3.3.2.jar
+Progress (4): 47 kB | 144 kB | 42 kB | 264/457 kBProgress (4): 47 kB | 144 kB | 42 kB | 280/457 kBProgress (4): 47 kB | 144 kB | 42 kB | 296/457 kBProgress (4): 47 kB | 144 kB | 42 kB | 313/457 kBProgress (4): 47 kB | 144 kB | 42 kB | 329/457 kBProgress (4): 47 kB | 144 kB | 42 kB | 346/457 kBProgress (4): 47 kB | 144 kB | 42 kB | 362/457 kBProgress (4): 47 kB | 144 kB | 42 kB | 378/457 kBProgress (4): 47 kB | 144 kB | 42 kB | 395/457 kBProgress (4): 47 kB | 144 kB | 42 kB | 411/457 kBProgress (4): 47 kB | 144 kB | 42 kB | 427/457 kBProgress (4): 47 kB | 144 kB | 42 kB | 444/457 kBProgress (4): 47 kB | 144 kB | 42 kB | 457 kB                                                 Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/commons-digester/commons-digester/1.8/commons-digester-1.8.jar (144 kB at 94 kB/s)
+Progress (4): 47 kB | 42 kB | 457 kB | 1.9/58 kBProgress (4): 47 kB | 42 kB | 457 kB | 18/58 kB Progress (4): 47 kB | 42 kB | 457 kB | 21/58 kBProgress (4): 47 kB | 42 kB | 457 kB | 37/58 kBProgress (4): 47 kB | 42 kB | 457 kB | 38/58 kBProgress (4): 47 kB | 42 kB | 457 kB | 46/58 kBProgress (4): 47 kB | 42 kB | 457 kB | 49/58 kBProgress (4): 47 kB | 42 kB | 457 kB | 56/58 kBProgress (4): 47 kB | 42 kB | 457 kB | 58 kB                                               Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/dom4j/dom4j/1.1/dom4j-1.1.jar (457 kB at 229 kB/s)
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-common-artifact-filters/3.3.2/maven-common-artifact-filters-3.3.2.jar (58 kB at 29 kB/s)
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/doxia/doxia-integration-tools/1.11.1/doxia-integration-tools-1.11.1.jar (47 kB at 17 kB/s)
+Downloaded from aliyun-maven: https://maven.aliyun.com/repository/public/org/apache/maven/shared/maven-dependency-analyzer/1.14.1/maven-dependency-analyzer-1.14.1.jar (42 kB at 12 kB/s)
+[INFO] com.guidinglight:decision-hub:pom:1.0.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for decision-hub 1.0.0-SNAPSHOT:
+[INFO] 
+[INFO] dh-bom ............................................. SUCCESS [ 26.255 s]
+[INFO] dh-common .......................................... SUCCESS [  0.100 s]
+[INFO] dh-observability ................................... SUCCESS [  0.065 s]
+[INFO] dh-domain .......................................... SUCCESS [  0.087 s]
+[INFO] dh-ledger .......................................... SUCCESS [  0.053 s]
+[INFO] dh-providers ....................................... SUCCESS [  0.045 s]
+[INFO] dh-connector ....................................... SUCCESS [  0.069 s]
+[INFO] dh-knowledge ....................................... SUCCESS [  0.052 s]
+[INFO] dh-memory .......................................... SUCCESS [  0.060 s]
+[INFO] dh-usecase ......................................... SUCCESS [  0.107 s]
+[INFO] dh-infra ........................................... SUCCESS [  0.352 s]
+[INFO] dh-security ........................................ SUCCESS [  0.031 s]
+[INFO] dh-eval ............................................ SUCCESS [  0.051 s]
+[INFO] dh-scheduler ....................................... SUCCESS [  0.041 s]
+[INFO] dh-config .......................................... SUCCESS [  0.030 s]
+[INFO] dh-sdk ............................................. SUCCESS [  0.056 s]
+[INFO] dh-api ............................................. SUCCESS [  0.107 s]
+[INFO] dh-app ............................................. SUCCESS [  0.524 s]
+[INFO] decision-hub ....................................... SUCCESS [ 11.301 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:42 min
+[INFO] Finished at: 2026-05-25T14:12:02+08:00
+[INFO] ------------------------------------------------------------------------

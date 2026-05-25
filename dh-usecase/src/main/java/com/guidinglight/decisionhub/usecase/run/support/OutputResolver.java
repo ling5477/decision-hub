@@ -3,6 +3,8 @@ package com.guidinglight.decisionhub.usecase.run.support;
 import java.util.List;
 import java.util.Map;
 
+/** @deprecated Stage1-CLOSE：旧多模型平台 DecisionRecord 字段解析器。 */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public final class OutputResolver {
     private OutputResolver() {}
 

@@ -78,12 +78,12 @@ docs/current/TESTING.md
 ## 4. 当前阶段
 
 ```text
-Current stage: DH-REFIT-1-PLAN completed
-Next stage: DH-REFIT-1-WO
+Current stage: Stage2-PoC PLAN completed
+Next stage:    Stage2-PoC WO
 Source of truth: docs/current
 ```
 
-下一步只能做 Agent Runtime Skeleton 的第一批实现，不允许夹带交易执行能力。
+下一步只能进入 Stage2-PoC WO，不允许夹带交易执行能力。
 
 ## 5. 硬边界
 

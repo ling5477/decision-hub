@@ -2,6 +2,8 @@ package com.guidinglight.decisionhub.usecase.contract;
 
 import java.util.Map;
 
+/** @deprecated Stage1-CLOSE：旧决策请求 DTO。 */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class DecisionRequest {
     private Map<String, Object> decisionRecord;
 

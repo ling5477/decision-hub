@@ -5,7 +5,10 @@ import java.util.*;
 /**
  * v1：轻量工具，不依赖你现有 util，避免循环依赖。
  * 如果你更喜欢复用 dh-common 的 OutputResolver，可把这里替换掉。
+ *
+ * @deprecated Stage1-CLOSE：旧 Gate 评估器内部工具。
  */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public final class OutputResolverV1 {
     private OutputResolverV1() {}
 

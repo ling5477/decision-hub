@@ -9,8 +9,8 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-Current stage: DH-REFIT-1-PLAN completed
-Next stage: DH-REFIT-1-WO
+Current stage: Stage2-PoC PLAN completed
+Next stage:    Stage2-PoC WO
 Source of truth: docs/current
 ```
 
@@ -31,15 +31,16 @@ docs/current/ROADMAP.md
 docs/current/WORKFLOW.md
 docs/current/WORK_ORDER.md
 docs/current/DH_NQ_INTEGRATION.md
-docs/current/DH_REFACTOR_STAGE1_WORK_ORDER.md
+docs/current/DH_REFACTOR_STAGE1_STATUS.md
+docs/current/STAGE1_CLOSE_WORKLOG.md
 ```
 
 ## 文档结构
 
 ```text
 docs/current/      当前事实源
-docs/gates/        历史阶段快照
-docs/codex/        历史计划与辅助执行区
+docs/gates/        历史阶段快照（Stage1 冻结后归档）
+docs/codex/        当前活跃计划（plans/_active/） + 历史归档（plans/_archive/）
 contracts/         对外协议、Schema、事件契约
 golden_cases/      黄金样例与回归用例
 ```
@@ -64,13 +65,13 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-DH-REFIT-1-WO
+Stage2-PoC：NQ 真实事件回流接通 + Kronos/global-stock-data 工具接口预留
 ```
 
 ## 构建与验证
 
 ```bash
-mvn test
+mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false
 ```
 
 质量检查：

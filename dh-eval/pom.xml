@@ -5,8 +5,9 @@
 
   <parent>
     <groupId>com.guidinglight</groupId>
-    <artifactId>decision-hub</artifactId>
+    <artifactId>dh-bom</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../dh-bom/pom.xml</relativePath>
   </parent>
 
   <artifactId>dh-eval</artifactId>

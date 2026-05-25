@@ -9,7 +9,11 @@ import java.util.UUID;
 
 /**
  * v1 最小可跑实现：用于 golden 回归闭环。
+ *
+ * @deprecated Stage1-CLOSE：与 DecisionHubFacade 一起退役；新链路通过
+ *     {@code DefaultResearchRunCommandService} 提供 create/start。
  */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class DecisionHubFacadeImpl implements DecisionHubFacade {
 
     @Override

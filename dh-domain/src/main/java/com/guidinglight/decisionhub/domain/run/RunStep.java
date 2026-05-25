@@ -2,6 +2,11 @@ package com.guidinglight.decisionhub.domain.run;
 
 import java.time.Instant;
 
+/**
+ * @deprecated Stage1-CLOSE：旧 Run 内步骤；新链路使用
+ *     {@link com.guidinglight.decisionhub.domain.agent.TaskNode}。
+ */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class RunStep {
   private final String stepId;
   private final StepType type;

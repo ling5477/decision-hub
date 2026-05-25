@@ -12,7 +12,11 @@ import java.util.stream.Collectors;
  * - 策略：hybrid（rule_based -> weighted_vote -> majority_vote）
  *
  * 注意：该类是“骨架”，你可以把真正的模型调用/评估器执行/配置加载放到外层服务里。
+ *
+ * @deprecated Stage1-CLOSE：旧多模型平台决策引擎，新链路使用
+ *     {@link com.guidinglight.decisionhub.usecase.agent.JudgeDecisionService}。
  */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class DecisionEngineV1 {
 
     public static List<String> REQUIRED_GATE = Arrays.asList("constraint", "consistency");

@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/** @deprecated Stage1-CLOSE：旧多模型平台决策契约。 */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class DecisionOutcome {
     private TargetRef selected;
     private double confidence;

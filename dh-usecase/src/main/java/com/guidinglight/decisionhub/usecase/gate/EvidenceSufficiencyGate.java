@@ -4,6 +4,8 @@ import com.guidinglight.decisionhub.domain.run.Run;
 
 import java.util.Map;
 
+/** @deprecated Stage1-CLOSE：旧多模型平台 Gate。 */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class EvidenceSufficiencyGate implements Gate {
 
   @Override

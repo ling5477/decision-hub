@@ -2,6 +2,8 @@ package com.guidinglight.decisionhub.usecase.contract;
 
 import java.util.Map;
 
+/** @deprecated Stage1-CLOSE：旧 Evaluator 输入 DTO。 */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class EvalRequest {
     private String evaluator;
     private TargetRef target;

@@ -1,5 +1,7 @@
 package com.guidinglight.decisionhub.usecase.contract;
 
+/** @deprecated Stage1-CLOSE：旧多模型平台 TargetRef。 */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class TargetRef {
     private String type; // model_run | final_decision | aggregate
     private String ref;

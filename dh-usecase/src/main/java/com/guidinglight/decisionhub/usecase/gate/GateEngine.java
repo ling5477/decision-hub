@@ -3,6 +3,8 @@ package com.guidinglight.decisionhub.usecase.gate;
 import java.util.ArrayList;
 import java.util.List;
 
+/** @deprecated Stage1-CLOSE：旧 Gate 引擎；新链路由 JudgeDecisionService 聚合评分。 */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class GateEngine {
 
   private final List<Gate> gates = new ArrayList<>();

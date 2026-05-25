@@ -7,7 +7,10 @@ import java.util.regex.Pattern;
  * v1 规则版：ConstraintEvaluator
  * - language/no_web/output_format/must_include/must_not_include
  * - 约束违反 => passed=false（硬门槛）
+ *
+ * @deprecated Stage1-CLOSE：旧 Gate 评估器。
  */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class ConstraintEvaluatorV1 {
 
     @SuppressWarnings("unchecked")

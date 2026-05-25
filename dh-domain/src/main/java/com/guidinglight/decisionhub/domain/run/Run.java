@@ -8,6 +8,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @deprecated Stage1-CLOSE：旧多模型平台 Run 模型，已被 {@link com.guidinglight.decisionhub.domain.research.ResearchRun} 取代。
+ *     保留仅为兼容 V1 schema，不要在新代码中使用。
+ */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 public class Run {
 
   private final String runId;

@@ -6,7 +6,11 @@ import java.util.Map;
 
 /**
  * 创建 Run 的输入参数。
+ *
+ * @deprecated Stage1-CLOSE：旧多模型平台 DTO，新链路使用
+ *     {@code dh-api} 的 {@code CreateResearchRunRequest}。
  */
+@Deprecated(since = "Stage1-CLOSE", forRemoval = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RunCreateCommand {
 

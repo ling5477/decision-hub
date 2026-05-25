@@ -39,6 +39,153 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 未建设前端页面
 ```
 
+---
+
+## 2026-05-25 Stage1（Boundary Freeze + Agent Runtime Skeleton）
+
+详细记录见 `docs/current/DH_REFACTOR_STAGE1_WORKLOG.md`。本节为顶层小结。
+
+### 已完成
+
+```text
+dh-domain  新增 ResearchRun / AgentTask / TaskNode / AgentRole / AgentArtifact /
+           StrategyCandidate / SignalProposal / RiskReview / JudgeDecision /
+           DecisionRecommendation / ExperienceEntry / PheromoneEdge /
+           NqFeedbackEvent + 5 个状态枚举
+dh-memory  ExperienceStore / PheromoneStore / FailureCaseStore /
+           MarketRegimeMemory / StrategyPatternMemory + InMemory 实现
+dh-eval    CandidateScorer / RiskHeuristicScorer / EvidenceQualityScorer /
+           BacktestResultScorer / JudgeAggregator + 规则实现
+dh-connector NqBacktestClient / NqFeedbackClient / NqStrategyCandidateMapper /
+             NqContractVerifier + Fake/Default 实现
+dh-usecase agent runtime 8 个 service + 6 个 repository 端口 + 默认实现 + InMemory 仓储
+dh-api     /api/ai/research-runs/...（POST/GET/start/tasks/candidates/judge-decision）
+           /api/ai/feedback/nq
+dh-app     AgentRuntimeWiringConfig
+db/migration V2__dh_agent_runtime.sql（10 张表，全部带 trace_id / status / payload_json）
+test       dh-usecase 新增 ResearchRunStage1ClosedLoopTest，覆盖
+           create → start → candidate → judge → NQ feedback → experience 闭环
+```
+
+### 验收
+
+```text
+mvn -pl dh-domain,dh-memory,dh-eval,dh-connector,dh-usecase -am clean test  BUILD SUCCESS
+mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false  BUILD SUCCESS
+仅 dh-app/PostgresContainerSmokeTest 因当前环境无 Docker 而跳过（与本次改动无关）
+```
+
+---
+
+## 2026-05-25 Stage1-CLOSE（旧链路收敛 + 文档单源 + ArchUnit 兜底）
+
+详细记录见 `docs/current/STAGE1_CLOSE_WORKLOG.md`。本节为顶层小结。
+
+### 已完成
+
+```text
+旧"多模型平台"链路整体 @Deprecated(since="Stage1-CLOSE", forRemoval=true)：
+  - domain.run.{Run,RunStatus,RunStep,StepType}
+  - usecase.facade.* + impl + dto
+  - usecase.run.* + support.*
+  - usecase.gate.* + evaluator.*
+  - usecase.contract.*
+  - dh-providers.{ModelProvider,MockProvider,ModelOutput,ProviderRegistry}
+  - dh-app/AppWiringConfig（旧 bean）
+
+api.run.RunController 迁移到 api.legacy.run 子包，@RequestMapping 从 /runs 改为 /legacy/runs；
+同步 CreateRunRequest / RunView 迁移。
+
+contracts/openapi.yaml 中 /runs 路径迁到 /legacy/runs 并标 deprecated。
+
+文档单源：根 README + docs/current/{README,STATUS,ROADMAP,WORKLOG,WORK_ORDER,TESTING}.md
+全部更新为 "Stage1 completed / Next: Stage2-PoC"。
+
+docs/codex/plans/_active/STATUS.json 切到 2026-05-25_Stage1_agent_runtime_skeleton；
+老 M1 mock-provider 计划归档到 docs/codex/plans/_archive/2026-02-04_M1/。
+
+ArchitectureTest 新增 4 条规则：
+  ① ..domain.. 不依赖 ..usecase.. / ..api.. / ..infra..
+  ② ..connector.nq.. 字段/方法名禁止出现 placeOrder|submitOrder|executeOrder|bypassRisk|forceExecute
+     （DefaultNqContractVerifier 自身的黑名单豁免）
+  ③ ..usecase.agent.. 不依赖 dh-providers
+  ④ ..api.. 控制器 @RequestMapping 不能命中 /orders|/trades|/live
+
+dh-eval/pom.xml parent 从 decision-hub 改回 dh-bom，保留 jackson-databind / slf4j-api 依赖。
+
+dep-tree.txt 重新生成。
+```
+
+### 验收
+
+```text
+mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false  BUILD SUCCESS
+git grep "/runs" 在 dh-api 控制器里只命中 /legacy/runs 与 deprecation 注释。
+README / docs/current/STATUS.md / docs/codex/plans/_active/STATUS.json 三处状态措辞一致。
+```
+
 ### 下一步
 
-进入 DH-REFIT-1-WO，按 `docs/current/DH_REFACTOR_STAGE1_WORK_ORDER.md` 实现 Agent Runtime Skeleton。
+进入 Stage2-PoC：NQ 真实事件回流接通 + Kronos/global-stock-data 工具接口预留。
+
+---
+
+## 2026-05-25 Stage1-FREEZE
+
+### 已完成
+
+```text
+新建 docs/gates/dh-stage1/ 目录
+将 docs/current/ 快照复制到 docs/gates/dh-stage1/
+docs/gates/dh-stage1/README.md 声明 Stage1 completed / Stage1-CLOSE completed / mvn test passed / Next: Stage2-PoC
+更新 docs/current/STATUS.md：Current stage → Stage1-FREEZE completed
+更新 README.md：Current stage → Stage1-FREEZE completed
+更新 AGENTS.md：Current stage → Stage1-FREEZE completed
+三处状态措辞一致
+```
+
+### 未做
+
+```text
+未写业务代码
+未修改 Stage1 runtime 代码
+未接 NQ
+未接 Kronos / global-stock-data / TradingAgents
+未做前端
+```
+
+### 下一步
+
+进入 Stage2-PoC WO：细化工单为可执行步骤。
+
+---
+
+## 2026-05-25 Stage2-PoC PLAN
+
+### 已完成
+
+```text
+docs/current/STAGE2_POC_PLAN.md           总体规划（目标、范围、模块设计、风险、验收标准）
+docs/current/STAGE2_POC_API_PLAN.md       API 草案（新增端点、请求/响应格式）
+docs/current/STAGE2_POC_CONTRACT_PLAN.md  事件契约草案（NQ feedback 信封、Kronos/global-stock-data 接口）
+docs/current/STAGE2_POC_DB_PLAN.md        DB 迁移计划（V3 新表 + InMemory->JDBC 替换清单）
+docs/current/STAGE2_POC_TEST_PLAN.md      测试计划（6 个新测试 + ArchUnit 新规则）
+docs/current/STAGE2_POC_WORK_ORDER.md     工单草案（5 个 Batch + Codex 开工提示词）
+更新 docs/current/STATUS.md：Current stage → Stage2-PoC PLAN completed
+更新 README.md：Current stage → Stage2-PoC PLAN completed
+更新 AGENTS.md：Current stage → Stage2-PoC PLAN completed
+```
+
+### 未做
+
+```text
+未写业务代码
+未修改任何 Java 文件
+未接 NQ
+未接 Kronos / global-stock-data / TradingAgents
+未做前端
+```
+
+### 下一步
+
+进入 Stage2-PoC WO：细化工单为可执行步骤，确认每个 Batch 的具体文件清单。

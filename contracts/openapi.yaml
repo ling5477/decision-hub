@@ -9,9 +9,10 @@ paths:
       responses:
         '200':
           description: ok
-  /runs:
+  /legacy/runs:
     post:
-      summary: create run (skeleton)
+      summary: '[deprecated Stage1-CLOSE] create run (legacy multi-model platform)'
+      deprecated: true
       requestBody:
         required: true
         content:
@@ -31,9 +32,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /runs/{runId}:
+  /legacy/runs/{runId}:
     get:
-      summary: get run (skeleton)
+      summary: '[deprecated Stage1-CLOSE] get run (legacy multi-model platform)'
+      deprecated: true
       parameters:
         - in: path
           name: runId
