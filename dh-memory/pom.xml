@@ -17,6 +17,11 @@
     <artifactId>dh-common</artifactId>
     <version>${project.version}</version>
   </dependency>
+  <dependency>
+    <groupId>com.guidinglight</groupId>
+    <artifactId>dh-domain</artifactId>
+    <version>${project.version}</version>
+  </dependency>
 </dependencies>
 
 </project>

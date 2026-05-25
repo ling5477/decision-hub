@@ -37,6 +37,16 @@
       <artifactId>dh-knowledge</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.guidinglight</groupId>
+      <artifactId>dh-memory</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.guidinglight</groupId>
+      <artifactId>dh-connector</artifactId>
+      <version>${project.version}</version>
+    </dependency>
       <!-- JUnit 5 -->
       <dependency>
         <groupId>org.junit.jupiter</groupId>

@@ -20,7 +20,7 @@ Decision Hub 是一个工程级的多模型协作决策系统，目标是：
 
 ```
 decision-hub/
-├─ .codex/              # Codex / Agent 行为约束
+├─ .agents/              # skills 技能
 ├─ .github/             # CI / GitHub Actions
 ├─ .mvn/                # Maven Wrapper
 ├─ config/              # Checkstyle / 质量门禁配置
