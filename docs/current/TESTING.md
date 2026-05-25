@@ -9,6 +9,8 @@ Stage2-PoC-B1 IMPLEMENT 领域模型 + JSON Schema + OpenAPI components 落地
 Stage2-PoC-B2 IMPLEMENT NQ feedback ingestion envelope/Validator/Router/8 Handler/幂等/WebMvc
 Stage2-PoC-B3 IMPLEMENT dh-connector Forecast / Research Adapter 接口预留 + Fake 实现
 Stage2-PoC-B4 IMPLEMENT Reflection / Checkpoint / Dynamic Planner + 4 个 StrategyHandler + 内存仓储 + 4 个测试
+Stage2-PoC-B5 IMPLEMENT V3 migration + 5 个 Stage2 JDBC 仓储 + Stage2JdbcWiringConfig +
+                        ArchUnit 扩到 10 条 + OpenAPI 对齐 + Stage2ClosedLoopTest 全闭环
 ```
 
 最近一次 `mvn test` 见 §3。
@@ -35,7 +37,66 @@ mvn -Pquality validate
 mvn -pl dh-app -am spring-boot:run
 ```
 
-## 3. 最近一次验收结果（2026-05-25 Stage2-PoC-B4 IMPLEMENT）
+## 3. 最近一次验收结果（2026-05-25 Stage2-PoC-B5 IMPLEMENT）
+
+```text
+日期：2026-05-25
+阶段：Stage2-PoC-B5 IMPLEMENT
+命令：mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false
+结果：BUILD SUCCESS
+
+通过的关键测试：
+  Batch 5 新增（dh-app）
+    - V3MigrationPresenceTest                   5/5   通过（4 张新表 / 2 ALTER / event_id 唯一索引 /
+                                                              jsonb 列 + comment 保留 / 无 orders|trades|fills|positions|live_）
+    - ArchitectureTest                          10/10 通过（Stage1-CLOSE 5 + Stage2-PoC-B5 新增 5：
+                                                              connector.tools/research !-> infra；
+                                                              domain.{forecast,marketdata,reflection,checkpoint} !-> connector；
+                                                              usecase.agent.planner/feedback !-> providers）
+
+  Batch 5 新增（dh-infra）
+    - JdbcNqFeedbackEventRepositoryTest         4/4   通过（首次写返回 true + CAST(? AS jsonb) /
+                                                              幂等命中返回 false 不调 update /
+                                                              unique 竞态 catch DuplicateKeyException /
+                                                              null eventId 返回 Optional.empty）
+    - JdbcSqlFragmentsTest                      5/5   通过（reflection/checkpoint insert 命中表名 + 1 段 CAST(? AS jsonb)，
+                                                              forecast insert 2 段 CAST(? AS jsonb)，
+                                                              external_snapshot insert 3 段 CAST(? AS jsonb)，
+                                                              external_snapshot.findById 走 RowMapper 返回 empty）
+
+  Batch 5 新增（dh-usecase）
+    - Stage2ClosedLoopTest                      2/2   通过（bullish 走 BULL_FOCUSED + reflections 按 stepIndex 升序 +
+                                                              checkpoints 按 checkpointIndex 升序 + JudgeDecision 唯一出口；
+                                                              bear 走 BEAR_FOCUSED 仍以 JudgeDecision 终结）
+
+  Batch 4 / Batch 3 / Batch 2 / Batch 1 回归保持全绿
+    - dh-domain    Batch 1                      35/35
+    - dh-connector Batch 3                      9/9
+    - dh-usecase   Batch 2 + B4 + B5            47/47
+    - dh-api       Batch 2 WebMvc               7/7
+    - dh-app                                    15/15（含 ArchUnit 10 + V3MigrationPresence 5）
+    - dh-infra     Batch 5                      9/9
+
+  Stage1 回归
+    - ResearchRunStage1ClosedLoopTest           1/1   通过（DefaultAgentTaskPlanner 仍直连）
+    - DecisionHubFacadeImplTest                 1/1   通过（旧链路冒烟）
+
+跳过：
+  - PostgresContainerSmokeTest                  因当前环境无 Docker，按命令显式排除
+                                                Stage2-PoC VERIFY 在装好 Docker 的 CI 上跑
+
+Batch 5 范围（零 NQ 仓库改动 / 零真实外部服务调用 / 零 LLM / 零 TradingAgents Python 代码 / 零前端 /
+              零 dh-memory JDBC 替换（留 Stage3）/ 零绕过 NQ 风控）：
+  - dh-app 新增   V3__stage2_poc_tools.sql, Stage2JdbcWiringConfig, V3MigrationPresenceTest
+                  AgentRuntimeWiringConfig 补 DynamicAgentTaskPlanner + ReflectionCheckpointService 等
+                  ArchitectureTest 扩到 10 条规则
+  - dh-infra 新增  5 个 JDBC 仓储 + 2 个测试类（9 cases 全绿） + pom.xml 加 dh-connector / jdbc starter
+  - dh-usecase 新增 Stage2ClosedLoopTest（2 cases 全绿）
+  - dh-connector 新增 ForecastArtifactStore + InMemoryForecastArtifactStore
+  - contracts/openapi.yaml  /api/ai/feedback/nq 对齐 + B3/B4 路径占位注释
+```
+
+## 5. 历史验收：2026-05-25 Stage2-PoC-B4 IMPLEMENT
 
 ```text
 日期：2026-05-25
@@ -245,6 +306,11 @@ Batch 1 范围 (零 Controller/Service/Repository/JDBC/WiringConfig 改动)：
    bypassRisk/forceExecute），DefaultNqContractVerifier 自身黑名单豁免（Stage1-CLOSE）
 ✅ ..usecase.agent.. 不依赖 ..providers..（Stage1-CLOSE）
 ✅ ..api.. 控制器 @RequestMapping 不命中 /orders|/trades|/live（Stage1-CLOSE）
+✅ ..connector.tools..  不依赖 ..infra..（Stage2-PoC-B5）
+✅ ..connector.research.. 不依赖 ..infra..（Stage2-PoC-B5）
+✅ ..domain.{forecast,marketdata,reflection,checkpoint}.. 不依赖 ..connector..（Stage2-PoC-B5）
+✅ ..usecase.agent.planner.. 不依赖 ..providers..（Stage2-PoC-B5）
+✅ ..usecase.agent.feedback.. 不依赖 ..providers..（Stage2-PoC-B5）
 ```
 
 ## 6. 验收记录格式

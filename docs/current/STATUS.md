@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: Stage2-PoC-B4 IMPLEMENT completed
-> Next stage:    Stage2-PoC-B5 IMPLEMENT
+> Current stage: Stage2-PoC-B5 IMPLEMENT completed
+> Next stage:    Stage2-PoC VERIFY
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -33,6 +33,12 @@ Stage2-PoC-B4 IMPLEMENT Reflection / Checkpoint / Dynamic Planner：
                         DynamicAgentTaskPlanner + ReflectionCheckpointService +
                         Reflection/Checkpoint InMemory 仓储 + 4 个测试类（28 cases 全绿）；
                         JudgeDecision 仍是唯一最终出口；零 LLM/Python/graph scheduler/dh-domain 改动
+Stage2-PoC-B5 IMPLEMENT JDBC + Tests + Docs 收口：
+                        V3 Flyway 迁移（4 新表 + 2 ALTER）+ 5 个 Stage2 JDBC 仓储 +
+                        Stage2JdbcWiringConfig + @ConditionalOnMissingBean 兜底 +
+                        ArchUnit 10 条规则（新增 5 条）+ OpenAPI 对齐 + Stage2ClosedLoopTest 全闭环；
+                        本地无 Docker，PostgresContainerSmokeTest 跳过，跑 mvn test
+                        -Dtest='!PostgresContainerSmokeTest' 全绿
 ```
 
 ## 3. 当前阶段边界
@@ -49,26 +55,24 @@ Stage2-PoC-B4 IMPLEMENT Reflection / Checkpoint / Dynamic Planner：
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（Stage2-PoC-B5 IMPLEMENT）
-
-按 docs/current/STAGE2_POC_WORK_ORDER.md §Batch 5 实施：
+## 4. 下一阶段（Stage2-PoC VERIFY）
 
 ```text
-Batch 5  JDBC + Tests + Docs：
-         V3 Flyway 迁移脚本（4 张新表 + 2 张 ALTER）+
-         6 个 InMemory 仓储替换为 JDBC + 4 个 Stage2 新 JDBC 仓储 +
-         ArchUnit 新增 5 条规则 + ApplicationContextLoadsTest 装配 + OpenAPI/Controllers 收口
+按 docs/current/STAGE2_POC_WORK_ORDER.md §VERIFY 实施：
+- 在装好 Docker 的 CI 环境中跑 PostgresContainerSmokeTest（V3 schema + JDBC 仓储）
+- 对接 NQ 团队真实 ingest endpoint（保持只读、回放安全）
+- 灰度切换 decisionhub.stage2.jdbc.enabled=true，验证 InMemory → JDBC 平滑切换
+- dh-memory 5 个 Store 的 JDBC 替换（仍归 Stage3 完整持久化），本阶段不触动
 ```
 
 ## 5. 当前风险
 
 ```text
-ArchUnit 当前只有 5 条规则；Batch 5 需补 5 条新规则覆盖 connector.tools / connector.research /
-domain.tool / usecase.agent.planner / usecase.agent.feedback。
-所有 InMemory 仓储进程重启即丢；Stage2 必须在 Batch 5 持久化升级完成后再灰度对外。
+ArchUnit 已扩到 10 条规则，覆盖 connector.tools/research、domain.{forecast/marketdata/reflection/checkpoint}、
+usecase.agent.{planner,feedback} 边界。Stage2 持久化通路已就绪但默认仍走 InMemory；
+decisionhub.stage2.jdbc.enabled=true 后必须先在 CI 跑 PostgresContainerSmokeTest 再上线。
 NQ 端 /api/ai/* endpoint 不存在；Stage2 启动前需先与 NQ 团队达成事件契约。
-TradingAgents 思想只能"借鉴"，禁止整体复制；Batch 4 仅落 Reflection/Checkpoint + 4 strategy handler，
+TradingAgents 思想只能"借鉴"，禁止整体复制；本批仅落 Reflection/Checkpoint + 4 strategy handler，
 无 LLM / Python / graph scheduler。
-PlannerStrategy / MarketRegime 当前不放在 dh-domain（Batch 4 的"不修改 dh-domain"约束），
-Batch 5 评估是否补回 domain 枚举与 ArchUnit 规则。
+dh-memory 5 个 Store 仍是 InMemory，留 Stage3 替换。
 ```

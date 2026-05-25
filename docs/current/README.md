@@ -1,7 +1,7 @@
 # Decision Hub Current Docs
 
-> Current stage: Stage2-PoC-B4 IMPLEMENT completed
-> Next stage:    Stage2-PoC-B5 IMPLEMENT
+> Current stage: Stage2-PoC-B5 IMPLEMENT completed
+> Next stage:    Stage2-PoC VERIFY
 > Source of truth: docs/current
 
 ## 1. 当前定位
@@ -62,13 +62,14 @@ DH-REFIT-1-PLAN（文档结构对齐）
 Stage1 (Boundary Freeze + Agent Runtime Skeleton)
 Stage1-CLOSE（旧链路 @Deprecated + 文档单源 + ArchUnit 兜底）
 Stage1-FREEZE（docs/current 快照冻结到 docs/gates/dh-stage1/）
-Stage2-PoC-B1 / B2 / B3 / B4 IMPLEMENT
+Stage2-PoC-B1 / B2 / B3 / B4 / B5 IMPLEMENT
 ```
 
 下一步只允许进入：
 
 ```text
-Stage2-PoC-B5 IMPLEMENT：JDBC + Tests + Docs（V3 迁移脚本 + 9 个 JDBC 仓储 + ArchUnit 新规则 + OpenAPI/装配收口）
+Stage2-PoC VERIFY：在装好 Docker 的 CI 环境跑 PostgresContainerSmokeTest（V3 schema + JDBC 仓储），
+                   与 NQ 团队对齐真实 ingest endpoint，灰度切换 decisionhub.stage2.jdbc.enabled=true。
 ```
 
 ## 4. 当前不允许做

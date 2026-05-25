@@ -9,8 +9,8 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-Current stage: Stage2-PoC-B4 IMPLEMENT completed
-Next stage:    Stage2-PoC-B5 IMPLEMENT
+Current stage: Stage2-PoC-B5 IMPLEMENT completed
+Next stage:    Stage2-PoC VERIFY
 Source of truth: docs/current
 ```
 
@@ -65,7 +65,8 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-Stage2-PoC-B5 IMPLEMENT：JDBC + Tests + Docs（V3 迁移脚本 + 9 个 JDBC 仓储 + ArchUnit 新规则 + OpenAPI/装配收口）
+Stage2-PoC VERIFY：在装好 Docker 的 CI 环境跑 PostgresContainerSmokeTest（V3 schema + JDBC 仓储），
+                   与 NQ 团队对齐真实 ingest endpoint，灰度切换 decisionhub.stage2.jdbc.enabled=true。
 ```
 
 ## 构建与验证

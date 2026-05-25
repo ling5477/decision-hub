@@ -168,4 +168,93 @@ public class ArchitectureTest {
               + String.join("\n", violations));
     }
   }
+
+  // ============================================================================
+  // Stage2-PoC-B5：新增 5 条规则
+  // ============================================================================
+
+  /**
+   * Stage2-B5 ⑥ connector.tools 不允许依赖 ..infra.. 。
+   *
+   * <p>tools 端口与 Fake 适配器应保持与 infra 完全解耦；JDBC 实现位于 dh-infra/jdbc，单向依赖 connector。
+   */
+  @Test
+  void stage2B5_rule6_connectorToolsDoesNotDependOnInfra() {
+    noClasses()
+        .that()
+        .resideInAPackage("..connector.tools..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage("..infra..")
+        .check(importMainClasses());
+  }
+
+  /**
+   * Stage2-B5 ⑦ connector.research 不允许依赖 ..infra.. 。
+   *
+   * <p>research 端口与 Fake 适配器应保持与 infra 完全解耦；JDBC 实现位于 dh-infra/jdbc，单向依赖 connector。
+   */
+  @Test
+  void stage2B5_rule7_connectorResearchDoesNotDependOnInfra() {
+    noClasses()
+        .that()
+        .resideInAPackage("..connector.research..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage("..infra..")
+        .check(importMainClasses());
+  }
+
+  /**
+   * Stage2-B5 ⑧ Stage2 新增的 domain 子包不允许依赖 connector。
+   *
+   * <p>覆盖 domain.forecast / domain.marketdata / domain.reflection / domain.checkpoint。 这些是值对象 +
+   * 枚举，不应反向耦合到 adapter 端口。
+   */
+  @Test
+  void stage2B5_rule8_stage2DomainDoesNotDependOnConnector() {
+    noClasses()
+        .that()
+        .resideInAnyPackage(
+            "..domain.forecast..",
+            "..domain.marketdata..",
+            "..domain.reflection..",
+            "..domain.checkpoint..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage("..connector..")
+        .check(importMainClasses());
+  }
+
+  /**
+   * Stage2-B5 ⑨ usecase.agent.planner 不允许依赖 dh-providers。
+   *
+   * <p>动态 Planner 内部不得通过 provider 调 LLM；保持纯编排。
+   */
+  @Test
+  void stage2B5_rule9_useCaseAgentPlannerDoesNotDependOnProviders() {
+    noClasses()
+        .that()
+        .resideInAPackage("..usecase.agent.planner..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAPackage("com.guidinglight.decisionhub.providers..")
+        .check(importMainClasses());
+  }
+
+  /**
+   * Stage2-B5 ⑩ usecase.agent.feedback 不允许依赖 dh-providers。
+   *
+   * <p>NQ feedback ingestion 必须保持纯本地编排，不允许通过 provider 触达外部 LLM。
+   */
+  @Test
+  void stage2B5_rule10_useCaseAgentFeedbackDoesNotDependOnProviders() {
+    noClasses()
+        .that()
+        .resideInAPackage("..usecase.agent.feedback..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAPackage("com.guidinglight.decisionhub.providers..")
+        .check(importMainClasses());
+  }
 }

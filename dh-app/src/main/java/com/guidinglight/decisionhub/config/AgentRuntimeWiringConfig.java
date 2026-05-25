@@ -8,6 +8,14 @@ import com.guidinglight.decisionhub.connector.nq.fake.DefaultNqContractVerifier;
 import com.guidinglight.decisionhub.connector.nq.fake.DefaultNqStrategyCandidateMapper;
 import com.guidinglight.decisionhub.connector.nq.fake.FakeNqBacktestClient;
 import com.guidinglight.decisionhub.connector.nq.fake.FakeNqFeedbackClient;
+import com.guidinglight.decisionhub.connector.research.ResearchDataAdapter;
+import com.guidinglight.decisionhub.connector.research.ResearchSnapshotStore;
+import com.guidinglight.decisionhub.connector.research.fake.FakeResearchDataAdapter;
+import com.guidinglight.decisionhub.connector.research.fake.InMemoryResearchSnapshotStore;
+import com.guidinglight.decisionhub.connector.tools.ForecastArtifactStore;
+import com.guidinglight.decisionhub.connector.tools.ForecastToolPort;
+import com.guidinglight.decisionhub.connector.tools.fake.FakeForecastToolAdapter;
+import com.guidinglight.decisionhub.connector.tools.fake.InMemoryForecastArtifactStore;
 import com.guidinglight.decisionhub.eval.agent.BacktestResultScorer;
 import com.guidinglight.decisionhub.eval.agent.CandidateScorer;
 import com.guidinglight.decisionhub.eval.agent.EvidenceQualityScorer;
@@ -33,11 +41,14 @@ import com.guidinglight.decisionhub.usecase.agent.AgentTaskPlanner;
 import com.guidinglight.decisionhub.usecase.agent.AgentTaskRepository;
 import com.guidinglight.decisionhub.usecase.agent.CandidateGenerationService;
 import com.guidinglight.decisionhub.usecase.agent.CandidateReviewService;
+import com.guidinglight.decisionhub.usecase.agent.CheckpointEntryRepository;
 import com.guidinglight.decisionhub.usecase.agent.ExperienceFeedbackService;
 import com.guidinglight.decisionhub.usecase.agent.JudgeDecisionRepository;
 import com.guidinglight.decisionhub.usecase.agent.JudgeDecisionService;
 import com.guidinglight.decisionhub.usecase.agent.NqFeedbackEventRepository;
 import com.guidinglight.decisionhub.usecase.agent.NqIntegrationUseCase;
+import com.guidinglight.decisionhub.usecase.agent.ReflectionCheckpointService;
+import com.guidinglight.decisionhub.usecase.agent.ReflectionEntryRepository;
 import com.guidinglight.decisionhub.usecase.agent.ResearchRunCommandService;
 import com.guidinglight.decisionhub.usecase.agent.ResearchRunQueryService;
 import com.guidinglight.decisionhub.usecase.agent.ResearchRunRepository;
@@ -57,22 +68,34 @@ import com.guidinglight.decisionhub.usecase.agent.feedback.handler.PaperRunStopp
 import com.guidinglight.decisionhub.usecase.agent.feedback.impl.DefaultNqFeedbackContractValidator;
 import com.guidinglight.decisionhub.usecase.agent.feedback.impl.DefaultNqFeedbackEventTypeRouter;
 import com.guidinglight.decisionhub.usecase.agent.feedback.impl.DefaultNqFeedbackIngestionService;
-import com.guidinglight.decisionhub.usecase.agent.impl.DefaultAgentTaskPlanner;
 import com.guidinglight.decisionhub.usecase.agent.impl.DefaultCandidateGenerationService;
 import com.guidinglight.decisionhub.usecase.agent.impl.DefaultCandidateReviewService;
 import com.guidinglight.decisionhub.usecase.agent.impl.DefaultExperienceFeedbackService;
 import com.guidinglight.decisionhub.usecase.agent.impl.DefaultJudgeDecisionService;
 import com.guidinglight.decisionhub.usecase.agent.impl.DefaultNqIntegrationUseCase;
+import com.guidinglight.decisionhub.usecase.agent.impl.DefaultReflectionCheckpointService;
 import com.guidinglight.decisionhub.usecase.agent.impl.DefaultResearchRunCommandService;
 import com.guidinglight.decisionhub.usecase.agent.impl.DefaultResearchRunQueryService;
 import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryAgentArtifactRepository;
 import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryAgentTaskRepository;
+import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryCheckpointEntryRepository;
 import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryJudgeDecisionRepository;
 import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryNqFeedbackEventRepository;
+import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryReflectionEntryRepository;
 import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryResearchRunRepository;
 import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryStrategyCandidateRepository;
+import com.guidinglight.decisionhub.usecase.agent.planner.DynamicAgentTaskPlanner;
+import com.guidinglight.decisionhub.usecase.agent.planner.PlannerStrategyRegistry;
+import com.guidinglight.decisionhub.usecase.agent.planner.PlannerStrategyResolver;
+import com.guidinglight.decisionhub.usecase.agent.planner.impl.DefaultPlannerStrategyResolver;
+import com.guidinglight.decisionhub.usecase.agent.planner.strategy.BearFocusedPlannerStrategyHandler;
+import com.guidinglight.decisionhub.usecase.agent.planner.strategy.BullFocusedPlannerStrategyHandler;
+import com.guidinglight.decisionhub.usecase.agent.planner.strategy.DefaultPlannerStrategyHandler;
+import com.guidinglight.decisionhub.usecase.agent.planner.strategy.PlannerStrategyHandler;
+import com.guidinglight.decisionhub.usecase.agent.planner.strategy.VolatileDiversifiedPlannerStrategyHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -105,6 +128,7 @@ public class AgentRuntimeWiringConfig {
   }
 
   @Bean
+  @ConditionalOnMissingBean
   public NqFeedbackEventRepository nqFeedbackEventRepository() {
     return new InMemoryNqFeedbackEventRepository();
   }
@@ -185,8 +209,87 @@ public class AgentRuntimeWiringConfig {
   }
 
   @Bean
-  public AgentTaskPlanner agentTaskPlanner() {
-    return new DefaultAgentTaskPlanner();
+  public AgentTaskPlanner agentTaskPlanner(
+      final PlannerStrategyResolver plannerStrategyResolver,
+      final PlannerStrategyRegistry plannerStrategyRegistry) {
+    return new DynamicAgentTaskPlanner(plannerStrategyResolver, plannerStrategyRegistry);
+  }
+
+  // ===== Stage2-PoC-B4: planner strategies + reflection / checkpoint =====
+
+  @Bean
+  public PlannerStrategyHandler defaultPlannerStrategyHandler() {
+    return new DefaultPlannerStrategyHandler();
+  }
+
+  @Bean
+  public PlannerStrategyHandler bullFocusedPlannerStrategyHandler() {
+    return new BullFocusedPlannerStrategyHandler();
+  }
+
+  @Bean
+  public PlannerStrategyHandler bearFocusedPlannerStrategyHandler() {
+    return new BearFocusedPlannerStrategyHandler();
+  }
+
+  @Bean
+  public PlannerStrategyHandler volatileDiversifiedPlannerStrategyHandler() {
+    return new VolatileDiversifiedPlannerStrategyHandler();
+  }
+
+  @Bean
+  public PlannerStrategyResolver plannerStrategyResolver() {
+    return new DefaultPlannerStrategyResolver();
+  }
+
+  @Bean
+  public PlannerStrategyRegistry plannerStrategyRegistry(
+      final List<PlannerStrategyHandler> handlers) {
+    return new PlannerStrategyRegistry(handlers);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public ReflectionEntryRepository reflectionEntryRepository() {
+    return new InMemoryReflectionEntryRepository();
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public CheckpointEntryRepository checkpointEntryRepository() {
+    return new InMemoryCheckpointEntryRepository();
+  }
+
+  @Bean
+  public ReflectionCheckpointService reflectionCheckpointService(
+      final ReflectionEntryRepository reflectionEntryRepository,
+      final CheckpointEntryRepository checkpointEntryRepository) {
+    return new DefaultReflectionCheckpointService(
+        reflectionEntryRepository, checkpointEntryRepository);
+  }
+
+  // ===== Stage2-PoC-B3: forecast tool + research data adapter / snapshot store =====
+
+  @Bean
+  public ForecastToolPort forecastToolPort() {
+    return new FakeForecastToolAdapter();
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public ForecastArtifactStore forecastArtifactStore() {
+    return new InMemoryForecastArtifactStore();
+  }
+
+  @Bean
+  public ResearchDataAdapter researchDataAdapter() {
+    return new FakeResearchDataAdapter();
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public ResearchSnapshotStore researchSnapshotStore() {
+    return new InMemoryResearchSnapshotStore();
   }
 
   @Bean

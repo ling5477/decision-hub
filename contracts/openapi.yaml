@@ -55,6 +55,46 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  # ===== Stage2-PoC-B2: NQ -> DH feedback ingestion (implemented) =====
+  /api/ai/feedback/nq:
+    post:
+      summary: 'Stage2-PoC-B2: NQ -> DH 正式回流事件 ingest'
+      description: |
+        接收 NQ 端推送的 NqFeedbackEnvelope；按 eventId 做幂等去重，重放视作命中。
+        校验失败返回 400；幂等命中返回 200 + duplicate=true。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NqFeedbackEnvelope'
+      responses:
+        '200':
+          description: accepted or duplicate
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [eventId, duplicate]
+                properties:
+                  eventId:   { type: string }
+                  duplicate: { type: boolean }
+        '400':
+          description: invalid envelope or payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ===== Stage2-PoC-B3 / B4 planned endpoints (controllers 留 Batch 后续 / Stage2 VERIFY) =====
+  # Schemas (ForecastArtifact / ExternalMarketSnapshot / ReflectionEntry / CheckpointEntry) 已在 components 落地。
+  # 此处仅以注释占位，避免 OpenAPI 出现尚未实现的 controller 误导消费方。
+  # POST /api/ai/tools/forecast              -> ForecastArtifact
+  # POST /api/ai/research/snapshots          -> ExternalMarketSnapshot
+  # GET  /api/ai/research/snapshots/{id}     -> ExternalMarketSnapshot
+  # GET  /api/ai/research-runs/{runId}/reflections -> ReflectionEntry[]
+  # GET  /api/ai/research-runs/{runId}/checkpoints -> CheckpointEntry[]
+
 components:
   schemas:
     RunCreateRequest:

@@ -724,3 +724,110 @@ dh-app ArchitectureTest 5/5 保持通过
 
 进入 Stage2-PoC-B5 IMPLEMENT：JDBC + Tests + Docs（V3 迁移脚本 + 9 个 JDBC 仓储 + ArchUnit 新规则 +
 OpenAPI/装配收口）。
+
+---
+
+## 2026-05-25 Stage2-PoC-B5 IMPLEMENT
+
+完成 Stage2-PoC 最后一批收口：V3 migration、JDBC 仓储、WiringConfig、ArchUnit 新规则、OpenAPI 对齐、文档与测试收口。
+
+### 已完成
+
+```text
+dh-app/src/main/resources/db/migration/V3__stage2_poc_tools.sql
+  4 张新表（CREATE IF NOT EXISTS）：
+    dh_forecast_artifacts          (predictions_json jsonb, raw_payload_json jsonb)
+    dh_external_market_snapshots   (symbols_json/data_json/raw_payload_json jsonb)
+    dh_reflection_entries          (payload_json jsonb，unique(run_id, step_index))
+    dh_checkpoint_entries          (snapshot_json jsonb，unique(run_id, checkpoint_index))
+  2 张 ALTER（ADD COLUMN IF NOT EXISTS）：
+    dh_research_runs               regime, planner_strategy default 'DEFAULT'
+    dh_nq_feedback_events          event_id / schema_version / validation_status /
+                                   source_job_id / request_id / correlation_id
+    + DO 块创建 ux_dh_nq_feedback_events_event_id (event_id is not null)
+  comment on table / comment on column 覆盖 trace_id/request_id/correlation_id 等追踪列
+
+dh-infra（新增 5 个 Stage2 JDBC 仓储 + dh-connector 依赖 + jackson + jdbc starter）：
+  JdbcNqFeedbackEventRepository      Stage1 append/listByRun + Stage2 saveEnvelope/findEnvelopeByEventId
+                                     INSERT 使用 CAST(? AS jsonb)，eventId 幂等：先查询再 catch DuplicateKeyException
+  JdbcForecastArtifactRepository     ForecastArtifactStore 实现；predictions_json + raw_payload_json
+                                     双 CAST(? AS jsonb)；Jackson ArrayNode 序列化
+  JdbcExternalMarketSnapshotRepository ResearchSnapshotStore 实现；symbols_json + data_json +
+                                       raw_payload_json 三段 CAST(? AS jsonb)；
+                                       findBySymbolAndDateRange 用 symbols_json @> CAST(? AS jsonb)
+  JdbcReflectionEntryRepository      payload_json CAST(? AS jsonb)；RowMapper 重建 ReflectionEntry
+  JdbcCheckpointEntryRepository      snapshot_json CAST(? AS jsonb)
+
+dh-app config：
+  Stage2JdbcWiringConfig             @ConditionalOnProperty(prefix="decisionhub.stage2.jdbc",
+                                     name="enabled", havingValue="true", matchIfMissing=false)
+                                     装配 5 个 JDBC bean；默认不生效
+  AgentRuntimeWiringConfig           5 个 InMemory bean 加 @ConditionalOnMissingBean
+                                     允许 JDBC bean 在 enabled=true 时覆盖；
+                                     补 DynamicAgentTaskPlanner + Resolver + Registry +
+                                     4 个 PlannerStrategyHandler + ReflectionCheckpointService +
+                                     ForecastToolPort + ResearchDataAdapter +
+                                     InMemoryForecastArtifactStore + InMemoryResearchSnapshotStore
+
+contracts/openapi.yaml：
+  POST /api/ai/feedback/nq           对齐 B2 实现（NqFeedbackEnvelope 请求 + {eventId, duplicate} 响应）
+  B3/B4 路径以注释占位（forecast/snapshots/reflections/checkpoints controllers 留 VERIFY 上线）
+
+dh-app tests：
+  V3MigrationPresenceTest            5 cases（4 张新表 / 2 ALTER / event_id 唯一索引 /
+                                     jsonb 列与 comment 保留 / 无 orders|trades|fills|positions|live_）
+  ArchitectureTest                   扩到 10 条规则；新增：
+                                     - connector.tools !depends ..infra..
+                                     - connector.research !depends ..infra..
+                                     - domain.{forecast,marketdata,reflection,checkpoint} !depends ..connector..
+                                     - usecase.agent.planner !depends providers..
+                                     - usecase.agent.feedback !depends providers..
+
+dh-infra tests：
+  JdbcNqFeedbackEventRepositoryTest  4 cases：首次写返回 true + CAST(? AS jsonb) /
+                                     幂等命中返回 false 且不调 update / unique 竞态返回 false /
+                                     null eventId 返回 Optional.empty
+  JdbcSqlFragmentsTest               5 cases：reflection/checkpoint/forecast/external_snapshot
+                                     insert SQL 命中正确表名 + CAST(? AS jsonb) 次数（>=1/2/3）+
+                                     external_snapshot.findById RowMapper 路径
+
+dh-usecase tests：
+  Stage2ClosedLoopTest               2 cases：完整 Stage2 闭环——
+                                     bullish 走 BULL_FOCUSED / bear 走 BEAR_FOCUSED；
+                                     reflections 按 stepIndex 升序、checkpoints 按 checkpointIndex 升序；
+                                     JudgeDecision 仍是唯一最终出口
+
+docs/current/STATUS.md / WORKLOG.md / TESTING.md / API.md / DB_SCHEMA.md / README.md / AGENTS.md
+  状态切到 Stage2-PoC-B5 IMPLEMENT completed / Next: Stage2-PoC VERIFY
+```
+
+### 边界守恒（B5 严格边界）
+
+```text
+未修改 NQ 仓库
+未接真实 NQ API / Kronos / global-stock-data
+未引入 TradingAgents Python 代码
+未实现真实下单 / 未绕过 NQ 风控 / 未重写 NQ 回测核心
+未建设前端
+未改 Stage1 已冻结语义（Stage1ClosedLoopTest 仍直连 DefaultAgentTaskPlanner，绿）
+未删除 legacy 旧链路（/legacy/runs 保留）
+未引入外部 HTTP 客户端
+未把 dh-memory 5 个 Store 替换为 JDBC（留 Stage3）
+```
+
+### 验收
+
+```text
+mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false  BUILD SUCCESS
+
+Stage1 闭环 + Batch 1/2/3/4 测试保持全绿
+Stage2-PoC-B5 新增 16 cases（V3 5 + JdbcNqFeedback 4 + JdbcSqlFragments 5 + Stage2ClosedLoop 2）全绿
+ArchitectureTest 10/10 通过
+默认 profile 下 JDBC bean 不装配，InMemory 通路不被破坏
+```
+
+### 下一步
+
+进入 Stage2-PoC VERIFY：在装好 Docker 的 CI 环境跑 PostgresContainerSmokeTest，
+与 NQ 团队对齐真实 ingest endpoint，灰度切换 decisionhub.stage2.jdbc.enabled=true。
+

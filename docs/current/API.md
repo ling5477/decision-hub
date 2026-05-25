@@ -2,9 +2,37 @@
 
 ## 1. 当前状态
 
-当前为 API 规划文档，DH-REFIT-1-PLAN 阶段不实现业务 API。
+```text
+Current stage: Stage2-PoC-B5 IMPLEMENT completed
+Next stage:    Stage2-PoC VERIFY
+```
 
-## 2. Stage1 最小 API 草案
+OpenAPI 单源：`contracts/openapi.yaml`。
+
+## 2. 已实现端点
+
+```text
+GET  /_ping                           健康检查
+POST /api/ai/feedback/nq              NQ -> DH 正式回流事件 ingest（Stage2-PoC-B2 落地）
+                                      - eventId 幂等去重，重放返回 200 + duplicate=true
+                                      - 信封 / payload 校验失败返回 400
+POST /legacy/runs                     旧链路（@Deprecated，保留 6 周）
+GET  /legacy/runs/{runId}             旧链路（@Deprecated）
+```
+
+## 3. Stage2-PoC-VERIFY 计划上线端点
+
+OpenAPI components 已就位，路径以注释占位，待 Stage2-PoC VERIFY 阶段在装好 Docker 的 CI 环境上线：
+
+```text
+POST /api/ai/tools/forecast                       -> ForecastArtifact
+POST /api/ai/research/snapshots                   -> ExternalMarketSnapshot
+GET  /api/ai/research/snapshots/{snapshotId}      -> ExternalMarketSnapshot
+GET  /api/ai/research-runs/{runId}/reflections    -> ReflectionEntry[]
+GET  /api/ai/research-runs/{runId}/checkpoints    -> CheckpointEntry[]
+```
+
+## 4. Stage1 最小 API 草案
 
 ```text
 POST /api/ai/research-runs
@@ -17,7 +45,7 @@ GET  /api/ai/research-runs/{runId}/judge-decision
 POST /api/ai/feedback/nq
 ```
 
-## 3. API 原则
+## 5. API 原则
 
 ```text
 所有输出结构化
@@ -27,7 +55,7 @@ POST /api/ai/feedback/nq
 所有最终建议必须经过 JudgeDecision
 ```
 
-## 4. 禁止 API
+## 6. 禁止 API
 
 ```text
 禁止直接下单 API
@@ -36,7 +64,7 @@ POST /api/ai/feedback/nq
 禁止复制 NQ 回测核心 API
 ```
 
-## 5. NQ 对接方向
+## 7. NQ 对接方向
 
 DH -> NQ：
 
