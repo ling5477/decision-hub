@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://decision-hub.guidinglight/contracts/json-schema/dh-backtest-result-snapshot.schema.json",
   "title": "DhBacktestResultSnapshot",
-  "description": "Stage2-PoC-B1：NQ 回测结果在 DH 侧的领域快照。",
+  "description": "Stage2-PoC-B1 / Stage3-B1：NQ 回测结果在 DH 侧的领域快照。由 BACKTEST_RESULT_READY 反馈事件落地；DH 不重写 NQ 回测核心，仅承载结果。Stage3-B1 仅追加字段描述。",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -17,19 +17,71 @@
     "rawPayloadJson"
   ],
   "properties": {
-    "resultId":       { "type": "string", "minLength": 1 },
-    "requestId":      { "type": "string", "minLength": 1 },
-    "traceId":        { "type": "string", "minLength": 1 },
-    "candidateId":    { "type": "string", "minLength": 1 },
-    "sharpeRatio":    { "type": ["number", "null"] },
-    "maxDrawdown":    { "type": ["number", "null"] },
-    "annualReturn":   { "type": ["number", "null"] },
-    "winRate":        { "type": ["number", "null"], "minimum": 0.0, "maximum": 1.0 },
-    "profitFactor":   { "type": ["number", "null"] },
-    "periodStart":    { "type": "string", "format": "date" },
-    "periodEnd":      { "type": "string", "format": "date" },
-    "verdict":        { "type": "string", "enum": ["PASS", "FAIL", "MARGINAL"] },
-    "recordedAt":     { "type": "string", "format": "date-time" },
-    "rawPayloadJson": { "type": "string" }
+    "resultId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：DH 端本地结果记录 ID；与 NQ 端 backtestId 解耦。"
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：必须 = 触发本次回测的 DhBacktestRequest.requestId；用于回链与对账。"
+    },
+    "traceId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：沿用 ResearchRun.traceId；必须能在 dh_research_runs 命中。"
+    },
+    "candidateId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：必须 = DhBacktestRequest.candidateId。"
+    },
+    "sharpeRatio": {
+      "type": ["number", "null"],
+      "description": "Stage3-B1：年化 Sharpe；NQ 未给则 null；DH 不重新计算。"
+    },
+    "maxDrawdown": {
+      "type": ["number", "null"],
+      "description": "Stage3-B1：最大回撤；NQ 未给则 null。"
+    },
+    "annualReturn": {
+      "type": ["number", "null"],
+      "description": "Stage3-B1：年化收益率；NQ 未给则 null。"
+    },
+    "winRate": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Stage3-B1：胜率 [0,1]；NQ 未给则 null。"
+    },
+    "profitFactor": {
+      "type": ["number", "null"],
+      "description": "Stage3-B1：盈亏比；NQ 未给则 null。"
+    },
+    "periodStart": {
+      "type": "string",
+      "format": "date",
+      "description": "Stage3-B1：回测窗口开始；映射自 DhBacktestRequest.startDate。"
+    },
+    "periodEnd": {
+      "type": "string",
+      "format": "date",
+      "description": "Stage3-B1：回测窗口结束；映射自 DhBacktestRequest.endDate。"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "MARGINAL"],
+      "description": "Stage3-B1：NQ 给出的结论；不允许 DH 推翻；JudgeDecision 仍是 DH 唯一最终出口，但 verdict 进入 ExperienceEntry / PheromoneEdge 经验链路。"
+    },
+    "recordedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Stage3-B1：DH 端落地时间。"
+    },
+    "rawPayloadJson": {
+      "type": "string",
+      "description": "Stage3-B1：NQ 原始结果 payload（来自 BACKTEST_RESULT_READY.rawPayloadJson）；DH 永久留底。"
+    }
   }
 }

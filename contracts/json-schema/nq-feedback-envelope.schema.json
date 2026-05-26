@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://decision-hub.guidinglight/contracts/json-schema/nq-feedback-envelope.schema.json",
   "title": "NqFeedbackEnvelope",
-  "description": "Stage2-PoC-B1：NQ -> DH 回流事件统一信封。eventId 用于幂等；traceId 关联 ResearchRun。payloadJson 必须保留原始 JSON 字符串。",
+  "description": "Stage2-PoC-B1 / Stage3-B1：NQ -> DH 回流事件统一信封。eventId 用于幂等；traceId 关联 ResearchRun；payloadJson 必须保留原始 JSON 字符串。Stage3-B1 仅追加描述与示例，不修改字段结构。",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -18,9 +18,15 @@
     "payloadJson"
   ],
   "properties": {
-    "eventId":       { "type": "string", "minLength": 1 },
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：NQ outbox 端生成；推荐 UUIDv7；全局唯一；DH 端用作幂等键（dh_nq_feedback_events.event_id 唯一索引）。同一 eventId 不允许换 payload 重发。",
+      "examples": ["01HQK9YE6Z3M2BX5J7V0W2N4QP"]
+    },
     "eventType": {
       "type": "string",
+      "description": "Stage3-B1：必须落在 NqFeedbackEventType 8 个枚举值之一；HTTP 边界接收为字符串，服务层映射到枚举失败返回 400 UNKNOWN_EVENT_TYPE。Stage3 不新增事件类型。",
       "enum": [
         "PAPER_RUN_CREATED",
         "PAPER_RUN_STARTED",
@@ -32,14 +38,50 @@
         "BACKTEST_RESULT_READY"
       ]
     },
-    "occurredAt":    { "type": "string", "format": "date-time" },
-    "sourceSystem":  { "type": "string", "const": "nexus-quant" },
-    "sourceJobId":   { "type": "string", "minLength": 1 },
-    "traceId":       { "type": "string", "minLength": 1 },
-    "requestId":     { "type": "string", "minLength": 1 },
-    "correlationId": { "type": "string", "minLength": 1 },
-    "schemaVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
-    "payloadJson":   { "type": "string", "description": "raw payload JSON string preserved as-is" },
-    "receivedAt":    { "type": "string", "format": "date-time" }
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Stage3-B1：事件在 NQ 端的发生时间（业务时间），不是发送时间；ISO-8601。"
+    },
+    "sourceSystem": {
+      "type": "string",
+      "const": "nexus-quant",
+      "description": "Stage3-B1：常量；任何其它值在 DH 端返回 400 INVALID_SCHEMA。"
+    },
+    "sourceJobId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：NQ 端业务 Job ID（paperRunId / backtestId / alertId 等）；DH 仅用于对账与排错，不写 NQ 数据。"
+    },
+    "traceId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：与 DH ResearchRun.trace_id 串联；推荐 32 位 hex（OpenTelemetry trace id 对齐）。DH 端校验必须能在 dh_research_runs.trace_id 命中，否则返回 400 UNKNOWN_TRACE。"
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：若由 DH 出站请求触发（如 DhBacktestRequest），等于原 requestId；否则由 NQ 端生成（推荐 UUIDv7）。NQ 在异步 feedback 中必须原样回传。"
+    },
+    "correlationId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：业务上下文 ID（如一个 candidate 的整个 paper 周期）；同 correlationId 串联多个 requestId/traceId；推荐 UUIDv7。"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Stage3-B1：semver；当前 1.0.0；MINOR/PATCH 向后兼容；MAJOR 升级必须双方同步发版。DH 端遇到本地未支持的 MAJOR 返回 400 INVALID_SCHEMA。",
+      "examples": ["1.0.0"]
+    },
+    "payloadJson": {
+      "type": "string",
+      "description": "Stage3-B1：payload 原始 JSON 字符串（raw payload preserved as-is）；DH 端永久留底，不允许丢失。各 eventType 对应一份 contracts/json-schema/nq-feedback-*.schema.json。"
+    },
+    "receivedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Stage3-B1：DH 端入口接收时间戳；由 DH 端在 ingest 时回写，NQ 端不必填写。"
+    }
   }
 }

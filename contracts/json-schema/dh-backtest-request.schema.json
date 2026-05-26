@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://decision-hub.guidinglight/contracts/json-schema/dh-backtest-request.schema.json",
   "title": "DhBacktestRequest",
-  "description": "Stage2-PoC-B1：DH -> NQ 回测请求契约。DH 仅请求 NQ 执行正式回测能力，不代表交易指令。",
+  "description": "Stage2-PoC-B1 / Stage3-B1：DH -> NQ 回测请求契约。DH 仅请求 NQ 执行正式回测能力，不代表交易指令。Stage3-B1 仅追加字段描述，不修改字段结构、required、additionalProperties 与枚举值。",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -22,28 +22,83 @@
     "status"
   ],
   "properties": {
-    "requestId":              { "type": "string", "minLength": 1 },
-    "traceId":                { "type": "string", "minLength": 1 },
-    "candidateId":            { "type": "string", "minLength": 1 },
-    "strategyName":           { "type": "string", "minLength": 1 },
-    "strategyVersion":        { "type": "string", "minLength": 1 },
-    "strategyParametersJson": { "type": "string" },
-    "entryRulesRef":          { "type": ["string", "null"] },
-    "exitRulesRef":           { "type": ["string", "null"] },
-    "startDate":              { "type": "string", "format": "date" },
-    "endDate":                { "type": "string", "format": "date" },
-    "initialCapital":         { "type": "number", "exclusiveMinimum": 0 },
+    "requestId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：DH 出站请求 ID；推荐 UUIDv7；一次回测请求 = 一个 requestId；24h 内同 candidate + 同参数 hash 应在 DH 侧短路（Stage3-B3 IMPL 落地）。"
+    },
+    "traceId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：沿用 ResearchRun.traceId；HTTP header X-Trace-Id + body.traceId 双通道；NQ 在异步 feedback envelope 中原样回传。"
+    },
+    "candidateId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：StrategyCandidate.id；必须是已冻结（frozen=true）的候选；NQ feedback BACKTEST_RESULT_READY.candidateId 必须 = 本字段。"
+    },
+    "strategyName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：StrategyCandidate.name；NQ 仅用于展示与日志。"
+    },
+    "strategyVersion": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：StrategyCandidate.version；参与 paramsHash 计算。"
+    },
+    "strategyParametersJson": {
+      "type": "string",
+      "description": "Stage3-B1：StrategyCandidate 完整参数快照（JSON 字符串）；参与 paramsHash 计算；不允许携带敏感凭据。"
+    },
+    "entryRulesRef": {
+      "type": ["string", "null"],
+      "description": "Stage3-B1：可选；引用 StrategyCandidate 的入场规则文本/资源 ID。"
+    },
+    "exitRulesRef": {
+      "type": ["string", "null"],
+      "description": "Stage3-B1：可选；引用 StrategyCandidate 的出场规则文本/资源 ID。"
+    },
+    "startDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Stage3-B1：回测窗口开始日期；DH 校验 startDate < endDate，否则 400 INVALID_DATE_RANGE。"
+    },
+    "endDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Stage3-B1：回测窗口结束日期；与 startDate 一同构成回测区间。"
+    },
+    "initialCapital": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Stage3-B1：初始资金；exclusiveMinimum 0；超出 NQ 侧规则由 NQ 返回 400 RISK_GATED 或 QUOTA_EXCEEDED。"
+    },
     "symbols": {
       "type": "array",
       "minItems": 1,
-      "items": { "type": "string", "minLength": 1 }
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Stage3-B1：回测代码集合；minItems 1；不允许全市场扫描；测试环境仅允许 t-test-* 白名单。"
     },
-    "frequency":   { "type": "string", "enum": ["DAILY", "HOURLY", "MINUTE"] },
-    "requestedBy": { "type": "string", "minLength": 1 },
-    "requestedAt": { "type": "string", "format": "date-time" },
+    "frequency": {
+      "type": "string",
+      "enum": ["DAILY", "HOURLY", "MINUTE"],
+      "description": "Stage3-B1：回测频率；NQ 不支持的频率返回 400 UNSUPPORTED_FREQUENCY。"
+    },
+    "requestedBy": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage3-B1：DH 侧调用者标识；NQ 仅用于审计。"
+    },
+    "requestedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Stage3-B1：DH 侧请求生成时间（TimeProvider.now）。"
+    },
     "status": {
       "type": "string",
-      "enum": ["DRAFT", "QUEUED", "ACCEPTED", "REJECTED", "RESULT_READY", "FAILED"]
+      "enum": ["DRAFT", "QUEUED", "ACCEPTED", "REJECTED", "RESULT_READY", "FAILED"],
+      "description": "Stage3-B1：DH 内部跟踪状态机；构造时 DRAFT；进入 outbox 后 QUEUED；与 NQ 同步响应映射 ACCEPTED / REJECTED；异步 feedback 映射 RESULT_READY / FAILED。本字段不含 PLACE/SUBMIT/EXECUTE 等下单语义。"
     }
   }
 }

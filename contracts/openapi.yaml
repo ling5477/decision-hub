@@ -2,6 +2,20 @@ openapi: 3.0.3
 info:
   title: decision-hub
   version: 0.1.0
+  description: |
+    Decision Hub OpenAPI 契约（Stage2-PoC FREEZE + Stage3-B1 Contract Alignment）。
+
+    本规约只描述 DH 仓库内已实现 / 计划中的契约口径，不代表 DH 接管任何交易能力。
+
+    - Stage2-PoC-B2 已实现：POST /api/ai/feedback/nq（NQ -> DH 正式回流事件 ingest）。
+    - Stage3-B1 仅做契约对齐：补充描述、对齐 contracts/json-schema/*.schema.json、
+      明确 NQ 侧未来 endpoint 期望（不在本仓库新增 path，不实现真实联调）。
+
+    硬边界（OpenAPI 与代码同步遵守）：
+      不出现 /orders / /trades / /live API 路径；
+      不出现下单 / 绕风控类危险语义（详见 contracts 黑名单扫描）；
+      不引入新事件类型（NqFeedbackEventType 保持 8 种）；
+      不修改已落地 endpoint 语义；JudgeDecision 仍是 DH 唯一最终出口。
 paths:
   /_ping:
     get:
@@ -92,6 +106,28 @@ paths:
   # GET  /api/ai/research/snapshots/{id}     -> ExternalMarketSnapshot
   # GET  /api/ai/research-runs/{runId}/reflections -> ReflectionEntry[]
   # GET  /api/ai/research-runs/{runId}/checkpoints -> CheckpointEntry[]
+
+  # ===== Stage3-B1 planned contract（NQ 侧未来 endpoint，DH 不在本仓库落 path / 不实现真实联调） =====
+  # 详见 docs/current/STAGE3_CONTRACT_PLAN.md §2 与 docs/current/STAGE3_DH_TO_NQ_BACKTEST_PLAN.md §2。
+  #
+  # NQ 端 endpoint (待 NQ 团队确认)：
+  #   POST /api/ai/research/backtest-requests
+  #     request body:  DhBacktestRequest               (components/schemas)
+  #     202 response:  DhBacktestRequestAccepted       (components/schemas)
+  #     400 response:  errorCode 之一：INVALID_SYMBOLS / INVALID_DATE_RANGE /
+  #                    UNSUPPORTED_FREQUENCY / INVALID_PARAMETERS_JSON /
+  #                    QUOTA_EXCEEDED / RISK_GATED
+  #     409 response:  同 requestId 重放，DH 视为 idempotent 成功
+  #     5xx:            DH 出站 outbox（Stage3-B3 IMPLEMENT 才落地）按 1s/5s/30s/5m/1h 重试
+  #
+  # 异步回测结果以 BACKTEST_RESULT_READY feedback 事件回传，路径仍走已实现的
+  # POST /api/ai/feedback/nq；payload schema 见 contracts/json-schema/nq-feedback-backtest-result-ready.schema.json。
+  #
+  # 本仓库 Stage3-B1 严格禁止：
+  #   - 在 paths 段新增任何 /api/ai/research/backtest-requests / /orders / /trades / /live；
+  #   - 出现下单 / 绕风控类危险语义（详见 contracts 黑名单扫描）；
+  #   - 修改已落地 endpoint 语义；
+  #   - 新增 NqFeedbackEventType（保持 8 种）。
 
 components:
   schemas:
