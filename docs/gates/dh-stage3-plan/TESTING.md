@@ -58,18 +58,6 @@ Stage3-B4 PLAN           2026-05-26 完成：仅落 docs/current/STAGE3_E2E_CONT
                         零真实联调；零实盘；
                         mvn test 作为回归基线 BUILD SUCCESS / 151 tests / ArchUnit 10/10；
                         下一阶段进入 Stage3-PLAN-FREEZE
-Stage3-PLAN-FREEZE       2026-05-26 完成：Stage3 规划成果落盘冻结：
-                        - 10 份 STAGE3_*.md 一致性核查 9 条核心原则通过（无措辞修订）
-                        - docs/current/* 33 个文件复制到 docs/gates/dh-stage3-plan/
-                        - 冻结快照 README.md 顶部加冻结声明 + 一致性核查表 +
-                          Stage3-PLAN 交付物清单
-                        - 6 份状态文档同步到 "Stage3-PLAN-FREEZE completed /
-                          Next: Stage3-B1 IMPLEMENT"
-                        - mvn test 作为回归基线 BUILD SUCCESS / 151 tests / 0 failures /
-                          0 errors / 0 skipped / ArchUnit 10/10
-                        - 本轮为文档冻结，零 Java 业务代码改动；零 NQ 仓库改动；
-                          零 contracts / migration / OpenAPI 修改；零真实外部接入
-                        - 下一阶段进入 Stage3-B1 IMPLEMENT（B1 已完成；B2/B3/B4 单独开工）
 ```
 
 最近一次 `mvn test` 见 §3。
@@ -569,31 +557,4 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
 准入决定   进入 Stage3-PLAN-FREEZE（评审 10 份 STAGE3_*.md 文档口径一致性；视需要冻结到
            docs/gates/dh-stage3-plan/；6 份状态文档切到 "Stage3-PLAN-FREEZE completed /
            Next: Stage3-B1 IMPLEMENT" 体例）
-```
-
-## 14. 2026-05-26 Stage3-PLAN-FREEZE 验收记录
-
-```text
-日期       2026-05-26
-阶段       Stage3-PLAN-FREEZE（仅文档冻结，无 Java 业务代码改动）
-命令       mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false
-结果       BUILD SUCCESS / 151 tests / 0 failures / 0 errors / 0 skipped
-           - ArchUnit 10/10 PASS
-           - dh-domain 64 / dh-connector 9 / dh-usecase 47 / dh-infra 9 / dh-api 7 / dh-app 15
-           - Stage1ClosedLoop / Stage2ClosedLoop / Stage3-B1 29 contract tests 全部保持回归基线
-本次改动   仅文档冻结：
-           - docs/current/* 33 个文件完整复制到 docs/gates/dh-stage3-plan/（含 10 份 STAGE3_*.md）
-           - docs/gates/dh-stage3-plan/README.md 顶部加冻结声明（Status: FREEZE completed /
-             Next: Stage3-B1 IMPLEMENT）+ 一致性核查表 + Stage3-PLAN 交付物清单
-           - 6 份状态文档 bump（README / AGENTS / docs/current/README / STATUS / WORKLOG / TESTING）
-           零 Java 业务代码改动；零 NQ 仓库改动；零 contracts/openapi.yaml 修改；
-           零 contracts/json-schema/*.schema.json 修改；零 Flyway migration 新增；
-           零 OpenAPI path 新增；零真实 HTTP / 真实联调 / 实盘 / Kronos /
-           global-stock-data / TradingAgents Python 接入
-本次范围   文档冻结：10 份 STAGE3_*.md 一致性核查（9 条核心原则口径一致；无措辞修订）；
-           落盘 docs/gates/dh-stage3-plan/；状态文档同步；mvn test 回归基线保持
-           本轮为文档冻结，无代码实现；冻结后不得修改本目录内容
-准入决定   进入 Stage3-B1 IMPLEMENT（Stage3-B1 Contract Alignment IMPLEMENT 已于 2026-05-26 完成；
-           Stage3-B2/B3/B4 IMPLEMENT 单独开工，按 STAGE3_WORK_ORDER / NQ_OUTBOX_SPEC §8 /
-           DH_BACKTEST_ADAPTER_SPEC §12 / E2E_CONTRACT_TEST_SPEC §8 推进）
 ```

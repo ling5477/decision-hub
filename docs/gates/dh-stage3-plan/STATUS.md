@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: Stage3-PLAN-FREEZE completed
-> Next stage:    Stage3-B2 NQ Feedback Outbox IMPL
+> Current stage: Stage3-B4 End-to-End Contract Test PLAN completed
+> Next stage:    Stage3-PLAN-FREEZE
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -230,32 +230,6 @@ Stage3-B4 End-to-End Contract Test PLAN
                           零 contracts/json-schema 修改；零 Flyway migration 新增；零 OpenAPI path 新增；
                           零真实 HTTP；零真实联调；零实盘；零下单 / 绕风控 / 重写回测核心；
                           零 TradingAgents Python / Kronos / global-stock-data 接入
-Stage3-PLAN-FREEZE      2026-05-26 完成 Stage3 规划成果落盘冻结：
-                        - 一致性核查 10 份 STAGE3_*.md：9 条核心原则口径一致
-                          （可插拔 + 默认关闭 + 非强依赖 / NQ without DH 可运行 /
-                           DH without NQ 走 fake-disabled 闭环 / outbox 旁路不阻塞主链路 /
-                           backtest request 默认 disabled-fake / NQ 仍是唯一正式回测执行方 /
-                           DH 不下单 + 不绕风控 + 不改订单状态 + 不重写回测核心 /
-                           Stage3 只规划真实联调不接实盘 / IMPL 必须逐 Batch 执行）；
-                           无措辞修订需要
-                        - 落盘快照：docs/current/* 33 个文件完整复制到
-                          docs/gates/dh-stage3-plan/（含 10 份 STAGE3_*.md）
-                        - docs/gates/dh-stage3-plan/README.md 顶部加 8 行冻结声明 +
-                          冻结范围说明 + Stage3-B1 IMPLEMENT 已先行完成特别说明 +
-                          Stage3 后续不允许做的事清单 + 后续允许进入的工单清单 +
-                          验收命令与结果 + 模块测试分布 + 冻结快照文件清单 +
-                          10 份 STAGE3_*.md 一致性核查表 + Stage3-PLAN 交付物清单
-                        - 6 份状态文档同步到 "Stage3-PLAN-FREEZE completed /
-                          Next: Stage3-B1 IMPLEMENT"
-                        - mvn test -Dtest='!PostgresContainerSmokeTest' BUILD SUCCESS /
-                          151 tests / 0 failures / 0 errors / 0 skipped / ArchUnit 10/10 /
-                          Stage1ClosedLoopTest + Stage2ClosedLoopTest + Stage3-B1 29 contract tests
-                          全部回归基线保持
-                        - 零 Java 业务代码改动；零 NQ 仓库改动；零 contracts/openapi.yaml 修改；
-                          零 contracts/json-schema 修改；零 Flyway migration 新增；零 OpenAPI path 新增；
-                          零真实 HTTP；零真实联调；零实盘；零下单 / 绕风控 / 重写回测核心；
-                          零 TradingAgents Python / Kronos / global-stock-data 接入
-                        - 冻结后任何 Stage3 推进必须在新工单中单独开工
 ```
 
 ## 3. 当前阶段边界
@@ -272,48 +246,29 @@ Stage3-PLAN-FREEZE      2026-05-26 完成 Stage3 规划成果落盘冻结：
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（Stage3-B2 NQ Feedback Outbox IMPL 及后续 Batch）
+## 4. 下一阶段（Stage3-PLAN-FREEZE）
 
 ```text
 按 docs/current/STAGE3_WORK_ORDER.md + docs/current/STAGE3_BATCH_PLAN.md 拆批实施：
-- Batch 1  Contract Alignment IMPLEMENT     （DH 仓库内对齐契约 + schema + OpenAPI + 测试 + 文档）  ✅ DONE (2026-05-26)
-- Batch 2  NQ Feedback Outbox PLAN          （DH 仓库内 SPEC：STAGE3_NQ_OUTBOX_SPEC.md）           ✅ DONE (PLAN)
-- Batch 3  DH Backtest Request Adapter PLAN （DH 仓库内 SPEC：STAGE3_DH_BACKTEST_ADAPTER_SPEC.md）  ✅ DONE (PLAN)
-- Batch 4  End-to-End Contract Test PLAN    （DH 仓库内 SPEC：STAGE3_E2E_CONTRACT_TEST_SPEC.md）   ✅ DONE (PLAN)
-- PLAN-FREEZE                                 （冻结快照 docs/gates/dh-stage3-plan/）                ✅ DONE
+- Batch 1  Contract Alignment           （DH 仓库内对齐契约 + schema + OpenAPI + 测试 + 文档）  ✅ DONE
+- Batch 2  NQ Feedback Outbox PLAN      （DH 仓库内 SPEC 文档；NQ 仓库由 NQ 团队后续实施）       ✅ DONE
+- Batch 3  DH Backtest Request Adapter  （DH 仓库内 SPEC：可插拔 / Fake-Disabled-Real / 默认关闭）✅ DONE (PLAN)
+- Batch 4  End-to-End Contract Test     （DH 仓库内 SPEC：T1-T7 + 10 类 + B4-1..B4-5 拆批）     ✅ DONE (PLAN)
 
-Stage3-PLAN 与 Stage3-B1 IMPLEMENT 全部完工，规划成果已冻结。
-
-下一步执行口径（重要约束）：
-
-- Stage3-B1 Contract Alignment already completed (2026-05-26).
-  不要重复开工 Stage3-B1 IMPLEMENT；本批已落 4 份 contract 测试类（29 cases）+
-  contracts/openapi.yaml + contracts/json-schema/* 描述对齐。
-- Stage3-B2 touches NQ and must not start until NQ GateJ-FREEZE is complete
-  or explicitly approved on an isolated branch.
-  B2 是 NQ 仓库工作（按 STAGE3_NQ_OUTBOX_SPEC §8 / NQ-1..NQ-5）；
-  NQ GateJ-FREEZE 未完工前 B2 不允许启动；
-  即便有隔离分支启动也必须遵守 STAGE3_NQ_OUTBOX_SPEC §1.3 / §9 全部硬边界
-  （不影响 GateJ-FREEZE / 不进入交易同步链路 / 不阻塞订单/风控/账本/回测）。
-- DH-side Stage3-B3 can proceed independently with fake/disabled mode
-  if NQ work is blocked.
-  Stage3-B3 DH Backtest Request Adapter IMPL 可在 DH 仓库独立推进
-  （按 STAGE3_DH_BACKTEST_ADAPTER_SPEC §12 / B3-1..B3-5），
-  默认 profile FakeNqBacktestClient 兜底；
-  decisionhub.stage3.nq.enabled=false / backtest-request.enabled=false /
-  fake-mode=true；不接真实 NQ；不真实联调；不接真实 HTTP；
-  B3-3 RealNqBacktestClient skeleton 仍只做 mock HTTP（WireMock / MockWebServer）。
-
-后续路径：
-- Stage3-B2 NQ Feedback Outbox IMPL          NQ 团队实施，DH 仓库不动
-- Stage3-B3 DH Backtest Request Adapter IMPL DH 团队按 SPEC §12 实施（B3-1..B3-5）
-- Stage3-B4 End-to-End Contract Test IMPL    DH+NQ 联调，按 SPEC §8 实施（B4-1..B4-5）
-- Stage3-VERIFY                               B4-5 联调 GO 后；产出 STAGE3_VERIFY_REPORT.md
-- Stage3-FREEZE                               VERIFY GO 后；拷贝 docs/current 到 docs/gates/dh-stage3/
-- DH-FREEZE                                   Stage3-FREEZE 后；DH Agent Decision Layer v1 长期维护态
+Stage3 全部 4 个 PLAN Batch 完工。下一步：
+- Stage3-PLAN-FREEZE        评审 10 份 STAGE3_*.md 文档口径；
+                            视需要在 docs/gates/dh-stage3-plan/ 落盘冻结快照；
+                            6 份状态文档切到 "Stage3-PLAN-FREEZE completed / Next: Stage3-B1 IMPLEMENT"
+- Stage3 IMPL 路径（FREEZE 后）
+  * B1 IMPL 已完成（Stage3-B1 Contract Alignment IMPLEMENT 2026-05-26）
+  * B2 IMPL 由 NQ 团队按 STAGE3_NQ_OUTBOX_SPEC §8 实施
+  * B3 IMPL 由 DH 团队按 STAGE3_DH_BACKTEST_ADAPTER_SPEC §12 实施
+  * B4 IMPL/VERIFY 由 DH+NQ 联调按 STAGE3_E2E_CONTRACT_TEST_SPEC §8 实施
+- Stage3-FREEZE（B4 VERIFY GO 后）：
+  docs/current/* 完整拷贝到 docs/gates/dh-stage3/；切到 "Stage3 FREEZE completed / Next: DH-FREEZE"
 
 每个 Batch 严格遵守：
-- 不修改 NQ 仓库（DH 仓库部分；B2/B4 NQ 端工作在 NQ 仓库由 NQ 团队完成）
+- 不修改 NQ 仓库
 - 不接真实下单 / 不绕风控 / 不重写回测核心
 - 不建设前端
 - 不引入 TradingAgents Python / Kronos / global-stock-data 真实接入

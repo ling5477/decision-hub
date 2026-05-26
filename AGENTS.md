@@ -78,12 +78,12 @@ docs/current/TESTING.md
 ## 4. 当前阶段
 
 ```text
-Current stage: Stage3-PLAN completed
-Next stage:    Stage3-WO
+Current stage: Stage3-PLAN-FREEZE completed
+Next stage:    Stage3-B2 NQ Feedback Outbox IMPL
 Source of truth: docs/current
 ```
 
-下一步只能进入 Stage3-WO，按 docs/current/STAGE3_WORK_ORDER.md 拆 4 个 Batch 实施。每个 Batch 都必须保证：不修改 NQ 仓库、不接实盘、不自动下单、不绕过 NQ 风控、不重写 NQ 回测核心、不引入 TradingAgents Python、mvn test 全绿。
+下一步只能进入 Stage3-B2 NQ Feedback Outbox IMPL。注意：Stage3-B1 Contract Alignment IMPLEMENT 已于 2026-05-26 完成，不要重复开工；B2 触及 NQ 仓库，必须等待 NQ GateJ-FREEZE 完工或在隔离分支上获得显式批准后才能启动；若 NQ 端 B2 工作被阻塞，可优先推进 DH 端 Stage3-B3 DH Backtest Request Adapter IMPL（按 STAGE3_DH_BACKTEST_ADAPTER_SPEC §12 在 fake / disabled 模式下落地，不接真实 NQ）。每个 Batch 都必须保证：不修改 NQ 仓库（B2 启动前）、不接实盘、不自动下单、不绕过 NQ 风控、不重写 NQ 回测核心、不引入 TradingAgents Python、mvn test 全绿。Stage3 规划冻结快照位于 docs/gates/dh-stage3-plan/。
 
 ## 5. 硬边界
 
