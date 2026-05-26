@@ -1660,3 +1660,112 @@ BUILD SUCCESS / 151 tests / 0 failures / 0 errors / 0 skipped / ArchUnit 10/10
 - 推荐路径：Stage3-B3 DH Backtest Request Adapter IMPL（DH 独立推进，fake / disabled 模式）
 - NQ 路径：Stage3-B2 NQ Feedback Outbox IMPL（等待 NQ GateJ-FREEZE 或隔离分支批准后启动）
 - Stage3-B4 / VERIFY / FREEZE / DH-FREEZE 依次按 STAGE3_WORK_ORDER.md 推进
+
+---
+
+## 2026-05-26 Stage3-B3 DH Backtest Request Adapter IMPL
+
+按用户工单：实现 DH -> NQ Backtest Request Adapter 的 DH 侧可插拔骨架。
+本轮只允许 fake / disabled，不允许真实 NQ HTTP 调用。
+Stage3-B3 was executed before B2 because B2 touches NQ.
+
+### 已完成
+
+```text
+1) dh-connector（新建 2 类 + 修改 2 类）
+
+  com.guidinglight.decisionhub.connector.nq:
+    - NqBacktestSubmitStatus.java        枚举 4 值（ACCEPTED / DUPLICATE / DISABLED / FAILED）
+    - NqBacktestSubmitResult.java        5 工厂方法 + 6 字段
+    - NqBacktestClient.java (修改)        扩 typed submit(DhBacktestRequest) 默认方法；旧 Map 接口保留
+  com.guidinglight.decisionhub.connector.nq.fake:
+    - FakeNqBacktestClient.java (修改)    扩 typed deterministic submit；
+                                          jobId = "fake-job-" + sha256(requestId).take(16)；Clock 可注入
+    - DisabledNqBacktestClient.java       新增；submit 返回 outcome=DISABLED + errorCode=DH_DISABLED；
+                                          不抛 RuntimeException；不发 HTTP
+
+2) dh-usecase（新建 9 类）
+
+  com.guidinglight.decisionhub.usecase.agent.backtest:
+    - DhBacktestRequestService.java                       端口接口
+    - DhBacktestRequestCommand.java                       Builder 风格 12 字段
+    - DhBacktestRequestResult.java                        5 工厂方法
+    - DhBacktestRequestOutcome.java                       6 值枚举
+    - DhBacktestRequestErrorCode.java                     17 值枚举 + isRetryable
+    - DhBacktestRequestRepository.java                    端口接口 + RequestSnapshot 内部类
+  com.guidinglight.decisionhub.usecase.agent.backtest.impl:
+    - DefaultDhBacktestRequestService.java                默认实现
+      流程：校验入参 -> 计算 paramsHash (sha256) -> 24h 短路 -> 生成 requestId -> 写仓储 ->
+            调 NqBacktestClient.submit(typed) -> 映射 status -> 更新仓储 -> 返回 typed Result
+      硬约束：不抛 RuntimeException 中断 caller；状态机不允许从 service 内自动生成 RESULT_READY
+  com.guidinglight.decisionhub.usecase.agent.backtest.inmemory:
+    - InMemoryDhBacktestRequestRepository.java            InMemory 实现（24h 短路）
+
+3) dh-app（新建 2 类 + 修改 1 类）
+
+  com.guidinglight.decisionhub.config:
+    - NqBacktestClientProperties.java     @ConfigurationProperties("decisionhub.stage3.nq")
+    - Stage3NqBacktestWiringConfig.java   互斥 SpEL 三层 gate 装配
+    - AgentRuntimeWiringConfig.java (修改) 移除 nqBacktestClient bean（由 Stage3 装配接管）
+
+4) ArchUnit 扩到 12 条（dh-app ArchitectureTest）
+
+  新增规则 R11 stage3B3_rule11_httpClientOnlyInsideConnectorNqOrAppConfig
+    业务模块禁止直接依赖 RestTemplate / WebClient / OkHttp3 / HttpURLConnection；
+    仅允许在 ..connector.nq.. 或 ..config.. 内出现
+  新增规则 R12 stage3B3_rule12_useCaseBacktestDoesNotDependOnRealClientOrProviders
+    usecase.agent.backtest 不依赖 RealNqBacktestClient（占位 + 防御）与 providers
+
+5) 8 个 B3 测试类共 39 cases 全绿
+
+  dh-connector:
+    - FakeNqBacktestClientTest                  5 cases
+    - DisabledNqBacktestClientTest              5 cases
+
+  dh-usecase:
+    - DhBacktestRequestServiceTest              5 cases
+    - DhBacktestRequestIdempotencyTest          3 cases
+    - DhBacktestResultSnapshotConsumptionTest   4 cases
+
+  dh-app:
+    - RealNqBacktestClientDisabledByDefaultTest 4 cases
+    - NoNqDependencyStartupTest                 4 cases
+    - ArchitectureTest                          扩 R11 / R12（总 12 条）
+
+  dh-domain:
+    - NoDangerousEndpointContractTest           6 cases
+
+mvn test BUILD SUCCESS / 190 tests (151 -> 190, +39) / 0 failures / 0 errors / 0 skipped
+ArchUnit 12/12 PASS
+Stage1ClosedLoopTest + Stage2ClosedLoopTest + Stage3-B1 29 contract tests 全部保持回归基线
+
+6) 文档同步（6 份状态文档）
+  - README.md / AGENTS.md / docs/current/README.md：banner + 当前阶段 + 下一步段
+  - docs/current/STATUS.md：顶部 banner + §2 新增 Stage3-NEXT-STATUS-FIX + Stage3-B3 IMPL 段 + §4 重写
+  - docs/current/WORKLOG.md：本段
+  - docs/current/TESTING.md：§1 状态行 + §15 验收记录块
+```
+
+### 严格边界（本阶段未违反）
+
+```text
+不修改 NQ 仓库                     不接真实 NQ API
+不创建真实 HTTP client             不接真实 Kronos
+不接真实 global-stock-data         不引入 TradingAgents Python
+不实现真实下单                     不绕过 NQ 风控
+不重写 NQ 回测核心                 不建设前端
+不改 NQ 订单 / 风控 / 账本 / 实盘 / 回测核心语义
+RealNqBacktestClient 未实现（fake-mode=false 仍走 Fake 兜底）
+不修改 contracts/openapi.yaml      不修改 contracts/json-schema
+不新增 Flyway migration            不新增 OpenAPI path
+```
+
+### 下一步
+
+进入 **Stage3-B2 NQ Feedback Outbox IMPL**（blocked until NQ GateJ-FREEZE 或隔离分支批准）：
+- B2 是 NQ 仓库工作（按 STAGE3_NQ_OUTBOX_SPEC §8 / NQ-1..NQ-5）；
+- NQ GateJ-FREEZE 未完工前 B2 不允许启动；
+- 即便有隔离分支启动也必须遵守 STAGE3_NQ_OUTBOX_SPEC §1.3 / §9 全部硬边界。
+
+后续路径：Stage3-B4 联调（按 STAGE3_E2E_CONTRACT_TEST_SPEC §8 / B4-1..B4-5） -> Stage3-VERIFY ->
+Stage3-FREEZE -> DH-FREEZE。

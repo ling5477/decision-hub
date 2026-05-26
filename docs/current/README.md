@@ -1,7 +1,7 @@
 # Decision Hub Current Docs
 
-> Current stage: Stage3-PLAN-FREEZE completed
-> Next stage:    Stage3-B2 NQ Feedback Outbox IMPL
+> Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
+> Next stage:    Stage3-B2 NQ Feedback Outbox IMPL, blocked until NQ GateJ-FREEZE or isolated branch approval
 > Source of truth: docs/current
 
 ## 1. 当前定位
@@ -103,22 +103,58 @@ Stage3-PLAN-FREEZE（2026-05-26，Stage3 规划成果落盘冻结）：
            - 6 份状态文档同步到 "Stage3-PLAN-FREEZE completed / Next: Stage3-B1 IMPLEMENT"
            - 零 Java 业务代码改动；零 NQ 仓库改动；零 contracts / migration / OpenAPI 修改；
              mvn test 仍 151 全绿 / ArchUnit 10/10
+Stage3-NEXT-STATUS-FIX（2026-05-26，修正 PLAN-FREEZE 后 Next 指向）：
+           - Stage3-B1 已完成（2026-05-26），Next 不应再指向 B1
+           - 修正为 Stage3-B2 NQ Feedback Outbox IMPL；blocked until NQ GateJ-FREEZE
+           - STATUS.md §4 新增 3 条执行口径
+Stage3-B3 DH Backtest Request Adapter IMPL（2026-05-26，DH 端可插拔骨架落地）：
+           - dh-usecase 新增 backtest 包：DhBacktestRequestService 端口 + Default 实现 +
+             Command/Result/Outcome/ErrorCode + Repository 端口 + InMemory 实现
+             （24h paramsHash 幂等短路 + 9 状态机 + 错误码映射 + 不抛 RuntimeException 中断 caller）
+           - dh-connector 扩展 NqBacktestClient typed submit (DhBacktestRequest)；
+             新增 NqBacktestSubmitResult / NqBacktestSubmitStatus（4 状态）；
+             新增 DisabledNqBacktestClient（DH gate 关闭时返回 DISABLED 不抛异常）；
+             FakeNqBacktestClient 扩展 deterministic typed submit（jobId = sha256(requestId).take(16)）
+           - dh-app 新增 NqBacktestClientProperties (@ConfigurationProperties) +
+             Stage3NqBacktestWiringConfig（互斥 SpEL 三层 gate；默认 Fake 兜底；
+             stage3.nq.enabled=true && backtest-request.enabled=false → Disabled；
+             fake-mode=false 仍走 Fake 兜底，无 RealNqBacktestClient）
+           - 修改 AgentRuntimeWiringConfig：移除 nqBacktestClient bean（由 Stage3 装配接管），
+             避免多 config @ConditionalOnMissingBean 评估冲突
+           - dh-app ArchUnit 扩到 12 条：新增 R11 HTTP 客户端仅允许 connector.nq / config /
+             R12 usecase.agent.backtest 不依赖 RealClient 或 providers
+           - 8 个 B3 测试类（dh-connector 2 + dh-usecase 3 + dh-app 2 + dh-domain 1）共 39 cases 全绿
+           - mvn test BUILD SUCCESS / 190 tests（151 → 190，+39）/ 0 failures / 0 errors / 0 skipped
+           - 零 NQ 仓库改动；零真实 HTTP；零 contracts/openapi.yaml 修改；
+             零 contracts/json-schema 修改；零 Flyway migration 新增；零 OpenAPI path 新增；
+             零下单 / 绕风控 / 重写回测核心；零 TradingAgents Python / Kronos / global-stock-data
 ```
 
 下一步只允许进入：
 
 ```text
-Stage3-B2 NQ Feedback Outbox IMPL：
-  - Stage3-B1 Contract Alignment IMPLEMENT 已于 2026-05-26 完成，不要重复开工
-  - B2 触及 NQ 仓库；必须等待 NQ GateJ-FREEZE 完工或在隔离分支上获得显式批准后才能启动
-  - NQ 团队按 STAGE3_NQ_OUTBOX_SPEC §8（NQ-1..NQ-5）实施；DH 仓库不动
-  - 若 NQ 端 B2 工作被阻塞，可优先推进 DH 端 Stage3-B3 DH Backtest Request Adapter IMPL
-    （按 STAGE3_DH_BACKTEST_ADAPTER_SPEC §12 在 fake / disabled 模式下落地 B3-1..B3-5；
-     不接真实 NQ；不真实联调；fake-mode=true 默认装配 FakeNqBacktestClient）
+Stage3-B2 NQ Feedback Outbox IMPL（blocked until NQ GateJ-FREEZE 或隔离分支批准）。
+
+执行口径：
+  - Stage3-B3 DH Backtest Request Adapter IMPL 已于 2026-05-26 完成：
+    * dh-usecase 新增 backtest 包（DhBacktestRequestService + Default + Command + Result +
+      Outcome + ErrorCode + Repository + InMemory），共 9 个生产类；
+    * dh-connector 扩展 NqBacktestClient typed submit + 新增 DisabledNqBacktestClient +
+      NqBacktestSubmitResult/Status，共 4 个生产类；
+    * dh-app 新增 NqBacktestClientProperties + Stage3NqBacktestWiringConfig（三层 gate
+      互斥 SpEL 条件，默认 Fake 兜底；fake-mode=false 仍走 Fake 兜底，无 RealClient）；
+    * dh-app ArchUnit 扩到 12 条（新增 R11 HTTP 客户端隔离 + R12 backtest 端口隔离）；
+    * 8 个 B3 测试类共 39 cases 全绿；190 tests 全绿；
+    * 零真实 HTTP；零 NQ 仓库改动；零下单 / 风控旁路 / 实盘 / 前端。
+  - Stage3-B2 是 NQ 仓库工作（按 STAGE3_NQ_OUTBOX_SPEC §8 / NQ-1..NQ-5）；
+    NQ GateJ-FREEZE 未完工前 B2 不允许启动；即便有隔离分支启动也必须遵守 STAGE3_NQ_OUTBOX_SPEC
+    §1.3 / §9 全部硬边界（不影响 GateJ-FREEZE / 不进入交易同步链路 / 不阻塞订单/风控/账本/回测）。
+  - 后续 Stage3-B4 联调（按 STAGE3_E2E_CONTRACT_TEST_SPEC §8 / B4-1..B4-5）+ Stage3-VERIFY/FREEZE
+    按 STAGE3_WORK_ORDER 推进。
 
 严格禁止：
   修改 NQ 仓库（B2 启动前）/ 接实盘 / 自动下单 / 绕风控 / 重写 NQ 回测核心 /
-  引入 TradingAgents Python / 接真实 Kronos / 接真实 global-stock-data
+  引入 TradingAgents Python / 接真实 Kronos / 接真实 global-stock-data。
 ```
 
 Stage3 规划冻结快照（不得修改）：

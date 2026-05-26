@@ -1,12 +1,10 @@
 package com.guidinglight.decisionhub.config;
 
-import com.guidinglight.decisionhub.connector.nq.NqBacktestClient;
 import com.guidinglight.decisionhub.connector.nq.NqContractVerifier;
 import com.guidinglight.decisionhub.connector.nq.NqFeedbackClient;
 import com.guidinglight.decisionhub.connector.nq.NqStrategyCandidateMapper;
 import com.guidinglight.decisionhub.connector.nq.fake.DefaultNqContractVerifier;
 import com.guidinglight.decisionhub.connector.nq.fake.DefaultNqStrategyCandidateMapper;
-import com.guidinglight.decisionhub.connector.nq.fake.FakeNqBacktestClient;
 import com.guidinglight.decisionhub.connector.nq.fake.FakeNqFeedbackClient;
 import com.guidinglight.decisionhub.connector.research.ResearchDataAdapter;
 import com.guidinglight.decisionhub.connector.research.ResearchSnapshotStore;
@@ -188,10 +186,8 @@ public class AgentRuntimeWiringConfig {
     return new DefaultJudgeAggregator();
   }
 
-  @Bean
-  public NqBacktestClient nqBacktestClient() {
-    return new FakeNqBacktestClient();
-  }
+  // NqBacktestClient bean 由 Stage3NqBacktestWiringConfig 装配（Fake / Disabled 三层 gate）。
+  // 本类不再声明 nqBacktestClient @Bean，避免多 config 间 @ConditionalOnMissingBean 评估冲突。
 
   @Bean
   public NqFeedbackClient nqFeedbackClient() {

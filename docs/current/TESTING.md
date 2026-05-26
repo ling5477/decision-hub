@@ -597,3 +597,66 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
            Stage3-B2/B3/B4 IMPLEMENT 单独开工，按 STAGE3_WORK_ORDER / NQ_OUTBOX_SPEC §8 /
            DH_BACKTEST_ADAPTER_SPEC §12 / E2E_CONTRACT_TEST_SPEC §8 推进）
 ```
+
+## 15. 2026-05-26 Stage3-B3 DH Backtest Request Adapter IMPL 验收记录
+
+```text
+日期       2026-05-26
+阶段       Stage3-B3 DH Backtest Request Adapter IMPL
+命令       mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false
+结果       BUILD SUCCESS / 190 tests / 0 failures / 0 errors / 0 skipped
+           - ArchUnit 12/12 PASS（新增 R11 HTTP 客户端隔离 / R12 backtest 端口隔离）
+           - 151 → 190（+39 new tests）
+
+本次新增（Java 业务代码）：
+  dh-usecase (新建 com.guidinglight.decisionhub.usecase.agent.backtest 包)
+    - DhBacktestRequestService 端口
+    - impl/DefaultDhBacktestRequestService（校验 + paramsHash sha256 + 24h 短路 +
+      不抛 RuntimeException + 状态机映射）
+    - DhBacktestRequestCommand（Builder 风格 12 字段）
+    - DhBacktestRequestResult（4 工厂方法：accepted/duplicate/idempotentShortCircuit/disabled/failed）
+    - DhBacktestRequestOutcome 枚举（6 值）
+    - DhBacktestRequestErrorCode 枚举（17 值 + isRetryable）
+    - DhBacktestRequestRepository 端口 + inmemory/InMemoryDhBacktestRequestRepository
+  dh-connector
+    - nq/NqBacktestSubmitStatus 枚举（4 值：ACCEPTED/DUPLICATE/DISABLED/FAILED）
+    - nq/NqBacktestSubmitResult（5 工厂方法 + 6 字段）
+    - nq/NqBacktestClient.submit(DhBacktestRequest) 默认方法（typed）
+    - nq/fake/FakeNqBacktestClient typed deterministic submit
+      （jobId = "fake-job-" + sha256(requestId).take(16) + Clock 可注入）
+    - nq/fake/DisabledNqBacktestClient（DH gate 关闭；返回 DISABLED 不抛异常）
+  dh-app
+    - config/NqBacktestClientProperties (@ConfigurationProperties)
+    - config/Stage3NqBacktestWiringConfig（互斥 SpEL 三层 gate 装配）
+    - config/AgentRuntimeWiringConfig 移除 nqBacktestClient bean（由 Stage3 接管）
+
+本次新增（测试，共 8 个测试类 39 cases）：
+  dh-connector
+    - FakeNqBacktestClientTest                                              5
+    - DisabledNqBacktestClientTest                                          5
+  dh-usecase
+    - DhBacktestRequestServiceTest                                          5
+    - DhBacktestRequestIdempotencyTest                                      3
+    - DhBacktestResultSnapshotConsumptionTest                               4
+  dh-app
+    - RealNqBacktestClientDisabledByDefaultTest                             4
+      （4 profile case 全覆盖装配真值表）
+    - NoNqDependencyStartupTest                                             4
+      （默认 profile / Spring context / 无 HTTP 客户端 bean / 零 Spring 手动构造）
+  dh-domain
+    - NoDangerousEndpointContractTest                                       6
+      （openapi.yaml 无危险关键词 + paths 无危险段 + 16 schemas 无危险关键词 +
+       DhBacktestRequestStatus / NqFeedbackEventType 无危险前缀 + 事件类型保持 8 值）
+  dh-app ArchitectureTest                                                   2 (新增 R11 / R12)
+
+本次范围：
+  - 仅 DH-side IMPL；Fake / Disabled 装配；零真实 HTTP；零 RealNqBacktestClient
+  - Stage3-B3 was executed before B2 because B2 touches NQ
+  - NQ repository remains unchanged
+  - 零 contracts/openapi.yaml 修改；零 contracts/json-schema 修改；
+    零 Flyway migration 新增；零 OpenAPI path 新增
+
+准入决定   Stage3-B3 IMPL completed；
+           Next: Stage3-B2 NQ Feedback Outbox IMPL, blocked until NQ GateJ-FREEZE
+           or isolated branch approval。
+```

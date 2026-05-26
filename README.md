@@ -9,8 +9,8 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-Current stage: Stage3-PLAN-FREEZE completed
-Next stage:    Stage3-B2 NQ Feedback Outbox IMPL
+Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
+Next stage:    Stage3-B2 NQ Feedback Outbox IMPL, blocked until NQ GateJ-FREEZE or isolated branch approval
 Source of truth: docs/current
 ```
 
@@ -65,14 +65,12 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-Stage3-B2 NQ Feedback Outbox IMPL（注意：B2 触及 NQ 仓库，必须等待 NQ GateJ-FREEZE 完工
-或在隔离分支上获得显式批准后才能启动；本仓库 Stage3-B1 Contract Alignment IMPLEMENT 已于
-2026-05-26 完成，不要重复开工）。
-若 NQ 端 B2 工作被阻塞，可优先推进 DH 端 Stage3-B3 DH Backtest Request Adapter IMPL：
-  - 按 STAGE3_DH_BACKTEST_ADAPTER_SPEC §12 在 fake / disabled 模式下落地 B3-1..B3-5；
-  - 不接真实 NQ；不真实联调；fake-mode=true 默认装配 FakeNqBacktestClient。
-严格禁止：修改 NQ 仓库（B2 启动前）/ 接实盘 / 自动下单 / 绕风控 / 重写回测核心 /
-        引入 TradingAgents Python。
+Stage3-B2 NQ Feedback Outbox IMPL（blocked until NQ GateJ-FREEZE 或隔离分支批准）。
+- Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架落地（Fake / Disabled 三层 gate，
+  无真实 HTTP，无 RealNqBacktestClient；190 tests 全绿 / ArchUnit 12/12）。
+- Stage3-B2 触及 NQ 仓库；NQ GateJ-FREEZE 完工或隔离分支批准前不允许启动。
+- 后续 Stage3-B4 联调与 Stage3-VERIFY/FREEZE 按 STAGE3_WORK_ORDER 推进。
+严格禁止：修改 NQ 仓库 / 接实盘 / 自动下单 / 绕风控 / 重写回测核心 / 引入 TradingAgents Python。
 ```
 
 冻结快照：`docs/gates/dh-stage3-plan/`（33 个文件含 10 份 STAGE3_*.md；不得直接修改）

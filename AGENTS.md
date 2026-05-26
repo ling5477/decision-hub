@@ -78,12 +78,12 @@ docs/current/TESTING.md
 ## 4. 当前阶段
 
 ```text
-Current stage: Stage3-PLAN-FREEZE completed
-Next stage:    Stage3-B2 NQ Feedback Outbox IMPL
+Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
+Next stage:    Stage3-B2 NQ Feedback Outbox IMPL, blocked until NQ GateJ-FREEZE or isolated branch approval
 Source of truth: docs/current
 ```
 
-下一步只能进入 Stage3-B2 NQ Feedback Outbox IMPL。注意：Stage3-B1 Contract Alignment IMPLEMENT 已于 2026-05-26 完成，不要重复开工；B2 触及 NQ 仓库，必须等待 NQ GateJ-FREEZE 完工或在隔离分支上获得显式批准后才能启动；若 NQ 端 B2 工作被阻塞，可优先推进 DH 端 Stage3-B3 DH Backtest Request Adapter IMPL（按 STAGE3_DH_BACKTEST_ADAPTER_SPEC §12 在 fake / disabled 模式下落地，不接真实 NQ）。每个 Batch 都必须保证：不修改 NQ 仓库（B2 启动前）、不接实盘、不自动下单、不绕过 NQ 风控、不重写 NQ 回测核心、不引入 TradingAgents Python、mvn test 全绿。Stage3 规划冻结快照位于 docs/gates/dh-stage3-plan/。
+Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架（dh-usecase service + DTO + Repository / dh-connector Fake + Disabled client / dh-app Stage3NqBacktestWiringConfig 三层 gate / ArchUnit 扩到 12 条）；190 tests 全绿；无真实 HTTP；无 RealNqBacktestClient。下一步进入 Stage3-B2，但 B2 触及 NQ 仓库，必须等待 NQ GateJ-FREEZE 完工或在隔离分支上获得显式批准后才能启动。每个 Batch 都必须保证：不修改 NQ 仓库（B2 启动前）、不接实盘、不自动下单、不绕过 NQ 风控、不重写 NQ 回测核心、不引入 TradingAgents Python、mvn test 全绿。Stage3 规划冻结快照位于 docs/gates/dh-stage3-plan/。
 
 ## 5. 硬边界
 

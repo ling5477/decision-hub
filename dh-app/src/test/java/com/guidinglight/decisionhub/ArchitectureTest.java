@@ -257,4 +257,58 @@ public class ArchitectureTest {
         .resideInAPackage("com.guidinglight.decisionhub.providers..")
         .check(importMainClasses());
   }
+
+  // ============================================================================
+  // Stage3-B3：新增 2 条规则
+  // ============================================================================
+
+  /**
+   * Stage3-B3 ⑪ 只有 connector.nq 与 dh-app config 允许直接引用 HTTP 客户端。
+   *
+   * <p>本规则收口"DH 不接真实 HTTP"硬边界（参见 STAGE3_DH_BACKTEST_ADAPTER_SPEC §3.5 / §7.3）：
+   * 业务模块禁止直接使用 RestTemplate / WebClient / OkHttp / HttpURLConnection。
+   * 当前未引入真实 HTTP 依赖；本规则确保未来不会被静默引入。
+   */
+  @Test
+  void stage3B3_rule11_httpClientOnlyInsideConnectorNqOrAppConfig() {
+    noClasses()
+        .that()
+        .resideOutsideOfPackages("..connector.nq..", "..config..")
+        .should()
+        .dependOnClassesThat()
+        .haveFullyQualifiedName("org.springframework.web.client.RestTemplate")
+        .orShould()
+        .dependOnClassesThat()
+        .haveFullyQualifiedName("org.springframework.web.reactive.function.client.WebClient")
+        .orShould()
+        .dependOnClassesThat()
+        .resideInAPackage("okhttp3..")
+        .orShould()
+        .dependOnClassesThat()
+        .haveFullyQualifiedName("java.net.HttpURLConnection")
+        .check(importMainClasses());
+  }
+
+  /**
+   * Stage3-B3 ⑫ usecase.agent.backtest 不允许直接依赖 RealNqBacktestClient。
+   *
+   * <p>本规则收口"通过端口依赖、不依赖具体实现"原则（参见 SPEC §3.2）。
+   * 因 Stage3-B3 本轮未实现 RealNqBacktestClient 类，本规则当前为"占位 + 防御"：
+   * 即使未来引入 RealNqBacktestClient，业务层仍必须通过 NqBacktestClient 端口依赖。
+   *
+   * <p>本规则同时禁止 usecase.agent.backtest 反向依赖 dh-providers。
+   */
+  @Test
+  void stage3B3_rule12_useCaseBacktestDoesNotDependOnRealClientOrProviders() {
+    noClasses()
+        .that()
+        .resideInAPackage("..usecase.agent.backtest..")
+        .should()
+        .dependOnClassesThat()
+        .haveSimpleName("RealNqBacktestClient")
+        .orShould()
+        .dependOnClassesThat()
+        .resideInAPackage("com.guidinglight.decisionhub.providers..")
+        .check(importMainClasses());
+  }
 }

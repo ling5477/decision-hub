@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: Stage3-PLAN-FREEZE completed
-> Next stage:    Stage3-B2 NQ Feedback Outbox IMPL
+> Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
+> Next stage:    Stage3-B2 NQ Feedback Outbox IMPL, blocked until NQ GateJ-FREEZE or isolated branch approval
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -256,6 +256,63 @@ Stage3-PLAN-FREEZE      2026-05-26 完成 Stage3 规划成果落盘冻结：
                           零真实 HTTP；零真实联调；零实盘；零下单 / 绕风控 / 重写回测核心；
                           零 TradingAgents Python / Kronos / global-stock-data 接入
                         - 冻结后任何 Stage3 推进必须在新工单中单独开工
+Stage3-NEXT-STATUS-FIX  2026-05-26 修正 PLAN-FREEZE 后 Next 指向：
+                        - Stage3-B1 Contract Alignment 已于 2026-05-26 完成；
+                          Next 不应再写 Stage3-B1 IMPLEMENT
+                        - 修正 5 份状态文档 Next 字段为 Stage3-B2 NQ Feedback Outbox IMPL
+                        - STATUS.md §4 新增 3 条执行口径：
+                          * B1 already completed (2026-05-26)
+                          * B2 must wait for NQ GateJ-FREEZE or isolated-branch approval
+                          * DH-side B3 can proceed independently with fake/disabled mode
+Stage3-B3 IMPL          2026-05-26 完成 DH Backtest Request Adapter 可插拔骨架：
+                        - dh-usecase 新增 backtest 包 (9 类)：
+                          DhBacktestRequestService 端口 + Default 实现 +
+                          Command (Builder 风格 12 字段) + Result (4 工厂方法) +
+                          Outcome 枚举 (6 值) + ErrorCode 枚举 (17 值 + isRetryable) +
+                          Repository 端口 + InMemory 实现 (24h paramsHash 短路) +
+                          DefaultDhBacktestRequestService (校验 + paramsHash sha256 +
+                          24h 短路 + 不抛 RuntimeException 中断 caller)
+                        - dh-connector (4 类 + 2 扩展)：
+                          NqBacktestSubmitStatus 枚举 (ACCEPTED/DUPLICATE/DISABLED/FAILED) +
+                          NqBacktestSubmitResult (5 工厂方法 + 6 字段) +
+                          NqBacktestClient.submit(DhBacktestRequest) 默认方法 (typed) +
+                          FakeNqBacktestClient typed deterministic submit
+                          (jobId = "fake-job-" + sha256(requestId).take(16) + Clock 可注入) +
+                          DisabledNqBacktestClient (DH gate 关闭；返回 DISABLED 不抛异常)
+                        - dh-app (2 类 + 1 修改)：
+                          NqBacktestClientProperties @ConfigurationProperties("decisionhub.stage3.nq")
+                          (含 BacktestRequest 子配置 6 字段) +
+                          Stage3NqBacktestWiringConfig (互斥 SpEL 三层 gate；
+                          stage3.nq.enabled + backtest-request.enabled + fake-mode 真值表；
+                          fake-mode=false 仍走 Fake 兜底 - 本轮无 RealNqBacktestClient) +
+                          AgentRuntimeWiringConfig 移除 nqBacktestClient bean (由 Stage3 接管)
+                        - dh-app ArchitectureTest 扩到 12 条：
+                          R11 HTTP 客户端只允许出现在 connector.nq / config 之外 (RestTemplate /
+                          WebClient / OkHttp3 / HttpURLConnection 全部封堵) +
+                          R12 usecase.agent.backtest 不依赖 RealNqBacktestClient (类不存在;
+                          占位 + 防御) 与 providers
+                        - 8 个 B3 测试类共 39 cases 全绿：
+                          * dh-connector: FakeNqBacktestClientTest 5 + DisabledNqBacktestClientTest 5
+                          * dh-usecase: DhBacktestRequestServiceTest 5 +
+                                          DhBacktestRequestIdempotencyTest 3 +
+                                          DhBacktestResultSnapshotConsumptionTest 4
+                          * dh-app: RealNqBacktestClientDisabledByDefaultTest 4 (4 profile case) +
+                                     NoNqDependencyStartupTest 4 (无 NQ 时 DH 仍能启动)
+                          * dh-domain: NoDangerousEndpointContractTest 6
+                            (openapi.yaml 无危险关键词/路径段 + 16 schemas 无危险关键词 +
+                             DhBacktestRequestStatus / NqFeedbackEventType 无危险前缀 +
+                             NqFeedbackEventType 保持 8 值)
+                        - mvn test BUILD SUCCESS / 190 tests (151 → 190, +39) /
+                          0 failures / 0 errors / 0 skipped / ArchUnit 12/12 /
+                          Stage1ClosedLoopTest + Stage2ClosedLoopTest + Stage3-B1 29 contract tests
+                          全部回归基线保持全绿
+                        - 零真实 HTTP；零 RealNqBacktestClient；零 contracts/openapi.yaml 修改；
+                          零 contracts/json-schema 修改；零 Flyway migration 新增；零 OpenAPI path 新增；
+                          零 NQ 仓库改动；零下单 / 绕风控 / 重写回测核心；
+                          零 TradingAgents Python / Kronos / global-stock-data 接入
+                        - 注：Stage3-B3 was executed before B2 because B2 touches NQ.
+                              Stage3-B3 remains DH-only and fake/disabled.
+                              NQ repository remains unchanged.
 ```
 
 ## 3. 当前阶段边界
@@ -272,48 +329,45 @@ Stage3-PLAN-FREEZE      2026-05-26 完成 Stage3 规划成果落盘冻结：
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（Stage3-B2 NQ Feedback Outbox IMPL 及后续 Batch）
+## 4. 下一阶段（Stage3-B2 NQ Feedback Outbox IMPL，blocked until NQ GateJ-FREEZE）
 
 ```text
 按 docs/current/STAGE3_WORK_ORDER.md + docs/current/STAGE3_BATCH_PLAN.md 拆批实施：
 - Batch 1  Contract Alignment IMPLEMENT     （DH 仓库内对齐契约 + schema + OpenAPI + 测试 + 文档）  ✅ DONE (2026-05-26)
 - Batch 2  NQ Feedback Outbox PLAN          （DH 仓库内 SPEC：STAGE3_NQ_OUTBOX_SPEC.md）           ✅ DONE (PLAN)
 - Batch 3  DH Backtest Request Adapter PLAN （DH 仓库内 SPEC：STAGE3_DH_BACKTEST_ADAPTER_SPEC.md）  ✅ DONE (PLAN)
+- Batch 3  DH Backtest Request Adapter IMPL （DH 仓库内 IMPL：可插拔骨架，190 tests 全绿）        ✅ DONE (IMPL, 2026-05-26)
 - Batch 4  End-to-End Contract Test PLAN    （DH 仓库内 SPEC：STAGE3_E2E_CONTRACT_TEST_SPEC.md）   ✅ DONE (PLAN)
 - PLAN-FREEZE                                 （冻结快照 docs/gates/dh-stage3-plan/）                ✅ DONE
 
-Stage3-PLAN 与 Stage3-B1 IMPLEMENT 全部完工，规划成果已冻结。
+Stage3-PLAN 全部完工 + Stage3-B1/B3 DH 侧 IMPL 完工。
 
 下一步执行口径（重要约束）：
 
 - Stage3-B1 Contract Alignment already completed (2026-05-26).
-  不要重复开工 Stage3-B1 IMPLEMENT；本批已落 4 份 contract 测试类（29 cases）+
-  contracts/openapi.yaml + contracts/json-schema/* 描述对齐。
+- Stage3-B3 was executed before B2 because B2 touches NQ.
+  Stage3-B3 remains DH-only and fake/disabled.
+  NQ repository remains unchanged.
 - Stage3-B2 touches NQ and must not start until NQ GateJ-FREEZE is complete
   or explicitly approved on an isolated branch.
   B2 是 NQ 仓库工作（按 STAGE3_NQ_OUTBOX_SPEC §8 / NQ-1..NQ-5）；
   NQ GateJ-FREEZE 未完工前 B2 不允许启动；
   即便有隔离分支启动也必须遵守 STAGE3_NQ_OUTBOX_SPEC §1.3 / §9 全部硬边界
   （不影响 GateJ-FREEZE / 不进入交易同步链路 / 不阻塞订单/风控/账本/回测）。
-- DH-side Stage3-B3 can proceed independently with fake/disabled mode
-  if NQ work is blocked.
-  Stage3-B3 DH Backtest Request Adapter IMPL 可在 DH 仓库独立推进
-  （按 STAGE3_DH_BACKTEST_ADAPTER_SPEC §12 / B3-1..B3-5），
-  默认 profile FakeNqBacktestClient 兜底；
-  decisionhub.stage3.nq.enabled=false / backtest-request.enabled=false /
-  fake-mode=true；不接真实 NQ；不真实联调；不接真实 HTTP；
-  B3-3 RealNqBacktestClient skeleton 仍只做 mock HTTP（WireMock / MockWebServer）。
+- DH-side Stage3-B3 已完成 (2026-05-26).
+  仍可在后续单独工单中扩展 RealNqBacktestClient skeleton（仅 mock HTTP，不联调真实 NQ）；
+  本轮 fake-mode=false 仍走 Fake 兜底，无 RealClient 类。
 
 后续路径：
-- Stage3-B2 NQ Feedback Outbox IMPL          NQ 团队实施，DH 仓库不动
-- Stage3-B3 DH Backtest Request Adapter IMPL DH 团队按 SPEC §12 实施（B3-1..B3-5）
+- Stage3-B2 NQ Feedback Outbox IMPL          NQ 团队实施，DH 仓库不动（blocked）
+- Stage3-B3 Real Client Skeleton（可选）      DH 团队按 SPEC §12 / B3-3 实施 mock HTTP（不真实联调）
 - Stage3-B4 End-to-End Contract Test IMPL    DH+NQ 联调，按 SPEC §8 实施（B4-1..B4-5）
 - Stage3-VERIFY                               B4-5 联调 GO 后；产出 STAGE3_VERIFY_REPORT.md
 - Stage3-FREEZE                               VERIFY GO 后；拷贝 docs/current 到 docs/gates/dh-stage3/
 - DH-FREEZE                                   Stage3-FREEZE 后；DH Agent Decision Layer v1 长期维护态
 
 每个 Batch 严格遵守：
-- 不修改 NQ 仓库（DH 仓库部分；B2/B4 NQ 端工作在 NQ 仓库由 NQ 团队完成）
+- 不修改 NQ 仓库（B2 启动前；B2 启动期间隔离分支也不允许在 DH 仓库 mirror NQ 改动）
 - 不接真实下单 / 不绕风控 / 不重写回测核心
 - 不建设前端
 - 不引入 TradingAgents Python / Kronos / global-stock-data 真实接入
