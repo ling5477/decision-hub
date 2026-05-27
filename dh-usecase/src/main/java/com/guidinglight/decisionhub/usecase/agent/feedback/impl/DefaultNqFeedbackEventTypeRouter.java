@@ -37,11 +37,11 @@ public final class DefaultNqFeedbackEventTypeRouter implements NqFeedbackEventTy
   }
 
   @Override
-  public void route(final NqFeedbackEnvelope envelope) {
+  public void route(final NqFeedbackEnvelope envelope, final String tenantId) {
     final NqFeedbackEventHandler handler = handlersByType.get(envelope.getEventType());
     if (handler == null) {
       throw new IllegalStateException("no handler for eventType: " + envelope.getEventType());
     }
-    handler.handle(envelope);
+    handler.handle(envelope, tenantId);
   }
 }

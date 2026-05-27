@@ -28,11 +28,9 @@ import java.util.Map;
  *
  * <p>禁止在子类里写复杂业务推理；子类只能贡献：positive 判定、FeedbackSource 选择、candidateId 解析。
  *
- * <p>默认 tenantId 在 Stage1 即为 {@code t-default}；Stage2-PoC-B2 仍延续。
+ * <p>tenantId 必须来自认证后的 ingestion command，禁止 handler 使用硬编码默认 tenant。
  */
 public abstract class AbstractNqFeedbackEventHandler implements NqFeedbackEventHandler {
-
-  protected static final String DEFAULT_TENANT = "t-default";
 
   private final ExperienceFeedbackService experienceFeedbackService;
   private final NqFeedbackEventRepository feedbackEventRepository;
@@ -48,11 +46,11 @@ public abstract class AbstractNqFeedbackEventHandler implements NqFeedbackEventH
   }
 
   @Override
-  public final void handle(final NqFeedbackEnvelope envelope) {
+  public final void handle(final NqFeedbackEnvelope envelope, final String tenantId) {
     final Map<String, Object> payload = parsePayload(envelope.getPayloadJson());
     final NqFeedbackEvent event =
         NqFeedbackEvent.create(
-            DEFAULT_TENANT,
+            tenantId,
             envelope.getTraceId(), // Stage1：traceId == runId
             extractCandidateId(payload),
             envelope.getTraceId(),

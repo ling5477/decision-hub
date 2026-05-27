@@ -1,6 +1,7 @@
 package com.guidinglight.decisionhub.api.research;
 
 import com.guidinglight.decisionhub.api.TraceIdFilter;
+import com.guidinglight.decisionhub.api.security.AuthenticatedRequest;
 import com.guidinglight.decisionhub.common.api.ApiResponse;
 import com.guidinglight.decisionhub.common.error.BizException;
 import com.guidinglight.decisionhub.common.error.CommonErrorCodes;
@@ -29,8 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/ai/research-runs")
 public final class ResearchRunController {
 
-  private static final String DEFAULT_TENANT = "t-default";
-
   private final ResearchRunCommandService commandService;
   private final ResearchRunQueryService queryService;
 
@@ -47,16 +46,18 @@ public final class ResearchRunController {
   public ApiResponse<ResearchRunView> create(
       @Valid @RequestBody final CreateResearchRunRequest req,
       final HttpServletRequest httpRequest) {
+    final String tenantId = AuthenticatedRequest.requireTenantId(httpRequest);
     final ResearchRun run =
-        commandService.create(DEFAULT_TENANT, req.getTopic(), req.getPayloadJson());
+        commandService.create(tenantId, req.getTopic(), req.getPayloadJson());
     return ApiResponse.ok(ResearchRunView.of(run), traceId(httpRequest));
   }
 
   /** 列出当前租户的全部 run。 */
   @GetMapping
   public ApiResponse<List<ResearchRunView>> list(final HttpServletRequest httpRequest) {
+    final String tenantId = AuthenticatedRequest.requireTenantId(httpRequest);
     final List<ResearchRunView> views =
-        queryService.listRuns(DEFAULT_TENANT).stream().map(ResearchRunView::of).toList();
+        queryService.listRuns(tenantId).stream().map(ResearchRunView::of).toList();
     return ApiResponse.ok(views, traceId(httpRequest));
   }
 
@@ -64,8 +65,10 @@ public final class ResearchRunController {
   @GetMapping("/{runId}")
   public ApiResponse<ResearchRunView> detail(
       @PathVariable final String runId, final HttpServletRequest httpRequest) {
+    final String tenantId = AuthenticatedRequest.requireTenantId(httpRequest);
     final ResearchRun run =
         queryService.findRun(runId).orElseThrow(() -> notFound(runId));
+    AuthenticatedRequest.requireTenantMatch(tenantId, run.getTenantId());
     return ApiResponse.ok(ResearchRunView.of(run), traceId(httpRequest));
   }
 
@@ -73,6 +76,10 @@ public final class ResearchRunController {
   @PostMapping("/{runId}/start")
   public ApiResponse<ResearchRunView> start(
       @PathVariable final String runId, final HttpServletRequest httpRequest) {
+    final String tenantId = AuthenticatedRequest.requireTenantId(httpRequest);
+    final ResearchRun beforeStart =
+        queryService.findRun(runId).orElseThrow(() -> notFound(runId));
+    AuthenticatedRequest.requireTenantMatch(tenantId, beforeStart.getTenantId());
     final ResearchRun run = commandService.start(runId);
     return ApiResponse.ok(ResearchRunView.of(run), traceId(httpRequest));
   }
@@ -81,6 +88,7 @@ public final class ResearchRunController {
   @GetMapping("/{runId}/tasks")
   public ApiResponse<AgentTask> tasks(
       @PathVariable final String runId, final HttpServletRequest httpRequest) {
+    assertRunTenant(runId, httpRequest);
     final AgentTask task = queryService.findTask(runId).orElseThrow(() -> notFound(runId));
     return ApiResponse.ok(task, traceId(httpRequest));
   }
@@ -89,6 +97,7 @@ public final class ResearchRunController {
   @GetMapping("/{runId}/candidates")
   public ApiResponse<List<StrategyCandidate>> candidates(
       @PathVariable final String runId, final HttpServletRequest httpRequest) {
+    assertRunTenant(runId, httpRequest);
     return ApiResponse.ok(queryService.listCandidates(runId), traceId(httpRequest));
   }
 
@@ -96,9 +105,17 @@ public final class ResearchRunController {
   @GetMapping("/{runId}/judge-decision")
   public ApiResponse<JudgeDecision> judgeDecision(
       @PathVariable final String runId, final HttpServletRequest httpRequest) {
+    assertRunTenant(runId, httpRequest);
     final JudgeDecision decision =
         queryService.findJudgeDecision(runId).orElseThrow(() -> notFound(runId));
     return ApiResponse.ok(decision, traceId(httpRequest));
+  }
+
+  private void assertRunTenant(final String runId, final HttpServletRequest httpRequest) {
+    final String tenantId = AuthenticatedRequest.requireTenantId(httpRequest);
+    final ResearchRun run =
+        queryService.findRun(runId).orElseThrow(() -> notFound(runId));
+    AuthenticatedRequest.requireTenantMatch(tenantId, run.getTenantId());
   }
 
   private static BizException notFound(final String runId) {

@@ -71,7 +71,7 @@ class NqFeedbackHandlerDispatchTest {
     // 期望：依次派发 8 种 eventType，experience.apply 被调用 8 次，对应 eventType 各 1 次
     final Map<NqFeedbackEventType, Integer> expectedCount = new EnumMap<>(NqFeedbackEventType.class);
     for (NqFeedbackEventType t : NqFeedbackEventType.values()) {
-      router.route(envelopeOf(t));
+      router.route(envelopeOf(t), "tenant-dispatch");
       expectedCount.merge(t, 1, Integer::sum);
     }
 
@@ -101,17 +101,15 @@ class NqFeedbackHandlerDispatchTest {
         new PaperRunCreatedHandler(experience, repo, om);
     final NqFeedbackEnvelope envelope = envelopeOf(NqFeedbackEventType.PAPER_RUN_CREATED);
 
-    handler.handle(envelope);
+    handler.handle(envelope, "tenant-handler");
 
     assertEquals(1, experience.totalCalls);
-    // Stage1 仓库按 (tenant, runId=traceId) 索引；DEFAULT_TENANT 与 AbstractNqFeedbackEventHandler 内部一致。
-    final String defaultTenant = "t-default";
     assertTrue(
-        repo.listByRun(defaultTenant, envelope.getTraceId()).size() > 0,
+        repo.listByRun("tenant-handler", envelope.getTraceId()).size() > 0,
         "handler must append Stage1 NqFeedbackEvent");
     // raw payload 必须被保留进入 Stage1 事件的 payloadJson
     final Map<String, Object> stage1Payload =
-        repo.listByRun(defaultTenant, envelope.getTraceId()).get(0).getPayloadJson();
+        repo.listByRun("tenant-handler", envelope.getTraceId()).get(0).getPayloadJson();
     assertTrue(
         stage1Payload.containsKey("rawPayloadJson"),
         "Stage1 payload map must contain rawPayloadJson");

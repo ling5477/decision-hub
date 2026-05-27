@@ -31,6 +31,11 @@
     <artifactId>dh-usecase</artifactId>
     <version>${project.version}</version>
   </dependency>
+  <dependency>
+    <groupId>com.guidinglight</groupId>
+    <artifactId>dh-security</artifactId>
+    <version>${project.version}</version>
+  </dependency>
 
   <!-- Stage2-PoC-B2: WebMvc 入口测试需要 MockMvc + Jackson -->
   <dependency>

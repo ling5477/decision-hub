@@ -45,7 +45,7 @@ public final class InMemoryDhBacktestRequestRepository implements DhBacktestRequ
             request.getTraceId(),
             request.getStatus(),
             null,
-            Instant.now(),
+            request.getRequestedAt(),
             null,
             null,
             null);
@@ -141,7 +141,7 @@ public final class InMemoryDhBacktestRequestRepository implements DhBacktestRequ
             request.getTraceId(),
             request.getStatus(),
             null,
-            Instant.now(),
+            request.getRequestedAt(),
             null,
             null,
             null);

@@ -1,7 +1,11 @@
 package com.guidinglight.decisionhub.api.feedback;
 
 import com.guidinglight.decisionhub.api.TraceIdFilter;
+import com.guidinglight.decisionhub.api.security.AuthenticatedRequest;
 import com.guidinglight.decisionhub.common.util.TimeProvider;
+import com.guidinglight.decisionhub.security.nq.NqFeedbackAuthRequest;
+import com.guidinglight.decisionhub.security.nq.NqFeedbackAuthResult;
+import com.guidinglight.decisionhub.security.nq.NqFeedbackAuthenticator;
 import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionCommand;
 import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionResult;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionService;
@@ -32,12 +36,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/ai/feedback")
 public final class NqFeedbackController {
 
-  private static final String DEFAULT_TENANT = "t-default";
+  private static final String NQ_SOURCE_HEADER = "X-DH-NQ-Source";
+  private static final String NQ_TIMESTAMP_HEADER = "X-DH-NQ-Timestamp";
+  private static final String NQ_NONCE_HEADER = "X-DH-NQ-Nonce";
+  private static final String NQ_SIGNATURE_HEADER = "X-DH-NQ-Signature";
 
   private final NqFeedbackIngestionService ingestionService;
+  private final NqFeedbackAuthenticator feedbackAuthenticator;
 
-  public NqFeedbackController(final NqFeedbackIngestionService ingestionService) {
+  /** 构造 NQ feedback controller。 */
+  public NqFeedbackController(
+      final NqFeedbackIngestionService ingestionService,
+      final NqFeedbackAuthenticator feedbackAuthenticator) {
     this.ingestionService = ingestionService;
+    this.feedbackAuthenticator = feedbackAuthenticator;
   }
 
   /** 接收一条 NQ envelope 事件。 */
@@ -46,13 +58,28 @@ public final class NqFeedbackController {
       @Valid @RequestBody final NqFeedbackEnvelopeRequest req,
       final HttpServletRequest httpRequest) {
 
+    final String tenantId = AuthenticatedRequest.requireTenantId(httpRequest);
     final String httpTraceId = resolveHttpTraceId(httpRequest);
+    final NqFeedbackAuthResult authResult = authenticateNqSource(req, httpRequest);
+    if (!authResult.allowed()) {
+      return ResponseEntity.status(authResult.status())
+          .header(TraceIdFilter.TRACE_HEADER, nonNull(httpTraceId, req.getTraceId()))
+          .body(
+              (Object)
+                  new NqFeedbackErrorResponse(
+                      "UNAUTHORIZED_NQ_FEEDBACK",
+                      authResult.reason(),
+                      "NQ feedback source authentication failed",
+                      req.getEventId(),
+                      req.getTraceId(),
+                      req.getCorrelationId()));
+    }
     final Instant occurredAt = req.getOccurredAt() == null ? TimeProvider.now() : req.getOccurredAt();
     final Instant receivedAt = TimeProvider.now();
 
     final IngestionCommand command =
         IngestionCommand.of(
-            DEFAULT_TENANT,
+            tenantId,
             req.getEventId(),
             req.getEventType(),
             occurredAt,
@@ -112,5 +139,22 @@ public final class NqFeedbackController {
 
   private static String nonNull(final String a, final String fallback) {
     return a == null || a.isBlank() ? fallback : a;
+  }
+
+  private NqFeedbackAuthResult authenticateNqSource(
+      final NqFeedbackEnvelopeRequest req, final HttpServletRequest httpRequest) {
+    return feedbackAuthenticator.authenticate(
+        new NqFeedbackAuthRequest(
+            httpRequest.getHeader(NQ_SOURCE_HEADER),
+            req.getSourceSystem(),
+            httpRequest.getHeader(NQ_TIMESTAMP_HEADER),
+            httpRequest.getHeader(NQ_NONCE_HEADER),
+            httpRequest.getHeader(NQ_SIGNATURE_HEADER),
+            req.getEventId(),
+            req.getRequestId(),
+            req.getTraceId(),
+            req.getPayloadJson(),
+            httpRequest.getContentLengthLong(),
+            TimeProvider.now()));
   }
 }

@@ -42,7 +42,7 @@ class NqFeedbackIdempotencyTest {
       handlerMap.put(t, new CountingHandler(t, handlerCalls));
     }
     final NqFeedbackEventTypeRouter router =
-        envelope -> handlerMap.get(envelope.getEventType()).handle(envelope);
+        (envelope, tenantId) -> handlerMap.get(envelope.getEventType()).handle(envelope, tenantId);
 
     final NqFeedbackContractValidator validator =
         new DefaultNqFeedbackContractValidator(runRepo, new ObjectMapper());
@@ -74,7 +74,7 @@ class NqFeedbackIdempotencyTest {
     final AtomicInteger handlerCalls = new AtomicInteger(0);
 
     final NqFeedbackEventTypeRouter router =
-        envelope -> {
+        (envelope, tenantId) -> {
           handlerCalls.incrementAndGet();
         };
     final NqFeedbackContractValidator validator =
@@ -97,7 +97,7 @@ class NqFeedbackIdempotencyTest {
     final ResearchRunRepository runRepo = B2TestFixtures.repoWithRun(TRACE);
     final NqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
     final AtomicInteger handlerCalls = new AtomicInteger(0);
-    final NqFeedbackEventTypeRouter router = envelope -> handlerCalls.incrementAndGet();
+    final NqFeedbackEventTypeRouter router = (envelope, tenantId) -> handlerCalls.incrementAndGet();
     final NqFeedbackContractValidator validator =
         new DefaultNqFeedbackContractValidator(runRepo, new ObjectMapper());
     final NqFeedbackIngestionService service =
@@ -131,7 +131,7 @@ class NqFeedbackIdempotencyTest {
     }
 
     @Override
-    public void handle(final NqFeedbackEnvelope envelope) {
+    public void handle(final NqFeedbackEnvelope envelope, final String tenantId) {
       assertSame(type, envelope.getEventType());
       counter.incrementAndGet();
     }

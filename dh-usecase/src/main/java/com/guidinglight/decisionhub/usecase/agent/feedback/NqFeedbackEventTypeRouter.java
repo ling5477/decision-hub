@@ -10,6 +10,11 @@ import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEnvelope;
  */
 public interface NqFeedbackEventTypeRouter {
 
-  /** 按 envelope.eventType 路由到对应 handler；找不到 handler 抛异常。 */
-  void route(NqFeedbackEnvelope envelope);
+  /**
+   * 按 envelope.eventType 路由到对应 handler；找不到 handler 抛异常。
+   *
+   * @param envelope 已校验 envelope。
+   * @param tenantId 已认证请求上下文中的 tenant。
+   */
+  void route(NqFeedbackEnvelope envelope, String tenantId);
 }

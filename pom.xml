@@ -37,6 +37,7 @@
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <spotless.version>3.1.0</spotless.version>
   </properties>
 
   <dependencyManagement>
@@ -122,6 +123,7 @@
           <plugin>
             <groupId>com.diffplug.spotless</groupId>
             <artifactId>spotless-maven-plugin</artifactId>
+            <version>${spotless.version}</version>
             <executions>
               <execution>
                 <id>spotless-check</id>
