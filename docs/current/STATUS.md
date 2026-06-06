@@ -1,7 +1,7 @@
 # Decision Hub Status
 
 > Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
-> Next stage:    Stage3-B2 NQ Feedback Outbox IMPL, blocked until NQ GateJ-FREEZE or isolated branch approval
+> Next stage:    Integration-0-PLAN
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -13,6 +13,20 @@ usecase.contract / dh-providers）已全部 `@Deprecated`，REST 路径迁移到
 不再与新链路 `/api/ai/research-runs` 冲突。
 
 文档单源已收敛到 `docs/current/`，与 `docs/codex/plans/_active/STATUS.json` 一致。
+
+Codex workflow routing 已固化到 `nq-dh-workflow-router` 与 `docs/current/CODEX_*.md` / `docs/current/DH_CODEX_*.md` 文档。所有 DH / NQ 任务必须先分类，再选择插件、scope 和标准输出格式。
+
+当前状态锁定：
+
+```text
+DH-AUDIT-FIX completed.
+NQ integration not started.
+Integration-0 not started / plan only.
+RealClient forbidden.
+real provider forbidden.
+LIVE trading forbidden.
+NQ mutation forbidden.
+```
 
 ## 2. 当前已完成
 
@@ -313,6 +327,48 @@ Stage3-B3 IMPL          2026-05-26 完成 DH Backtest Request Adapter 可插拔�
                         - 注：Stage3-B3 was executed before B2 because B2 touches NQ.
                               Stage3-B3 remains DH-only and fake/disabled.
                               NQ repository remains unchanged.
+DH-CODEX-WORKFLOW       2026-06-06 完成 Codex workflow routing 规则固化（仅文档）：
+                        - 新增 `.agents/skills/nq-dh-workflow-router/SKILL.md`
+                        - 新增 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+                        - 新增 docs/current/CODEX_WORKFLOW_INDEX.md
+                        - 新增 docs/current/DH_CODEX_PLUGIN_WORKFLOW.md
+                        - 新增 docs/current/DH_WORKFLOW_ROUTER_SKILL.md
+                        - 新增 docs/current/DH_CODEX_TASK_TEMPLATES.md
+                        - AGENTS.md 声明 `nq-dh-workflow-router` 为 active skill
+                        - 统一输出字段使用 Findings；Summary 不作为必填字段
+                        - 明确 NQ integration not started；Integration-0 not started / plan only
+                        - RealClient / real provider / LIVE trading / NQ mutation 继续禁止
+                        - 本轮不修改业务代码，不新增 API / migration / NQ client
+DH-CODEX-WORKFLOW-CLEANUP
+                        2026-06-06 完成 DOCUMENTATION 冲突修复（仅 Markdown / Skill 文档）：
+                        - ROADMAP.md / WORK_ORDER.md 已收口，当前 next 统一为 Integration-0-PLAN
+                        - Stage2-PoC / 真实 NQ client / 真实 HTTP / event / backtest request
+                          表述已改为 historical / superseded / deferred / forbidden
+                        - DH workflow 已补齐 NQ 通用排除目录：
+                          node_modules / target / build / dist / .git / logs / test-results /
+                          secrets / credentials
+                        - DH workflow 已补齐细凭证禁令：
+                          token / cookie / API key / API secret / exchange secret /
+                          production .env / private key / mnemonic / keystore password /
+                          2FA backup code
+                        - DH workflow 已补齐开工前范围字段：
+                          repository / module / target files / excluded files / expected output
+                        - DH workflow 已补齐 archived / historical / superseded 文档不作为当前事实源规则
+                        - 当前仍保持 DH-AUDIT-FIX completed；NQ integration not started；
+                          Integration-0 not started / plan only；RealClient / real provider /
+                          LIVE trading / NQ mutation forbidden
+DH-CODEX-WORKFLOW-FINAL-CLEANUP
+                        2026-06-06 完成 DOCUMENTATION 入口口径收口（仅 Markdown）：
+                        - AGENTS.md / README.md / docs/current/README.md 的 current next 已统一为
+                          Integration-0-PLAN
+                        - docs/current/DH_NQ_INTEGRATION.md 已增加当前状态锁定，并把 REST API /
+                          POST /api/ai/backtest-requests / 真实 HTTP / event / NQ client /
+                          RealClient / real provider 方向标记为 historical / superseded /
+                          deferred / gated
+                        - 本轮不修改业务代码、API、migration、provider、NQ client、RealClient 或交易路径
+                        - 当前仍保持 DH-AUDIT-FIX completed；NQ integration not started；
+                          Integration-0 not started / plan only；RealClient / real provider /
+                          LIVE trading / NQ mutation forbidden
 ```
 
 ## 3. 当前阶段边界
@@ -329,49 +385,43 @@ Stage3-B3 IMPL          2026-05-26 完成 DH Backtest Request Adapter 可插拔�
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（Stage3-B2 NQ Feedback Outbox IMPL，blocked until NQ GateJ-FREEZE）
+## 4. 下一阶段（Integration-0-PLAN）
 
 ```text
-按 docs/current/STAGE3_WORK_ORDER.md + docs/current/STAGE3_BATCH_PLAN.md 拆批实施：
-- Batch 1  Contract Alignment IMPLEMENT     （DH 仓库内对齐契约 + schema + OpenAPI + 测试 + 文档）  ✅ DONE (2026-05-26)
-- Batch 2  NQ Feedback Outbox PLAN          （DH 仓库内 SPEC：STAGE3_NQ_OUTBOX_SPEC.md）           ✅ DONE (PLAN)
-- Batch 3  DH Backtest Request Adapter PLAN （DH 仓库内 SPEC：STAGE3_DH_BACKTEST_ADAPTER_SPEC.md）  ✅ DONE (PLAN)
-- Batch 3  DH Backtest Request Adapter IMPL （DH 仓库内 IMPL：可插拔骨架，190 tests 全绿）        ✅ DONE (IMPL, 2026-05-26)
-- Batch 4  End-to-End Contract Test PLAN    （DH 仓库内 SPEC：STAGE3_E2E_CONTRACT_TEST_SPEC.md）   ✅ DONE (PLAN)
-- PLAN-FREEZE                                 （冻结快照 docs/gates/dh-stage3-plan/）                ✅ DONE
+唯一下一步是 Integration-0-PLAN。
 
-Stage3-PLAN 全部完工 + Stage3-B1/B3 DH 侧 IMPL 完工。
+Integration-0-PLAN 只允许：
+- 输出只读边界规划
+- 输出契约草案
+- 定义 scope token / permission model
+- 定义 audit trail
+- 定义 replay protection / tenant binding / request signing
+- 定义 timestamp / nonce / payload size limit / source allowlist
+- 定义验收清单和风险清单
 
-下一步执行口径（重要约束）：
+Integration-0-PLAN 不允许：
+- 实现真实 NQ client
+- 实现 RealClient / RealNqBacktestClient
+- 接真实 HTTP / event 到 NQ
+- 调用 NQ /api/ai/research/backtest-requests
+- 启动 Paper Run
+- 修改 NQ 交易状态
+- 访问交易所密钥
+- 触碰 LIVE trading
+- 读取或写入 NQ DB
+- 新增 API / migration / provider / 交易路径
 
-- Stage3-B1 Contract Alignment already completed (2026-05-26).
-- Stage3-B3 was executed before B2 because B2 touches NQ.
-  Stage3-B3 remains DH-only and fake/disabled.
-  NQ repository remains unchanged.
-- Stage3-B2 touches NQ and must not start until NQ GateJ-FREEZE is complete
-  or explicitly approved on an isolated branch.
-  B2 是 NQ 仓库工作（按 STAGE3_NQ_OUTBOX_SPEC §8 / NQ-1..NQ-5）；
-  NQ GateJ-FREEZE 未完工前 B2 不允许启动；
-  即便有隔离分支启动也必须遵守 STAGE3_NQ_OUTBOX_SPEC §1.3 / §9 全部硬边界
-  （不影响 GateJ-FREEZE / 不进入交易同步链路 / 不阻塞订单/风控/账本/回测）。
-- DH-side Stage3-B3 已完成 (2026-05-26).
-  仍可在后续单独工单中扩展 RealNqBacktestClient skeleton（仅 mock HTTP，不联调真实 NQ）；
-  本轮 fake-mode=false 仍走 Fake 兜底，无 RealClient 类。
+Stage2-PoC、Stage3-B2/B3/B4 的真实接入、联调、RealClient 或 NQ mutation 方向
+均为 historical / superseded / deferred，不是当前 next，不允许作为当前实现任务。
 
-后续路径：
-- Stage3-B2 NQ Feedback Outbox IMPL          NQ 团队实施，DH 仓库不动（blocked）
-- Stage3-B3 Real Client Skeleton（可选）      DH 团队按 SPEC §12 / B3-3 实施 mock HTTP（不真实联调）
-- Stage3-B4 End-to-End Contract Test IMPL    DH+NQ 联调，按 SPEC §8 实施（B4-1..B4-5）
-- Stage3-VERIFY                               B4-5 联调 GO 后；产出 STAGE3_VERIFY_REPORT.md
-- Stage3-FREEZE                               VERIFY GO 后；拷贝 docs/current 到 docs/gates/dh-stage3/
-- DH-FREEZE                                   Stage3-FREEZE 后；DH Agent Decision Layer v1 长期维护态
-
-每个 Batch 严格遵守：
-- 不修改 NQ 仓库（B2 启动前；B2 启动期间隔离分支也不允许在 DH 仓库 mirror NQ 改动）
-- 不接真实下单 / 不绕风控 / 不重写回测核心
-- 不建设前端
-- 不引入 TradingAgents Python / Kronos / global-stock-data 真实接入
-- mvn test 全绿
+当前状态保持：
+- DH-AUDIT-FIX completed
+- NQ integration not started
+- Integration-0 not started / plan only
+- RealClient forbidden
+- real provider forbidden
+- LIVE trading forbidden
+- NQ mutation forbidden
 ```
 
 ## 5. 当前风险

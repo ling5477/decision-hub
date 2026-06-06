@@ -1,12 +1,29 @@
 # Decision Hub Current Work Order
 
-> Current stage: Stage1 (Boundary Freeze + Agent Runtime Skeleton) completed
-> Closed:        Stage1-CLOSE（旧链路 @Deprecated + 文档单源 + ArchUnit 兜底）
-> Next stage:    Stage2-PoC (NQ 真实事件回流 + 工具接口预留)
+> Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
+> Closed:        DH-CODEX-WORKFLOW conflict cleanup
+> Next stage:    Integration-0-PLAN
 
 ## 1. 当前目标
 
-Stage1-CLOSE 已完成，等待开 Stage2-PoC 的工单。
+下一步唯一允许工作内容是 Integration-0-PLAN。
+
+Integration-0-PLAN 只允许输出规划文档，不允许实现真实接入：
+
+```text
+只读边界
+契约草案
+权限模型
+审计模型
+replay protection
+tenant binding
+request signing
+timestamp / nonce
+payload size limit
+source allowlist
+验收清单
+风险清单
+```
 
 ## 2. Stage1-CLOSE 已完成范围
 
@@ -21,23 +38,55 @@ ArchUnit： 新增 4 条规则保护新边界
 pom：      dh-eval parent 修回 dh-bom
 ```
 
-## 3. Stage2-PoC（下一轮）
+## 3. Integration-0-PLAN（唯一下一步）
 
-下一份工单将以"NQ 真实事件回流 + 工具接口预留"为主题；启动前必须先在 docs/current/ 下出
-`STAGE2_POC_WORK_ORDER.md` 由 Plan 阶段交付。
+下一份工单只能以 `Integration-0-PLAN` 为主题；启动前必须先在 `docs/current/` 下输出
+Integration-0 规划文档。
 
-下一轮工单候选范围（待 Plan 收敛）：
+允许范围：
 
 ```text
-NqFeedbackClient / NqBacktestClient 接通真实 HTTP/事件（保留 Fake fallback）
-ForecastToolPort（Kronos 接口骨架，不接真实模型）
-ResearchDataAdapter / ExternalMarketSnapshot / ResearchSnapshotStore（global-stock-data 预留）
-AgentTaskPlanner 动态选边（按 topic/regime）
-ResearchRun.payloadJson 引入 reflection / checkpoint 字段命名约定
-dh-infra：把 InMemory 仓储替换为 JDBC 实现（V2 已就位）
+输出 Integration-0-PLAN 文档
+梳理 DH -> NQ 只读边界
+定义契约草案
+定义 scope token / permission model
+定义 audit trail
+定义 replay protection / tenant binding / request signing
+定义 timestamp / nonce / payload size limit / source allowlist
+定义验收清单
+定义风险清单
 ```
 
-## 4. 不做事项（持续硬约束）
+当前状态必须保持：
+
+```text
+DH-AUDIT-FIX completed
+NQ integration not started
+Integration-0 not started / plan only
+RealClient forbidden
+real provider forbidden
+LIVE trading forbidden
+NQ mutation forbidden
+```
+
+## 4. Historical / superseded / deferred 内容
+
+```text
+NqFeedbackClient 接通真实 HTTP / event         forbidden / deferred
+NqBacktestClient 接通真实 NQ                    forbidden / deferred
+NQ /api/ai/research/backtest-requests           forbidden / deferred
+RealNqBacktestClient / RealClient               forbidden
+real provider                                   forbidden
+真实 HTTP / event 到 NQ                         forbidden
+启动 Paper Run                                  forbidden
+修改 NQ 交易状态                                forbidden
+访问交易所密钥                                  forbidden
+LIVE trading                                    forbidden
+```
+
+以上内容只保留为历史背景，不是当前 next，不允许作为当前实现任务。后续如需恢复，必须先通过 Integration-0-PLAN 的安全审查、契约冻结和人工确认。
+
+## 5. 不做事项（持续硬约束）
 
 ```text
 不修改 NQ 仓库交易核心
@@ -48,22 +97,30 @@ dh-infra：把 InMemory 仓储替换为 JDBC 实现（V2 已就位）
 不建设第二套完整前端
 不引入 BCO/ACO/GWO 等重型数学优化器
 不把 Kronos / TradingAgents / global-stock-data 整体复制进 DH/NQ
+不新增 API / migration / provider / NQ client / RealClient / 交易路径
+不读取 token / cookie / exchange secret / production .env / API key / private key / mnemonic / 2FA backup code
 ```
 
-## 5. 下一轮 Codex 开工提示词草稿
+## 6. 下一轮 Codex 开工提示词草稿
 
 ```text
-你在 decision-hub 仓库 dev 分支上工作。任务名：Stage2-PoC-PLAN。
+你在 decision-hub 仓库 dev 分支上工作。任务名：Integration-0-PLAN。
 
-目标：把 Stage1 的 Fake NQ adapter 与内存仓储升级为"NQ 真实事件回流 + 工具接口预留"；
-不动 Stage1 已落地的领域模型与用例服务边界，不修改 NQ 仓库，不实现真实下单。
+目标：只输出 DH -> NQ 未来接入前的只读边界、契约草案、权限模型、审计模型、
+replay protection、tenant binding、request signing、timestamp / nonce、payload size limit、
+source allowlist、验收清单和风险清单。
 
-请先在 docs/current/STAGE2_POC_WORK_ORDER.md 中产出：
-1. 与 NQ 团队需要协调的 NqFeedbackEvent / NqBacktestRequest 契约清单（OpenAPI 草稿）。
-2. dh-connector.tools.ForecastToolPort 与 ForecastArtifact 的接口签名（不接 Python）。
-3. dh-connector.research.{ResearchDataAdapter, ExternalMarketSnapshot, ResearchSnapshotStore} 接口签名。
-4. AgentTaskPlanner 动态选边的最小决策表。
-5. dh-infra：InMemory 仓储替换为 JDBC 实现的迁移清单（V3 候选 + 既有 V2 表对齐）。
+禁止：
+- 不实现真实 NQ client
+- 不实现 RealClient
+- 不接真实 HTTP / event 到 NQ
+- 不调用 NQ /api/ai/research/backtest-requests
+- 不启动 Paper Run
+- 不修改 NQ 交易状态
+- 不访问交易所密钥
+- 不触碰 LIVE trading
+- 不读取或写入 NQ DB
+- 不新增 API / migration / provider / 交易路径
 
-不要写业务代码。本轮只产出 WORK_ORDER 草稿与 PLAN_QUEUE。
+不要写业务代码。本轮只产出 Integration-0-PLAN 文档草案。
 ```

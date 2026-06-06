@@ -10,7 +10,7 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 
 ```text
 Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
-Next stage:    Stage3-B2 NQ Feedback Outbox IMPL, blocked until NQ GateJ-FREEZE or isolated branch approval
+Next stage:    Integration-0-PLAN
 Source of truth: docs/current
 ```
 
@@ -26,6 +26,8 @@ docs/current/README.md
 
 ```text
 AGENTS.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/CODEX_WORKFLOW_INDEX.md
 docs/current/STATUS.md
 docs/current/ROADMAP.md
 docs/current/WORKFLOW.md
@@ -44,6 +46,19 @@ docs/codex/        当前活跃计划（plans/_active/） + 历史归档（plans
 contracts/         对外协议、Schema、事件契约
 golden_cases/      黄金样例与回归用例
 ```
+
+## Codex workflow 入口
+
+```text
+docs/current/CODEX_WORKFLOW_INDEX.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/DH_CODEX_PLUGIN_WORKFLOW.md
+docs/current/DH_WORKFLOW_ROUTER_SKILL.md
+docs/current/DH_CODEX_TASK_TEMPLATES.md
+.agents/skills/nq-dh-workflow-router/SKILL.md
+```
+
+所有 Codex / Agent 任务先使用 `nq-dh-workflow-router` 做任务分类、插件路由、scope 收口和输出格式统一。标准输出字段固定为 `Task classification`、`Plugins selected`、`Scope`、`Files inspected`、`Files changed`、`Findings`、`Validation`、`Risks`、`Next concrete action`；`Summary` 不是必填字段。
 
 ## 当前工程边界
 
@@ -65,12 +80,15 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-Stage3-B2 NQ Feedback Outbox IMPL（blocked until NQ GateJ-FREEZE 或隔离分支批准）。
+Integration-0-PLAN。
 - Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架落地（Fake / Disabled 三层 gate，
   无真实 HTTP，无 RealNqBacktestClient；190 tests 全绿 / ArchUnit 12/12）。
-- Stage3-B2 触及 NQ 仓库；NQ GateJ-FREEZE 完工或隔离分支批准前不允许启动。
-- 后续 Stage3-B4 联调与 Stage3-VERIFY/FREEZE 按 STAGE3_WORK_ORDER 推进。
-严格禁止：修改 NQ 仓库 / 接实盘 / 自动下单 / 绕风控 / 重写回测核心 / 引入 TradingAgents Python。
+- Integration-0-PLAN 只允许输出只读边界、契约草案、权限模型、审计模型、风险清单和验收标准。
+- Stage3-B2 / NQ Feedback Outbox / 真实 HTTP / event / NQ client / RealClient / real provider
+  均为 historical / superseded / deferred / gated，不是当前 next，不允许作为当前实现任务。
+- NQ integration not started；Integration-0 not started / plan only。
+- RealClient forbidden；real provider forbidden；LIVE trading forbidden；NQ mutation forbidden。
+严格禁止：接 NQ / 修改 NQ 仓库 / 接实盘 / 自动下单 / 绕风控 / 重写回测核心 / 引入 TradingAgents Python。
 ```
 
 冻结快照：`docs/gates/dh-stage3-plan/`（33 个文件含 10 份 STAGE3_*.md；不得直接修改）

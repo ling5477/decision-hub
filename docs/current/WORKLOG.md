@@ -1769,3 +1769,226 @@ RealNqBacktestClient 未实现（fake-mode=false 仍走 Fake 兜底）
 
 后续路径：Stage3-B4 联调（按 STAGE3_E2E_CONTRACT_TEST_SPEC §8 / B4-1..B4-5） -> Stage3-VERIFY ->
 Stage3-FREEZE -> DH-FREEZE。
+
+---
+
+## 2026-06-06 DH-CODEX-WORKFLOW（Codex workflow routing 规则固化）
+
+按用户工单：把 NQ 已完成的 Codex workflow routing、`nq-dh-workflow-router`、插件路由规则、输出格式和 NQ/DH 安全边界同步到 Decision Hub 仓库。
+
+本轮任务类型为 `DOCUMENTATION`，只修改文档和规则文件，不修改业务代码，不启动 NQ integration。
+
+### 已完成
+
+```text
+新增 .agents/skills/nq-dh-workflow-router/SKILL.md
+  - 定义 DOCUMENTATION / CODE_ANALYSIS / CODE_CHANGE / SECURITY_AUDIT /
+    AGENT_API / NQ_INTEGRATION_PLAN / PRODUCT_DESIGN / PRESENTATION 分类
+  - 固化插件路由矩阵
+  - 固化 DH/NQ 禁止项
+  - 固化标准输出格式，以 Findings 为必填字段，不要求 Summary
+
+新增 docs/current/DH_CODEX_PLUGIN_WORKFLOW.md
+  - 固化插件路由规则
+  - 明确插件不授权真实 provider / RealClient / DB / 交易能力
+
+新增 docs/current/DH_WORKFLOW_ROUTER_SKILL.md
+  - 说明 router skill 触发规则、分类优先级、Integration-0 边界
+
+新增 docs/current/DH_CODEX_TASK_TEMPLATES.md
+  - 为 8 类任务提供统一输出模板
+  - 所有模板使用 Findings
+  - Summary 明确不是必填字段
+
+新增 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+  - 固化 nq-dh-workflow-router 前置分类规则
+  - 固化 DH 项目边界和当前状态锁定
+
+新增 docs/current/CODEX_WORKFLOW_INDEX.md
+  - 建立 Codex workflow 当前入口索引
+
+更新 AGENTS.md
+  - 开工读取清单加入 CODEX_PROJECT_INSTRUCTIONS.md
+  - 新增 Codex workflow routing 强制章节
+  - active skills 从 8 个调整为 9 个，加入 nq-dh-workflow-router
+
+更新 README.md / docs/current/README.md
+  - 增加 Codex workflow 入口
+  - 固化标准输出字段
+
+更新 docs/current/STATUS.md / TESTING.md / WORKLOG.md
+  - 记录 DH-CODEX-WORKFLOW completed
+  - 保持 DH-AUDIT-FIX completed
+  - 明确 NQ integration not started
+  - 明确 Integration-0 not started / plan only
+```
+
+### 严格边界（本阶段未违反）
+
+```text
+不修改 backend / frontend / scripts / deploy / migration / API
+不新增 NQ client
+不新增 RealClient
+不新增 real provider
+不新增真实交易路径
+不连接 NQ
+不读取 NQ 数据库
+不写 NQ 数据库
+不启动 Paper Run
+不接 LIVE trading
+不读取密钥、凭证、生产配置
+不扫描 node_modules / target / build / dist / .git / logs / test-results
+不把 DH integration 写成已开始或已完成
+```
+
+### 验收
+
+```text
+git status --short
+git diff --check
+定向 rg 检查：
+  - AGENTS.md 声明 nq-dh-workflow-router 为 active skill
+  - .agents/skills/nq-dh-workflow-router/SKILL.md 存在
+  - docs/current/CODEX_PROJECT_INSTRUCTIONS.md 包含前置分类规则
+  - 标准输出格式统一使用 Findings
+  - Summary 不是必填字段
+  - 未把 DH integration 写成 started / completed
+  - 未新增 NQ client / RealClient / real provider / LIVE trading
+  - 未修改业务代码
+```
+
+---
+
+## 2026-06-06 DH-CODEX-WORKFLOW-CLEANUP（DOCUMENTATION 冲突修复）
+
+按用户工单：修复 NQ/DH 横向对照发现的剩余冲突，只允许修改当前 workflow 和状态文档，不修改业务代码、API、migration、provider、NQ client、RealClient 或交易路径。
+
+### 已完成
+
+```text
+ROADMAP.md
+  - 当前路线 next 从 Stage2-PoC 收口为 Integration-0-PLAN
+  - Stage2-PoC 改为 historical / superseded / deferred
+  - NqFeedbackClient / NqBacktestClient / 真实 HTTP / event / backtest request /
+    RealNqBacktestClient / RealClient / real provider 明确不是当前 next
+  - 后续如需恢复，必须先通过 Integration-0-PLAN 安全审查、契约冻结和人工确认
+
+WORK_ORDER.md
+  - Next stage 改为 Integration-0-PLAN
+  - 下一步唯一允许输出 Integration-0-PLAN 文档
+  - 真实 NQ client / NQ /api/ai/research/backtest-requests / RealClient /
+    real provider / Paper Run / NQ 交易状态 / LIVE trading 全部标记为 forbidden / deferred / historical
+
+DH workflow 文档
+  - AGENTS.md
+  - .agents/skills/nq-dh-workflow-router/SKILL.md
+  - docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+  - docs/current/DH_CODEX_PLUGIN_WORKFLOW.md
+  - docs/current/DH_WORKFLOW_ROUTER_SKILL.md
+
+同步 NQ 通用规则：
+  - 完整排除目录：node_modules / target / build / dist / .git / logs /
+    test-results / secrets / credentials
+  - 细凭证禁令：token / cookie / API key / API secret / exchange secret /
+    production .env / private key / mnemonic / keystore password / 2FA backup code
+  - 开工前范围字段：repository / module / target files / excluded files / expected output
+  - archived / historical / superseded 文档不作为当前事实源；
+    历史 Stage 文档只能作为背景，不得自动转化为当前 next task
+
+STATUS.md / TESTING.md / WORKLOG.md
+  - 记录 ROADMAP / WORK_ORDER 已收口，当前 next 统一为 Integration-0-PLAN
+  - 记录 workflow 已补齐 NQ 通用规则
+  - 记录本轮只修改 Markdown / Skill 文档，未运行 mvn test
+```
+
+### 严格边界（本阶段未违反）
+
+```text
+不修改业务代码
+不修改 API / migration / provider / NQ client / RealClient / 交易路径
+不新增 NQ client
+不新增 RealClient
+不新增 real provider
+不接 NQ
+不读取或写入 NQ DB
+不启动 Paper Run
+不访问交易所密钥
+不触碰 LIVE trading
+不扫描 node_modules / target / build / dist / .git / logs / test-results / secrets / credentials
+不读取 token / cookie / exchange secret / production .env / API key / private key / mnemonic / 2FA backup code
+不把 Integration-0 / Stage2-PoC / NQ integration 写成 started / completed
+不把 archived / historical / superseded 文档当作当前事实源
+```
+
+### 下一步
+
+```text
+再次执行最终只读一致性验证，确认 Conflicts 为 None。
+```
+
+---
+
+## 2026-06-06 DH-CODEX-WORKFLOW-FINAL-CLEANUP（DOCUMENTATION 入口口径修复）
+
+按用户工单：修复最终只读验证发现的剩余入口文档冲突，只允许修改 AGENTS.md、README.md、
+docs/current/README.md、docs/current/DH_NQ_INTEGRATION.md、STATUS.md、TESTING.md、WORKLOG.md。
+
+### 已完成
+
+```text
+AGENTS.md
+  - Current stage 保持 Stage3-B3 DH Backtest Request Adapter IMPL completed
+  - Next stage 改为 Integration-0-PLAN
+  - 明确 Integration-0-PLAN 只做只读边界、契约冻结、权限模型、审计模型、风险清单和验收标准
+  - Stage3-B2 / NQ Feedback Outbox / 真实 HTTP / event / NQ client / RealClient /
+    real provider 标记为 historical / superseded / deferred / gated
+
+README.md
+  - Next stage 改为 Integration-0-PLAN
+  - 当前下一步从 Stage3-B2 收口为 Integration-0-PLAN
+  - 明确 NQ integration not started；Integration-0 not started / plan only；
+    RealClient / real provider / LIVE trading / NQ mutation forbidden
+
+docs/current/README.md
+  - 顶部 Next stage 改为 Integration-0-PLAN
+  - “下一步只允许进入”改为 Integration-0-PLAN
+  - 明确 Integration-0-PLAN 不是 implementation；不接 NQ；不新增 NQ client /
+    RealClient / real provider；不触碰 LIVE trading；不修改 NQ 状态
+
+docs/current/DH_NQ_INTEGRATION.md
+  - 增加当前状态锁定声明
+  - REST API 控制面 / POST /api/ai/backtest-requests / 真实 HTTP / event /
+    NQ client / RealClient / real provider 方向标记为 historical / superseded /
+    deferred / gated
+  - 明确这些方向不是当前 next，不是当前 implementation，不允许作为当前开发任务
+  - 明确 Integration-0-PLAN 只能做只读边界、契约草案、scope token /
+    permission model、audit trail、replay protection、tenant binding、
+    request signing、timestamp / nonce、payload size limit、source allowlist、
+    risk checklist、acceptance checklist
+```
+
+### 严格边界（本阶段未违反）
+
+```text
+不修改业务代码
+不修改 API / migration / provider / NQ client / RealClient / 交易路径
+不新增 NQ client
+不新增 RealClient
+不新增 real provider
+不接 NQ
+不读取或写入 NQ DB
+不启动 Paper Run
+不访问交易所密钥
+不触碰 LIVE trading
+不扫描 node_modules / target / build / dist / .git / logs / test-results / secrets / credentials
+不读取 token / cookie / API key / API secret / exchange secret / production .env /
+private key / mnemonic / keystore password / 2FA backup code
+不把 Integration-0 / Stage2-PoC / Stage3-B2 / NQ integration 写成 started / completed
+不把 archived / historical / superseded 文档当作当前事实源
+```
+
+### 下一步
+
+```text
+再次执行最终只读一致性验证，确认 Conflicts 为 None。
+```

@@ -10,8 +10,9 @@ DH 的目标不是成为交易系统，而是成为 NQ 的 AI Agent 决策能力
 DH-REFIT-1:   文档结构与边界统一                          [completed]
 Stage1:       Boundary Freeze + Agent Runtime Skeleton    [completed]
 Stage1-CLOSE: 旧链路 @Deprecated + 文档单源 + ArchUnit    [completed]
-Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [next]
-Stage3:       NQ Console AI 页面接入                      [later]
+Integration-0-PLAN: 只读边界、契约冻结、权限模型、审计模型  [next]
+Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
+Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
 ```
 
@@ -59,32 +60,80 @@ dh-eval/pom.xml parent 修回 dh-bom
 dep-tree.txt 重新生成
 ```
 
-## 4. Stage2-PoC（下一阶段）
+## 4. Integration-0-PLAN（唯一下一步）
 
-目标：把 Stage1 的 Fake 接入升级为"NQ 真实事件回流 + 工具接口预留"。
+目标：只做 DH -> NQ 未来接入前的只读边界、契约冻结、权限模型和审计模型规划。
+
+Integration-0-PLAN 当前状态：
+
+```text
+NQ integration not started
+Integration-0 not started / plan only
+RealClient forbidden
+real provider forbidden
+LIVE trading forbidden
+NQ mutation forbidden
+```
 
 范围：
 
 ```text
-NqFeedbackClient 接通真实 HTTP/事件（仍保留 Fake 作为测试 fallback）
-NqBacktestClient 接通真实 NQ /api/ai/research/backtest-requests
-dh-connector.tools.ForecastToolPort + dh-domain ForecastArtifact（Kronos 接口预留，不接真实模型）
-dh-connector.research.{ResearchDataAdapter, ExternalMarketSnapshot, ResearchSnapshotStore}（global-stock-data 预留）
-AgentTaskPlanner 支持基于 topic/regime 动态选边（TradingAgents 思想吸收）
-ResearchRun.payloadJson 增加 reflection / checkpoint 字段命名约定
-dh-infra：把 InMemory 仓储替换为 JDBC 实现
+DH -> NQ 只读边界梳理
+契约草案
+scope token / permission model
+audit trail
+replay protection
+tenant binding
+request signing
+timestamp / nonce
+payload size limit
+source allowlist
+验收清单
+风险清单
+```
+
+Integration-0-PLAN 必须明确禁止：
+
+```text
+不实现真实 NQ client
+不实现 RealClient
+不接真实 HTTP / event 到 NQ
+不调用 NQ /api/ai/research/backtest-requests
+不启动 Paper Run
+不修改 NQ 交易状态
+不访问交易所密钥
+不触碰 LIVE trading
+不读取 NQ DB
+不写 NQ DB
 ```
 
 验收：
 
 ```text
-端到端：DH 主动发起 fake/真实 NQ backtest request -> NQ 回流 feedback -> DH 经验强化
-mvn test 全绿
-ArchUnit 4 条规则保持绿色
-DB_SCHEMA 与 V2 + V3 迁移脚本一致
+输出 Integration-0-PLAN 文档
+只读边界、契约草案、权限模型、审计模型和 replay protection 规则可审查
+明确 payload size limit、source allowlist、tenant binding、request signing、timestamp / nonce
+列出 forbidden 能力清单和回滚 / 停止条件
+git diff --check 通过
+本轮不要求 mvn test，除非后续任务修改业务代码
 ```
 
-## 5. Stage3：NQ Console 接入
+## 5. Stage2-PoC（historical / superseded / deferred）
+
+以下内容是历史规划背景，不是当前 next，不允许作为当前实现任务：
+
+```text
+NqFeedbackClient 接通真实 HTTP/事件（deferred / forbidden until Integration-0 approved）
+NqBacktestClient 接通真实 NQ /api/ai/research/backtest-requests（deferred / forbidden until Integration-0 approved）
+RealNqBacktestClient / RealClient（forbidden）
+real provider（forbidden）
+真实 HTTP / event 到 NQ（forbidden）
+DH 主动发起真实 NQ backtest request（forbidden）
+```
+
+后续如需恢复这些方向，必须先通过 Integration-0-PLAN 的安全审查、契约冻结和人工确认。
+
+## 6. Stage3：NQ Console 接入
 
 目标：NQ Console 接入 DH AI 页面。
 
@@ -100,7 +149,7 @@ DB_SCHEMA 与 V2 + V3 迁移脚本一致
 
 验收：NQ Console 统一前端入口，不建设 DH 完整业务前端。
 
-## 6. DH-FREEZE
+## 7. DH-FREEZE
 
 目标：冻结 DH Agent Decision Layer v1。
 

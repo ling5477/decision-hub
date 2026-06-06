@@ -70,6 +70,9 @@ Stage3-PLAN-FREEZE       2026-05-26 完成：Stage3 规划成果落盘冻结：
                         - 本轮为文档冻结，零 Java 业务代码改动；零 NQ 仓库改动；
                           零 contracts / migration / OpenAPI 修改；零真实外部接入
                         - 下一阶段进入 Stage3-B1 IMPLEMENT（B1 已完成；B2/B3/B4 单独开工）
+DH-CODEX-WORKFLOW       2026-06-06 完成：Codex workflow routing 文档固化；
+                        本轮仅文档与规则文件变更，不运行 mvn test；
+                        使用 git status --short / git diff --check / 定向文本检查验证
 ```
 
 最近一次 `mvn test` 见 §3。
@@ -659,4 +662,70 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
 准入决定   Stage3-B3 IMPL completed；
            Next: Stage3-B2 NQ Feedback Outbox IMPL, blocked until NQ GateJ-FREEZE
            or isolated branch approval。
+```
+
+## 16. 2026-06-06 DH Codex Workflow Rules 验收记录
+
+```text
+日期       2026-06-06
+阶段       DH-CODEX-WORKFLOW（仅文档规则固化）
+命令       git status --short
+结果       已执行；用于确认本轮只出现允许范围内的文档与规则文件变更
+命令       git diff --check
+结果       已执行；用于确认 diff 无 whitespace error
+命令       定向 rg 检查
+结果       已执行；检查 nq-dh-workflow-router active skill、router skill 文件存在、
+           CODEX_PROJECT_INSTRUCTIONS 前置分类规则、Findings 标准字段、Summary 非必填、
+           integration 未写成 started / completed、无新增业务代码路径
+失败原因   无
+修复结论   不适用
+剩余风险   本轮未运行 mvn test；原因是任务类型为 DOCUMENTATION，且禁止修改业务代码
+准入决定   Codex workflow routing 规则固化完成；NQ integration not started；
+           Integration-0 not started / plan only
+```
+
+## 17. 2026-06-06 DH Codex Workflow Conflict Cleanup 验收记录
+
+```text
+日期       2026-06-06
+阶段       DH-CODEX-WORKFLOW-CLEANUP（仅 Markdown / Skill 文档冲突修复）
+命令       git status --short
+结果       已执行；用于确认本轮只出现允许范围内的文档与规则文件变更
+命令       git diff --check
+结果       已执行；用于确认 diff 无 whitespace error
+命令       定向文本检查
+结果       已执行；检查 ROADMAP / WORK_ORDER next 已统一为 Integration-0-PLAN；
+           Stage2-PoC / 真实 NQ client / HTTP / event / backtest request 已标记为
+           historical / superseded / deferred / forbidden；
+           workflow 文档包含完整排除目录、细凭证禁令、开工前范围字段和
+           archived / historical / superseded 文档不作为当前事实源规则
+失败原因   无
+修复结论   不适用
+剩余风险   本轮未运行 mvn test；原因是任务类型为 DOCUMENTATION，且只修改 Markdown / Skill 文档，
+           未修改业务代码、API、migration、provider、NQ client、RealClient 或交易路径
+准入决定   下一步只允许 Integration-0-PLAN；NQ integration not started；
+           Integration-0 not started / plan only
+```
+
+## 18. 2026-06-06 DH Codex Workflow Final Cleanup 验收记录
+
+```text
+日期       2026-06-06
+阶段       DH-CODEX-WORKFLOW-FINAL-CLEANUP（仅 Markdown 文档口径修复）
+命令       git status --short
+结果       已执行；用于确认本轮只出现允许范围内的 Markdown / Skill 文档变更，
+           未出现业务代码、API、migration、provider、NQ client、RealClient 或交易路径变更
+命令       git diff --check
+结果       已执行；用于确认 diff 无 whitespace error
+命令       定向文本检查
+结果       已执行；检查 AGENTS.md / README.md / docs/current/README.md 不再把 Stage3-B2
+           写成当前 next；docs/current/DH_NQ_INTEGRATION.md 已把 REST API /
+           POST /api/ai/backtest-requests / 真实 HTTP / event / NQ client /
+           RealClient / real provider 标记为 historical / superseded / deferred / gated
+失败原因   无
+修复结论   不适用
+剩余风险   本轮未运行 mvn test；原因是任务类型为 DOCUMENTATION，且只修改 Markdown，
+           未修改业务代码、API、migration、provider、NQ client、RealClient 或交易路径
+准入决定   下一步只允许 Integration-0-PLAN；NQ integration not started；
+           Integration-0 not started / plan only
 ```

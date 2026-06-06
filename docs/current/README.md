@@ -1,7 +1,7 @@
 # Decision Hub Current Docs
 
 > Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
-> Next stage:    Stage3-B2 NQ Feedback Outbox IMPL, blocked until NQ GateJ-FREEZE or isolated branch approval
+> Next stage:    Integration-0-PLAN
 > Source of truth: docs/current
 
 ## 1. 当前定位
@@ -38,6 +38,8 @@ NQ 负责：
 必须优先读取：
 
 ```text
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/CODEX_WORKFLOW_INDEX.md
 docs/current/STATUS.md
 docs/current/ROADMAP.md
 docs/current/WORKFLOW.md
@@ -46,6 +48,33 @@ docs/current/DH_NQ_INTEGRATION.md
 docs/current/DH_REFACTOR_STAGE1_STATUS.md
 docs/current/STAGE1_CLOSE_WORKLOG.md
 ```
+
+Codex workflow 入口：
+
+```text
+docs/current/CODEX_WORKFLOW_INDEX.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/DH_CODEX_PLUGIN_WORKFLOW.md
+docs/current/DH_WORKFLOW_ROUTER_SKILL.md
+docs/current/DH_CODEX_TASK_TEMPLATES.md
+.agents/skills/nq-dh-workflow-router/SKILL.md
+```
+
+标准输出字段：
+
+```text
+Task classification:
+Plugins selected:
+Scope:
+Files inspected:
+Files changed:
+Findings:
+Validation:
+Risks:
+Next concrete action:
+```
+
+`Summary` 不作为必填字段。
 
 ## 3. 当前工作流
 
@@ -133,7 +162,7 @@ Stage3-B3 DH Backtest Request Adapter IMPL（2026-05-26，DH 端可插拔骨架�
 下一步只允许进入：
 
 ```text
-Stage3-B2 NQ Feedback Outbox IMPL（blocked until NQ GateJ-FREEZE 或隔离分支批准）。
+Integration-0-PLAN。
 
 执行口径：
   - Stage3-B3 DH Backtest Request Adapter IMPL 已于 2026-05-26 完成：
@@ -146,15 +175,17 @@ Stage3-B2 NQ Feedback Outbox IMPL（blocked until NQ GateJ-FREEZE 或隔离分�
     * dh-app ArchUnit 扩到 12 条（新增 R11 HTTP 客户端隔离 + R12 backtest 端口隔离）；
     * 8 个 B3 测试类共 39 cases 全绿；190 tests 全绿；
     * 零真实 HTTP；零 NQ 仓库改动；零下单 / 风控旁路 / 实盘 / 前端。
-  - Stage3-B2 是 NQ 仓库工作（按 STAGE3_NQ_OUTBOX_SPEC §8 / NQ-1..NQ-5）；
-    NQ GateJ-FREEZE 未完工前 B2 不允许启动；即便有隔离分支启动也必须遵守 STAGE3_NQ_OUTBOX_SPEC
-    §1.3 / §9 全部硬边界（不影响 GateJ-FREEZE / 不进入交易同步链路 / 不阻塞订单/风控/账本/回测）。
-  - 后续 Stage3-B4 联调（按 STAGE3_E2E_CONTRACT_TEST_SPEC §8 / B4-1..B4-5）+ Stage3-VERIFY/FREEZE
-    按 STAGE3_WORK_ORDER 推进。
+  - Integration-0-PLAN 不是 implementation；只能输出计划、边界、契约草案、权限模型、
+    审计模型、验收清单和风险清单。
+  - 不接 NQ；不新增 NQ client / RealClient / real provider；不触碰 LIVE trading；
+    不修改 NQ 状态；不读取或写入 NQ DB；不启动 Paper Run。
+  - Stage3-B2 / NQ Feedback Outbox / 真实 HTTP / event / NQ client / RealClient / real provider
+    均为 historical / superseded / deferred / gated，不是当前 next，不允许作为当前实现任务。
 
 严格禁止：
-  修改 NQ 仓库（B2 启动前）/ 接实盘 / 自动下单 / 绕风控 / 重写 NQ 回测核心 /
-  引入 TradingAgents Python / 接真实 Kronos / 接真实 global-stock-data。
+  接 NQ / 修改 NQ 仓库 / 接实盘 / 自动下单 / 绕风控 / 重写 NQ 回测核心 /
+  引入 TradingAgents Python / 接真实 Kronos / 接真实 global-stock-data /
+  新增 API / migration / provider / NQ client / RealClient / 交易路径。
 ```
 
 Stage3 规划冻结快照（不得修改）：
