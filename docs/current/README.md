@@ -62,6 +62,8 @@ docs/current/DH_NQ_INTEGRATION0_SECURITY_POLICY.md
 docs/current/DH_NQ_INTEGRATION0_CONTRACT_TEST_PLAN.md
 ```
 
+`DH_NQ_INTEGRATION0_CONTRACT_TEST_PLAN.md` 已含 15 项 × 16 字段详细测试矩阵 + 共享 fixture + forbidden side-effect checklist + Integration-0/1 blocker + 代码任务草案（mock/contract test 设计，只写计划不写测试代码）。
+
 Codex workflow 入口：
 
 ```text

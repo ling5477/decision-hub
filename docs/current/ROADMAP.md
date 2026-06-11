@@ -83,6 +83,10 @@ DH-NQ Integration-0 契约冻结已完成（contract / mock / docs，未实现�
 `DH_NQ_INTEGRATION0_CONTRACT_TEST_PLAN.md`。下一步只允许 mock / contract test 设计或安全文档固化，
 禁止真实联调；真实通道必须等 Integration-1 并先修复 P1-4 残留。
 
+DH-NQ Integration-0 mock / contract test 详细矩阵（15 项）已设计完成（docs-only，未写测试代码）。
+下一步可进入 contract test 代码实现（草案 `NQ-DH-INTEGRATION0-CONTRACT-TEST-IMPL`，DH 侧只加测试与
+fixture、走 Fake/Disabled、不接真实通道），仍禁止真实联调。
+
 范围：
 
 ```text

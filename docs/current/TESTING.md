@@ -778,3 +778,28 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
            真实通道必须等 Integration-1 并先修复 DH P1-4 残留
            （rate limit / memory cap / replay nonce 持久化）
 ```
+
+## 21. 2026-06-11 NQ-DH-INTEGRATION0-MOCK-CONTRACT-TEST-DESIGN 验收记录
+
+```text
+日期       2026-06-11
+阶段       NQ-DH-INTEGRATION0-MOCK-CONTRACT-TEST-DESIGN（DOCUMENTATION + CONTRACT TEST DESIGN）
+修改       docs/current/DH_NQ_INTEGRATION0_CONTRACT_TEST_PLAN.md（新增详细矩阵 §6-§12）
+           docs/current/README.md / ROADMAP.md / WORKLOG.md / TESTING.md
+命令       git status --short
+结果       已执行；仅命中本轮修改的 docs/current Markdown，无业务代码、contracts schema、
+           migration、provider、NQ client、RealClient 或交易路径变更
+命令       git diff --check
+结果       已执行；diff 无 whitespace error
+命令       git diff --stat
+结果       已执行；改动集中在 DH_NQ_INTEGRATION0_CONTRACT_TEST_PLAN.md 与 README/ROADMAP/WORKLOG/TESTING
+全量测试   未执行；本轮 docs + contract test design only，未写测试代码，未修改 Java、
+           contracts schema、migration 或部署脚本
+代码文件   未创建；futureCodeLocationSuggestion 仅为建议路径，未创建任何 .java / 测试 / fixture 文件
+失败原因   无
+修复结论   不适用
+剩余风险   文档测试矩阵与未来测试代码可能脱节，后续 NQ-DH-INTEGRATION0-CONTRACT-TEST-IMPL
+           必须按本矩阵固化；本轮未实现集成、未接真实 HTTP / RealClient / 真实 Provider、未开启 LIVE
+准入决定   下一步可进入 contract test 代码实现（草案，只加测试与 fixture、走 Fake/Disabled，
+           不接真实通道）；真实通道必须等 Integration-1 并先修复 DH P1-4 残留
+```
