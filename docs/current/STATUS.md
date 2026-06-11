@@ -28,6 +28,43 @@ LIVE trading forbidden.
 NQ mutation forbidden.
 ```
 
+## 1.1 NQ / DH 三轮审计同步（2026-06-11，DOC-SYNC-GATEK-PRE-AND-INT0-REGISTRATION）
+
+本轮只做事实源文档同步，不修改代码，不启动 Integration-0 实现。
+
+三轮只读审计已完成：
+
+- 第一轮：NQ 全仓只读审计 completed。
+- 第二轮：DH 全仓只读审计 completed。
+- 第三轮：NQ-DH 联合边界审计 completed（`docs/current/NQ_DH_INTEGRATION_SECURITY_AUDIT_REPORT.md`）。
+- 三轮审计汇总 completed。
+
+DH 当前阶段口径：
+
+```text
+Current:         DH audit fixed / ready for Integration-0 planning
+Next:            Integration-0-PLAN
+Provider:        no real provider
+NQ client:       no RealClient
+Trading ability: none
+Security baseline: P1-1 / P1-2 / P1-3 closed
+Remaining issue: P1-4 residual rate limit / memory cap / replay nonce persistence
+                 -> blocks Integration-1, does NOT block Integration-0
+```
+
+NQ-DH 口径：
+
+```text
+Integration status: not integrated
+Runtime connection: none
+Contract status:    Integration-0 contract freeze allowed
+Allowed work:       docs, contract freeze, mock, stub, contract test, security policy
+Forbidden work:     real NQ connection, RealClient, real Provider, trading,
+                    credential access, NQ DB access, LIVE
+```
+
+Integration-0 是 contract / mock / documentation 工作线，不是 runtime integration；NQ 侧仍无 DH 入站端点、无 DH client、无 feedback outbox，DH not integrated 成立。
+
 ## 2. 当前已完成
 
 ```text

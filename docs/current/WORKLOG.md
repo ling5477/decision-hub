@@ -1,5 +1,62 @@
 # Decision Hub Worklog
 
+## 2026-06-11 DOC-SYNC-GATEK-PRE-AND-INT0-REGISTRATION
+
+把 NQ / DH 三轮只读审计结论与当前阶段事实同步到 DH 事实源文档。本轮只做文档同步，不修改代码，不启动 Integration-0 实现。
+
+### 三轮审计事实
+
+```text
+第一轮：NQ 全仓只读审计 completed
+第二轮：DH 全仓只读审计 completed
+第三轮：NQ-DH 联合边界审计 completed（docs/current/NQ_DH_INTEGRATION_SECURITY_AUDIT_REPORT.md）
+三轮审计汇总 completed
+```
+
+### 同步口径
+
+```text
+DH Current:       DH audit fixed / ready for Integration-0 planning
+DH Next:          Integration-0-PLAN
+Provider:         no real provider
+NQ client:        no RealClient
+Trading ability:  none
+Security baseline: P1-1 / P1-2 / P1-3 closed
+Remaining issue:  P1-4 residual rate limit / memory cap / replay nonce persistence
+                  -> blocks Integration-1, not Integration-0
+NQ-DH:            not integrated；runtime connection none；
+                  Integration-0 contract freeze allowed；
+                  Integration-0 = contract / mock / docs work line, not runtime integration
+```
+
+### 修改文件
+
+```text
+docs/current/STATUS.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/WORKLOG.md
+docs/current/TESTING.md
+AGENTS.md
+```
+
+### 验证记录
+
+```text
+本轮只改文档，未运行 mvn test；原因：未修改 Java、契约、migration 或部署代码。
+已执行 git status --short / git diff --check / git diff --stat 核对改动范围。
+```
+
+### 边界确认
+
+```text
+未修改任何代码、API、migration、测试或部署脚本。
+未新增 RealClient、未新增真实 provider、未做真实联调、未接 NQ 运行时、未开启 LIVE。
+未访问 NQ 凭证、未读写 NQ DB。
+未把 Integration-0 写成真实集成；未把 NQ integration 写成 started；未把 DH 写成 integrated；未把 LIVE 写成 enabled。
+DH 仓库无 CLAUDE.md，未按任务建议新建同名替代文件。
+```
+
 ## 2026-05-25 DH-REFIT-1-PLAN
 
 完成 DH 文档结构重构的第一批落地。

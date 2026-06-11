@@ -3,6 +3,10 @@
 > Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
 > Next stage:    Integration-0-PLAN
 > Source of truth: docs/current
+>
+> NQ / DH 三轮只读审计已完成；DH not integrated；no RealClient；no real provider；no trading ability。
+> Integration-0 allowed only as contract / mock / documentation work line, not runtime integration。
+> Security baseline: P1-1 / P1-2 / P1-3 closed；P1-4 残留（rate limit / memory cap / replay nonce 持久化）阻塞 Integration-1，不阻塞 Integration-0。详见 `STATUS.md` §1.1。
 
 ## 1. 当前定位
 

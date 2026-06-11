@@ -729,3 +729,25 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
 准入决定   下一步只允许 Integration-0-PLAN；NQ integration not started；
            Integration-0 not started / plan only
 ```
+
+## 19. 2026-06-11 DOC-SYNC-GATEK-PRE-AND-INT0-REGISTRATION 验收记录
+
+```text
+日期       2026-06-11
+阶段       DOC-SYNC-GATEK-PRE-AND-INT0-REGISTRATION（仅事实源文档同步）
+命令       git status --short
+结果       已执行；仅命中本轮同步的 docs/current/{STATUS,README,ROADMAP,WORKLOG,TESTING}.md
+           与 AGENTS.md，无业务代码、API、migration、provider、NQ client、RealClient 或交易路径变更
+命令       git diff --check
+结果       已执行；diff 无 whitespace error
+命令       git diff --stat
+结果       已执行；用于核对改动集中在事实源 Markdown 文件
+全量测试   未执行；任务类型为 DOCUMENTATION，仅改 Markdown，未修改 Java、契约、migration 或部署代码
+失败原因   无
+修复结论   不适用
+剩余风险   阶段口径误写风险已通过禁止项控制：未把 Integration-0 写成真实集成；
+           未把 NQ integration 写成 started；未把 DH 写成 integrated；未把 LIVE 写成 enabled
+准入决定   DH Next 仍为 Integration-0-PLAN；NQ-DH not integrated；
+           Integration-0 = contract / mock / docs work line, not runtime integration；
+           P1-4 残留阻塞 Integration-1，不阻塞 Integration-0
+```

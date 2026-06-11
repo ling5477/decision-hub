@@ -1,6 +1,10 @@
-# Decision Hub Agent Guidelines
+# CLAUDE（Claude 开发指引 - Decision Hub）
 
-本仓库是 Decision Hub。任何 Agent、Codex、人工改动都必须按本文件执行。
+> 目的：让 Claude / 开发者在本仓库内严格遵循当前阶段、模块边界、文档事实源、验证纪律和禁止范围。
+> 本文件与 `AGENTS.md` 同源，内容一致；`AGENTS.md` 面向 Codex，本文件面向 Claude。
+> 当冲突时，按以下优先级执行：安全/合规/凭证保护 > 用户本轮明确指令 > 当前 Gate / Freeze / Work Order 边界 > 本文件与 `AGENTS.md` > 通用工程最佳实践。
+
+本仓库是 Decision Hub。任何 Agent、Codex、Claude、人工改动都必须按本文件执行。
 
 ## 1. 项目定位
 
@@ -50,6 +54,7 @@ docs/current/WORK_ORDER.md
 ```text
 docs/current/DH_NQ_INTEGRATION.md
 docs/current/DH_REFACTOR_STAGE1_WORK_ORDER.md
+docs/current/NQ_DH_INTEGRATION_SECURITY_AUDIT_REPORT.md
 ```
 
 `docs/current` 是唯一当前事实源。
@@ -176,6 +181,8 @@ docs/current/TESTING.md
 docs/current/WORKLOG.md
 ```
 
+如果只改文档，可以不跑全量测试，但必须在 `docs/current/WORKLOG.md` / `docs/current/TESTING.md` 中写清未跑原因。
+
 ## 8. 代码与命名规范
 
 ```text
@@ -211,9 +218,9 @@ public/protected 的类、接口、枚举、字段、方法必须有清晰注释
 
 所有外部输入必须校验，避免 SQL、路径、命令注入。
 
-## 11. Codex workflow routing（强制）
+## 11. Codex / Claude workflow routing（强制）
 
-所有 Codex / Agent 任务必须先执行 `nq-dh-workflow-router` 前置分类，再决定插件、skill、文件范围和验收命令。
+所有 Codex / Claude / Agent 任务必须先执行 `nq-dh-workflow-router` 前置分类，再决定插件、skill、文件范围和验收命令。
 
 开工前必须明确：
 
@@ -258,7 +265,7 @@ keystore password
 
 ```text
 不把 archived / historical / superseded 文档当作当前事实源。
-除非用户明确要求历史对照，否则当前状态以 STATUS.md、AGENTS.md、
+除非用户明确要求历史对照，否则当前状态以 STATUS.md、AGENTS.md、CLAUDE.md、
 CODEX_PROJECT_INSTRUCTIONS.md、WORK_ORDER.md 的当前段落为准。
 历史 Stage 文档只能作为背景，不得自动转化为当前 next task。
 ```
@@ -302,15 +309,18 @@ DH 当前只允许研究、分析、候选信号、风险解释、审计记录�
 DH 不允许下单、撤单、修改策略状态、启动 Paper Run、访问交易所密钥、直接读写 NQ DB。
 DH 到 NQ 的任何未来接入都必须从 Integration-0-PLAN 开始。
 Integration-0 只能是只读边界、契约冻结、权限模型、审计模型，不允许真实业务打通。
+Integration-0 only as contract / mock / documentation work line, not runtime integration.
 NQ integration not started.
 Integration-0 not started / plan only.
 RealClient forbidden.
 real provider forbidden.
 LIVE trading forbidden.
 NQ mutation forbidden.
+P1-1 / P1-2 / P1-3 closed; P1-4 residual rate limit / memory cap / replay nonce persistence
+  blocks Integration-1, not Integration-0.
 ```
 
-### 11.3 当前 Codex workflow 文档入口
+### 11.3 当前 Codex / Claude workflow 文档入口
 
 ```text
 docs/current/CODEX_WORKFLOW_INDEX.md
@@ -320,8 +330,6 @@ docs/current/DH_WORKFLOW_ROUTER_SKILL.md
 docs/current/DH_CODEX_TASK_TEMPLATES.md
 .agents/skills/nq-dh-workflow-router/SKILL.md
 ```
-
-
 ## 12. Claude 执行纪律
 
 - 默认使用简体中文说明计划、过程和结论。
