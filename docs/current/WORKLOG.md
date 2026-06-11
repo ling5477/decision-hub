@@ -1,5 +1,64 @@
 # Decision Hub Worklog
 
+## 2026-06-11 NQ-DH-INTEGRATION-0-CONTRACT-FREEZE
+
+冻结 DH-NQ Integration-0 的契约与边界，输出可作为后续 mock / contract test 的稳定依据。本轮只做契约冻结、边界文档、安全策略文档、mock/contract-test 设计，不做真实集成，不修改 Java/API/migration，不新增运行时代码。
+
+### 新增文件
+
+```text
+docs/current/DH_NQ_INTEGRATION0_CONTRACT_FREEZE.md
+docs/current/DH_NQ_INTEGRATION0_SECURITY_POLICY.md
+docs/current/DH_NQ_INTEGRATION0_CONTRACT_TEST_PLAN.md
+```
+
+### 修改文件
+
+```text
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/WORKLOG.md
+docs/current/TESTING.md
+```
+
+### 冻结内容
+
+```text
+DH → NQ 禁止能力清单（下单/撤单/改订单·策略·风控状态/Paper 启停/读凭证/读写 NQ DB/
+  绕过 API·风控·状态机·审计/触发 LIVE/NL·Agent output·feedback 驱动交易）：
+  每项 Integration-0=否 / Integration-1=默认否 / LIVE=否 / 需代码硬闸=是 / 需审计=是
+DH → NQ 可开放只读/候选能力清单（12 项）：真实 HTTP=否，需认证/签名/tenant/
+  requestId/traceId/timestamp/nonce/replay/payload≤64KiB/audit=是，进入执行路径=否
+header / auth / replay 契约：X-NQ-DH-Source/Tenant-Id/Request-Id/Trace-Id/Timestamp/
+  Nonce/Signature + application/json；±300s 窗口；HMAC-SHA256 候选；64 KiB 上限；
+  source allowlist；签名原材料/raw/prompt 不落库
+10 个数据契约草案（DHSignalCandidate / DHResearchReport / DHRiskReview /
+  DHDecisionSummary / NQFeedbackEvent / NQPaperResultSummary / NQStrategyMetadata /
+  NQBacktestSummary / NQErrorResponse / NQDhContractError），contract-only / mock-only
+统一禁止字段清单 + NQ 不可信输入处理原则 + 拒绝矩阵（400/401/403/409/413/423/429）
+mock / contract test 设计（15 项），只写计划不写代码
+Integration-0 验收标准；DH P1-4 残留登记为 Integration-1 前置，不在本轮修复
+```
+
+### 验证记录
+
+```text
+本轮 docs + contract design only，未运行 mvn test；原因：未修改 Java、契约代码、
+migration、测试代码或部署脚本（contracts/ 下 schema 未改，仅新增 docs/current Markdown）。
+已执行 git status --short / git diff --check / git diff --stat 核对改动范围。
+```
+
+### 边界确认
+
+```text
+未修改代码、未新增 API、未新增 migration、未新增 Controller/Service/Repository/DTO。
+未新增 DH RealClient、未新增 NQ RealClient、未新增真实 Provider、未做真实联调、
+未接真实 HTTP、未接真实交易所、未开启 LIVE。
+未读取或输出真实密钥；未读写 NQ DB。
+未把本轮写成 implemented；未把 Integration-0 写成真实集成；未把 DH not integrated
+写成 integrated；未把 AI not started 写成 started；未把 LIVE disabled 写成 enabled。
+```
+
 ## 2026-06-11 DOC-SYNC-GATEK-PRE-AND-INT0-REGISTRATION
 
 把 NQ / DH 三轮只读审计结论与当前阶段事实同步到 DH 事实源文档。本轮只做文档同步，不修改代码，不启动 Integration-0 实现。

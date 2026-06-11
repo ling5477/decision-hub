@@ -53,6 +53,15 @@ docs/current/DH_REFACTOR_STAGE1_STATUS.md
 docs/current/STAGE1_CLOSE_WORKLOG.md
 ```
 
+DH-NQ Integration-0 契约冻结入口（contract / mock / docs，未实现集成）：
+
+```text
+docs/current/NQ_DH_INTEGRATION_SECURITY_AUDIT_REPORT.md
+docs/current/DH_NQ_INTEGRATION0_CONTRACT_FREEZE.md
+docs/current/DH_NQ_INTEGRATION0_SECURITY_POLICY.md
+docs/current/DH_NQ_INTEGRATION0_CONTRACT_TEST_PLAN.md
+```
+
 Codex workflow 入口：
 
 ```text

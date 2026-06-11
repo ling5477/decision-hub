@@ -78,6 +78,11 @@ NQ mutation forbidden
 NQ / DH 三轮只读审计（NQ 全仓 / DH 全仓 / NQ-DH 联合边界 + 汇总）已完成。Integration-0 是 contract / mock / documentation 工作线，不是 runtime integration。
 DH P1-1 / P1-2 / P1-3 已关闭；P1-4 残留（rate limit / memory cap / replay nonce 持久化）阻塞 Integration-1，不阻塞 Integration-0。
 
+DH-NQ Integration-0 契约冻结已完成（contract / mock / docs，未实现集成），见
+`DH_NQ_INTEGRATION0_CONTRACT_FREEZE.md` / `DH_NQ_INTEGRATION0_SECURITY_POLICY.md` /
+`DH_NQ_INTEGRATION0_CONTRACT_TEST_PLAN.md`。下一步只允许 mock / contract test 设计或安全文档固化，
+禁止真实联调；真实通道必须等 Integration-1 并先修复 P1-4 残留。
+
 范围：
 
 ```text

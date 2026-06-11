@@ -751,3 +751,30 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
            Integration-0 = contract / mock / docs work line, not runtime integration；
            P1-4 残留阻塞 Integration-1，不阻塞 Integration-0
 ```
+
+## 20. 2026-06-11 NQ-DH-INTEGRATION-0-CONTRACT-FREEZE 验收记录
+
+```text
+日期       2026-06-11
+阶段       NQ-DH-INTEGRATION-0-CONTRACT-FREEZE（DOCUMENTATION + CONTRACT DESIGN）
+新增       docs/current/DH_NQ_INTEGRATION0_CONTRACT_FREEZE.md
+           docs/current/DH_NQ_INTEGRATION0_SECURITY_POLICY.md
+           docs/current/DH_NQ_INTEGRATION0_CONTRACT_TEST_PLAN.md
+修改       docs/current/README.md / ROADMAP.md / WORKLOG.md / TESTING.md
+命令       git status --short
+结果       已执行；仅命中本轮新增/修改的 docs/current Markdown，无业务代码、契约代码、
+           migration、provider、NQ client、RealClient 或交易路径变更
+命令       git diff --check
+结果       已执行；diff 无 whitespace error
+命令       git diff --stat
+结果       已执行；改动集中在 docs/current/DH_NQ_INTEGRATION0_*.md 与 README/ROADMAP/WORKLOG/TESTING
+全量测试   未执行；本轮 docs + contract design only，未修改 Java、contracts/ schema、
+           migration、测试代码或部署脚本
+失败原因   无
+修复结论   不适用
+剩余风险   文档契约与未来代码实现可能脱节，后续必须用 contract test 固化；
+           本轮未实现集成、未接真实 HTTP / RealClient / 真实 Provider、未开启 LIVE
+准入决定   下一步只允许 Integration-0 mock / contract test 设计或安全文档固化，禁止真实联调；
+           真实通道必须等 Integration-1 并先修复 DH P1-4 残留
+           （rate limit / memory cap / replay nonce 持久化）
+```
