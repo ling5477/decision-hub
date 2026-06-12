@@ -803,3 +803,29 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
 准入决定   下一步可进入 contract test 代码实现（草案，只加测试与 fixture、走 Fake/Disabled，
            不接真实通道）；真实通道必须等 Integration-1 并先修复 DH P1-4 残留
 ```
+
+## 22. 2026-06-12 NQ-DH-INTEGRATION0-CONTRACT-TEST-IMPL 验收记录
+
+```text
+日期       2026-06-12
+阶段       NQ-DH-INTEGRATION0-CONTRACT-TEST-IMPL（TEST_CODE_CHANGE）
+新增       dh-domain/src/test/java/.../integration0/support/（9 个 test-only helper）
+           dh-domain/src/test/java/.../integration0/（3 个测试类，16 用例覆盖 INT0-T01..T15）
+           dh-domain/src/test/resources/integration0/（10 个脱敏 fixture JSON）
+命令       mvn test
+结果       BUILD SUCCESS；全仓回归全绿；DhNqIntegration0*Test 16 passed / 0 failed；
+           ArchitectureTest（ArchUnit 12 条）全绿；PostgresContainerSmokeTest 因无 Docker skip（既有）
+命令       mvn -pl dh-domain -am -Dtest='DhNqIntegration0*Test' -Dsurefire.failIfNoSpecifiedTests=false test
+结果       16 tests / 0 failures / 0 errors
+命令       git diff --check
+结果       已执行；无 whitespace error
+命令       git status --short
+结果       已执行；仅命中 dh-domain/src/test/**（测试代码与 fixtures）
+生产代码   未修改 src/main；未新增 API / migration / Controller / Service / Repository / DTO / RealClient / 真实 Provider
+真实通道   未做真实 HTTP / 真实 NQ / 真实交易所；未读取真实密钥（固定假值）；未开启 LIVE
+失败原因   无
+剩余风险   nonce store 为 test-only 内存实现，不代表真实通道安全；Integration-1 前必须补
+           持久化 nonce、rate limit、memory cap（DH P1-4 residual）
+准入决定   下一步进入 Integration-0 contract test implementation review / safety gate review，
+           不得直接真实联调
+```

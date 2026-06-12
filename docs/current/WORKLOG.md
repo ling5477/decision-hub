@@ -1,5 +1,58 @@
 # Decision Hub Worklog
 
+## 2026-06-12 NQ-DH-INTEGRATION0-CONTRACT-TEST-IMPL
+
+把已冻结的 Integration-0 contract test matrix（INT0-T01..T15）落成 DH 侧可运行测试代码与脱敏 fixture。本轮只新增 `dh-domain/src/test/**`，不实现真实集成，不修改生产代码，不新增 API/migration/Controller/Service/Repository/DTO，不新增 DH RealClient（RealNqBacktestClient）/真实 Provider，不做真实 HTTP/真实 NQ/真实交易所调用。
+
+### 新增文件（仅 dh-domain/src/test）
+
+```text
+dh-domain/src/test/java/.../integration0/support/  9 个 test-only helper
+  Int0Contract / Int0Signing / Int0NonceStore / Int0ContractValidator /
+  Int0RequestFactory / Int0AuditEvent / Int0ValidationResult /
+  Int0SideEffectTracker / Int0CredentialAccessTracker
+dh-domain/src/test/java/.../integration0/  3 个测试类（共 16 用例覆盖 INT0-T01..T15）
+  DhNqIntegration0ContractValidationTest / DhNqIntegration0SecurityContractTest /
+  DhNqIntegration0NoSideEffectTest
+dh-domain/src/test/resources/integration0/  10 个脱敏 fixture JSON
+```
+
+### 覆盖关系（INT0-T01..T15）
+
+```text
+ContractValidation：T02 / T03 / T07 / T08 / T11 / T12
+SecurityContract：  T01 / T04 / T05 / T06（test-only 内存 nonce）/ T09 / T10 / T13 / T15
+NoSideEffect：      T14（无交易副作用 + 无真实 NQ 调用 + 无凭证访问）
+```
+
+### 验证记录
+
+```text
+mvn test：BUILD SUCCESS。全仓回归全绿；新增 DhNqIntegration0*Test 16 passed / 0 failed。
+ArchitectureTest（ArchUnit 12 条）全绿：integration0 测试包未引入 RealClient / providers /
+  RestTemplate / WebClient / OkHttp 等被封堵依赖。
+PostgresContainerSmokeTest 因本机无 Docker 自动 skip（既有行为，非本轮引入）。
+git diff --check 通过；git status --short 仅命中 dh-domain/src/test/**。
+```
+
+### 边界确认
+
+```text
+未修改任何 src/main；未新增 API / migration / Controller / Service / Repository / DTO 到 main。
+未新增 DH RealClient / NQ RealClient / 真实 Provider；未做真实 HTTP / 真实 NQ / 真实交易所调用。
+未下单 / 撤单 / 启停 Paper Run / 改策略状态 / 读写 NQ DB / 开启 LIVE；
+未读取或输出真实密钥（固定假值 int0-test-secret / t-test-int0 / dh-int0-test）。
+未把 Integration-0 写成真实集成；未把 DH 写成 integrated；未把 AI 写成 started；
+未把 LIVE 写成 enabled。
+```
+
+### Integration-1 前置（不在本轮）
+
+```text
+nonce store 为 test-only 内存实现；Integration-1 前必须补持久化 / 集中缓存 nonce。
+rate limit、memory cap 仍缺失（DH P1-4 residual），阻塞 Integration-1。
+```
+
 ## 2026-06-11 NQ-DH-INTEGRATION0-MOCK-CONTRACT-TEST-DESIGN
 
 将已冻结的 15 项 mock / contract test plan 拆成 DH 侧详细测试矩阵，定义 mock/stub 行为、DH 侧期望、forbidden side-effect 检查、验收标准与 Integration-0/1 blocker，并产出后续“写测试代码”任务输入材料。本轮只做设计，不写测试代码，不修改 Java/frontend/Python/API/migration/contracts schema，不做真实联调。
