@@ -2381,3 +2381,43 @@ private key / mnemonic / keystore password / 2FA backup code
 ```text
 再次执行最终只读一致性验证，确认 Conflicts 为 None。
 ```
+
+## 2026-06-12 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2（bounded memory cap）
+
+### 范围
+只实现 bounded memory cap；不实现 rate limit；不做 header alignment；不启动 Integration-1；不做真实联调。
+
+### 改动文件（main）
+- dh-security/.../security/nq/InMemoryNonceReplayGuard.java：无界 -> 有界（maxEntries + TTL + fail-closed，
+  满容量不驱逐未过期 key；有效期取 laterOf 只延长不缩短防重放窗口；非法配置启动失败）
+- dh-usecase/.../usecase/agent/inmemory/InMemoryNqFeedbackEventRepository.java：无界 -> 有界
+  （maxEvents + perTenantMaxEvents + retention TTL；驱逐最老项；envelope 幂等+有界；保留原始 payload，
+  不新增凭证存储；非法配置启动失败）
+- dh-app/.../config/SecurityWiringConfig.java：in-memory guard 注入 max-entries/ttl-seconds
+- dh-app/.../config/AgentRuntimeWiringConfig.java：feedback repository 注入 max-events/per-tenant-max-events/retention-seconds
+- dh-app/src/main/resources/application.yml：新增 replay.in-memory.* 与 feedback-store.* 保守默认（各 profile 经 base 继承）
+
+### 改动文件（test）
+- dh-security/.../BoundedInMemoryNonceReplayGuardTest.java（7）
+- dh-security/.../NqFeedbackPayloadSizeGateTest.java（2，确认 64KiB 上限未被破坏）
+- dh-usecase/.../inmemory/BoundedInMemoryNqFeedbackEventRepositoryTest.java（7）
+
+### 验证
+- mvn test：BUILD SUCCESS；7 模块全绿；INT0-T01..T15（16 用例）未被破坏；ArchUnit 12/12
+- 本轮 runner 有 Docker，JdbcNonceReplayGuardPersistenceTest 3 用例真实跑通
+- git diff --check：无 whitespace error
+- mvn -Pquality validate：未强制修复；既有 baseline 问题已分流到独立任务 DH-QUALITY-BASELINE-CLEANUP
+
+### 设计取舍 / 冲突解决
+- payload 保留冲突：Batch 2 指引「不得保存 raw payload」与域不变量 + 项目 CLAUDE.md §9「NQ feedback 必须
+  保存原始 payload」冲突。按优先级以域不变量/项目规范为准：保留 payloadJson，本批仅确保不新增 secret/token/credential 存储。
+- TTL 与认证层 expiresAt 双来源：guard 有效期取 laterOf(认证层 expiresAt, now+ttl)，保证 ttl-seconds 只作为
+  最小保留下限，绝不缩短由 2×max-clock-skew-seconds 决定的防重放窗口。
+
+### 边界确认
+未修改 NQ；未实现 rate limit；未做 header alignment；未新增 API/migration/RealClient/真实 Provider；
+未做真实 HTTP/真实 NQ/真实交易所；未接 AI；未开启 LIVE；未读取或输出真实密钥。
+
+### 准入
+Integration-1 仍 NOT STARTED；P1-4 仍未全部关闭（rate limit 残留）；
+下一步 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2-REVIEW，再进入 Batch 3 rate limit。

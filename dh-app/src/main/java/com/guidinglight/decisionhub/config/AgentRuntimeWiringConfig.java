@@ -92,7 +92,10 @@ import com.guidinglight.decisionhub.usecase.agent.planner.strategy.DefaultPlanne
 import com.guidinglight.decisionhub.usecase.agent.planner.strategy.PlannerStrategyHandler;
 import com.guidinglight.decisionhub.usecase.agent.planner.strategy.VolatileDiversifiedPlannerStrategyHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Clock;
+import java.time.Duration;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -125,10 +128,28 @@ public class AgentRuntimeWiringConfig {
     return new InMemoryJudgeDecisionRepository();
   }
 
+  /**
+   * NqFeedback 内存仓储装配（DH-P1-4 Batch 2：bounded memory cap）。
+   *
+   * <p>引入全局上限 / 单 tenant 上限 / retention TTL，避免无界增长撑爆内存；非法配置（上限或 retention 非正）
+   * 由 {@link InMemoryNqFeedbackEventRepository} 构造抛 {@link IllegalArgumentException} -> 启动失败。
+   *
+   * @param maxEvents 全局事件上限（保守默认 10000）。
+   * @param perTenantMaxEvents 单 tenant 事件上限（保守默认 10000）。
+   * @param retentionSeconds 事件保留秒数（保守默认 86400）。
+   * @return 有界内存 NqFeedbackEventRepository。
+   */
   @Bean
   @ConditionalOnMissingBean
-  public NqFeedbackEventRepository nqFeedbackEventRepository() {
-    return new InMemoryNqFeedbackEventRepository();
+  public NqFeedbackEventRepository nqFeedbackEventRepository(
+      @Value("${decisionhub.security.nq-feedback.feedback-store.max-events:10000}")
+          final int maxEvents,
+      @Value("${decisionhub.security.nq-feedback.feedback-store.per-tenant-max-events:10000}")
+          final int perTenantMaxEvents,
+      @Value("${decisionhub.security.nq-feedback.feedback-store.retention-seconds:86400}")
+          final long retentionSeconds) {
+    return new InMemoryNqFeedbackEventRepository(
+        maxEvents, perTenantMaxEvents, Duration.ofSeconds(retentionSeconds), Clock.systemUTC());
   }
 
   @Bean

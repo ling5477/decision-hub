@@ -13,6 +13,7 @@ import com.guidinglight.decisionhub.security.provider.DefaultProviderTrustPolicy
 import com.guidinglight.decisionhub.security.provider.PromptContextRedactionGate;
 import com.guidinglight.decisionhub.security.provider.ProviderTrustLevel;
 import com.guidinglight.decisionhub.security.provider.ProviderTrustPolicy;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -97,7 +98,11 @@ public class SecurityWiringConfig {
       final ObjectProvider<JdbcTemplate> jdbcTemplateProvider,
       @Value("${decisionhub.security.nq-feedback.replay.guard-type:}") final String guardType,
       @Value("${decisionhub.security.nq-feedback.replay.cleanup-enabled:true}")
-          final boolean cleanupEnabled) {
+          final boolean cleanupEnabled,
+      @Value("${decisionhub.security.nq-feedback.replay.in-memory.max-entries:10000}")
+          final int inMemoryMaxEntries,
+      @Value("${decisionhub.security.nq-feedback.replay.in-memory.ttl-seconds:600}")
+          final long inMemoryTtlSeconds) {
     final boolean devOrTest =
         NonceReplayGuardType.isDevOrTest(List.of(environment.getActiveProfiles()));
     final NonceReplayGuardType resolved = NonceReplayGuardType.select(guardType, devOrTest);
@@ -110,8 +115,10 @@ public class SecurityWiringConfig {
       }
       return new JdbcNonceReplayGuard(jdbcTemplate, cleanupEnabled);
     }
-    // 仅在 dev/test 且策略已校验通过时到达此分支。
-    return new InMemoryNonceReplayGuard();
+    // 仅在 dev/test 且策略已校验通过时到达此分支。in-memory 也有界：上限 + TTL，超限 fail-closed。
+    // 非法配置（上限非正 / TTL 非正）由 InMemoryNonceReplayGuard 构造抛 IllegalArgumentException -> 启动失败。
+    return new InMemoryNonceReplayGuard(
+        inMemoryMaxEntries, Duration.ofSeconds(inMemoryTtlSeconds), Clock.systemUTC());
   }
 
   /** Provider trust policy 默认无 allowlist，因此拒绝 UNKNOWN / UNTRUSTED_RELAY。 */

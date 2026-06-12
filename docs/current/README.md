@@ -6,7 +6,7 @@
 >
 > NQ / DH 三轮只读审计已完成；DH not integrated；no RealClient；no real provider；no trading ability。
 > Integration-0 allowed only as contract / mock / documentation work line, not runtime integration。
-> Security baseline: P1-1 / P1-2 / P1-3 closed；P1-4 残留中 replay nonce 持久化已实现（DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-1，2026-06-12），rate limit / memory cap 仍残留，P1-4 未全部关闭，仍阻塞 Integration-1，不阻塞 Integration-0。详见 `STATUS.md` §1.1。
+> Security baseline: P1-1 / P1-2 / P1-3 closed；P1-4 残留中 replay nonce 持久化已实现（DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-1，2026-06-12），bounded memory cap 已实现（DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2，2026-06-12：InMemoryNonceReplayGuard / InMemoryNqFeedbackEventRepository 有界 + TTL + fail-closed），rate limit 仍残留，P1-4 未全部关闭，仍阻塞 Integration-1，不阻塞 Integration-0。详见 `STATUS.md` §1.1。
 
 ## 1. 当前定位
 

@@ -40,3 +40,15 @@ decisionhub:
         guard-type: jdbc
         # jdbc 实现登记前惰性清理过期行，保证存储有界增长。
         cleanup-enabled: true
+        # in-memory guard 仅 dev/test 使用，但同样有界（DH-P1-4 Batch 2）：
+        # 超过 max-entries 且无过期项时 fail-closed 拒绝，绝不无界增长、绝不驱逐未过期 key。
+        # nonce 有效期取 laterOf(认证层窗口=2×max-clock-skew-seconds, ttl-seconds)，只延长不缩短防重放窗口。
+        in-memory:
+          max-entries: 10000
+          ttl-seconds: 600
+      # NqFeedback 内存仓储有界（DH-P1-4 Batch 2）：全局/单 tenant 上限 + retention TTL；
+      # 各 profile（含 prod）经 base 继承，保证不会无上限增长。缺配置时由 @Value 默认值兜底为有界。
+      feedback-store:
+        max-events: 10000
+        per-tenant-max-events: 10000
+        retention-seconds: 86400

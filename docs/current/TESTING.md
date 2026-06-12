@@ -912,3 +912,49 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
 准入决定   Integration-1 仍 NOT STARTED；下一步 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2（bounded memory cap），
            不得直接真实联调
 ```
+
+## 25. 2026-06-12 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2 验收记录（bounded memory cap）
+
+```text
+日期       2026-06-12
+阶段       DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2（CODE_CHANGE + SECURITY_FIX + TEST_CODE_CHANGE）
+范围       只实现 bounded memory cap；不实现 rate limit / header alignment；不启动 Integration-1
+本次改动（main）
+  - dh-security InMemoryNonceReplayGuard 改为有界：maxEntries 全局上限 + TTL；
+    markIfAbsent 先 TTL 清理 -> 命中拒绝 -> 满容量 fail-closed（绝不驱逐未过期 key）；
+    有效期取 laterOf(认证层 expiresAt, now+ttl) 只延长不缩短防重放窗口；非法配置构造抛 IllegalArgumentException
+  - dh-usecase InMemoryNqFeedbackEventRepository 改为有界：maxEvents 全局 + perTenantMaxEvents +
+    retention TTL；append 前先 TTL 清理再按 tenant/global 驱逐最老项；envelope 幂等 + 有界；
+    按域不变量与项目规范保留原始 payloadJson，不新增 secret/token 存储；非法配置构造抛 IllegalArgumentException
+  - dh-app SecurityWiringConfig / AgentRuntimeWiringConfig 注入保守默认上限/TTL；application.yml 新增
+    replay.in-memory.{max-entries,ttl-seconds} 与 feedback-store.{max-events,per-tenant-max-events,retention-seconds}
+新增测试
+  - dh-security BoundedInMemoryNonceReplayGuardTest（7）：memory_cap_rejects_overflow /
+    ttl_cleanup_allows_new_nonce_after_expiry / does_not_evict_unexpired_nonce_window /
+    replay_same_key_still_rejected / ttl_floor_never_shortens_replay_window /
+    bad_config_fails_closed / default_constructor_is_bounded
+  - dh-security NqFeedbackPayloadSizeGateTest（2）：payload_64kib_gate_remains_valid /
+    payload_at_64kib_passes_size_gate
+  - dh-usecase BoundedInMemoryNqFeedbackEventRepositoryTest（7）：rejects_or_bounds_overflow /
+    ttl_cleanup_removes_expired_events / is_per_tenant_bounded /
+    existing_query_semantics_preserved_sorted_by_received_at / save_envelope_is_idempotent_and_bounded /
+    bad_config_fails_closed / default_constructor_is_bounded
+命令       mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false
+结果       BUILD SUCCESS；7 模块全 SUCCESS；全仓回归全绿
+           - dh-domain 86（INT0-T01..T15 = DhNqIntegration0*Test 16 用例未被破坏）
+           - dh-security 26（Bounded 7 + PayloadSizeGate 2 + 既有）
+           - dh-usecase 66（Bounded repo 7 + 既有）
+           - dh-app 25（ArchitectureTest 12 / NoNqDependencyStartup 4 等，装配通过）
+           - 本次 runner 恰好有 Docker：JdbcNonceReplayGuardPersistenceTest 3 用例真实跑通（未 skip）
+命令       mvn -Pquality validate
+结果       未在本轮重跑/未强制修复；既有 quality-baseline 问题（checkstyle DTD 网络 + spotless 基线）
+           已登记为独立任务 DH-QUALITY-BASELINE-CLEANUP；本轮未顺手修未改动文件
+命令       git diff --check / git status --short
+结果       无 whitespace error（仅 LF→CRLF 提示）；改动仅落在 dh-app/dh-security/dh-usecase 允许范围与 docs/current
+边界       未修改 NQ；未实现 rate limit；未做 header alignment；未新增 API / migration / RealClient /
+           真实 Provider；未做真实 HTTP / 真实 NQ / 真实交易所调用；未接 AI；未开启 LIVE；未读取真实密钥
+剩余风险   bounded in-memory 仅适合 dev/test 或单实例辅助路径，真实通道仍应用 JdbcNonceReplayGuard；
+           容量满时的保护性拒绝属 fail-closed（拒绝而非放行），需运维监控容量与 TTL
+准入决定   Integration-1 仍 NOT STARTED；P1-4 仍未全部关闭（rate limit 残留）；
+           下一步 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2-REVIEW，再进入 Batch 3 rate limit，不得直接真实联调
+```
