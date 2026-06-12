@@ -6,3 +6,10 @@ spring:
   data:
     redis:
       url: redis://localhost:6379
+
+decisionhub:
+  security:
+    nq-feedback:
+      replay:
+        # dev profile 允许进程内 in-memory 防重放（单实例，无需 DB）。生产严禁。
+        guard-type: in-memory

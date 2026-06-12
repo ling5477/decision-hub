@@ -871,3 +871,44 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
 准入决定   下一步进入 Integration-0 contract test implementation review / safety gate review，
            不得直接真实联调
 ```
+
+## 23. 2026-06-12 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-1 验收记录（replay nonce persistence）
+
+```text
+日期       2026-06-12
+阶段       DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-1（CODE_CHANGE + SECURITY_FIX + DB_MIGRATION）
+范围       只实现 replay nonce persistence；不实现 rate limit / memory cap / header alignment
+新增测试   dh-security NonceReplayGuardTypeTest（5 用例）
+             - explicit_jdbc_is_allowed_under_any_profile
+             - in_memory_guard_only_dev_test（非 dev/test 显式 in-memory 启动失败）
+             - missing_config_does_not_fallback_to_unsafe_in_memory（缺配置非 dev/test 默认 jdbc）
+             - unknown_guard_type_fails_closed
+             - isDevOrTest_detects_dev_or_test_profiles_only
+           dh-infra JdbcNonceReplayGuardTest（5 用例，Mockito，无需 Docker）
+             - markIfAbsent insert 1 -> true 且 SQL 含 on conflict (replay_key) do nothing
+             - markIfAbsent insert 0 -> false（replay detected）
+             - replay_store_unavailable_fails_closed（DataAccessException -> false，无 secret/payload 拼进 SQL）
+             - cleanup_runs_before_mark_when_enabled / cleanup_skipped_when_disabled
+           dh-infra JdbcNonceReplayGuardPersistenceTest（3 用例，Testcontainers，需 Docker）
+             - persistent_nonce_rejects_replay_after_restart_simulation
+             - persistent_nonce_is_source_tenant_request_scoped
+             - cleanup_removes_expired_rows_only
+命令       mvn test
+结果       BUILD SUCCESS；全仓回归全绿；INT0-T01..T15（DhNqIntegration0*Test 16 用例）未被破坏；
+           NonceReplayGuardTypeTest 5 / JdbcNonceReplayGuardTest 5 全绿；
+           JdbcNonceReplayGuardPersistenceTest 因无 Docker 整类 skip（3）；PostgresContainerSmokeTest 无 Docker skip（既有）
+说明       CI 需要 Docker 才能验证持久化 nonce 的 restart 语义（JdbcNonceReplayGuardPersistenceTest），
+           本机无 Docker 时按 @Testcontainers(disabledWithoutDocker=true) 既有策略跳过。
+命令       mvn -Pquality validate
+结果       FAILURE，来源为既有/环境问题，非本轮改动：聚合模块 checkstyle 读 suppressions.xml 网络超时；
+           spotless:check 在多个**未改动**既有文件即报 format 违规（基线本身不干净）。
+           已对本轮自有文件单独 spotless:apply（-DspotlessFiles 限定），未触碰未改动文件。
+命令       git diff --check / git status --short
+结果       无 whitespace error；改动仅落在 dh-app/dh-infra/dh-security 允许范围与 docs/current
+真实通道   未做真实 HTTP / 真实 NQ / 真实交易所；未读取真实密钥（固定假值）；未开启 LIVE；未接 AI
+失败原因   无
+剩余风险   replay nonce 已持久化，但 rate limit / memory cap 仍残留（P1-4 未全部关闭）；
+           DB 不可用时 guard fail-closed（拒绝），属预期保护，需运维保障 DB 可用
+准入决定   Integration-1 仍 NOT STARTED；下一步 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2（bounded memory cap），
+           不得直接真实联调
+```

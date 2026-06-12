@@ -6,3 +6,11 @@ spring:
   data:
     redis:
       url: ${REDIS_URL}
+
+decisionhub:
+  security:
+    nq-feedback:
+      replay:
+        # prod 强制持久化防重放；不得退回无界 in-memory。
+        guard-type: jdbc
+        cleanup-enabled: true

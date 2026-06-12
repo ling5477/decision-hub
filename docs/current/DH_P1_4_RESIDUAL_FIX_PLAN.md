@@ -152,6 +152,11 @@ replay_cache_ttl_eviction：过期 key 被清理，过期后同 key 可视为新
 
 ## 4. Proposed fix — Replay nonce persistence
 
+> **实现状态（2026-06-12，DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-1）：已实现候选 A。**
+> 落地 = `JdbcNonceReplayGuard`（dh-infra）+ Flyway `V4__nq_feedback_replay_nonce.sql`（表 `dh_nq_replay_nonce`）+ `SecurityWiringConfig` 条件装配 + `NonceReplayGuardType` 选择策略（dev/test 允许 in-memory，非 dev/test 默认 jdbc，fail-closed）。
+> 表口径采用本节 §4.2 候选 A 的窄表 `dh_nq_replay_nonce(replay_key PK, expires_at, created_at)`：因端口 `markIfAbsent(replayKey, expiresAt)` 只提供 replayKey 与 expiresAt（无独立 tenant），故不拆分 source/tenant/request/nonce 列，避免不可靠解析与存储非必要字段。
+> 详见 `WORKLOG.md` / `TESTING.md §23`。rate limit、memory cap 仍未实现。
+
 ### 4.1 nonce key 组成（沿用现有口径）
 
 ```text
@@ -307,7 +312,7 @@ LIVE:                 DISABLED
 ```
 
 - P1-4 未修复前，**仍禁止进入 Integration-1**（真实只读通道 / 真实 HTTP / RealClient / 真实 Provider）。
-- 本轮仅产出修复方案，**未修复任何缺口**。
+- 方案产出时未修复任何缺口；**DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-1（2026-06-12）已实现 replay nonce persistence（§4）**；rate limit（§2）、memory cap（§3）仍未实现，P1-4 仍未全部关闭，仍不得进入 Integration-1。
 
 ## 11. Risks
 

@@ -30,3 +30,13 @@ management:
   endpoint:
     health:
       show-details: always
+
+decisionhub:
+  security:
+    nq-feedback:
+      replay:
+        # 防重放 guard 实现：jdbc(持久化) | in-memory(仅 dev/test)。
+        # 默认 jdbc：多实例/重启后窗口内重放仍被拒；非 dev/test 不得用无界 in-memory。
+        guard-type: jdbc
+        # jdbc 实现登记前惰性清理过期行，保证存储有界增长。
+        cleanup-enabled: true

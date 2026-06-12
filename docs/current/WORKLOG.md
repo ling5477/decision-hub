@@ -1,5 +1,70 @@
 # Decision Hub Worklog
 
+## 2026-06-12 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-1（replay nonce persistence）
+
+实现 P1-4 三项残留中的第 3 项 **replay nonce persistence**（PostgreSQL-backed），不实现 rate limit、不实现 memory cap、不做 header alignment、不启动 Integration-1、不做真实 NQ 联调。
+
+### 新增文件
+
+```text
+dh-app/src/main/resources/db/migration/V4__nq_feedback_replay_nonce.sql      （Flyway V4，新增 dh_nq_replay_nonce 表，不改历史 V1–V3）
+dh-infra/src/main/java/.../infra/jdbc/JdbcNonceReplayGuard.java               （JdbcTemplate 实现 NonceReplayGuard，INSERT ON CONFLICT DO NOTHING + fail-closed）
+dh-security/src/main/java/.../security/nq/NonceReplayGuardType.java           （guard 选择策略枚举，fail-closed）
+dh-security/src/test/java/.../security/nq/NonceReplayGuardTypeTest.java       （选择策略单测：in_memory_guard_only_dev_test 等）
+dh-infra/src/test/java/.../infra/jdbc/JdbcNonceReplayGuardTest.java           （Mockito 单测：语义/fail-closed/cleanup）
+dh-infra/src/test/java/.../infra/jdbc/JdbcNonceReplayGuardPersistenceTest.java（Testcontainers，Docker-gated：restart simulation / scoping / cleanup）
+```
+
+### 修改文件
+
+```text
+dh-app/src/main/java/.../config/SecurityWiringConfig.java   （硬编码 InMemoryNonceReplayGuard 改为条件装配：dev/test 允许 in-memory，非 dev/test 默认 jdbc，fail-closed）
+dh-app/src/main/resources/application.yml                   （新增 replay.guard-type=jdbc / cleanup-enabled=true 默认）
+dh-app/src/main/resources/application-dev.yml               （dev: replay.guard-type=in-memory）
+dh-app/src/main/resources/application-prod.yml              （prod: replay.guard-type=jdbc）
+dh-infra/pom.xml                                            （新增 dh-security 依赖供实现端口；test 新增 testcontainers junit-jupiter/postgresql + postgresql 驱动）
+```
+
+### 验证
+
+```text
+命令   mvn test
+结果   BUILD SUCCESS；全仓回归全绿；INT0-T01..T15（DhNqIntegration0*Test 16 用例）未被破坏；
+       NonceReplayGuardTypeTest 5 / JdbcNonceReplayGuardTest 5 全绿；
+       JdbcNonceReplayGuardPersistenceTest 因无 Docker 整类 skip（3）；PostgresContainerSmokeTest 无 Docker skip（既有）
+命令   mvn -Pquality validate
+结果   FAILURE，来源为既有/环境问题，非本轮改动：
+       (1) 聚合模块 checkstyle 读取 config/checkstyle/checkstyle-suppressions.xml 时网络 Connection timed out；
+       (2) spotless:check 在多个**未改动**既有文件（AuthContext / TokenVerifier / StaticTokenVerifier /
+           HmacNqFeedbackAuthenticator 等）即报 format 违规，说明 spotless 基线本身在本环境不干净。
+       已对**本轮自有文件**单独执行 spotless:apply（-DspotlessFiles 限定），未触碰未改动文件。
+命令   git diff --check / git status --short / git diff --stat
+结果   无 whitespace error；改动仅落在 dh-app/dh-infra/dh-security 允许范围与 docs/current
+```
+
+### 严格边界（本轮未违反）
+
+```text
+未修改 NQ 仓库；未实现 rate limit；未实现 memory cap；未做 header X-DH-NQ-*/X-NQ-DH-* alignment；
+未新增 API / Controller / DTO；未新增 RealClient / 真实 Provider；未做真实 HTTP / 真实 NQ / 真实交易所调用；
+未下单 / 撤单 / 启停 Paper Run；未改策略 / 风控状态；未读写 NQ DB；未读取或输出真实密钥（测试用固定假值）；
+未开启 LIVE；未把 DH 写成 integrated；未把 Integration-1 写成 started；未改历史 migration V1–V3；
+未改 contracts/openapi.yaml。
+```
+
+### Integration-1 decision
+
+```text
+Integration-1 仍 NOT STARTED；Runtime integration NOT STARTED；DH NOT INTEGRATED；AI NOT STARTED；LIVE DISABLED。
+P1-4 仍未全部关闭：本轮只关闭 replay nonce persistence，rate limit / memory cap 仍残留。
+```
+
+### 下一步
+
+```text
+DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2：bounded memory cap（仍不接真实 NQ / 不真实 HTTP / 不 Integration-1）。
+```
+
 ## 2026-06-12 DH-P1-4-RESIDUAL-FIX-PLAN
 
 输出 DH P1-4 residual（rate limit / memory cap / replay nonce persistence）修复方案，**只做设计不改代码**：不实现限流、不实现 memory cap、不实现 replay nonce persistence、不启动 Integration-1、不做真实 NQ 联调。

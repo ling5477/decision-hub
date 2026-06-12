@@ -37,6 +37,12 @@
     <artifactId>dh-connector</artifactId>
     <version>${project.version}</version>
   </dependency>
+  <!-- JdbcNonceReplayGuard 实现 dh-security 的 NonceReplayGuard 端口；dh-security 仅依赖 dh-common，无循环。 -->
+  <dependency>
+    <groupId>com.guidinglight</groupId>
+    <artifactId>dh-security</artifactId>
+    <version>${project.version}</version>
+  </dependency>
 
   <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -54,6 +60,22 @@
   <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <!-- JdbcNonceReplayGuard 持久化/重启语义需真实 Postgres 验证；无 Docker 时按 disabledWithoutDocker 跳过。 -->
+  <dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>junit-jupiter</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
     <scope>test</scope>
   </dependency>
 </dependencies>
