@@ -68,6 +68,8 @@ DH-NQ Integration-0 contract test 代码已实现（仅 `dh-domain/src/test/**`�
 
 DH-NQ Integration-0 safety gate：**CLOSED / ACCEPTED**（见 `DH_NQ_INTEGRATION0_ACCEPTANCE_REPORT.md`）。Runtime integration / Integration-1 / AI 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED；Integration-1 前置为 DH P1-4 residual（rate limit / memory cap / replay nonce persistence）+ header 对齐 + 真实通道安全审查。
 
+DH P1-4 residual 修复方案已设计（docs-only，未改代码），见 `DH_P1_4_RESIDUAL_FIX_PLAN.md`：限流加在 dh-api 层（key=source+tenant+route，429 RATE_LIMITED）、memory cap（TTL + tenant/全局上限 + fail-closed）、replay nonce persistence（推荐 PostgreSQL-backed JdbcNonceReplayGuard，real channel 必须集中式）。P1-4 未修复前仍禁止 Integration-1。
+
 Codex workflow 入口：
 
 ```text

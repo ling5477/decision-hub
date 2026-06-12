@@ -1,5 +1,61 @@
 # Decision Hub Worklog
 
+## 2026-06-12 DH-P1-4-RESIDUAL-FIX-PLAN
+
+输出 DH P1-4 residual（rate limit / memory cap / replay nonce persistence）修复方案，**只做设计不改代码**：不实现限流、不实现 memory cap、不实现 replay nonce persistence、不启动 Integration-1、不做真实 NQ 联调。
+
+### 新增文件
+
+```text
+docs/current/DH_P1_4_RESIDUAL_FIX_PLAN.md
+```
+
+### 修改文件
+
+```text
+docs/current/README.md / ROADMAP.md / WORKLOG.md / TESTING.md
+```
+
+### 只读核查结论（当前状态）
+
+```text
+rate limit：完全缺失。NqFeedbackController -> HmacNqFeedbackAuthenticator 无任何限流；
+  NqFeedbackAuthResult 无 429 / RATE_LIMITED。
+memory cap：缺失。InMemoryNonceReplayGuard 为无界 ConcurrentHashMap 且无清理（注释已声明生产需替换）；
+  InMemoryNqFeedbackEventRepository 及多个 dh-usecase/dh-memory/dh-infra InMemory 仓储均无界。
+replay nonce persistence：缺失。InMemoryNonceReplayGuard 单实例内存、无持久化、无 eviction；
+  NonceReplayGuard 端口含 expiresAt（TTL 意图）但内存实现未消费。
+header：现为 X-DH-NQ-*，Integration-0 冻结 canonical 为 X-NQ-DH-*，对齐属 Integration-1 前置。
+```
+
+### 方案要点
+
+```text
+rate limit：dh-api 层前置 RateLimiter（端口在 dh-security）；key=source+tenant+route；
+  窗口/阈值配置化保守默认；超限 429 RATE_LIMITED（不泄露阈值）；审计 RATE_LIMITED。
+memory cap：replay cache 与入站 store 加 TTL + 单 tenant/全局上限 + TTL 优先于容量驱逐；
+  超限 fail-closed；审计 MEMORY_CAP_EVICTION / MEMORY_CAP_REJECTED。
+replay nonce persistence：候选 A PostgreSQL-backed JdbcNonceReplayGuard（推荐，复用 dh-infra + Flyway）/
+  候选 B Redis / 候选 C bounded in-memory（仅 dev/test）；real channel 必须集中式；
+  存储不可用 fail-closed；重放 409 REPLAY_DETECTED。
+```
+
+### 验证记录
+
+```text
+本轮 docs-only：未运行 mvn test；未改代码、测试代码、API、migration、provider、NQ client。
+已执行 git status --short / git diff --check / git diff --stat（仅 docs/current）。
+```
+
+### 边界确认
+
+```text
+未改代码 / 测试代码；未新增 API / migration / Controller / Service / Repository / DTO / RealClient / 真实 Provider。
+未做真实 HTTP / 真实 NQ / 真实交易所调用；未启动 Integration-1；未读写 NQ DB；未读取真实密钥；未开启 LIVE。
+未把 DH 写成 integrated；未把 Integration-1 写成 started。
+只读核查中未输出任何敏感值（仅报告路径、字段名、风险类型）。
+```
+
 ## 2026-06-12 NQ-DH-INTEGRATION0-SAFETY-GATE-CLOSE
 
 输出 DH-NQ Integration-0 safety gate close / acceptance report，正式判定 Integration-0 验收通过并关闭。本轮只做验收文档，不写代码、不改测试代码、不新增 API/migration/RealClient/真实 Provider、不做真实联调。

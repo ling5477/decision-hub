@@ -92,6 +92,11 @@ CLOSED / ACCEPTED**（见 `DH_NQ_INTEGRATION0_ACCEPTANCE_REPORT.md`）。下一�
 planning-only audit / DH P1-4 residual fix planning / NQ GateK-PLAN 文档规划；禁止直接 Integration-1
 实现、真实只读通道、真实 HTTP、RealClient、Provider、LIVE、AI 自动交易。
 
+DH P1-4 residual 修复方案已设计完成（docs-only，见 `DH_P1_4_RESIDUAL_FIX_PLAN.md`）；下一步可进入
+DH-P1-4-RESIDUAL-FIX-REVIEW 或 DH-P1-4-RESIDUAL-FIX-IMPL（rate limit / memory cap / replay nonce
+persistence 实现 + 测试，仍走 fake/mock/容器 DB，不接真实 NQ）。P1-4 修复并回归 INT0-T01..T15 前，
+Integration-1 仍 NOT STARTED。
+
 范围：
 
 ```text

@@ -804,6 +804,23 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
            不接真实通道）；真实通道必须等 Integration-1 并先修复 DH P1-4 残留
 ```
 
+## 24. 2026-06-12 DH-P1-4-RESIDUAL-FIX-PLAN 验收记录
+
+```text
+日期       2026-06-12
+阶段       DH-P1-4-RESIDUAL-FIX-PLAN（DOCUMENTATION + FIX_PLAN）
+新增       docs/current/DH_P1_4_RESIDUAL_FIX_PLAN.md
+修改       docs/current/README.md / ROADMAP.md / WORKLOG.md / TESTING.md
+命令       git status --short / git diff --check / git diff --stat
+结果       已执行；仅命中 docs/current Markdown；无 whitespace error；无业务/测试代码改动
+全量测试   未执行；本轮 docs-only fix planning，未改 Java、测试代码、API、migration、provider、NQ client
+失败原因   无
+修复结论   不适用（本轮仅出方案，未修复任何缺口）
+剩余风险   方案与未来实现可能漂移；rate limit 阈值、fail-closed、TTL 优先于驱逐等须在实现阶段用测试固化
+准入决定   Integration-1 仍 NOT STARTED；P1-4 未修复前禁止真实只读通道 / 真实 HTTP / RealClient；
+           下一步 DH-P1-4-RESIDUAL-FIX-REVIEW 或 DH-P1-4-RESIDUAL-FIX-IMPL，不得直接 Integration-1
+```
+
 ## 23. 2026-06-12 NQ-DH-INTEGRATION0-SAFETY-GATE-CLOSE 验收记录
 
 ```text
