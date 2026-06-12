@@ -65,6 +65,25 @@ Forbidden work:     real NQ connection, RealClient, real Provider, trading,
 
 Integration-0 是 contract / mock / documentation 工作线，不是 runtime integration；NQ 侧仍无 DH 入站端点、无 DH client、无 feedback outbox，DH not integrated 成立。
 
+## 1.2 NQ-DH Integration-0 safety gate（2026-06-12，CLOSED / ACCEPTED）
+
+```text
+Decision:             PASS
+Integration-0 safety gate: CLOSED / ACCEPTED
+Runtime integration:  NOT STARTED
+Integration-1:        NOT STARTED
+LIVE:                 DISABLED
+AI:                   NOT STARTED
+DH integration:       NOT INTEGRATED
+```
+
+- 详见 `DH_NQ_INTEGRATION0_ACCEPTANCE_REPORT.md`。
+- 已完成链路：三轮审计 + 汇总 → 事实源同步 → 契约冻结 → contract test 矩阵设计 → contract test 代码实现（NQ 16 + DH 16）→ implementation review（PASS）→ 本次验收关闭。
+- 验收依据：DH `mvn test` BUILD SUCCESS（dh-domain 86 tests / 0 failures，Integration-0 16 passed，ArchitectureTest 12 条全绿，PostgresContainerSmokeTest 既有环境性 skip）；NQ `mvn -f backend/pom.xml test` BUILD SUCCESS（nq-app 51 tests / 0 failures，Integration-0 16 passed，ArchUnit 全绿）。两侧均覆盖 INT0-T01..T15，含 negative path、audit event shape、forbidden side-effect。
+- 契约范围：10 个契约 contract-only / mock-only / test-protected（无真实 HTTP / 无 RealClient / 无真实 NQ）。
+- Integration-1 前置 blocker：DH P1-4 residual（rate limit / memory cap / replay nonce persistence，修复后须重跑 contract tests，T06 须以持久化 nonce 重跑，并新增 429 限流与 bounded store 测试）；header `X-DH-NQ-*`/`X-NQ-DH-*` 对齐；真实通道安全前置（单独开工 + 设计审计 + staging/paper-only + LIVE disabled + 无凭证落日志 + no trading side-effect + 安全审查）。
+- 下一步只允许：Integration-0 acceptance/归档、Integration-1 planning-only audit、DH P1-4 residual fix planning、NQ GateK-PLAN 文档规划。禁止直接 Integration-1 实现 / 真实只读通道 / 真实 HTTP / RealClient / Provider / LIVE / AI 自动交易。
+
 ## 2. 当前已完成
 
 ```text

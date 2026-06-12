@@ -66,6 +66,8 @@ docs/current/DH_NQ_INTEGRATION0_CONTRACT_TEST_PLAN.md
 
 DH-NQ Integration-0 contract test 代码已实现（仅 `dh-domain/src/test/**`，test-only，INT0-T01..T15 共 16 用例，全部 mock/stub/内存校验，无真实集成、无 RealClient、无真实 NQ）；`mvn test` 通过，全仓回归全绿。
 
+DH-NQ Integration-0 safety gate：**CLOSED / ACCEPTED**（见 `DH_NQ_INTEGRATION0_ACCEPTANCE_REPORT.md`）。Runtime integration / Integration-1 / AI 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED；Integration-1 前置为 DH P1-4 residual（rate limit / memory cap / replay nonce persistence）+ header 对齐 + 真实通道安全审查。
+
 Codex workflow 入口：
 
 ```text

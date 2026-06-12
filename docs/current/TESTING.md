@@ -804,6 +804,31 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
            不接真实通道）；真实通道必须等 Integration-1 并先修复 DH P1-4 残留
 ```
 
+## 23. 2026-06-12 NQ-DH-INTEGRATION0-SAFETY-GATE-CLOSE 验收记录
+
+```text
+日期       2026-06-12
+阶段       NQ-DH-INTEGRATION0-SAFETY-GATE-CLOSE（DOCUMENTATION + ACCEPTANCE_REPORT）
+新增       docs/current/DH_NQ_INTEGRATION0_ACCEPTANCE_REPORT.md
+修改       docs/current/STATUS.md / README.md / ROADMAP.md / WORKLOG.md / TESTING.md
+命令       git status --short
+结果       已执行；仅命中本轮新增/修改的 docs/current Markdown
+命令       git diff --check
+结果       已执行；无 whitespace error
+命令       git diff --stat
+结果       已执行；改动集中在 acceptance report 与 STATUS/README/ROADMAP/WORKLOG/TESTING
+全量测试   未执行；本轮 docs-only，未改业务/测试代码；验收依据引用上一轮 mvn test BUILD SUCCESS
+           （dh-domain 86 tests / 0 failures，Integration-0 16 passed，ArchitectureTest 12 条全绿）
+失败原因   无
+修复结论   不适用
+验收结论   Integration-0 PASS / CLOSED / ACCEPTED；Runtime integration / Integration-1 / AI NOT STARTED；
+           DH NOT INTEGRATED；LIVE DISABLED
+剩余风险   Integration-0 只证明 contract / test-only 安全边界，不证明真实通道安全；
+           Integration-1 前必须修复 DH P1-4 residual 并重跑 contract tests
+准入决定   下一步只允许 Integration-1 planning-only audit / DH P1-4 residual fix planning /
+           NQ GateK-PLAN 文档规划；禁止直接真实联调
+```
+
 ## 22. 2026-06-12 NQ-DH-INTEGRATION0-CONTRACT-TEST-IMPL 验收记录
 
 ```text

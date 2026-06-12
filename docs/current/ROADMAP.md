@@ -87,6 +87,11 @@ DH-NQ Integration-0 mock / contract test 详细矩阵（15 项）已设计完成
 下一步可进入 contract test 代码实现（草案 `NQ-DH-INTEGRATION0-CONTRACT-TEST-IMPL`，DH 侧只加测试与
 fixture、走 Fake/Disabled、不接真实通道），仍禁止真实联调。
 
+DH-NQ Integration-0 contract test 代码已实现并通过 implementation review；**Integration-0 safety gate
+CLOSED / ACCEPTED**（见 `DH_NQ_INTEGRATION0_ACCEPTANCE_REPORT.md`）。下一步只允许 Integration-1
+planning-only audit / DH P1-4 residual fix planning / NQ GateK-PLAN 文档规划；禁止直接 Integration-1
+实现、真实只读通道、真实 HTTP、RealClient、Provider、LIVE、AI 自动交易。
+
 范围：
 
 ```text
