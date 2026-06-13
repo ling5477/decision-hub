@@ -135,7 +135,7 @@ public class AgentRuntimeWiringConfig {
    * 由 {@link InMemoryNqFeedbackEventRepository} 构造抛 {@link IllegalArgumentException} -> 启动失败。
    *
    * @param maxEvents 全局事件上限（保守默认 10000）。
-   * @param perTenantMaxEvents 单 tenant 事件上限（保守默认 10000）。
+   * @param perTenantMaxEvents 单 tenant 事件上限（保守默认 1000，&lt; 全局上限，DH-P1-4 Batch 3 P2-1 加固）。
    * @param retentionSeconds 事件保留秒数（保守默认 86400）。
    * @return 有界内存 NqFeedbackEventRepository。
    */
@@ -144,7 +144,9 @@ public class AgentRuntimeWiringConfig {
   public NqFeedbackEventRepository nqFeedbackEventRepository(
       @Value("${decisionhub.security.nq-feedback.feedback-store.max-events:10000}")
           final int maxEvents,
-      @Value("${decisionhub.security.nq-feedback.feedback-store.per-tenant-max-events:10000}")
+      // DH-P1-4 Batch 3（P2-1 加固）：per-tenant 默认值由 10000 下调到 1000（< 全局上限），恢复 tenant 隔离意义；
+      // 仅调默认值，不改 bounded memory cap 主逻辑（实现仍在 dh-usecase InMemoryNqFeedbackEventRepository）。
+      @Value("${decisionhub.security.nq-feedback.feedback-store.per-tenant-max-events:1000}")
           final int perTenantMaxEvents,
       @Value("${decisionhub.security.nq-feedback.feedback-store.retention-seconds:86400}")
           final long retentionSeconds) {

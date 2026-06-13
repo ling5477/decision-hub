@@ -2433,3 +2433,39 @@ Integration-1 仍 NOT STARTED；P1-4 仍未全部关闭（rate limit 残留）�
 - 复验：`mvn test`（root，全 19 模块）BUILD SUCCESS；`mvn -Pquality validate`（root）BUILD SUCCESS；
   INT0-T01..T15 仍全绿；`git diff --check` 无 whitespace error。
 - 改动文件：`dh-usecase/.../inmemory/BoundedInMemoryNqFeedbackEventRepositoryTest.java`（+5/-1，test-only）。
+
+## 2026-06-13 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-3（inbound rate limit / 429）
+
+### 范围
+只实现 NQ feedback 入站 rate limit / 429 限流路径；不做 header alignment；不启动 Integration-1；不做真实联调 / 真实 HTTP / RealClient。
+
+### 改动文件（main）
+- `dh-security/.../security/nq/RateLimiter.java`（新增）：限流端口，key=source+tenant+route；只接收 source/tenant/route/now，不读 body/secret/签名材料。
+- `dh-security/.../security/nq/RateLimitResult.java`（新增）：独立结果模型（allowed/reason/retryAfterSeconds/auditCode），超限 reason/auditCode=RATE_LIMITED；不污染 `NqFeedbackAuthResult`。静态工厂命名 `pass()` 以避开 record `allowed()` 访问器同名冲突。
+- `dh-security/.../security/nq/InMemoryRateLimiter.java`（新增）：固定窗口计数器；windowSeconds + maxRequests + maxKeys；窗口 TTL 清理优先；maxKeys 满且无过期项 fail-closed 拒绝（不无界、不驱逐活跃窗口）；非法配置构造抛 `IllegalArgumentException` -> 启动失败。
+- `dh-api/.../api/feedback/NqFeedbackController.java`：限流前置于 HMAC authenticator；超限 429 + errorCode `RATE_LIMITED`；`log.warn` 审计（auditCode/tenant/source/route/traceId，不含阈值/窗口/计数/密钥）；保留既有 401/403/409/413/202 语义。
+- `dh-app/.../config/SecurityWiringConfig.java`：新增 `nqFeedbackRateLimiter` bean，`@Value` 注入保守默认（window=1s / max-requests=20 / max-keys=10000）；非法配置启动失败。
+- `dh-app/.../config/AgentRuntimeWiringConfig.java`：feedback-store `per-tenant-max-events` 默认 `@Value` 10000 -> 1000（P2-1 加固）。
+- `dh-app/src/main/resources/application.yml`：新增 `rate-limit.{window-seconds,max-requests,max-keys}`；`feedback-store.per-tenant-max-events` 10000 -> 1000。
+
+### 改动文件（test）
+- `dh-security/.../security/nq/InMemoryRateLimiterTest.java`（新增，6）。
+- `dh-api/.../api/feedback/NqFeedbackRateLimitWebMvcTest.java`（新增，3）。
+- `dh-api/.../api/feedback/NqFeedbackControllerWebMvcTest.java`：构造器加注入宽松 limiter（+9/-1），15/15 仍全绿。
+
+### 验证
+- `mvn test`：BUILD SUCCESS；InMemoryRateLimiterTest 6/6、NqFeedbackRateLimitWebMvcTest 3/3、NqFeedbackControllerWebMvcTest 15/15、NqFeedbackPayloadSizeGateTest 2/2、Batch 2（7+7）未破坏；INT0-T01..T15（16）未破坏；ArchUnit 全绿。
+- 无 Docker runner：JdbcNonceReplayGuardPersistenceTest 3 + PostgresContainerSmokeTest 1 按 disabledWithoutDocker 跳过（非失败）。
+- `mvn -Pquality validate`：BUILD SUCCESS（未引入 quality 违规）。
+- `git diff --check`：无 whitespace error（仅 LF→CRLF 提示）。
+
+### 设计取舍
+- 限流作用点选在 controller 内、`requireTenantId` 之后、HMAC 之前：tenant 来自已认证上下文（bearer filter 先行 401），source 取 `X-DH-NQ-Source` header；source 缺失归一化为占位符，与真实 tenant 组合仍是按租户隔离的有界 key，不会合并成单一无界公共 key。
+- `retryAfterSeconds` 保留在结果模型供审计 / 日志，但 controller 不在响应头暴露，避免泄露精确窗口。
+- in-memory limiter 仅 dev/test 或单实例辅助路径；真实多实例集中式（Redis）limiter 另起任务，本轮先修复「完全无限流」。
+
+### 边界确认
+未修改 NQ；未做 header alignment；未新增 API 路径；未新增 migration / RealClient / 真实 Provider；未做真实 HTTP / 真实 NQ / 真实交易所；未接 AI；未开启 LIVE；未读取或输出真实密钥。
+
+### 准入
+Integration-1 仍 NOT STARTED；P1-4 三项残留实现均已落地（replay nonce / memory cap / rate limit），但 **P1-4 未标记全部关闭**——须先 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-3-REVIEW，再 DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE 单独验收后方可关闭；不得直接进入 Integration-1。

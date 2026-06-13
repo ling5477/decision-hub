@@ -6,7 +6,7 @@
 >
 > NQ / DH 三轮只读审计已完成；DH not integrated；no RealClient；no real provider；no trading ability。
 > Integration-0 allowed only as contract / mock / documentation work line, not runtime integration。
-> Security baseline: P1-1 / P1-2 / P1-3 closed；P1-4 残留中 replay nonce 持久化已实现（DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-1，2026-06-12），bounded memory cap 已实现（DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2，2026-06-12：InMemoryNonceReplayGuard / InMemoryNqFeedbackEventRepository 有界 + TTL + fail-closed），rate limit 仍残留，P1-4 未全部关闭，仍阻塞 Integration-1，不阻塞 Integration-0。详见 `STATUS.md` §1.1。
+> Security baseline: P1-1 / P1-2 / P1-3 closed；P1-4 三项残留实现均已落地——replay nonce 持久化（DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-1，2026-06-12）、bounded memory cap（DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2，2026-06-12：InMemoryNonceReplayGuard / InMemoryNqFeedbackEventRepository 有界 + TTL + fail-closed）、inbound rate limit（DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-3，2026-06-13：dh-security RateLimiter + bounded fail-closed InMemoryRateLimiter，NqFeedbackController 前置限流，超限 429 RATE_LIMITED）。**P1-4 仍未标记全部关闭**：须先 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-3-REVIEW，再 DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE 单独验收后方可关闭，在此之前仍阻塞 Integration-1，不阻塞 Integration-0。详见 `STATUS.md` §1.1。
 
 ## 1. 当前定位
 
@@ -68,7 +68,7 @@ DH-NQ Integration-0 contract test 代码已实现（仅 `dh-domain/src/test/**`�
 
 DH-NQ Integration-0 safety gate：**CLOSED / ACCEPTED**（见 `DH_NQ_INTEGRATION0_ACCEPTANCE_REPORT.md`）。Runtime integration / Integration-1 / AI 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED；Integration-1 前置为 DH P1-4 residual（rate limit / memory cap / replay nonce persistence）+ header 对齐 + 真实通道安全审查。
 
-DH P1-4 residual 修复方案已设计，见 `DH_P1_4_RESIDUAL_FIX_PLAN.md`：限流加在 dh-api 层（key=source+tenant+route，429 RATE_LIMITED）、memory cap（TTL + tenant/全局上限 + fail-closed）、replay nonce persistence（PostgreSQL-backed JdbcNonceReplayGuard，real channel 必须集中式）。其中 **replay nonce persistence 已实现**（BATCH-1，2026-06-12：`JdbcNonceReplayGuard` + Flyway V4 `dh_nq_replay_nonce` + `SecurityWiringConfig` 条件装配，dev/test 允许 in-memory、非 dev/test 默认 jdbc、fail-closed）；rate limit / memory cap 仍未实现。P1-4 未全部关闭前仍禁止 Integration-1。
+DH P1-4 residual 修复方案见 `DH_P1_4_RESIDUAL_FIX_PLAN.md`：限流加在 dh-api 层（key=source+tenant+route，429 RATE_LIMITED）、memory cap（TTL + tenant/全局上限 + fail-closed）、replay nonce persistence（PostgreSQL-backed JdbcNonceReplayGuard，real channel 必须集中式）。三项均已实现：**replay nonce persistence**（BATCH-1，2026-06-12：`JdbcNonceReplayGuard` + Flyway V4 `dh_nq_replay_nonce` + `SecurityWiringConfig` 条件装配，dev/test 允许 in-memory、非 dev/test 默认 jdbc、fail-closed）；**bounded memory cap**（BATCH-2，2026-06-12：有界 + TTL + fail-closed）；**inbound rate limit**（BATCH-3，2026-06-13：dh-security `RateLimiter` 端口 + 独立 `RateLimitResult` + bounded fail-closed `InMemoryRateLimiter`，`NqFeedbackController` 前置限流、超限 429 RATE_LIMITED，in-memory 仅 dev/test/单实例，真实多实例集中式 limiter 另起任务）。**P1-4 仍未标记全部关闭**：须先 BATCH-3-REVIEW，再 REGRESSION-CLOSE 单独验收；P1-4 全部关闭前仍禁止 Integration-1。header `X-DH-NQ-*` -> canonical `X-NQ-DH-*` 对齐仍未做（另起独立任务）。
 
 Codex workflow 入口：
 

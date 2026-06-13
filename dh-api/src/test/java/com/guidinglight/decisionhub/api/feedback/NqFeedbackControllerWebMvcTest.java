@@ -13,6 +13,7 @@ import com.guidinglight.decisionhub.api.security.DhApiAuthenticationFilter;
 import com.guidinglight.decisionhub.security.AuthContext;
 import com.guidinglight.decisionhub.security.nq.HmacNqFeedbackAuthenticator;
 import com.guidinglight.decisionhub.security.nq.InMemoryNonceReplayGuard;
+import com.guidinglight.decisionhub.security.nq.InMemoryRateLimiter;
 import com.guidinglight.decisionhub.security.nq.NqFeedbackAuthRequest;
 import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionCommand;
 import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionErrorCode;
@@ -71,7 +72,13 @@ class NqFeedbackControllerWebMvcTest {
             Duration.ofMinutes(5),
             2048,
             new InMemoryNonceReplayGuard());
-    final NqFeedbackController controller = new NqFeedbackController(stubService, authenticator);
+    // 既有用例不验证限流：注入宽松 limiter（每窗口 1000 次），避免与 429 分支耦合；
+    // 429 行为由独立的 NqFeedbackRateLimitWebMvcTest 用严格阈值覆盖。
+    final NqFeedbackController controller =
+        new NqFeedbackController(
+            stubService,
+            authenticator,
+            new InMemoryRateLimiter(60, 1000, 1000, java.time.Clock.systemUTC()));
 
     final MappingJackson2HttpMessageConverter jacksonConverter =
         new MappingJackson2HttpMessageConverter();

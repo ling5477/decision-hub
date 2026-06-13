@@ -7,7 +7,9 @@ import com.guidinglight.decisionhub.security.nq.HmacNqFeedbackAuthenticator;
 import com.guidinglight.decisionhub.security.nq.InMemoryNonceReplayGuard;
 import com.guidinglight.decisionhub.security.nq.NonceReplayGuard;
 import com.guidinglight.decisionhub.security.nq.NonceReplayGuardType;
+import com.guidinglight.decisionhub.security.nq.InMemoryRateLimiter;
 import com.guidinglight.decisionhub.security.nq.NqFeedbackAuthenticator;
+import com.guidinglight.decisionhub.security.nq.RateLimiter;
 import com.guidinglight.decisionhub.security.provider.DefaultPromptContextRedactionGate;
 import com.guidinglight.decisionhub.security.provider.DefaultProviderTrustPolicy;
 import com.guidinglight.decisionhub.security.provider.PromptContextRedactionGate;
@@ -119,6 +121,30 @@ public class SecurityWiringConfig {
     // 非法配置（上限非正 / TTL 非正）由 InMemoryNonceReplayGuard 构造抛 IllegalArgumentException -> 启动失败。
     return new InMemoryNonceReplayGuard(
         inMemoryMaxEntries, Duration.ofSeconds(inMemoryTtlSeconds), Clock.systemUTC());
+  }
+
+  /**
+   * NQ feedback 入站限流 bean（DH-P1-4 Batch 3）。
+   *
+   * <p>Why：在本批之前 {@code NqFeedbackController -> HmacNqFeedbackAuthenticator} 链路完全无限流。本 bean 提供
+   * bounded in-memory limiter（仅 dev/test 或单实例辅助路径；真实多实例需集中式 limiter，另起任务）。作用点由
+   * controller 置于 HMAC 认证之前；key=source+tenant+route；超限 429 RATE_LIMITED。
+   *
+   * <p>fail-closed：window / max-requests / max-keys 非正时由 {@link InMemoryRateLimiter} 构造抛
+   * {@link IllegalArgumentException} -> bean 初始化失败 -> 启动失败，绝不静默 fail-open。
+   *
+   * @param windowSeconds 固定窗口秒数（保守默认 1）。
+   * @param maxRequests 单窗口最大请求数（保守默认 20，per source+tenant+route）。
+   * @param maxKeys key 上限（保守默认 10000，兜底防无界增长）。
+   * @return 有界 fail-closed 限流器。
+   */
+  @Bean
+  public RateLimiter nqFeedbackRateLimiter(
+      @Value("${decisionhub.security.nq-feedback.rate-limit.window-seconds:1}")
+          final int windowSeconds,
+      @Value("${decisionhub.security.nq-feedback.rate-limit.max-requests:20}") final int maxRequests,
+      @Value("${decisionhub.security.nq-feedback.rate-limit.max-keys:10000}") final int maxKeys) {
+    return new InMemoryRateLimiter(windowSeconds, maxRequests, maxKeys, Clock.systemUTC());
   }
 
   /** Provider trust policy 默认无 allowlist，因此拒绝 UNKNOWN / UNTRUSTED_RELAY。 */

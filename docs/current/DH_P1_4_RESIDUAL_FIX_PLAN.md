@@ -29,11 +29,19 @@
 ### 1.2 P1-4 三项缺口判定
 
 ```text
-rate limit            完全缺失（入口、认证层、结果模型均无）
+rate limit            已实现（DH-P1-4-...-BATCH-3，2026-06-13）：dh-security RateLimiter 端口 +
+                      RateLimitResult + bounded fail-closed InMemoryRateLimiter；NqFeedbackController
+                      前置限流（key=source+tenant+route，超限 429 RATE_LIMITED）；SecurityWiringConfig
+                      注入保守默认；in-memory 仅 dev/test/单实例，真实多实例集中式 limiter 另起任务
 memory cap            已实现（DH-P1-4-...-BATCH-2，2026-06-12）：InMemoryNonceReplayGuard /
-                      InMemoryNqFeedbackEventRepository 改为有界（上限 + TTL + fail-closed / 驱逐最老）
+                      InMemoryNqFeedbackEventRepository 改为有界（上限 + TTL + fail-closed / 驱逐最老）；
+                      Batch 3 加固：feedback-store per-tenant 默认 10000 -> 1000（< 全局上限，仅默认值）
 replay nonce          已实现（DH-P1-4-...-BATCH-1，2026-06-12）：JdbcNonceReplayGuard + V4 持久化
 ```
+
+> 状态（2026-06-13）：P1-4 三项残留实现（replay nonce / memory cap / rate limit）均已落地。但 **P1-4 未标记全部关闭**：
+> 须先 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-3-REVIEW，再 DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE 单独验收后方可关闭。
+> Integration-1 仍 NOT STARTED；header `X-DH-NQ-*` -> canonical `X-NQ-DH-*` 对齐仍未做（另起独立任务）。
 
 > 当前 header 为 `X-DH-NQ-*`；Integration-0 冻结 canonical 为 `X-NQ-DH-*`。header 对齐是 Integration-1 前置（见 acceptance report），不在本 P1-4 方案内修复，但 nonce/replay 实现切换时应同步评估。
 

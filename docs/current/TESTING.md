@@ -983,3 +983,50 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
            真实 Provider；未做真实 HTTP / 真实 NQ / 真实交易所；未接 AI；未开启 LIVE；未读取真实密钥
 准入决定   Integration-1 仍 NOT STARTED；P1-4 仍未全部关闭（rate limit 残留）
 ```
+
+## 26. 2026-06-13 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-3 验收记录（inbound rate limit / 429）
+
+```text
+日期       2026-06-13
+阶段       DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-3（CODE_CHANGE + SECURITY_FIX + TEST_CODE_CHANGE）
+范围       只实现 NQ feedback 入站 rate limit / 429；不做 header alignment；不启动 Integration-1；不做真实联调
+本次改动（main）
+  - dh-security 新增 RateLimiter（端口）/ RateLimitResult（独立结果模型，不污染 HMAC authenticator）/
+    InMemoryRateLimiter（固定窗口 + maxKeys 有界 + 窗口 TTL 清理优先 + 满容量 fail-closed + 非法配置启动失败）
+  - dh-api NqFeedbackController：限流前置于 HMAC authenticator；key=source+tenant+route；超限 429 + errorCode
+    RATE_LIMITED；审计 log.warn(auditCode/tenant/source/route/traceId，不含阈值/窗口/计数/密钥）；
+    保留 HMAC/timestamp/nonce/replay 409/payload 413/成功 202 既有语义
+  - dh-app SecurityWiringConfig 注入 RateLimiter bean（保守默认 window=1s / max-requests=20 / max-keys=10000；
+    非法配置启动失败）；application.yml 新增 rate-limit.{window-seconds,max-requests,max-keys}
+  - 配置加固（P2-1）：feedback-store.per-tenant-max-events 默认 10000 -> 1000（< 全局上限），
+    仅改默认值（application.yml + AgentRuntimeWiringConfig @Value），不改 bounded memory cap 主逻辑
+新增测试
+  - dh-security InMemoryRateLimiterTest（6）：returns_limited_after_threshold / tenant_source_isolated /
+    store_is_bounded_fail_closed（maxKeys=1）/ ttl_cleanup_allows_new_key_after_window /
+    invalid_config_fails_closed / check_requires_no_secret_or_payload（no_credential_access 契约）
+  - dh-api NqFeedbackRateLimitWebMvcTest（3）：returns_429_with_rate_limited /
+    does_not_leak_internal_thresholds（429 body 无 window/maxRequests/maxKeys/count/threshold/retry-after/secret）/
+    rate_limited_request_does_not_invoke_downstream_ingestion（no_trading_side_effect 代理）
+  - 既有 NqFeedbackControllerWebMvcTest 更新构造器（注入宽松 limiter），15/15 仍全绿；
+    payload 64KiB gate 由 NqFeedbackPayloadSizeGateTest（2）+ 既有 413 用例保持有效
+命令       mvn test
+结果       BUILD SUCCESS；全仓回归全绿
+           - InMemoryRateLimiterTest 6/6、NqFeedbackRateLimitWebMvcTest 3/3、NqFeedbackControllerWebMvcTest 15/15
+           - NqFeedbackPayloadSizeGateTest 2/2、BoundedInMemoryNonceReplayGuardTest 7/7、
+             BoundedInMemoryNqFeedbackEventRepositoryTest 7/7（Batch 2 未破坏）
+           - INT0-T01..T15 = DhNqIntegration0*（6+2+8）16/16 未破坏；ArchUnit 全绿
+           - 无 Docker 的 runner：JdbcNonceReplayGuardPersistenceTest 3 + PostgresContainerSmokeTest 1
+             按 disabledWithoutDocker 跳过（非失败）
+命令       mvn -Pquality validate
+结果       BUILD SUCCESS（本轮未引入 quality 违规）
+命令       git diff --check / git status --short
+结果       无 whitespace error（仅 LF→CRLF 提示）；改动仅落在 dh-api/feedback + dh-api/test + dh-app/config +
+           application.yml + dh-security/nq + dh-security/test 允许范围与 docs/current
+边界       未修改 NQ；未做 header alignment；未新增 API 路径；未新增 migration / RealClient / 真实 Provider；
+           未做真实 HTTP / 真实 NQ / 真实交易所；未接 AI；未开启 LIVE；未读取或输出真实密钥
+剩余风险   in-memory limiter 仅适合 dev/test 或单实例辅助路径，真实多实例需集中式（Redis）limiter（另起任务）；
+           容量满 / 超阈值的保护性拒绝属 fail-closed，需运维监控阈值与命中率；阈值需按真实流量调优
+准入决定   Integration-1 仍 NOT STARTED；P1-4 三项残留实现均已落地（replay nonce / memory cap / rate limit），
+           但 P1-4 未标记全部关闭——须先 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-3-REVIEW，再
+           DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE 单独验收后方可关闭；不得直接进入 Integration-1
+```

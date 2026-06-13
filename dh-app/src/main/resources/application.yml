@@ -48,7 +48,17 @@ decisionhub:
           ttl-seconds: 600
       # NqFeedback 内存仓储有界（DH-P1-4 Batch 2）：全局/单 tenant 上限 + retention TTL；
       # 各 profile（含 prod）经 base 继承，保证不会无上限增长。缺配置时由 @Value 默认值兜底为有界。
+      # per-tenant-max-events 由 10000 下调到 1000（< 全局上限，DH-P1-4 Batch 3 P2-1 加固），恢复 tenant 隔离意义。
       feedback-store:
         max-events: 10000
-        per-tenant-max-events: 10000
+        per-tenant-max-events: 1000
         retention-seconds: 86400
+      # 入站限流（DH-P1-4 Batch 3）：作用于 NqFeedbackController -> HMAC authenticator 之前。
+      # bounded in-memory（仅 dev/test 或单实例辅助路径；真实多实例需集中式 limiter，另起任务）。
+      # key=source+tenant+route；超限 429 RATE_LIMITED；响应不暴露阈值/窗口/计数。
+      # max-keys 满且无过期窗口时 fail-closed 保护性拒绝；非法配置（任一上限非正）启动失败，不 fail-open。
+      # dev/test 可在对应 profile 调小阈值用于测试；prod 经 base 继承保守默认，应按真实流量另行调优。
+      rate-limit:
+        window-seconds: 1
+        max-requests: 20
+        max-keys: 10000
