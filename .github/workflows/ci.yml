@@ -1,0 +1,77 @@
+name: CI
+
+# DH-CI-PERSISTENT-NONCE-IT-ENABLE：在带 Docker 的 GitHub-hosted runner 上真实运行 Testcontainers 集成测试，
+# 验证 persistent replay nonce 的 restart 语义（JdbcNonceReplayGuardPersistenceTest）与 PostgresContainerSmokeTest。
+# 本机/无 Docker 环境仍由 @Testcontainers(disabledWithoutDocker = true) 优雅 skip；CI 有 Docker 必须实跑（见 assert 步骤）。
+# 范围：仅 DH 仓库构建与测试；不接真实 NQ / 不发真实 HTTP / 不开启 LIVE / 不启动 Integration-1。
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+# 最小权限基线：CI 只读取仓库内容，不授予写权限。
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: build & test (Testcontainers / Docker)
+    # GitHub-hosted ubuntu runner 预装并运行 Docker daemon，Testcontainers 可直接拉起 postgres:17。
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      # 确认 Docker 可用：若不可用则直接失败，避免 Testcontainers IT 被静默 skip 后误判为"已验证"。
+      - name: Verify Docker is available
+        run: docker info
+
+      # 全量构建 + 测试。ubuntu runner 有 Docker，故 @Testcontainers(disabledWithoutDocker=true) 的
+      # JdbcNonceReplayGuardPersistenceTest / PostgresContainerSmokeTest 在此真实执行（不 skip）。
+      - name: Build and test
+        run: ./mvnw -B -ntp test
+
+      # 断言两个 Testcontainers IT 在 CI（有 Docker）下确实执行、且零 skip。
+      # 若被 skip（例如 Docker 异常），此步骤失败，防止"无 Docker 静默跳过"被当成通过。
+      - name: Assert Testcontainers IT actually executed in CI (not skipped)
+        run: |
+          set -euo pipefail
+          persistence="dh-infra/target/surefire-reports/com.guidinglight.decisionhub.infra.jdbc.JdbcNonceReplayGuardPersistenceTest.txt"
+          smoke="dh-app/target/surefire-reports/com.guidinglight.decisionhub.PostgresContainerSmokeTest.txt"
+          for report in "$persistence" "$smoke"; do
+            if [ ! -f "$report" ]; then
+              echo "ERROR: surefire report missing (test did not run): $report"
+              exit 1
+            fi
+            if ! grep -q "Skipped: 0" "$report"; then
+              echo "ERROR: Testcontainers IT was skipped in CI although Docker is expected. Report:"
+              cat "$report"
+              exit 1
+            fi
+            echo "OK (executed, 0 skipped): $report"
+            cat "$report"
+          done
+
+      # 失败或成功都上传 surefire 报告，便于排查（含 Testcontainers IT 结果）。
+      - name: Upload test reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: '**/target/surefire-reports/*'
+          if-no-files-found: ignore
+          retention-days: 7

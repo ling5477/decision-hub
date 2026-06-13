@@ -6,7 +6,7 @@
 >
 > NQ / DH 三轮只读审计已完成；DH not integrated；no RealClient；no real provider；no trading ability。
 > Integration-0 allowed only as contract / mock / documentation work line, not runtime integration。
-> Security baseline: P1-1 / P1-2 / P1-3 closed；**P1-4 residual: CLOSED（2026-06-13，DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE）**——replay nonce persistence（BATCH-1）、bounded memory cap（BATCH-2）、inbound rate limit / 429 RATE_LIMITED（BATCH-3）三项均已实现、各自 review 通过并完成整体回归收口（`mvn test` / `mvn -Pquality validate` BUILD SUCCESS，INT0-T01..T15 16/16 未破坏，既有 HMAC/timestamp/nonce/replay/payload/source/tenant 语义保持）。P1-4 CLOSED 仅表示 Integration-1 的前置安全缺口关闭，**不等于允许真实联调**：Integration-1 仍 NOT STARTED，DH NOT INTEGRATED，LIVE DISABLED，AI NOT STARTED，header alignment 未做（另起任务）。持久化 nonce restart 语义仍需 Docker CI 独立验证。详见 `STATUS.md` §1.3。
+> Security baseline: P1-1 / P1-2 / P1-3 closed；**P1-4 residual: CLOSED（2026-06-13，DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE）**——replay nonce persistence（BATCH-1）、bounded memory cap（BATCH-2）、inbound rate limit / 429 RATE_LIMITED（BATCH-3）三项均已实现、各自 review 通过并完成整体回归收口（`mvn test` / `mvn -Pquality validate` BUILD SUCCESS，INT0-T01..T15 16/16 未破坏，既有 HMAC/timestamp/nonce/replay/payload/source/tenant 语义保持）。P1-4 CLOSED 仅表示 Integration-1 的前置安全缺口关闭，**不等于允许真实联调**：Integration-1 仍 NOT STARTED，DH NOT INTEGRATED，LIVE DISABLED，AI NOT STARTED，header alignment 未做（另起任务）。持久化 nonce restart 语义经 `.github/workflows/ci.yml`（ubuntu + Docker）实跑 Testcontainers IT 验证——本地/无 Docker 仍优雅 skip，CI 有 Docker 实跑且 assert 强制非 skip（首次 push/PR 触发后确认，详见 `TESTING.md` §28）。详见 `STATUS.md` §1.3。
 
 ## 1. 当前定位
 

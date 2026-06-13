@@ -1072,3 +1072,45 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
 准入决定   P1-4 CLOSED 仅表示 Integration-1 前置安全缺口关闭，不等于允许真实联调；Integration-1 仍 NOT STARTED；
            下一步只允许 DH-CI-PERSISTENT-NONCE-IT-ENABLE 或 DH-NQ-HEADER-ALIGNMENT-PLAN，不得直接 Integration-1 runtime
 ```
+
+## 28. 2026-06-13 DH-CI-PERSISTENT-NONCE-IT-ENABLE（Docker CI 实跑持久化 nonce IT）
+
+```text
+日期       2026-06-13
+阶段       DH-CI-PERSISTENT-NONCE-IT-ENABLE（CI_TEST_ENABLEMENT + SECURITY_VALIDATION）
+范围       让带 Docker 的 CI runner 真实运行 Testcontainers IT，验证 persistent replay nonce 的 restart 语义；
+           不改业务生产代码、不改测试逻辑、不接真实 NQ / 真实 HTTP / 不启动 Integration-1
+本轮改动
+  - 新增 .github/workflows/ci.yml（GitHub Actions）：ubuntu-latest（预装并运行 Docker）+ JDK 21（temurin）+
+    maven cache；步骤：docker info -> ./mvnw -B -ntp test -> 断言 IT 未被 skip -> 上传 surefire 报告
+  - 未修改 JdbcNonceReplayGuardPersistenceTest / PostgresContainerSmokeTest：保留
+    @Testcontainers(disabledWithoutDocker = true)，使本地/无 Docker 仍优雅 skip、CI 有 Docker 实跑
+
+测试门控（关键区分）
+  - JdbcNonceReplayGuardPersistenceTest（dh-infra，3 用例）：
+      local no Docker  -> skipped（disabledWithoutDocker；本机已确认 Tests run: 3, Skipped: 3）
+      CI with Docker   -> 实跑（workflow assert 步骤强制 Skipped: 0，否则 CI 失败）
+  - PostgresContainerSmokeTest（dh-app，1 用例）：
+      local no Docker  -> skipped
+      CI with Docker   -> 实跑（同上 assert 守护）
+
+本机验证（无 Docker）
+  命令   mvn -pl dh-infra -am -Dtest=JdbcNonceReplayGuardPersistenceTest -Dsurefire.failIfNoSpecifiedTests=false test
+  结果   BUILD SUCCESS（exit 0）；JdbcNonceReplayGuardPersistenceTest Tests run: 3, Skipped: 3（无 Docker 优雅 skip，符合预期）
+  命令   git diff --check
+  结果   无 whitespace error
+  YAML   PyYAML 本机不可用，已做结构核验：无 Tab 缩进、顶层键（name/on/permissions/concurrency/jobs）与 6 个 step 结构正确
+
+CI Docker 预期（待首次 CI 运行确认，本轮无法在本机触发 GitHub Actions）
+  - ubuntu runner 有 Docker，两个 IT 实跑且 Skipped: 0；persistent nonce restart 语义（重建 guard 复用同一持久化存储后
+    窗口内重放仍被拒）经真实 PostgreSQL(postgres:17) 验证；assert 步骤若发现 skip 会让 CI 失败
+  - 注意：本条为"配置完成 + 预期"，**首次 push/PR 触发 CI 前不得记为已 executed/passed**
+
+边界       未修改 NQ；未新增业务 Java 生产代码；未新增 API / migration；未做 header alignment；
+           未新增 RealClient / 真实 Provider；未做真实 HTTP / 真实 NQ / 真实交易所；未接 AI；未开启 LIVE；
+           未启动 Integration-1；未把 DH 写成 integrated；未读取或输出真实密钥
+风险       Testcontainers 依赖 Docker daemon；CI runner 须能拉取 postgres:17（网络 / 镜像源）；
+           首次运行有镜像拉取耗时；私有 runner 若无 Docker 需另行启用
+准入决定   Integration-1 仍 NOT STARTED；本轮仅启用 CI 实跑能力，不改变 P1-4 CLOSED 口径；
+           下一步 DH-NQ-HEADER-ALIGNMENT-PLAN 或 DH-CONFIG-CREDENTIAL-DEFAULTS-GOVERNANCE，不得直接 Integration-1 runtime
+```

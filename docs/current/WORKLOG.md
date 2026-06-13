@@ -2516,3 +2516,30 @@ Integration-1: NOT STARTED；Runtime integration: NOT STARTED；DH: NOT INTEGRAT
 
 ### 准入
 P1-4 CLOSED 仅表示 Integration-1 的前置安全缺口关闭，**不等于允许真实联调**。Integration-1 仍 NOT STARTED；下一步只允许 DH-CI-PERSISTENT-NONCE-IT-ENABLE 或 DH-NQ-HEADER-ALIGNMENT-PLAN，不得直接进入 Integration-1 runtime。
+
+## 2026-06-13 DH-CI-PERSISTENT-NONCE-IT-ENABLE（Docker CI 实跑持久化 nonce IT）
+
+### 范围
+让带 Docker 的 CI runner 真实运行 Testcontainers 集成测试（JdbcNonceReplayGuardPersistenceTest / PostgresContainerSmokeTest），验证 persistent replay nonce 的 restart 语义。不改业务生产代码、不改测试逻辑、不接真实 NQ / 真实 HTTP、不启动 Integration-1。
+
+### 改动文件
+- 新增 `.github/workflows/ci.yml`（GitHub Actions）：`ubuntu-latest`（预装并运行 Docker）+ JDK 21（temurin）+ maven 缓存；步骤 `docker info` → `./mvnw -B -ntp test` → 断言两个 IT 在 CI 下 `Skipped: 0`（否则 CI 失败）→ 上传 surefire 报告。
+- 文档：`docs/current/TESTING.md`（§28）、`docs/current/WORKLOG.md`（本条）、`docs/current/README.md`。
+- **未修改任何测试代码**：`JdbcNonceReplayGuardPersistenceTest` / `PostgresContainerSmokeTest` 保留 `@Testcontainers(disabledWithoutDocker = true)`——本地/无 Docker 优雅 skip，CI 有 Docker 实跑。
+
+### 设计取舍
+- 仓库此前无 CI 配置（仅 `.github/PULL_REQUEST_TEMPLATE.md`），故新增 GitHub Actions workflow。
+- 不删除 `disabledWithoutDocker`：避免本地/无 Docker 环境硬失败；改为在 CI（确有 Docker）用 assert 步骤强制 IT 非 skip，兼顾"本地可跑"与"CI 必实跑"。
+- 仅运行 `test`（含 Testcontainers IT），不在本轮新 CI 引入 quality 门以免首版 CI 被环境性 checkstyle/spotless 波动阻塞；quality 门作为后续 CI 增强项。
+
+### 验证
+- 本机（无 Docker）：`mvn -pl dh-infra -am -Dtest=JdbcNonceReplayGuardPersistenceTest -Dsurefire.failIfNoSpecifiedTests=false test` → BUILD SUCCESS；该 IT `Tests run: 3, Skipped: 3`（disabledWithoutDocker 优雅 skip，符合预期）。
+- `git diff --check`：无 whitespace error。
+- YAML：PyYAML 本机不可用，已结构核验（无 Tab 缩进；顶层键 name/on/permissions/concurrency/jobs；6 个 step 结构正确）。
+- CI Docker 实跑结果：**待首次 push/PR 触发 GitHub Actions 后确认**；本轮无法在本机触发 CI，故不记为已 executed/passed。
+
+### 边界确认
+未修改 NQ；未新增业务 Java 生产代码；未新增 API；未新增 migration；未做 header alignment；未新增 RealClient / 真实 Provider；未做真实 HTTP / 真实 NQ / 真实交易所；未接 AI；未开启 LIVE；未启动 Integration-1；未把 DH 写成 integrated；未读取或输出真实密钥。
+
+### 准入
+Integration-1 仍 NOT STARTED；本轮仅启用 CI 实跑能力，不改变 P1-4 CLOSED 口径。下一步：DH-NQ-HEADER-ALIGNMENT-PLAN 或 DH-CONFIG-CREDENTIAL-DEFAULTS-GOVERNANCE，不得直接进入 Integration-1 runtime。
