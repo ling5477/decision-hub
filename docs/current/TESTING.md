@@ -958,3 +958,28 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
 准入决定   Integration-1 仍 NOT STARTED；P1-4 仍未全部关闭（rate limit 残留）；
            下一步 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2-REVIEW，再进入 Batch 3 rate limit，不得直接真实联调
 ```
+
+### 25.1 2026-06-13 Batch 2 flaky 测试修复复验
+
+```text
+日期       2026-06-13
+现象       2026-06-13 运行 mvn test 时 dh-usecase 失败 1 例：
+           BoundedInMemoryNqFeedbackEventRepositoryTest.existing_query_semantics_preserved_sorted_by_received_at
+           AssertionFailedError: expected:<3> but was:<1>（surefire-reports 已确认）
+根因       该用例用默认构造（真实 Clock.systemUTC()），事件 receivedAt 固定为 T0=2026-06-12，
+           默认 retention=24h。墙钟跨过 T0+24h 后，每次 append 的 TTL 清理把先前事件按 retention 过期驱逐，
+           只剩最后一条 -> 时间依赖（flaky）用例，非 bounded memory cap 生产语义缺陷
+修复       仅改该测试：注入固定 MutableClock(T0)（与同类其余用例一致），事件 age 远小于 retention，
+           三条均保留，仅验证排序语义；生产代码与 retention/上限语义未改（test-only，+5/-1）
+命令       mvn test（root，全 19 模块）
+结果       BUILD SUCCESS；BoundedInMemoryNqFeedbackEventRepositoryTest 7/7、
+           BoundedInMemoryNonceReplayGuardTest 7/7、NqFeedbackPayloadSizeGateTest 2/2、
+           DhNqIntegration0*（INT0）6+2+8=16/16 全绿
+命令       mvn -Pquality validate（root）
+结果       BUILD SUCCESS（本轮未引入 quality 违规）
+命令       git diff --check / git diff --stat
+结果       无 whitespace error；1 file changed, 5 insertions(+), 1 deletion(-)
+边界       未修改 NQ；未实现 rate limit；未做 header alignment；未新增 API / migration / RealClient /
+           真实 Provider；未做真实 HTTP / 真实 NQ / 真实交易所；未接 AI；未开启 LIVE；未读取真实密钥
+准入决定   Integration-1 仍 NOT STARTED；P1-4 仍未全部关闭（rate limit 残留）
+```

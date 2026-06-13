@@ -129,7 +129,11 @@ class BoundedInMemoryNqFeedbackEventRepositoryTest {
 
   @Test
   void existing_query_semantics_preserved_sorted_by_received_at() {
-    final InMemoryNqFeedbackEventRepository repo = new InMemoryNqFeedbackEventRepository();
+    // 注入固定时钟（T0），避免默认实时时钟下事件相对 retention 过期导致测试随墙钟时间漂移而 flaky：
+    // 事件 receivedAt 为 T0+10..30s，age 远小于 retention，三条均保留，仅验证排序语义。
+    final InMemoryNqFeedbackEventRepository repo =
+        new InMemoryNqFeedbackEventRepository(
+            10, 10, Duration.ofSeconds(86_400), new MutableClock(T0));
     repo.append(event("tenant-a", "run-1", T0.plusSeconds(30)));
     repo.append(event("tenant-a", "run-1", T0.plusSeconds(10)));
     repo.append(event("tenant-a", "run-1", T0.plusSeconds(20)));

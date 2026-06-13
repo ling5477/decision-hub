@@ -2421,3 +2421,15 @@ private key / mnemonic / keystore password / 2FA backup code
 ### 准入
 Integration-1 仍 NOT STARTED；P1-4 仍未全部关闭（rate limit 残留）；
 下一步 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2-REVIEW，再进入 Batch 3 rate limit。
+
+### 2026-06-13 后续修复：Batch 2 flaky 测试
+- 现象：`BoundedInMemoryNqFeedbackEventRepositoryTest.existing_query_semantics_preserved_sorted_by_received_at`
+  在 2026-06-13 运行时 `mvn test` 失败（expected:3 but was:1）。
+- 根因：该用例使用默认构造（真实 `Clock.systemUTC()`），但事件 receivedAt 固定为 `T0=2026-06-12`，
+  默认 retention=24h。墙钟跨过 T0+24h 后，每次 append 的 TTL 清理把先前事件按 retention 过期驱逐，只剩最后一条。
+  属时间依赖（flaky）用例，非 bounded memory cap 生产语义缺陷。
+- 修复：仅改该测试，注入固定 `MutableClock(T0)`（与同类其余用例一致），事件 age 远小于 retention，三条均保留，
+  仅验证排序语义。生产代码与 retention/上限语义未改。
+- 复验：`mvn test`（root，全 19 模块）BUILD SUCCESS；`mvn -Pquality validate`（root）BUILD SUCCESS；
+  INT0-T01..T15 仍全绿；`git diff --check` 无 whitespace error。
+- 改动文件：`dh-usecase/.../inmemory/BoundedInMemoryNqFeedbackEventRepositoryTest.java`（+5/-1，test-only）。
