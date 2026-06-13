@@ -43,7 +43,9 @@ jobs:
       # 全量构建 + 测试。ubuntu runner 有 Docker，故 @Testcontainers(disabledWithoutDocker=true) 的
       # JdbcNonceReplayGuardPersistenceTest / PostgresContainerSmokeTest 在此真实执行（不 skip）。
       - name: Build and test
-        run: ./mvnw -B -ntp test
+        run: |
+          chmod +x ./mvnw
+          ./mvnw -B -ntp test
 
       # 断言两个 Testcontainers IT 在 CI（有 Docker）下确实执行、且零 skip。
       # 若被 skip（例如 Docker 异常），此步骤失败，防止"无 Docker 静默跳过"被当成通过。
