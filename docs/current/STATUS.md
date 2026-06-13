@@ -49,7 +49,7 @@ NQ client:       no RealClient
 Trading ability: none
 Security baseline: P1-1 / P1-2 / P1-3 closed
 Remaining issue: P1-4 residual rate limit / memory cap / replay nonce persistence
-                 -> blocks Integration-1, does NOT block Integration-0
+                 -> CLOSED 2026-06-13（见 §1.3）；关闭前阻塞 Integration-1，从不阻塞 Integration-0
 ```
 
 NQ-DH 口径：
@@ -83,6 +83,38 @@ DH integration:       NOT INTEGRATED
 - 契约范围：10 个契约 contract-only / mock-only / test-protected（无真实 HTTP / 无 RealClient / 无真实 NQ）。
 - Integration-1 前置 blocker：DH P1-4 residual（rate limit / memory cap / replay nonce persistence，修复后须重跑 contract tests，T06 须以持久化 nonce 重跑，并新增 429 限流与 bounded store 测试）；header `X-DH-NQ-*`/`X-NQ-DH-*` 对齐；真实通道安全前置（单独开工 + 设计审计 + staging/paper-only + LIVE disabled + 无凭证落日志 + no trading side-effect + 安全审查）。
 - 下一步只允许：Integration-0 acceptance/归档、Integration-1 planning-only audit、DH P1-4 residual fix planning、NQ GateK-PLAN 文档规划。禁止直接 Integration-1 实现 / 真实只读通道 / 真实 HTTP / RealClient / Provider / LIVE / AI 自动交易。
+
+## 1.3 DH P1-4 residual regression close（2026-06-13，CLOSED）
+
+P1-4 residual 三项修复整体回归收口验收（DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE）通过：
+
+```text
+DH P1-4 residual:        CLOSED
+  replay nonce persistence: closed   （BATCH-1：JdbcNonceReplayGuard + V4 + 条件装配 + fail-closed）
+  memory cap:               closed   （BATCH-2：bounded nonce guard / feedback repo + TTL + fail-closed）
+  rate limit:               closed   （BATCH-3：RateLimiter + 429 RATE_LIMITED，前置于 HMAC，bounded fail-closed）
+Integration-1:           NOT STARTED
+Runtime integration:     NOT STARTED
+DH:                      NOT INTEGRATED
+AI:                      NOT STARTED
+LIVE:                    DISABLED
+header alignment:        NOT DONE（另起独立任务，未 completed）
+```
+
+- 验收依据：`mvn test` BUILD SUCCESS、`mvn -Pquality validate` BUILD SUCCESS；关键测试全绿——
+  JdbcNonceReplayGuardTest 5、NonceReplayGuardTypeTest 5、HmacNqFeedbackAuthenticatorTest 6、
+  BoundedInMemoryNonceReplayGuardTest 7、BoundedInMemoryNqFeedbackEventRepositoryTest 7、
+  NqFeedbackPayloadSizeGateTest 2、InMemoryRateLimiterTest 6、NqFeedbackRateLimitWebMvcTest 3、
+  NqFeedbackControllerWebMvcTest 15、DhNqIntegration0*（INT0-T01..T15）16/16、ArchUnit 全绿。
+- 既有安全语义保持：HMAC / timestamp / nonce / replay 409 / payload 64KiB gate / source allowlist /
+  tenant binding 全部不变；状态码 401/403/409/413/429/202 均有测试覆盖；三项修复之间无冲突
+  （Batch1 JDBC 与 Batch2 in-memory 经 NonceReplayGuardType 按 profile 二选一同端口；Batch3 限流前置短路，不消耗 nonce/replay store）。
+- **持久化 nonce restart 语义仍需 Docker CI 独立验证**：本机无 Docker，JdbcNonceReplayGuardPersistenceTest（3）
+  按 `disabledWithoutDocker` skip；不得据此声称 restart 语义已在本机实跑。
+- **P1-4 CLOSED 仅表示 Integration-1 的前置安全缺口关闭，不等于允许真实联调。** Integration-1 仍 NOT STARTED。
+- 非阻塞后续项（均未在本轮处理）：① Docker CI 跑通持久化 nonce IT；② header `X-DH-NQ-*`/`X-NQ-DH-*` 对齐；
+  ③ datasource 默认弱口令治理；④ 多实例真实通道集中式（Redis）rate limiter，Integration-1 前设计审查；
+  ⑤ rate limit 指标 / counter 可观测性增强；⑥ P1-4 后 Integration-1 planning-only audit。
 
 ## 2. 当前已完成
 

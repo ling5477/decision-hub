@@ -76,7 +76,7 @@ NQ mutation forbidden
 ```
 
 NQ / DH 三轮只读审计（NQ 全仓 / DH 全仓 / NQ-DH 联合边界 + 汇总）已完成。Integration-0 是 contract / mock / documentation 工作线，不是 runtime integration。
-DH P1-1 / P1-2 / P1-3 已关闭；P1-4 残留（rate limit / memory cap / replay nonce 持久化）阻塞 Integration-1，不阻塞 Integration-0。
+DH P1-1 / P1-2 / P1-3 已关闭；P1-4 残留（rate limit / memory cap / replay nonce 持久化）**已于 2026-06-13 CLOSED**（DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE，见 `STATUS.md` §1.3）。P1-4 CLOSED 仅表示 Integration-1 的前置安全缺口关闭，不等于允许真实联调；Integration-1 仍 NOT STARTED，不阻塞 Integration-0。
 
 DH-NQ Integration-0 契约冻结已完成（contract / mock / docs，未实现集成），见
 `DH_NQ_INTEGRATION0_CONTRACT_FREEZE.md` / `DH_NQ_INTEGRATION0_SECURITY_POLICY.md` /
@@ -92,10 +92,12 @@ CLOSED / ACCEPTED**（见 `DH_NQ_INTEGRATION0_ACCEPTANCE_REPORT.md`）。下一�
 planning-only audit / DH P1-4 residual fix planning / NQ GateK-PLAN 文档规划；禁止直接 Integration-1
 实现、真实只读通道、真实 HTTP、RealClient、Provider、LIVE、AI 自动交易。
 
-DH P1-4 residual 修复方案已设计完成（docs-only，见 `DH_P1_4_RESIDUAL_FIX_PLAN.md`）；下一步可进入
-DH-P1-4-RESIDUAL-FIX-REVIEW 或 DH-P1-4-RESIDUAL-FIX-IMPL（rate limit / memory cap / replay nonce
-persistence 实现 + 测试，仍走 fake/mock/容器 DB，不接真实 NQ）。P1-4 修复并回归 INT0-T01..T15 前，
-Integration-1 仍 NOT STARTED。
+DH P1-4 residual 三项修复（replay nonce persistence / memory cap / rate limit）已分别实现并 review 通过，
+并于 2026-06-13 完成整体回归收口（DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE）：`mvn test` / `mvn -Pquality validate`
+BUILD SUCCESS，INT0-T01..T15 16/16 未破坏，既有 HMAC/timestamp/nonce/replay/payload/source/tenant 语义保持，
+**P1-4 residual: CLOSED**（见 `STATUS.md` §1.3 / `DH_P1_4_RESIDUAL_FIX_PLAN.md`）。下一步只允许：
+① DH-CI-PERSISTENT-NONCE-IT-ENABLE（Docker CI 跑通持久化 nonce IT）或 ② DH-NQ-HEADER-ALIGNMENT-PLAN
+（header `X-DH-NQ-*`/`X-NQ-DH-*` 对齐规划）；**不得直接进入 Integration-1 runtime**。Integration-1 仍 NOT STARTED。
 
 范围：
 

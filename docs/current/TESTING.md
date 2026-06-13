@@ -1030,3 +1030,45 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
            但 P1-4 未标记全部关闭——须先 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-3-REVIEW，再
            DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE 单独验收后方可关闭；不得直接进入 Integration-1
 ```
+
+## 27. 2026-06-13 DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE 验收记录（P1-4 整体回归收口）
+
+```text
+日期       2026-06-13
+阶段       DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE（REGRESSION_VALIDATION + SECURITY_REVIEW + DOCUMENTATION）
+范围       只做 P1-4 三项修复整体回归收口验收 + 文档关闭口径；不新增功能；不改生产代码 / 测试代码
+本轮改动   仅文档：STATUS.md（§1.1 残留项指向关闭 + 新增 §1.3 CLOSED 记录）、ROADMAP.md、README.md、
+           DH_P1_4_RESIDUAL_FIX_PLAN.md、TESTING.md（本节）、WORKLOG.md
+回归制品核验（只读）
+  - Batch1 replay nonce：JdbcNonceReplayGuard 存在；MARK_SQL = INSERT ... ON CONFLICT (replay_key) DO NOTHING；
+    DataAccessException -> return false（fail-closed -> 409）；异常只记 ex.getClass().getName()（不记 replay_key/
+    nonce/payload/secret）；V4 dh_nq_replay_nonce 表 if not exists、不动 V1–V3、无凭证列；NonceReplayGuardType.select
+    缺省非 dev/test -> JDBC，非 dev/test 显式 in-memory -> IllegalStateException（启动失败）
+  - Batch2 memory cap：InMemoryNonceReplayGuard maxEntries + TTL、满容量不驱逐未过期 key、fail-closed；
+    InMemoryNqFeedbackEventRepository global + per-tenant + retention 上限、TTL 清理优先、非法配置启动失败；
+    payload 64KiB gate 不受影响（per-tenant 默认 Batch3 已加固为 1000 < 全局上限）
+  - Batch3 rate limit：RateLimiter / RateLimitResult / InMemoryRateLimiter 存在；限流前置于 HMAC；
+    key=source+tenant+route（缺失项归一化为占位符，不合并成无界公共 key）；超限 429 RATE_LIMITED；
+    429 不泄露阈值/窗口/计数/secret/签名材料；限流短路下游 ingestion；HMAC/timestamp/nonce/replay/payload 语义不变
+命令       mvn test
+结果       BUILD SUCCESS；关键测试全绿
+           - JdbcNonceReplayGuardTest 5/5、NonceReplayGuardTypeTest 5/5、HmacNqFeedbackAuthenticatorTest 6/6
+           - BoundedInMemoryNonceReplayGuardTest 7/7、BoundedInMemoryNqFeedbackEventRepositoryTest 7/7
+           - NqFeedbackPayloadSizeGateTest 2/2、InMemoryRateLimiterTest 6/6、NqFeedbackRateLimitWebMvcTest 3/3
+           - NqFeedbackControllerWebMvcTest 15/15、DhNqIntegration0*（INT0-T01..T15）6+2+8=16/16、ArchUnit 全绿
+           - 本机无 Docker：JdbcNonceReplayGuardPersistenceTest 3 + PostgresContainerSmokeTest 1 按
+             disabledWithoutDocker skip（非失败）；**持久化 nonce restart 语义仍需 Docker CI 独立验证，未在本机实跑**
+命令       mvn -Pquality validate
+结果       BUILD SUCCESS（本轮未引入 quality 违规；仅改文档）
+命令       git diff --check / git status --short
+结果       无 whitespace error；本轮改动仅文档（docs/current/*），无代码 / 测试改动
+关闭口径   DH P1-4 residual: CLOSED（replay nonce persistence: closed / memory cap: closed / rate limit: closed）
+           Integration-1: NOT STARTED；Runtime integration: NOT STARTED；DH: NOT INTEGRATED；
+           AI: NOT STARTED；LIVE: DISABLED；header alignment: NOT DONE
+边界       未修改 NQ；未做 header alignment；未新增 API / migration / RealClient / 真实 Provider；
+           未做真实 HTTP / 真实 NQ / 真实交易所；未接 AI；未开启 LIVE；未读取或输出真实密钥
+剩余风险   in-memory limiter / in-memory guard 单实例局限，真实多实例需集中式（Redis）；fail-closed 保护性拒绝需监控；
+           固定窗口边界突发；阈值需按真实流量调优；持久化 nonce restart 语义待 Docker CI 验证
+准入决定   P1-4 CLOSED 仅表示 Integration-1 前置安全缺口关闭，不等于允许真实联调；Integration-1 仍 NOT STARTED；
+           下一步只允许 DH-CI-PERSISTENT-NONCE-IT-ENABLE 或 DH-NQ-HEADER-ALIGNMENT-PLAN，不得直接 Integration-1 runtime
+```

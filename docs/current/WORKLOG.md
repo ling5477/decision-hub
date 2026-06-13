@@ -2469,3 +2469,50 @@ Integration-1 仍 NOT STARTED；P1-4 仍未全部关闭（rate limit 残留）�
 
 ### 准入
 Integration-1 仍 NOT STARTED；P1-4 三项残留实现均已落地（replay nonce / memory cap / rate limit），但 **P1-4 未标记全部关闭**——须先 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-3-REVIEW，再 DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE 单独验收后方可关闭；不得直接进入 Integration-1。
+
+## 2026-06-13 DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE（P1-4 整体回归收口）
+
+### 范围
+只做 P1-4 三项修复整体回归收口验收 + 文档关闭口径。不新增功能；不改生产代码 / 测试代码；不启动 Integration-1；不做真实联调 / header alignment。
+
+### 改动文件（仅文档）
+- `docs/current/STATUS.md`：§1.1 残留项指向关闭；新增 §1.3「DH P1-4 residual regression close（2026-06-13，CLOSED）」。
+- `docs/current/ROADMAP.md`：P1-4 残留 -> CLOSED；下一步只允许 CI 持久化 nonce IT 或 header alignment plan。
+- `docs/current/README.md`：security baseline -> P1-4 residual CLOSED（指向 STATUS §1.3）。
+- `docs/current/DH_P1_4_RESIDUAL_FIX_PLAN.md`：状态注记 -> CLOSED + 非阻塞后续项。
+- `docs/current/TESTING.md`：新增 §27 回归收口验收记录。
+- `docs/current/WORKLOG.md`：本条目。
+
+### 回归制品核验（只读，未改代码）
+- Batch1 replay nonce：`JdbcNonceReplayGuard`（`INSERT ... ON CONFLICT (replay_key) DO NOTHING`、`DataAccessException` -> false fail-closed -> 409、异常只记类型不记 replay_key/nonce/payload/secret、惰性清理过期行）；`V4__nq_feedback_replay_nonce.sql`（`if not exists`、不动 V1–V3、无凭证列）；`NonceReplayGuardType.select`（缺省非 dev/test -> JDBC，非 dev/test 显式 in-memory -> 启动失败）。
+- Batch2 memory cap：`InMemoryNonceReplayGuard`（maxEntries + TTL + 满容量 fail-closed 不驱逐未过期 key）；`InMemoryNqFeedbackEventRepository`（global + per-tenant + retention 上限、TTL 清理优先、非法配置启动失败）；payload 64KiB gate 未受影响。
+- Batch3 rate limit：`RateLimiter` / `RateLimitResult` / `InMemoryRateLimiter` 存在；限流前置于 HMAC；key=source+tenant+route；超限 429 RATE_LIMITED 且不泄露阈值/窗口/计数/secret/签名材料；限流短路下游 ingestion；HMAC/timestamp/nonce/replay/payload 语义不变。
+
+### 验证
+- `mvn test`：BUILD SUCCESS。JdbcNonceReplayGuardTest 5/5、NonceReplayGuardTypeTest 5/5、HmacNqFeedbackAuthenticatorTest 6/6、BoundedInMemoryNonceReplayGuardTest 7/7、BoundedInMemoryNqFeedbackEventRepositoryTest 7/7、NqFeedbackPayloadSizeGateTest 2/2、InMemoryRateLimiterTest 6/6、NqFeedbackRateLimitWebMvcTest 3/3、NqFeedbackControllerWebMvcTest 15/15、DhNqIntegration0*（INT0）16/16、ArchUnit 全绿。
+- 本机无 Docker：JdbcNonceReplayGuardPersistenceTest 3 + PostgresContainerSmokeTest 1 按 `disabledWithoutDocker` skip（非失败）。**持久化 nonce restart 语义仍需 Docker CI 独立验证，未在本机实跑。**
+- `mvn -Pquality validate`：BUILD SUCCESS（仅改文档，未引入违规）。
+- `git diff --check`：无 whitespace error；本轮改动仅 `docs/current/*`。
+
+### 三项之间无冲突
+- Batch1 JDBC guard 与 Batch2 in-memory bounded guard 是同一 `NonceReplayGuard` 端口的两个实现，由 `NonceReplayGuardType.select` 按 profile 二选一（非 dev/test 默认 JDBC，dev/test 允许 bounded in-memory），互不冲突。
+- Batch3 限流前置于 HMAC，超限请求短路、不消耗 nonce / 不写 replay store，对 Batch1/2 是正向交互。
+- Batch3 P2-1 加固只下调 feedback-store per-tenant 默认值（config-only），不改 Batch2 主逻辑。
+
+### 关闭口径
+DH P1-4 residual: CLOSED；replay nonce persistence: closed；memory cap: closed；rate limit: closed。
+Integration-1: NOT STARTED；Runtime integration: NOT STARTED；DH: NOT INTEGRATED；AI: NOT STARTED；LIVE: DISABLED；header alignment: NOT DONE。
+
+### 非阻塞后续项（均未在本轮处理）
+1. DH-CI-PERSISTENT-NONCE-IT-ENABLE：Docker CI 跑通 `JdbcNonceReplayGuardPersistenceTest`（restart 语义）。
+2. DH-NQ-HEADER-ALIGNMENT-PLAN：header `X-DH-NQ-*` / `X-NQ-DH-*` 对齐。
+3. datasource 默认弱口令治理（单独任务）。
+4. 多实例真实通道集中式（Redis）rate limiter，Integration-1 前设计审查。
+5. rate limit 指标 / counter 可观测性增强。
+6. P1-4 后 Integration-1 planning-only audit。
+
+### 边界确认
+未修改 NQ；未做 header alignment；未新增 API；未新增 migration；未新增 RealClient / 真实 Provider；未做真实 HTTP / 真实 NQ / 真实交易所；未接 AI；未开启 LIVE；未读取或输出真实密钥。
+
+### 准入
+P1-4 CLOSED 仅表示 Integration-1 的前置安全缺口关闭，**不等于允许真实联调**。Integration-1 仍 NOT STARTED；下一步只允许 DH-CI-PERSISTENT-NONCE-IT-ENABLE 或 DH-NQ-HEADER-ALIGNMENT-PLAN，不得直接进入 Integration-1 runtime。

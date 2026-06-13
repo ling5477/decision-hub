@@ -39,9 +39,18 @@ memory cap            已实现（DH-P1-4-...-BATCH-2，2026-06-12）：InMemory
 replay nonce          已实现（DH-P1-4-...-BATCH-1，2026-06-12）：JdbcNonceReplayGuard + V4 持久化
 ```
 
-> 状态（2026-06-13）：P1-4 三项残留实现（replay nonce / memory cap / rate limit）均已落地。但 **P1-4 未标记全部关闭**：
-> 须先 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-3-REVIEW，再 DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE 单独验收后方可关闭。
-> Integration-1 仍 NOT STARTED；header `X-DH-NQ-*` -> canonical `X-NQ-DH-*` 对齐仍未做（另起独立任务）。
+> 状态（2026-06-13）：P1-4 三项残留实现（replay nonce / memory cap / rate limit）均已落地、各自 review 通过，
+> 并已完成整体回归收口（DH-P1-4-RESIDUAL-FIX-REGRESSION-CLOSE）：**DH P1-4 residual: CLOSED**
+> （replay nonce persistence: closed / memory cap: closed / rate limit: closed）。
+> 验收：`mvn test` / `mvn -Pquality validate` BUILD SUCCESS；INT0-T01..T15 16/16 未破坏；
+> 既有 HMAC/timestamp/nonce/replay 409/payload 64KiB/source allowlist/tenant binding 语义保持；
+> 状态码 401/403/409/413/429/202 均有测试覆盖；三项修复间无冲突。详见 `STATUS.md` §1.3 与 `TESTING.md` §27。
+>
+> **P1-4 CLOSED 仅表示 Integration-1 的前置安全缺口关闭，不等于允许真实联调。** Integration-1 仍 NOT STARTED；
+> Runtime integration NOT STARTED；DH NOT INTEGRATED；AI NOT STARTED；LIVE DISABLED；header alignment 未做。
+> 非阻塞后续项：① Docker CI 跑通持久化 nonce IT（本机无 Docker，restart 语义未实跑）；
+> ② header `X-DH-NQ-*` -> `X-NQ-DH-*` 对齐；③ datasource 默认弱口令治理；④ 多实例集中式（Redis）rate limiter
+> Integration-1 前设计审查；⑤ rate limit 指标 / counter 可观测性增强；⑥ Integration-1 planning-only audit。
 
 > 当前 header 为 `X-DH-NQ-*`；Integration-0 冻结 canonical 为 `X-NQ-DH-*`。header 对齐是 Integration-1 前置（见 acceptance report），不在本 P1-4 方案内修复，但 nonce/replay 实现切换时应同步评估。
 
