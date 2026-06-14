@@ -42,10 +42,13 @@ jobs:
 
       # 全量构建 + 测试。ubuntu runner 有 Docker，故 @Testcontainers(disabledWithoutDocker=true) 的
       # JdbcNonceReplayGuardPersistenceTest / PostgresContainerSmokeTest 在此真实执行（不 skip）。
+      # 使用 runner 预装的 Maven（ubuntu-latest 自带 mvn），绕开仓库内已损坏的 .mvn/wrapper/maven-wrapper.jar。
+      # 该 jar 因仓库缺 .gitattributes + 提交端 autocrlf 被 EOL 规范化破坏，CI 检出后 "no main manifest attribute"；
+      # wrapper 二进制修复属独立后续项（见 WORKLOG/TESTING：DH-MAVEN-WRAPPER-REPAIR），不在本 CI 任务允许范围内。
       - name: Build and test
         run: |
-          chmod +x ./mvnw
-          ./mvnw -B -ntp test
+          mvn -version
+          mvn -B -ntp test
 
       # 断言两个 Testcontainers IT 在 CI（有 Docker）下确实执行、且零 skip。
       # 若被 skip（例如 Docker 异常），此步骤失败，防止"无 Docker 静默跳过"被当成通过。
