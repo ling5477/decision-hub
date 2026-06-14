@@ -2588,3 +2588,35 @@ canonical 优先 + 短兼容期（双 header 接收、canonical 优先）+ 冲�
 
 ### 准入
 header alignment 仍 NOT STARTED（仅 PLAN）；Integration-1 仍 NOT STARTED；PLAN 通过也不等于允许 runtime integration。下一步 DH-NQ-HEADER-ALIGNMENT-PLAN-REVIEW，通过后 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-1。
+
+## 2026-06-14 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-1（内部结构 skeleton，不改对外行为）
+
+### 范围
+实现 header alignment 第一批内部结构：集中 header 常量 + parser + 归一化模型 + validator skeleton。不切换 canonical、不移除 legacy、不做双接收、不改 HMAC 语义、不启动 Integration-1。已定策略：后续 canonical-only（无兼容期）；Tenant/Request/Trace 保权威来源、header 仅一致性校验。
+
+### 新增文件（dh-security/main）
+- `security/nq/NqDhHeaderNames.java`：集中 canonical `X-NQ-DH-*`(7) + legacy `X-DH-NQ-*`(7) 常量，消除散落 magic string。
+- `security/nq/NormalizedNqDhHeaders.java`：归一化 header 模型（record）；`toString` 对 signature 脱敏（[REDACTED]）。
+- `security/nq/NqDhHeaderParser.java`：parser skeleton，Batch 1 仅 `parseLegacy`（按 legacy 读取，封装现有行为）；canonical 读取留待 Batch 2。
+- `security/nq/NqDhHeaderValidator.java`：validator skeleton，Batch 1 pass-through（恒 ok，不引入新拒绝）；Batch 2/3 填充 canonical-only + binding 一致性校验。
+- `security/nq/NqDhHeaderValidationResult.java`：校验结果模型 + 审计码常量（HEADER_BINDING_MISMATCH / MISSING_CANONICAL_HEADER）。
+
+### 新增文件（dh-security/test）
+- `NqDhHeaderNamesTest`(2)、`NqDhHeaderParserTest`(3)、`NqDhHeaderValidatorTest`(2)。
+
+### 修改文件（dh-api/main）
+- `api/feedback/NqFeedbackController.java`：去除 4 个 magic string header 常量，改用 `NqDhHeaderParser.parseLegacy(httpRequest::getHeader)` 产出归一化模型；限流 source 与 authenticateNqSource 的 4 个 header 值改取自模型（值与此前逐个 getHeader 等价）。**构造器未变、对外行为未变**：仍读 legacy `X-DH-NQ-*`，HMAC signatureMaterial 语义不变，401/403/409/413/429/202 语义不变，rate limit key=source+tenant+route 不变。validator 本批未接入 controller（Batch 2 再接），保证零行为变更。
+
+### 验证
+- `mvn test`：BUILD SUCCESS（exit 0）。新单测 NqDhHeaderNamesTest 2/2、NqDhHeaderParserTest 3/3、NqDhHeaderValidatorTest 2/2；既有 NqFeedbackControllerWebMvcTest 15/15、NqFeedbackRateLimitWebMvcTest 3/3、NqFeedbackPayloadSizeGateTest 2/2（行为不变）；INT0 DhNqIntegration0* 6+2+8=16/16 未破坏；ArchUnit 全绿。无 Docker：JDBC 持久化 IT / PostgresContainerSmokeTest 按 disabledWithoutDocker skip。
+- `mvn -Pquality validate`：BUILD SUCCESS（未引入 quality 违规）。
+- `git diff --check`：无 whitespace error。
+
+### 安全自查
+- 不记录 raw signature / signature material / secret / token / full body：parser/validator 不打日志；归一化模型 toString 对 signature 脱敏（单测固化）。
+
+### 边界确认
+未修改 NQ；未切换生产 controller 到 canonical-only；未移除 legacy 行为；未实现双接收；未新增 API；未新增 migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未把 header alignment 写成 completed；未读取或输出真实密钥。
+
+### 准入
+header alignment 整体仍 NOT COMPLETED（canonical-only 未切换）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-1-REVIEW，通过后 Batch 2（canonical 读取）。

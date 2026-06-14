@@ -3,6 +3,8 @@ package com.guidinglight.decisionhub.api.feedback;
 import com.guidinglight.decisionhub.api.TraceIdFilter;
 import com.guidinglight.decisionhub.api.security.AuthenticatedRequest;
 import com.guidinglight.decisionhub.common.util.TimeProvider;
+import com.guidinglight.decisionhub.security.nq.NormalizedNqDhHeaders;
+import com.guidinglight.decisionhub.security.nq.NqDhHeaderParser;
 import com.guidinglight.decisionhub.security.nq.NqFeedbackAuthRequest;
 import com.guidinglight.decisionhub.security.nq.NqFeedbackAuthResult;
 import com.guidinglight.decisionhub.security.nq.NqFeedbackAuthenticator;
@@ -42,13 +44,14 @@ public final class NqFeedbackController {
 
   private static final Logger log = LoggerFactory.getLogger(NqFeedbackController.class);
 
-  private static final String NQ_SOURCE_HEADER = "X-DH-NQ-Source";
-  private static final String NQ_TIMESTAMP_HEADER = "X-DH-NQ-Timestamp";
-  private static final String NQ_NONCE_HEADER = "X-DH-NQ-Nonce";
-  private static final String NQ_SIGNATURE_HEADER = "X-DH-NQ-Signature";
-
   /** 固定逻辑路由标识，作为限流 key 的 route 维度；不读取 raw path / query。 */
   private static final String NQ_FEEDBACK_ROUTE = "NQ_FEEDBACK";
+
+  /**
+   * header 解析器（DH-NQ-HEADER-ALIGNMENT Batch 1）：集中 header 名 + 归一化模型，去除散落 magic string。
+   * Batch 1 仅按 legacy {@code X-DH-NQ-*} 读取，对外行为不变；canonical 读取在 Batch 2 引入。无状态可复用。
+   */
+  private final NqDhHeaderParser headerParser = new NqDhHeaderParser();
 
   private final NqFeedbackIngestionService ingestionService;
   private final NqFeedbackAuthenticator feedbackAuthenticator;
@@ -73,9 +76,12 @@ public final class NqFeedbackController {
     final String tenantId = AuthenticatedRequest.requireTenantId(httpRequest);
     final String httpTraceId = resolveHttpTraceId(httpRequest);
 
+    // Batch 1：经集中 parser 读取 legacy header 族（行为与此前逐个 getHeader 等价）。
+    final NormalizedNqDhHeaders nqHeaders = headerParser.parseLegacy(httpRequest::getHeader);
+
     // 限流必须前置于 HMAC authenticator：超限请求在进入签名 / 重放校验 / 入库前即被拒，降低被刷成本。
     // key = source + tenant + route（租户 / 来源隔离）；超限映射 429 RATE_LIMITED，且不暴露阈值 / 窗口 / 计数。
-    final String nqSource = httpRequest.getHeader(NQ_SOURCE_HEADER);
+    final String nqSource = nqHeaders.source();
     final RateLimitResult rateLimit =
         rateLimiter.check(nqSource, tenantId, NQ_FEEDBACK_ROUTE, TimeProvider.now());
     if (!rateLimit.allowed()) {
@@ -100,7 +106,7 @@ public final class NqFeedbackController {
                       req.getCorrelationId()));
     }
 
-    final NqFeedbackAuthResult authResult = authenticateNqSource(req, httpRequest);
+    final NqFeedbackAuthResult authResult = authenticateNqSource(req, nqHeaders, httpRequest);
     if (!authResult.allowed()) {
       return ResponseEntity.status(authResult.status())
           .header(TraceIdFilter.TRACE_HEADER, nonNull(httpTraceId, req.getTraceId()))
@@ -181,15 +187,27 @@ public final class NqFeedbackController {
     return a == null || a.isBlank() ? fallback : a;
   }
 
+  /**
+   * 构造认证请求并校验。Batch 1：header 值取自归一化模型（legacy 族），与此前逐个 {@code getHeader} 等价；
+   * 权威 tenant 仍来自认证上下文、requestId/traceId/eventId/sourceSystem/payload 仍来自 body，未改变。
+   * 不改变 HMAC signatureMaterial 语义（仍 value-based）。
+   *
+   * @param req envelope 请求体
+   * @param nqHeaders 归一化 header 模型
+   * @param httpRequest 仅用于读取 contentLength
+   * @return 认证结果
+   */
   private NqFeedbackAuthResult authenticateNqSource(
-      final NqFeedbackEnvelopeRequest req, final HttpServletRequest httpRequest) {
+      final NqFeedbackEnvelopeRequest req,
+      final NormalizedNqDhHeaders nqHeaders,
+      final HttpServletRequest httpRequest) {
     return feedbackAuthenticator.authenticate(
         new NqFeedbackAuthRequest(
-            httpRequest.getHeader(NQ_SOURCE_HEADER),
+            nqHeaders.source(),
             req.getSourceSystem(),
-            httpRequest.getHeader(NQ_TIMESTAMP_HEADER),
-            httpRequest.getHeader(NQ_NONCE_HEADER),
-            httpRequest.getHeader(NQ_SIGNATURE_HEADER),
+            nqHeaders.timestamp(),
+            nqHeaders.nonce(),
+            nqHeaders.signature(),
             req.getEventId(),
             req.getRequestId(),
             req.getTraceId(),

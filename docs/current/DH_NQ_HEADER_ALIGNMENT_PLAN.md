@@ -7,7 +7,15 @@
 > 状态：**planning-only**（本轮只读核查 + 输出方案；未改运行代码 / 测试；未启动 Integration-1）
 > 配套：`DH_NQ_INTEGRATION0_CONTRACT_FREEZE.md` / `DH_NQ_INTEGRATION0_SECURITY_POLICY.md` / `DH_NQ_INTEGRATION0_ACCEPTANCE_REPORT.md`
 
-本文件**只做对齐方案设计，不改代码**：不实现 header 改名、不接真实 NQ、不启动 Integration-1。canonical 化的实施留待 `DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-*`。
+本文件**只做对齐方案设计**：canonical 化的实施分批进行（`DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-*`）。
+
+> **实施进展**
+> - PLAN：ACCEPTED（DH-NQ-HEADER-ALIGNMENT-PLAN-REVIEW，2026-06-14）。已定策略：canonical-only（无兼容期）；
+>   Tenant/Request/Trace 保权威来源、header 仅一致性校验不覆盖；timestamp 格式另列 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT。
+> - **Batch 1：DONE（2026-06-14）** —— 内部结构 skeleton（集中 header 常量 `NqDhHeaderNames` + 归一化模型
+>   `NormalizedNqDhHeaders` + `NqDhHeaderParser`（legacy-only 读取）+ `NqDhHeaderValidator` skeleton + `NqDhHeaderValidationResult`）；
+>   controller 去 magic string、经 parser 读取，**对外行为不变**（仍 legacy `X-DH-NQ-*`）。canonical 读取与强制留待 Batch 2+。
+> - **header alignment 整体仍 NOT COMPLETED**：canonical-only 尚未切换；下一步 Batch 2（canonical 读取）。
 
 ---
 

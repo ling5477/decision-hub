@@ -1140,3 +1140,32 @@ CI Docker 实跑结果（2026-06-14，已确认；GitHub Actions run 27485958120
 准入决定   header alignment 仍 NOT STARTED（仅 PLAN）；Integration-1 仍 NOT STARTED；
            下一步 DH-NQ-HEADER-ALIGNMENT-PLAN-REVIEW，通过后 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-1。
 ```
+
+## 30. 2026-06-14 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-1 验收记录（内部结构 skeleton）
+
+```text
+日期       2026-06-14
+阶段       DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-1（CODE_CHANGE + CONTRACT_REFACTOR + TEST_REVIEW）
+范围       内部结构：集中 header 常量 + parser + 归一化模型 + validator skeleton；不切 canonical、不改对外行为
+新增（main）NqDhHeaderNames / NormalizedNqDhHeaders / NqDhHeaderParser（legacy-only）/ NqDhHeaderValidator(skeleton) /
+           NqDhHeaderValidationResult（均 dh-security/security/nq）
+新增（test）NqDhHeaderNamesTest(2) / NqDhHeaderParserTest(3) / NqDhHeaderValidatorTest(2)
+修改（main）NqFeedbackController：去 magic string，经 parser 读取 legacy header 产出归一化模型；构造器不变、行为不变
+命令       mvn test
+结果       BUILD SUCCESS（exit 0）
+           - 新单测：NqDhHeaderNamesTest 2/2、NqDhHeaderParserTest 3/3、NqDhHeaderValidatorTest 2/2
+           - 行为不变回归：NqFeedbackControllerWebMvcTest 15/15、NqFeedbackRateLimitWebMvcTest 3/3、
+             NqFeedbackPayloadSizeGateTest 2/2
+           - INT0 DhNqIntegration0*（INT0-T01..T15）6+2+8=16/16 未破坏；ArchUnit 全绿
+           - 无 Docker：JdbcNonceReplayGuardPersistenceTest / PostgresContainerSmokeTest 按 disabledWithoutDocker skip
+命令       mvn -Pquality validate
+结果       BUILD SUCCESS（未引入 quality 违规）
+命令       git diff --check
+结果       无 whitespace error
+安全自查   不记录 raw signature / signature material / secret / token / full body；归一化模型 toString 对 signature
+           脱敏（[REDACTED]，单测固化 model_toString_does_not_leak_signature）
+边界       未修改 NQ；未切 canonical-only；未移除 legacy；未实现双接收；未新增 API / migration；未真实 HTTP /
+           真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未读取真实密钥
+准入决定   header alignment 整体仍 NOT COMPLETED（canonical-only 未切换）；Integration-1 仍 NOT STARTED；
+           下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-1-REVIEW，通过后 Batch 2（canonical 读取）
+```
