@@ -1101,9 +1101,14 @@ ArchUnit   10/10 PASS（Stage1-CLOSE 5 + Stage2-PoC-B5 5；本批未新增也未
   结果   无 whitespace error
   YAML   PyYAML 本机不可用，已做结构核验：无 Tab 缩进、顶层键（name/on/permissions/concurrency/jobs）与 6 个 step 结构正确
 
-CI Docker 预期（待首次 CI 运行确认，本轮无法在本机触发 GitHub Actions）
-  - ubuntu runner 有 Docker，两个 IT 实跑且 Skipped: 0；persistent nonce restart 语义（重建 guard 复用同一持久化存储后
-    窗口内重放仍被拒）经真实 PostgreSQL(postgres:17) 验证；assert 步骤若发现 skip 会让 CI 失败
+CI Docker 实跑结果（2026-06-14，已确认；GitHub Actions run 27485958120，结论 success）
+  - JdbcNonceReplayGuardPersistenceTest：Tests run: 3, Failures: 0, Errors: 0, **Skipped: 0**, 8.317s
+    —— persistent nonce restart 语义（重建 guard 复用同一持久化存储后窗口内重放仍被拒）经真实 PostgreSQL(postgres:17) 验证。
+  - PostgresContainerSmokeTest：Tests run: 1, Failures: 0, Errors: 0, **Skipped: 0**, 6.645s（全 app 上下文加载成功）。
+  - assert 步骤打印 `OK (executed, 0 skipped)` × 2；`[INFO] BUILD SUCCESS`；job success。
+  - 迭代历程：首跑 mvnw 缺执行位（chmod 后仍）wrapper jar 损坏 -> 改用 runner 预装 mvn（fd522ce）；
+    再暴露 PostgresContainerSmokeTest 因 Flyway 缺 PostgreSQL 模块报 "Unsupported Database: PostgreSQL 17.10"
+    -> 补 flyway-database-postgresql（841354d，用户授权的生产级修复）-> CI 整体全绿。
   - 注意：本条为"配置完成 + 预期"，**首次 push/PR 触发 CI 前不得记为已 executed/passed**
 
 边界       未修改 NQ；未新增业务 Java 生产代码；未新增 API / migration；未做 header alignment；
@@ -1111,6 +1116,7 @@ CI Docker 预期（待首次 CI 运行确认，本轮无法在本机触发 GitHu
            未启动 Integration-1；未把 DH 写成 integrated；未读取或输出真实密钥
 风险       Testcontainers 依赖 Docker daemon；CI runner 须能拉取 postgres:17（网络 / 镜像源）；
            首次运行有镜像拉取耗时；私有 runner 若无 Docker 需另行启用
-准入决定   Integration-1 仍 NOT STARTED；本轮仅启用 CI 实跑能力，不改变 P1-4 CLOSED 口径；
+准入决定   CI 已确认整体全绿（run 27485958120 success）；persistent nonce restart 语义经真实 PG17 在 CI 实跑通过。
+           Integration-1 仍 NOT STARTED；不改变 P1-4 CLOSED 口径（CI 实跑只是补强证据，非改变结论）；
            下一步 DH-NQ-HEADER-ALIGNMENT-PLAN 或 DH-CONFIG-CREDENTIAL-DEFAULTS-GOVERNANCE，不得直接 Integration-1 runtime
 ```

@@ -2543,3 +2543,23 @@ P1-4 CLOSED 仅表示 Integration-1 的前置安全缺口关闭，**不等于允
 
 ### 准入
 Integration-1 仍 NOT STARTED；本轮仅启用 CI 实跑能力，不改变 P1-4 CLOSED 口径。下一步：DH-NQ-HEADER-ALIGNMENT-PLAN 或 DH-CONFIG-CREDENTIAL-DEFAULTS-GOVERNANCE，不得直接进入 Integration-1 runtime。
+
+### 2026-06-14 CI 实跑收尾（commit + push + 修复 + 全绿确认）
+- 提交并推送 CI 配置后，GitHub Actions（origin/dev）连续暴露并修复两个问题：
+  1. **mvnw 在 Linux runner 无法执行**：`./mvnw` -> `Permission denied`（exit 126）。先经 `chmod +x ./mvnw` 仍失败为
+     `no main manifest attribute, in .mvn/wrapper/maven-wrapper.jar`——仓库内 wrapper jar 因缺 `.gitattributes` +
+     提交端 autocrlf 被 EOL 规范化破坏。**修复（fd522ce）**：CI 改用 ubuntu-latest 预装 `mvn -B -ntp test`，绕开损坏 wrapper。
+  2. **PostgresContainerSmokeTest 全上下文加载失败**：`Unsupported Database: PostgreSQL 17.10`——dh-app 仅依赖
+     `flyway-core`，Flyway 10+ 已将 PostgreSQL 支持拆为独立模块。**修复（841354d，用户明确授权的生产级修复）**：
+     `dh-app/pom.xml` 增加 `flyway-database-postgresql`（版本由 spring-boot-starter-parent 3.5.10 管理）。
+- **CI 全绿确认**：GitHub Actions run 27485958120（commit 841354d）结论 success，`[INFO] BUILD SUCCESS`：
+  - JdbcNonceReplayGuardPersistenceTest：Tests run 3 / Skipped 0 / 8.317s（restart 语义经真实 PG17 验证）。
+  - PostgresContainerSmokeTest：Tests run 1 / Skipped 0 / 6.645s（全上下文加载成功）。
+  - assert 步骤 `OK (executed, 0 skipped)` × 2；两个 IT 在 CI Docker 下确认未被 skip。
+- 代码改动（本轮，超出原 CI 任务范围但经用户授权）：`dh-app/pom.xml`（+flyway-database-postgresql，8 行）。
+  其余为 CI/docs。**说明**：flyway-database-postgresql 是真实 PG 迁移本就必需的模块，属修复既有生产缺陷，非新增功能。
+- 边界：未修改 NQ；未新增 API / migration（仅补依赖，未动 V1–V4）；未做 header alignment；未新增 RealClient /
+  真实 Provider；未真实 HTTP / 真实 NQ / 真实交易所；未接 AI；未开启 LIVE；未读取或输出真实密钥。
+- 准入：CI 整体全绿已确认；P1-4 CLOSED 口径不变（CI 实跑是补强证据）；Integration-1 仍 NOT STARTED。
+  下一步（用户 step 4，CI 已通过故解阻）：DH-NQ-HEADER-ALIGNMENT-PLAN。
+- 后续项：DH-MAVEN-WRAPPER-REPAIR（修复仓库内 .mvn/wrapper/maven-wrapper.jar + 加 .gitattributes，恢复本地/Linux mvnw 可用）。
