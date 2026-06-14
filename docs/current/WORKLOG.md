@@ -2563,3 +2563,28 @@ Integration-1 仍 NOT STARTED；本轮仅启用 CI 实跑能力，不改变 P1-4
 - 准入：CI 整体全绿已确认；P1-4 CLOSED 口径不变（CI 实跑是补强证据）；Integration-1 仍 NOT STARTED。
   下一步（用户 step 4，CI 已通过故解阻）：DH-NQ-HEADER-ALIGNMENT-PLAN。
 - 后续项：DH-MAVEN-WRAPPER-REPAIR（修复仓库内 .mvn/wrapper/maven-wrapper.jar + 加 .gitattributes，恢复本地/Linux mvnw 可用）。
+
+## 2026-06-14 DH-NQ-HEADER-ALIGNMENT-PLAN（planning-only）
+
+### 范围
+只读核查 DH + NQ 两仓 header 用法，输出对齐方案 `docs/current/DH_NQ_HEADER_ALIGNMENT_PLAN.md`。不改运行代码 / 测试；不启动 Integration-1；不做真实联调 / header 改名实施。
+
+### 只读核查结论（current header map）
+- NQ（nexus-quant）：canonical `X-NQ-DH-*` 仅在 INT0 fixture（`Int0Contract.java` 7 个）+ docs；**NQ 无生产 header 处理代码**（无 DH 入站端点）；docs 里 `X-DH-NQ-*` 均为对齐说明引用。
+- DH：生产 `NqFeedbackController` 用 **legacy `X-DH-NQ-*`**，且仅消费 4 个（Source/Timestamp/Nonce/Signature）；Tenant 来自认证上下文、Request-Id/Trace-Id 来自 body。WebMvc 测试用 legacy；INT0 fixture（`Int0Contract.java`）用 canonical 7（与冻结契约一致，但不经真实 controller，二者解耦故都绿）。
+- 关键：`HmacNqFeedbackAuthenticator.signatureMaterial` 为 **value-based（不含 header name）** -> header 改名不会导致签名漂移。
+
+### Findings
+- P1-1：DH 生产 legacy 与 Integration-0 冻结 canonical 不一致（已登记 Integration-1 前置）。
+- P1-2：契约 7 header vs 实现 4 header 的结构差异（Tenant/Request/Trace 来自 auth-context/body，非 header），对齐需显式决策。
+- P2-1：DH 内部命名分裂（生产 legacy / INT0 fixture canonical）。P2-2：source 双绑定校验需在解析层保留。
+- P3：header 常量散落、docs/fixtures 术语需统一。
+
+### 推荐策略
+canonical 优先 + 短兼容期（双 header 接收、canonical 优先）+ 冲突 fail-closed（同名值不同 -> 拒绝）+ value-based 签名基于 normalized 模型（防混签）+ Tenant/Request/Trace header 不覆盖权威来源（防提权/串租户）+ 审计码 LEGACY_HEADER_USED / HEADER_CONFLICT / MISSING_CANONICAL_HEADER。分 6 批实施（常量/parser -> canonical -> legacy 兼容 -> 冲突 fail-closed -> docs/fixtures -> 移除 legacy 独立 review 后）。
+
+### 边界确认
+未修改 Java；未修改测试；未新增 API；未新增 migration；未做真实 HTTP / 真实 NQ / 真实交易所；未接 AI；未开启 LIVE；未启动 Integration-1；未把 DH 写成 integrated；未读取或输出真实密钥。**未跨仓写 NQ**（保持 DH/NQ 仓库边界；NQ companion 文档建议由 NQ-scoped 任务补）。
+
+### 准入
+header alignment 仍 NOT STARTED（仅 PLAN）；Integration-1 仍 NOT STARTED；PLAN 通过也不等于允许 runtime integration。下一步 DH-NQ-HEADER-ALIGNMENT-PLAN-REVIEW，通过后 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-1。

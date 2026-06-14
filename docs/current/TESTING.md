@@ -1120,3 +1120,23 @@ CI Docker 实跑结果（2026-06-14，已确认；GitHub Actions run 27485958120
            Integration-1 仍 NOT STARTED；不改变 P1-4 CLOSED 口径（CI 实跑只是补强证据，非改变结论）；
            下一步 DH-NQ-HEADER-ALIGNMENT-PLAN 或 DH-CONFIG-CREDENTIAL-DEFAULTS-GOVERNANCE，不得直接 Integration-1 runtime
 ```
+
+## 29. 2026-06-14 DH-NQ-HEADER-ALIGNMENT-PLAN（planning-only，未跑测试）
+
+```text
+日期       2026-06-14
+阶段       DH-NQ-HEADER-ALIGNMENT-PLAN（INTEGRATION_CONTRACT_PLANNING + SECURITY_REVIEW + DOCUMENTATION）
+范围       只读核查 DH + NQ header 用法 + 输出对齐方案文档；不改运行代码 / 测试
+为何未跑   本轮纯文档（planning-only），未触及任何 Java / 测试 / 构建文件，故未运行 mvn test / quality；
+           按 CLAUDE 文档任务纪律记录未跑原因。header alignment 的测试将于 IMPL-BATCH-* 实施时新增并验证。
+只读核查   DH 生产 controller 用 legacy X-DH-NQ-*（4：Source/Timestamp/Nonce/Signature）；
+           DH INT0 fixture + 两仓 docs + NQ INT0 fixture 用 canonical X-NQ-DH-*；NQ 无生产 header 处理代码；
+           HmacNqFeedbackAuthenticator 签名 value-based（不含 header name）-> 改名不漂移。
+规划测试   见 DH_NQ_HEADER_ALIGNMENT_PLAN.md §6（accepts_canonical / legacy_compat / conflict_fail_closed /
+           signature_after_normalization / keeps_payload_64kib / keeps_nonce_replay / keeps_rate_limit_key /
+           keeps_tenant_binding / keeps_INT0_T01_to_T15 / no_real_http / no_credential_access 等）。
+边界       未修改 Java；未修改测试；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未接 AI；
+           未开启 LIVE；未启动 Integration-1；未跨仓写 NQ；未读取或输出真实密钥。
+准入决定   header alignment 仍 NOT STARTED（仅 PLAN）；Integration-1 仍 NOT STARTED；
+           下一步 DH-NQ-HEADER-ALIGNMENT-PLAN-REVIEW，通过后 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-1。
+```
