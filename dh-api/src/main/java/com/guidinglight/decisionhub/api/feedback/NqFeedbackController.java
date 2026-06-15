@@ -5,6 +5,8 @@ import com.guidinglight.decisionhub.api.security.AuthenticatedRequest;
 import com.guidinglight.decisionhub.common.util.TimeProvider;
 import com.guidinglight.decisionhub.security.nq.NormalizedNqDhHeaders;
 import com.guidinglight.decisionhub.security.nq.NqDhHeaderParser;
+import com.guidinglight.decisionhub.security.nq.NqDhHeaderValidationResult;
+import com.guidinglight.decisionhub.security.nq.NqDhHeaderValidator;
 import com.guidinglight.decisionhub.security.nq.NqFeedbackAuthRequest;
 import com.guidinglight.decisionhub.security.nq.NqFeedbackAuthResult;
 import com.guidinglight.decisionhub.security.nq.NqFeedbackAuthenticator;
@@ -53,6 +55,13 @@ public final class NqFeedbackController {
    * 不做双接收。无状态可复用。
    */
   private final NqDhHeaderParser headerParser = new NqDhHeaderParser();
+
+  /**
+   * canonical header binding 校验器（DH-NQ-HEADER-ALIGNMENT Batch 3）：校验 canonical
+   * {@code X-NQ-DH-Tenant-Id/Request-Id/Trace-Id} 与权威来源（tenant=认证上下文，requestId/traceId=body）一致；
+   * 若提供且不一致则 fail-closed（403 {@code HEADER_BINDING_MISMATCH}）。<b>header 绝不覆盖权威来源</b>。无状态可复用。
+   */
+  private final NqDhHeaderValidator headerValidator = new NqDhHeaderValidator();
 
   private final NqFeedbackIngestionService ingestionService;
   private final NqFeedbackAuthenticator feedbackAuthenticator;
@@ -122,6 +131,32 @@ public final class NqFeedbackController {
                       req.getTraceId(),
                       req.getCorrelationId()));
     }
+    // Batch 3：canonical Tenant/Request/Trace 与权威来源（tenant=认证上下文，requestId/traceId=body）binding 一致性校验。
+    // 三个 header 可选；若提供则必须一致，否则 fail-closed（403 HEADER_BINDING_MISMATCH）。绝不以 header 覆盖权威来源。
+    final NqDhHeaderValidationResult headerBinding =
+        headerValidator.validate(nqHeaders, tenantId, req.getRequestId(), req.getTraceId());
+    if (!headerBinding.valid()) {
+      // 审计：仅记 auditCode + 安全字段；不记 header 原值 / 权威值 / signature / secret / full body。
+      log.warn(
+          "nq feedback header binding mismatch, auditCode={}, tenantId={}, source={}, route={}, traceId={}",
+          headerBinding.auditCode(),
+          tenantId,
+          nonNull(nqHeaders.source(), "absent"),
+          NQ_FEEDBACK_ROUTE,
+          nonNull(httpTraceId, req.getTraceId()));
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .header(TraceIdFilter.TRACE_HEADER, nonNull(httpTraceId, req.getTraceId()))
+          .body(
+              (Object)
+                  new NqFeedbackErrorResponse(
+                      "HEADER_BINDING_MISMATCH",
+                      headerBinding.auditCode(),
+                      "NQ feedback header binding mismatch",
+                      req.getEventId(),
+                      req.getTraceId(),
+                      req.getCorrelationId()));
+    }
+
     final Instant occurredAt = req.getOccurredAt() == null ? TimeProvider.now() : req.getOccurredAt();
     final Instant receivedAt = TimeProvider.now();
 

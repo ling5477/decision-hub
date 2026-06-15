@@ -279,6 +279,91 @@ class NqFeedbackControllerWebMvcTest {
   }
 
   @Test
+  void post_canonicalBindingAllConsistent_returns202() throws Exception {
+    // Batch 3：canonical Tenant/Request/Trace 与权威来源全一致 -> 通过（header 不覆盖权威来源）。
+    nextResult.set(IngestionResult.accepted("evt-bind-ok"));
+    final Map<String, Object> envelope = legalEnvelope("evt-bind-ok");
+    final String body = objectMapper.writeValueAsString(envelope);
+
+    mockMvc
+        .perform(
+            signedPost(envelope, body, "nonce-bind-ok", Instant.now())
+                .header("X-NQ-DH-Tenant-Id", "tenant-a")
+                .header("X-NQ-DH-Request-Id", envelope.get("requestId").toString())
+                .header("X-NQ-DH-Trace-Id", envelope.get("traceId").toString()))
+        .andExpect(status().isAccepted());
+  }
+
+  @Test
+  void post_tenantHeaderMismatch_returns403BindingMismatch() throws Exception {
+    // canonical Tenant-Id 与认证上下文 tenant（tenant-a）不一致 -> 403 HEADER_BINDING_MISMATCH。
+    final Map<String, Object> envelope = legalEnvelope("evt-bind-tenant");
+    final String body = objectMapper.writeValueAsString(envelope);
+
+    mockMvc
+        .perform(
+            signedPost(envelope, body, "nonce-bind-tenant", Instant.now())
+                .header("X-NQ-DH-Tenant-Id", "tenant-OTHER"))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.errorCode").value("HEADER_BINDING_MISMATCH"));
+  }
+
+  @Test
+  void post_requestIdHeaderMismatch_returns403BindingMismatch() throws Exception {
+    // canonical Request-Id 与 body requestId 不一致 -> 403 HEADER_BINDING_MISMATCH。
+    final Map<String, Object> envelope = legalEnvelope("evt-bind-req");
+    final String body = objectMapper.writeValueAsString(envelope);
+
+    mockMvc
+        .perform(
+            signedPost(envelope, body, "nonce-bind-req", Instant.now())
+                .header("X-NQ-DH-Request-Id", "req-WRONG"))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.errorCode").value("HEADER_BINDING_MISMATCH"));
+  }
+
+  @Test
+  void post_traceIdHeaderMismatch_returns403BindingMismatch() throws Exception {
+    // canonical Trace-Id 与 body traceId 不一致 -> 403 HEADER_BINDING_MISMATCH。
+    final Map<String, Object> envelope = legalEnvelope("evt-bind-trace");
+    final String body = objectMapper.writeValueAsString(envelope);
+
+    mockMvc
+        .perform(
+            signedPost(envelope, body, "nonce-bind-trace", Instant.now())
+                .header("X-NQ-DH-Trace-Id", "trace-WRONG"))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.errorCode").value("HEADER_BINDING_MISMATCH"));
+  }
+
+  @Test
+  void post_bindingMismatch_doesNotLeakSensitive() throws Exception {
+    final Map<String, Object> envelope = legalEnvelope("evt-bind-leak");
+    final String body = objectMapper.writeValueAsString(envelope);
+    final String nonce = "nonce-bind-leak";
+    final Instant ts = Instant.now();
+    final String signature =
+        canonicalSignature(envelope, body, nonce, ts, envelope.get("sourceSystem").toString());
+
+    final MvcResult result =
+        mockMvc
+            .perform(
+                signedPost(envelope, body, nonce, ts).header("X-NQ-DH-Tenant-Id", "tenant-OTHER"))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.errorCode").value("HEADER_BINDING_MISMATCH"))
+            .andReturn();
+
+    final String responseBody = result.getResponse().getContentAsString();
+    org.junit.jupiter.api.Assertions.assertFalse(
+        responseBody.contains(signature), "binding mismatch body must not echo raw signature");
+    org.junit.jupiter.api.Assertions.assertFalse(
+        responseBody.contains(NQ_SECRET), "binding mismatch body must not leak secret");
+    org.junit.jupiter.api.Assertions.assertFalse(
+        responseBody.contains(envelope.get("payloadJson").toString()),
+        "binding mismatch body must not echo full payload");
+  }
+
+  @Test
   void post_validEnvelope_returns202AcceptedReceivedOutcome() throws Exception {
     nextResult.set(IngestionResult.accepted("evt-1"));
     final Map<String, Object> envelope = legalEnvelope("evt-1");

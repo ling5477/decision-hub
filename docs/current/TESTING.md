@@ -1211,3 +1211,27 @@ CI Docker 实跑结果（2026-06-14，已确认；GitHub Actions run 27485958120
 边界       未改 NQ；未双接收；未兼容 legacy；未保留 legacy 为生产可接受 header；未移除 legacy 常量；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未读取真实密钥
 准入决定   生产入站现为 canonical-only；header alignment 整体仍 NOT COMPLETED（binding=Batch 3 / docs-fixtures=Batch 4 尚待）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2-REVIEW，通过后 Batch 3
 ```
+
+## 33. 2026-06-15 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3 验收记录（Tenant/Request/Trace binding 一致性）
+
+```text
+日期       2026-06-15
+阶段       DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3（CODE_CHANGE + CONTRACT_ALIGNMENT + SECURITY_FIX + TEST_CODE_CHANGE）
+范围       接入 NqDhHeaderValidator，canonical Tenant/Request/Trace 与权威来源 binding 一致性；不恢复 legacy / 不双接收 / 不启动 Integration-1
+修改（main）NqDhHeaderValidator（4 参 validate + binding 校验）、NqFeedbackController（接入 validator，mismatch -> 403 HEADER_BINDING_MISMATCH）
+修改（test）NqDhHeaderValidatorTest 重写为 6 binding 用例；NqFeedbackControllerWebMvcTest +5 binding 用例
+命令       mvn test
+结果       BUILD SUCCESS
+           - NqDhHeaderValidatorTest 6/6、NqFeedbackControllerWebMvcTest 25/25、NqDhHeaderParserTest 5/5、NqFeedbackRateLimitWebMvcTest 3/3、NqFeedbackPayloadSizeGateTest 2/2
+           - INT0 DhNqIntegration0*（INT0-T01..T15）6+2+8=16/16 未破坏；ArchUnit 全绿
+           - 无 Docker：JdbcNonceReplayGuardPersistenceTest / PostgresContainerSmokeTest 按 disabledWithoutDocker skip
+命令       mvn -Pquality validate
+结果       BUILD SUCCESS（0 Checkstyle violations；spotless 通过；checkstyle DTD 未抖动）
+命令       git diff --check
+结果       无 whitespace error
+binding    canonical Tenant-Id != auth tenant / Request-Id != body requestId / Trace-Id != body traceId（若提供）-> 403 HEADER_BINDING_MISMATCH；header 缺省跳过；header 不覆盖权威来源
+保持       HMAC value-based；rate limit key=source+tenant+route；payload 413；nonce replay 409；缺 source/timestamp/nonce/signature 由 authenticator 403/401；成功 202
+安全自查   mismatch 响应不回显 header 原值 / signature / secret / full payload；validator reason 不含具体值；不记录 raw signature / material / secret / token / full body
+边界       未改 NQ；未恢复 legacy；未双接收；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未读取真实密钥
+准入决定   header alignment 整体仍 NOT COMPLETED（仅余 docs/fixtures 收口 Batch 4）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3-REVIEW，通过后 Batch 4
+```

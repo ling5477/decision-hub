@@ -2678,3 +2678,35 @@ header alignment 整体仍 NOT COMPLETED（canonical-only 未切换，生产仍�
 
 ### 准入
 生产入站现为 canonical-only（`X-NQ-DH-*`）；header alignment 整体仍 NOT COMPLETED（Tenant/Request/Trace binding=Batch 3、docs/fixtures 收口=Batch 4 尚待）；Integration-1 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2-REVIEW，通过后 Batch 3。
+
+## 2026-06-15 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3（Tenant/Request/Trace binding 一致性校验）
+
+### 范围
+正式接入 `NqDhHeaderValidator`，实现 canonical `X-NQ-DH-Tenant-Id/Request-Id/Trace-Id` 与权威来源的 binding 一致性校验。不恢复 legacy 兼容、不做双接收、不启动 Integration-1、不真实联调、不处理 timestamp 格式 / checkstyle DTD / wrapper / datasource 弱口令。
+
+### 修改文件（main）
+- `dh-security/security/nq/NqDhHeaderValidator.java`：`validate(NormalizedNqDhHeaders, authTenant, bodyRequestId, bodyTraceId)`；三个 binding header 可选，若提供（非空）则必须等于权威来源，任一不一致 -> invalid / `HEADER_BINDING_MISMATCH`；缺省跳过；`reason` 仅含字段名不含具体值。`AUDIT_MISSING_CANONICAL_HEADER` 保留为预留码（缺必需 canonical 仍由 authenticator 既有码覆盖）。
+- `dh-api/api/feedback/NqFeedbackController.java`：新增 `headerValidator` 字段；在 HMAC 认证成功后、入库前调用 `validate(nqHeaders, tenantId, req.getRequestId(), req.getTraceId())`；不一致返回 403 + `NqFeedbackErrorResponse(error=HEADER_BINDING_MISMATCH, errorCode=HEADER_BINDING_MISMATCH, ...)`；审计日志仅记 auditCode + 安全字段。权威来源不变（tenant=认证上下文，requestId/traceId=body）；header 绝不覆盖权威来源。
+
+### 修改文件（test）
+- `dh-security/.../NqDhHeaderValidatorTest.java`：重写为 binding 测试（全一致 ok、缺省跳过、tenant/request/trace mismatch 各 1、factory），6 用例；断言 reason 不泄露值。
+- `dh-api/.../NqFeedbackControllerWebMvcTest.java`：+5（binding 全一致 202、tenant/request/trace mismatch 各 403 HEADER_BINDING_MISMATCH、mismatch 不泄露 signature/secret/full payload）。
+
+### 安全 / 不变量
+- HMAC signatureMaterial 仍 value-based（不含 header name）；canonical Tenant/Request/Trace 不参与签名、不参与认证、不覆盖权威来源。
+- 不记录 raw signature / signature material / secret / token / full body；mismatch 响应不回显 header 原值 / signature / secret / payload。
+- 保持：rate limit key=source+tenant+route、payload 64KiB（413）、nonce replay（409）、缺 source/timestamp/nonce/signature 由 authenticator fail-closed（403/401）、202/400 语义。
+
+### 验证
+- `mvn test`：BUILD SUCCESS。NqDhHeaderValidatorTest 6/6、NqFeedbackControllerWebMvcTest 25/25、NqDhHeaderParserTest 5/5、NqFeedbackRateLimitWebMvcTest 3/3、NqFeedbackPayloadSizeGateTest 2/2、INT0 DhNqIntegration0* 6+2+8=16/16；ArchUnit 全绿；无 Docker：JDBC 持久化 IT / PostgresContainerSmokeTest 按 disabledWithoutDocker skip。
+- `mvn -Pquality validate`：BUILD SUCCESS（0 Checkstyle / spotless 通过；本轮 checkstyle DTD 未抖动）。
+- `git diff --check`：无 whitespace error。
+
+### 边界确认
+未改 NQ；未恢复 legacy 兼容；未实现双接收；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未处理 timestamp 格式 / checkstyle DTD / wrapper / datasource 弱口令；未读取或输出真实密钥。
+
+### 后续项（不在本轮）
+- Batch 4 docs/fixtures 收口：统一 §4.3 / §4.6 / §6 关于 `MISSING_CANONICAL_HEADER` 的措辞（该码当前为预留，缺必需 canonical 由 authenticator 既有码覆盖）；WebMvc 既有 fixtures 已是 canonical，核对一致。
+
+### 准入
+header alignment 整体仍 NOT COMPLETED（仅余 docs/fixtures 收口 Batch 4）；Integration-1 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3-REVIEW，通过后 Batch 4。

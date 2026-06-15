@@ -16,9 +16,10 @@
 >   `NormalizedNqDhHeaders` + `NqDhHeaderParser`（legacy-only 读取）+ `NqDhHeaderValidator` skeleton + `NqDhHeaderValidationResult`）；
 >   controller 去 magic string、经 parser 读取，**对外行为不变**（仍 legacy `X-DH-NQ-*`）。canonical 读取与强制留待 Batch 2+。
 > - **DOC-RECONCILE（2026-06-15）**：本文件 §4–§7 已统一为 canonical-only。初版 PLAN 早期的"短兼容期 / 双 header 接收 / 冲突 fail-closed / 移除 legacy 独立批次"等措辞为 PLAN-REVIEW 改判前的待决推荐，已作废，仅保留为历史脉络说明。
-> - **Batch 2：DONE（2026-06-15，待 BATCH-2-REVIEW）** —— 生产入站切到 **canonical-only**：`NqDhHeaderParser.parseCanonical` + controller 改用 canonical `X-NQ-DH-*`，**不再读取 legacy、不做双接收**；仅 legacy / 缺必需 canonical header 由现有 HMAC authenticator fail-closed 拒绝（Source→403 / Timestamp·Nonce·Signature→401），状态码语义不变；HMAC 仍 value-based。
+> - **Batch 2：DONE / ACCEPTED（2026-06-15，BATCH-2-REVIEW 通过）** —— 生产入站切到 **canonical-only**：`NqDhHeaderParser.parseCanonical` + controller 改用 canonical `X-NQ-DH-*`，**不再读取 legacy、不做双接收**；仅 legacy / 缺必需 canonical header 由现有 HMAC authenticator fail-closed 拒绝（Source→403 / Timestamp·Nonce·Signature→401），状态码语义不变；HMAC 仍 value-based。
 > - **生产入站现为 canonical-only**：仅接受 canonical `X-NQ-DH-*`；legacy `X-DH-NQ-*` 不再被接受（等同缺失 -> fail-closed）。legacy 常量 / `parseLegacy` 仅作历史引用保留。
-> - **header alignment 整体仍 NOT COMPLETED**：核心读取已切 canonical-only（Batch 2），但 Tenant/Request/Trace binding 一致性（Batch 3）与 docs/fixtures 收口（Batch 4）尚待；Integration-1 仍 NOT STARTED。下一步 Batch 3。
+> - **Batch 3：DONE（2026-06-15，待 BATCH-3-REVIEW）** —— 正式接入 `NqDhHeaderValidator`：canonical `X-NQ-DH-Tenant-Id/Request-Id/Trace-Id` 与权威来源（tenant=认证上下文，requestId/traceId=body）binding 一致性校验；header 可选、若提供且不一致则 fail-closed（403 `HEADER_BINDING_MISMATCH`）；**header 绝不覆盖权威来源**。
+> - **header alignment 整体仍 NOT COMPLETED**：canonical-only 读取（Batch 2）+ Tenant/Request/Trace binding 一致性（Batch 3）已落地；仅余 docs/fixtures 收口（Batch 4）；Integration-1 仍 NOT STARTED。下一步 Batch 4（先经 BATCH-3-REVIEW）。
 
 ---
 
@@ -195,11 +196,11 @@ canonical-only 下不引入 `LEGACY_HEADER_USED` / `HEADER_CONFLICT`（无 legac
 - 权威来源不变：tenant=认证上下文，requestId/traceId=body；canonical Tenant/Request/Trace 进入模型但不参与认证、不覆盖权威来源。HMAC signatureMaterial 仍 value-based（不含 header name）。
 - 验收（实跑）：WebMvc 20（canonical 成功路径 + legacy-only 拒绝 + 缺 source/timestamp/nonce + 签名不泄露）、rate limit 3、parser 5；INT0 16/16 未回归；payload 64KiB / nonce replay / rate limit key 全绿。`mvn test` + `mvn -Pquality validate` BUILD SUCCESS（0 Checkstyle / spotless 通过）。
 
-### Batch 3 — Tenant / Request / Trace binding 一致性校验（**当前 next**）
-- 目标：按 §4.5，对可选 canonical `Tenant-Id/Request-Id/Trace-Id` 做一致性校验：若提供则必须等于权威来源（tenant=auth-context，requestId/traceId=body），不一致 -> **fail-closed** / `HEADER_BINDING_MISMATCH`；**header 绝不覆盖权威来源**。
-- 允许改：validator binding 校验 + 将 Batch 2 留作未接入 skeleton 的 `NqDhHeaderValidator` 正式接入 controller + 对应测试。
-- 禁止：以 header 覆盖权威 tenant/body；改签名 value 集；改 NQ；新增 API / migration。
-- 验收：`rejects_header_binding_mismatch`（tenant/request/trace 各一）、`keeps_tenant_binding`；INT0 16/16 不回归。
+### Batch 3 — Tenant / Request / Trace binding 一致性校验（**DONE，2026-06-15，待 BATCH-3-REVIEW**）
+- 已做：`NqDhHeaderValidator.validate(headers, authTenant, bodyRequestId, bodyTraceId)` 实现 binding 一致性（header 可选；若提供则必须等于权威来源），并由 `NqFeedbackController` 在 HMAC 认证成功后、入库前正式接入；任一不一致 -> **fail-closed** 403 / `HEADER_BINDING_MISMATCH`。**header 绝不覆盖权威来源**（tenant=认证上下文，requestId/traceId=body）。
+- 安全：mismatch 响应仅含 error / errorCode(`HEADER_BINDING_MISMATCH`) / message / eventId / traceId / correlationId，不回显 header 原值 / signature / secret / full body；validator `reason` 仅含字段名不含具体值；审计日志仅记 auditCode + 安全字段。
+- 保持：HMAC value-based、rate limit key=source+tenant+route、payload 64KiB、nonce replay；缺 source/timestamp/nonce/signature 仍由 authenticator fail-closed（403/401）。
+- 验收（实跑）：WebMvc 25（binding 全一致 202 + tenant/request/trace mismatch 各 403 + mismatch 不泄露）、validator 单测 6、parser 5、rate limit 3；INT0 16/16 未回归；`mvn test` + `mvn -Pquality validate` BUILD SUCCESS。
 
 ### Batch 4 — docs / fixtures / WebMvc 测试切 canonical 收口
 - 允许：DH WebMvc 测试 fixtures、docs（contract / test plan / README）统一到 canonical 表述；INT0 fixture 已是 canonical，核对一致。
@@ -259,6 +260,6 @@ no_credential_access                                       每批边界
 
 边界确认（PLAN 轮，2026-06-14）：未修改 Java；未修改测试；未新增 API；未新增 migration；未做真实 HTTP；未做真实 NQ 调用；未新增 RealClient；未新增真实 Provider；未做真实交易所调用；未接 AI；未开启 LIVE；未启动 Integration-1；未读取或输出真实密钥。（Batch 1 IMPL 轮、DOC-RECONCILE 轮的边界分别见 WORKLOG / TESTING 对应条目；DOC-RECONCILE 轮仅改文档。）
 
-Integration-1 decision：**Integration-1 仍 NOT STARTED**。Header alignment 推进也不代表允许 runtime integration；DH NOT INTEGRATED / Runtime integration NOT STARTED。**header alignment 整体 NOT COMPLETED**（Batch 1 DONE/ACCEPTED；Batch 2 DONE：生产入站已切 canonical-only `X-NQ-DH-*`、不再接受 legacy；Tenant/Request/Trace binding（Batch 3）与 docs/fixtures 收口（Batch 4）尚待）。
+Integration-1 decision：**Integration-1 仍 NOT STARTED**。Header alignment 推进也不代表允许 runtime integration；DH NOT INTEGRATED / Runtime integration NOT STARTED。**header alignment 整体 NOT COMPLETED**（Batch 1 DONE/ACCEPTED；Batch 2 DONE/ACCEPTED：生产入站已切 canonical-only `X-NQ-DH-*`、不再接受 legacy；Batch 3 DONE：Tenant/Request/Trace binding 一致性校验已接入（fail-closed `HEADER_BINDING_MISMATCH`，header 不覆盖权威来源）；仅余 docs/fixtures 收口（Batch 4）尚待）。
 
-Next concrete action：`DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2-REVIEW`；通过后 `DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3`（Tenant/Request/Trace binding 一致性校验）。
+Next concrete action：`DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3-REVIEW`；通过后 `DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-4`（docs/fixtures 收口）。
