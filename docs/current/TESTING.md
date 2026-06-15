@@ -1212,6 +1212,26 @@ CI Docker 实跑结果（2026-06-14，已确认；GitHub Actions run 27485958120
 准入决定   生产入站现为 canonical-only；header alignment 整体仍 NOT COMPLETED（binding=Batch 3 / docs-fixtures=Batch 4 尚待）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2-REVIEW，通过后 Batch 3
 ```
 
+## 34. 2026-06-15 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-4 收口记录（docs/fixtures，纯文档 + 回归）
+
+```text
+日期       2026-06-15
+阶段       DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-4（DOCUMENTATION + CONTRACT_FIXTURE_REVIEW + REGRESSION_VALIDATION）
+范围       docs/fixtures 收口：统一 MISSING_CANONICAL_HEADER 措辞 + 明确 canonical-only / binding 已落地 + 核对 fixtures；无运行代码改动
+修改       仅 docs（PLAN / README / TESTING / WORKLOG）；无 Java / fixture 业务改动
+fixtures   WebMvc 成功路径全 canonical X-NQ-DH-*；唯一 legacy 在 legacy-only 负路径（刻意保留）；INT0 Int0Contract 7 canonical X-NQ-DH-*
+命令       mvn test
+结果       BUILD SUCCESS（回归）。WebMvc 25/25、validator 6/6、parser 5/5、rate limit 3/3、payload gate 2/2、INT0 6+2+8=16/16；ArchUnit 全绿；无 Docker IT skip
+命令       mvn -Pquality validate（本轮 3 次重跑）
+结果       BUILD FAILURE（环境性）：checkstyle SuppressionFilter 联网解析 suppressions DTD 超时（Connection timed out），非本批所致；
+           本批仅改 docs（无 Java/test），checkstyle/spotless 覆盖面同 Batch 3 最近 PASS；按规定本轮不修 checkstyle（见 DH-CHECKSTYLE-OFFLINE-DTD-GOVERNANCE）
+命令       git diff --check
+结果       无 whitespace error
+事实       MISSING_CANONICAL_HEADER=预留码（缺 canonical 由 authenticator 403/401 覆盖）；canonical-only 已落地（不接受 legacy、无兼容期、无双接收）；binding mismatch -> 403 HEADER_BINDING_MISMATCH
+后续项     DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT / DH-CHECKSTYLE-OFFLINE-DTD-GOVERNANCE / DH-NQ-HEADER-BINDING-PRE-AUTH-PLAN（独立，不阻塞 close）
+准入决定   header alignment 整体 READY FOR CLOSE / PENDING FINAL REVIEW（仍未 CLOSED）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW
+```
+
 ## 33. 2026-06-15 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3 验收记录（Tenant/Request/Trace binding 一致性）
 
 ```text

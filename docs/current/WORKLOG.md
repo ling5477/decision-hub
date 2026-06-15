@@ -2710,3 +2710,39 @@ header alignment 整体仍 NOT COMPLETED（canonical-only 未切换，生产仍�
 
 ### 准入
 header alignment 整体仍 NOT COMPLETED（仅余 docs/fixtures 收口 Batch 4）；Integration-1 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3-REVIEW，通过后 Batch 4。
+
+## 2026-06-15 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-4（docs/fixtures 收口）
+
+### 范围
+对 header alignment 做 docs/fixtures 收口：统一文档措辞与当前实现事实。**不新增运行代码、不改核心行为、不启动 Integration-1**。
+
+### 修改文件（仅文档）
+- `DH_NQ_HEADER_ALIGNMENT_PLAN.md`：§4.3/§4.6/§6 统一 `MISSING_CANONICAL_HEADER` 措辞（预留码，缺 canonical 由 authenticator 既有码 fail-closed、不单独发码）；§5 Batch 2/3 标 ACCEPTED、Batch 4 标 DONE；顶部进展与 §8 标 header alignment 整体 READY FOR CLOSE / PENDING FINAL REVIEW；§7 item 9/13 同步；登记独立后续项。
+- `README.md`：同步 `MISSING_CANONICAL_HEADER` 预留码措辞、Batch 3 ACCEPTED、Batch 4 DONE、整体 READY FOR CLOSE、下一步 CLOSE-REVIEW。
+- `TESTING.md`：新增第 34 条 Batch 4 收口验收记录。
+- `WORKLOG.md`：本条目。
+- 无 Java / fixture 文件改动（核对结论见下）。
+
+### 收口核对结论
+- **MISSING_CANONICAL_HEADER**：预留审计码；缺 source/timestamp/nonce/signature 仍由 `HmacNqFeedbackAuthenticator` 既有码 fail-closed（SOURCE_NOT_ALLOWED 403 / TIMESTAMP_EXPIRED 401 / REPLAY_KEY_MISSING 401 / BAD_SIGNATURE 401），当前不单独发码。
+- **canonical-only 已落地**：生产入站只接受 `X-NQ-DH-*`；legacy `X-DH-NQ-*` 不再接受；无兼容期；无双接收。
+- **binding mismatch 已落地**：canonical Tenant-Id/Request-Id/Trace-Id 与权威来源（tenant=认证上下文、requestId/traceId=body）不一致 -> 403 `HEADER_BINDING_MISMATCH`；header 不覆盖权威来源。
+- **WebMvc fixtures**：成功路径全用 canonical `X-NQ-DH-*`；唯一 legacy `X-DH-NQ-*` 在 `post_legacyOnlyHeaders_areRejected_canonicalOnly` 负路径（验证 legacy 被拒，刻意保留）。
+- **INT0 fixtures**：`Int0Contract` 7 个 canonical `X-NQ-DH-*`（不经真实 controller）。
+- README/TESTING/WORKLOG 与当前状态一致。
+
+### 验证
+- `mvn test`：BUILD SUCCESS（回归，无运行代码改动）。NqFeedbackControllerWebMvcTest 25/25、NqDhHeaderValidatorTest 6/6、NqDhHeaderParserTest 5/5、NqFeedbackRateLimitWebMvcTest 3/3、NqFeedbackPayloadSizeGateTest 2/2、INT0 DhNqIntegration0* 6+2+8=16/16；ArchUnit 全绿；无 Docker：JDBC 持久化 IT / PostgresContainerSmokeTest 按 disabledWithoutDocker skip。
+- `mvn -Pquality validate`：本轮 3 次均因 checkstyle SuppressionFilter 联网解析 `checkstyle-suppressions.xml` 外部 DTD 超时（`Connection timed out`）BUILD FAILURE —— 已知环境性问题（`DH-CHECKSTYLE-OFFLINE-DTD-GOVERNANCE`），**非本批所致**；本批仅改 docs（无 Java/test 改动），checkstyle/spotless 覆盖面与 Batch 3（最近一次 PASS：0 violations / spotless 通过）一致；按规定本轮不修 checkstyle 配置。
+- `git diff --check`：无 whitespace error。
+
+### 边界确认
+未改 NQ；未改 Java 生产代码；未改 controller 行为；未恢复 legacy 兼容；未实现双接收；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未处理 timestamp 格式 / checkstyle DTD / wrapper / datasource 弱口令 / nonce-burn race 前移；未读取或输出真实密钥。
+
+### 独立后续项（不阻塞 close）
+- `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT`：timestamp 格式分歧。
+- `DH-CHECKSTYLE-OFFLINE-DTD-GOVERNANCE`：checkstyle suppressions DTD 离线解析治理（曾偶发联网超时）。
+- `DH-NQ-HEADER-BINDING-PRE-AUTH-PLAN`：binding 前移至 HMAC 之前，关闭 nonce-burn race（防御纵深，低危）。
+
+### 准入
+header alignment 整体 **READY FOR CLOSE / PENDING FINAL REVIEW（仍未 CLOSED）**；Integration-1 / Runtime integration 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 `DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW`（通过后方可 CLOSED）。
