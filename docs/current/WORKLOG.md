@@ -2806,3 +2806,33 @@ Batch 1–4 全部仍通过；checkstyle 离线修复未降低 quality gate（�
 
 ### 准入
 header alignment CLOSED。下一步 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT` 或 GateK-PLAN。Integration-1 runtime 仍禁止，须独立 PLAN。
+
+## 2026-06-15 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT（planning-only）
+
+### 范围
+只读核查 DH↔NQ `X-NQ-DH-Timestamp` 线缆格式分歧并输出对齐方案 `docs/current/DH_NQ_TIMESTAMP_FORMAT_ALIGNMENT_PLAN.md`。不改运行代码 / 测试；不启动 Integration-1；不跨仓写 NQ。
+
+### 只读核查结论（三方分歧）
+- 生产 `HmacNqFeedbackAuthenticator.parseTimestamp` = `Instant.parse` → **RFC3339 / ISO-8601**；签名绑定归一化 `Instant.toString()`（UTC `Z`）；窗口 ±maxClockSkew（默认 300s）。
+- `DH_NQ_INTEGRATION0_SECURITY_POLICY.md` §2 = 「冻结为 **epoch 毫秒**」（与生产冲突）。
+- DH INT0 fixture（`Int0RequestFactory` / `Int0ContractValidator` / `Int0Contract`）= **epoch 秒**（Long，窗口 ±300s）。
+- `CONTRACT_FREEZE` / `CONTRACT_TEST_PLAN` / `AUDIT_REPORT` = 仅 ±300s 窗口，格式中立。
+- NQ 仓库本会话不可达（`E:\Project\nexus-quant`）→ NQ 侧格式未当面核对（列 P1-3，可信度中；降级披露见 PLAN §2.5）。
+
+### Findings
+- P1-1：生产 RFC3339 与 SECURITY_POLICY epoch 毫秒冲突 → 真实发送方按文档发 epoch 会被 `Instant.parse` 拒绝 → 401，Integration-1 阻断级。
+- P1-2：INT0 用 epoch 秒，掩盖 P1-1（不经真实 controller，各自绿）。
+- P1-3：NQ 侧未跨仓核对。
+- P2：epoch 秒/毫秒单位歧义；RFC3339 子格式（UTC `Z` 规范形）需钉死。
+
+### 推荐决策
+canonical = **RFC3339 / ISO-8601 UTC（`Instant.toString()` 规范形，例 `2026-06-15T12:34:56Z`）**；窗口保持 ±300s。依据：生产零改动、跨语言（Java/Py/JS）稳定解析、可读审计、value-based 签名不漂移、规避秒/毫秒歧义。不改 HMAC signatureMaterial；不影响 nonce replay / requestId / traceId / rate limit key / payload gate。不需要运行期兼容期 / 双格式接收。
+
+### 实施分批（本轮不实施）
+T1 docs 收口（SECURITY_POLICY epoch 毫秒 -> RFC3339；CONTRACT_FREEZE 钉格式）-> T2 INT0 测试由 epoch 秒改 RFC3339（窗口/语义不变，INT0 16/16 不回归）-> T4 NQ companion 跨仓核对 ->（可选 gated）T3 生产 `parseTimestamp` 收紧 UTC `Z`。
+
+### 边界确认
+未改 NQ；未改 Java 生产代码；未改测试；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未处理 wrapper / datasource 弱口令 / nonce-burn race；未读取真实密钥。本轮仅新增 PLAN 文档 + 更新 README/TESTING/WORKLOG。
+
+### 准入
+timestamp format alignment PLAN-only / NOT STARTED；Integration-1 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-PLAN-REVIEW`，通过后 IMPL-BATCH-T1。

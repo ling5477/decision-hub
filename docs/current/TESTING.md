@@ -1268,6 +1268,21 @@ Close      header alignment overall = CLOSED（不放开 runtime；Integration-1
 准入决定   CLOSED；下一步 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT 或 GateK-PLAN
 ```
 
+## 37. 2026-06-15 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT（planning-only，未跑测试）
+
+```text
+日期       2026-06-15
+阶段       DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT（INTEGRATION_CONTRACT_PLANNING + SECURITY_REVIEW + DOCUMENTATION）
+范围       只读核查 X-NQ-DH-Timestamp 线缆格式 + 输出对齐方案；不改运行代码 / 测试
+为何未跑   纯文档（planning-only），未触及任何 Java / 测试 / 构建文件，故未运行 mvn test / quality；按文档任务纪律记录未跑原因。
+           回归基线沿用 header alignment CLOSE-REVIEW-RERUN（2026-06-15）：mvn test + mvn -Pquality validate BUILD SUCCESS / INT0 16/16。
+只读核查   生产 Instant.parse(RFC3339)；SECURITY_POLICY §2=epoch 毫秒（冲突）；INT0 fixture=epoch 秒；CONTRACT_FREEZE/TEST_PLAN=仅 ±300s；NQ 仓库本会话不可达（未当面核对）。
+决策       canonical = RFC3339 / ISO-8601 UTC（Instant.toString() 规范形）；窗口 ±300s 不变；HMAC value-based 不改；nonce/replay/binding 不受影响。
+实施分批   T1 docs 收口 / T2 INT0 测试对齐 / T4 NQ companion /（可选 gated）T3 生产收紧（见 DH_NQ_TIMESTAMP_FORMAT_ALIGNMENT_PLAN.md §6）。
+边界       未改 NQ / Java / 测试；未新增 API / migration；未真实 HTTP / NQ / 交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未读取真实密钥。
+准入决定   timestamp alignment NOT STARTED（仅 PLAN）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-PLAN-REVIEW
+```
+
 ## 33. 2026-06-15 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3 验收记录（Tenant/Request/Trace binding 一致性）
 
 ```text
