@@ -2778,3 +2778,31 @@ header alignment 整体 **READY FOR CLOSE / PENDING FINAL REVIEW（仍未 CLOSED
 
 ### 准入
 quality gate 离线稳定通过，header alignment close review 的环境性阻断已 **UNBLOCKED**；但本轮**不直接标 header alignment CLOSED**。下一步 `DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW-RERUN`。
+
+## 2026-06-15 DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW-RERUN（header alignment 整体 CLOSED）
+
+### 范围
+quality gate 离线 DTD 治理完成后，重跑 header alignment 全链路 close review。只评审 + 记录 close 结论；未改任何 Java/测试，仅更新状态文档。
+
+### 复跑结果（HEAD f260ac7，工作区净）
+- `git status --short`：仅本轮状态文档改动；`git diff --check`：无 whitespace error。
+- `mvn test`：BUILD SUCCESS。NqDhHeaderNamesTest 2、NqDhHeaderParserTest 5、NqDhHeaderValidatorTest 6、NqFeedbackPayloadSizeGateTest 2、NqFeedbackControllerWebMvcTest 25、NqFeedbackRateLimitWebMvcTest 3、INT0 DhNqIntegration0* 6+2+8=16/16；ArchUnit 全绿；无 Docker：JDBC 持久化 IT / PostgresContainerSmokeTest 按 disabledWithoutDocker skip。
+- `mvn -Pquality validate`：**BUILD SUCCESS / 0 Checkstyle violations / spotless 通过**（离线 DTD 治理后稳定）。
+
+### 逐项确认（17/17）
+Batch 1–4 全部仍通过；checkstyle 离线修复未降低 quality gate（仅 1 行 PUBLIC id，SuppressionFilter / 规则集 / profile 不变，0 violations 证明全规则集实跑）；WebMvc 成功路径 canonical-only（唯一 legacy 在 legacy-only 负路径，刻意保留）；INT0 fixtures canonical；legacy-only 仍 403；canonical 成功 202；HEADER_BINDING_MISMATCH 403 正确；HMAC value-based；rate limit key=source+tenant+route；payload 413；nonce replay 409；INT0 16/16。Integration-1 仍禁止。
+
+### Close decision
+**header alignment overall：CLOSED。** 全部验收标准满足、quality gate 稳定绿。**CLOSED 仅指 DH 入站 header 对齐完成，不放开 runtime**：Integration-1 / Runtime integration NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED；AI NOT STARTED。
+
+### 修改文件（仅状态文档）
+- `DH_NQ_HEADER_ALIGNMENT_PLAN.md`（front-matter 状态 + 顶部进展 + §8 标 CLOSED、next）、`README.md`（标 CLOSED）、`TESTING.md`（§36 close 记录）、`WORKLOG.md`（本条目）。
+
+### 边界确认
+未改 NQ / Java 生产代码 / controller 行为 / 测试逻辑；未恢复 legacy；未双接收；未新增 API / migration；未真实 HTTP / NQ / 交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未读取真实密钥。
+
+### 后续项（与 close 解耦，均不放开 runtime）
+`DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT`、`DH-NQ-HEADER-BINDING-PRE-AUTH-PLAN`（nonce-burn race 防御纵深）、Maven wrapper repair、datasource 默认弱口令治理。
+
+### 准入
+header alignment CLOSED。下一步 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT` 或 GateK-PLAN。Integration-1 runtime 仍禁止，须独立 PLAN。

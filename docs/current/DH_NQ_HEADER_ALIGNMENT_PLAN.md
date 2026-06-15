@@ -4,7 +4,7 @@
 > 类型：INTEGRATION_CONTRACT_PLANNING + SECURITY_REVIEW + DOCUMENTATION
 > 日期：2026-06-14
 > 仓库：Decision Hub（DH）；配套 NQ 侧只读核查
-> 状态：**planning-only**（本轮只读核查 + 输出方案；未改运行代码 / 测试；未启动 Integration-1）
+> 状态：**header alignment CLOSED（2026-06-15，CLOSE-REVIEW-RERUN 通过）**（本文件起于 planning-only；Batch 1–4 实施 + close 历程见下方"实施进展"；CLOSED 不放开 runtime，Integration-1 仍 NOT STARTED）
 > 配套：`DH_NQ_INTEGRATION0_CONTRACT_FREEZE.md` / `DH_NQ_INTEGRATION0_SECURITY_POLICY.md` / `DH_NQ_INTEGRATION0_ACCEPTANCE_REPORT.md`
 
 本文件**只做对齐方案设计**：canonical 化的实施分批进行（`DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-*`）。
@@ -20,8 +20,8 @@
 > - **生产入站现为 canonical-only**：仅接受 canonical `X-NQ-DH-*`；legacy `X-DH-NQ-*` 不再被接受（等同缺失 -> fail-closed）。legacy 常量 / `parseLegacy` 仅作历史引用保留。
 > - **Batch 3：DONE / ACCEPTED（2026-06-15，BATCH-3-REVIEW 通过）** —— 正式接入 `NqDhHeaderValidator`：canonical `X-NQ-DH-Tenant-Id/Request-Id/Trace-Id` 与权威来源（tenant=认证上下文，requestId/traceId=body）binding 一致性校验；header 可选、若提供且不一致则 fail-closed（403 `HEADER_BINDING_MISMATCH`）；**header 绝不覆盖权威来源**。
 > - **Batch 4：DONE（2026-06-15）** —— docs/fixtures 收口：统一 §4.3/§4.6/§6 对 `MISSING_CANONICAL_HEADER` 的措辞（预留码，缺失由 authenticator 既有码 fail-closed、不单独发码）；核对 WebMvc 与 INT0 fixtures 均为 canonical；README/TESTING/WORKLOG 与当前状态一致。
-> - **header alignment 整体：READY FOR CLOSE / PENDING FINAL REVIEW（仍未 CLOSED）** —— canonical-only 读取（Batch 2）+ binding 一致性（Batch 3）+ docs/fixtures 收口（Batch 4）均已落地；待 `DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW` 后方可 CLOSED。Integration-1 / Runtime integration 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。
-> - **独立后续项（不阻塞 close）**：timestamp 格式分歧 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT`；checkstyle DTD 离线治理 `DH-CHECKSTYLE-OFFLINE-DTD-GOVERNANCE`；nonce-burn race 防御纵深 `DH-NQ-HEADER-BINDING-PRE-AUTH-PLAN`。
+> - **header alignment 整体：CLOSED（2026-06-15，DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW-RERUN 通过）** —— canonical-only 读取（Batch 2）+ binding 一致性（Batch 3）+ docs/fixtures 收口（Batch 4）均已落地并验收；quality gate 经 `DH-CHECKSTYLE-OFFLINE-DTD-GOVERNANCE` 离线稳定通过（`mvn test` + `mvn -Pquality validate` BUILD SUCCESS、INT0 16/16）。**CLOSED 仅指 DH 入站 header 对齐完成，不放开 runtime**：Integration-1 / Runtime integration 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。
+> - **独立后续项（与 header alignment close 解耦、均不放开 runtime）**：timestamp 格式分歧 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT`；nonce-burn race 防御纵深 `DH-NQ-HEADER-BINDING-PRE-AUTH-PLAN`；checkstyle DTD 离线治理 `DH-CHECKSTYLE-OFFLINE-DTD-GOVERNANCE`（已 DONE）。
 
 ---
 
@@ -264,6 +264,6 @@ no_credential_access                                       每批边界
 
 边界确认（PLAN 轮，2026-06-14）：未修改 Java；未修改测试；未新增 API；未新增 migration；未做真实 HTTP；未做真实 NQ 调用；未新增 RealClient；未新增真实 Provider；未做真实交易所调用；未接 AI；未开启 LIVE；未启动 Integration-1；未读取或输出真实密钥。（Batch 1 IMPL 轮、DOC-RECONCILE 轮的边界分别见 WORKLOG / TESTING 对应条目；DOC-RECONCILE 轮仅改文档。）
 
-Integration-1 decision：**Integration-1 仍 NOT STARTED**。Header alignment 推进也不代表允许 runtime integration；DH NOT INTEGRATED / Runtime integration NOT STARTED。**header alignment 整体：READY FOR CLOSE / PENDING FINAL REVIEW（仍未 CLOSED）**（Batch 1 DONE/ACCEPTED；Batch 2 DONE/ACCEPTED：生产入站已切 canonical-only `X-NQ-DH-*`、不再接受 legacy；Batch 3 DONE/ACCEPTED：Tenant/Request/Trace binding 一致性校验已接入（fail-closed `HEADER_BINDING_MISMATCH`，header 不覆盖权威来源）；Batch 4 DONE：docs/fixtures 收口完成）。close 前提：`DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW` 通过。
+Integration-1 decision：**Integration-1 仍 NOT STARTED**。Header alignment CLOSED 也不代表允许 runtime integration；DH NOT INTEGRATED / Runtime integration NOT STARTED。**header alignment 整体：CLOSED（CLOSE-REVIEW-RERUN 通过，2026-06-15）**（Batch 1 DONE/ACCEPTED；Batch 2 DONE/ACCEPTED：生产入站已切 canonical-only `X-NQ-DH-*`、不再接受 legacy；Batch 3 DONE/ACCEPTED：Tenant/Request/Trace binding 一致性校验已接入（fail-closed `HEADER_BINDING_MISMATCH`，header 不覆盖权威来源）；Batch 4 DONE：docs/fixtures 收口完成；quality gate 经离线 DTD 治理稳定通过）。
 
-Next concrete action：`DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW`（header alignment 整体 close 评审；通过后方可标记 CLOSED）。独立后续项（均不阻塞 close）：`DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT` / `DH-CHECKSTYLE-OFFLINE-DTD-GOVERNANCE` / `DH-NQ-HEADER-BINDING-PRE-AUTH-PLAN`。
+Next concrete action：`DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT` 或 GateK-PLAN。独立后续项（与 header alignment close 解耦、均不放开 runtime）：`DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT` / `DH-NQ-HEADER-BINDING-PRE-AUTH-PLAN`（nonce-burn race 防御纵深）/ Maven wrapper repair / datasource 默认弱口令治理。

@@ -1250,6 +1250,24 @@ fixtures   WebMvc 成功路径全 canonical X-NQ-DH-*；唯一 legacy 在 legacy
 准入决定   quality gate 离线稳定通过；header alignment close review 环境性阻断 UNBLOCKED；本轮不直接 CLOSED。下一步 DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW-RERUN
 ```
 
+## 36. 2026-06-15 DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW-RERUN 验收记录（header alignment CLOSED）
+
+```text
+日期       2026-06-15
+阶段       DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW-RERUN（REGRESSION_VALIDATION + CONTRACT/SECURITY/DOC REVIEW）
+范围       离线 DTD 治理后重跑 close review；只评审 + 记录 CLOSED；未改代码/测试
+命令       mvn test
+结果       BUILD SUCCESS。names 2 / parser 5 / validator 6 / payload gate 2 / WebMvc 25 / rate limit 3；INT0 6+2+8=16/16；ArchUnit 全绿；无 Docker IT skip
+命令       mvn -Pquality validate
+结果       BUILD SUCCESS（0 Checkstyle violations；spotless 通过）—— 离线 DTD 治理后稳定，gate 未降低（仅 1 行 PUBLIC id；全规则集实跑）
+命令       git status --short / git diff --check
+结果       仅状态文档改动；无 whitespace error
+确认       17/17：canonical-only 读取、binding mismatch 403 HEADER_BINDING_MISMATCH、HMAC value-based、rate limit key、payload 413、replay 409、legacy-only 403、INT0 16/16
+Close      header alignment overall = CLOSED（不放开 runtime；Integration-1 / Runtime / DH integration / AI NOT STARTED；LIVE DISABLED）
+后续项     DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT / DH-NQ-HEADER-BINDING-PRE-AUTH-PLAN / Maven wrapper / datasource 弱口令（均与 close 解耦）
+准入决定   CLOSED；下一步 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT 或 GateK-PLAN
+```
+
 ## 33. 2026-06-15 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3 验收记录（Tenant/Request/Trace binding 一致性）
 
 ```text
