@@ -1169,3 +1169,20 @@ CI Docker 实跑结果（2026-06-14，已确认；GitHub Actions run 27485958120
 准入决定   header alignment 整体仍 NOT COMPLETED（canonical-only 未切换）；Integration-1 仍 NOT STARTED；
            下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-1-REVIEW，通过后 Batch 2（canonical 读取）
 ```
+
+## 31. 2026-06-15 DH-NQ-HEADER-ALIGNMENT-DOC-RECONCILE（纯文档，未跑测试）
+
+```text
+日期       2026-06-15
+阶段       DH-NQ-HEADER-ALIGNMENT-DOC-RECONCILE（DOCUMENTATION + INTEGRATION_CONTRACT_RECONCILE）
+范围       仅将 header alignment 文档口径统一到 canonical-only；改 DH_NQ_HEADER_ALIGNMENT_PLAN.md / README.md / TESTING.md / WORKLOG.md
+为何未跑   本轮纯文档，未触及任何 Java / 测试 / 构建文件，故未运行 mvn test / quality；按 CLAUDE 文档任务纪律记录未跑原因。
+           回归基线沿用 BATCH-1 验收（2026-06-14）：mvn test BUILD SUCCESS / mvn -Pquality validate BUILD SUCCESS / INT0 16/16，未受文档改动影响。
+验证       git status --short（仅 4 份 docs 改动 + 4 个会话起始即存在的未跟踪杂散文件）；git diff --check 无 whitespace error；git diff --stat 仅 docs/current/*.md。
+口径       canonical-only：无兼容期、无双接收；Batch 2=canonical-only 读取；Batch 3=Tenant/Request/Trace binding 一致性校验（HEADER_BINDING_MISMATCH）；
+           legacy 仅历史引用、生产在 Batch 2 前仍读 legacy；timestamp 格式分歧另列，不在本轮。
+边界       未改 Java；未改测试；未切 canonical-only 行为；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；
+           未接 AI；未开启 LIVE；未启动 Integration-1；未处理 wrapper / datasource 弱口令 / timestamp 格式；未删除未跟踪文件；未读取真实密钥。
+后续项     P3-2 未跟踪杂散文件（4 个，会话起始即存在）登记为待用户授权后清理，本轮不处理。
+准入决定   header alignment 整体仍 NOT COMPLETED（canonical-only 未切换）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2（canonical-only 读取）。
+```

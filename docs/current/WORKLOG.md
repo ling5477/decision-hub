@@ -2620,3 +2620,29 @@ header alignment 仍 NOT STARTED（仅 PLAN）；Integration-1 仍 NOT STARTED�
 
 ### 准入
 header alignment 整体仍 NOT COMPLETED（canonical-only 未切换）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-1-REVIEW，通过后 Batch 2（canonical 读取）。
+
+## 2026-06-15 DH-NQ-HEADER-ALIGNMENT-DOC-RECONCILE（文档口径收口，纯文档）
+
+### 范围
+仅修正 header alignment 文档口径漂移，将计划统一到已评审通过的 **canonical-only** 策略。不改 Java、不改测试、不进入 Batch 2 implementation、不启动 Integration-1。允许改：`DH_NQ_HEADER_ALIGNMENT_PLAN.md` / `README.md` / `TESTING.md` / `WORKLOG.md`。
+
+### 背景
+`DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-1-REVIEW`（2026-06-14）通过；评审发现文档漂移：PLAN §4–§7 与 README 仍保留 PLAN-REVIEW 改判前的"短兼容期 / 双 header 接收 / 冲突 fail-closed / 移除 legacy 独立批次"措辞，而已 ACCEPTED 的策略是 canonical-only（无兼容期）。本轮收口该漂移。
+
+### 修改文件（仅文档）
+- `DH_NQ_HEADER_ALIGNMENT_PLAN.md`：顶部实施进展补 DOC-RECONCILE 说明 + Batch 1 标 DONE/ACCEPTED + legacy 仍当前生产；§4.1 总体方针 兼容期→canonical-only；§4.2 改为"不需要兼容期、不允许双接收"；§4.3 冲突表→canonical-only 接收表（缺/仅 legacy -> `MISSING_CANONICAL_HEADER`）；§4.4 去双解析与"canonical 优先"，normalized 模型对齐实现类 `NormalizedNqDhHeaders`；§4.5 binding 校验明确归 Batch 3；§4.6 审计码去 `LEGACY_HEADER_USED`/`HEADER_CONFLICT`，保留 `MISSING_CANONICAL_HEADER`/`HEADER_BINDING_MISMATCH`/`SIGNATURE_MISMATCH`；§4.7 去 legacy 通道；§5 批次重排（Batch 1 DONE/ACCEPTED；Batch 2 canonical-only 读取；Batch 3 binding 一致性校验；Batch 4 docs/fixtures 收口；legacy 常量退场列为可选后续小批）；§6 测试清单去 legacy_compat/conflict、加 canonical-only/binding 用例；§7 14 问速答 7–11/13 改 canonical-only；§8 next action 改为 Batch 2。
+- `README.md`：header alignment 段"推荐 canonical 优先 + 短兼容期 + 冲突 fail-closed"→canonical-only；明确 Batch 2 = canonical-only 读取、Batch 3 = binding 一致性校验、legacy 仍是当前生产行为直到 Batch 2、header alignment overall NOT COMPLETED、Integration-1 NOT STARTED。
+- `TESTING.md`：新增第 31 条 DOC-RECONCILE 记录（纯文档，未跑测试 + 原因）。
+- `WORKLOG.md`：本条目。
+
+### 口径确认（canonical-only）
+1. 采用 canonical-only；2. 无 legacy 兼容期；3. 不实现 legacy/canonical 双接收；4. Batch 2 = canonical-only 读取；5. Batch 3 = Tenant/Request/Trace binding mismatch 一致性校验（`HEADER_BINDING_MISMATCH`）；6. legacy 常量仅作历史引用、不再扩散；7. timestamp 格式分歧另列 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT`，不在本轮。
+
+### 后续项（登记，不在本轮处理）
+- **P3-2 未跟踪杂散文件**：工作区存在 4 个未跟踪文件（文件名为任务/计划中文片段，各约 7–15KB，会话开始即存在，疑似历史命令重定向误写）。**不属于任何 commit、不影响构建**（`git diff --check` 干净）。按纪律**未删除**，登记为「待用户单独授权后清理」，本轮不处理。
+
+### 边界确认
+未改 Java 生产代码；未改测试；未切 canonical-only 行为（生产仍读 legacy `X-DH-NQ-*`）；未实现双接收；未移除 legacy；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未处理 Maven wrapper / datasource 弱口令 / timestamp 格式分歧；未删除未跟踪杂散文件；未读取或输出真实密钥。
+
+### 准入
+header alignment 整体仍 NOT COMPLETED（canonical-only 未切换，生产仍读 legacy `X-DH-NQ-*`）；Integration-1 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2（canonical-only 读取）。
