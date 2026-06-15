@@ -1283,6 +1283,24 @@ Close      header alignment overall = CLOSED（不放开 runtime；Integration-1
 准入决定   timestamp alignment NOT STARTED（仅 PLAN）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-PLAN-REVIEW
 ```
 
+## 38. 2026-06-15 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T1 验收记录（docs 收口）
+
+```text
+日期       2026-06-15
+阶段       DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T1（DOCUMENTATION + INTEGRATION_CONTRACT_ALIGNMENT）
+范围       DH 侧 timestamp 契约文档统一为 RFC3339 / ISO-8601 UTC Z；不改 Java / 测试 / NQ
+修改       SECURITY_POLICY §2+§4、CONTRACT_FREEZE §规则、CONTRACT_TEST_PLAN T5/INT0-T05、TIMESTAMP_FORMAT_ALIGNMENT_PLAN、README/TESTING/WORKLOG；无 Java/测试/NQ
+canonical  RFC3339 / ISO-8601 UTC Z（例 2026-06-15T12:34:56Z）；拒绝 epoch 秒/毫秒/数字偏移；窗口 ±300s 不变；HMAC value-based 不改、header name 不入签
+命令       mvn test
+结果       BUILD SUCCESS（回归）。INT0 6+2+8=16/16、WebMvc 25、validator 6、parser 5、rate limit 3、payload gate 2；ArchUnit 全绿；无 Docker IT skip
+命令       mvn -Pquality validate
+结果       BUILD SUCCESS（0 Checkstyle violations；spotless 通过）
+命令       git diff --check
+结果       无 whitespace error
+未收口     INT0 epoch 秒(T2) / NQ companion(T4，Integration-1 前置阻断) / 生产 UTC-Z 强制(可选 T3)；timestamp alignment 整体 NOT COMPLETED
+准入决定   T1 DONE；Integration-1 仍 NOT STARTED。下一步 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T1-REVIEW
+```
+
 ## 33. 2026-06-15 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3 验收记录（Tenant/Request/Trace binding 一致性）
 
 ```text

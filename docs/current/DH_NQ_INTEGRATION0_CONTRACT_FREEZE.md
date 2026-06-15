@@ -104,7 +104,7 @@ X-NQ-DH-Signature
 Content-Type: application/json
 ```
 
-规则：Timestamp ±300 秒窗口；Nonce 防重放（`Source+Nonce+RequestId` TTL 内唯一）；Signature HMAC-SHA256（候选）；Payload ≤ 64 KiB；Source 必在 allowlist；Tenant 绑定请求/审计/数据作用域；RequestId 幂等+审计；TraceId 跨系统排查；签名原材料/raw request/raw response/prompt/full context 不得落日志、不得落库。
+规则：Timestamp **格式 RFC3339 / ISO-8601 UTC（`Z` 结尾，例 `2026-06-15T12:34:56Z`；不接受 epoch 秒/毫秒、不接受数字时区偏移）**，±300 秒窗口；Nonce 防重放（`Source+Nonce+RequestId` TTL 内唯一）；Signature HMAC-SHA256（候选）；Payload ≤ 64 KiB；Source 必在 allowlist；Tenant 绑定请求/审计/数据作用域；RequestId 幂等+审计；TraceId 跨系统排查；签名原材料/raw request/raw response/prompt/full context 不得落日志、不得落库。
 
 与现有实现的关系（诚实声明，不在本轮修复）：DH 已实现的 NQ feedback authenticator 当前使用 `X-DH-NQ-*` 命名族（见 `DH_AUDIT_FIX_REPORT.md`，P1-1/P1-2/P1-3 已关闭）。Integration-0 冻结的 canonical 跨系统 header 族为 `X-NQ-DH-*`。两者对齐是 **Integration-1 前置项**，不在本轮修复。
 

@@ -53,7 +53,7 @@
 
 ### T5 timestamp 过期测试
 - targetSystem：NQ / DH
-- purpose：超 ±300 秒窗口拒绝。
+- purpose：超 ±300 秒窗口拒绝（timestamp canonical=RFC3339 / ISO-8601 UTC `Z`）。
 - input：早于/晚于窗口的 timestamp。
 - expectedResult：401/403。
 - forbiddenSideEffect：接受过期请求。
@@ -260,7 +260,7 @@ DH 侧重点：NQ feedback 入站认证/校验（DH 已有 envelope/validator/ro
 - testName：timestamp_window_rejection_dh
 - targetSystem：DH
 - testType：SECURITY / NEGATIVE
-- purpose：feedback timestamp 超 ±300s 窗口拒绝。
+- purpose：feedback timestamp 超 ±300s 窗口拒绝；canonical timestamp=RFC3339 / ISO-8601 UTC `Z`（DH INT0 fixture 当前仍为 epoch 秒，待 T2 对齐）。
 - inputFixture：`FX-TIMESTAMP`。
 - requiredHeaders：Timestamp 越界。
 - payload：合法 `NQFeedbackEvent`。

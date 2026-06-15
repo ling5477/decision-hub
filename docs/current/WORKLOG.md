@@ -2836,3 +2836,33 @@ T1 docs 收口（SECURITY_POLICY epoch 毫秒 -> RFC3339；CONTRACT_FREEZE 钉�
 
 ### 准入
 timestamp format alignment PLAN-only / NOT STARTED；Integration-1 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-PLAN-REVIEW`，通过后 IMPL-BATCH-T1。
+
+## 2026-06-15 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T1（docs 收口，RFC3339 UTC Z）
+
+### 范围
+只做 DH 侧 timestamp format 文档收口，将 Integration-0/1 前置契约文档中 `X-NQ-DH-Timestamp` 格式统一为 RFC3339 / ISO-8601 UTC `Z`。不改 Java 生产代码 / 测试 / NQ；不启动 Integration-1。
+
+### 修改文件（仅文档）
+- `DH_NQ_INTEGRATION0_SECURITY_POLICY.md`：§2 header 表「epoch 毫秒」→ RFC3339 / ISO-8601 UTC `Z`（例 `2026-06-15T12:34:56Z`）；§4「Timestamp & Replay」加 canonical 格式 + 现状/不变量诚实声明（生产 `Instant.parse`→`Instant.toString()` 归一化、HMAC value-based、header name 不入签、严格 UTC-Z=可选 T3、INT0 epoch 秒待 T2、NQ 侧待 T4 且 Integration-1 前置阻断）；±300s 窗口不变。
+- `DH_NQ_INTEGRATION0_CONTRACT_FREEZE.md`：§规则 Timestamp 补 RFC3339 UTC `Z`（拒绝 epoch / 数字偏移），±300s 不变。
+- `DH_NQ_INTEGRATION0_CONTRACT_TEST_PLAN.md`：T5 / INT0-T05 timestamp 测试 purpose 补 canonical=RFC3339 UTC `Z`；INT0-T05 注明 fixture 当前 epoch 秒待 T2。
+- `DH_NQ_TIMESTAMP_FORMAT_ALIGNMENT_PLAN.md`：T1 标 DONE、front-matter / §8 状态与 next 更新。
+- `README.md` / `TESTING.md`（§38）/ `WORKLOG.md`（本条目）。
+- 无 Java / 测试 / NQ 改动。
+
+### 收口要点
+- canonical = RFC3339 / ISO-8601 UTC `Z`（例 `2026-06-15T12:34:56Z`）；明确拒绝 epoch 秒/毫秒、数字时区偏移。
+- replay 窗口仍 ±300s；HMAC signatureMaterial 不改（value-based、header name 不入签）；生产 `Instant.parse` + `Instant.toString()` 归一化 UTC `Z` 入签。
+- 严格 UTC-Z-only 强制 = 可选 T3（未做）；DH INT0 epoch 秒 = T2（未做）；NQ 侧核对 = T4（未做，Integration-1 前置阻断）。
+- 未把 timestamp alignment 写成 CLOSED；未把 Integration-1 / Runtime 写成 started；未把 DH 写成 integrated；未把 LIVE 写成 enabled。
+
+### 验证
+- `mvn test`：BUILD SUCCESS（回归，无代码改动）。INT0 DhNqIntegration0* 6+2+8=16/16、NqFeedbackControllerWebMvcTest 25、NqDhHeaderValidatorTest 6、NqDhHeaderParserTest 5、NqFeedbackRateLimitWebMvcTest 3、NqFeedbackPayloadSizeGateTest 2；ArchUnit 全绿；无 Docker：JDBC 持久化 IT / PostgresContainerSmokeTest 按 disabledWithoutDocker skip。
+- `mvn -Pquality validate`：BUILD SUCCESS（0 Checkstyle / spotless 通过；离线 DTD 治理后稳定）。
+- `git diff --check`：无 whitespace error。
+
+### 边界确认
+未改 NQ；未改 Java 生产代码；未改测试；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未处理 INT0 epoch 秒(T2) / NQ companion(T4) / 生产 UTC-Z 收紧(T3) / datasource 弱口令 / wrapper / nonce-burn race；未读取真实密钥。
+
+### 准入
+T1 docs 收口 DONE；timestamp alignment 整体 NOT COMPLETED（T2 / T4 待办）；Integration-1 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T1-REVIEW`，通过后 T2。

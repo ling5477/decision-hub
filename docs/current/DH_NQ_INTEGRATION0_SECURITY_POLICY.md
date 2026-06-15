@@ -25,7 +25,7 @@ X-NQ-DH-Source         来源系统标识，必须命中 allowlist
 X-NQ-DH-Tenant-Id      租户标识，必须与认证主体绑定
 X-NQ-DH-Request-Id     幂等键
 X-NQ-DH-Trace-Id       端到端追踪键
-X-NQ-DH-Timestamp      请求时间戳（冻结为 epoch 毫秒）
+X-NQ-DH-Timestamp      请求时间戳（冻结为 RFC3339 / ISO-8601 UTC，必须 Z 结尾，例 2026-06-15T12:34:56Z）
 X-NQ-DH-Nonce          一次性随机值
 X-NQ-DH-Signature      HMAC-SHA256 签名（候选方案）
 Content-Type: application/json
@@ -43,7 +43,9 @@ Content-Type: application/json
 
 ## 4. Timestamp & Replay Protection（冻结）
 
+- Timestamp 格式（canonical）：**RFC3339 / ISO-8601 UTC，必须 `Z` 结尾**，例 `2026-06-15T12:34:56Z`；不接受 epoch 秒/毫秒，不接受带数字时区偏移（如 `+08:00`）。
 - Timestamp 窗口：默认 ±300 秒，超窗拒绝。
+- 实现现状（诚实声明）：DH 生产 `HmacNqFeedbackAuthenticator` 用 `Instant.parse` 解析，并以 `Instant.toString()` 归一化为 UTC `Z` 形参与验签；HMAC signatureMaterial 仍 **value-based、不含 header name**（timestamp 以归一化值入签）。**严格拒绝非 UTC `Z` 子格式**属可选 T3（生产收紧），不在本轮；DH INT0 fixture 当前仍为 epoch 秒，待 T2 收口；NQ 侧未当面核对，待 T4 / NQ companion，且为 **Integration-1 前置阻断**。
 - Nonce 防重放：`Source + Nonce + Request-Id` 在 TTL 内唯一；重放拒绝（409）。
 - Nonce TTL：≥ 2 × maxClockSkew。
 - **Integration-1 前置（DH P1-4 残留，本轮不修复）**：nonce 必须持久化或集中缓存，不能只依赖单实例内存。
