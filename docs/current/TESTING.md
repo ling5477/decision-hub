@@ -1186,3 +1186,28 @@ CI Docker 实跑结果（2026-06-14，已确认；GitHub Actions run 27485958120
 后续项     P3-2 未跟踪杂散文件（4 个，会话起始即存在）登记为待用户授权后清理，本轮不处理。
 准入决定   header alignment 整体仍 NOT COMPLETED（canonical-only 未切换）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2（canonical-only 读取）。
 ```
+
+## 32. 2026-06-15 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2 验收记录（canonical-only 读取）
+
+```text
+日期       2026-06-15
+阶段       DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2（CODE_CHANGE + CONTRACT_ALIGNMENT + SECURITY_FIX + TEST_CODE_CHANGE）
+范围       入站 header 切 canonical-only X-NQ-DH-*；不做双接收 / 不兼容 legacy / 不做 binding mismatch（Batch 3）/ 不启动 Integration-1
+修改（main）NqDhHeaderParser（+parseCanonical；parseLegacy 保留历史引用）、NqFeedbackController（parseLegacy->parseCanonical）
+修改（test）NqDhHeaderParserTest +2；NqFeedbackControllerWebMvcTest 切 canonical +5；NqFeedbackRateLimitWebMvcTest 切 canonical
+命令       mvn test
+结果       BUILD SUCCESS（exit 0）
+           - NqFeedbackControllerWebMvcTest 20/20（canonical 成功 + legacy-only 403 + 缺 source 403 + 缺 timestamp 401 + 缺 nonce 401 + 签名不泄露）
+           - NqFeedbackRateLimitWebMvcTest 3/3（429 RATE_LIMITED 保持）
+           - NqDhHeaderParserTest 5/5、NqDhHeaderNamesTest 2/2、NqDhHeaderValidatorTest 2/2、NqFeedbackPayloadSizeGateTest 2/2
+           - INT0 DhNqIntegration0*（INT0-T01..T15）6+2+8=16/16 未破坏；ArchUnit 全绿
+           - 无 Docker：JdbcNonceReplayGuardPersistenceTest / PostgresContainerSmokeTest 按 disabledWithoutDocker skip
+命令       mvn -Pquality validate
+结果       BUILD SUCCESS（0 Checkstyle violations；spotless 通过）
+命令       git diff --check
+结果       无 whitespace error
+缺失语义   canonical Source 缺失/不匹配->403 SOURCE_NOT_ALLOWED；Timestamp->401 TIMESTAMP_EXPIRED；Nonce->401 REPLAY_KEY_MISSING；Signature->401 BAD_SIGNATURE；replay->409；payload->413；rate limit->429；成功->202（全部保持）
+安全自查   不记录 raw signature / signature material / secret / token / full body；canonical 成功路径断言响应不回显 signature / secret；HMAC value-based 不含 header name
+边界       未改 NQ；未双接收；未兼容 legacy；未保留 legacy 为生产可接受 header；未移除 legacy 常量；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未读取真实密钥
+准入决定   生产入站现为 canonical-only；header alignment 整体仍 NOT COMPLETED（binding=Batch 3 / docs-fixtures=Batch 4 尚待）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2-REVIEW，通过后 Batch 3
+```

@@ -207,10 +207,10 @@ class NqFeedbackRateLimitWebMvcTest {
         .header("Authorization", "Bearer " + GOOD_TOKEN)
         .contentType(MediaType.APPLICATION_JSON)
         .content(body)
-        .header("X-DH-NQ-Source", sourceHeader)
-        .header("X-DH-NQ-Timestamp", timestamp.toString())
-        .header("X-DH-NQ-Nonce", nonce)
-        .header("X-DH-NQ-Signature", signature);
+        .header("X-NQ-DH-Source", sourceHeader)
+        .header("X-NQ-DH-Timestamp", timestamp.toString())
+        .header("X-NQ-DH-Nonce", nonce)
+        .header("X-NQ-DH-Signature", signature);
   }
 
   private static String value(final Object value) {

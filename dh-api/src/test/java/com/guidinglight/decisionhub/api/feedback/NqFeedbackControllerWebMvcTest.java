@@ -30,14 +30,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
- * Stage2-PoC-B2 / DH-AUDIT-FIX：NqFeedbackController 的 MockMvc 入口测试。
+ * Stage2-PoC-B2 / DH-AUDIT-FIX / DH-NQ-HEADER-ALIGNMENT Batch 2：NqFeedbackController 的 MockMvc 入口测试。
  *
  * <p>覆盖正常 envelope、service 结果映射，以及 P1 修复要求的 API 认证、HMAC 签名、timestamp、
  * nonce/requestId 防重放、source allowlist 和 payload 大小限制。
+ *
+ * <p>Batch 2：入站为 <b>canonical-only</b> {@code X-NQ-DH-*}；成功路径用 canonical header，仅 legacy
+ * {@code X-DH-NQ-*} 与缺失任一必需 canonical header 一律 fail-closed 拒绝（保持现有 401/403 语义）。
  */
 class NqFeedbackControllerWebMvcTest {
 
@@ -114,9 +118,9 @@ class NqFeedbackControllerWebMvcTest {
     mockMvc
         .perform(
             authenticatedPost(body)
-                .header("X-DH-NQ-Source", "nexus-quant")
-                .header("X-DH-NQ-Timestamp", Instant.now().toString())
-                .header("X-DH-NQ-Nonce", "nonce-missing-sig"))
+                .header("X-NQ-DH-Source", "nexus-quant")
+                .header("X-NQ-DH-Timestamp", Instant.now().toString())
+                .header("X-NQ-DH-Nonce", "nonce-missing-sig"))
         .andExpect(status().isUnauthorized());
   }
 
@@ -128,10 +132,10 @@ class NqFeedbackControllerWebMvcTest {
     mockMvc
         .perform(
             authenticatedPost(body)
-                .header("X-DH-NQ-Source", "nexus-quant")
-                .header("X-DH-NQ-Timestamp", Instant.now().toString())
-                .header("X-DH-NQ-Nonce", "nonce-bad-sig")
-                .header("X-DH-NQ-Signature", "bad"))
+                .header("X-NQ-DH-Source", "nexus-quant")
+                .header("X-NQ-DH-Timestamp", Instant.now().toString())
+                .header("X-NQ-DH-Nonce", "nonce-bad-sig")
+                .header("X-NQ-DH-Signature", "bad"))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.errorCode").value("BAD_SIGNATURE"));
   }
@@ -184,6 +188,94 @@ class NqFeedbackControllerWebMvcTest {
         .perform(signedPost(envelope, body, "nonce-large", Instant.now()))
         .andExpect(status().isPayloadTooLarge())
         .andExpect(jsonPath("$.errorCode").value("PAYLOAD_TOO_LARGE"));
+  }
+
+  @Test
+  void post_legacyOnlyHeaders_areRejected_canonicalOnly() throws Exception {
+    // canonical-only：仅发送 legacy X-DH-NQ-* 等同缺失 canonical -> fail-closed（canonical source 缺失 -> 403）。
+    final Map<String, Object> envelope = legalEnvelope("evt-legacy-only");
+    final String body = objectMapper.writeValueAsString(envelope);
+
+    mockMvc
+        .perform(
+            authenticatedPost(body)
+                .header("X-DH-NQ-Source", "nexus-quant")
+                .header("X-DH-NQ-Timestamp", Instant.now().toString())
+                .header("X-DH-NQ-Nonce", "nonce-legacy-only")
+                .header("X-DH-NQ-Signature", "irrelevant-legacy-sig"))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.errorCode").value("SOURCE_NOT_ALLOWED"));
+  }
+
+  @Test
+  void post_missingCanonicalSource_returns403() throws Exception {
+    // 缺 canonical Source：body.sourceSystem 与（空的）header source 不一致 -> 403 SOURCE_NOT_ALLOWED。
+    final Map<String, Object> envelope = legalEnvelope("evt-miss-src");
+    final String body = objectMapper.writeValueAsString(envelope);
+
+    mockMvc
+        .perform(
+            authenticatedPost(body)
+                .header("X-NQ-DH-Timestamp", Instant.now().toString())
+                .header("X-NQ-DH-Nonce", "nonce-miss-src")
+                .header("X-NQ-DH-Signature", "irrelevant"))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.errorCode").value("SOURCE_NOT_ALLOWED"));
+  }
+
+  @Test
+  void post_missingCanonicalTimestamp_returns401() throws Exception {
+    // 缺 canonical Timestamp：source 校验通过后 timestamp 为 null -> 401 TIMESTAMP_EXPIRED。
+    final Map<String, Object> envelope = legalEnvelope("evt-miss-ts");
+    final String body = objectMapper.writeValueAsString(envelope);
+
+    mockMvc
+        .perform(
+            authenticatedPost(body)
+                .header("X-NQ-DH-Source", "nexus-quant")
+                .header("X-NQ-DH-Nonce", "nonce-miss-ts")
+                .header("X-NQ-DH-Signature", "irrelevant"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.errorCode").value("TIMESTAMP_EXPIRED"));
+  }
+
+  @Test
+  void post_missingCanonicalNonce_returns401() throws Exception {
+    // 缺 canonical Nonce：source/timestamp 通过后 nonce 为空 -> 401 REPLAY_KEY_MISSING。
+    final Map<String, Object> envelope = legalEnvelope("evt-miss-nonce");
+    final String body = objectMapper.writeValueAsString(envelope);
+
+    mockMvc
+        .perform(
+            authenticatedPost(body)
+                .header("X-NQ-DH-Source", "nexus-quant")
+                .header("X-NQ-DH-Timestamp", Instant.now().toString())
+                .header("X-NQ-DH-Signature", "irrelevant"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.errorCode").value("REPLAY_KEY_MISSING"));
+  }
+
+  @Test
+  void post_canonicalSuccess_doesNotLeakSignatureRawMaterial() throws Exception {
+    nextResult.set(IngestionResult.accepted("evt-nosig-leak"));
+    final Map<String, Object> envelope = legalEnvelope("evt-nosig-leak");
+    final String body = objectMapper.writeValueAsString(envelope);
+    final String nonce = "nonce-nosig-leak";
+    final Instant ts = Instant.now();
+    final String signature =
+        canonicalSignature(envelope, body, nonce, ts, envelope.get("sourceSystem").toString());
+
+    final MvcResult result =
+        mockMvc
+            .perform(signedPost(envelope, body, nonce, ts))
+            .andExpect(status().isAccepted())
+            .andReturn();
+
+    final String responseBody = result.getResponse().getContentAsString();
+    org.junit.jupiter.api.Assertions.assertFalse(
+        responseBody.contains(signature), "202 body must not echo raw signature");
+    org.junit.jupiter.api.Assertions.assertFalse(
+        responseBody.contains(NQ_SECRET), "202 body must not leak secret");
   }
 
   @Test
@@ -330,27 +422,36 @@ class NqFeedbackControllerWebMvcTest {
       final String nonce,
       final Instant timestamp,
       final String sourceHeader) {
-    final String signature =
-        HmacNqFeedbackAuthenticator.hmacSha256Hex(
-            NQ_SECRET,
-            HmacNqFeedbackAuthenticator.signatureMaterial(
-                new NqFeedbackAuthRequest(
-                    sourceHeader,
-                    envelope.get("sourceSystem").toString(),
-                    timestamp.toString(),
-                    nonce,
-                    "",
-                    value(envelope.get("eventId")),
-                    value(envelope.get("requestId")),
-                    value(envelope.get("traceId")),
-                    value(envelope.get("payloadJson")),
-                    body.getBytes(java.nio.charset.StandardCharsets.UTF_8).length,
-                    timestamp)));
+    final String signature = canonicalSignature(envelope, body, nonce, timestamp, sourceHeader);
     return authenticatedPost(body)
-        .header("X-DH-NQ-Source", sourceHeader)
-        .header("X-DH-NQ-Timestamp", timestamp.toString())
-        .header("X-DH-NQ-Nonce", nonce)
-        .header("X-DH-NQ-Signature", signature);
+        .header("X-NQ-DH-Source", sourceHeader)
+        .header("X-NQ-DH-Timestamp", timestamp.toString())
+        .header("X-NQ-DH-Nonce", nonce)
+        .header("X-NQ-DH-Signature", signature);
+  }
+
+  /** 计算 value-based 签名（与生产 authenticator 的 signatureMaterial 一致；不含 header name）。 */
+  private static String canonicalSignature(
+      final Map<String, Object> envelope,
+      final String body,
+      final String nonce,
+      final Instant timestamp,
+      final String sourceHeader) {
+    return HmacNqFeedbackAuthenticator.hmacSha256Hex(
+        NQ_SECRET,
+        HmacNqFeedbackAuthenticator.signatureMaterial(
+            new NqFeedbackAuthRequest(
+                sourceHeader,
+                envelope.get("sourceSystem").toString(),
+                timestamp.toString(),
+                nonce,
+                "",
+                value(envelope.get("eventId")),
+                value(envelope.get("requestId")),
+                value(envelope.get("traceId")),
+                value(envelope.get("payloadJson")),
+                body.getBytes(java.nio.charset.StandardCharsets.UTF_8).length,
+                timestamp)));
   }
 
   private static MockHttpServletRequestBuilder authenticatedPost(final String body) {

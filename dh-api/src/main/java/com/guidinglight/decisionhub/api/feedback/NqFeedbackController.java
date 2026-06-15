@@ -48,8 +48,9 @@ public final class NqFeedbackController {
   private static final String NQ_FEEDBACK_ROUTE = "NQ_FEEDBACK";
 
   /**
-   * header 解析器（DH-NQ-HEADER-ALIGNMENT Batch 1）：集中 header 名 + 归一化模型，去除散落 magic string。
-   * Batch 1 仅按 legacy {@code X-DH-NQ-*} 读取，对外行为不变；canonical 读取在 Batch 2 引入。无状态可复用。
+   * header 解析器（DH-NQ-HEADER-ALIGNMENT Batch 2）：集中 header 名 + 归一化模型。
+   * Batch 2 起 <b>canonical-only</b>：仅按 canonical {@code X-NQ-DH-*} 读取，不接收 legacy {@code X-DH-NQ-*}、
+   * 不做双接收。无状态可复用。
    */
   private final NqDhHeaderParser headerParser = new NqDhHeaderParser();
 
@@ -76,8 +77,9 @@ public final class NqFeedbackController {
     final String tenantId = AuthenticatedRequest.requireTenantId(httpRequest);
     final String httpTraceId = resolveHttpTraceId(httpRequest);
 
-    // Batch 1：经集中 parser 读取 legacy header 族（行为与此前逐个 getHeader 等价）。
-    final NormalizedNqDhHeaders nqHeaders = headerParser.parseLegacy(httpRequest::getHeader);
+    // Batch 2：canonical-only 读取 canonical X-NQ-DH-* header 族；不再读取 legacy X-DH-NQ-*、不做双接收。
+    // 仅 legacy header 存在时 source/timestamp/nonce/signature 均为 null，等同缺失 canonical -> 由 authenticator fail-closed 拒绝。
+    final NormalizedNqDhHeaders nqHeaders = headerParser.parseCanonical(httpRequest::getHeader);
 
     // 限流必须前置于 HMAC authenticator：超限请求在进入签名 / 重放校验 / 入库前即被拒，降低被刷成本。
     // key = source + tenant + route（租户 / 来源隔离）；超限映射 429 RATE_LIMITED，且不暴露阈值 / 窗口 / 计数。
@@ -188,9 +190,10 @@ public final class NqFeedbackController {
   }
 
   /**
-   * 构造认证请求并校验。Batch 1：header 值取自归一化模型（legacy 族），与此前逐个 {@code getHeader} 等价；
+   * 构造认证请求并校验。Batch 2：header 值取自归一化模型（canonical 族 {@code X-NQ-DH-*}）；
    * 权威 tenant 仍来自认证上下文、requestId/traceId/eventId/sourceSystem/payload 仍来自 body，未改变。
-   * 不改变 HMAC signatureMaterial 语义（仍 value-based）。
+   * canonical Tenant/Request/Trace 即使出现在模型中也不参与认证、不覆盖权威来源（binding 校验见 Batch 3）。
+   * 不改变 HMAC signatureMaterial 语义（仍 value-based，不含 header name）。
    *
    * @param req envelope 请求体
    * @param nqHeaders 归一化 header 模型

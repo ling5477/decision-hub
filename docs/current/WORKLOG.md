@@ -2646,3 +2646,35 @@ header alignment 整体仍 NOT COMPLETED（canonical-only 未切换）；Integra
 
 ### 准入
 header alignment 整体仍 NOT COMPLETED（canonical-only 未切换，生产仍读 legacy `X-DH-NQ-*`）；Integration-1 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2（canonical-only 读取）。
+
+## 2026-06-15 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2（canonical-only 读取）
+
+### 范围
+将 DH NQ feedback 入站 header 从 legacy `X-DH-NQ-*` 切到 **canonical-only** `X-NQ-DH-*` 读取。不做 legacy/canonical 双接收、不保留兼容期、不做 Tenant/Request/Trace binding mismatch 强制（留 Batch 3）、不启动 Integration-1、不真实联调。
+
+### 修改文件（main）
+- `dh-security/security/nq/NqDhHeaderParser.java`：新增 `parseCanonical(HeaderLookup)`，读 canonical 7 header（Source/Tenant-Id/Request-Id/Trace-Id/Timestamp/Nonce/Signature），family=CANONICAL；`parseLegacy` 保留为历史引用 / 单测（不再被生产 controller 调用）；类 / 方法注释更新为 canonical-only。
+- `dh-api/api/feedback/NqFeedbackController.java`：`parseLegacy` -> `parseCanonical`；不再读取 legacy、不做双接收；注释更新。tenant 仍来自认证上下文、requestId/traceId/eventId/sourceSystem/payload 仍来自 body；canonical Tenant/Request/Trace 进入模型但不参与认证、不覆盖权威来源；HMAC signatureMaterial 仍 value-based（不含 header name）。
+
+### 修改文件（test）
+- `dh-security/.../NqDhHeaderParserTest.java`：+2（`parse_canonical_reads_x_nq_dh_headers_into_model`、`parse_canonical_does_not_read_legacy_headers`）。
+- `dh-api/.../NqFeedbackControllerWebMvcTest.java`：成功路径 header 切 canonical；+5（legacy-only 拒绝→403 SOURCE_NOT_ALLOWED、缺 canonical Source→403、缺 Timestamp→401 TIMESTAMP_EXPIRED、缺 Nonce→401 REPLAY_KEY_MISSING、canonical 成功路径不泄露 raw signature/secret）；签名计算抽出 `canonicalSignature` 复用。
+- `dh-api/.../NqFeedbackRateLimitWebMvcTest.java`：header 切 canonical。
+- INT0（dh-domain）：无需改（`Int0Contract` 早已用 canonical `X-NQ-DH-*`，且不经真实 controller）。
+
+### 缺失语义（fail-closed，状态码不变）
+仅 legacy / 缺必需 canonical header 由现有 `HmacNqFeedbackAuthenticator` 拒绝：canonical Source 缺失/不匹配 -> 403 SOURCE_NOT_ALLOWED；Timestamp -> 401 TIMESTAMP_EXPIRED；Nonce -> 401 REPLAY_KEY_MISSING；Signature -> 401 BAD_SIGNATURE。`NqDhHeaderValidator` 本批仍未接入 controller（显式 MISSING_CANONICAL_HEADER / binding 随 Batch 3 接入）。
+
+### 验证
+- `mvn test`：BUILD SUCCESS（exit 0）。NqFeedbackControllerWebMvcTest 20/20、NqFeedbackRateLimitWebMvcTest 3/3、NqDhHeaderParserTest 5/5、NqDhHeaderNamesTest 2/2、NqDhHeaderValidatorTest 2/2、NqFeedbackPayloadSizeGateTest 2/2、INT0 DhNqIntegration0* 6+2+8=16/16；ArchUnit 全绿；无 Docker：JDBC 持久化 IT / PostgresContainerSmokeTest 按 disabledWithoutDocker skip。
+- `mvn -Pquality validate`：BUILD SUCCESS（0 Checkstyle / spotless 通过）。
+- `git diff --check`：无 whitespace error。
+
+### 安全自查
+不记录 raw signature / signature material / secret / token / full body；归一化模型 toString 对 signature 脱敏；canonical 成功路径单测断言响应不回显 signature / secret。HMAC value-based 不含 header name，改名不漂移。payload 64KiB / nonce replay / rate limit key=source+tenant+route 全保持。
+
+### 边界确认
+未改 NQ；未做 legacy/canonical 双接收；未兼容 legacy 入站；未保留 legacy 为生产可接受 header；未移除 legacy 常量；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未处理 wrapper / datasource 弱口令 / timestamp 格式分歧；未删除未跟踪杂散文件；未读取或输出真实密钥。
+
+### 准入
+生产入站现为 canonical-only（`X-NQ-DH-*`）；header alignment 整体仍 NOT COMPLETED（Tenant/Request/Trace binding=Batch 3、docs/fixtures 收口=Batch 4 尚待）；Integration-1 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-2-REVIEW，通过后 Batch 3。
