@@ -2746,3 +2746,35 @@ header alignment 整体仍 NOT COMPLETED（仅余 docs/fixtures 收口 Batch 4�
 
 ### 准入
 header alignment 整体 **READY FOR CLOSE / PENDING FINAL REVIEW（仍未 CLOSED）**；Integration-1 / Runtime integration 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 `DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW`（通过后方可 CLOSED）。
+
+## 2026-06-15 DH-CHECKSTYLE-OFFLINE-DTD-GOVERNANCE（quality gate 离线 DTD 治理）
+
+### 范围
+治理 `mvn -Pquality validate` 因 Checkstyle SuppressionFilter 解析外部 DTD 联网超时导致的质量门禁不稳定。仅改 checkstyle 配置 + 文档；不改 header alignment / `NqFeedbackController` 运行行为，不启动 Integration-1。
+
+### 失败根因
+`config/checkstyle/checkstyle-suppressions.xml` 的 DOCTYPE PUBLIC id 为**非标准串** `-//Checkstyle//DTD Suppressions 1.2//EN`，不在 Checkstyle（10.20.0）`SuppressionsLoader` 的 EntityResolver 映射表中，故解析回退到 SYSTEM URL `https://checkstyle.org/dtds/suppressions_1_2.dtd` 联网拉取 -> 弱网/离线下 `Connection timed out: connect` -> checkstyle goal 失败 -> BUILD FAILURE。对照：`config/checkstyle/checkstyle.xml` 用官方 `-//Checkstyle//DTD Checkstyle Configuration 1.3//EN`（在映射表中），故 config 解析本地命中、从不联网（失败只出现在 suppressions，印证根因）。
+
+### 修复方式
+把 suppressions 的 PUBLIC id 改为 Checkstyle 官方串 `-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN`（与 checkstyle.org `config_filters` 文档一致），使 EntityResolver 命中并改用 Checkstyle **内置 DTD 资源**解析、不再访问外网；保留 SYSTEM URL 作为标准声明（命中 PUBLIC 后不会被拉取）。**未删除 SuppressionFilter、未删除 suppressions 文件、未降低规则集、未关闭 checkstyle、未跳过 quality profile**；仅改 1 行 PUBLIC id。
+
+### 修改文件
+- `config/checkstyle/checkstyle-suppressions.xml`：DOCTYPE PUBLIC id 1 行。
+- docs：本 WORKLOG + TESTING（§35）+ README（说明）。
+
+### 验证
+- 修复前同会话 `mvn -Pquality validate` 连续 **6 次 BUILD FAILURE**（DTD 联网超时）。
+- 修复后（网络仍不可用）`mvn -Pquality validate` **连续 2 次 BUILD SUCCESS / 0 Checkstyle violations / spotless 通过** —— 证明 suppressions DTD 现已离线解析。
+- `mvn test`：BUILD SUCCESS；header alignment 类（names 2 / parser 5 / validator 6 / WebMvc 25 / rate limit 3 / payload gate 2）+ INT0 16/16 全绿；无 Docker：JDBC 持久化 IT / PostgresContainerSmokeTest 按 disabledWithoutDocker skip。
+- `git diff --check`：无 whitespace error。
+
+### 本轮未改变业务行为
+仅改 checkstyle 配置元数据（DTD PUBLIC id）；未改任何 Java 生产代码 / 测试逻辑 / header alignment 行为 / controller / 签名 / 限流 / 鉴权 / 鉴别码。
+
+### 残留风险
+- 若未来有人把 suppressions PUBLIC id 改回非标准串、或新增引用未知 PUBLIC id 的 XML，将再次触发联网回退。
+- 本机/CI runner 的 Checkstyle 版本须保持 10.x（其 `SuppressionsLoader` 含该官方 PUBLIC id 映射）；大版本升级时需复核内置 DTD 映射。
+- 本修复消除“正常路径”联网；属深度防御的本地 DTD/catalog（SYSTEM 改本地路径）未引入，保持最小化。
+
+### 准入
+quality gate 离线稳定通过，header alignment close review 的环境性阻断已 **UNBLOCKED**；但本轮**不直接标 header alignment CLOSED**。下一步 `DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW-RERUN`。

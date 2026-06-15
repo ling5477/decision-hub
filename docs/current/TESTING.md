@@ -1232,6 +1232,24 @@ fixtures   WebMvc 成功路径全 canonical X-NQ-DH-*；唯一 legacy 在 legacy
 准入决定   header alignment 整体 READY FOR CLOSE / PENDING FINAL REVIEW（仍未 CLOSED）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW
 ```
 
+## 35. 2026-06-15 DH-CHECKSTYLE-OFFLINE-DTD-GOVERNANCE 验收记录（quality gate 离线 DTD 治理）
+
+```text
+日期       2026-06-15
+阶段       DH-CHECKSTYLE-OFFLINE-DTD-GOVERNANCE（QUALITY_GATE_FIX + BUILD_STABILITY + SECURITY_VALIDATION）
+范围       仅治理 checkstyle suppressions 外部 DTD 联网解析；改 config/checkstyle/checkstyle-suppressions.xml 1 行 PUBLIC id + 文档
+根因       suppressions DOCTYPE PUBLIC id=非标准 "-//Checkstyle//DTD Suppressions 1.2//EN" 不在 SuppressionsLoader 解析映射 -> 回退 SYSTEM URL 联网 -> 弱网超时 Connection timed out
+修复       PUBLIC id 改为官方 "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN" -> EntityResolver 命中内置 DTD、离线解析；未删 filter/文件、未降规则、未关 checkstyle、未跳 profile（仅 1 行）
+命令       mvn -Pquality validate（修复后 2 次）
+结果       BUILD SUCCESS ×2（0 Checkstyle violations；spotless 通过）；网络仍不可用 -> 证明离线解析成功（修复前同会话连续 6 次 DTD 超时 FAILURE）
+命令       mvn test
+结果       BUILD SUCCESS。NqDhHeaderNamesTest 2/2、NqDhHeaderParserTest 5/5、NqDhHeaderValidatorTest 6/6、NqFeedbackControllerWebMvcTest 25/25、NqFeedbackRateLimitWebMvcTest 3/3、NqFeedbackPayloadSizeGateTest 2/2、INT0 6+2+8=16/16；ArchUnit 全绿；无 Docker IT skip
+命令       git diff --check
+结果       无 whitespace error
+行为       未改任何 Java / header alignment / controller / 签名 / 限流 / 鉴权行为；仅 checkstyle 配置元数据
+准入决定   quality gate 离线稳定通过；header alignment close review 环境性阻断 UNBLOCKED；本轮不直接 CLOSED。下一步 DH-NQ-HEADER-ALIGNMENT-CLOSE-REVIEW-RERUN
+```
+
 ## 33. 2026-06-15 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3 验收记录（Tenant/Request/Trace binding 一致性）
 
 ```text
