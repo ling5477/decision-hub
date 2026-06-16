@@ -1301,6 +1301,24 @@ canonical  RFC3339 / ISO-8601 UTC Z（例 2026-06-15T12:34:56Z）；拒绝 epoch
 准入决定   T1 DONE；Integration-1 仍 NOT STARTED。下一步 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T1-REVIEW
 ```
 
+## 39. 2026-06-15 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T2 验收记录（INT0 测试对齐 RFC3339 UTC Z）
+
+```text
+日期       2026-06-15
+阶段       DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T2（TEST_CODE_CHANGE + INTEGRATION_CONTRACT_ALIGNMENT + REGRESSION）
+范围       DH INT0 contract test/fixture timestamp 由 epoch 秒改 RFC3339 / ISO-8601 UTC Z；不改生产 Java / NQ
+修改       Int0RequestFactory（Instant.ofEpochSecond(...).toString()）、Int0ContractValidator（Instant.parse(...).getEpochSecond()，非 RFC3339→TIMESTAMP_INVALID）、DhNqIntegration0SecurityContractTest（int0T05 增量断言）；+docs
+命令       mvn test
+结果       BUILD SUCCESS。INT0 6+2+8=16/16（SecurityContractTest 8，int0T05 内含 RFC3339-Z accept + epoch 秒/毫秒 reject）；WebMvc 25 / validator 6 / parser 5 / rate limit 3 / payload gate 2；ArchUnit 全绿；无 Docker IT skip
+命令       mvn -Pquality validate
+结果       BUILD SUCCESS（0 Checkstyle violations；spotless 通过）
+命令       git diff --check
+结果       无 whitespace error
+不变量     HMAC（Int0Signing）value-based 不改、header name 不入签；±300s 窗口、TIMESTAMP_INVALID/TIMESTAMP_OUT_OF_WINDOW 语义、其它 INT0 测试均不变
+未收口     T4 NQ companion（Integration-1 前置阻断）；T3 生产 UTC-Z-only 收紧（可选）；timestamp alignment 整体 NOT COMPLETED
+准入决定   T2 DONE；Integration-1 仍 NOT STARTED。下一步 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T2-REVIEW
+```
+
 ## 33. 2026-06-15 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3 验收记录（Tenant/Request/Trace binding 一致性）
 
 ```text

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -52,14 +53,21 @@ public final class Int0RequestFactory {
     return MAPPER;
   }
 
-  /** 构造一组合法签名 header（timestamp=now，nonce 可指定），供 happy path 与负向变体使用。 */
+  /**
+   * 构造一组合法签名 header（nonce 可指定），供 happy path 与负向变体使用。
+   *
+   * <p>timestamp canonical 为 RFC3339 / ISO-8601 UTC `Z`（由 {@code nowEpochSeconds} 派生：
+   * {@code Instant.ofEpochSecond(nowEpochSeconds).toString()}，例 {@code 2026-06-15T12:34:56Z}），与 DH 生产
+   * {@code Instant.parse} 实际接受格式一致；**不再使用 epoch 秒**。{@code nowEpochSeconds} 仅作 test-only 参考时钟，
+   * 窗口比较仍以秒为单位（见 {@link Int0ContractValidator}）。
+   */
   public static Map<String, String> validHeaders(String body, long nowEpochSeconds, String nonce) {
     Map<String, String> headers = new LinkedHashMap<>();
     headers.put(Int0Contract.H_SOURCE, Int0Contract.FAKE_SOURCE);
     headers.put(Int0Contract.H_TENANT, Int0Contract.FAKE_TENANT);
     headers.put(Int0Contract.H_REQUEST_ID, "req-int0-0001");
     headers.put(Int0Contract.H_TRACE_ID, "trace-int0-0001");
-    headers.put(Int0Contract.H_TIMESTAMP, Long.toString(nowEpochSeconds));
+    headers.put(Int0Contract.H_TIMESTAMP, Instant.ofEpochSecond(nowEpochSeconds).toString());
     headers.put(Int0Contract.H_NONCE, nonce);
     headers.put(Int0Contract.H_CONTENT_TYPE, Int0Contract.CONTENT_TYPE_JSON);
     String signature =

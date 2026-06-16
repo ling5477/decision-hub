@@ -2,6 +2,7 @@ package com.guidinglight.decisionhub.integration0.support;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -99,15 +100,16 @@ public final class Int0ContractValidator {
               "PAYLOAD_TOO_LARGE"));
     }
 
-    // timestamp 窗口（401）
-    long ts;
+    // timestamp 窗口（401）：canonical = RFC3339 / ISO-8601 UTC `Z`（与 DH 生产 Instant.parse 一致）。
+    // epoch 秒/毫秒等非 RFC3339 字符串 -> Instant.parse 抛 RuntimeException -> TIMESTAMP_INVALID。窗口比较仍以秒为单位。
+    final long ts;
     try {
-      ts = Long.parseLong(headers.get(Int0Contract.H_TIMESTAMP));
-    } catch (NumberFormatException ex) {
+      ts = Instant.parse(headers.get(Int0Contract.H_TIMESTAMP)).getEpochSecond();
+    } catch (RuntimeException ex) {
       return Int0ValidationResult.reject(
           401,
           "TIMESTAMP_INVALID",
-          List.of("timestamp not numeric"),
+          List.of("timestamp not RFC3339/ISO-8601 UTC Z"),
           Int0AuditEvent.rejected(
               Int0AuditEvent.REJECTED, source, tenant, requestId, traceId, "TIMESTAMP_INVALID"));
     }

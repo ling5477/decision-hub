@@ -2866,3 +2866,31 @@ timestamp format alignment PLAN-only / NOT STARTED；Integration-1 仍 NOT START
 
 ### 准入
 T1 docs 收口 DONE；timestamp alignment 整体 NOT COMPLETED（T2 / T4 待办）；Integration-1 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T1-REVIEW`，通过后 T2。
+
+## 2026-06-15 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T2（INT0 测试对齐 RFC3339 UTC Z）
+
+### 范围
+只对齐 DH INT0 contract test/fixture 的 `X-NQ-DH-Timestamp`：epoch 秒 → RFC3339 / ISO-8601 UTC `Z`，使 INT0 与 DH 生产 `Instant.parse` 接受格式一致。不改 Java 生产代码 / NQ；不启动 Integration-1。
+
+### 修改文件（test-only + docs）
+- `dh-domain/.../integration0/support/Int0RequestFactory.java`：`H_TIMESTAMP` 由 `Long.toString(nowEpochSeconds)` → `Instant.ofEpochSecond(nowEpochSeconds).toString()`（RFC3339 UTC `Z`）；javadoc 更新；新增 `import java.time.Instant`。
+- `dh-domain/.../integration0/support/Int0ContractValidator.java`：timestamp 解析由 `Long.parseLong` → `Instant.parse(...).getEpochSecond()`；非 RFC3339（含 epoch 秒/毫秒）→ `RuntimeException` → `TIMESTAMP_INVALID`（401）；窗口比较仍以秒为单位、保持 ±300s 与 `TIMESTAMP_OUT_OF_WINDOW`；新增 `import java.time.Instant`。
+- `dh-domain/.../integration0/DhNqIntegration0SecurityContractTest.java`：`int0T05_timestampWindow` 内补断言（方法数不变）：canonical timestamp 以 `Z` 结尾；epoch 秒字符串 → 401 `TIMESTAMP_INVALID`；epoch 毫秒字符串 → 401 `TIMESTAMP_INVALID`。
+- docs：`DH_NQ_TIMESTAMP_FORMAT_ALIGNMENT_PLAN.md`（T2 标 DONE、状态/§8 更新）、`README.md`、`TESTING.md`（§39）、`WORKLOG.md`（本条目）。
+- 无生产 Java / NQ 改动。
+
+### 不变量
+- HMAC（`Int0Signing`）仍 value-based、header name 不入签；timestamp 以其字符串值（现 RFC3339）参与 canonical 签名，签名结构不变。
+- header name / requestId / traceId / nonce / tenant / payload / 禁止能力测试 / 禁止字段测试 均未改。
+- INT0-T05 语义保持：窗口内通过、过去/未来超窗拒绝（401）；新增格式拒绝为同一 T05 的增量断言。
+
+### 验证
+- `mvn test`：BUILD SUCCESS。INT0 DhNqIntegration0* 6+2+8=16/16（SecurityContractTest 8，int0T05 增量断言通过）；NqFeedbackControllerWebMvcTest 25 / NqDhHeaderValidatorTest 6 / NqDhHeaderParserTest 5 / NqFeedbackRateLimitWebMvcTest 3 / NqFeedbackPayloadSizeGateTest 2；ArchUnit 全绿；无 Docker：JDBC 持久化 IT / PostgresContainerSmokeTest 按 disabledWithoutDocker skip。
+- `mvn -Pquality validate`：BUILD SUCCESS（0 Checkstyle / spotless 通过）。
+- `git diff --check`：无 whitespace error。
+
+### 边界确认
+未改 NQ；未改 Java 生产代码；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未处理 T3 生产收紧 / T4 NQ companion / header 命名 stale / datasource 弱口令 / wrapper / nonce-burn race；未读取真实密钥。未把 timestamp alignment 写成 CLOSED、未把 Integration-1 / Runtime 写成 started、未把 DH 写成 integrated、未把 LIVE 写成 enabled。
+
+### 准入
+T2 DONE；timestamp alignment 整体 NOT COMPLETED（T4 NQ companion 待办，Integration-1 前置阻断；T3 可选）；Integration-1 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T2-REVIEW`。

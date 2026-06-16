@@ -123,6 +123,31 @@ class DhNqIntegration0SecurityContractTest {
     Int0ValidationResult futureResult = validate(payload, future, checkNow, new Int0NonceStore());
     assertFalse(futureResult.accepted());
     assertEquals(401, futureResult.statusCode());
+
+    // canonical timestamp 必须是 RFC3339 / ISO-8601 UTC `Z`（与 DH 生产 Instant.parse 一致）。
+    assertTrue(
+        inWindow.get(Int0Contract.H_TIMESTAMP).endsWith("Z"),
+        "INT0 canonical timestamp must be RFC3339 UTC Z");
+
+    // epoch 秒字符串（旧格式）必须被拒：非 RFC3339 -> 401 TIMESTAMP_INVALID（timestamp 校验先于签名）。
+    Map<String, String> epochSeconds =
+        new LinkedHashMap<>(Int0RequestFactory.validHeaders(body, checkNow, "nonce-int0-t05d"));
+    epochSeconds.put(Int0Contract.H_TIMESTAMP, Long.toString(checkNow));
+    Int0ValidationResult epochSecondsResult =
+        validate(payload, epochSeconds, checkNow, new Int0NonceStore());
+    assertFalse(epochSecondsResult.accepted(), "epoch seconds timestamp must be rejected");
+    assertEquals(401, epochSecondsResult.statusCode());
+    assertEquals("TIMESTAMP_INVALID", epochSecondsResult.errorCategory());
+
+    // epoch 毫秒字符串必须被拒：非 RFC3339 -> 401 TIMESTAMP_INVALID。
+    Map<String, String> epochMillis =
+        new LinkedHashMap<>(Int0RequestFactory.validHeaders(body, checkNow, "nonce-int0-t05e"));
+    epochMillis.put(Int0Contract.H_TIMESTAMP, Long.toString(checkNow * 1000L));
+    Int0ValidationResult epochMillisResult =
+        validate(payload, epochMillis, checkNow, new Int0NonceStore());
+    assertFalse(epochMillisResult.accepted(), "epoch milliseconds timestamp must be rejected");
+    assertEquals(401, epochMillisResult.statusCode());
+    assertEquals("TIMESTAMP_INVALID", epochMillisResult.errorCategory());
   }
 
   /**
