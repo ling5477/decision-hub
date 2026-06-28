@@ -1,5 +1,102 @@
 # Decision Hub Worklog
 
+## 2026-06-28 DH-CODE-REALITY-AUDIT-FIX-PACK
+
+关闭 code reality audit 中阻断 GateK-PLAN / Integration-1-PLAN 的两个 P1，并在同域处理 P2/P3。
+
+### 修改文件
+
+```text
+dh-api/src/main/java/com/guidinglight/decisionhub/api/security/DhApiAuthenticationFilter.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/legacy/run/RunController.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/IdempotencyFilter.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/agent/feedback/IngestionErrorCode.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/agent/feedback/impl/DefaultNqFeedbackContractValidator.java
+dh-api/src/test/java/com/guidinglight/decisionhub/api/legacy/run/LegacyRunControllerSecurityWebMvcTest.java
+dh-api/src/test/java/com/guidinglight/decisionhub/api/IdempotencyFilterSecurityTest.java
+dh-api/src/test/java/com/guidinglight/decisionhub/api/feedback/NqFeedbackControllerWebMvcTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/agent/feedback/NqFeedbackContractValidationTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/agent/feedback/NqFeedbackIdempotencyTest.java
+docs/current/API.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+```
+
+### 实现要点
+
+```text
+P1-1 /legacy/runs:
+  - DhApiAuthenticationFilter 保护 /legacy/runs 与 /legacy/runs/**。
+  - RunController.create 从 AuthenticatedRequest.requireTenantId 读取认证 tenant。
+  - RunController.get 校验 run tenant 与认证 tenant 一致，不再允许匿名读取。
+
+P1-2 NQ feedback validator:
+  - production DefaultNqFeedbackContractValidator 内置 INT0 frozen forbidden fields / capabilities。
+  - 递归扫描 payload field name、字符串 capability value，并解析 rawPayloadJson 中的 JSON 字符串继续扫描。
+  - 命中后返回 FORBIDDEN_FIELD / FORBIDDEN_CAPABILITY，ingestion service 不保存 envelope、不派发 handler。
+
+P2-1 IdempotencyFilter:
+  - filter 顺序从 HIGHEST_PRECEDENCE+5 调整为 +30，位于 DhApiAuthenticationFilter 之后。
+  - 幂等 key tenant 只取认证 request attribute；未认证请求不写 synthetic/default tenant key。
+
+P3-1 API.md:
+  - Current stage / Next stage 更新为 fix pack / close。
+  - 明确 Integration-0 CLOSED / ACCEPTED、header CLOSED、timestamp CLOSED / ACCEPTED、
+    code reality audit DONE、GateK-PLAN blocked by this fix pack、Integration-1/runtime NOT STARTED、LIVE DISABLED。
+```
+
+### 测试覆盖
+
+```text
+LegacyRunControllerSecurityWebMvcTest:
+  - anonymous POST /legacy/runs -> 401，未触达 RunService。
+  - anonymous GET /legacy/runs/{runId} -> 401，未触达 RunService。
+  - authenticated POST 使用 tenant-a，不再是 t-default。
+  - authenticated GET 跨 tenant -> 403；同 tenant -> 200。
+
+IdempotencyFilterSecurityTest:
+  - IdempotencyFilter order > DhApiAuthenticationFilter order。
+  - POST + Idempotency-Key 使用认证 tenant。
+  - 未认证请求不写 t-default / synthetic tenant key。
+
+NqFeedbackContractValidationTest / NqFeedbackIdempotencyTest / NqFeedbackControllerWebMvcTest:
+  - nested forbidden field reject -> FORBIDDEN_FIELD。
+  - nested forbidden capability reject -> FORBIDDEN_CAPABILITY。
+  - valid payload still accepted。
+  - signed controller request with forbidden payload -> 400 FORBIDDEN_FIELD，未保存 envelope，未路由 handler。
+  - INT0 DhNqIntegration0*Test 16/16 回归通过。
+```
+
+### 验证记录
+
+```text
+Focused:
+  mvn "-Dtest=LegacyRunControllerSecurityWebMvcTest,IdempotencyFilterSecurityTest,NqFeedbackControllerWebMvcTest,NqFeedbackContractValidationTest,NqFeedbackIdempotencyTest,DhNqIntegration0*Test" "-Dsurefire.failIfNoSpecifiedTests=false" test
+  BUILD SUCCESS；34 tests passed；INT0 16/16 passed。
+
+Full:
+  git status --short
+    仅本 fix pack 允许范围内文件变更；新增 legacy/idempotency 回归测试文件。
+  git diff --check
+    exit code 0；仅 LF/CRLF 提示，无 whitespace error。
+  git diff --stat
+    tracked diff 11 files changed, 558 insertions(+), 28 deletions(-)；另有 2 个新测试文件未计入 tracked stat。
+  mvn test
+    BUILD SUCCESS；Surefire reports 汇总 307 tests / 0 failures / 0 errors / 4 skipped。
+    Skipped 为 Docker/Testcontainers 环境项（JdbcNonceReplayGuardPersistenceTest 3 + PostgresContainerSmokeTest 1）。
+  mvn -Pquality validate
+    BUILD SUCCESS；checkstyle 0 violations；spotless check passed。
+```
+
+### 边界确认
+
+```text
+未修改 NQ 仓库；未新增 API；未新增 migration；未做真实 HTTP；未做真实 NQ 调用；
+未做真实交易所调用；未新增 RealClient / real provider；未接 AI / LangGraph / LLM；
+未启动 Integration-1；未开启 LIVE；未读取或输出真实密钥、token、cookie、API secret、passphrase。
+未处理 DecisionOrchestrator；未处理完整 audit/replay 生产模型；未处理多实例集中式 rate limiter。
+```
+
 ## 2026-06-12 DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-1（replay nonce persistence）
 
 实现 P1-4 三项残留中的第 3 项 **replay nonce persistence**（PostgreSQL-backed），不实现 rate limit、不实现 memory cap、不做 header alignment、不启动 Integration-1、不做真实 NQ 联调。

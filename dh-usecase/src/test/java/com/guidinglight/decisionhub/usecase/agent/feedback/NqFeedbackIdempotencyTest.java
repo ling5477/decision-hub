@@ -115,6 +115,34 @@ class NqFeedbackIdempotencyTest {
     assertTrue(feedbackRepo.findEnvelopeByEventId("e-bad").isEmpty());
   }
 
+  @Test
+  void forbiddenPayloadDoesNotPersistEnvelopeOrDispatchHandler() {
+    final ResearchRunRepository runRepo = B2TestFixtures.repoWithRun(TRACE);
+    final NqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
+    final AtomicInteger handlerCalls = new AtomicInteger(0);
+    final NqFeedbackEventTypeRouter router = (envelope, tenantId) -> handlerCalls.incrementAndGet();
+    final NqFeedbackContractValidator validator =
+        new DefaultNqFeedbackContractValidator(runRepo, new ObjectMapper());
+    final NqFeedbackIngestionService service =
+        new DefaultNqFeedbackIngestionService(validator, feedbackRepo, router);
+
+    final IngestionCommand forbidden =
+        B2TestFixtures.commandWith(
+            B2TestFixtures.legalCommand(
+                "e-forbidden-store", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE),
+            "payloadJson",
+            "{\"paperRunId\":\"pr-1\",\"candidateId\":\"c-1\",\"strategyName\":\"S1\","
+                + "\"requestedBy\":\"alice\",\"createdAt\":\"2026-05-25T08:00:00Z\","
+                + "\"rawPayloadJson\":\"{\\\"apiSecret\\\":\\\"redacted\\\"}\"}");
+
+    final IngestionResult r = service.ingest(forbidden);
+
+    assertEquals(IngestionOutcome.REJECTED, r.getOutcome());
+    assertEquals(IngestionErrorCode.FORBIDDEN_FIELD, r.getErrorCode());
+    assertEquals(0, handlerCalls.get(), "forbidden payload must not dispatch handler");
+    assertTrue(feedbackRepo.findEnvelopeByEventId("e-forbidden-store").isEmpty());
+  }
+
   /** 计数 handler，断言重放时不重复调用。 */
   private static final class CountingHandler implements NqFeedbackEventHandler {
     private final NqFeedbackEventType type;

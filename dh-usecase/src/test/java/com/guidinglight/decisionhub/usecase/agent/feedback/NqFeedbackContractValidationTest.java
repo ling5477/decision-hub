@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEventType;
 import com.guidinglight.decisionhub.usecase.agent.ResearchRunRepository;
 import com.guidinglight.decisionhub.usecase.agent.feedback.impl.DefaultNqFeedbackContractValidator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -114,5 +116,61 @@ class NqFeedbackContractValidationTest {
     final ValidationResult r = v.validate(mutated);
     assertFalse(r.isValid());
     assertEquals(IngestionErrorCode.INVALID_SCHEMA, r.getErrorCode());
+  }
+
+  @Test
+  void nestedForbiddenField_returnsForbiddenField() {
+    final NqFeedbackContractValidator v = newValidator();
+    final IngestionCommand base =
+        B2TestFixtures.legalCommand("e-forbidden-field", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE);
+    final Map<String, Object> payload = legalPaperRunCreatedPayload();
+    payload.put("rawPayloadJson", B2TestFixtures.toJson(Map.of("nested", Map.of("apiSecret", "redacted"))));
+
+    final ValidationResult r =
+        v.validate(B2TestFixtures.commandWith(base, "payloadJson", B2TestFixtures.toJson(payload)));
+
+    assertFalse(r.isValid());
+    assertEquals(IngestionErrorCode.FORBIDDEN_FIELD, r.getErrorCode());
+  }
+
+  @Test
+  void nestedForbiddenCapability_returnsForbiddenCapability() {
+    final NqFeedbackContractValidator v = newValidator();
+    final IngestionCommand base =
+        B2TestFixtures.legalCommand(
+            "e-forbidden-capability", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE);
+    final Map<String, Object> payload = legalPaperRunCreatedPayload();
+    payload.put("capabilityPlan", Map.of("nextAction", "placeOrder"));
+
+    final ValidationResult r =
+        v.validate(B2TestFixtures.commandWith(base, "payloadJson", B2TestFixtures.toJson(payload)));
+
+    assertFalse(r.isValid());
+    assertEquals(IngestionErrorCode.FORBIDDEN_CAPABILITY, r.getErrorCode());
+  }
+
+  @Test
+  void validPayloadStillAcceptedAfterForbiddenContractHardening() {
+    final NqFeedbackContractValidator v = newValidator();
+
+    final ValidationResult r =
+        v.validate(
+            B2TestFixtures.legalCommand(
+                "e-valid-after-hardening", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE));
+
+    assertTrue(r.isValid());
+    assertNotNull(r.getEnvelope());
+  }
+
+  /** 构造 PAPER_RUN_CREATED 的合法 payload，再由单测只改一个风险字段。 */
+  private static Map<String, Object> legalPaperRunCreatedPayload() {
+    final Map<String, Object> payload = new LinkedHashMap<>();
+    payload.put("paperRunId", "pr-1");
+    payload.put("candidateId", "cand-1");
+    payload.put("strategyName", "S1");
+    payload.put("requestedBy", "alice");
+    payload.put("createdAt", "2026-05-25T08:00:00Z");
+    payload.put("rawPayloadJson", "{\"src\":\"fake\"}");
+    return payload;
   }
 }

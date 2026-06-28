@@ -1,5 +1,34 @@
 # Decision Hub Testing
 
+## 2026-06-28 DH-CODE-REALITY-AUDIT-FIX-PACK
+
+```text
+Scope:
+  - /legacy/runs 纳入 DhApiAuthenticationFilter；POST/GET 匿名访问拒绝，认证请求使用认证 tenant。
+  - production NQ feedback validator 对齐 INT0 forbidden-field / forbidden-capability 递归校验。
+  - IdempotencyFilter 调整到认证之后，只使用认证 tenant，不再写固定 t-default 幂等 key。
+  - docs/current/API.md 修正旧阶段口径。
+
+Focused regression:
+  Command:
+    mvn "-Dtest=LegacyRunControllerSecurityWebMvcTest,IdempotencyFilterSecurityTest,NqFeedbackControllerWebMvcTest,NqFeedbackContractValidationTest,NqFeedbackIdempotencyTest,DhNqIntegration0*Test" "-Dsurefire.failIfNoSpecifiedTests=false" test
+  Result:
+    BUILD SUCCESS；34 tests passed；INT0 16/16 passed。
+
+Full validation:
+  git status --short:
+    仅本 fix pack 允许范围内文件变更；新增 legacy/idempotency 回归测试文件。
+  git diff --check:
+    exit code 0；仅 LF/CRLF 提示，无 whitespace error。
+  git diff --stat:
+    tracked diff 11 files changed, 558 insertions(+), 28 deletions(-)；另有 2 个新测试文件未计入 tracked stat。
+  mvn test:
+    BUILD SUCCESS；Surefire reports 汇总 307 tests / 0 failures / 0 errors / 4 skipped。
+    Skipped 为 Docker/Testcontainers 环境项（JdbcNonceReplayGuardPersistenceTest 3 + PostgresContainerSmokeTest 1）。
+  mvn -Pquality validate:
+    BUILD SUCCESS；checkstyle 0 violations；spotless check passed。
+```
+
 ## 1. 当前状态
 
 ```text

@@ -11,6 +11,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.guidinglight.decisionhub.api.GlobalExceptionHandler;
 import com.guidinglight.decisionhub.api.security.DhApiAuthenticationFilter;
 import com.guidinglight.decisionhub.security.AuthContext;
+import com.guidinglight.decisionhub.domain.research.ResearchRun;
+import com.guidinglight.decisionhub.domain.research.ResearchRunStatus;
 import com.guidinglight.decisionhub.security.nq.HmacNqFeedbackAuthenticator;
 import com.guidinglight.decisionhub.security.nq.InMemoryNonceReplayGuard;
 import com.guidinglight.decisionhub.security.nq.InMemoryRateLimiter;
@@ -19,11 +21,16 @@ import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionCommand;
 import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionErrorCode;
 import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionResult;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionService;
+import com.guidinglight.decisionhub.usecase.agent.feedback.impl.DefaultNqFeedbackContractValidator;
+import com.guidinglight.decisionhub.usecase.agent.feedback.impl.DefaultNqFeedbackIngestionService;
+import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryNqFeedbackEventRepository;
+import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryResearchRunRepository;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -446,6 +453,45 @@ class NqFeedbackControllerWebMvcTest {
   }
 
   @Test
+  void post_signedForbiddenPayload_isRejectedByProductionValidatorAndNotPersisted() throws Exception {
+    final InMemoryResearchRunRepository runRepository = new InMemoryResearchRunRepository();
+    runRepository.save(
+        ResearchRun.rehydrate(
+            "trace-1",
+            "tenant-a",
+            "trace-1",
+            "feedback hardening",
+            Map.of(),
+            ResearchRunStatus.CREATED,
+            Instant.parse("2026-06-28T00:00:00Z"),
+            Instant.parse("2026-06-28T00:00:00Z")));
+    final InMemoryNqFeedbackEventRepository feedbackRepository =
+        new InMemoryNqFeedbackEventRepository();
+    final AtomicInteger routeCalls = new AtomicInteger(0);
+    final NqFeedbackIngestionService realService =
+        new DefaultNqFeedbackIngestionService(
+            new DefaultNqFeedbackContractValidator(runRepository, objectMapper),
+            feedbackRepository,
+            (envelope, tenantId) -> routeCalls.incrementAndGet());
+    final MockMvc realPipelineMockMvc = newMockMvc(realService);
+    final Map<String, Object> envelope = legalEnvelope("evt-forbidden-real-pipeline");
+    envelope.put("payloadJson", forbiddenPayloadJson());
+    final String body = objectMapper.writeValueAsString(envelope);
+
+    realPipelineMockMvc
+        .perform(signedPost(envelope, body, "nonce-forbidden-real-pipeline", Instant.now()))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errorCode").value("FORBIDDEN_FIELD"))
+        .andExpect(jsonPath("$.eventId").value("evt-forbidden-real-pipeline"));
+
+    org.junit.jupiter.api.Assertions.assertEquals(
+        0, routeCalls.get(), "production validator rejection must stop event routing");
+    org.junit.jupiter.api.Assertions.assertTrue(
+        feedbackRepository.findEnvelopeByEventId("evt-forbidden-real-pipeline").isEmpty(),
+        "forbidden payload must not be persisted");
+  }
+
+  @Test
   void post_beanValidationFailure_returns400FromGlobalHandler() throws Exception {
     final Map<String, Object> envelope = legalEnvelope("evt-6");
     envelope.remove("eventId");
@@ -491,6 +537,47 @@ class NqFeedbackControllerWebMvcTest {
             + "\"strategyName\":\"S1\",\"requestedBy\":\"alice\","
             + "\"createdAt\":\"2026-05-25T08:00:00Z\",\"rawPayloadJson\":\"{}\"}");
     return m;
+  }
+
+  /** 构造含 nested forbidden field 的合法 PAPER_RUN_CREATED payload。 */
+  private String forbiddenPayloadJson() throws Exception {
+    final Map<String, Object> raw = Map.of("nested", Map.of("apiSecret", "redacted"));
+    final Map<String, Object> payload = new LinkedHashMap<>();
+    payload.put("paperRunId", "pr-1");
+    payload.put("candidateId", "c-1");
+    payload.put("strategyName", "S1");
+    payload.put("requestedBy", "alice");
+    payload.put("createdAt", "2026-05-25T08:00:00Z");
+    payload.put("rawPayloadJson", objectMapper.writeValueAsString(raw));
+    return objectMapper.writeValueAsString(payload);
+  }
+
+  private MockMvc newMockMvc(final NqFeedbackIngestionService service) {
+    final HmacNqFeedbackAuthenticator authenticator =
+        new HmacNqFeedbackAuthenticator(
+            Set.of("nexus-quant"),
+            NQ_SECRET,
+            Duration.ofMinutes(5),
+            2048,
+            new InMemoryNonceReplayGuard());
+    final NqFeedbackController controller =
+        new NqFeedbackController(
+            service,
+            authenticator,
+            new InMemoryRateLimiter(60, 1000, 1000, java.time.Clock.systemUTC()));
+    final MappingJackson2HttpMessageConverter jacksonConverter =
+        new MappingJackson2HttpMessageConverter();
+    jacksonConverter.setObjectMapper(objectMapper);
+    return MockMvcBuilders.standaloneSetup(controller)
+        .setControllerAdvice(new GlobalExceptionHandler())
+        .setMessageConverters(jacksonConverter)
+        .addFilters(
+            new DhApiAuthenticationFilter(
+                token ->
+                    GOOD_TOKEN.equals(token)
+                        ? new AuthContext("user-a", "tenant-a", Set.of("DH_API"))
+                        : null))
+        .build();
   }
 
   private MockHttpServletRequestBuilder signedPost(

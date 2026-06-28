@@ -3,16 +3,27 @@
 ## 1. 当前状态
 
 ```text
-Current stage: Stage3-B1 Contract Alignment completed
-Next stage:    Stage3-B2 NQ Feedback Outbox PLAN
+Current stage: DH-CODE-REALITY-AUDIT-FIX-PACK
+Next stage:    DH-CODE-REALITY-AUDIT-FIX-PACK-CLOSE
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
 
-Stage3-B1 在该文件 info.description 内追加硬边界声明，并在 components 段保留
-NQ 端 endpoint `POST /api/ai/research/backtest-requests` 的注释占位（不新增 paths）。
-contracts/json-schema/*.schema.json 16 份维持，仅追加字段 description / examples，
-不修改 required / enum / additionalProperties 等结构语义。
+当前状态锁定：
+
+```text
+Integration-0:        CLOSED / ACCEPTED
+Header alignment:     CLOSED
+Timestamp alignment:  CLOSED / ACCEPTED
+Code reality audit:   DONE
+GateK-PLAN:           BLOCKED BY DH-CODE-REALITY-AUDIT-FIX-PACK
+Integration-1:        NOT STARTED
+Runtime integration:  NOT STARTED
+LIVE:                 DISABLED
+```
+
+OpenAPI 仍为 API 单源；本 fix pack 不新增 path、不新增 migration、不新增 RealClient / provider，
+不启动 Integration-1 runtime。
 
 ## 2. 已实现端点
 
@@ -26,12 +37,14 @@ GET  /api/ai/research-runs/{runId}/tasks             查询 run 的任务图
 GET  /api/ai/research-runs/{runId}/candidates        查询 run 下的候选列表
 GET  /api/ai/research-runs/{runId}/judge-decision    查询 run 的 JudgeDecision
 POST /api/ai/feedback/nq                             NQ -> DH 正式回流事件 ingest（Stage2-PoC-B2 落地）
-                                                     - eventId 幂等去重；首次/重放均返回 202
-                                                       + NqFeedbackAcceptedResponse（outcome=ACCEPTED|DUPLICATE）
-                                                     - 信封 / payload 校验失败返回 400
-                                                       + NqFeedbackErrorResponse
-POST /legacy/runs                                    旧链路（@Deprecated，保留 6 周）
-GET  /legacy/runs/{runId}                            旧链路（@Deprecated）
+                                                      - eventId 幂等去重；首次/重放均返回 202
+                                                        + NqFeedbackAcceptedResponse（outcome=ACCEPTED|DUPLICATE）
+                                                      - 信封 / payload 校验失败返回 400
+                                                        + NqFeedbackErrorResponse
+                                                      - forbidden field / forbidden capability 命中返回 400
+                                                        + errorCode=FORBIDDEN_FIELD|FORBIDDEN_CAPABILITY
+POST /legacy/runs                                    旧链路（@Deprecated，必须认证，不允许匿名）
+GET  /legacy/runs/{runId}                            旧链路（@Deprecated，必须认证且 tenant 匹配）
 ```
 
 ## 3. Stage2-PoC-VERIFY 计划上线端点
@@ -87,6 +100,9 @@ BacktestRequest
 PaperTrialRequest
 ReleaseReviewRequest
 ```
+
+以上仅为 historical / deferred 方向，不代表当前已启动 runtime integration；当前仍禁止真实 HTTP、真实 NQ
+调用、NQ mutation、RealClient、real provider 和 LIVE。
 
 NQ -> DH：
 

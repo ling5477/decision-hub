@@ -1,6 +1,7 @@
 package com.guidinglight.decisionhub.api.legacy.run;
 
 import com.guidinglight.decisionhub.api.TraceIdFilter;
+import com.guidinglight.decisionhub.api.security.AuthenticatedRequest;
 import com.guidinglight.decisionhub.common.api.ApiResponse;
 import com.guidinglight.decisionhub.domain.run.Run;
 import com.guidinglight.decisionhub.usecase.run.RunService;
@@ -17,7 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
  * Legacy 多模型平台 Run REST 入口。
  *
  * <p>Stage1-CLOSE：从 {@code /runs} 改路径到 {@code /legacy/runs}，避免与新链路 {@code /api/ai/research-runs}
- * 混淆；同时整体标记 @Deprecated，等 Stage2 接通真实 NQ 事件后再删除。
+ * 混淆；同时整体标记 @Deprecated。DH-CODE-REALITY-AUDIT-FIX-PACK 后，该 legacy 入口仍必须走 DH API
+ * 认证上下文，禁止匿名访问，也禁止继续使用固定 {@code t-default} 作为生产入口租户。
  *
  * @deprecated Stage1-CLOSE：旧多模型平台入口；新链路使用
  *     {@link com.guidinglight.decisionhub.api.research.ResearchRunController}。
@@ -37,7 +39,7 @@ public class RunController {
   @PostMapping
   public ApiResponse<RunView> create(
       @Valid @RequestBody final CreateRunRequest req, final HttpServletRequest httpReq) {
-    final String tenantId = "t-default";
+    final String tenantId = AuthenticatedRequest.requireTenantId(httpReq);
     final Run run = runService.create(tenantId, req.getQuestion(), req.getConfigSnapshot());
     final String traceId = (String) httpReq.getAttribute(TraceIdFilter.TRACE_HEADER);
     return ApiResponse.ok(toView(run), traceId);
@@ -46,7 +48,9 @@ public class RunController {
   @GetMapping("/{runId}")
   public ApiResponse<RunView> get(
       @PathVariable final String runId, final HttpServletRequest httpReq) {
+    final String tenantId = AuthenticatedRequest.requireTenantId(httpReq);
     final Run run = runService.get(runId);
+    AuthenticatedRequest.requireTenantMatch(tenantId, run.getTenantId());
     final String traceId = (String) httpReq.getAttribute(TraceIdFilter.TRACE_HEADER);
     return ApiResponse.ok(toView(run), traceId);
   }
