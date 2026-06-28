@@ -4,10 +4,10 @@
 > 类型：INTEGRATION_CONTRACT_PLANNING + SECURITY_REVIEW + DOCUMENTATION
 > 日期：2026-06-15
 > 仓库：Decision Hub（DH）；配套 NQ 侧只读核查（本会话 NQ 仓库不可达，见 §2.5）
-> 状态：**PLAN ACCEPTED；T1 docs ACCEPTED；T2 INT0 测试对齐 DONE（2026-06-15，待 T2-REVIEW）**；timestamp alignment 整体 **NOT COMPLETED**（T4 NQ companion 待办、Integration-1 前置阻断；T3 生产收紧可选）；未改运行代码；Integration-1 NOT STARTED
+> 状态：**PLAN ACCEPTED；T1 docs ACCEPTED；T2 INT0 测试对齐 DONE；T3 production / INT0 UTC-Z-only 收紧 IMPLEMENTED（2026-06-28，pending review）**；timestamp alignment 整体 **NOT COMPLETED / NOT CLOSED**（T4 NQ companion 与 close review 待办、Integration-1 前置阻断）；Integration-1 NOT STARTED
 > 前置：DH-NQ header alignment = **CLOSED**（canonical `X-NQ-DH-*`）。本方案处理 header alignment 收尾时显式另列的 timestamp 格式分歧。
 
-本文件**只做对齐方案设计**：timestamp 格式 canonical 化的实施分批进行（`DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-*`），本轮不实施。
+本文件记录 timestamp 格式 canonical 化的分批状态（`DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-*`）。截至 2026-06-28，T3 已在 DH production / DH INT0 侧实现 UTC `Z` 强制并等待 review；整体仍未 CLOSED。
 
 ---
 
@@ -128,14 +128,17 @@ DH CONTRACT_FREEZE  仅 ±300s 窗口（格式中立）
 - 已做：`Int0RequestFactory.validHeaders` 把 `X-NQ-DH-Timestamp` 从 `Long.toString(epochSeconds)` 改为 `Instant.ofEpochSecond(...).toString()`（RFC3339 UTC `Z`）；`Int0ContractValidator` 把 `Long.parseLong` 改为 `Instant.parse(...).getEpochSecond()`（非 RFC3339 → `RuntimeException` → `TIMESTAMP_INVALID`），窗口比较仍以秒为单位、保持 ±300s 与 `TIMESTAMP_INVALID` / `TIMESTAMP_OUT_OF_WINDOW` 语义；`INT0-T05` 内补 RFC3339-`Z` accept + epoch 秒/毫秒 reject 断言（方法数不变，INT0 16/16）。
 - 未改生产 / NQ / header name / 其它 INT0 语义；HMAC（`Int0Signing`）仍 value-based。验收（实跑）：`mvn test` + `mvn -Pquality validate` BUILD SUCCESS；INT0 6+2+8=16/16。
 
-### Batch T3 —（可选，gated）生产 parseTimestamp 收紧
-- 仅当需要时：把 `parseTimestamp` 收紧为「要求 UTC `Z` 规范形、拒绝带数字偏移」，并加显式 WebMvc 测试固化 canonical timestamp 形（P2-2）。属生产行为微调，需单独 review/gate；**不在本规划默认范围**，列为可选。
-- 禁止：改签名 value 集；改窗口语义。
+### Batch T3 — production / INT0 UTC-Z-only 收紧（**IMPLEMENTED，2026-06-28，pending review**）
+- 已做：`HmacNqFeedbackAuthenticator.parseTimestamp` 在 `Instant.parse` 前显式要求 `timestampHeader.endsWith("Z")`，因此 epoch 秒、epoch 毫秒和 `2026-06-15T20:34:56+08:00` 等数字时区偏移均 fail-closed，错误契约沿用 `TIMESTAMP_EXPIRED`（401），不新增错误码。
+- 已做：`Int0ContractValidator` 使用同一最小规则（非空、必须以 UTC `Z` 结尾，再 `Instant.parse`），`+08:00` 与 epoch 秒/毫秒均返回 `TIMESTAMP_INVALID`（401）。
+- 测试：`HmacNqFeedbackAuthenticatorTest` 覆盖 RFC3339 UTC `Z` accept、epoch seconds reject、epoch milliseconds reject、`+08:00` reject、过去/未来超出 ±300s reject；`DhNqIntegration0SecurityContractTest` 的 INT0-T05 覆盖 RFC3339 UTC `Z` accept、epoch seconds reject、epoch milliseconds reject、`+08:00` reject、过去/未来超窗 reject。
+- 保持：HMAC signatureMaterial value-based，header name 不入签；验签仍使用 `timestamp.toString()` 归一化 UTC `Z` 值；nonce / source / tenant / requestId / traceId / payload 语义与 ±300s replay window 不变。
+- 禁止项确认：未改 NQ；未新增 API / migration；未真实 HTTP；未新增 RealClient / real provider；未启动 Integration-1；未开启 LIVE；未处理 Maven wrapper / datasource 默认弱口令 / nonce-burn race。
 
 ### Batch T4 — NQ 侧 companion（独立 NQ-scoped 任务）
 - 跨仓核对 NQ `NQ_DH_INTEGRATION0_*` / NQ INT0 fixture timestamp 线缆格式，并对齐到同一 canonical RFC3339；**本轮不跨仓写 NQ**（保持仓库边界）。解决 P1-3。
 
-> 顺序建议：T1 → T2 →（NQ）T4 →（可选）T3。T1/T2 即可消除 DH 内三方分歧并使「契约测试覆盖生产实际格式」。
+> 当前顺序：T1 → T2 → T3 已在 DH 侧落地；T4 NQ companion 与 timestamp close review 仍待办。T3 通过 review 后仍不放开 runtime integration。
 
 ---
 
@@ -150,7 +153,7 @@ DH CONTRACT_FREEZE  仅 ±300s 窗口（格式中立）
 6. 是否需要兼容期：否。NQ 无真实发送方；属契约澄清 + 测试/文档对齐，非运行期双格式接收（不做 dual-format parsing）。
 7. 是否改 HMAC signatureMaterial：否。维持 value-based、不含 header name；canonical=RFC3339 即维持现状。
 8. 是否影响 nonce replay / ±300s / requestId / traceId：不影响。仅 timestamp 解析输入表示；窗口、replay、binding 全保持。
-9. 后续分批：T1 docs 收口 -> T2 INT0 测试对齐 ->（NQ）T4 companion ->（可选 gated）T3 生产 parseTimestamp 收紧。
+9. 后续分批：T1 docs 收口 -> T2 INT0 测试对齐 -> T3 production/INT0 UTC-Z-only 收紧（pending review）->（NQ）T4 companion -> close review。
 10. 是否仍禁止 Integration-1 runtime：是。Integration-1 NOT STARTED；timestamp 对齐通过也不放开 runtime。
 ```
 
@@ -160,6 +163,6 @@ DH CONTRACT_FREEZE  仅 ±300s 窗口（格式中立）
 
 边界确认（本 PLAN 轮，2026-06-15）：未修改 NQ 仓库；未修改 Java 生产代码；未修改测试；未新增 API；未新增 migration；未做真实 HTTP；未做真实 NQ 调用；未新增 RealClient；未新增真实 Provider；未做真实交易所调用；未接 AI；未开启 LIVE；未启动 Integration-1；未处理 Maven wrapper / datasource 弱口令 / nonce-burn race；未读取或输出真实密钥。本轮仅新增本规划文档 + 更新状态文档。
 
-Integration-1 decision：**Integration-1 仍 NOT STARTED**。timestamp 对齐推进也不代表允许 runtime integration；DH NOT INTEGRATED / Runtime integration NOT STARTED / LIVE DISABLED。timestamp format alignment **整体 NOT COMPLETED**：PLAN ACCEPTED；**T1 docs ACCEPTED；T2 INT0 测试对齐 DONE（2026-06-15）**；T4 NQ companion（Integration-1 前置阻断）待办、（可选）T3 生产收紧 待办。
+Integration-1 decision：**Integration-1 仍 NOT STARTED**。timestamp 对齐推进也不代表允许 runtime integration；DH NOT INTEGRATED / Runtime integration NOT STARTED / LIVE DISABLED。timestamp format alignment **整体 NOT COMPLETED / NOT CLOSED**：PLAN ACCEPTED；**T1 docs ACCEPTED；T2 INT0 测试对齐 DONE；T3 production / INT0 UTC-Z-only 收紧 IMPLEMENTED（pending review）**；T4 NQ companion（Integration-1 前置阻断）与 close review 待办。
 
-Next concrete action：`DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T2-REVIEW`；通过后 NQ-scoped `T4`（NQ companion，Integration-1 前置阻断）；（可选 gated）`T3` 生产 `parseTimestamp` 收紧。
+Next concrete action：`DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T3-REVIEW`；通过后仍需 NQ-scoped `T4`（NQ companion，Integration-1 前置阻断）与 timestamp close review；不得直接进入 Integration-1 runtime。

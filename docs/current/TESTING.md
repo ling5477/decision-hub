@@ -1342,3 +1342,29 @@ binding    canonical Tenant-Id != auth tenant / Request-Id != body requestId / T
 边界       未改 NQ；未恢复 legacy；未双接收；未新增 API / migration；未真实 HTTP / 真实 NQ / 真实交易所；未新增 RealClient / 真实 Provider；未接 AI；未开启 LIVE；未启动 Integration-1；未读取真实密钥
 准入决定   header alignment 整体仍 NOT COMPLETED（仅余 docs/fixtures 收口 Batch 4）；Integration-1 仍 NOT STARTED。下一步 DH-NQ-HEADER-ALIGNMENT-IMPL-BATCH-3-REVIEW，通过后 Batch 4
 ```
+
+## 40. 2026-06-28 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T3 验收记录（production / INT0 UTC-Z-only 收紧）
+
+```text
+日期       2026-06-28
+阶段       DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T3（SECURITY_FIX + CONTRACT_ALIGNMENT + TEST_CODE_CHANGE + REGRESSION_VALIDATION）
+范围       DH production parseTimestamp + DH INT0 validator 收紧为 RFC3339 / ISO-8601 UTC `Z`；不改 NQ / 不真实 HTTP / 不启动 Integration-1
+修改（main）HmacNqFeedbackAuthenticator：parseTimestamp 在 Instant.parse 前要求 timestampHeader.endsWith("Z")；epoch 秒/毫秒与 +08:00 fail-closed，非法格式沿用 TIMESTAMP_EXPIRED（401）
+修改（test）HmacNqFeedbackAuthenticatorTest：覆盖 RFC3339 UTC Z accept、epoch seconds reject、epoch milliseconds reject、+08:00 reject、过去/未来超出 ±300s reject
+修改（INT0）Int0ContractValidator：同步要求 UTC Z 后再 Instant.parse；DhNqIntegration0SecurityContractTest INT0-T05 补 +08:00 reject（签名按 offset header 重算）
+命令       mvn -pl dh-domain,dh-security -am "-Dtest=HmacNqFeedbackAuthenticatorTest,DhNqIntegration0SecurityContractTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
+结果       BUILD SUCCESS；DhNqIntegration0SecurityContractTest 8/8；HmacNqFeedbackAuthenticatorTest 8/8
+命令       git status --short
+结果       仅本轮代码/测试/docs 变更；补 TESTING 前为 8 个文件
+命令       git diff --check
+结果       exit 0；仅 LF/CRLF warning，无 whitespace error
+命令       git diff --stat
+结果       补 TESTING 前 8 files changed, 146 insertions(+), 18 deletions(-)
+命令       mvn test
+结果       BUILD SUCCESS；INT0 6+2+8=16/16，Hmac 8/8，WebMvc 25/25，parser 5/5，validator 6/6，rate limit 3/3，payload gate 2/2，ArchUnit 12/12；本机无 Docker，既有 PostgresContainerSmokeTest skip 1
+命令       mvn -Pquality validate
+结果       BUILD SUCCESS；0 Checkstyle violations；spotless 通过
+不变量     HMAC signatureMaterial value-based 不改、header name 不入签；验签仍使用 timestamp.toString() 归一化 UTC Z；±300s replay window、nonce/source/tenant/requestId/traceId/payload 语义不变
+边界       未改 NQ；未新增 API / migration；未真实 HTTP / DH-NQ 调用 / 交易所调用；未新增 RealClient / 真实 Provider；未读取凭证；未启动 Integration-1；未开启 LIVE；未处理 Maven wrapper / datasource 默认弱口令 / nonce-burn race；未引入双格式兼容或 epoch fallback
+准入决定   T3 IMPLEMENTED / PENDING REVIEW；timestamp alignment 整体 NOT COMPLETED / NOT CLOSED（T4 NQ companion 与 close review 待办）；Integration-1 / Runtime integration NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T3-REVIEW
+```

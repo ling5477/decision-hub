@@ -100,11 +100,20 @@ public final class Int0ContractValidator {
               "PAYLOAD_TOO_LARGE"));
     }
 
-    // timestamp 窗口（401）：canonical = RFC3339 / ISO-8601 UTC `Z`（与 DH 生产 Instant.parse 一致）。
-    // epoch 秒/毫秒等非 RFC3339 字符串 -> Instant.parse 抛 RuntimeException -> TIMESTAMP_INVALID。窗口比较仍以秒为单位。
+    // timestamp 窗口（401）：canonical = RFC3339 / ISO-8601 UTC `Z`。必须先拒绝数字时区偏移，
+    // 因为 Instant.parse 会把 `+08:00` 等偏移归一化为 UTC，掩盖线缆格式违规。
     final long ts;
+    String timestampHeader = headers.get(Int0Contract.H_TIMESTAMP);
+    if (isBlank(timestampHeader) || !timestampHeader.endsWith("Z")) {
+      return Int0ValidationResult.reject(
+          401,
+          "TIMESTAMP_INVALID",
+          List.of("timestamp not RFC3339/ISO-8601 UTC Z"),
+          Int0AuditEvent.rejected(
+              Int0AuditEvent.REJECTED, source, tenant, requestId, traceId, "TIMESTAMP_INVALID"));
+    }
     try {
-      ts = Instant.parse(headers.get(Int0Contract.H_TIMESTAMP)).getEpochSecond();
+      ts = Instant.parse(timestampHeader).getEpochSecond();
     } catch (RuntimeException ex) {
       return Int0ValidationResult.reject(
           401,

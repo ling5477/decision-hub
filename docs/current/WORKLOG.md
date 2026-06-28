@@ -2894,3 +2894,32 @@ T1 docs 收口 DONE；timestamp alignment 整体 NOT COMPLETED（T2 / T4 待办�
 
 ### 准入
 T2 DONE；timestamp alignment 整体 NOT COMPLETED（T4 NQ companion 待办，Integration-1 前置阻断；T3 可选）；Integration-1 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T2-REVIEW`。
+
+## 2026-06-28 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T3（production / INT0 UTC-Z-only 收紧）
+
+### 范围
+将 DH production `X-NQ-DH-Timestamp` 从 `Instant.parse` 可接受任意 RFC3339 offset 收紧为契约要求的 RFC3339 / ISO-8601 UTC `Z`。同步收紧 DH INT0 validator。只做 DH 本地代码、测试与状态文档；不改 NQ、不真实联调、不启动 Integration-1。
+
+### 修改文件
+- `dh-security/src/main/java/.../HmacNqFeedbackAuthenticator.java`：`parseTimestamp` 在 `Instant.parse` 前显式要求 `timestampHeader.endsWith("Z")`；非法格式仍返回 `TIMESTAMP_EXPIRED`（401），不新增错误码。
+- `dh-security/src/test/java/.../HmacNqFeedbackAuthenticatorTest.java`：补 RFC3339 UTC `Z` accept（既有成功路径）、epoch seconds reject、epoch milliseconds reject、`+08:00` reject、过去/未来超出 ±300s reject。
+- `dh-domain/src/test/java/.../integration0/support/Int0ContractValidator.java`：INT0 timestamp 校验同步要求 UTC `Z`，拒绝数字时区偏移；非法格式仍为 `TIMESTAMP_INVALID`（401）。
+- `dh-domain/src/test/java/.../integration0/DhNqIntegration0SecurityContractTest.java`：INT0-T05 补 `+08:00` reject，签名按 offset header 重算，证明旧行为会被接受而新行为 fail-closed。
+- docs：`DH_NQ_TIMESTAMP_FORMAT_ALIGNMENT_PLAN.md`、`DH_NQ_INTEGRATION0_SECURITY_POLICY.md`、`README.md`、`TESTING.md`、`WORKLOG.md`。
+
+### 不变量
+HMAC signatureMaterial 仍 value-based、header name 不入签；验签仍使用 `timestamp.toString()` 归一化 UTC `Z` 值；nonce / source / tenant / requestId / traceId / payload 语义不变；±300s replay window 不变。
+
+### 验证
+- `mvn -pl dh-domain,dh-security -am "-Dtest=HmacNqFeedbackAuthenticatorTest,DhNqIntegration0SecurityContractTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`：BUILD SUCCESS；INT0 SecurityContractTest 8/8、HmacNqFeedbackAuthenticatorTest 8/8。
+- `git status --short`：仅本轮 8 个文件变更（后续补 `TESTING.md` 后为 9 个）。
+- `git diff --check`：exit 0；仅 LF/CRLF warning，无 whitespace error。
+- `git diff --stat`：8 files changed, 146 insertions(+), 18 deletions(-)（补 `TESTING.md` 前）。
+- `mvn test`：BUILD SUCCESS；INT0 6+2+8=16/16，HmacNqFeedbackAuthenticatorTest 8/8，WebMvc 25/25，parser 5/5，validator 6/6，rate limit 3/3，payload gate 2/2，ArchUnit 12/12；本机无 Docker，既有 PostgresContainerSmokeTest skip 1。
+- `mvn -Pquality validate`：BUILD SUCCESS；0 Checkstyle violations，spotless 通过。
+
+### 边界确认
+未改 NQ；未新增 API / migration；未真实 HTTP / DH-NQ 调用 / 交易所调用；未新增 RealClient / 真实 Provider；未读取凭证；未启动 Integration-1；未开启 LIVE；未处理 Maven wrapper / datasource 默认弱口令 / nonce-burn race；未改变 HMAC signatureMaterial 字段集合；未引入双格式兼容；未接受 epoch fallback。
+
+### 准入
+T3 IMPLEMENTED / PENDING REVIEW；timestamp alignment 整体仍 NOT COMPLETED / NOT CLOSED（T4 NQ companion 与 close review 待办）；Integration-1 仍 NOT STARTED；Runtime integration NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T3-REVIEW`。

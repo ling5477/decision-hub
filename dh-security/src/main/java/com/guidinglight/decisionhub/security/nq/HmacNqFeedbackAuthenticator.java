@@ -149,8 +149,17 @@ public final class HmacNqFeedbackAuthenticator implements NqFeedbackAuthenticato
     return timestamp.isBefore(anchor.minus(maxClockSkew)) || timestamp.isAfter(anchor.plus(maxClockSkew));
   }
 
+  /**
+   * 解析 canonical timestamp。
+   *
+   * <p>Why：{@link Instant#parse(CharSequence)} 会接受带数字时区偏移的 RFC3339 文本，并归一化为 UTC `Z`。
+   * DH-NQ 契约要求线缆值本身必须是 UTC `Z` 形，避免发送方用 `+08:00` 等格式绕过契约并造成 HMAC 归一化歧义。
+   */
   private static Instant parseTimestamp(final String value) {
     if (isBlank(value)) {
+      return null;
+    }
+    if (!value.endsWith("Z")) {
       return null;
     }
     try {

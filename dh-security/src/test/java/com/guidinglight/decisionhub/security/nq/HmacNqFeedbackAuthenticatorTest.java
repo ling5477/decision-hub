@@ -49,14 +49,42 @@ final class HmacNqFeedbackAuthenticatorTest {
   }
 
   @Test
-  void expiredTimestamp_isRejected() {
+  void timestampOutsideAllowedWindow_isRejected() {
+    final HmacNqFeedbackAuthenticator authenticator = authenticator();
+    final NqFeedbackAuthRequest past =
+        signedRequest("nonce-3a", "req-3a", NOW.minus(Duration.ofMinutes(10)), "nexus-quant");
+    final NqFeedbackAuthRequest future =
+        signedRequest("nonce-3b", "req-3b", NOW.plus(Duration.ofSeconds(301)), "nexus-quant");
+
+    final NqFeedbackAuthResult pastResult = authenticator.authenticate(past);
+    final NqFeedbackAuthResult futureResult = authenticator.authenticate(future);
+
+    assertFalse(pastResult.allowed());
+    assertEquals("TIMESTAMP_EXPIRED", pastResult.reason());
+    assertFalse(futureResult.allowed());
+    assertEquals("TIMESTAMP_EXPIRED", futureResult.reason());
+  }
+
+  @Test
+  void epochTimestampFormats_areRejected() {
+    final HmacNqFeedbackAuthenticator authenticator = authenticator();
+
+    assertTimestampRejected(authenticator, Long.toString(NOW.getEpochSecond()), "nonce-7a", "req-7a");
+    assertTimestampRejected(
+        authenticator, Long.toString(NOW.toEpochMilli()), "nonce-7b", "req-7b");
+  }
+
+  @Test
+  void timestampWithNumericOffset_isRejected() {
     final HmacNqFeedbackAuthenticator authenticator = authenticator();
     final NqFeedbackAuthRequest request =
-        signedRequest("nonce-3", "req-3", NOW.minus(Duration.ofMinutes(10)), "nexus-quant");
+        signedRequestWithTimestampHeader(
+            "nonce-8", "req-8", "2026-05-26T18:00:00+08:00", NOW.toString(), "nexus-quant");
 
     final NqFeedbackAuthResult result = authenticator.authenticate(request);
 
-    assertFalse(result.allowed());
+    assertFalse(result.allowed(), "numeric timezone offset must fail closed");
+    assertEquals(401, result.status());
     assertEquals("TIMESTAMP_EXPIRED", result.reason());
   }
 
@@ -107,16 +135,50 @@ final class HmacNqFeedbackAuthenticatorTest {
 
   private static NqFeedbackAuthRequest signedRequest(
       final String nonce, final String requestId, final Instant timestamp, final String source) {
+    return signedRequestWithTimestampHeader(
+        nonce, requestId, timestamp.toString(), timestamp.toString(), source);
+  }
+
+  private static void assertTimestampRejected(
+      final HmacNqFeedbackAuthenticator authenticator,
+      final String timestampHeader,
+      final String nonce,
+      final String requestId) {
+    final NqFeedbackAuthResult result =
+        authenticator.authenticate(
+            signedRequestWithTimestampHeader(
+                nonce, requestId, timestampHeader, timestampHeader, "nexus-quant"));
+    assertFalse(result.allowed(), "timestamp must be rejected: " + timestampHeader);
+    assertEquals(401, result.status());
+    assertEquals("TIMESTAMP_EXPIRED", result.reason());
+  }
+
+  private static NqFeedbackAuthRequest signedRequestWithTimestampHeader(
+      final String nonce,
+      final String requestId,
+      final String timestampHeader,
+      final String signatureTimestamp,
+      final String source) {
     final NqFeedbackAuthRequest unsigned =
         new NqFeedbackAuthRequest(
-            source, source, timestamp.toString(), nonce, "", "evt-1", requestId, "trace-1", "{}", 128, NOW);
+            source,
+            source,
+            signatureTimestamp,
+            nonce,
+            "",
+            "evt-1",
+            requestId,
+            "trace-1",
+            "{}",
+            128,
+            NOW);
     final String signature =
         HmacNqFeedbackAuthenticator.hmacSha256Hex(
             SECRET, HmacNqFeedbackAuthenticator.signatureMaterial(unsigned));
     return new NqFeedbackAuthRequest(
         source,
         source,
-        timestamp.toString(),
+        timestampHeader,
         nonce,
         signature,
         "evt-1",

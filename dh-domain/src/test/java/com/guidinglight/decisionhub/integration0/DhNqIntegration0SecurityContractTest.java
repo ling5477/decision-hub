@@ -14,6 +14,8 @@ import com.guidinglight.decisionhub.integration0.support.Int0NonceStore;
 import com.guidinglight.decisionhub.integration0.support.Int0RequestFactory;
 import com.guidinglight.decisionhub.integration0.support.Int0Signing;
 import com.guidinglight.decisionhub.integration0.support.Int0ValidationResult;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -148,6 +150,22 @@ class DhNqIntegration0SecurityContractTest {
     assertFalse(epochMillisResult.accepted(), "epoch milliseconds timestamp must be rejected");
     assertEquals(401, epochMillisResult.statusCode());
     assertEquals("TIMESTAMP_INVALID", epochMillisResult.errorCategory());
+
+    // 数字时区偏移必须被拒：Instant.parse 可归一化 `+08:00`，所以 INT0 显式要求线缆值以 UTC `Z` 结尾。
+    Map<String, String> numericOffset =
+        new LinkedHashMap<>(Int0RequestFactory.validHeaders(body, checkNow, "nonce-int0-t05f"));
+    numericOffset.put(
+        Int0Contract.H_TIMESTAMP,
+        Instant.ofEpochSecond(checkNow).atOffset(ZoneOffset.ofHours(8)).toString());
+    numericOffset.put(
+        Int0Contract.H_SIGNATURE,
+        Int0Signing.hmacSha256Hex(
+            Int0Signing.canonical(numericOffset, body), Int0Contract.FAKE_SECRET));
+    Int0ValidationResult numericOffsetResult =
+        validate(payload, numericOffset, checkNow, new Int0NonceStore());
+    assertFalse(numericOffsetResult.accepted(), "numeric timezone offset must be rejected");
+    assertEquals(401, numericOffsetResult.statusCode());
+    assertEquals("TIMESTAMP_INVALID", numericOffsetResult.errorCategory());
   }
 
   /**
