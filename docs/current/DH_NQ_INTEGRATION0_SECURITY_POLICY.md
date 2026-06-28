@@ -45,7 +45,7 @@ Content-Type: application/json
 
 - Timestamp 格式（canonical）：**RFC3339 / ISO-8601 UTC，必须 `Z` 结尾**，例 `2026-06-15T12:34:56Z`；不接受 epoch 秒/毫秒，不接受带数字时区偏移（如 `+08:00`）。
 - Timestamp 窗口：默认 ±300 秒，超窗拒绝。
-- 实现现状（诚实声明）：DH 生产 `HmacNqFeedbackAuthenticator` 已在 `Instant.parse` 前要求 header 文本以 UTC `Z` 结尾，并以 `Instant.toString()` 归一化为 UTC `Z` 形参与验签；HMAC signatureMaterial 仍 **value-based、不含 header name**（timestamp 以归一化值入签）。DH INT0 validator 同步拒绝 epoch 秒、epoch 毫秒和数字时区偏移；NQ 侧仍待 T4 / NQ companion 当面核对，且为 **Integration-1 前置阻断**。
+- 实现现状（诚实声明）：DH 生产 `HmacNqFeedbackAuthenticator` 已在 `Instant.parse` 前要求 header 文本以 UTC `Z` 结尾，并以 `Instant.toString()` 归一化为 UTC `Z` 形参与验签；HMAC signatureMaterial 仍 **value-based、不含 header name**（timestamp 以归一化值入签）。DH INT0 validator 与 NQ INT0 companion 均同步拒绝 epoch 秒、epoch 毫秒和数字时区偏移；timestamp alignment overall 已 **CLOSED / ACCEPTED**。CLOSED 仅表示 timestamp 契约收口完成，不授权 Integration-1 runtime。
 - Nonce 防重放：`Source + Nonce + Request-Id` 在 TTL 内唯一；重放拒绝（409）。
 - Nonce TTL：≥ 2 × maxClockSkew。
 - **Integration-1 前置（DH P1-4 残留，本轮不修复）**：nonce 必须持久化或集中缓存，不能只依赖单实例内存。
@@ -102,9 +102,9 @@ full prompt / full context / raw request / raw response
 
 ## 11. 与现有实现的关系（诚实声明）
 
-- DH 已实现 NQ feedback 认证使用 `X-DH-NQ-*` header 族 + HMAC/timestamp/nonce/source allowlist/payload gate（`DH_AUDIT_FIX_REPORT.md`，P1-1/P1-2/P1-3 已关闭）。
-- 本策略冻结的 canonical 跨系统 header 族为 `X-NQ-DH-*`。
-- 两者对齐（统一命名或映射层转换）是 **Integration-1 前置项**，不在本轮实现。
+- DH-NQ header alignment 已 **CLOSED**；DH production NQ feedback 入站已使用 canonical-only `X-NQ-DH-*` header 族，不再接受 legacy `X-DH-NQ-*` 作为成功路径。
+- 本策略冻结的 canonical 跨系统 header 族仍为 `X-NQ-DH-*`；HMAC/timestamp/nonce/source allowlist/payload gate 语义保持。
+- Header alignment CLOSED 与 timestamp alignment CLOSED 均不授权 Integration-1 runtime；真实通道仍必须另起独立 PLAN 与安全审查。
 
 ## 12. Integration-1 安全前置（冻结）
 

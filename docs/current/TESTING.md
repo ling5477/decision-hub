@@ -1366,5 +1366,27 @@ binding    canonical Tenant-Id != auth tenant / Request-Id != body requestId / T
 结果       BUILD SUCCESS；0 Checkstyle violations；spotless 通过
 不变量     HMAC signatureMaterial value-based 不改、header name 不入签；验签仍使用 timestamp.toString() 归一化 UTC Z；±300s replay window、nonce/source/tenant/requestId/traceId/payload 语义不变
 边界       未改 NQ；未新增 API / migration；未真实 HTTP / DH-NQ 调用 / 交易所调用；未新增 RealClient / 真实 Provider；未读取凭证；未启动 Integration-1；未开启 LIVE；未处理 Maven wrapper / datasource 默认弱口令 / nonce-burn race；未引入双格式兼容或 epoch fallback
-准入决定   T3 IMPLEMENTED / PENDING REVIEW；timestamp alignment 整体 NOT COMPLETED / NOT CLOSED（T4 NQ companion 与 close review 待办）；Integration-1 / Runtime integration NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T3-REVIEW
+准入决定   T3 已由后续 review ACCEPTED；timestamp alignment 后续由 FINALIZE 收口为 CLOSED / ACCEPTED。Integration-1 / Runtime integration NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。
+```
+
+## 41. 2026-06-28 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-FINALIZE（timestamp overall CLOSED）
+
+```text
+日期       2026-06-28
+阶段       DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-FINALIZE（CONTRACT_FINALIZATION + DOCUMENTATION_FIX + CROSS_REPO_REGRESSION_VALIDATION）
+范围       合并 DH T3 review 后旧状态修正、header naming stale docs 小修、DH/NQ 双仓最终回归；不改生产代码 / 测试代码 / API / migration
+Final      timestamp alignment overall = CLOSED / ACCEPTED
+canonical  RFC3339 / ISO-8601 UTC Z（例 2026-06-15T12:34:56Z）；DH/NQ 均拒绝 epoch seconds / epoch milliseconds / 数字时区偏移；窗口 ±300s 不变
+边界       CLOSED 仅表示 timestamp 契约收口完成；Integration-1 / Runtime integration NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED
+验证       DH git status --short：仅允许的 7 个 docs/current 文件 modified
+           DH git diff --check：通过；仅 LF/CRLF warning，无 whitespace error
+           DH git diff --stat：7 files changed, 141 insertions(+), 134 deletions(-)
+           DH mvn test：BUILD SUCCESS；既有 PostgresContainerSmokeTest 因本机无 Docker skipped 1
+           DH mvn -Pquality validate：BUILD SUCCESS；0 Checkstyle violations；Spotless check 通过
+           NQ git status --short：仅允许的 8 个 docs/current 文件 modified
+           NQ git diff --check：通过；仅 LF/CRLF warning，无 whitespace error
+           NQ git diff --stat：8 files changed, 55 insertions(+), 12 deletions(-)
+           NQ mvn -f backend/pom.xml test：BUILD SUCCESS
+           NQ INT0 scoped test：BUILD SUCCESS；Integration0 6+2+9=17/17
+           NQ backend quality profile 探测：backend POM 未检出 quality profile / Spotless / Checkstyle
 ```

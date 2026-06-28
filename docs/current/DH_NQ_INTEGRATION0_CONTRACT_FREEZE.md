@@ -106,7 +106,7 @@ Content-Type: application/json
 
 规则：Timestamp **格式 RFC3339 / ISO-8601 UTC（`Z` 结尾，例 `2026-06-15T12:34:56Z`；不接受 epoch 秒/毫秒、不接受数字时区偏移）**，±300 秒窗口；Nonce 防重放（`Source+Nonce+RequestId` TTL 内唯一）；Signature HMAC-SHA256（候选）；Payload ≤ 64 KiB；Source 必在 allowlist；Tenant 绑定请求/审计/数据作用域；RequestId 幂等+审计；TraceId 跨系统排查；签名原材料/raw request/raw response/prompt/full context 不得落日志、不得落库。
 
-与现有实现的关系（诚实声明，不在本轮修复）：DH 已实现的 NQ feedback authenticator 当前使用 `X-DH-NQ-*` 命名族（见 `DH_AUDIT_FIX_REPORT.md`，P1-1/P1-2/P1-3 已关闭）。Integration-0 冻结的 canonical 跨系统 header 族为 `X-NQ-DH-*`。两者对齐是 **Integration-1 前置项**，不在本轮修复。
+与现有实现的关系（诚实声明）：DH-NQ header alignment 已 **CLOSED**；DH production 入站已切到 canonical-only `X-NQ-DH-*`，不再接受 legacy `X-DH-NQ-*` 作为成功路径。Integration-0 冻结的 canonical 跨系统 header 族仍为 `X-NQ-DH-*`；该 header 命名收口不授权 Integration-1 runtime。
 
 ## 7. Data Contracts（冻结草案，contract-only / mock-only）
 
@@ -163,7 +163,7 @@ DH 侧对应行为：DH 必须能正确处理上述拒绝码（重试/退避/死
 - **memory cap 缺失**：DH InMemory 仓储（dh-memory 5 个 Store、Stage2/Stage3 InMemory 仓储）无上限，真实流量下内存膨胀风险。
 - **replay nonce 持久化缺失**：nonce 仅单实例内存，多实例重放防护失效，必须持久化或集中缓存（TTL ≥ 2 × maxClockSkew）。
 
-其它前置：NQ 侧 DH 入站端点 / DH client / feedback outbox 未实现；header `X-DH-NQ-*` 与 `X-NQ-DH-*` 对齐。
+其它前置：NQ 侧 DH 入站端点 / DH client / feedback outbox 未实现；任何真实通道仍必须从 Integration-1 独立 PLAN 与安全审查开始。Header naming alignment 已 CLOSED，当前不再作为 Integration-1 blocker。
 
 ## 13. Out-of-Scope（本轮不做）
 

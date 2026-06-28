@@ -2922,4 +2922,37 @@ HMAC signatureMaterial 仍 value-based、header name 不入签；验签仍使用
 未改 NQ；未新增 API / migration；未真实 HTTP / DH-NQ 调用 / 交易所调用；未新增 RealClient / 真实 Provider；未读取凭证；未启动 Integration-1；未开启 LIVE；未处理 Maven wrapper / datasource 默认弱口令 / nonce-burn race；未改变 HMAC signatureMaterial 字段集合；未引入双格式兼容；未接受 epoch fallback。
 
 ### 准入
-T3 IMPLEMENTED / PENDING REVIEW；timestamp alignment 整体仍 NOT COMPLETED / NOT CLOSED（T4 NQ companion 与 close review 待办）；Integration-1 仍 NOT STARTED；Runtime integration NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。下一步 `DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-IMPL-BATCH-T3-REVIEW`。
+T3 后续 review 已 ACCEPTED；timestamp alignment 后续由 FINALIZE 收口为 CLOSED / ACCEPTED。Integration-1 仍 NOT STARTED；Runtime integration NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。
+
+## 2026-06-28 DH-NQ-TIMESTAMP-FORMAT-ALIGNMENT-FINALIZE
+
+### 范围
+一次性完成 DH-NQ timestamp format alignment 最终收口：更新 DH current docs 中 T3/T4/overall 旧状态，修正 DH Integration-0 contract freeze 里的 legacy `X-DH-NQ-*` stale 声明，并与 NQ companion 当前事实对齐。只改允许的 `docs/current` 文档；不改 DH/NQ Java production code，不改测试代码，不新增 API / migration / RealClient / real provider，不真实 HTTP，不启动 Integration-1。
+
+### Final state
+`X-NQ-DH-Timestamp` canonical contract 已 **CLOSED / ACCEPTED**：
+
+- T1 docs：ACCEPTED。
+- T2 DH INT0：ACCEPTED。
+- T3 DH production / INT0 UTC-Z-only hardening：ACCEPTED。
+- T4 NQ companion：ACCEPTED。
+- canonical timestamp：RFC3339 / ISO-8601 UTC `Z`，例 `2026-06-15T12:34:56Z`。
+- DH production 已强制 `endsWith("Z") + Instant.parse`。
+- DH / NQ INT0 均拒绝 epoch seconds、epoch milliseconds、数字时区偏移。
+- replay window 保持 ±300s；HMAC signatureMaterial value-based 且 header name 不入签。
+
+### 边界
+timestamp CLOSED 只表示 timestamp 契约收口完成，不授权 Integration-1 runtime。Integration-1 / Runtime integration 仍 NOT STARTED；DH NOT INTEGRATED；LIVE DISABLED。未处理 Maven wrapper / datasource 默认弱口令 / nonce-burn race，未读取或输出凭证。
+
+### 验证
+- DH `git status --short`：仅允许的 7 个 `docs/current` 文件 modified。
+- DH `git diff --check`：通过；仅 LF/CRLF warning，无 whitespace error。
+- DH `git diff --stat`：7 files changed, 141 insertions(+), 134 deletions(-)。
+- DH `mvn test`：BUILD SUCCESS；既有 `PostgresContainerSmokeTest` 因本机无 Docker skipped 1。
+- DH `mvn -Pquality validate`：BUILD SUCCESS；0 Checkstyle violations；Spotless check 通过。
+- NQ `git status --short`：仅允许的 8 个 `docs/current` 文件 modified。
+- NQ `git diff --check`：通过；仅 LF/CRLF warning，无 whitespace error。
+- NQ `git diff --stat`：8 files changed, 55 insertions(+), 12 deletions(-)。
+- NQ `mvn -f backend/pom.xml test`：BUILD SUCCESS。
+- NQ `mvn -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test`：BUILD SUCCESS；INT0 6+2+9=17/17。
+- NQ backend POM quality profile 探测：未检出 `<id>quality</id>` / `spotless` / `checkstyle`，未伪造 quality gate 成功。

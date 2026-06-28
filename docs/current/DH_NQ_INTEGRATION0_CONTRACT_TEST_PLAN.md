@@ -260,7 +260,7 @@ DH 侧重点：NQ feedback 入站认证/校验（DH 已有 envelope/validator/ro
 - testName：timestamp_window_rejection_dh
 - targetSystem：DH
 - testType：SECURITY / NEGATIVE
-- purpose：feedback timestamp 超 ±300s 窗口拒绝；canonical timestamp=RFC3339 / ISO-8601 UTC `Z`（DH INT0 fixture 当前仍为 epoch 秒，待 T2 对齐）。
+- purpose：feedback timestamp 超 ±300s 窗口拒绝；canonical timestamp=RFC3339 / ISO-8601 UTC `Z`。DH INT0 已完成 T2 对齐并拒绝 epoch 秒、epoch 毫秒和数字时区偏移。
 - inputFixture：`FX-TIMESTAMP`。
 - requiredHeaders：Timestamp 越界。
 - payload：合法 `NQFeedbackEvent`。
@@ -484,7 +484,7 @@ FX-ALL-ALLOWED / FX-AUDIT-PATHS
 [ ] rate limit：新增 429 限流 contract test；DH InMemory 无限流，须补租户/能力级限流
 [ ] memory cap：dh-memory 5 Store 与 Stage2/Stage3 InMemory 仓储上限/外部存储就绪后补容量测试
 [ ] replay nonce persistence：T06 须以持久化/集中缓存 nonce 多实例重跑
-[ ] header X-DH-NQ-* 与 X-NQ-DH-* 对齐验证
+[x] header alignment：DH production 入站 canonical-only `X-NQ-DH-*`，header alignment CLOSED
 [ ] 真实通道隔离 staging / test cluster，Paper-only，LIVE 关闭
 ```
 
