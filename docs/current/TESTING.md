@@ -2130,3 +2130,87 @@ Readiness decision
            下一步允许进入 K6 mock NQ dry-run contract tests；不得跳到 K7-K8、M2 close review、
            Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
 ```
+
+## 52. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS 验证记录
+
+```text
+日期       2026-07-01
+阶段       DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS
+类型       CODE_CHANGE + CONTRACT_TESTS + MOCK_NQ_DRYRUN + SECURITY_BOUNDARY + NO_LIVE_TRADE + DOCS_SYNC
+范围       只实现 K6 mock NQ dry-run contract tests、test-support 与最小 fixture；不新增 API / Controller / migration；
+           不修改生产代码；不真实 HTTP；不接真实 NQ runtime / real provider / LLM / LangGraph / LIVE。
+
+K6 新增测试
+  - MockNqDecisionDryRunContractTest 2/2：
+    mock NQ valid request -> structured DecisionOutput；fixture 字段与禁止词校验。
+  - MockNqDecisionNoLiveTradeContractTest 3/3：
+    DecisionAction vocabulary 无 BUY / SELL / PLACE_ORDER / CANCEL_ORDER / MARKET_ORDER / LIMIT_ORDER；
+    Decision Pipeline 生产代码无 outbound runtime / Controller annotation token；fixture 无 execution intent / credential。
+  - MockNqDecisionPersistenceReplayContractTest 2/2：
+    mock NQ dry-run 写入 K3 request / trace / provider / output / audit 后，K4 replay read model 可读回；
+    replay read model 不跨 tenant 返回明细。
+  - MockNqDecisionProviderGuardContractTest 3/3：
+    provider disabled / budget exceeded / timeout 均 fail-closed 到 ABSTAIN，并保留 structured output。
+
+命令       git status --short
+结果       通过；显示本轮新增 K6 tests / support / golden_cases 与 docs/current 修改，均未 stage。
+
+命令       git diff --check
+结果       通过；exit 0；无 whitespace error。
+
+命令       git diff --stat
+结果       通过；tracked diff 为 docs/current 六个状态文档同步，267 insertions / 44 deletions；
+           新增未跟踪 tests / fixture 由 git status 标识。
+
+命令       mvn -ntp -pl dh-usecase -am "-Dtest=MockNqDecisionDryRunContractTest,MockNqDecisionProviderGuardContractTest,MockNqDecisionPersistenceReplayContractTest,MockNqDecisionNoLiveTradeContractTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
+结果       BUILD SUCCESS；K6 新增测试 10 tests / 0 failures / 0 errors / 0 skipped；
+           Finished at 2026-07-01T22:58:37+08:00。
+说明       首次未加引号的 PowerShell `-Dtest=..., ...` 被逗号解析阻断；随后加引号并补 `-am` 与
+           `surefire.failIfNoSpecifiedTests=false` 后通过。前两次失败是命令形态问题，不是代码失败。
+
+命令       mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test
+结果       BUILD SUCCESS；reactor 15/15 SUCCESS；Finished at 2026-07-01T22:54:40+08:00。
+补充       `PostgresContainerSmokeTest` 实际访问 Docker Desktop，启动 `postgres:17`，Flyway V1-V5 在 PostgreSQL 17.10 上迁移通过。
+
+命令       mvn -ntp test
+结果       BUILD SUCCESS；reactor 19/19 SUCCESS；Finished at 2026-07-01T22:55:23+08:00。
+测试摘要   Surefire XML 汇总 424 tests / 0 failures / 0 errors / 0 skipped。
+补充       `PostgresContainerSmokeTest` 未 skip，真实启动 `postgres:17` 并迁移 V1-V5。
+
+命令       mvn -ntp -Pquality validate
+结果       BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed；
+           Finished at 2026-07-01T22:56:01+08:00。
+补充       各子模块仍输出既有 `unable to find checkstyle:checkstyle outputFile` 信息；聚合 checkstyle 最终为
+           0 violations，reactor status 为 SUCCESS。
+
+命令       K6 边界关键词扫描
+范围       dh-domain/src/main、dh-usecase/src/main、dh-infra/src/main、dh-app/src/main、dh-api/src/main、
+           dh-connector/src/main、dh-security/src/main、contracts、golden_cases、docs/current、K6 新增测试；
+           排除 target / build / dist / node_modules / logs / test-results / secrets / credentials。
+关键词     RealClient / LangGraph / OpenAI / Claude / Gemini / WebClient / RestTemplate / HttpClient /
+           placeOrder / cancelOrder / BUY / SELL / apiSecret / passphrase / accountId / Controller /
+           NqClient / Exchange / Broker / live / LIVE / endpoint / Endpoint / PostMapping /
+           GetMapping / RequestMapping。
+结果       命中项均为既有 Controller / mapping、历史或禁止说明、denylist、负向安全断言、K6 no-live-trade 测试、
+           fixture 文件名语义或 docs/current 边界说明；未发现本轮新增 API / Controller / migration / RealClient /
+           real provider / HTTP client / NQ runtime / LangGraph runtime / LIVE / BUY-SELL action 生产实现。
+
+Readiness decision
+           ALLOW_K6_CLOSE: YES
+           ALLOW_K7_IMPLEMENTATION: YES
+           ALLOW_GATEK_ACCEPTANCE_REVIEW: NO
+           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_ACCEPTANCE_REVIEW: NO
+           ALLOW_INTEGRATION_1_RUNTIME: NO
+           ALLOW_AGENT_PHASE: NO
+           ALLOW_LANGGRAPH_RUNTIME: NO
+           ALLOW_LIVE: NO
+
+边界       未实现 K7-K8；未新增 API path；未新增 Controller；未新增 migration；未新增 replay API /
+           query endpoint；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；
+           未新增 RealClient / 真实 Provider；未读取或输出 credential、token、cookie、API secret、passphrase；
+           未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；未启动 Integration-1 runtime；
+           未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；
+           未开启 LIVE；未修改 NQ 仓库；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 output action。
+
+下一步     DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED。
+```

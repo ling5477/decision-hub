@@ -1,0 +1,25 @@
+{
+  "requestId": "mock-nq-dryrun-valid-1",
+  "traceId": "trace-mock-nq-dryrun-valid-1",
+  "tenantId": "tenant-mock-nq",
+  "source": "NQ_MOCK",
+  "decisionType": "READ_ONLY_RECOMMENDATION",
+  "subject": {
+    "symbol": "BTC-USDT",
+    "market": "CRYPTO_SPOT",
+    "timeframe": "1h",
+    "strategyRef": "mock-nq-readonly-strategy",
+    "researchRef": null
+  },
+  "contextRef": "mock-nq://decision-pipeline/dryrun",
+  "contextSnapshot": {
+    "snapshotId": "snapshot-mock-nq-valid",
+    "capturedAt": "2026-07-01T00:00:00Z",
+    "evidenceRefs": [
+      "evidence://mock-nq/market-regime",
+      "evidence://mock-nq/risk-summary"
+    ]
+  },
+  "requestedAt": "2026-07-01T00:00:00Z",
+  "schemaVersion": "1.0.0"
+}

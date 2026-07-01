@@ -1,14 +1,14 @@
 # Decision Hub 当前工单
 
-> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / IMPLEMENTED / READY FOR NEXT
+> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS / IMPLEMENTED / READY FOR NEXT
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment
-> 下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS / NOT STARTED
+> 下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED
 
 ## 1. 当前目标
 
-下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS`。
+下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL`。
 
-`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 已完成 review 并 `PASS / CLOSED / ACCEPTED`。K2 已完成 mock-only usecase 编排骨架。K3 已经 M1 readiness review 关闭。K4 已完成内部 Replay Read Model，只读取 K3 已持久化数据，不新增 API、Controller、migration 或 replay endpoint。K5 已完成 mock-only provider health / budget / latency controls，不新增 API、Controller、migration、真实 provider 或 NQ runtime。下一步只允许进入 K6，不允许连续进入 K7-K8 或全量 implementation：
+`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 已完成 review 并 `PASS / CLOSED / ACCEPTED`。K2 已完成 mock-only usecase 编排骨架。K3 已经 M1 readiness review 关闭。K4 已完成内部 Replay Read Model，只读取 K3 已持久化数据，不新增 API、Controller、migration 或 replay endpoint。K5 已完成 mock-only provider health / budget / latency controls，不新增 API、Controller、migration、真实 provider 或 NQ runtime。K6 已完成 mock NQ dry-run contract tests 与最小 fixture，不新增 API、Controller、migration、真实 HTTP 或 NQ runtime。下一步只允许进入 K7，不允许连续进入 K8 或全量 implementation：
 
 ```text
 READ_ONLY_RECOMMENDATION
@@ -97,8 +97,9 @@ K3 status: CLOSED / ACCEPTED after M1
 M1 status: CLOSED / ACCEPTED
 K4 status: IMPLEMENTED / READY FOR NEXT
 K5 status: IMPLEMENTED / READY FOR NEXT
-K6 status: NOT STARTED
-Next: DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS / NOT STARTED
+K6 status: IMPLEMENTED / READY FOR NEXT
+K7 status: NOT STARTED
+Next: DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED
 ```
 
 批次顺序：
@@ -177,7 +178,8 @@ K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
 M1 Readiness Review: CLOSED / ACCEPTED
 K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
 K5 Provider Health / Budget / Latency: IMPLEMENTED / READY FOR NEXT
-K6 Mock NQ Dry-run Contract Tests: NOT STARTED
+K6 Mock NQ Dry-run Contract Tests: IMPLEMENTED / READY FOR NEXT
+K7 Golden Cases / Eval: NOT STARTED
 ```
 
 ## 5. DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON（已实现）

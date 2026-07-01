@@ -3722,3 +3722,105 @@ ObjectMapper bean 仍唯一
 
 ### 下一步
 进入 `DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS / NOT STARTED`；不得直接进入 K7-K8、M2 close review、Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
+
+## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS
+
+### 范围
+
+完成 `DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS` single-batch implementation。K6 只新增 mock NQ dry-run contract tests、test-support 和最小 fixture，不新增 API、Controller、migration、replay endpoint、真实 HTTP、NQ runtime、real provider、LLM、LangGraph 或 LIVE；不修改生产代码。
+
+### 新增文件
+
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/support/MockNqDecisionRequestFactory.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/support/MockNqDryRunFixtures.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/support/MockNqDryRunAssertionSupport.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/support/RecordingDecisionAuditReplayRepository.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/MockNqDecisionDryRunContractTest.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/MockNqDecisionNoLiveTradeContractTest.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/MockNqDecisionPersistenceReplayContractTest.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/MockNqDecisionProviderGuardContractTest.java`
+- `golden_cases/decision/mock_nq_valid_dryrun.json`
+- `golden_cases/decision/mock_nq_provider_blocked.json`
+- `golden_cases/decision/mock_nq_no_live_trade_guard.json`
+
+### 修改文件
+
+- `docs/current/README.md`
+- `docs/current/ROADMAP.md`
+- `docs/current/STATUS.md`
+- `docs/current/WORK_ORDER.md`
+- `docs/current/TESTING.md`
+- `docs/current/WORKLOG.md`
+
+### Implementation
+
+- `MockNqDecisionRequestFactory` 生成 K1 `DecisionRequest`，source 固定为 `NQ_MOCK`，decisionType 固定为 `READ_ONLY_RECOMMENDATION`，只包含 tenantId / requestId / traceId / subject / schemaVersion / requestedAt / evidenceRefs，不包含 account、order、credential、side、price、quantity 或 execution intent。
+- `MockNqDryRunFixtures` 读取 K6 fixture 文本；fixture 只作为 K6 contract test 输入，不进入 K7 eval framework。
+- `MockNqDryRunAssertionSupport` 集中断言 mock NQ request 只读语义、structured output、allowed actions 和 mandatory forbiddenActions。
+- `RecordingDecisionAuditReplayRepository` 是 test-only 内存 repository，同时实现 K3 audit write port 与 K4 replay read repository，用于证明 orchestrator 写入后能通过现有 replay read model 只读回放，并验证 tenant isolation。
+- `MockNqDecisionDryRunContractTest` 覆盖 mock NQ valid request -> structured output、fixture 字段对齐与禁止字段。
+- `MockNqDecisionProviderGuardContractTest` 覆盖 provider disabled / budget exceeded / timeout 的 ABSTAIN fail-closed。
+- `MockNqDecisionPersistenceReplayContractTest` 覆盖 K3 request / trace / provider / output / audit 写入后 K4 replay 读回，以及跨 tenant 不返回明细。
+- `MockNqDecisionNoLiveTradeContractTest` 覆盖 DecisionAction vocabulary、Decision Pipeline 生产源码无 outbound runtime token、fixture 无 execution intent / credential。
+
+### Tests
+
+新增 K6 tests 10 cases：
+
+```text
+MockNqDecisionDryRunContractTest: 2
+MockNqDecisionNoLiveTradeContractTest: 3
+MockNqDecisionPersistenceReplayContractTest: 2
+MockNqDecisionProviderGuardContractTest: 3
+```
+
+覆盖项：
+
+```text
+mock NQ valid request -> structured DecisionOutput
+DecisionOutput.decisionType = READ_ONLY_RECOMMENDATION
+action only ABSTAIN / OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS
+forbiddenActions fixed mandatory five
+request / fixture no credential / order / execution fields
+provider disabled / budget exceeded / timeout -> ABSTAIN fail-closed
+persistence write-through -> K4 replay read model found
+replay tenant mismatch -> no details returned
+Decision Pipeline production code no HTTP / LLM / LangGraph / Controller token
+DecisionAction no BUY / SELL / PLACE_ORDER / CANCEL_ORDER
+```
+
+### 验证
+
+- `mvn -ntp -pl dh-usecase -am "-Dtest=MockNqDecisionDryRunContractTest,MockNqDecisionProviderGuardContractTest,MockNqDecisionPersistenceReplayContractTest,MockNqDecisionNoLiveTradeContractTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`：BUILD SUCCESS；K6 10 tests / 0 failures / 0 errors / 0 skipped。
+- `mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test`：BUILD SUCCESS；reactor 15/15 SUCCESS；`PostgresContainerSmokeTest` 实际启动 `postgres:17` 并通过。
+- `mvn -ntp test`：BUILD SUCCESS；reactor 19/19 SUCCESS；Surefire XML 汇总 424 tests / 0 failures / 0 errors / 0 skipped；`PostgresContainerSmokeTest` 未 skip。
+- `mvn -ntp -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。
+- `git diff --check`：通过；exit 0；无 whitespace error。
+- K6 边界关键词扫描：命中均为既有 Controller / mapping、历史或禁止说明、denylist、负向安全断言、K6 no-live-trade 测试、fixture 文件名语义或 docs/current 边界说明；未发现本轮新增 API / Controller / migration / RealClient / real provider / HTTP client / NQ runtime / LangGraph runtime / LIVE / BUY-SELL action 生产实现。
+
+### Readiness
+
+- `ALLOW_K6_CLOSE: YES`
+- `ALLOW_K7_IMPLEMENTATION: YES`
+- `ALLOW_GATEK_ACCEPTANCE_REVIEW: NO`
+- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_ACCEPTANCE_REVIEW: NO`
+- `ALLOW_INTEGRATION_1_RUNTIME: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 边界确认
+
+未实现 K7-K8；未新增 API path；未新增 Controller；未新增 migration；未新增 replay API / query endpoint；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient / 真实 Provider；未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；未读取或输出 credential、token、cookie、API secret、passphrase；未启动 Integration-1 runtime；未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；未修改 NQ 仓库；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 output action。
+
+### 剩余风险
+
+- K7 Golden Cases / Eval 尚未实现。
+- K8 Acceptance / Freeze 尚未执行。
+- Integration-1 仍需基于 NQ GateN 重新规划。
+- LangGraph 后置。
+- Agent phase 后置。
+
+### 下一步
+
+进入 `DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED`；不得直接进入 K8、GateK acceptance / freeze、Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
