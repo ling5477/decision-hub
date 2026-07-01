@@ -1,14 +1,14 @@
 # Decision Hub 当前工单
 
-> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
+> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON / IMPLEMENTED / READY FOR REVIEW
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment
-> 下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
+> 下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED
 
 ## 1. 当前目标
 
-下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW`。
+下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW`。
 
-`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 已完成 domain contract、JSON Schema 与 contract tests，状态为 `IMPLEMENTED / READY FOR REVIEW`。下一步只允许 review K1，不允许跳过 review 直接进入 K2 或全量 implementation：
+`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 已完成 review 并 `PASS / CLOSED / ACCEPTED`。K2 已完成 mock-only usecase 编排骨架，状态为 `IMPLEMENTED / READY FOR REVIEW`。下一步只允许 review K2，不允许跳过 review 直接进入 K3 或全量 implementation：
 
 ```text
 READ_ONLY_RECOMMENDATION
@@ -84,15 +84,16 @@ ALLOW_LIVE: NO
 
 ## 4. DH-GATEK-DECISION-PIPELINE-MVP-WO（工单产物）
 
-本节记录已关闭工单。WO 已授权 K1 单批次 implementation；K1 已实现并等待 review。WO 不授权 K2-K8 连续实施，不授权 Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
+本节记录已关闭工单。WO 已授权按 review gate 逐批 implementation；K1 已 `PASS / CLOSED / ACCEPTED`，K2 已 `IMPLEMENTED / READY FOR REVIEW`。WO 不授权 K3-K8 连续实施，不授权 Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
 
 工单产物：
 
 ```text
 docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
 Status: ACCEPTED / CLOSED
-K1 status: IMPLEMENTED / READY FOR REVIEW
-Next: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
+K1 status: PASS / CLOSED / ACCEPTED
+K2 status: IMPLEMENTED / READY FOR REVIEW
+Next: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED
 ```
 
 批次顺序：
@@ -165,10 +166,41 @@ LIVE trading forbidden
 NQ mutation forbidden
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
-K2 DecisionOrchestrator Skeleton: NOT STARTED
+K2 DecisionOrchestrator Skeleton: IMPLEMENTED / READY FOR REVIEW
+K3 Audit / Snapshot / Trace Persistence: NOT STARTED
 ```
 
-## 5. Historical / superseded / deferred 内容
+## 5. DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON（当前待 review）
+
+K2 已在 `dh-usecase` 内完成 mock-only orchestrator skeleton，下一步只能做只读 review。
+
+K2 实施范围：
+
+```text
+DecisionOrchestrator / DefaultDecisionOrchestrator
+DecisionContext / DecisionContextBuilder / DefaultDecisionContextBuilder
+DecisionPolicyChecker / DefaultDecisionPolicyChecker
+DecisionSignalProvider / DecisionSignalResult / MockDecisionSignalProvider
+DecisionRiskReviewer / DefaultDecisionRiskReviewer
+DecisionOutputAssembler
+DecisionOutput observation / abstainForRisk factory
+K2 unit tests
+```
+
+K2 明确未做：
+
+```text
+K3 audit / snapshot / trace / replay persistence
+API path / Controller
+Repository / JDBC / migration
+real provider / OpenAI / Claude / Gemini / local model
+LangGraph runtime
+NQ runtime / real HTTP / RealClient
+Integration-1 runtime
+LIVE / trading / NQ mutation
+```
+
+## 6. Historical / superseded / deferred 内容
 
 ```text
 NqFeedbackClient 接通真实 HTTP / event         forbidden / deferred
@@ -185,7 +217,7 @@ LIVE trading                                    forbidden
 
 以上内容只保留为历史背景，不是当前 next，不允许作为当前实现任务。后续如需恢复，必须先基于 NQ GateN 重新进入 planning-only audit，并通过安全审查、契约冻结和人工确认。
 
-## 6. 不做事项（持续硬约束）
+## 7. 不做事项（持续硬约束）
 
 ```text
 不修改 NQ 仓库交易核心
@@ -200,20 +232,20 @@ LIVE trading                                    forbidden
 不读取 token / cookie / exchange secret / production .env / API key / private key / mnemonic / 2FA backup code
 ```
 
-## 7. 下一轮 Codex 开工提示词草稿
+## 8. 下一轮 Codex 开工提示词草稿
 
 ```text
-你在 decision-hub 仓库 dev 分支上工作。任务名：DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW。
+你在 decision-hub 仓库 dev 分支上工作。任务名：DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW。
 
-目标：只读 review K1 Decision Contract Freeze 的实现、schema、contract tests、docs 和验证证据。
-判断是否允许 K1 close；不要实现 K2。
+目标：只读 review K2 DecisionOrchestrator Skeleton 的 usecase 编排骨架、fail-closed 行为、mock-only provider、policy/risk/assembler tests、docs 和验证证据。
+判断是否允许 K2 close；不要实现 K3。
 
 禁止：
-- 不实现 DecisionOrchestrator
 - 不修改生产代码
 - 不修改测试代码
 - 不新增 API
 - 不新增 migration
+- 不实现 audit / snapshot / trace / replay persistence
 - 不实现真实 NQ client
 - 不实现 RealClient
 - 不接真实 HTTP / event 到 NQ

@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
-> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
+> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON / IMPLEMENTED / READY FOR REVIEW
+> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -32,9 +32,11 @@ LIVE DISABLED.
 NQ mutation forbidden.
 GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED.
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW.
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED.
-K2 DecisionOrchestrator Skeleton: NOT STARTED.
+K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON / IMPLEMENTED / READY FOR REVIEW.
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED.
+K2 DecisionOrchestrator Skeleton: IMPLEMENTED / READY FOR REVIEW.
+K3 Audit / Snapshot / Trace Persistence: NOT STARTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
@@ -149,9 +151,11 @@ AI / Agent runtime: NOT STARTED
 LIVE: DISABLED
 GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED
 GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
-K2 DecisionOrchestrator Skeleton: NOT STARTED
+K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON / IMPLEMENTED / READY FOR REVIEW
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED
+K2 DecisionOrchestrator Skeleton: IMPLEMENTED / READY FOR REVIEW
+K3 Audit / Snapshot / Trace Persistence: NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
@@ -169,9 +173,10 @@ Plan artifact: docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md
 Plan status: ACCEPTED / CLOSED
 Work order artifact: docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
 Work order status: ACCEPTED / CLOSED
-K1 contract freeze status: IMPLEMENTED / READY FOR REVIEW
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
-Decision pipeline implementation: NOT STARTED
+K1 contract freeze status: PASS / CLOSED / ACCEPTED
+K2 DecisionOrchestrator Skeleton status: IMPLEMENTED / READY FOR REVIEW
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED
+Full decision pipeline runtime: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
 DH integrated: NO
@@ -191,9 +196,10 @@ LIVE: DISABLED
 Work order artifact: docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
 Work order status: ACCEPTED / CLOSED
 Source plan: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / ACCEPTED / CLOSED
-K1 contract freeze status: IMPLEMENTED / READY FOR REVIEW
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
-Decision pipeline implementation: NOT STARTED
+K1 contract freeze status: PASS / CLOSED / ACCEPTED
+K2 DecisionOrchestrator Skeleton status: IMPLEMENTED / READY FOR REVIEW
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED
+Full decision pipeline runtime: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
 DH integrated: NO
@@ -208,13 +214,13 @@ LIVE: DISABLED
 - `forbiddenActions` 必须包含 `PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE / READ_NQ_DB / WRITE_NQ_DB`；最终输出必须是 structured JSON，不允许 free-text final output，不允许真实交易指令。
 - Readiness decision：`ALLOW_WO_CLOSE: YES`；`ALLOW_K1_IMPLEMENTATION: YES`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
-## 1.7 DH GateK Decision Pipeline MVP K1 Contract Freeze（2026-07-01，IMPLEMENTED / READY FOR REVIEW）
+## 1.7 DH GateK Decision Pipeline MVP K1 Contract Freeze（2026-07-01，PASS / CLOSED / ACCEPTED）
 
 ```text
-K1 status: IMPLEMENTED / READY FOR REVIEW
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
-K2 DecisionOrchestrator Skeleton: NOT STARTED
-DecisionOrchestrator implementation: NOT STARTED
+K1 status: PASS / CLOSED / ACCEPTED
+K1 review: PASS / CLOSED / ACCEPTED
+K2 DecisionOrchestrator Skeleton: IMPLEMENTED / READY FOR REVIEW
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED
 API changes: NONE
 Migration changes: NONE
 Runtime integration: NOT STARTED
@@ -227,8 +233,8 @@ LIVE: DISABLED
 - 本轮新增 `com.guidinglight.decisionhub.domain.decision` K1 合同包，冻结 `DecisionRequest`、`DecisionOutput`、`DecisionSubject`、`DecisionContextSnapshot`、`DecisionEvidence`、`DecisionPolicyResult`、`DecisionRiskReview`、`ProviderDecisionSignal`、`DecisionTraceStep`、`DecisionAuditEvent` 与配套 enum。
 - 新增 JSON Schema：`contracts/json-schema/dh-decision-request.schema.json`、`contracts/json-schema/dh-decision-output.schema.json`。
 - 新增 K1 contract tests：schema 存在性、required 字段、`additionalProperties=false`、Java enum 与 schema enum 一致、action 禁止 `BUY / SELL / PLACE_ORDER / CANCEL_ORDER / MARKET_ORDER / LIMIT_ORDER`、`decisionType` 仅允许 `READ_ONLY_RECOMMENDATION`、`forbiddenActions` 固定五项、request schema 不含 credential / execution intent 字段、output schema 不含 free-text final output 或 execution command 字段。
-- K1 只冻结 domain contract / JSON schema / contract tests；未实现 `DecisionOrchestrator`、`DecisionContextBuilder`、mock provider、policy evaluator 生产逻辑、audit / snapshot / trace / replay persistence、API、migration、repository、service、client、runtime provider、NQ runtime、AI / LangGraph 或 LIVE。
-- Readiness decision：`ALLOW_K1_CLOSE: YES`；`ALLOW_K2_IMPLEMENTATION: NO`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- K1 已通过 review 并关闭；K1 只冻结 domain contract / JSON schema / contract tests，未授权 API、migration、repository、client、NQ runtime、AI / LangGraph 或 LIVE。
+- K1 review decision：`ALLOW_K1_CLOSE: YES`；`ALLOW_K2_IMPLEMENTATION: YES`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 1.8 DH Docs Language Governance Fix（2026-07-01，DOCS-ONLY / READY FOR REVIEW）
 
@@ -236,9 +242,10 @@ LIVE: DISABLED
 Task: DH-DOCS-LANGUAGE-GOVERNANCE-FIX
 Scope: docs governance / language policy / comment style rules / factsource sync
 Business state change: NONE
-Current main line remains: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
-Next concrete action remains: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
-K2 DecisionOrchestrator Skeleton: NOT STARTED
+Current main line now: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON / IMPLEMENTED / READY FOR REVIEW
+Next concrete action now: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED
+K2 DecisionOrchestrator Skeleton: IMPLEMENTED / READY FOR REVIEW
+K3 Audit / Snapshot / Trace Persistence: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
 DH integrated: NO
@@ -252,6 +259,29 @@ LIVE: DISABLED
 - 允许保留英文的范围：Java 包名 / 类名 / 方法名 / 字段名、enum 值、JSON Schema 字段、OpenAPI 字段、HTTP header、状态枚举、命令、外部技术名和固定输出字段。
 - 固定输出字段可保留英文，但字段内容必须中文为主；不得新增英文长段落；不得把中文业务概念翻译成不稳定英文术语后反复使用；从 NQ skill 同步规则时必须改写为 DH 中文主语言风格。
 - 已修正 `DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md` 的明显英文标题、说明段落和表格列名漂移；保留工程名词、enum、schema key、状态词和命令原样。
+
+## 1.9 DH GateK Decision Pipeline MVP K2 Orchestrator Skeleton（2026-07-01，IMPLEMENTED / READY FOR REVIEW）
+
+```text
+K2 status: IMPLEMENTED / READY FOR REVIEW
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED
+K3 Audit / Snapshot / Trace Persistence: NOT STARTED
+API changes: NONE
+Migration changes: NONE
+Repository / JDBC changes: NONE
+Runtime integration: NOT STARTED
+Integration-1 runtime: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+- 本轮只实现 K2 usecase 编排骨架：`DecisionOrchestrator`、`DefaultDecisionOrchestrator`、`DecisionContext`、`DefaultDecisionContextBuilder`、`DefaultDecisionPolicyChecker`、`MockDecisionSignalProvider`、`DefaultDecisionRiskReviewer` 与 `DecisionOutputAssembler`。
+- K2 provider 为 deterministic mock-only，默认 `ProviderSignalStatus.MOCKED + DecisionAction.NO_TRADE`；显式拒绝 `ProviderSignalStatus.SUCCESS`，避免误表示真实 provider runtime。
+- K2 fail-closed 路径：missing request / forbidden execution intent -> `BLOCKED`；no evidence -> `ABSTAIN`；provider failure / timeout / untrusted -> `ABSTAIN`；high risk -> `ABSTAIN`；内部异常 -> structured `ABSTAIN`。
+- 本轮只在 K1 domain output 中补充 observation / risk factory，以便 K2 复用已冻结输出合同；未新增第二套 response model。
+- 新增 K2 单元测试 22 cases，覆盖 orchestrator、policy、risk、assembler、mock provider、null / missing evidence / provider failure / high risk / unexpected failure。
+- Readiness decision：`ALLOW_K2_CLOSE: YES`；`ALLOW_K3_IMPLEMENTATION: NO`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 2. 当前已完成
 
@@ -610,24 +640,23 @@ DH-CODEX-WORKFLOW-FINAL-CLEANUP
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW）
+## 4. 下一阶段（DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW）
 
 ```text
-唯一下一步是 DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW（NOT STARTED）。
+唯一下一步是 DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW（NOT STARTED）。
 
-K1 review 只允许：
-- 审查 dh-domain domain.decision 合同模型
-- 审查 dh-decision-request / dh-decision-output JSON Schema
-- 审查 K1 contract tests 和 validation evidence
-- 判断 ALLOW_K1_CLOSE 是否成立
-- 判断是否允许另开 K2 work item
+K2 review 只允许：
+- 审查 dh-usecase usecase.decision 编排骨架
+- 审查 DecisionOutput K2 复用工厂方法是否仍符合 K1 contract
+- 审查 deterministic mock provider、policy checker、risk reviewer、output assembler
+- 审查 no evidence / provider failure / policy denied / high risk / unexpected failure fail-closed tests
+- 审查 validation evidence 与 docs/current 同步
+- 判断 ALLOW_K2_CLOSE 是否成立
+- 判断是否允许另开 K3 work item
 
-K1 review 不允许：
-- 直接开始 K2 implementation
-- 实现 DecisionOrchestrator
-- 实现 DecisionContextBuilder
-- 实现 MockDecisionProvider
-- 实现 policy evaluator 生产逻辑
+K2 review 不允许：
+- 直接开始 K3 implementation
+- 实现 audit / snapshot / trace / replay persistence
 - 实现真实 NQ client
 - 实现 RealClient / RealNqBacktestClient
 - 接真实 HTTP / event 到 NQ
@@ -640,7 +669,7 @@ K1 review 不允许：
 - 访问交易所密钥
 - 触碰 LIVE trading
 - 读取或写入 NQ DB
-- 新增 API / migration / provider / 交易路径
+- 新增 API / Controller / Repository / JDBC / migration / provider / 交易路径
 
 Stage2-PoC、Stage3-B2/B3/B4 的真实接入、联调、RealClient 或 NQ mutation 方向均为 historical / superseded / deferred，不是当前 next，不允许作为当前实现任务。旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK 为 SUPERSEDED / REBASE_REQUIRED；如需恢复 NQ runtime 相关 planning，必须基于 NQ GateN 重新规划。
 
@@ -650,9 +679,10 @@ Stage2-PoC、Stage3-B2/B3/B4 的真实接入、联调、RealClient 或 NQ mutati
 - Integration-0 safety gate CLOSED / ACCEPTED
 - DH-GATEK-DECISION-PIPELINE-MVP-PLAN ACCEPTED / CLOSED
 - DH-GATEK-DECISION-PIPELINE-MVP-WO ACCEPTED / CLOSED
-- DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE IMPLEMENTED / READY FOR REVIEW
-- K2 DecisionOrchestrator Skeleton NOT STARTED
-- Decision pipeline runtime implementation not started
+- DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE PASS / CLOSED / ACCEPTED
+- DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON IMPLEMENTED / READY FOR REVIEW
+- K3 Audit / Snapshot / Trace Persistence NOT STARTED
+- Full decision pipeline runtime not started
 - Integration-1 not started
 - Runtime integration not started
 - DH integrated NO

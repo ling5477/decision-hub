@@ -1720,3 +1720,97 @@ Readiness decision:
            未开启 LIVE；未把 Integration-1 / Runtime integration / Agent phase 写成 started。
 准入决定   本轮语言治理修复已完成并通过 Git / rg / Maven / quality 验证。当前主线仍为 K1 review，不得直接进入 K2。
 ```
+
+## 47. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON 验证记录（mock-only usecase skeleton）
+
+```text
+日期       2026-07-01
+阶段       DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON（ORCHESTRATOR_SKELETON + DECISION_PIPELINE_MVP + MOCK_ONLY + SECURITY_BOUNDARY + NO_LIVE_TRADE）
+范围       只执行 K2：dh-usecase 内 mock-only DecisionOrchestrator skeleton、context builder、policy checker、mock signal provider、risk reviewer、output assembler 与 K2 unit tests；不实现 K3-K8、不新增 API / Controller / Repository / JDBC / migration、不接真实 provider / NQ / HTTP / LangGraph / LIVE
+
+命令       Get-Location
+结果       F:\project\decision-hub
+
+命令       git branch --show-current
+结果       dev
+
+命令       git status --short
+初始结果   工作区 clean；本轮从上一提交后开始
+最终范围   仅 K2 允许范围内变更：
+           dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionOutput.java
+           dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/**
+           dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/**
+           docs/current/README.md
+           docs/current/STATUS.md
+           docs/current/ROADMAP.md
+           docs/current/WORK_ORDER.md
+           docs/current/TESTING.md
+           docs/current/WORKLOG.md
+
+命令       git diff --check
+结果       通过；仅 Windows LF -> CRLF warning，无 whitespace error
+
+命令       rg K2 禁止范围扫描
+范围       dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision
+           dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision
+           dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision
+结果       仅命中：
+           - policy denylist 中的 `passphrase`
+           - 负向测试字符串 `placeOrder-plan` / `cancelOrder-attempt`
+           - 注释中明确禁止 LangGraph / HTTP / NQ / provider runtime 的说明
+           未命中新增 Controller / Repository / JDBC / migration / HTTP client / RealClient / OpenAI / Claude / Gemini / BUY / SELL / accountId 等生产实现
+
+命令       mvn -pl dh-usecase -am test
+结果       未进入编译；本机全局 Maven settings / repository 阻断：
+           1) D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml line 227 存在 Unrecognised tag: profiles warning；
+           2) D:\Tool\Maven\maven-repository\org\springframework\boot\spring-boot-starter-parent\3.5.10 写 tracking file 时 FileAlreadyExistsException。
+
+命令       mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -U -pl dh-usecase -am test
+结果       首次绕开全局 settings 后进入依赖解析，但 Maven Central TLS handshake 中断；未进入 K2 编译。
+
+命令       mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -pl dh-usecase -am test
+结果       BUILD SUCCESS；reactor 9/9 SUCCESS；Total time 10.539 s；Finished at 2026-07-01T15:28:42+08:00
+测试摘要   dh-domain 108 tests / 0 failures / 0 errors / 0 skipped
+           dh-connector 19 tests / 0 failures / 0 errors / 0 skipped
+           dh-usecase 92 tests / 0 failures / 0 errors / 0 skipped
+           K2 新增 tests 22 cases：
+           DecisionOrchestratorTest 7
+           DecisionOutputAssemblerTest 4
+           DefaultDecisionPolicyCheckerTest 4
+           DefaultDecisionRiskReviewerTest 4
+           MockDecisionSignalProviderTest 3
+
+命令       mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality -pl dh-usecase -am validate
+结果       BUILD SUCCESS；reactor 9/9 SUCCESS；Total time 4.784 s；Finished at 2026-07-01T15:28:37+08:00
+补充       Maven 输出 `Unable to perform checkstyle:check, unable to find checkstyle:checkstyle outputFile.`，但 reactor status 为 SUCCESS；未报告 checkstyle violation。
+
+命令       mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality -pl dh-usecase -am spotless:check
+结果       BUILD FAILURE；失败点在 dh-common 既有格式问题（ApiResponse.java、BizException.java、CommonErrorCodes.java、ErrorCode.java），未进入 K2 模块；未做跨范围格式化。
+
+命令       mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality -pl dh-domain,dh-usecase spotless:check
+结果       BUILD FAILURE；失败点在 dh-domain 既有格式漂移（100 个既有文件），不是本轮 K2 变更专属问题；未运行 spotless:apply，避免扩大修改范围。
+
+K2 覆盖     正常 mock 输出 -> READ_ONLY_RECOMMENDATION / OBSERVATION_ONLY / NO_TRADE / Provider MOCKED
+           no evidence -> ABSTAIN / UNKNOWN / NOT_CALLED
+           forbidden execution intent -> BLOCKED / DENIED / NOT_CALLED
+           provider timeout -> ABSTAIN / UNKNOWN / TIMEOUT
+           high risk directional signal -> ABSTAIN / HIGH
+           internal failure -> structured ABSTAIN / UNEXPECTED_FAILURE
+           null request -> BLOCKED / INVALID / unknown-request
+
+Readiness decision:
+           ALLOW_K2_CLOSE: YES
+           ALLOW_K3_IMPLEMENTATION: NO
+           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO
+           ALLOW_INTEGRATION_1_RUNTIME: NO
+           ALLOW_AGENT_PHASE: NO
+           ALLOW_LANGGRAPH_RUNTIME: NO
+           ALLOW_LIVE: NO
+
+边界       未新增 API path；未新增 Controller；未新增 Repository / JDBC / migration；未新增 audit / snapshot / trace / replay persistence；
+           未接真实 HTTP；未接 NQ runtime；未新增 RealClient；未新增真实 Provider；未接 OpenAI / Claude / Gemini / 本地模型；
+           未接 LangGraph；未接 MCP 写能力；未实现 replay API；未读取或输出 credential / token / cookie / API secret / passphrase；
+           未启动 Integration-1 runtime；未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；
+           未开启 LIVE；未修改 NQ 仓库；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 action enum 或 output action。
+准入决定   K2 Orchestrator Skeleton 已完成 implementation 并通过模块 Maven 测试与 quality validate；下一步只能进入 K2 review，不得直接进入 K3。
+```

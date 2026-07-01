@@ -3338,3 +3338,85 @@ DH 文档正文、架构说明、阶段计划、WORKLOG、TESTING、ROADMAP、ST
 
 ### 下一步
 进入 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED`；不得直接进入 K2。
+
+## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON
+
+### 范围
+完成 `DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON` single-batch implementation。K2 只在 `dh-usecase` 落 mock-only DecisionOrchestrator skeleton，并补 K2 单元测试与 `docs/current` 状态同步；不实现 K3-K8、不新增 API / Controller / Repository / JDBC / migration、不接真实 provider / NQ / HTTP / LangGraph / LIVE。
+
+### 修改文件
+- `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionOutput.java`：补充 `observation(...)` 与 `abstainForRisk(...)` 工厂方法，供 K2 复用 K1 output contract，不新增第二套 response model。
+- 新增 `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DecisionOrchestrator.java` 与 `DefaultDecisionOrchestrator.java`：固定 policy -> context -> mock signal -> risk -> output assembler 流程，异常统一 fail-closed。
+- 新增 `DecisionContext`、`DecisionContextBuilder`、`DefaultDecisionContextBuilder`：只读取 K1 request 内 `contextSnapshot.evidenceRefs`，不读 DB / 文件 / NQ / HTTP。
+- 新增 `DecisionPolicyChecker`、`DefaultDecisionPolicyChecker`：阻断 null request、非 read-only、执行意图、账户 / 凭证 / 订单 token。
+- 新增 `DecisionSignalProvider`、`DecisionSignalResult`、`MockDecisionSignalProvider`：deterministic mock-only，默认 `MOCKED + NO_TRADE`，拒绝 `SUCCESS`。
+- 新增 `DecisionRiskReviewer`、`DefaultDecisionRiskReviewer`：无 evidence / provider failure -> UNKNOWN，`HIGH_RISK` marker -> HIGH，其余 mock-only -> LOW。
+- 新增 `DecisionOutputAssembler`：统一组装 structured output，policy denied / no evidence / provider failure / high risk / unexpected failure 均 fail-closed。
+- 新增 K2 单元测试：`DecisionOrchestratorTest`、`DecisionOutputAssemblerTest`、`DefaultDecisionPolicyCheckerTest`、`DefaultDecisionRiskReviewerTest`、`MockDecisionSignalProviderTest`。
+- 更新 `docs/current/README.md`、`STATUS.md`、`ROADMAP.md`、`WORK_ORDER.md`、`TESTING.md`、`WORKLOG.md`：同步 K1 closed、K2 ready-for-review、K3 not started 与验证证据。
+
+### Implementation
+- K2 orchestrator 默认构造器使用本地 deterministic 组件，无 Spring wiring、无配置项、无 runtime provider。
+- `DefaultDecisionPolicyChecker` 在 provider 前阻断执行意图；测试覆盖 `placeOrder` / `cancelOrder` 负向输入。
+- `DefaultDecisionContextBuilder` 只复制 request snapshot evidence，不查询外部资源。
+- `MockDecisionSignalProvider` 默认 `NO_TRADE`，并拒绝 `ProviderSignalStatus.SUCCESS`，确保 K2 不模拟真实 provider success。
+- `DefaultDecisionRiskReviewer` 对无证据、provider failure 和 high risk 均 fail-closed。
+- `DecisionOutputAssembler` 保证输出始终是 K1 `DecisionOutput`，并保留 mandatory `forbiddenActions`。
+
+### Tests
+新增 K2 tests 22 cases：
+
+```text
+DecisionOrchestratorTest: 7
+DecisionOutputAssemblerTest: 4
+DefaultDecisionPolicyCheckerTest: 4
+DefaultDecisionRiskReviewerTest: 4
+MockDecisionSignalProviderTest: 3
+```
+
+覆盖项：
+
+```text
+正常 mock 输出
+无 evidence -> ABSTAIN
+forbidden execution intent -> BLOCKED
+provider timeout / failure -> ABSTAIN
+high risk directional signal -> ABSTAIN
+unexpected internal failure -> structured ABSTAIN
+null request -> BLOCKED / INVALID
+mock provider rejects SUCCESS
+mandatory forbiddenActions 保持固定
+```
+
+### 验证
+- `Get-Location`：`F:\project\decision-hub`。
+- `git branch --show-current`：`dev`。
+- 初始 `git status --short`：clean。
+- `git diff --check`：通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+- K2 禁止范围 `rg` 扫描：仅命中 policy denylist、负向测试字符串和禁止项注释；未新增 Controller / Repository / JDBC / migration / HTTP client / RealClient / real provider / OpenAI / Claude / Gemini / BUY / SELL / accountId 生产实现。
+- 裸 `mvn -pl dh-usecase -am test`：被本机全局 Maven settings / repository 阻断，未进入编译；关键错误为 `settings.xml` line 227 `Unrecognised tag: profiles` 与 `FileAlreadyExistsException`。
+- `mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -pl dh-usecase -am test`：BUILD SUCCESS；reactor 9/9 SUCCESS；dh-domain 108 tests、dh-connector 19 tests、dh-usecase 92 tests，全部 0 failures / 0 errors / 0 skipped；Finished at 2026-07-01T15:28:42+08:00。
+- `mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality -pl dh-usecase -am validate`：BUILD SUCCESS；reactor 9/9 SUCCESS；Finished at 2026-07-01T15:28:37+08:00。
+- 直接 `spotless:check`：失败于既有 `dh-common` / `dh-domain` 大量格式漂移，不属于本轮 K2 专属变更；未执行 `spotless:apply`，避免扩大范围。
+
+### Readiness
+- `ALLOW_K2_CLOSE: YES`
+- `ALLOW_K3_IMPLEMENTATION: NO`
+- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`
+- `ALLOW_INTEGRATION_1_RUNTIME: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 边界确认
+未实现 K3 audit / snapshot / trace / replay persistence；未新增 API path / Controller / Repository / JDBC / migration；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient / 真实 Provider；未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；未接 MCP 写能力；未实现 replay API；未读取或输出 credential、token、cookie、API secret、passphrase；未启动 Integration-1 runtime；未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；未修改 NQ 仓库。
+
+### 剩余风险
+- K2 尚未 review。
+- K3 audit / snapshot / trace / replay persistence 尚未实现。
+- Mock provider health / budget / latency 尚未实现。
+- Mock NQ dry-run contract tests 尚未实现。
+- Direct Spotless check 被既有全仓格式漂移阻断；本轮未做跨范围格式化。
+
+### 下一步
+进入 `DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED`；不得直接进入 K3。

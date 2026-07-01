@@ -183,6 +183,62 @@ public final class DecisionOutput {
         DEFAULT_SCHEMA_VERSION);
   }
 
+  /** 生成安全的 observation-only 输出，不表达方向性偏好。 */
+  public static DecisionOutput observation(
+      final String requestId,
+      final String traceId,
+      final String tenantId,
+      final DecisionAction action,
+      final DecisionRiskLevel riskLevel,
+      final List<String> reasonCodes,
+      final List<String> evidenceRefs,
+      final Instant createdAt) {
+    if (action != DecisionAction.OBSERVE && action != DecisionAction.NO_TRADE) {
+      throw new IllegalArgumentException("action must be OBSERVE or NO_TRADE");
+    }
+    return new DecisionOutput(
+        requestId,
+        traceId,
+        tenantId,
+        DecisionType.READ_ONLY_RECOMMENDATION,
+        action,
+        DecisionStatus.OBSERVATION_ONLY,
+        riskLevel,
+        DecisionPolicyStatus.ALLOWED,
+        ProviderSignalStatus.MOCKED,
+        ForbiddenAction.mandatorySet(),
+        reasonCodes,
+        evidenceRefs,
+        createdAt,
+        DEFAULT_SCHEMA_VERSION);
+  }
+
+  /** 风险或编排失败输出，统一 fail-closed 为 ABSTAIN。 */
+  public static DecisionOutput abstainForRisk(
+      final String requestId,
+      final String traceId,
+      final String tenantId,
+      final DecisionRiskLevel riskLevel,
+      final List<String> reasonCodes,
+      final List<String> evidenceRefs,
+      final Instant createdAt) {
+    return new DecisionOutput(
+        requestId,
+        traceId,
+        tenantId,
+        DecisionType.READ_ONLY_RECOMMENDATION,
+        DecisionAction.ABSTAIN,
+        DecisionStatus.ABSTAINED,
+        riskLevel,
+        DecisionPolicyStatus.REVIEW_REQUIRED,
+        ProviderSignalStatus.NOT_CALLED,
+        ForbiddenAction.mandatorySet(),
+        reasonCodes,
+        evidenceRefs,
+        createdAt,
+        DEFAULT_SCHEMA_VERSION);
+  }
+
   public String getRequestId() {
     return requestId;
   }
