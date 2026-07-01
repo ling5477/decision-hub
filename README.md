@@ -9,9 +9,9 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-Current stage: Integration-0 safety gate CLOSED / ACCEPTED
-Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-PLAN
-Source of truth: docs/current
+当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
+下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
+事实源: docs/current
 ```
 
 ## 文档入口
@@ -61,6 +61,8 @@ docs/current/DH_CODEX_TASK_TEMPLATES.md
 
 所有 Codex / Agent 任务先使用 `nq-dh-workflow-router` 做任务分类、插件路由、scope 收口和输出格式统一。所有 DH 文档治理、docs/current、Gate/Phase/Stage planning、work order、acceptance/freeze/close review、WORKLOG/TESTING/STATUS/ROADMAP/API 同步和 Decision Pipeline MVP 文档规划任务必须使用 `dh-docs-writer`。标准输出字段固定为 `Task classification`、`Plugins selected`、`Scope`、`Files inspected`、`Files changed`、`Findings`、`Validation`、`Risks`、`Next concrete action`；`Summary` 不是必填字段。
 
+DH 文档正文与代码注释 / Javadoc 默认中文为主；类名、方法名、包名、enum、JSON/OpenAPI 字段、HTTP header、状态枚举、命令和外部技术名保留英文原样。固定输出字段可以保留英文，但字段内容必须中文为主；不得把中文项目文档整体漂移为英文说明。
+
 ## 当前工程边界
 
 ```text
@@ -81,13 +83,13 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-DH-GATEK-DECISION-PIPELINE-MVP-PLAN。
+DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW。
 - Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架落地（Fake / Disabled 三层 gate，
   无真实 HTTP，无 RealNqBacktestClient；190 tests 全绿 / ArchUnit 12/12）。
 - Integration-0 safety gate 已 CLOSED / ACCEPTED；P1-4 residual、header alignment、timestamp alignment、
   code reality audit blockers 已关闭或修复。
-- Decision Pipeline MVP PLAN 只允许规划 DecisionRequest / DecisionOutput / DecisionOrchestrator /
-  Snapshot / Trace / Replay / Audit 的只读建议和 fail-closed 边界。
+- Decision Pipeline MVP PLAN 与 WO 已 ACCEPTED / CLOSED。
+- K1 Contract Freeze 已 IMPLEMENTED / READY FOR REVIEW；下一步只允许 K1 review，不得直接进入 K2。
 - Stage3-B2 / NQ Feedback Outbox / 真实 HTTP / event / NQ client / RealClient / real provider
   均为 historical / superseded / deferred / gated，不是当前 next，不允许作为当前实现任务。
 - 旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK：SUPERSEDED / REBASE_REQUIRED。

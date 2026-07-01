@@ -1,12 +1,12 @@
 # Decision Hub Current Docs
 
-> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-WO / READY FOR REVIEW
-> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED
-> Source of truth: docs/current
+> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
+> 下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
+> 事实源: docs/current
 >
 > NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 NOT STARTED；no RealClient；no real provider；no trading ability；LIVE DISABLED。
 > Security baseline: FULL；fail-closed state: FULL；P1-4 residual CLOSED；header alignment CLOSED；timestamp alignment CLOSED；code reality audit blockers fixed。
-> Current work-order artifact: `DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`；source plan `DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 已 `ACCEPTED / CLOSED`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。当前不允许接 LangGraph、LLM、真实 NQ runtime、真实 provider、真实 HTTP 或 LIVE。
+> Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。当前不允许接 LangGraph、LLM、真实 NQ runtime、真实 provider、真实 HTTP 或 LIVE。
 
 ## 1. 当前定位
 
@@ -101,6 +101,18 @@ Next concrete action:
 ```
 
 `Summary` 不作为必填字段。
+
+语言治理规则：
+
+```text
+DH 文档正文默认中文为主。
+DH 架构说明、阶段计划、WORKLOG、TESTING、ROADMAP、STATUS 默认中文为主。
+DH 代码注释 / Javadoc 默认中文为主。
+类名、方法名、包名、enum、JSON Schema 字段、OpenAPI 字段、HTTP header、状态枚举、命令和外部技术名保留英文原样。
+固定输出字段可保留英文，但字段内容必须中文为主。
+从 NQ skill 或历史文档同步规则时，必须改写为 DH 中文主语言风格。
+如果 Codex 输出英文大段内容，必须在同轮改为中文。
+```
 
 ## 3. 当前工作流
 

@@ -79,14 +79,14 @@ docs/current/TESTING.md
 ## 4. 当前阶段
 
 ```text
-Current stage: Integration-0 safety gate CLOSED / ACCEPTED
-Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-PLAN
-Source of truth: docs/current
+当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
+下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
+事实源: docs/current
 ```
 
 Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架（dh-usecase service + DTO + Repository / dh-connector Fake + Disabled client / dh-app Stage3NqBacktestWiringConfig 三层 gate / ArchUnit 扩到 12 条）；190 tests 全绿；无真实 HTTP；无 RealNqBacktestClient。
 
-Integration-0 safety gate 已 `CLOSED / ACCEPTED`；P1-4 residual、header alignment、timestamp alignment、code reality audit blockers 均已关闭或修复。当前下一步主线是 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN`，仅允许规划 Decision Pipeline MVP 的只读建议、证据、策略、审计、snapshot / trace / replay 边界；不允许启动 Integration-1 runtime、真实 NQ runtime、真实 Provider、真实 HTTP、LangGraph runtime、AI / Agent runtime 或 LIVE。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 只能作为 historical reference，当前标记为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。Stage3 规划冻结快照位于 docs/gates/dh-stage3-plan/。
+Integration-0 safety gate 已 `CLOSED / ACCEPTED`；P1-4 residual、header alignment、timestamp alignment、code reality audit blockers 均已关闭或修复。`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 与 `DH-GATEK-DECISION-PIPELINE-MVP-WO` 已 `ACCEPTED / CLOSED`；K1 Contract Freeze 已实现并等待 review。当前下一步主线只允许 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW`，不得跳过 K1 review 直接进入 K2；不允许启动 Integration-1 runtime、真实 NQ runtime、真实 Provider、真实 HTTP、LangGraph runtime、AI / Agent runtime 或 LIVE。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 只能作为 historical reference，当前标记为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。Stage3 规划冻结快照位于 docs/gates/dh-stage3-plan/。
 
 NQ / DH 三轮只读审计（NQ 全仓 / DH 全仓 / NQ-DH 联合边界 + 汇总）已完成，结论同步在 `docs/current/STATUS.md` §1.1。当前口径固定为：
 
@@ -196,6 +196,12 @@ public/protected 的类、接口、枚举、字段、方法必须有清晰注释
 关键 private 方法如果承载业务规则，也必须注释。
 
 变量、方法、类、枚举命名必须贴近业务原意、可读、可搜索。
+
+## 8.1 语言治理
+
+DH 项目文档正文默认中文为主，代码注释 / Javadoc 原则上也使用中文。类名、方法名、包名、字段名、enum 值、JSON Schema 字段、OpenAPI 字段、HTTP header、状态枚举、命令和外部技术名保留英文原样。
+
+文档任务必须使用 `dh-docs-writer`，并遵守其语言规则：固定输出字段可以保留英文，但字段内容必须中文为主；不得新增整段英文说明；不得把中文业务概念翻译成不稳定英文术语后反复使用；从 NQ skill 或历史文档同步规则时，必须改写为 DH 中文主语言风格。
 
 ## 9. Agent 输出要求
 

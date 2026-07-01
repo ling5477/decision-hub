@@ -1,9 +1,9 @@
 # Codex Project Instructions
 
-> Project: Decision Hub
-> Required pre-skill: `nq-dh-workflow-router`
-> Required docs skill: `dh-docs-writer`
-> Source of truth: `docs/current`
+> 项目: Decision Hub
+> 必需前置 skill: `nq-dh-workflow-router`
+> 必需文档 skill: `dh-docs-writer`
+> 事实源: `docs/current`
 
 ## 1. 前置分类规则
 
@@ -66,6 +66,17 @@ docs/current/README.md、docs/current/ROADMAP.md、CODEX_PROJECT_INSTRUCTIONS.md
 和 AGENTS.md 的当前段落为准。
 历史 Stage 文档只能作为背景，不得自动转化为当前 next task。
 DH 文档治理任务必须使用 .agents/skills/dh-docs-writer/SKILL.md。
+```
+
+语言治理规则：
+
+```text
+DH 文档正文、架构说明、阶段计划、Worklog、Testing、Roadmap、Status 默认中文为主。
+DH 代码注释 / Javadoc 默认中文为主。
+Java 包名 / 类名 / 方法名 / 字段名、enum 值、JSON Schema 字段、OpenAPI 字段、HTTP header、状态枚举、命令和外部技术名保留英文原样。
+固定输出字段可保留英文，但字段内容必须中文为主。
+不允许新增英文长段落，除非是协议、代码片段、命令、schema 或外部规范引用。
+从 NQ skill 同步规则时，必须改写为 DH 中文主语言风格。
 ```
 
 分类只能从以下集合选择：
@@ -134,7 +145,11 @@ RealClient forbidden.
 real provider forbidden.
 LIVE DISABLED.
 NQ mutation forbidden.
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN.
+GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
+GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED.
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW.
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED.
+K2 DecisionOrchestrator Skeleton: NOT STARTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```

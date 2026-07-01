@@ -100,7 +100,11 @@ Runtime integration: NOT STARTED
 DH integrated: NO
 AI / Agent runtime: NOT STARTED
 LIVE: DISABLED
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN
+GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED
+GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
+K2 DecisionOrchestrator Skeleton: NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
@@ -119,6 +123,19 @@ Do not use old `Integration-0 not started / plan only` lines as current authorit
 - Every documentation change must synchronize relevant indexes. Do not create orphan documents.
 - Do not write a command as passed unless it was actually run and passed.
 - Do not write a validation as complete when it was skipped, blocked, or failed.
+
+## Language Rules
+
+DH 文档与注释默认使用中文为主，英文只保留在稳定工程标识和外部协议中。
+
+- DH 文档正文、架构说明、阶段计划、Worklog、Testing、Roadmap、Status 默认中文。
+- DH 代码注释 / Javadoc 默认中文；类名、方法名、字段名、包名、enum、JSON 字段、OpenAPI 字段、HTTP header、状态枚举和外部技术名保持英文原样。
+- Maven / Spring / Git / Docker / CI 命令、LangGraph / Spring AI / MCP / PostgreSQL 等外部技术名可以保留英文。
+- 固定输出字段可以保留英文，例如 `Task classification`、`Scope`、`Files inspected`、`Files changed`、`Validation`、`Risks`、`Next concrete action`；字段内容必须中文为主。
+- 不允许把中文项目文档整篇漂移为英文说明，不允许新增英文长段落，除非是协议、代码片段、命令、schema 或外部规范引用。
+- 不允许为了“专业感”把中文业务概念翻译成不稳定英文术语后反复使用。
+- 如果从 NQ skill 或历史文档同步规则，必须改写为 DH 中文主语言风格，不能照搬英文段落。
+- 如果 Codex 输出了大段英文说明，必须在同轮改为中文，除非该英文属于上述允许保留范围。
 
 ## Gate And Freeze Rules
 

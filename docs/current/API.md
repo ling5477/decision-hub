@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW
-Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED
+当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
+下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -16,7 +16,9 @@ Integration-0:        CLOSED / ACCEPTED
 Header alignment:     CLOSED
 Timestamp alignment:  CLOSED / ACCEPTED
 Code reality audit:   DONE
-GateK-PLAN:           READY FOR REVIEW
+GateK-PLAN:           ACCEPTED / CLOSED
+GateK-WO:             ACCEPTED / CLOSED
+K1 Contract Freeze:   IMPLEMENTED / READY FOR REVIEW
 Decision pipeline API: NOT IMPLEMENTED
 Integration-1:        NOT STARTED
 Runtime integration:  NOT STARTED
@@ -24,7 +26,7 @@ AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为 API 单源；GateK Decision Pipeline MVP PLAN 不新增 path、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` / `DecisionTrace` / audit / replay 目前只在 `DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 中作为 planning contract，尚未成为已实现 API。
+OpenAPI 仍为 API 单源；GateK Decision Pipeline MVP PLAN / WO / K1 均不新增 API path、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地，但尚未成为已实现 API；`DecisionTrace` / audit / replay 仍未实现 API。
 
 ## 2. 已实现端点
 
@@ -48,9 +50,9 @@ POST /legacy/runs                                    旧链路（@Deprecated，�
 GET  /legacy/runs/{runId}                            旧链路（@Deprecated，必须认证且 tenant 匹配）
 ```
 
-## 3. Historical / deferred API directions（not implemented current API）
+## 3. Historical / deferred API 方向（当前 API 未实现）
 
-以下方向是 historical / deferred / gated，不是当前 GateK Plan 的已实现端点，也不得作为当前 implementation 入口：
+以下方向是 historical / deferred / gated，不是当前 GateK 的已实现端点，也不得作为当前 implementation 入口：
 
 ```text
 POST /api/ai/tools/forecast                       -> ForecastArtifact
@@ -60,7 +62,7 @@ GET  /api/ai/research-runs/{runId}/reflections    -> ReflectionEntry[]
 GET  /api/ai/research-runs/{runId}/checkpoints    -> CheckpointEntry[]
 ```
 
-GateK Decision Pipeline MVP planned contracts remain documentation-only until a later accepted WO authorizes code, schema, OpenAPI, migration, and test changes.
+GateK Decision Pipeline MVP 的 API 层仍未实现；只有后续已接受 WO 明确授权后，才允许新增 API / OpenAPI / migration / controller 相关变更。
 
 ## 4. Stage1 最小 API 集合（已实现，留作历史记录）
 

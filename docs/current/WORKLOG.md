@@ -3190,10 +3190,151 @@ LangGraph GateL or later
 - 裸 `mvn test`：被本机全局 Maven settings / repository 阻断，未进入测试执行；关键错误为 `settings.xml` line 227 `Unrecognised tag: profiles` 与 `FileAlreadyExistsException`。
 - `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml test`：BUILD SUCCESS；reactor 19/19 SUCCESS；既有 `PostgresContainerSmokeTest` 因本机无可用 Docker 环境 skipped 1。
 - 裸 `mvn -Pquality validate`：被同一本机 Maven 环境问题阻断，未进入 quality 执行。
-- `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check 通过。
+- `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check 通过；最终重跑完成于 2026-07-01T13:48:23+08:00。
 
 ### 边界确认
 Integration-0 仍 `CLOSED / ACCEPTED`，但只代表 contract / mock / documentation work line；Integration-1 `NOT STARTED`；Runtime integration `NOT STARTED`；DH integrated `NO`；AI / Agent runtime `NOT STARTED`；LangGraph runtime `NOT STARTED`；LIVE `DISABLED`。未接真实 NQ runtime、真实 provider、RealClient、真实 HTTP、交易、NQ DB 或凭证。
 
 ### 下一步
 进入 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED`，只允许单批执行 K1 Decision Contract Freeze；不得跳过 K1 review 或全量 GateK implementation。
+
+## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE
+
+### 范围
+完成 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE` single-batch implementation。K1 只冻结 Decision Pipeline MVP 的 domain contract、enum、JSON Schema 和 contract tests；不实现 K2-K8，不新增 API、migration、runtime、provider、client、repository、service、controller 或 NQ 集成。
+
+### 修改文件
+- 新增 `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/`：
+  `DecisionRequest`、`DecisionOutput`、`DecisionSubject`、`DecisionContextSnapshot`、
+  `DecisionEvidence`、`DecisionPolicyResult`、`DecisionRiskReview`、`ProviderDecisionSignal`、
+  `DecisionTraceStep`、`DecisionAuditEvent`、`DecisionType`、`DecisionAction`、
+  `DecisionRiskLevel`、`DecisionPolicyStatus`、`ProviderSignalStatus`、`ForbiddenAction`、
+  `DecisionStatus`。
+- 新增 `contracts/json-schema/dh-decision-request.schema.json`：冻结 DH read-only recommendation request schema。
+- 新增 `contracts/json-schema/dh-decision-output.schema.json`：冻结 DH structured read-only recommendation output schema。
+- 新增 `dh-domain/src/test/java/com/guidinglight/decisionhub/domain/decision/DecisionRequestContractTest.java`。
+- 新增 `dh-domain/src/test/java/com/guidinglight/decisionhub/domain/decision/DecisionOutputContractTest.java`。
+- 新增 `dh-domain/src/test/java/com/guidinglight/decisionhub/contracts/DecisionRequestSchemaContractTest.java`。
+- 新增 `dh-domain/src/test/java/com/guidinglight/decisionhub/contracts/DecisionOutputSchemaContractTest.java`。
+- 新增 `dh-domain/src/test/java/com/guidinglight/decisionhub/contracts/DecisionEnumContractTest.java`。
+- 新增 `dh-domain/src/test/java/com/guidinglight/decisionhub/contracts/DecisionNoTradingInstructionContractTest.java`。
+- 更新 `docs/current/README.md`、`docs/current/STATUS.md`、`docs/current/ROADMAP.md`、`docs/current/WORK_ORDER.md`：同步 K1 implemented / ready-for-review，下一步仅 K1 review，K2 still NOT STARTED。
+- 更新 `docs/current/TESTING.md`、`docs/current/WORKLOG.md`：记录验证证据、边界确认和 readiness decision。
+
+### Implementation
+- `DecisionType` 仅包含 `READ_ONLY_RECOMMENDATION`。
+- `DecisionAction` 仅包含 `ABSTAIN / OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS`，不含 `BUY / SELL / PLACE_ORDER / CANCEL_ORDER / MARKET_ORDER / LIMIT_ORDER`。
+- `ForbiddenAction` 固定五项：`PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE / READ_NQ_DB / WRITE_NQ_DB`。
+- `DecisionRequest` 只表达 read-only recommendation request；字段为 request / trace / tenant / source / subject / context / requestedAt / schemaVersion，不含 account、quantity、price、side、credential 或 execution fields。
+- `DecisionOutput` 默认 fail-closed：no evidence -> `ABSTAIN`；provider failure -> `ABSTAIN`；policy denied -> `BLOCKED` + `ABSTAIN`；high / blocked risk 禁止 `LONG_BIAS / SHORT_BIAS`；每个 output 都强制包含 mandatory forbidden actions。
+- JSON Schema 使用仓库既有 `draft/2020-12` 风格，root `additionalProperties=false`，enum 与 Java enum 一致。
+
+### Tests
+新增 K1 tests 22 cases：
+
+```text
+DecisionRequestContractTest: 1
+DecisionOutputContractTest: 4
+DecisionRequestSchemaContractTest: 5
+DecisionOutputSchemaContractTest: 7
+DecisionEnumContractTest: 3
+DecisionNoTradingInstructionContractTest: 2
+```
+
+覆盖项：
+
+```text
+schema 文件存在性
+required 字段完整
+additionalProperties=false
+Java enum 与 schema enum 一致
+action enum 禁止 BUY / SELL / PLACE_ORDER / CANCEL_ORDER / MARKET_ORDER / LIMIT_ORDER
+decisionType 仅 READ_ONLY_RECOMMENDATION
+forbiddenActions 固定五项
+request schema 不含 apiKey / apiSecret / passphrase / account credential / execution intent
+response schema 不含 free-text final output / execution command fields
+domain no evidence / provider failure / policy denied / high risk fail-closed 行为
+```
+
+### 验证
+- `Get-Location`：`F:\project\decision-hub`。
+- `git branch --show-current`：`dev`。
+- `git status --short`：仅 K1 允许范围内 docs/current、contracts/json-schema、dh-domain main/test 变更。
+- `git diff --check`：通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+- `git diff --stat`：执行成功；tracked docs/current 文件存在 diff；新增 K1 schema / Java / tests 由 `git status` 标识为 untracked。
+- 裸 `mvn test`：被本机全局 Maven settings / repository 阻断，未进入测试执行；关键错误仍为 `settings.xml` line 227 `Unrecognised tag: profiles` 与 `FileAlreadyExistsException`。
+- `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -pl dh-domain -am test`：BUILD SUCCESS；dh-domain 108 tests；0 failures；0 errors；0 skipped。
+- `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml test`：BUILD SUCCESS；reactor 19/19 SUCCESS；既有 `PostgresContainerSmokeTest` 因本机无可用 Docker skipped 1。
+- 裸 `mvn -Pquality validate`：被同一本机 Maven 环境问题阻断，未进入 quality 执行。
+- `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check 通过。
+- `idea-mcp get_file_problems(errorsOnly=true)`：`DecisionOutput.java`、`DecisionRequest.java`、`DecisionOutputSchemaContractTest.java`、`DecisionRequestSchemaContractTest.java` 均无 error 级问题。
+
+### Readiness
+- `ALLOW_K1_CLOSE: YES`
+- `ALLOW_K2_IMPLEMENTATION: NO`
+- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`
+- `ALLOW_INTEGRATION_1_RUNTIME: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 边界确认
+未实现 `DecisionOrchestrator`；未实现 `DecisionContextBuilder`；未实现 `MockDecisionProvider`；未实现 RiskReview 流水线；未实现 policy evaluator 生产逻辑；未新增 API path / Controller / migration / Repository / Service / Client；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient / 真实 Provider；未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；未接 MCP 写能力；未实现 replay API；未实现 audit / snapshot / trace 表；未读取或输出 credential、token、cookie、API secret、passphrase；未启动 Integration-1 runtime；未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；未修改 NQ 仓库。
+
+### 剩余风险
+- `DecisionOrchestrator` 尚未实现。
+- Audit / snapshot / trace / replay 尚未实现。
+- Mock provider 尚未实现。
+- Mock NQ dry-run contract tests 尚未实现。
+- Integration-1 仍需基于 NQ GateN 重新规划。
+- LangGraph 后置。
+- Agent phase 后置。
+
+### 下一步
+进入 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED`；不得直接进入 K2。
+
+## 2026-07-01 DH-DOCS-LANGUAGE-GOVERNANCE-FIX
+
+### 范围
+完成 `DH-DOCS-LANGUAGE-GOVERNANCE-FIX` 文档治理修复：补齐 DH 文档语言政策，修正 `docs/current` 新增规划 / 工单文档中的明显英文漂移，并同步项目规则入口。本轮只改文档、skill 与项目规则文件；不改 Java 生产代码、测试代码、contracts、golden_cases、API path、migration、runtime、provider、NQ runtime 或 LIVE。
+
+预检时工作区已存在上一轮 K1 的 untracked `contracts/json-schema/**`、`dh-domain/src/main/**` 与 `dh-domain/src/test/**` 文件。本轮未编辑这些文件，也未回退它们。
+
+### 修改文件
+- `.agents/skills/dh-docs-writer/SKILL.md`：新增 `Language Rules`，要求 DH 文档正文、架构说明、阶段计划、Worklog、Testing、Roadmap、Status 与代码注释 / Javadoc 默认中文为主。
+- `AGENTS.md`：同步当前 K1 review 入口，新增语言治理规则，明确从 NQ skill 同步时必须改写为 DH 中文主语言风格。
+- `README.md`、`docs/current/README.md`：同步当前 K1 review 入口和语言治理规则。
+- `docs/current/CODEX_PROJECT_INSTRUCTIONS.md`、`docs/current/CODEX_WORKFLOW_INDEX.md`：同步 language policy 与当前主线。
+- `docs/current/API.md`：修正 stale GateK PLAN 状态，明确 K1 已落 domain/schema 合同但 Decision Pipeline API 仍 `NOT IMPLEMENTED`。
+- `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`：把文档主体、章节标题、表格列名和说明段落改为中文，保留稳定工程名词、enum、schema key、状态词和命令。
+- `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`：把工单主体、批次字段、表格列名和说明段落改为中文，并把下一轮提示改为 K1 review。
+- `docs/current/STATUS.md`、`docs/current/ROADMAP.md`、`docs/current/WORK_ORDER.md`：追加语言治理状态与规则，不改变 K1 review 主线。
+- `docs/current/TESTING.md`、`docs/current/WORKLOG.md`：记录本轮验证和边界确认。
+
+### 语言规则
+DH 文档正文、架构说明、阶段计划、WORKLOG、TESTING、ROADMAP、STATUS 默认中文为主。DH 代码注释 / Javadoc 默认中文为主。
+
+允许保留英文：Java 包名 / 类名 / 方法名 / 字段名、enum 值、JSON Schema 字段、OpenAPI 字段、HTTP header、状态枚举、Maven / Spring / Git / Docker / CI 命令、LangGraph / Spring AI / MCP / PostgreSQL 等外部技术名，以及 `Task classification`、`Scope`、`Validation`、`Risks`、`Next concrete action` 等固定输出字段。
+
+固定输出字段可保留英文，但字段内容必须中文为主。不得新增英文长段落；不得为了“专业感”把中文业务概念翻译成不稳定英文术语后反复使用；如果 Codex 输出英文大段内容，必须在同轮改为中文。
+
+### 验证
+- `Get-Location`：`F:\project\decision-hub`。
+- `git branch --show-current`：`dev`。
+- `git status --short`：tracked 变更仅为允许的 docs / skill / project rule 文件；预检前既有 K1 untracked contracts / dh-domain / test files 仍存在，本轮未触碰。
+- `git diff --check`：通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+- `git diff --stat`：执行成功；显示 14 个 tracked docs / skill / project rule 文件存在 diff。
+- 指定 `rg` 扫描：仅命中 `.agents/skills/dh-docs-writer/SKILL.md` 的固定输出字段模板 `Boundary confirmation:`，判定允许保留。
+- `git diff --name-only -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases`：空，tracked diff 未触碰禁止范围。
+- `git ls-files --others --exclude-standard dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases`：列出预检前已存在的 K1 untracked 文件，作为既有工作区状态记录。
+- `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml test`：BUILD SUCCESS；reactor 19/19 SUCCESS；Total time 41.525 s；Finished at 2026-07-01T14:13:48+08:00；既有 `PostgresContainerSmokeTest` 因本机无有效 Docker 环境 skipped 1。
+- `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check 通过；Total time 7.526 s；Finished at 2026-07-01T14:14:06+08:00。
+
+### 边界确认
+未修改 Java 生产代码；未修改测试代码；未修改 contracts；未修改 golden_cases；未新增 API；未新增 migration；未实现或启动 K1 新逻辑；未启动 K2；未接 NQ；未真实 HTTP；未接真实 provider；未接 AI / LangGraph；未开启 LIVE；未把 Integration-1 / Runtime integration / Agent phase 写成 started。
+
+### 风险
+`docs/current` 历史记录与冻结快照中仍可能存在历史英文术语、命令、状态枚举或 fixed output labels；本轮只修正当前允许文件中的明显漂移，不改历史 gate snapshot。当前附件写明“暂停 K1 / K1 NOT STARTED”，但工作区与 `docs/current/STATUS.md` 在预检时已是 K1 `IMPLEMENTED / READY FOR REVIEW`；本轮保留当前事实源，不回退既有 K1 变更。
+
+### 下一步
+进入 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED`；不得直接进入 K2。

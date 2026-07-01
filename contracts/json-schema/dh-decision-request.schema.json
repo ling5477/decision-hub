@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/dh-decision-request.schema.json",
+  "title": "DhDecisionRequest",
+  "description": "GateK K1 read-only recommendation request contract. The payload asks DH for structured analysis only and carries no execution fields or credential material.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "traceId",
+    "tenantId",
+    "source",
+    "decisionType",
+    "subject",
+    "requestedAt",
+    "schemaVersion"
+  ],
+  "properties": {
+    "requestId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "traceId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenantId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decisionType": {
+      "type": "string",
+      "enum": ["READ_ONLY_RECOMMENDATION"]
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["symbol", "market", "timeframe"],
+      "properties": {
+        "symbol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "market": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timeframe": {
+          "type": "string",
+          "minLength": 1
+        },
+        "strategyRef": {
+          "type": ["string", "null"]
+        },
+        "researchRef": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "contextRef": {
+      "type": ["string", "null"]
+    },
+    "contextSnapshot": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["snapshotId", "capturedAt", "evidenceRefs"],
+      "properties": {
+        "snapshotId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capturedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "requestedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    }
+  }
+}

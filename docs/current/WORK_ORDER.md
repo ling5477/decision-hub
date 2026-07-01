@@ -1,14 +1,14 @@
-# Decision Hub Current Work Order
+# Decision Hub 当前工单
 
-> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-WO / READY FOR REVIEW
-> Closed:        DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment
-> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED
+> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
+> 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment
+> 下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
 
 ## 1. 当前目标
 
-下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE`。
+下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW`。
 
-`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `WORK ORDER / READY FOR REVIEW`。下一步只允许按 K1 单批次执行 Decision Contract Freeze，不允许跳过 batch review 直接全量 implementation，也不允许实现真实模型、真实接入或交易能力：
+`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 已完成 domain contract、JSON Schema 与 contract tests，状态为 `IMPLEMENTED / READY FOR REVIEW`。下一步只允许 review K1，不允许跳过 review 直接进入 K2 或全量 implementation：
 
 ```text
 READ_ONLY_RECOMMENDATION
@@ -21,6 +21,8 @@ forbiddenActions 固化
 验收清单
 风险清单
 ```
+
+语言治理要求：当前工单、后续 review 记录、WORKLOG、TESTING、STATUS、ROADMAP 正文必须中文为主；`DecisionOutput`、`READ_ONLY_RECOMMENDATION`、`ABSTAIN`、`forbiddenActions`、文件路径、命令和固定输出字段等稳定工程标识保留英文原样。
 
 ## 2. Stage1-CLOSE 已完成范围
 
@@ -35,7 +37,7 @@ ArchUnit： 新增 4 条规则保护新边界
 pom：      dh-eval parent 修回 dh-bom
 ```
 
-## 3. DH-GATEK-DECISION-PIPELINE-MVP-PLAN（PLAN artifact）
+## 3. DH-GATEK-DECISION-PIPELINE-MVP-PLAN（计划产物）
 
 本节记录已关闭的 planning artifact。`docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 已 `ACCEPTED / CLOSED`；后续 implementation 必须遵守 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md` 的 K1-K8 批次顺序，不得跳过 review 直接全量 implementation。
 
@@ -54,7 +56,7 @@ pom：      dh-eval parent 修回 dh-bom
 定义风险清单
 ```
 
-Plan batch coverage:
+计划批次覆盖：
 
 ```text
 K0 Factsource Sync / Docs Rebase
@@ -67,7 +69,7 @@ K6 Golden Cases / Eval Plan
 K7 Acceptance / Freeze Plan
 ```
 
-Readiness recommendation:
+Readiness 推荐：
 
 ```text
 ALLOW_GATEK_PLAN_CLOSE: YES
@@ -80,17 +82,20 @@ ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
 
-## 4. DH-GATEK-DECISION-PIPELINE-MVP-WO（WORK ORDER artifact）
+## 4. DH-GATEK-DECISION-PIPELINE-MVP-WO（工单产物）
 
-本节记录当前可审查工单。WO 只授权下一步进入 K1，不授权 K2-K8 连续实施，不授权 Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
+本节记录已关闭工单。WO 已授权 K1 单批次 implementation；K1 已实现并等待 review。WO 不授权 K2-K8 连续实施，不授权 Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
 
-Work order artifact:
+工单产物：
 
 ```text
 docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
+Status: ACCEPTED / CLOSED
+K1 status: IMPLEMENTED / READY FOR REVIEW
+Next: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
 ```
 
-Batch order:
+批次顺序：
 
 ```text
 K1 Decision Contract Freeze
@@ -99,11 +104,11 @@ K3 Audit / Snapshot / Trace Persistence
 K4 Replay Read Model
 K5 Mock Provider / Provider Health / Budget / Latency
 K6 Mock NQ Dry-run Contract Tests
-K7 Golden Cases / Eval Baseline
+K7 Golden Cases / Eval 基线
 K8 Acceptance / Freeze
 ```
 
-Ordering constraints:
+顺序约束：
 
 ```text
 K1 after review before K2
@@ -115,7 +120,7 @@ Before GateK MVP closed: no Integration-1 runtime, no LangGraph runtime
 LangGraph GateL or later
 ```
 
-DecisionOutput hardening:
+DecisionOutput 加固：
 
 ```text
 decisionType = READ_ONLY_RECOMMENDATION
@@ -131,7 +136,7 @@ free-text final output forbidden
 real trading instruction forbidden
 ```
 
-Readiness decision:
+Readiness 决策：
 
 ```text
 ALLOW_WO_CLOSE: YES
@@ -160,6 +165,7 @@ LIVE trading forbidden
 NQ mutation forbidden
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
+K2 DecisionOrchestrator Skeleton: NOT STARTED
 ```
 
 ## 5. Historical / superseded / deferred 内容
@@ -197,14 +203,15 @@ LIVE trading                                    forbidden
 ## 7. 下一轮 Codex 开工提示词草稿
 
 ```text
-你在 decision-hub 仓库 dev 分支上工作。任务名：DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE。
+你在 decision-hub 仓库 dev 分支上工作。任务名：DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW。
 
-目标：只执行 K1 Decision Contract Freeze。冻结 DecisionRequest / DecisionOutput /
-DecisionAction / forbiddenActions / DecisionAuditEvent / DecisionTraceStep 的 domain contract
-与 JSON schema，并补齐 K1 contract tests。不要实现 K2-K8。
+目标：只读 review K1 Decision Contract Freeze 的实现、schema、contract tests、docs 和验证证据。
+判断是否允许 K1 close；不要实现 K2。
 
 禁止：
 - 不实现 DecisionOrchestrator
+- 不修改生产代码
+- 不修改测试代码
 - 不新增 API
 - 不新增 migration
 - 不实现真实 NQ client

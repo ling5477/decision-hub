@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.guidinglight/contracts/json-schema/dh-decision-output.schema.json",
+  "title": "DhDecisionOutput",
+  "description": "GateK K1 structured read-only recommendation output contract. The payload is JSON data only and carries no execution authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "traceId",
+    "tenantId",
+    "decisionType",
+    "action",
+    "status",
+    "riskLevel",
+    "policyStatus",
+    "providerStatus",
+    "forbiddenActions",
+    "createdAt",
+    "schemaVersion"
+  ],
+  "properties": {
+    "requestId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "traceId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenantId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decisionType": {
+      "type": "string",
+      "enum": ["READ_ONLY_RECOMMENDATION"]
+    },
+    "action": {
+      "type": "string",
+      "enum": ["ABSTAIN", "OBSERVE", "NO_TRADE", "LONG_BIAS", "SHORT_BIAS"],
+      "default": "ABSTAIN"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ABSTAINED", "OBSERVATION_ONLY", "DIRECTIONAL_BIAS", "BLOCKED", "INVALID"]
+    },
+    "riskLevel": {
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "BLOCKED", "UNKNOWN"]
+    },
+    "policyStatus": {
+      "type": "string",
+      "enum": ["ALLOWED", "DENIED", "REVIEW_REQUIRED", "INVALID", "BLOCKED"]
+    },
+    "providerStatus": {
+      "type": "string",
+      "enum": [
+        "NOT_CALLED",
+        "MOCKED",
+        "SUCCESS",
+        "TIMEOUT",
+        "FAILED",
+        "UNTRUSTED",
+        "BUDGET_EXCEEDED",
+        "DISABLED"
+      ]
+    },
+    "forbiddenActions": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "default": ["PLACE_ORDER", "CANCEL_ORDER", "MUTATE_NQ_STATE", "READ_NQ_DB", "WRITE_NQ_DB"],
+      "items": {
+        "type": "string",
+        "enum": ["PLACE_ORDER", "CANCEL_ORDER", "MUTATE_NQ_STATE", "READ_NQ_DB", "WRITE_NQ_DB"]
+      },
+      "allOf": [
+        { "contains": { "const": "PLACE_ORDER" } },
+        { "contains": { "const": "CANCEL_ORDER" } },
+        { "contains": { "const": "MUTATE_NQ_STATE" } },
+        { "contains": { "const": "READ_NQ_DB" } },
+        { "contains": { "const": "WRITE_NQ_DB" } }
+      ]
+    },
+    "reasonCodes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    }
+  }
+}
