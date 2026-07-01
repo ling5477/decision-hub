@@ -1503,3 +1503,67 @@ canonical  RFC3339 / ISO-8601 UTC Z（例 2026-06-15T12:34:56Z）；DH/NQ 均拒
 边界       未修改 NQ 仓库；未改 DH Java production / test code；未新增 API / migration；未改 contracts / golden_cases；未真实 HTTP；未接 NQ runtime；未接真实 provider；未接 AI / LangGraph runtime；未读取密钥；未开启 LIVE。
 准入决定   DH-GATEK-DECISION-PIPELINE-MVP-PLAN 已完成 docs-only 计划产物并通过 Git / Maven / quality 验证；下一步仅允许进入 DH-GATEK-DECISION-PIPELINE-MVP-WO，不允许直接实现 runtime。
 ```
+
+## 44. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-WO 验证记录（docs-only / work-order-only）
+
+```text
+日期       2026-07-01
+阶段       DH-GATEK-DECISION-PIPELINE-MVP-WO（WORK_ORDER + IMPLEMENTATION_BATCH_DESIGN + CONTRACT_FREEZE_PREP + AUDIT_REPLAY_PLANNING + SECURITY_BOUNDARY + NO_LIVE_TRADE）
+范围       新增 GateK Decision Pipeline MVP K1-K8 可执行工单，并同步 docs/current 当前事实源；不改 Java 生产代码、测试代码、API、migration、contracts、golden_cases、runtime 配置或 NQ 仓库
+
+命令       Get-Location
+结果       F:\project\decision-hub
+
+命令       git branch --show-current
+结果       dev
+
+命令       git status --short
+结果       仅 docs/current 文档变更；新增 docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md；未出现代码、测试、contracts、golden_cases 或 migration 变更
+
+命令       git diff --check
+结果       通过；仅 Windows LF -> CRLF warning，无 whitespace error
+
+命令       git diff --stat
+结果       执行成功；tracked docs/current 文件存在 diff；新增 WO 文件由 git status 标识为 untracked，未自动 stage
+
+命令       git diff --name-only
+结果       仅 docs/current/README.md、docs/current/ROADMAP.md、docs/current/STATUS.md、docs/current/WORK_ORDER.md 出现在 tracked diff；新增 WO 文件由 git status 标识为 untracked
+
+命令       rg current / next 状态残留扫描
+结果       未发现把当前阶段写回 PLAN / READY FOR REVIEW 或 WO / NOT STARTED 的残留；历史记录段落未作为当前事实源使用
+
+命令       rg readiness forbidden YES 扫描
+结果       未发现 ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: YES、ALLOW_INTEGRATION_1_RUNTIME: YES、ALLOW_AGENT_PHASE: YES、ALLOW_LANGGRAPH_RUNTIME: YES 或 ALLOW_LIVE: YES
+
+命令       mvn test
+初始结果   未进入测试执行；本机全局 Maven settings / repository 阻断：
+           1) D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml line 227 存在 Unrecognised tag: profiles warning；
+           2) D:\Tool\Maven\maven-repository\org\springframework\boot\spring-boot-starter-parent\3.5.10 写 tracking file 时 FileAlreadyExistsException。
+最终命令   mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml test
+最终结果   BUILD SUCCESS；reactor 19/19 SUCCESS；Total time 43.903 s；Finished at 2026-07-01T13:21:04+08:00
+补充       dh-app 中既有 PostgresContainerSmokeTest 因本机无可用 Docker 环境 skipped 1；其余测试无 failure / error
+
+命令       mvn -Pquality validate
+初始结果   未进入 quality 执行；本机全局 Maven settings / repository 阻断，错误与 mvn test 初始结果一致
+最终命令   mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality validate
+最终结果   BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check 通过；Total time 7.450 s；Finished at 2026-07-01T13:21:33+08:00
+
+Work order result:
+           新增 K1-K8 批次工单：K1 Decision Contract Freeze；K2 DecisionOrchestrator Skeleton；
+           K3 Audit / Snapshot / Trace Persistence；K4 Replay Read Model；
+           K5 Mock Provider / Provider Health / Budget / Latency；
+           K6 Mock NQ Dry-run Contract Tests；K7 Golden Cases / Eval Baseline；
+           K8 Acceptance / Freeze。
+
+Readiness decision:
+           ALLOW_WO_CLOSE: YES
+           ALLOW_K1_IMPLEMENTATION: YES
+           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO
+           ALLOW_INTEGRATION_1_RUNTIME: NO
+           ALLOW_AGENT_PHASE: NO
+           ALLOW_LANGGRAPH_RUNTIME: NO
+           ALLOW_LIVE: NO
+
+边界       未修改 NQ 仓库；未改 DH Java production / test code；未新增 API / migration；未改 contracts / golden_cases；未真实 HTTP；未接 NQ runtime；未接真实 provider；未接 AI / LangGraph runtime；未读取密钥；未开启 LIVE。
+准入决定   DH-GATEK-DECISION-PIPELINE-MVP-WO 已完成 docs-only 工单产物并通过 Git / Maven / quality 复验；下一步仅允许进入 K1 Decision Contract Freeze，且必须单批 review，不允许全量 GateK implementation。
+```

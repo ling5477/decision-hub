@@ -12,9 +12,11 @@ Stage1:       Boundary Freeze + Agent Runtime Skeleton    [completed]
 Stage1-CLOSE: 旧链路 @Deprecated + 文档单源 + ArchUnit    [completed]
 Integration-0: 只读边界、契约冻结、权限模型、审计模型        [closed / accepted]
 DH-GATEK-DECISION-PIPELINE-MVP-PLAN:
-              只读 Decision Pipeline MVP 规划               [plan / ready for review]
+              只读 Decision Pipeline MVP 规划               [accepted / closed]
 DH-GATEK-DECISION-PIPELINE-MVP-WO:
-              Decision Pipeline MVP 可执行工单               [next / not started]
+              Decision Pipeline MVP 可执行工单               [work order / ready for review]
+DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE:
+              Decision Contract Freeze                     [next / not started]
 Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
 Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
@@ -66,7 +68,7 @@ dep-tree.txt 重新生成
 
 ## 4. Integration-0 / Decision Pipeline MVP 当前路线
 
-Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `PLAN / READY FOR REVIEW`。下一步是 `DH-GATEK-DECISION-PIPELINE-MVP-WO`（NOT STARTED），不得跳过 WO 直接 implementation。
+Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `WORK ORDER / READY FOR REVIEW`。下一步是 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE`（NOT STARTED），不得跳过 K1 review 或批次 review 直接全量 implementation。
 
 当前状态：
 
@@ -81,9 +83,11 @@ RealClient forbidden
 real provider forbidden
 LIVE DISABLED
 NQ mutation forbidden
-Current GateK plan artifact docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md
-Current GateK plan status PLAN / READY FOR REVIEW
-Next concrete action DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED
+GateK plan artifact docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md
+GateK plan status ACCEPTED / CLOSED
+Current GateK work order artifact docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
+Current GateK work order status WORK ORDER / READY FOR REVIEW
+Next concrete action DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline GateN
 ```
@@ -125,13 +129,14 @@ Decision Pipeline MVP PLAN 必须明确禁止：
 不输出 BUY / SELL / PLACE_ORDER / CANCEL_ORDER
 ```
 
-GateK Plan 验收：
+GateK WO 验收：
 
 ```text
-已输出 DH-GATEK-DECISION-PIPELINE-MVP-PLAN 文档
-只读建议、证据、策略、审计、snapshot / trace / replay 规则可审查
-明确 DecisionOutput READ_ONLY_RECOMMENDATION 与 ABSTAIN / fail-closed 规则
-列出 forbidden 能力清单和回滚 / 停止条件
+已输出 DH-GATEK-DECISION-PIPELINE-MVP-WO 文档
+已拆分 K1-K8 implementation batches
+已明确每批 allowed / forbidden files、生产/测试/API/migration 权限、测试、验收和回滚
+已固化 DecisionOutput READ_ONLY_RECOMMENDATION 与 ABSTAIN / fail-closed 规则
+已固化 forbiddenActions 与批次顺序约束
 git diff --check 通过
 本轮按用户要求尝试 mvn test 与 mvn -Pquality validate，并在 TESTING.md 记录真实结果
 ```

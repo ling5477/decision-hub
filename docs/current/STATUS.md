@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW
-> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED
+> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-WO / READY FOR REVIEW
+> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -30,8 +30,9 @@ RealClient forbidden.
 real provider forbidden.
 LIVE DISABLED.
 NQ mutation forbidden.
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW.
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED.
+GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-WO / READY FOR REVIEW.
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
@@ -144,24 +145,27 @@ Runtime integration: NOT STARTED
 DH integrated: NO
 AI / Agent runtime: NOT STARTED
 LIVE: DISABLED
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED
+GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-WO / READY FOR REVIEW
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
 
 - 本轮新增 DH 文档治理 skill：`.agents/skills/dh-docs-writer/SKILL.md`。
 - DH 文档任务必须继续以 `docs/current` 为事实源；root `README.md` 只做入口和简要状态。
-- 后续 Decision Pipeline MVP PLAN 可以规划 DecisionRequest / DecisionOutput / DecisionOrchestrator / Snapshot / Trace / Replay / Audit，但未实现前不得写成 done。
+- 后续 K1 只能冻结 DecisionRequest / DecisionOutput / DecisionAction / forbiddenActions / DecisionAuditEvent / DecisionTraceStep 的 domain contract 与 JSON schema，并补齐 K1 contract tests；K2-K8 仍需逐批 review。
 - 第一版 DecisionOutput 必须保持 `READ_ONLY_RECOMMENDATION`；默认无证据或 provider 失败时 `ABSTAIN`；policy denied 与 audit 写失败必须 fail-closed。
 - 当前仍禁止真实 NQ runtime、真实 provider、真实 HTTP、LangGraph runtime、AI / Agent runtime、LIVE、NQ DB 读写、NQ mutation、下单和撤单。
 
-## 1.5 DH GateK Decision Pipeline MVP PLAN（2026-07-01，READY FOR REVIEW）
+## 1.5 DH GateK Decision Pipeline MVP PLAN（2026-07-01，ACCEPTED / CLOSED）
 
 ```text
 Plan artifact: docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md
-Plan status: PLAN / READY FOR REVIEW
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED
+Plan status: ACCEPTED / CLOSED
+Work order artifact: docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
+Work order status: WORK ORDER / READY FOR REVIEW
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED
 Decision pipeline implementation: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -175,6 +179,28 @@ LIVE: DISABLED
 - Readiness recommendation：`ALLOW_GATEK_PLAN_CLOSE: YES`；`ALLOW_GATEK_WO: YES`；`ALLOW_DECISION_PIPELINE_IMPLEMENTATION: NO`；`ALLOW_INTEGRATION_1_DRYRUN_PLAN_REBASE_N: YES`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 - 旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 继续保持 `SUPERSEDED / REBASE_REQUIRED`，只保留安全边界作为参考；后续 Integration-1 必须基于 NQ GateN 重新规划。
 - 本计划不新增 API path、不新增 migration、不新增 Controller / Service / Repository / Client、不接真实 HTTP、不接真实 provider、不接 AI / LangGraph、不改 NQ、不启动 Integration-1、不启用 LIVE。
+
+## 1.6 DH GateK Decision Pipeline MVP WO（2026-07-01，READY FOR REVIEW）
+
+```text
+Work order artifact: docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
+Work order status: WORK ORDER / READY FOR REVIEW
+Source plan: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / ACCEPTED / CLOSED
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED
+Decision pipeline implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+DH integrated: NO
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+- 本轮只做 docs-only / work-order-only：新增 GateK Decision Pipeline MVP K1-K8 工单拆解，不写生产代码、不写测试代码、不新增 API、不新增 migration、不新增 Controller / Service / Repository / Client、不接 provider、不接 NQ、不接 AI / LangGraph、不启用 LIVE。
+- K1-K8 顺序锁定：K1 review 后才允许 K2；K2 review 后才允许 K3；K3 review 后才允许 K4；K1-K5 完成后才允许 K6；K1-K7 完成后才允许 K8。
+- DecisionOutput hardening 固化为 `READ_ONLY_RECOMMENDATION`，action 仅允许 `ABSTAIN / OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS`，默认 `ABSTAIN`；no evidence / provider failure -> `ABSTAIN`；policy denied -> `BLOCKED` or `ABSTAIN` fail-closed；high risk 禁止 `LONG_BIAS / SHORT_BIAS`。
+- `forbiddenActions` 必须包含 `PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE / READ_NQ_DB / WRITE_NQ_DB`；最终输出必须是 structured JSON，不允许 free-text final output，不允许真实交易指令。
+- Readiness decision：`ALLOW_WO_CLOSE: YES`；`ALLOW_K1_IMPLEMENTATION: YES`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 2. 当前已完成
 

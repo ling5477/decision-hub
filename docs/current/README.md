@@ -1,12 +1,12 @@
 # Decision Hub Current Docs
 
-> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW
-> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED
+> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-WO / READY FOR REVIEW
+> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED
 > Source of truth: docs/current
 >
 > NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 NOT STARTED；no RealClient；no real provider；no trading ability；LIVE DISABLED。
 > Security baseline: FULL；fail-closed state: FULL；P1-4 residual CLOSED；header alignment CLOSED；timestamp alignment CLOSED；code reality audit blockers fixed。
-> Current planning artifact: `DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。当前不允许接 LangGraph、LLM、真实 NQ runtime、真实 provider、真实 HTTP 或 LIVE。
+> Current work-order artifact: `DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`；source plan `DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 已 `ACCEPTED / CLOSED`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。当前不允许接 LangGraph、LLM、真实 NQ runtime、真实 provider、真实 HTTP 或 LIVE。
 
 ## 1. 当前定位
 
@@ -50,6 +50,7 @@ docs/current/WORKFLOW.md
 docs/current/WORK_ORDER.md
 docs/current/DH_NQ_INTEGRATION.md
 docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md
+docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
 docs/current/DH_REFACTOR_STAGE1_STATUS.md
 docs/current/STAGE1_CLOSE_WORKLOG.md
 ```
@@ -184,10 +185,10 @@ Stage3-B3 DH Backtest Request Adapter IMPL（2026-05-26，DH 端可插拔骨架�
              零下单 / 绕风控 / 重写回测核心；零 TradingAgents Python / Kronos / global-stock-data
 ```
 
-下一步只允许进入：
+当前下一步只允许进入：
 
 ```text
-Integration-0-PLAN。
+DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE。
 
 执行口径：
   - Stage3-B3 DH Backtest Request Adapter IMPL 已于 2026-05-26 完成：
@@ -200,8 +201,10 @@ Integration-0-PLAN。
     * dh-app ArchUnit 扩到 12 条（新增 R11 HTTP 客户端隔离 + R12 backtest 端口隔离）；
     * 8 个 B3 测试类共 39 cases 全绿；190 tests 全绿；
     * 零真实 HTTP；零 NQ 仓库改动；零下单 / 风控旁路 / 实盘 / 前端。
-  - Integration-0-PLAN 不是 implementation；只能输出计划、边界、契约草案、权限模型、
-    审计模型、验收清单和风险清单。
+  - DH-GATEK-DECISION-PIPELINE-MVP-PLAN 已 ACCEPTED / CLOSED。
+  - DH-GATEK-DECISION-PIPELINE-MVP-WO 已 READY FOR REVIEW。
+  - K1 只能冻结 DecisionRequest / DecisionOutput / DecisionAction / forbiddenActions /
+    DecisionAuditEvent / DecisionTraceStep 的 domain contract 与 JSON schema，并补齐 K1 contract tests。
   - 不接 NQ；不新增 NQ client / RealClient / real provider；不触碰 LIVE trading；
     不修改 NQ 状态；不读取或写入 NQ DB；不启动 Paper Run。
   - Stage3-B2 / NQ Feedback Outbox / 真实 HTTP / event / NQ client / RealClient / real provider

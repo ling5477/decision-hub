@@ -3123,3 +3123,77 @@ Integration-0 仍 `CLOSED / ACCEPTED`，但只代表 contract / mock / documenta
 
 ### 下一步
 进入 `DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED` 的 work order 评审与冻结；不得跳过 WO 直接实现 Decision Pipeline runtime。
+
+## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-WO
+
+### 范围
+完成 `DH-GATEK-DECISION-PIPELINE-MVP-WO` docs-only / work-order-only 工单设计：基于已 `ACCEPTED / CLOSED` 的 GateK plan，新增 K1-K8 可执行批次，并同步 `docs/current` 入口、状态、路线图、当前工单、验证记录和工作日志。本轮不改 Java 生产代码、测试代码、API、migration、contracts、golden_cases、runtime 配置或 NQ 仓库。
+
+### 修改文件
+- 新增 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`：定义 K1-K8 批次目标、allowed / forbidden files、生产/测试/API/migration 权限、主要类/接口、schema/table、测试、验证命令、边界、退出条件、回滚方式和下一批次。
+- 更新 `docs/current/README.md`：把当前阶段同步为 `DH-GATEK-DECISION-PIPELINE-MVP-WO / READY FOR REVIEW`，下一阶段同步为 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED`，并加入 WO 文档入口。
+- 更新 `docs/current/STATUS.md`：把 GateK plan 标记为 `ACCEPTED / CLOSED`，新增 §1.6 WO ready 记录、K1 next、DecisionOutput hardening 和 readiness decision。
+- 更新 `docs/current/ROADMAP.md`：把路线推进到 WO ready / K1 next，并替换 GateK WO 验收条件。
+- 更新 `docs/current/WORK_ORDER.md`：把当前工单入口从“产出 WO”切换为“K1 Contract Freeze”，补充 WO artifact、批次顺序、DecisionOutput hardening、readiness decision 和 K1 开工提示词。
+- 更新 `docs/current/TESTING.md`、`docs/current/WORKLOG.md`：记录本轮真实验证结果、Maven 本机环境 RCA、边界确认和工作日志。
+
+### Work order result
+K1-K8 批次如下：
+
+```text
+K1 Decision Contract Freeze
+K2 DecisionOrchestrator Skeleton
+K3 Audit / Snapshot / Trace Persistence
+K4 Replay Read Model
+K5 Mock Provider / Provider Health / Budget / Latency
+K6 Mock NQ Dry-run Contract Tests
+K7 Golden Cases / Eval Baseline
+K8 Acceptance / Freeze
+```
+
+顺序锁定：
+
+```text
+K1 after review before K2
+K2 after review before K3
+K3 after review before K4
+K1-K5 complete before K6
+K1-K7 complete before K8
+Before GateK MVP closed: no Integration-1 runtime, no LangGraph runtime
+LangGraph GateL or later
+```
+
+### Key decisions
+- `DecisionOutput.decisionType` 固定为 `READ_ONLY_RECOMMENDATION`。
+- action vocabulary 仅允许 `ABSTAIN / OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS`。
+- 默认 `ABSTAIN`；no evidence -> `ABSTAIN`；provider failure -> `ABSTAIN`；policy denied -> `BLOCKED` or `ABSTAIN` fail-closed；high risk 禁止 `LONG_BIAS / SHORT_BIAS`。
+- `forbiddenActions` 必须包含 `PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE / READ_NQ_DB / WRITE_NQ_DB`。
+- 最终输出必须为 structured JSON，不允许 free-text final output，不允许真实交易指令。
+
+### Readiness
+- `ALLOW_WO_CLOSE: YES`
+- `ALLOW_K1_IMPLEMENTATION: YES`
+- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`
+- `ALLOW_INTEGRATION_1_RUNTIME: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 验证
+- `Get-Location`：`F:\project\decision-hub`。
+- `git branch --show-current`：`dev`。
+- `git status --short`：仅 docs/current 文档变更；新增 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`。
+- `git diff --check`：通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+- `git diff --stat`：执行成功；tracked docs/current 文件存在 diff，新增 WO 文件由 `git status` 标识为 untracked。
+- 状态残留扫描：未发现把当前阶段写回 PLAN ready 或 WO not started 的残留。
+- readiness forbidden YES 扫描：未发现 `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: YES`、`ALLOW_INTEGRATION_1_RUNTIME: YES`、`ALLOW_AGENT_PHASE: YES`、`ALLOW_LANGGRAPH_RUNTIME: YES` 或 `ALLOW_LIVE: YES`。
+- 裸 `mvn test`：被本机全局 Maven settings / repository 阻断，未进入测试执行；关键错误为 `settings.xml` line 227 `Unrecognised tag: profiles` 与 `FileAlreadyExistsException`。
+- `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml test`：BUILD SUCCESS；reactor 19/19 SUCCESS；既有 `PostgresContainerSmokeTest` 因本机无可用 Docker 环境 skipped 1。
+- 裸 `mvn -Pquality validate`：被同一本机 Maven 环境问题阻断，未进入 quality 执行。
+- `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check 通过。
+
+### 边界确认
+Integration-0 仍 `CLOSED / ACCEPTED`，但只代表 contract / mock / documentation work line；Integration-1 `NOT STARTED`；Runtime integration `NOT STARTED`；DH integrated `NO`；AI / Agent runtime `NOT STARTED`；LangGraph runtime `NOT STARTED`；LIVE `DISABLED`。未接真实 NQ runtime、真实 provider、RealClient、真实 HTTP、交易、NQ DB 或凭证。
+
+### 下一步
+进入 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED`，只允许单批执行 K1 Decision Contract Freeze；不得跳过 K1 review 或全量 GateK implementation。
