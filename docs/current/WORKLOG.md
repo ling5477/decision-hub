@@ -3084,3 +3084,42 @@ Integration-0 safety gate 仍为 CLOSED / ACCEPTED；P1-4 residual rate limit / 
 
 ### 准入
 docs / skill 变更已完成 Git 级验证。Maven 回归受外部依赖下载和本地 Maven 仓库状态阻塞，需在依赖仓库可用或本地 Maven 仓库修复后重跑 `mvn test` 与 `mvn -Pquality validate`。下一步保持 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN`，不得回退到 superseded 的旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK`。
+
+## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-PLAN
+
+### 范围
+完成 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN` docs-only / plan-only 规划：新增 Decision Pipeline MVP 当前计划文档，并同步附件允许范围内的 `docs/current` 入口、状态、路线图、工单、API 说明、验证记录和工作日志。本轮不改 Java 生产代码、测试代码、API、migration、contracts、golden_cases、runtime 配置或 NQ 仓库。
+
+### 修改文件
+- 新增 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`：定义 K0-K7 分批计划、Decision contract、audit / snapshot / trace / replay、mock provider、mock NQ dry-run contract test、golden cases、安全矩阵、验收与 readiness gate。
+- 更新 `docs/current/README.md`：把当前阶段同步为 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW`，下一阶段同步为 `DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED`，并加入新计划文档入口。
+- 更新 `docs/current/STATUS.md`、`docs/current/ROADMAP.md`、`docs/current/WORK_ORDER.md`：同步 GateK plan ready 状态、K0-K7 范围、next concrete action 和禁止直接实现 runtime 的边界。
+- 更新 `docs/current/API.md`：明确 Decision Pipeline API / runtime 仍 NOT IMPLEMENTED，旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 仍 `SUPERSEDED / REBASE_REQUIRED`。
+- 更新 `docs/current/TESTING.md`、`docs/current/WORKLOG.md`：记录本轮真实验证结果、Maven 配置 RCA、边界确认和工作日志。
+
+### Plan result
+计划产物将 GateK MVP 拆成 K0-K7：Factsource Sync、Decision Contract Freeze、DecisionOrchestrator Skeleton Plan、Audit / Snapshot / Trace / Replay Plan、Mock Provider / Provider Health Plan、Mock NQ Dry-run Contract Test Plan、Golden Cases / Eval Plan、Acceptance / Freeze Plan。目标 contract 只允许 `READ_ONLY_RECOMMENDATION`，候选动作限定为 `ABSTAIN | OBSERVE | NO_TRADE | LONG_BIAS | SHORT_BIAS`，禁止 `BUY / SELL / PLACE_ORDER / CANCEL_ORDER / NQ mutation`。
+
+### Readiness
+- `ALLOW_GATEK_PLAN_CLOSE: YES`
+- `ALLOW_GATEK_WO: YES`
+- `ALLOW_DECISION_PIPELINE_IMPLEMENTATION: NO`
+- `ALLOW_INTEGRATION_1_DRYRUN_PLAN_REBASE_N: YES`
+- `ALLOW_INTEGRATION_1_RUNTIME: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 验证
+- `git status --short`：仅 `docs/current` 计划与状态同步文件变更；新增 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`。
+- `git diff --check`：通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+- `git diff -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases`：空 diff。
+- 敏感词扫描：仅命中文档禁止清单和安全边界文字；未发现真实凭证值。
+- `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml test`：BUILD SUCCESS；reactor 19/19 SUCCESS；既有 `PostgresContainerSmokeTest` 因本机无可用 Docker 环境 skipped 1。
+- `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS。
+
+### 边界确认
+Integration-0 仍 `CLOSED / ACCEPTED`，但只代表 contract / mock / documentation work line；Integration-1 `NOT STARTED`；Runtime integration `NOT STARTED`；DH integrated `NO`；AI / Agent runtime `NOT STARTED`；LIVE `DISABLED`。未接真实 NQ runtime、真实 provider、RealClient、真实 HTTP、交易、NQ DB 或凭证。
+
+### 下一步
+进入 `DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED` 的 work order 评审与冻结；不得跳过 WO 直接实现 Decision Pipeline runtime。

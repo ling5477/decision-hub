@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: DH-CODE-REALITY-AUDIT-FIX-PACK
-Next stage:    DH-CODE-REALITY-AUDIT-FIX-PACK-CLOSE
+Current stage: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW
+Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -16,14 +16,15 @@ Integration-0:        CLOSED / ACCEPTED
 Header alignment:     CLOSED
 Timestamp alignment:  CLOSED / ACCEPTED
 Code reality audit:   DONE
-GateK-PLAN:           BLOCKED BY DH-CODE-REALITY-AUDIT-FIX-PACK
+GateK-PLAN:           READY FOR REVIEW
+Decision pipeline API: NOT IMPLEMENTED
 Integration-1:        NOT STARTED
 Runtime integration:  NOT STARTED
+AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为 API 单源；本 fix pack 不新增 path、不新增 migration、不新增 RealClient / provider，
-不启动 Integration-1 runtime。
+OpenAPI 仍为 API 单源；GateK Decision Pipeline MVP PLAN 不新增 path、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` / `DecisionTrace` / audit / replay 目前只在 `DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 中作为 planning contract，尚未成为已实现 API。
 
 ## 2. 已实现端点
 
@@ -47,9 +48,9 @@ POST /legacy/runs                                    旧链路（@Deprecated，�
 GET  /legacy/runs/{runId}                            旧链路（@Deprecated，必须认证且 tenant 匹配）
 ```
 
-## 3. Stage2-PoC-VERIFY 计划上线端点
+## 3. Historical / deferred API directions（not implemented current API）
 
-OpenAPI components 已就位，路径以注释占位，待 Stage2-PoC VERIFY 阶段在装好 Docker 的 CI 环境上线：
+以下方向是 historical / deferred / gated，不是当前 GateK Plan 的已实现端点，也不得作为当前 implementation 入口：
 
 ```text
 POST /api/ai/tools/forecast                       -> ForecastArtifact
@@ -58,6 +59,8 @@ GET  /api/ai/research/snapshots/{snapshotId}      -> ExternalMarketSnapshot
 GET  /api/ai/research-runs/{runId}/reflections    -> ReflectionEntry[]
 GET  /api/ai/research-runs/{runId}/checkpoints    -> CheckpointEntry[]
 ```
+
+GateK Decision Pipeline MVP planned contracts remain documentation-only until a later accepted WO authorizes code, schema, OpenAPI, migration, and test changes.
 
 ## 4. Stage1 最小 API 集合（已实现，留作历史记录）
 

@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: Integration-0 safety gate CLOSED / ACCEPTED
-> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-PLAN
+> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW
+> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -30,7 +30,8 @@ RealClient forbidden.
 real provider forbidden.
 LIVE DISABLED.
 NQ mutation forbidden.
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN.
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW.
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
@@ -143,7 +144,8 @@ Runtime integration: NOT STARTED
 DH integrated: NO
 AI / Agent runtime: NOT STARTED
 LIVE: DISABLED
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
@@ -153,6 +155,26 @@ NQ current planning baseline: GateN
 - 后续 Decision Pipeline MVP PLAN 可以规划 DecisionRequest / DecisionOutput / DecisionOrchestrator / Snapshot / Trace / Replay / Audit，但未实现前不得写成 done。
 - 第一版 DecisionOutput 必须保持 `READ_ONLY_RECOMMENDATION`；默认无证据或 provider 失败时 `ABSTAIN`；policy denied 与 audit 写失败必须 fail-closed。
 - 当前仍禁止真实 NQ runtime、真实 provider、真实 HTTP、LangGraph runtime、AI / Agent runtime、LIVE、NQ DB 读写、NQ mutation、下单和撤单。
+
+## 1.5 DH GateK Decision Pipeline MVP PLAN（2026-07-01，READY FOR REVIEW）
+
+```text
+Plan artifact: docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md
+Plan status: PLAN / READY FOR REVIEW
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED
+Decision pipeline implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+DH integrated: NO
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+- 本轮只做 docs-only / plan-only：规划 K0-K7、DecisionRequest / DecisionOutput、DecisionOrchestrator skeleton、snapshot / trace / audit / replay、mock provider、mock NQ dry-run contract tests、provider health / budget / latency、golden cases / eval、acceptance / freeze。
+- Readiness recommendation：`ALLOW_GATEK_PLAN_CLOSE: YES`；`ALLOW_GATEK_WO: YES`；`ALLOW_DECISION_PIPELINE_IMPLEMENTATION: NO`；`ALLOW_INTEGRATION_1_DRYRUN_PLAN_REBASE_N: YES`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- 旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 继续保持 `SUPERSEDED / REBASE_REQUIRED`，只保留安全边界作为参考；后续 Integration-1 必须基于 NQ GateN 重新规划。
+- 本计划不新增 API path、不新增 migration、不新增 Controller / Service / Repository / Client、不接真实 HTTP、不接真实 provider、不接 AI / LangGraph、不改 NQ、不启动 Integration-1、不启用 LIVE。
 
 ## 2. 当前已完成
 
@@ -511,13 +533,13 @@ DH-CODEX-WORKFLOW-FINAL-CLEANUP
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（DH-GATEK-DECISION-PIPELINE-MVP-PLAN）
+## 4. 下一阶段（DH-GATEK-DECISION-PIPELINE-MVP-WO）
 
 ```text
-唯一下一步是 DH-GATEK-DECISION-PIPELINE-MVP-PLAN。
+唯一下一步是 DH-GATEK-DECISION-PIPELINE-MVP-WO（NOT STARTED）。
 
-Decision Pipeline MVP PLAN 只允许：
-- 输出规划文档
+Decision Pipeline MVP WO 只允许：
+- 基于 DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md 输出可执行 work order
 - 定义 read-only recommendation 边界
 - 定义 evidence / risk / policy / audit trace 字段
 - 定义 DecisionRequest / DecisionResponse / DecisionTrace 草案
@@ -526,7 +548,8 @@ Decision Pipeline MVP PLAN 只允许：
 - 定义 provider unavailable / no evidence / audit write failure fail-closed 规则
 - 定义验收清单和风险清单
 
-Decision Pipeline MVP PLAN 不允许：
+Decision Pipeline MVP WO 不允许：
+- 直接开始 implementation
 - 实现真实 NQ client
 - 实现 RealClient / RealNqBacktestClient
 - 接真实 HTTP / event 到 NQ
@@ -547,6 +570,8 @@ Stage2-PoC、Stage3-B2/B3/B4 的真实接入、联调、RealClient 或 NQ mutati
 - DH-AUDIT-FIX completed
 - NQ integration not started
 - Integration-0 safety gate CLOSED / ACCEPTED
+- DH-GATEK-DECISION-PIPELINE-MVP-PLAN READY FOR REVIEW
+- Decision pipeline implementation not started
 - Integration-1 not started
 - Runtime integration not started
 - DH integrated NO

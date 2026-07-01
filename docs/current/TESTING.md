@@ -1459,3 +1459,47 @@ canonical  RFC3339 / ISO-8601 UTC Z（例 2026-06-15T12:34:56Z）；DH/NQ 均拒
 边界       未修改 NQ 仓库；未改 DH 生产代码；未改 DH 测试代码；未新增 API；未新增 migration；未真实 HTTP；未接 NQ runtime；未接真实 provider；未接 AI / LangGraph；未读取密钥；未开启 LIVE。
 准入决定   docs / skill 变更已完成 Git 级验证；Maven 回归被外部依赖下载阻塞，后续需在依赖仓库可用或本地 Maven 仓库修复后重跑 mvn test / mvn -Pquality validate。
 ```
+
+## 43. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-PLAN 验证记录（docs-only / plan-only）
+
+```text
+日期       2026-07-01
+阶段       DH-GATEK-DECISION-PIPELINE-MVP-PLAN（ARCHITECTURE_PLAN + CONTRACT_PLAN + DECISION_PIPELINE_PLAN + AUDIT_REPLAY_PLAN + SECURITY_BOUNDARY + NO_LIVE_TRADE）
+范围       新增 Decision Pipeline MVP 计划并同步 docs/current 当前事实源；不改 Java 生产代码、测试代码、API、migration、contracts、golden_cases、runtime 配置或 NQ 仓库
+
+命令       Get-Location
+结果       F:\project\decision-hub
+
+命令       git branch --show-current
+结果       dev
+
+命令       git status --short
+结果       仅 docs/current 计划与状态同步文件变更；新增 docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md；未出现代码、测试、contracts、golden_cases 或 migration 变更
+
+命令       git diff --check
+结果       通过；仅 Windows LF -> CRLF warning，无 whitespace error
+
+命令       git diff --stat
+结果       tracked docs/current 文件存在 diff；新增计划文件由 git status 标识为 untracked，未自动 stage
+
+命令       git diff -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases
+结果       空 diff；确认未改 DH 生产代码、测试代码、contracts 或 golden_cases
+
+命令       rg 敏感词扫描（token / cookie / API secret / passphrase / private key / exchange key / database password / real credential material）
+结果       仅命中文档禁止清单和安全边界文字；未发现真实凭证值
+
+命令       mvn test
+初始结果   默认 Maven 配置未进入测试执行：
+           1) 默认本地仓库 D:\Tool\Maven\maven-repository 写 spring-boot-starter-parent/3.5.10 tracking file 时 FileAlreadyExistsException；
+           2) 仅设置 -Dmaven.repo.local 仍受全局 settings 影响；
+           3) 仅设置 -s target/codex-maven-settings.xml 仍合并全局 Aliyun mirror，依赖下载 TLS handshake 中断。
+最终命令   mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml test
+最终结果   BUILD SUCCESS；reactor 19/19 SUCCESS；Total time 06:33；Finished at 2026-07-01T12:08:03+08:00
+补充       dh-app 中既有 PostgresContainerSmokeTest 因本机无可用 Docker 环境 skipped 1；其余测试无 failure / error
+
+命令       mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality validate
+结果       BUILD SUCCESS；reactor 19/19 SUCCESS；Total time 02:14；Finished at 2026-07-01T12:10:43+08:00
+
+边界       未修改 NQ 仓库；未改 DH Java production / test code；未新增 API / migration；未改 contracts / golden_cases；未真实 HTTP；未接 NQ runtime；未接真实 provider；未接 AI / LangGraph runtime；未读取密钥；未开启 LIVE。
+准入决定   DH-GATEK-DECISION-PIPELINE-MVP-PLAN 已完成 docs-only 计划产物并通过 Git / Maven / quality 验证；下一步仅允许进入 DH-GATEK-DECISION-PIPELINE-MVP-WO，不允许直接实现 runtime。
+```

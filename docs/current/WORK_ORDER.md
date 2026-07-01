@@ -1,14 +1,14 @@
 # Decision Hub Current Work Order
 
-> Current stage: Integration-0 safety gate CLOSED / ACCEPTED
+> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW
 > Closed:        DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment
-> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-PLAN
+> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED
 
 ## 1. 当前目标
 
-下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN`。
+下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-WO`。
 
-Decision Pipeline MVP PLAN 只允许输出规划文档，不允许实现真实模型、真实接入或交易能力：
+`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `PLAN / READY FOR REVIEW`。下一步 WO 只允许把该计划拆成可执行 implementation batches，不允许直接实现真实模型、真实接入或交易能力：
 
 ```text
 READ_ONLY_RECOMMENDATION
@@ -35,9 +35,9 @@ ArchUnit： 新增 4 条规则保护新边界
 pom：      dh-eval parent 修回 dh-bom
 ```
 
-## 3. DH-GATEK-DECISION-PIPELINE-MVP-PLAN（唯一下一步）
+## 3. DH-GATEK-DECISION-PIPELINE-MVP-PLAN（PLAN artifact）
 
-下一份工单只能以 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 为主题；启动前必须先在 `docs/current/` 下输出 Decision Pipeline MVP 规划文档。
+本节记录已输出的 planning artifact。下一份工单只能以 `DH-GATEK-DECISION-PIPELINE-MVP-WO` 为主题；启动前必须先 review `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，不得跳过 WO 直接 implementation。
 
 允许范围：
 
@@ -52,6 +52,32 @@ pom：      dh-eval parent 修回 dh-bom
 定义 provider unavailable / no evidence fail-closed 规则
 定义验收清单
 定义风险清单
+```
+
+Plan batch coverage:
+
+```text
+K0 Factsource Sync / Docs Rebase
+K1 Decision Contract Freeze
+K2 DecisionOrchestrator Skeleton Plan
+K3 Audit / Snapshot / Trace / Replay Plan
+K4 Mock Provider / Provider Health Plan
+K5 Mock NQ Dry-run Contract Test Plan
+K6 Golden Cases / Eval Plan
+K7 Acceptance / Freeze Plan
+```
+
+Readiness recommendation:
+
+```text
+ALLOW_GATEK_PLAN_CLOSE: YES
+ALLOW_GATEK_WO: YES
+ALLOW_DECISION_PIPELINE_IMPLEMENTATION: NO
+ALLOW_INTEGRATION_1_DRYRUN_PLAN_REBASE_N: YES
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
 ```
 
 当前状态必须保持：
@@ -108,11 +134,11 @@ LIVE trading                                    forbidden
 ## 6. 下一轮 Codex 开工提示词草稿
 
 ```text
-你在 decision-hub 仓库 dev 分支上工作。任务名：DH-GATEK-DECISION-PIPELINE-MVP-PLAN。
+你在 decision-hub 仓库 dev 分支上工作。任务名：DH-GATEK-DECISION-PIPELINE-MVP-WO。
 
-目标：只输出 DH 内部 Decision Pipeline MVP 的规划文档，定义 read-only recommendation、
-DecisionRequest / DecisionResponse / DecisionTrace、evidence / risk / policy / audit trace、
-ABSTAIN / NO_ACTION / POLICY_DENIED、forbiddenActions 和 fail-closed 验收标准。
+目标：只输出 DH GateK Decision Pipeline MVP 的可执行工单，把
+docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md 中 K0-K7 拆为小批次 implementation
+work order，明确每批允许文件、禁止项、测试、验收和回滚。不要写业务代码。
 
 禁止：
 - 不实现真实 NQ client
@@ -129,5 +155,5 @@ ABSTAIN / NO_ACTION / POLICY_DENIED、forbiddenActions 和 fail-closed 验收标
 - 不读取或写入 NQ DB
 - 不新增 API / migration / provider / 交易路径
 
-不要写业务代码。本轮只产出 Decision Pipeline MVP PLAN 文档草案。
+不要写业务代码。本轮只产出 Decision Pipeline MVP WO 文档草案；implementation 仍 NOT STARTED。
 ```
