@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * K2 deterministic mock signal provider。
+ * K2/K5 deterministic mock signal provider。
  *
  * <p>默认只返回 MOCKED + NO_TRADE，用于验证 orchestrator 骨架与 fail-closed 边界。构造器保留给测试注入不同 mock 状态，
- * 但明确拒绝 SUCCESS，避免把 K2 误写成真实 provider 成功路径。
+ * 但明确拒绝 SUCCESS，避免把 K2/K5 误写成真实 provider 成功路径。
  */
 public final class MockDecisionSignalProvider implements DecisionSignalProvider {
 
@@ -25,7 +25,7 @@ public final class MockDecisionSignalProvider implements DecisionSignalProvider 
   /**
    * 创建可测试的 deterministic mock provider。
    *
-   * @param status provider 状态；K2 不允许 SUCCESS
+   * @param status provider 状态；K2/K5 不允许 SUCCESS
    * @param action signal action；失败态必须为 ABSTAIN
    * @param reasonCodes signal 原因码
    */

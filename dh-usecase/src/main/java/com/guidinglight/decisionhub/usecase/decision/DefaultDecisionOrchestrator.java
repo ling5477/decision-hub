@@ -4,12 +4,13 @@ import com.guidinglight.decisionhub.domain.decision.DecisionAction;
 import com.guidinglight.decisionhub.domain.decision.DecisionOutput;
 import com.guidinglight.decisionhub.domain.decision.DecisionPolicyResult;
 import com.guidinglight.decisionhub.domain.decision.DecisionPolicyStatus;
+import com.guidinglight.decisionhub.domain.decision.DecisionProviderGuardResult;
+import com.guidinglight.decisionhub.domain.decision.DecisionProviderLatency;
 import com.guidinglight.decisionhub.domain.decision.DecisionRequest;
 import com.guidinglight.decisionhub.domain.decision.DecisionRiskLevel;
 import com.guidinglight.decisionhub.domain.decision.DecisionRiskReview;
 import com.guidinglight.decisionhub.domain.decision.DecisionSubject;
 import com.guidinglight.decisionhub.domain.decision.DecisionType;
-import com.guidinglight.decisionhub.domain.decision.ProviderSignalStatus;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
@@ -40,6 +41,8 @@ public final class DefaultDecisionOrchestrator implements DecisionOrchestrator {
   private final DecisionRiskReviewer riskReviewer;
   private final DecisionOutputAssembler outputAssembler;
   private final DecisionAuditRepository auditRepository;
+  private final DecisionProviderGuard providerGuard;
+  private final DecisionProviderLatencyRecorder latencyRecorder;
   private final Clock clock;
 
   /** 使用 K3 默认 mock-only 组件和内存审计仓储创建 orchestrator。 */
@@ -51,6 +54,8 @@ public final class DefaultDecisionOrchestrator implements DecisionOrchestrator {
         new DefaultDecisionRiskReviewer(),
         new DecisionOutputAssembler(),
         new InMemoryDecisionAuditRepository(),
+        new DefaultDecisionProviderGuard(),
+        new DefaultDecisionProviderLatencyRecorder(),
         Clock.systemUTC());
   }
 
@@ -78,6 +83,8 @@ public final class DefaultDecisionOrchestrator implements DecisionOrchestrator {
         riskReviewer,
         outputAssembler,
         new InMemoryDecisionAuditRepository(),
+        new DefaultDecisionProviderGuard(),
+        new DefaultDecisionProviderLatencyRecorder(),
         clock);
   }
 
@@ -100,12 +107,49 @@ public final class DefaultDecisionOrchestrator implements DecisionOrchestrator {
       final DecisionOutputAssembler outputAssembler,
       final DecisionAuditRepository auditRepository,
       final Clock clock) {
+    this(
+        contextBuilder,
+        policyChecker,
+        signalProvider,
+        riskReviewer,
+        outputAssembler,
+        auditRepository,
+        new DefaultDecisionProviderGuard(),
+        new DefaultDecisionProviderLatencyRecorder(),
+        clock);
+  }
+
+  /**
+   * 创建可注入 K5 provider guard 的 orchestrator。
+   *
+   * @param contextBuilder 只读上下文构造器
+   * @param policyChecker read-only policy checker
+   * @param signalProvider deterministic mock provider
+   * @param riskReviewer deterministic risk reviewer
+   * @param outputAssembler fail-closed output assembler
+   * @param auditRepository K3 audit / snapshot / trace / output 持久化端口
+   * @param providerGuard K5 provider enabled / budget / health guard
+   * @param latencyRecorder K5 provider latency recorder
+   * @param clock 输出时间源
+   */
+  public DefaultDecisionOrchestrator(
+      final DecisionContextBuilder contextBuilder,
+      final DecisionPolicyChecker policyChecker,
+      final DecisionSignalProvider signalProvider,
+      final DecisionRiskReviewer riskReviewer,
+      final DecisionOutputAssembler outputAssembler,
+      final DecisionAuditRepository auditRepository,
+      final DecisionProviderGuard providerGuard,
+      final DecisionProviderLatencyRecorder latencyRecorder,
+      final Clock clock) {
     this.contextBuilder = Objects.requireNonNull(contextBuilder, "contextBuilder");
     this.policyChecker = Objects.requireNonNull(policyChecker, "policyChecker");
     this.signalProvider = Objects.requireNonNull(signalProvider, "signalProvider");
     this.riskReviewer = Objects.requireNonNull(riskReviewer, "riskReviewer");
     this.outputAssembler = Objects.requireNonNull(outputAssembler, "outputAssembler");
     this.auditRepository = Objects.requireNonNull(auditRepository, "auditRepository");
+    this.providerGuard = Objects.requireNonNull(providerGuard, "providerGuard");
+    this.latencyRecorder = Objects.requireNonNull(latencyRecorder, "latencyRecorder");
     this.clock = Objects.requireNonNull(clock, "clock");
   }
 
@@ -152,53 +196,81 @@ public final class DefaultDecisionOrchestrator implements DecisionOrchestrator {
 
       currentStep = DecisionTraceStepName.MOCK_PROVIDER_SIGNAL;
       final Instant providerStarted = traceStarted(run, DecisionTraceStepName.MOCK_PROVIDER_SIGNAL);
-      final DecisionSignalResult signal;
-      try {
-        signal = signalProvider.signal(context);
-      } catch (final RuntimeException providerError) {
-        final Instant failedAt = clock.instant();
+      final DecisionProviderGuardResult beforeGuard =
+          providerGuard.beforeProviderCall(MOCK_PROVIDER_NAME, context, providerStarted);
+      if (beforeGuard.requiresFailClosed()) {
         traceFailed(
             run,
             DecisionTraceStepName.MOCK_PROVIDER_SIGNAL,
             providerStarted,
-            "PROVIDER_EXCEPTION",
-            providerError);
+            beforeGuard.errorCode(),
+            null);
         persist(
-            () ->
-                auditRepository.saveProviderCall(
-                    providerCallRecord(
-                        run,
-                        ProviderSignalStatus.FAILED,
-                        Map.of("reasonCode", "PROVIDER_EXCEPTION"),
-                        "PROVIDER_EXCEPTION",
-                        providerStarted,
-                        failedAt)));
+            () -> auditRepository.saveProviderCall(providerCallRecord(run, beforeGuard, null)));
         final DecisionOutput output =
-            DecisionOutput.abstainForProviderFailure(
-                requestId(request),
-                traceId(request),
-                tenantId(request),
-                ProviderSignalStatus.FAILED,
-                clock.instant());
+            providerGuardFailureOutput(request, beforeGuard, clock.instant());
         return finishTerminal(
             run,
             output,
             DecisionAuditEventType.PROVIDER_FAILED,
             DecisionAuditEventStatus.FAILED,
-            "PROVIDER_EXCEPTION");
+            beforeGuard.errorCode());
+      }
+
+      final DecisionSignalResult signal;
+      try {
+        signal = signalProvider.signal(context);
+      } catch (final RuntimeException providerError) {
+        final Instant failedAt = clock.instant();
+        final DecisionProviderLatency latency =
+            latencyRecorder.record(MOCK_PROVIDER_NAME, providerStarted, failedAt);
+        final DecisionProviderGuardResult failedGuard =
+            providerGuard.afterProviderCall(
+                MOCK_PROVIDER_NAME, context, null, latency, failedAt);
+        traceFailed(
+            run,
+            DecisionTraceStepName.MOCK_PROVIDER_SIGNAL,
+            providerStarted,
+            failedGuard.errorCode(),
+            providerError);
+        persist(() -> auditRepository.saveProviderCall(providerCallRecord(run, failedGuard, null)));
+        final DecisionOutput output =
+            providerGuardFailureOutput(request, failedGuard, clock.instant());
+        return finishTerminal(
+            run,
+            output,
+            DecisionAuditEventType.PROVIDER_FAILED,
+            DecisionAuditEventStatus.FAILED,
+            failedGuard.errorCode());
       }
       final Instant providerEnded = clock.instant();
-      traceCompleted(run, DecisionTraceStepName.MOCK_PROVIDER_SIGNAL, providerStarted, null);
+      final DecisionProviderLatency latency =
+          latencyRecorder.record(MOCK_PROVIDER_NAME, providerStarted, providerEnded);
+      final DecisionProviderGuardResult afterGuard =
+          providerGuard.afterProviderCall(
+              MOCK_PROVIDER_NAME, context, signal, latency, providerEnded);
+      if (afterGuard.requiresFailClosed()) {
+        traceFailed(
+            run,
+            DecisionTraceStepName.MOCK_PROVIDER_SIGNAL,
+            providerStarted,
+            afterGuard.errorCode(),
+            null);
+      } else {
+        traceCompleted(run, DecisionTraceStepName.MOCK_PROVIDER_SIGNAL, providerStarted, null);
+      }
       persist(
-          () ->
-              auditRepository.saveProviderCall(
-                  providerCallRecord(
-                      run,
-                      signal.status(),
-                      signalJson(signal),
-                      signal.requiresAbstain() ? signal.status().name() : null,
-                      providerStarted,
-                      providerEnded)));
+          () -> auditRepository.saveProviderCall(providerCallRecord(run, afterGuard, signal)));
+      if (afterGuard.requiresFailClosed()) {
+        final DecisionOutput output =
+            providerGuardFailureOutput(request, afterGuard, clock.instant());
+        return finishTerminal(
+            run,
+            output,
+            DecisionAuditEventType.PROVIDER_FAILED,
+            DecisionAuditEventStatus.FAILED,
+            afterGuard.errorCode());
+      }
 
       currentStep = DecisionTraceStepName.RISK_REVIEW;
       final Instant riskStarted = traceStarted(run, DecisionTraceStepName.RISK_REVIEW);
@@ -384,21 +456,19 @@ public final class DefaultDecisionOrchestrator implements DecisionOrchestrator {
 
   private DecisionPersistenceRecords.ProviderCallRecord providerCallRecord(
       final DecisionRun run,
-      final ProviderSignalStatus status,
-      final Map<String, Object> signalJson,
-      final String errorCode,
-      final Instant startedAt,
-      final Instant endedAt) {
+      final DecisionProviderGuardResult guardResult,
+      final DecisionSignalResult signal) {
+    final DecisionProviderLatency latency = guardResult.latency();
     return new DecisionPersistenceRecords.ProviderCallRecord(
         run.nextId("provider"),
         run.decisionId,
         run.tenantId,
         run.traceId,
-        MOCK_PROVIDER_NAME,
-        status,
-        Math.max(0L, endedAt.toEpochMilli() - startedAt.toEpochMilli()),
-        signalJson,
-        errorCode,
+        guardResult.providerName(),
+        guardResult.providerStatus(),
+        latency == null ? 0L : latency.latencyMs(),
+        signalJson(signal, guardResult),
+        guardResult.errorCode(),
         clock.instant());
   }
 
@@ -476,16 +546,44 @@ public final class DefaultDecisionOrchestrator implements DecisionOrchestrator {
         request.getContextSnapshot().evidenceRefs().size());
   }
 
-  private static Map<String, Object> signalJson(final DecisionSignalResult signal) {
-    return Map.of(
-        "providerMode",
-        "MOCK",
-        "status",
-        signal.status().name(),
-        "action",
-        signal.action().name(),
-        "reasonCodes",
-        signal.reasonCodes());
+  private static DecisionOutput providerGuardFailureOutput(
+      final DecisionRequest request,
+      final DecisionProviderGuardResult guardResult,
+      final Instant createdAt) {
+    return DecisionOutput.abstainForProviderFailure(
+        requestId(request),
+        traceId(request),
+        tenantId(request),
+        guardResult.providerStatus(),
+        guardResult.reasonCodes(),
+        createdAt);
+  }
+
+  private static Map<String, Object> signalJson(
+      final DecisionSignalResult signal, final DecisionProviderGuardResult guardResult) {
+    final Map<String, Object> payload = new LinkedHashMap<>();
+    payload.put("providerMode", "MOCK");
+    payload.put("status", guardResult.providerStatus().name());
+    payload.put(
+        "action", signal == null ? DecisionAction.ABSTAIN.name() : signal.action().name());
+    payload.put("reasonCodes", guardResult.reasonCodes());
+    payload.put("guardAllowed", guardResult.allowed());
+    payload.put("failureClass", guardResult.failureClass().name());
+    if (guardResult.health() != null) {
+      payload.put("healthStatus", guardResult.health().status().name());
+      payload.put("healthFailureClass", guardResult.health().failureClass().name());
+    }
+    if (guardResult.budget() != null) {
+      payload.put("budgetStatus", guardResult.budget().status().name());
+      payload.put("estimatedBudgetUnits", guardResult.budget().estimatedUnits());
+      payload.put("budgetLimitUnits", guardResult.budget().budgetLimitUnits());
+    }
+    if (guardResult.latency() != null) {
+      payload.put("latencyMs", guardResult.latency().latencyMs());
+      payload.put("timeoutMs", guardResult.latency().timeoutMs());
+      payload.put("timedOut", guardResult.latency().timedOut());
+    }
+    return payload;
   }
 
   private static Map<String, Object> outputJson(final DecisionOutput output) {

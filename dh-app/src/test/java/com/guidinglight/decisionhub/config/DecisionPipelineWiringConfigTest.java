@@ -4,6 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditRepository;
+import com.guidinglight.decisionhub.usecase.decision.DecisionOrchestrator;
+import com.guidinglight.decisionhub.usecase.decision.DecisionProviderBudgetGuard;
+import com.guidinglight.decisionhub.usecase.decision.DecisionProviderGuard;
+import com.guidinglight.decisionhub.usecase.decision.DecisionProviderHealthEvaluator;
+import com.guidinglight.decisionhub.usecase.decision.DecisionProviderLatencyRecorder;
 import com.guidinglight.decisionhub.usecase.decision.DecisionReplayQueryRepository;
 import com.guidinglight.decisionhub.usecase.decision.DecisionReplayQueryService;
 import org.junit.jupiter.api.Test;
@@ -34,6 +39,11 @@ final class DecisionPipelineWiringConfigTest {
           assertThat(ctx).hasSingleBean(DecisionAuditRepository.class);
           assertThat(ctx).hasSingleBean(DecisionReplayQueryRepository.class);
           assertThat(ctx).hasSingleBean(DecisionReplayQueryService.class);
+          assertThat(ctx).hasSingleBean(DecisionProviderHealthEvaluator.class);
+          assertThat(ctx).hasSingleBean(DecisionProviderBudgetGuard.class);
+          assertThat(ctx).hasSingleBean(DecisionProviderLatencyRecorder.class);
+          assertThat(ctx).hasSingleBean(DecisionProviderGuard.class);
+          assertThat(ctx).hasSingleBean(DecisionOrchestrator.class);
         });
   }
 

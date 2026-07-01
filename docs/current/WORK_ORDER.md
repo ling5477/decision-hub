@@ -1,14 +1,14 @@
 # Decision Hub 当前工单
 
-> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL / IMPLEMENTED / READY FOR NEXT
+> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / IMPLEMENTED / READY FOR NEXT
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment
-> 下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED
+> 下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS / NOT STARTED
 
 ## 1. 当前目标
 
-下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY`。
+下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS`。
 
-`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 已完成 review 并 `PASS / CLOSED / ACCEPTED`。K2 已完成 mock-only usecase 编排骨架。K3 已经 M1 readiness review 关闭。K4 已完成内部 Replay Read Model，只读取 K3 已持久化数据，不新增 API、Controller、migration 或 replay endpoint。下一步只允许进入 K5，不允许跳过 K5 review 连续进入 K6-K8 或全量 implementation：
+`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 已完成 review 并 `PASS / CLOSED / ACCEPTED`。K2 已完成 mock-only usecase 编排骨架。K3 已经 M1 readiness review 关闭。K4 已完成内部 Replay Read Model，只读取 K3 已持久化数据，不新增 API、Controller、migration 或 replay endpoint。K5 已完成 mock-only provider health / budget / latency controls，不新增 API、Controller、migration、真实 provider 或 NQ runtime。下一步只允许进入 K6，不允许连续进入 K7-K8 或全量 implementation：
 
 ```text
 READ_ONLY_RECOMMENDATION
@@ -96,8 +96,9 @@ K2 status: IMPLEMENTED
 K3 status: CLOSED / ACCEPTED after M1
 M1 status: CLOSED / ACCEPTED
 K4 status: IMPLEMENTED / READY FOR NEXT
-K5 status: NOT STARTED
-Next: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED
+K5 status: IMPLEMENTED / READY FOR NEXT
+K6 status: NOT STARTED
+Next: DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS / NOT STARTED
 ```
 
 批次顺序：
@@ -175,7 +176,8 @@ K2 DecisionOrchestrator Skeleton: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
 M1 Readiness Review: CLOSED / ACCEPTED
 K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
-K5 Provider Health / Budget / Latency: NOT STARTED
+K5 Provider Health / Budget / Latency: IMPLEMENTED / READY FOR NEXT
+K6 Mock NQ Dry-run Contract Tests: NOT STARTED
 ```
 
 ## 5. DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON（已实现）
@@ -303,7 +305,58 @@ ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
 
-## 8. Historical / superseded / deferred 内容
+## 8. DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY（IMPLEMENTED / READY FOR NEXT）
+
+K5 已在 DH 仓库内完成 mock-only provider health / budget / latency controls。该批次只强化 K2/K3/K4 已有 Decision Pipeline 的 provider guard 与 provider call summary，不新增 API、Controller、migration、真实 provider、HTTP、NQ runtime、LLM、LangGraph 或 LIVE。
+
+K5 实施范围：
+
+```text
+DecisionProviderHealth / Budget / Latency / GuardResult / FailureClass value objects
+DecisionProviderHealthEvaluator / DefaultDecisionProviderHealthEvaluator
+DecisionProviderBudgetGuard / DefaultDecisionProviderBudgetGuard
+DecisionProviderLatencyRecorder / DefaultDecisionProviderLatencyRecorder
+DecisionProviderGuard / DefaultDecisionProviderGuard
+DefaultDecisionOrchestrator provider pre/post guard integration
+MockDecisionSignalProvider K5 failure-state test hooks
+DecisionPipelineWiringConfig K5 guard wiring
+provider call log signal_json / latency_ms / error_code summary
+K4 replay provider call view regression
+docs/current sync
+```
+
+K5 明确未做：
+
+```text
+K6 mock NQ dry-run contract tests
+K7 golden cases / eval
+K8 acceptance / freeze
+new API path / Controller / replay API / query endpoint
+new migration / provider health table / budget table / latency table
+real provider / OpenAI / Claude / Gemini / local model
+real HTTP / WebClient / RestTemplate / HttpClient
+NQ runtime / RealClient / RealNqBacktestClient
+Integration-1 runtime
+LangGraph runtime
+LIVE / trading / NQ mutation
+NQ DB read/write
+credential / token / API secret / passphrase access
+```
+
+K5 readiness：
+
+```text
+ALLOW_K5_CLOSE: YES
+ALLOW_K6_IMPLEMENTATION: YES
+ALLOW_GATEK_M2_CLOSE_REVIEW: NO
+ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+## 9. Historical / superseded / deferred 内容
 
 ```text
 NqFeedbackClient 接通真实 HTTP / event         forbidden / deferred
@@ -320,7 +373,7 @@ LIVE trading                                    forbidden
 
 以上内容只保留为历史背景，不是当前 next，不允许作为当前实现任务。后续如需恢复，必须先基于 NQ GateN 重新进入 planning-only audit，并通过安全审查、契约冻结和人工确认。
 
-## 9. 不做事项（持续硬约束）
+## 10. 不做事项（持续硬约束）
 
 ```text
 不修改 NQ 仓库交易核心
@@ -335,17 +388,16 @@ LIVE trading                                    forbidden
 不读取 token / cookie / exchange secret / production .env / API key / private key / mnemonic / 2FA backup code
 ```
 
-## 10. 下一轮 Codex 开工提示词草稿
+## 11. 下一轮 Codex 开工提示词草稿
 
 ```text
-你在 decision-hub 仓库 dev 分支上工作。任务名：DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY。
+你在 decision-hub 仓库 dev 分支上工作。任务名：DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS。
 
-目标：只实现 K5 mock-only provider health / budget / latency controls；保持 provider unavailable / timeout / untrusted / budget exceeded fail-closed，不接真实 provider runtime。
-判断是否允许 K5 close；不要实现 K6。
+目标：只实现 K6 mock NQ dry-run contract tests；使用 mock / fixture 验证 K1-K5 只读边界和 provider guard summary，不接真实 NQ runtime。
+判断是否允许 K6 close；不要实现 K7。
 
 禁止：
 - 不修改生产代码
-- 不修改测试代码
 - 不新增 API
 - 不新增 migration
 - 不新增 replay API / Controller / query endpoint

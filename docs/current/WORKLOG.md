@@ -3618,3 +3618,107 @@ ObjectMapper bean remains unique
 
 ### 下一步
 进入 `DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED`；不得直接进入 K6-K8、Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
+
+## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY
+
+### 范围
+完成 `DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY` single-batch implementation。K5 只强化 K2/K3/K4 既有 Decision Pipeline 的 mock-only provider health、budget、latency 和 fail-closed guard，不新增 API、Controller、migration、provider health/budget/latency 表、真实 provider、HTTP、NQ runtime、LLM、LangGraph 或 LIVE。
+
+### 新增文件
+- `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionProviderHealth.java`
+- `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionProviderHealthStatus.java`
+- `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionProviderBudget.java`
+- `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionProviderBudgetStatus.java`
+- `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionProviderLatency.java`
+- `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionProviderGuardResult.java`
+- `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionProviderFailureClass.java`
+- `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DecisionProviderHealthEvaluator.java`
+- `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DefaultDecisionProviderHealthEvaluator.java`
+- `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DecisionProviderBudgetGuard.java`
+- `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DefaultDecisionProviderBudgetGuard.java`
+- `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DecisionProviderLatencyRecorder.java`
+- `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DefaultDecisionProviderLatencyRecorder.java`
+- `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DecisionProviderGuard.java`
+- `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DefaultDecisionProviderGuard.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/DecisionProviderHealthEvaluatorTest.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/DecisionProviderBudgetGuardTest.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/DecisionProviderLatencyRecorderTest.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/DecisionProviderGuardTest.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/DecisionOrchestratorProviderGuardTest.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/DecisionProviderGuardNoOutboundTest.java`
+
+### 修改文件
+- `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionOutput.java`
+- `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DefaultDecisionOrchestrator.java`
+- `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/MockDecisionSignalProvider.java`
+- `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/MockDecisionSignalProviderTest.java`
+- `dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/decision/JdbcDecisionReplayQueryRepositoryTest.java`
+- `dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java`
+- `dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java`
+- `docs/current/README.md`
+- `docs/current/ROADMAP.md`
+- `docs/current/STATUS.md`
+- `docs/current/WORK_ORDER.md`
+- `docs/current/TESTING.md`
+- `docs/current/WORKLOG.md`
+
+### Implementation
+- 新增 K5 domain value objects/enums，表达 provider health、budget、latency、guard result 与 failure class；模型只保存本地观测与审计字段，不保存 raw provider response、credential、token、HTTP endpoint 或 NQ 数据。
+- 新增 K5 usecase guard 组件：health evaluator、budget guard、latency recorder、provider guard。默认预算使用本地 deterministic unit；默认 timeout 为 1000ms；disabled、unhealthy、timeout、untrusted、budget exceeded、invalid signal 均 fail-closed。
+- `DefaultDecisionOrchestrator` 在 mock provider 调用前执行 budget/enabled pre-guard；调用后记录 latency、评估 health，并把 guard summary 写入既有 `dh_decision_provider_call_log` 字段：`latency_ms`、`provider_status`、`error_code`、`signal_json`。
+- provider guard 失败时跳过 risk review 和 directional bias，输出 K1 contract 内的 structured `ABSTAIN`；不向调用方抛业务 RuntimeException。
+- `DecisionOutput` 增加带 `reasonCodes` 的 `abstainForProviderFailure(...)` overload，不修改 schema、enum 或 action vocabulary。
+- `MockDecisionSignalProvider` 保持 deterministic mock-only；`SUCCESS` 继续被视为 forbidden/untrusted，不代表真实 provider 成功。
+- `DecisionPipelineWiringConfig` 补充 K5 guard beans，并把 guard/latency recorder 注入 orchestrator；仍不暴露额外全局 `ObjectMapper` bean。
+- `JdbcDecisionReplayQueryRepositoryTest` 增加回归，证明 K5 provider call summary 能通过 K4 replay read model 读取。
+
+### Tests
+新增/更新 K5 tests，覆盖：
+
+```text
+healthy mock provider -> NO_TRADE / OBSERVATION_ONLY
+provider disabled -> ABSTAIN
+provider unhealthy / failed / untrusted -> ABSTAIN
+provider timeout signal -> ABSTAIN
+latency timeout -> ABSTAIN
+budget exceeded -> ABSTAIN
+provider exception -> ABSTAIN 且不泄露 raw message
+latency_ms / failureClass / error_code / healthStatus / budgetStatus 写入 provider call summary
+K4 replay 可读取 K5 provider summary
+K5 guard source 不出现 HTTP / LLM / NQ / exchange / mapping 注解依赖
+MockDecisionSignalProvider 继续拒绝 SUCCESS
+ObjectMapper bean 仍唯一
+```
+
+### 验证
+- `mvn -ntp -pl dh-usecase,dh-infra,dh-app -am test`：BUILD SUCCESS；reactor 15/15 SUCCESS；`PostgresContainerSmokeTest` 实际启动 `postgres:17` 并通过。
+- `mvn -ntp test`：BUILD SUCCESS；reactor 19/19 SUCCESS；Surefire XML 汇总 414 tests / 0 failures / 0 errors / 0 skipped。
+- `mvn -ntp -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。
+- `idea-mcp get_file_problems` 对 4 个关键文件均约 300s timeout；已降级到 Maven 编译/测试/quality 与 scoped `rg`，可信度高。
+- K5 边界关键词扫描：命中均为既有 Controller、禁止说明、denylist、负向测试断言、migration comment、K5 no-outbound 测试或本轮边界注释；未发现本轮新增 API / Controller / migration / RealClient / real provider / HTTP client / NQ runtime / LangGraph runtime / LIVE / BUY-SELL action 生产实现。
+- `DecisionAction.java` 与 `DecisionOutput.java` 交易动作扫描无命中：未引入 `BUY / SELL / PLACE_ORDER / CANCEL_ORDER / MARKET_ORDER / LIMIT_ORDER`。
+- `git diff --check`：通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+
+### Readiness
+- `ALLOW_K5_CLOSE: YES`
+- `ALLOW_K6_IMPLEMENTATION: YES`
+- `ALLOW_GATEK_M2_CLOSE_REVIEW: NO`
+- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`
+- `ALLOW_INTEGRATION_1_RUNTIME: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 边界确认
+未实现 K6-K8；未新增 API path；未新增 Controller；未新增 migration；未新增 provider health / budget / latency 表；未新增 replay API / query endpoint；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient / 真实 Provider；未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；未读取或输出 credential、token、cookie、API secret、passphrase；未启动 Integration-1 runtime；未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；未修改 NQ 仓库；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 output action。
+
+### 剩余风险
+- K6 Mock NQ dry-run contract tests 尚未实现。
+- K7 Golden Cases / Eval 尚未实现。
+- K8 Acceptance / Freeze 尚未实现。
+- Integration-1 仍需基于 NQ GateN 重新规划。
+- LangGraph 后置。
+- Agent phase 后置。
+
+### 下一步
+进入 `DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS / NOT STARTED`；不得直接进入 K7-K8、M2 close review、Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。

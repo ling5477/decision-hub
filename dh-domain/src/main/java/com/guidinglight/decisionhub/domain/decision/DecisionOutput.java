@@ -106,6 +106,33 @@ public final class DecisionOutput {
       final String tenantId,
       final ProviderSignalStatus providerStatus,
       final Instant createdAt) {
+    return abstainForProviderFailure(
+        requestId,
+        traceId,
+        tenantId,
+        providerStatus,
+        List.of("PROVIDER_UNAVAILABLE"),
+        createdAt);
+  }
+
+  /**
+   * provider guard 失败输出：保留具体失败原因码，同时统一 fail-closed 为 ABSTAIN。
+   *
+   * @param requestId 请求 ID
+   * @param traceId trace ID
+   * @param tenantId 租户 ID
+   * @param providerStatus provider fail-closed 状态
+   * @param reasonCodes 可审计原因码；不得包含原始 provider 响应或敏感信息
+   * @param createdAt 输出创建时间
+   * @return K1 合同格式的只读 fail-closed output
+   */
+  public static DecisionOutput abstainForProviderFailure(
+      final String requestId,
+      final String traceId,
+      final String tenantId,
+      final ProviderSignalStatus providerStatus,
+      final List<String> reasonCodes,
+      final Instant createdAt) {
     if (!new ProviderDecisionSignal(providerStatus, List.of()).requiresAbstain()) {
       throw new IllegalArgumentException("providerStatus must require abstain");
     }
@@ -120,7 +147,9 @@ public final class DecisionOutput {
         DecisionPolicyStatus.REVIEW_REQUIRED,
         providerStatus,
         ForbiddenAction.mandatorySet(),
-        List.of("PROVIDER_UNAVAILABLE"),
+        reasonCodes == null || reasonCodes.isEmpty()
+            ? List.of("PROVIDER_UNAVAILABLE")
+            : List.copyOf(reasonCodes),
         List.of(),
         createdAt,
         DEFAULT_SCHEMA_VERSION);

@@ -41,6 +41,25 @@ final class MockDecisionSignalProviderTest {
   }
 
   @Test
+  void k5FailureStatesCanBeInjectedWithoutRealProviderRuntime() {
+    for (ProviderSignalStatus status :
+        List.of(
+            ProviderSignalStatus.TIMEOUT,
+            ProviderSignalStatus.FAILED,
+            ProviderSignalStatus.UNTRUSTED,
+            ProviderSignalStatus.BUDGET_EXCEEDED,
+            ProviderSignalStatus.DISABLED)) {
+      final DecisionSignalResult signal =
+          new MockDecisionSignalProvider(status, DecisionAction.ABSTAIN, List.of(status.name()))
+              .signal(context());
+
+      assertEquals(status, signal.status());
+      assertEquals(DecisionAction.ABSTAIN, signal.action());
+      assertTrue(signal.requiresAbstain());
+    }
+  }
+
+  @Test
   void successStatusIsRejectedForK2MockProvider() {
     assertThrows(
         IllegalArgumentException.class,

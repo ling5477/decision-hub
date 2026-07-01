@@ -13,6 +13,7 @@ import com.guidinglight.decisionhub.usecase.decision.DecisionReplayQuery;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +52,13 @@ class JdbcDecisionReplayQueryRepositoryTest {
     assertThat(view.request().subjectJson()).containsEntry("symbol", "BTC-USDT");
     assertThat(view.timeline().traceSteps()).extracting("id").containsExactly("trace-1", "trace-2");
     assertThat(view.timeline().providerCalls()).extracting("id").containsExactly("provider-1", "provider-2");
+    assertThat(view.timeline().providerCalls().get(0).providerStatus())
+        .isEqualTo(com.guidinglight.decisionhub.domain.decision.ProviderSignalStatus.TIMEOUT);
+    assertThat(view.timeline().providerCalls().get(0).latencyMs()).isEqualTo(125L);
+    assertThat(view.timeline().providerCalls().get(0).errorCode()).isEqualTo("TIMEOUT");
+    assertThat(view.timeline().providerCalls().get(0).signalJson())
+        .containsEntry("failureClass", "TIMEOUT")
+        .containsEntry("latencyMs", 125);
     assertThat(view.timeline().auditEvents()).extracting("id").containsExactly("audit-1", "audit-2");
     assertAllSelectsAreTenantAndDecisionScoped();
     assertNoJdbcWrites();
@@ -148,7 +156,21 @@ class JdbcDecisionReplayQueryRepositoryTest {
       return trace ? List.of(traceRow("trace-1", "POLICY_CHECK"), traceRow("trace-2", "RISK_REVIEW")) : List.of();
     }
     if (sql.contains("dh_decision_provider_call_log")) {
-      return provider ? List.of(providerRow("provider-1"), providerRow("provider-2")) : List.of();
+      return provider
+          ? List.of(
+              providerRow(
+                  "provider-1",
+                  "TIMEOUT",
+                  125L,
+                  "TIMEOUT",
+                  "{\"status\":\"TIMEOUT\",\"failureClass\":\"TIMEOUT\",\"latencyMs\":125}"),
+              providerRow(
+                  "provider-2",
+                  "MOCKED",
+                  0L,
+                  null,
+                  "{\"status\":\"MOCKED\",\"failureClass\":\"NONE\",\"latencyMs\":0}"))
+          : List.of();
     }
     if (sql.contains("dh_decision_output")) {
       return output ? List.of(outputRow()) : List.of();
@@ -197,17 +219,26 @@ class JdbcDecisionReplayQueryRepositoryTest {
         "created_at", Timestamp.from(NOW));
   }
 
-  private static Map<String, Object> providerRow(final String id) {
-    return Map.of(
-        "id", id,
-        "decision_id", "decision-1",
-        "tenant_id", "tenant-1",
-        "trace_id", "trace-1",
-        "provider_name", "MOCK_DECISION_PROVIDER",
-        "provider_status", "MOCKED",
-        "latency_ms", 0L,
-        "signal_json", "{\"status\":\"MOCKED\"}",
-        "created_at", Timestamp.from(NOW));
+  private static Map<String, Object> providerRow(
+      final String id,
+      final String providerStatus,
+      final long latencyMs,
+      final String errorCode,
+      final String signalJson) {
+    final Map<String, Object> row = new LinkedHashMap<>();
+    row.put("id", id);
+    row.put("decision_id", "decision-1");
+    row.put("tenant_id", "tenant-1");
+    row.put("trace_id", "trace-1");
+    row.put("provider_name", "MOCK_DECISION_PROVIDER");
+    row.put("provider_status", providerStatus);
+    row.put("latency_ms", latencyMs);
+    row.put("signal_json", signalJson);
+    if (errorCode != null) {
+      row.put("error_code", errorCode);
+    }
+    row.put("created_at", Timestamp.from(NOW));
+    return row;
   }
 
   private static Map<String, Object> outputRow() {

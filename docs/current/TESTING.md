@@ -2029,3 +2029,104 @@ Readiness decision
 
 下一步     DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED。
 ```
+
+## 51. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY 验证记录
+
+```text
+日期       2026-07-01
+阶段       DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY
+类型       CODE_CHANGE + PROVIDER_GUARD + HEALTH_MODEL + BUDGET_GUARD + LATENCY_TRACKING + SECURITY_BOUNDARY + DOCS_SYNC
+范围       只实现 K5 mock-only provider health / budget / latency；不新增 API / Controller / migration；
+           不新增 provider health / budget / latency 表；不接真实 provider / HTTP / NQ / LLM / LangGraph / LIVE。
+
+K5 新增/更新测试
+  - DecisionProviderHealthEvaluatorTest：health / failure class / SUCCESS forbidden 映射。
+  - DecisionProviderBudgetGuardTest：within budget / disabled / budget exceeded。
+  - DecisionProviderLatencyRecorderTest：latencyMs / timeout / 负阈值保护。
+  - DecisionProviderGuardTest：pre-guard budget gate 与 post-guard health/latency fail-closed。
+  - DecisionOrchestratorProviderGuardTest：healthy / disabled / unhealthy / timeout / failure /
+    untrusted / budget exceeded / provider exception 的 ABSTAIN fail-closed 与 provider call summary。
+  - DecisionProviderGuardNoOutboundTest：K5 guard source 不出现 HTTP / LLM / NQ / exchange / mapping 注解关键依赖。
+  - MockDecisionSignalProviderTest：mock-only provider 继续拒绝 SUCCESS。
+  - DecisionPipelineWiringConfigTest：K5 guard beans 可装配，ObjectMapper bean 仍唯一。
+  - JdbcDecisionReplayQueryRepositoryTest：K4 replay 能读取 K5 provider call summary。
+
+命令       mvn -ntp -pl dh-usecase,dh-infra,dh-app -am test
+早期结果   首次 120s 执行超时，未得到完整测试结论；随后延长到 300s 已通过。
+最终结果   BUILD SUCCESS；reactor 15/15 SUCCESS；Total time 28.561 s；
+           Finished at 2026-07-01T22:15:07+08:00。
+补充       本轮 Docker 可访问，dh-app `PostgresContainerSmokeTest` 实际启动 `postgres:17` 并通过。
+
+命令       mvn -ntp test
+结果       BUILD SUCCESS；reactor 19/19 SUCCESS；Total time 29.051 s；
+           Finished at 2026-07-01T21:53:11+08:00。
+测试摘要   Surefire XML 汇总 414 tests / 0 failures / 0 errors / 0 skipped。
+           dh-domain 108；dh-connector 19；dh-usecase 134；dh-security 47；
+           dh-infra 32；dh-api 42；dh-app 32。
+补充       本轮 Docker 可访问，`PostgresContainerSmokeTest` 未 skip，Flyway V1-V5 均在 PostgreSQL 17.10 上实际迁移通过。
+
+命令       mvn -ntp -Pquality validate
+结果       BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed；
+           Finished at 2026-07-01T21:53:47+08:00。
+补充       各子模块 checkstyle 插件仍输出既有 `unable to find checkstyle:checkstyle outputFile` 信息；
+           聚合 checkstyle 最终为 0 violations，reactor status 为 SUCCESS。
+
+命令       idea-mcp get_file_problems（DefaultDecisionOrchestrator / DefaultDecisionProviderGuard /
+           DecisionProviderGuardResult / DecisionPipelineWiringConfig）
+结果       4 个关键文件 problems 检查均约 300s timeout。
+降级       降级为 Maven 编译、模块测试、全仓测试、quality validate 与 scoped rg 扫描；可信度高，
+           因为 Java 编译、JUnit、Spring context、Checkstyle 与 Spotless 均已通过。
+
+命令       K5 边界关键词扫描
+范围       dh-domain/src/main、dh-usecase/src/main、dh-infra/src/main、dh-app/src/main、dh-api/src/main、
+           dh-connector/src/main、dh-security/src/main、相关 test、contracts、docs/current；
+           排除 target / build / dist / node_modules / logs / test-results / secrets / credentials。
+关键词     RealClient / LangGraph / OpenAI / Claude / Gemini / WebClient / RestTemplate / HttpClient /
+           placeOrder / cancelOrder / BUY / SELL / apiSecret / passphrase / accountId / Controller /
+           NqClient / Exchange / Broker / live / LIVE / endpoint / Endpoint / PostMapping /
+           GetMapping / RequestMapping。
+结果       命中项均为既有 Controller、禁止说明、denylist、负向测试断言、migration comment、
+           K5 no-outbound 测试或本轮边界注释；未发现本轮新增 API / Controller / migration /
+           RealClient / real provider / HTTP client / NQ runtime / LangGraph runtime / LIVE /
+           BUY-SELL action 生产实现。
+
+命令       changed-files 边界关键词扫描
+结果       本轮变更命中仅来自：
+           - K5 生产注释：明确禁止 LangGraph / LIVE / Controller / endpoint / real provider。
+           - `DefaultDecisionOrchestrator` denylist：`passphrase` 等敏感/执行意图词仅用于脱敏。
+           - `DecisionProviderGuardNoOutboundTest`：测试断言禁止 HTTP / LLM / NQ / exchange / mapping 注解。
+           - docs/current：当前边界、禁止项和 next action 文档说明。
+
+命令       rg -n "BUY|SELL|PLACE_ORDER|CANCEL_ORDER|MARKET_ORDER|LIMIT_ORDER"
+           dh-domain/src/main/java/.../DecisionAction.java
+           dh-domain/src/main/java/.../DecisionOutput.java
+结果       exit 1，无命中；未把交易动作加入 DecisionAction 或 DecisionOutput action。
+
+命令       git diff --check
+结果       通过；exit 0；仅 Windows LF -> CRLF warning，无 whitespace error。
+
+命令       git diff --stat
+结果       tracked diff 将随 `TESTING.md` / `WORKLOG.md` 本节追加增加；新增 K5 value objects、
+           guard components 和 tests 仍由 `git status --short` 标识为 untracked，未自动 stage。
+
+Readiness decision
+           ALLOW_K5_CLOSE: YES
+           ALLOW_K6_IMPLEMENTATION: YES
+           ALLOW_GATEK_M2_CLOSE_REVIEW: NO
+           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO
+           ALLOW_INTEGRATION_1_RUNTIME: NO
+           ALLOW_AGENT_PHASE: NO
+           ALLOW_LANGGRAPH_RUNTIME: NO
+           ALLOW_LIVE: NO
+
+边界       未实现 K6-K8；未新增 API path；未新增 Controller；未新增 migration；未新增 provider health /
+           budget / latency 表；未接真实 provider；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；
+           未真实交易所调用；未读取或输出 credential、token、cookie、API secret、passphrase；未接 OpenAI /
+           Claude / Gemini / 本地模型；未接 LangGraph；未启动 Integration-1 runtime；未开启 LIVE；
+           未修改 NQ 仓库；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 output action。
+
+准入决定   K5 Provider Health / Budget / Latency 已完成 implementation 并通过模块 Maven、全仓 Maven、
+           quality validate、K5 边界关键词扫描与 DecisionAction/DecisionOutput 交易动作扫描。
+           下一步允许进入 K6 mock NQ dry-run contract tests；不得跳到 K7-K8、M2 close review、
+           Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
+```
