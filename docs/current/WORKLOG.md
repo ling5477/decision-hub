@@ -1,5 +1,174 @@
 # Decision Hub Worklog
 
+## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL
+
+K7 已完成 deterministic golden cases / eval baseline / security boundary tests。本轮只做 K7 Golden Cases / Eval，不进入 K8 acceptance / freeze，不启动 Integration-1 runtime。
+
+### 新增文件
+
+```text
+golden_cases/decision/valid_no_trade.json
+golden_cases/decision/policy_blocked.json
+golden_cases/decision/provider_timeout_abstain.json
+golden_cases/decision/provider_budget_exceeded_abstain.json
+golden_cases/decision/high_risk_abstain.json
+golden_cases/decision/no_evidence_abstain.json
+golden_cases/decision/forbidden_action_rejected.json
+golden_cases/decision/replay_found_trace.json
+golden_cases/decision/replay_tenant_mismatch_blocked.json
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/DecisionGoldenCaseTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/DecisionEvalBaselineTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/DecisionGoldenCaseSecurityBoundaryTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/support/DecisionGoldenCaseFixtures.java
+```
+
+### 修改文件
+
+```text
+golden_cases/decision/mock_nq_valid_dryrun.json
+golden_cases/decision/mock_nq_provider_blocked.json
+golden_cases/decision/mock_nq_no_live_trade_guard.json
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/support/MockNqDryRunAssertionSupport.java
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/ROADMAP.md
+docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+```
+
+### 实现要点
+
+```text
+Golden cases:
+  - golden_cases/decision 现在共有 12 个 K7 deterministic wrapper。
+  - K6 的 3 个 mock NQ dry-run fixture 复用并升级为 K7 wrapper，避免重复创建冲突文件。
+  - 每个 wrapper 包含 caseId / description / input / expectedDecision / optional expectedReplay /
+    forbiddenAssertions / securityBoundary。
+  - expectedDecision 固定 READ_ONLY_RECOMMENDATION；action 只允许 ABSTAIN / OBSERVE / NO_TRADE /
+    LONG_BIAS / SHORT_BIAS；forbiddenActions 固定五项。
+
+Eval baseline:
+  - DecisionGoldenCaseFixtures 统一读取 golden_cases/decision/*.json，避免每个测试重复处理文件路径。
+  - DecisionGoldenCaseTest 覆盖所有 golden case 可解析、K1 request/output schema 形状、
+    action 白名单、forbiddenActions 固定五项、关键路径期望。
+  - DecisionEvalBaselineTest 固化 deterministic orchestrator 基线，覆盖 valid / blocked / provider failure /
+    budget exceeded / high risk / no evidence / forbidden action / replay 等路径。
+  - DecisionGoldenCaseSecurityBoundaryTest 扫描 credential / account / order / execution / endpoint /
+    provider / output action 禁止项，保证 golden cases 不漂移为真实交易样例。
+
+K6 compatibility:
+  - MockNqDryRunAssertionSupport 不再把 expectedDecision.forbiddenActions 内的 PLACE_ORDER /
+    CANCEL_ORDER 视为 fixture 越界，因为 K7 wrapper 需要固定 forbiddenActions 列表。
+  - K6 仍继续阻断 credential、order/execution 字段和 output action 中的交易动作误用。
+
+Docs:
+  - docs/current/README.md / STATUS.md / ROADMAP.md / WORK_ORDER.md 已同步 K7
+    IMPLEMENTED / READY FOR ACCEPTANCE。
+  - docs/current/TESTING.md 记录本轮实际 git / Maven / quality / boundary scan 结果。
+```
+
+### 测试覆盖
+
+```text
+DecisionGoldenCaseTest:
+  - 12 个 golden case 全部可解析。
+  - input / expectedDecision 具备 K1 schema 关键字段。
+  - action 白名单、READ_ONLY_RECOMMENDATION、mandatory forbiddenActions 固化。
+  - valid_no_trade / policy_blocked / provider timeout / budget exceeded / high risk /
+    no evidence / forbidden action / replay tenant mismatch 期望稳定。
+
+DecisionEvalBaselineTest:
+  - K1-K6 关键行为经 K7 golden cases 做 deterministic baseline。
+  - provider failure / no evidence 默认 ABSTAIN。
+  - high risk 不允许 LONG_BIAS / SHORT_BIAS。
+  - forbidden action request fail-closed。
+  - replay tenant mismatch 不跨 tenant 返回数据。
+
+DecisionGoldenCaseSecurityBoundaryTest:
+  - golden cases 中不存在 apiKey / apiSecret / passphrase / privateKey / token。
+  - golden cases 中不存在 accountId、quantity、price、side、orderId、venueCredential、brokerCredential。
+  - expectedDecision.action 不含 BUY / SELL / PLACE_ORDER / CANCEL_ORDER / MARKET_ORDER / LIMIT_ORDER。
+  - 不包含真实 HTTP endpoint、真实 provider 配置或 NQ DB 内容。
+
+K6 compatibility:
+  - MockNqDecisionDryRunContractTest 与 MockNqDecisionNoLiveTradeContractTest 继续通过。
+```
+
+### 验证记录
+
+```text
+git status --short
+  结果：仅 K7 允许范围内文件变更。
+
+git diff --check
+  结果：exit code 0；仅 LF/CRLF warning，无 whitespace error。
+
+git diff --stat
+  结果：tracked diff stat 正常输出；未跟踪新增文件由 git status --short 记录。
+
+mvn -ntp -pl dh-usecase -am "-Dtest=DecisionGoldenCaseTest,DecisionEvalBaselineTest,DecisionGoldenCaseSecurityBoundaryTest,MockNqDecisionDryRunContractTest,MockNqDecisionNoLiveTradeContractTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
+  结果：BUILD SUCCESS；14 tests passed。
+
+mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test
+  结果：BUILD SUCCESS；reactor 15/15 passed；PostgresContainerSmokeTest 在该轮实际使用 Docker / PostgreSQL 17 通过。
+
+mvn -ntp test
+  结果：BUILD SUCCESS；reactor 19/19 passed。
+  说明：该全量轮次中 PostgresContainerSmokeTest 因 Docker named pipe AccessDeniedException 按 Testcontainers 机制 skip；
+        这是本机 Docker 访问差异，不是 K7 代码失败。
+
+mvn -ntp -Pquality validate
+  结果：BUILD SUCCESS；reactor 19/19 passed；Checkstyle 0 violations；Spotless passed。
+
+rg boundary scan
+  结果：无 K7 生产越界实现；命中均归类为既有 negative tests / guard / docs boundary wording /
+        existing API controllers / historical docs / K7 forbidden assertions。
+```
+
+### 边界确认
+
+```text
+未实现 K8 acceptance / freeze。
+未新增 API path。
+未新增 Controller。
+未新增 migration。
+未修改生产代码。
+未新增 replay API / query endpoint。
+未真实 HTTP。
+未真实 NQ 调用。
+未真实 provider。
+未读取 credential、token、cookie、API secret、passphrase 或交易所密钥。
+未接 OpenAI / Claude / Gemini / 本地模型。
+未接 LangGraph。
+未启动 Integration-1 runtime。
+未把 DH 写成 integrated。
+未把 Runtime integration 写成 started。
+未把 AI / Agent runtime 写成 started。
+未开启 LIVE。
+未修改 NQ 仓库。
+未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放入 DecisionAction 或 expectedDecision.action。
+```
+
+### Readiness decision
+
+```text
+ALLOW_K7_CLOSE: YES
+ALLOW_K8_ACCEPTANCE_FREEZE: YES
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### 下一步
+
+```text
+进入 DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / NOT STARTED。
+K8 只能基于 K1-K7 evidence 做 acceptance / freeze，不得启动 Integration-1 runtime、真实 NQ runtime、
+真实 provider、LangGraph runtime、AI / Agent runtime 或 LIVE。
+```
+
 ## 2026-06-28 DH-CODE-REALITY-AUDIT-FIX-PACK
 
 关闭 code reality audit 中阻断 GateK-PLAN / Integration-1-PLAN 的两个 P1，并在同域处理 P2/P3。

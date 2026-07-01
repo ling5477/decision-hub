@@ -32,7 +32,9 @@ DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY:
 DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS:
               Mock NQ Dry-run Contract Tests               [implemented / ready for next]
 DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL:
-              Golden Cases / Eval                          [next / not started]
+              Golden Cases / Eval                          [implemented / ready for acceptance]
+DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE:
+              Acceptance / Freeze                          [next / not started]
 Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
 Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
@@ -84,7 +86,7 @@ dep-tree.txt 重新生成
 
 ## 4. Integration-0 / Decision Pipeline MVP 当前路线
 
-Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 Contract Freeze review 已 `PASS / CLOSED / ACCEPTED`。K2 DecisionOrchestrator Skeleton 已实现 mock-only usecase 编排骨架。K3 Audit / Snapshot / Trace Persistence 已经 M1 readiness review 关闭。K4 Replay Read Model 已实现内部只读 replay view、query service、JDBC read repository 与 wiring，不新增 API / Controller / migration / replay endpoint。K5 Provider Health / Budget / Latency 已实现 mock-only provider guard、health evaluator、budget guard、latency recorder 与 provider call log / replay 可见性，不新增 API / Controller / migration。K6 Mock NQ Dry-run Contract Tests 已实现 mock-only dry-run contract tests 与 fixture，不新增 API / Controller / migration。下一步是 `DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL`（NOT STARTED），不得连续进入 K8。
+Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 Contract Freeze review 已 `PASS / CLOSED / ACCEPTED`。K2 DecisionOrchestrator Skeleton 已实现 mock-only usecase 编排骨架。K3 Audit / Snapshot / Trace Persistence 已经 M1 readiness review 关闭。K4 Replay Read Model 已实现内部只读 replay view、query service、JDBC read repository 与 wiring，不新增 API / Controller / migration / replay endpoint。K5 Provider Health / Budget / Latency 已实现 mock-only provider guard、health evaluator、budget guard、latency recorder 与 provider call log / replay 可见性，不新增 API / Controller / migration。K6 Mock NQ Dry-run Contract Tests 已实现 mock-only dry-run contract tests 与 fixture，不新增 API / Controller / migration。K7 Golden Cases / Eval 已实现 deterministic golden cases、eval baseline tests 与 security boundary tests。下一步是 `DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE`（NOT STARTED）。
 
 语言治理补充：后续 DH roadmap、plan、work order、testing、worklog、status 文档正文必须中文为主；工程对象名、enum、JSON/OpenAPI 字段、HTTP header、状态枚举、命令和外部技术名保留英文原样。固定输出字段可以保留英文，但字段内容必须中文为主。
 
@@ -112,8 +114,9 @@ M1 Readiness Review CLOSED / ACCEPTED
 K4 Replay Read Model IMPLEMENTED / READY FOR NEXT
 K5 Provider Health / Budget / Latency IMPLEMENTED / READY FOR NEXT
 K6 Mock NQ Dry-run Contract Tests IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval NOT STARTED
-Next concrete action DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED
+K7 Golden Cases / Eval IMPLEMENTED / READY FOR ACCEPTANCE
+K8 Acceptance / Freeze NOT STARTED
+Next concrete action DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline GateN
 ```

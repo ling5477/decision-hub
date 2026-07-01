@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS / IMPLEMENTED / READY FOR NEXT
-> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED
+> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / IMPLEMENTED / READY FOR ACCEPTANCE
+> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / NOT STARTED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,14 +34,15 @@ GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS / IMPLEMENTED / READY FOR NEXT.
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED.
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / IMPLEMENTED / READY FOR ACCEPTANCE.
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / NOT STARTED.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT.
 K5 Provider Health / Budget / Latency: IMPLEMENTED / READY FOR NEXT.
 K6 Mock NQ Dry-run Contract Tests: IMPLEMENTED / READY FOR NEXT.
-K7 Golden Cases / Eval: NOT STARTED.
+K7 Golden Cases / Eval: IMPLEMENTED / READY FOR ACCEPTANCE.
+K8 Acceptance / Freeze: NOT STARTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
@@ -158,14 +159,15 @@ GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED
 GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED
 M1 Readiness Review: CLOSED / ACCEPTED
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS / IMPLEMENTED / READY FOR NEXT
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / IMPLEMENTED / READY FOR ACCEPTANCE
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / NOT STARTED
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
 K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
 K5 Provider Health / Budget / Latency: IMPLEMENTED / READY FOR NEXT
 K6 Mock NQ Dry-run Contract Tests: IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval: NOT STARTED
+K7 Golden Cases / Eval: IMPLEMENTED / READY FOR ACCEPTANCE
+K8 Acceptance / Freeze: NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
@@ -190,8 +192,9 @@ M1 Readiness Review status: CLOSED / ACCEPTED
 K4 Replay Read Model status: IMPLEMENTED / READY FOR NEXT
 K5 Provider Health / Budget / Latency status: IMPLEMENTED / READY FOR NEXT
 K6 Mock NQ Dry-run Contract Tests status: IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval status: NOT STARTED
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED
+K7 Golden Cases / Eval status: IMPLEMENTED / READY FOR ACCEPTANCE
+K8 Acceptance / Freeze status: NOT STARTED
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / NOT STARTED
 Full decision pipeline runtime: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -219,8 +222,9 @@ M1 Readiness Review status: CLOSED / ACCEPTED
 K4 Replay Read Model status: IMPLEMENTED / READY FOR NEXT
 K5 Provider Health / Budget / Latency status: IMPLEMENTED / READY FOR NEXT
 K6 Mock NQ Dry-run Contract Tests status: IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval status: NOT STARTED
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED
+K7 Golden Cases / Eval status: IMPLEMENTED / READY FOR ACCEPTANCE
+K8 Acceptance / Freeze status: NOT STARTED
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / NOT STARTED
 Full decision pipeline runtime: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -247,8 +251,9 @@ M1 Readiness Review: CLOSED / ACCEPTED
 K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
 K5 Provider Health / Budget / Latency: IMPLEMENTED / READY FOR NEXT
 K6 Mock NQ Dry-run Contract Tests: IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval: NOT STARTED
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED
+K7 Golden Cases / Eval: IMPLEMENTED / READY FOR ACCEPTANCE
+K8 Acceptance / Freeze: NOT STARTED
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / NOT STARTED
 API changes: NONE
 Migration changes: NONE
 Runtime integration: NOT STARTED
@@ -271,14 +276,15 @@ Task: DH-DOCS-LANGUAGE-GOVERNANCE-FIX
 Scope: docs governance / language policy / comment style rules / factsource sync
 Business state change: NONE
 Current main line now: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / IMPLEMENTED / READY FOR NEXT
-Next concrete action now: DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED
+Next concrete action now: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / NOT STARTED
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
 M1 Readiness Review: CLOSED / ACCEPTED
 K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
 K5 Provider Health / Budget / Latency: IMPLEMENTED / READY FOR NEXT
 K6 Mock NQ Dry-run Contract Tests: IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval: NOT STARTED
+K7 Golden Cases / Eval: IMPLEMENTED / READY FOR ACCEPTANCE
+K8 Acceptance / Freeze: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
 DH integrated: NO
@@ -303,7 +309,8 @@ M1 Readiness Review: CLOSED / ACCEPTED
 K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
 K5 Provider Health / Budget / Latency: IMPLEMENTED / READY FOR NEXT
 K6 Mock NQ Dry-run Contract Tests: IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval: NOT STARTED
+K7 Golden Cases / Eval: IMPLEMENTED / READY FOR ACCEPTANCE
+K8 Acceptance / Freeze: NOT STARTED
 API changes: NONE
 Migration changes: NONE
 Repository / JDBC changes: NONE
@@ -329,7 +336,8 @@ M1 Readiness Review: CLOSED / ACCEPTED
 K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
 K5 Provider Health / Budget / Latency: IMPLEMENTED / READY FOR NEXT
 K6 Mock NQ Dry-run Contract Tests: IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval: NOT STARTED
+K7 Golden Cases / Eval: IMPLEMENTED / READY FOR ACCEPTANCE
+K8 Acceptance / Freeze: NOT STARTED
 API changes: NONE
 Controller changes: NONE
 Replay API: NOT STARTED
@@ -345,7 +353,7 @@ LIVE: DISABLED
 - `DefaultDecisionOrchestrator` 已接入 request、context snapshot、trace step、mock provider call summary、decision output、audit event 持久化；audit / snapshot / trace / output 写失败统一返回 structured `ABSTAIN` + `PERSISTENCE_FAILURE`，即使 fail-closed output 二次写入失败也不返回普通成功或裸异常。
 - K3 `output_json` 使用显式安全 Map 保存 K1 structured fields，不直接序列化 domain object；provider call 只保存 deterministic mock summary，不保存真实 provider raw response、credential、NQ DB 内容或敏感 header。
 - 新增 K3 测试覆盖 valid write-through、policy denied、provider timeout、high risk no directional bias、request/context/output/audit persistence failure、missing request unknown IDs、JDBC SQL / JSONB cast / exception mapping、V5 migration presence 和 no trading table。
-- M1 readiness review 已关闭，K4 Replay Read Model 已实现内部只读 read model；K5 provider health / budget / latency 已实现；K6 mock NQ dry-run contract tests 已完成；K7 golden cases / eval、K8 acceptance / freeze 仍未开始。
+- M1 readiness review 已关闭，K4 Replay Read Model 已实现内部只读 read model；K5 provider health / budget / latency 已实现；K6 mock NQ dry-run contract tests 已完成；K7 golden cases / eval 已实现；K8 acceptance / freeze 仍未开始。
 - Readiness decision：`ALLOW_K3_CLOSE: YES`；`ALLOW_K4_IMPLEMENTATION: YES`；`ALLOW_GATEK_M1_CLOSE_REVIEW: YES`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 1.11 DH GateK Decision Pipeline MVP K4 Replay Read Model（2026-07-01，IMPLEMENTED / READY FOR NEXT）
@@ -354,7 +362,8 @@ LIVE: DISABLED
 K4 status: IMPLEMENTED / READY FOR NEXT
 K5 Provider Health / Budget / Latency: IMPLEMENTED / READY FOR NEXT
 K6 Mock NQ Dry-run Contract Tests: IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval: NOT STARTED
+K7 Golden Cases / Eval: IMPLEMENTED / READY FOR ACCEPTANCE
+K8 Acceptance / Freeze: NOT STARTED
 Replay API: NOT STARTED
 API changes: NONE
 Controller changes: NONE
@@ -379,7 +388,8 @@ LIVE: DISABLED
 ```text
 K5 status: IMPLEMENTED / READY FOR NEXT
 K6 Mock NQ Dry-run Contract Tests: IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval: NOT STARTED
+K7 Golden Cases / Eval: IMPLEMENTED / READY FOR ACCEPTANCE
+K8 Acceptance / Freeze: NOT STARTED
 API changes: NONE
 Controller changes: NONE
 Migration changes: NONE
@@ -403,7 +413,7 @@ LIVE: DISABLED
 
 ```text
 K6 status: IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval: NOT STARTED
+K7 Golden Cases / Eval: IMPLEMENTED / READY FOR ACCEPTANCE
 K8 Acceptance / Freeze: NOT STARTED
 API changes: NONE
 Controller changes: NONE
@@ -421,6 +431,28 @@ LIVE: DISABLED
 - 新增 K6 tests 覆盖 valid mock NQ request -> structured `DecisionOutput`、`READ_ONLY_RECOMMENDATION`、allowed action vocabulary、mandatory forbiddenActions、credential / execution intent 禁止字段、provider disabled / budget exceeded / timeout fail-closed、persistence / replay / tenant isolation、no-live-trade source scan。
 - 新增最小 fixture：`mock_nq_valid_dryrun.json`、`mock_nq_provider_blocked.json`、`mock_nq_no_live_trade_guard.json`；fixture 仅作为 K6 contract test 输入，不进入 K7 eval framework，不含真实账户、凭证或交易指令。
 - Readiness decision：`ALLOW_K6_CLOSE: YES`；`ALLOW_K7_IMPLEMENTATION: YES`；`ALLOW_GATEK_ACCEPTANCE_REVIEW: NO`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_ACCEPTANCE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+
+## 1.14 DH GateK Decision Pipeline MVP K7 Golden Cases / Eval（2026-07-01，IMPLEMENTED / READY FOR ACCEPTANCE）
+
+```text
+K7 status: IMPLEMENTED / READY FOR ACCEPTANCE
+K8 Acceptance / Freeze: NOT STARTED
+API changes: NONE
+Controller changes: NONE
+Migration changes: NONE
+Production code changes: NONE
+Runtime integration: NOT STARTED
+Integration-1 runtime: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+- 本轮将 `golden_cases/decision` 扩展为 12 个 deterministic golden cases，并把 K6 的 3 个 mock NQ fixture 升级为完整 golden case wrapper：`caseId`、`description`、`input`、`expectedDecision`、可选 `expectedReplay`、`forbiddenAssertions`、`securityBoundary`。
+- K7 覆盖 valid no-trade、policy blocked、provider timeout、provider budget exceeded、high risk、no evidence、forbidden action rejected、mock NQ dry-run、mock NQ provider blocked、mock NQ no-live guard、replay found trace、replay tenant mismatch。
+- 新增 K7 eval baseline tests：`DecisionGoldenCaseTest`、`DecisionEvalBaselineTest`、`DecisionGoldenCaseSecurityBoundaryTest`，覆盖 JSON 可解析、K1 request/output schema 形状、action 白名单、mandatory forbiddenActions、安全字段扫描、deterministic orchestrator 输出、K6 mock NQ dry-run 兼容与 replay tenant isolation。
+- 本轮只修改 golden cases、test code 与 `docs/current`；未修改生产代码、contracts schema、API、Controller、migration、wiring、provider runtime 或 NQ runtime。
+- Readiness decision：`ALLOW_K7_CLOSE: YES`；`ALLOW_K8_ACCEPTANCE_FREEZE: YES`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 2. 当前已完成
 
@@ -779,17 +811,17 @@ DH-CODEX-WORKFLOW-FINAL-CLEANUP
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL）
+## 4. 下一阶段（DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE）
 
 ```text
-唯一下一步是 DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL（NOT STARTED）。
+唯一下一步是 DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE（NOT STARTED）。
 
-K7 只允许：
-- 基于已完成的 K6 mock NQ dry-run contract tests，补充 golden cases / eval 基线。
+K8 只允许：
+- 基于已完成的 K1-K7 evidence，执行 acceptance / freeze 审查与 docs/current freeze 记录。
 - 继续保持 no real NQ runtime、no real provider、no HTTP、no LIVE。
-- 不把 golden cases 写成真实 NQ 联调、runtime integration 或 provider 接入。
+- 不把 acceptance / freeze 写成真实 NQ 联调、runtime integration 或 provider 接入。
 
-K7 不允许：
+K8 不允许：
 - 新增 replay API / Controller / query API。
 - 实现真实 NQ client。
 - 实现 RealClient / RealNqBacktestClient。
@@ -820,7 +852,8 @@ Stage2-PoC、Stage3-B2/B3/B4 的真实接入、联调、RealClient 或 NQ mutati
 - K4 Replay Read Model IMPLEMENTED / READY FOR NEXT
 - K5 Provider Health / Budget / Latency IMPLEMENTED / READY FOR NEXT
 - K6 Mock NQ Dry-run Contract Tests IMPLEMENTED / READY FOR NEXT
-- K7 Golden Cases / Eval NOT STARTED
+- K7 Golden Cases / Eval IMPLEMENTED / READY FOR ACCEPTANCE
+- K8 Acceptance / Freeze NOT STARTED
 - Full decision pipeline runtime not started
 - Integration-1 not started
 - Runtime integration not started

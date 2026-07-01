@@ -1,35 +1,35 @@
 {
-  "caseId": "mock-nq-valid-dryrun",
-  "description": "Mock NQ dry-run request returns a read-only no-trade recommendation.",
+  "caseId": "valid-no-trade",
+  "description": "Valid read-only request with evidence returns deterministic no-trade observation.",
   "input": {
-    "requestId": "mock-nq-dryrun-valid-1",
-    "traceId": "trace-mock-nq-dryrun-valid-1",
-    "tenantId": "tenant-mock-nq",
-    "source": "NQ_MOCK",
+    "requestId": "k7-valid-no-trade-1",
+    "traceId": "trace-k7-valid-no-trade-1",
+    "tenantId": "tenant-k7-eval",
+    "source": "K7_GOLDEN",
     "decisionType": "READ_ONLY_RECOMMENDATION",
     "subject": {
       "symbol": "BTC-USDT",
       "market": "CRYPTO_SPOT",
       "timeframe": "1h",
-      "strategyRef": "mock-nq-readonly-strategy",
-      "researchRef": null
+      "strategyRef": "k7-readonly-strategy",
+      "researchRef": "k7-readonly-research"
     },
-    "contextRef": "mock-nq://decision-pipeline/dryrun",
+    "contextRef": "golden://decision/valid-no-trade",
     "contextSnapshot": {
-      "snapshotId": "snapshot-mock-nq-valid",
+      "snapshotId": "snapshot-k7-valid-no-trade",
       "capturedAt": "2026-07-01T00:00:00Z",
       "evidenceRefs": [
-        "evidence://mock-nq/market-regime",
-        "evidence://mock-nq/risk-summary"
+        "evidence://k7/market-regime",
+        "evidence://k7/risk-summary"
       ]
     },
     "requestedAt": "2026-07-01T00:00:00Z",
     "schemaVersion": "1.0.0"
   },
   "expectedDecision": {
-    "requestId": "mock-nq-dryrun-valid-1",
-    "traceId": "trace-mock-nq-dryrun-valid-1",
-    "tenantId": "tenant-mock-nq",
+    "requestId": "k7-valid-no-trade-1",
+    "traceId": "trace-k7-valid-no-trade-1",
+    "tenantId": "tenant-k7-eval",
     "decisionType": "READ_ONLY_RECOMMENDATION",
     "action": "NO_TRADE",
     "status": "OBSERVATION_ONLY",
@@ -48,8 +48,8 @@
       "RISK_OK"
     ],
     "evidenceRefs": [
-      "evidence://mock-nq/market-regime",
-      "evidence://mock-nq/risk-summary"
+      "evidence://k7/market-regime",
+      "evidence://k7/risk-summary"
     ],
     "createdAt": "2026-07-01T00:00:00Z",
     "schemaVersion": "1.0.0"

@@ -1,41 +1,40 @@
 {
-  "caseId": "mock-nq-valid-dryrun",
-  "description": "Mock NQ dry-run request returns a read-only no-trade recommendation.",
+  "caseId": "policy-blocked",
+  "description": "Policy guard detects forbidden execution intent and fails closed.",
   "input": {
-    "requestId": "mock-nq-dryrun-valid-1",
-    "traceId": "trace-mock-nq-dryrun-valid-1",
-    "tenantId": "tenant-mock-nq",
-    "source": "NQ_MOCK",
+    "requestId": "k7-policy-blocked-1",
+    "traceId": "trace-k7-policy-blocked-1",
+    "tenantId": "tenant-k7-eval",
+    "source": "K7_GOLDEN",
     "decisionType": "READ_ONLY_RECOMMENDATION",
     "subject": {
       "symbol": "BTC-USDT",
       "market": "CRYPTO_SPOT",
       "timeframe": "1h",
-      "strategyRef": "mock-nq-readonly-strategy",
-      "researchRef": null
+      "strategyRef": "k7-readonly-strategy",
+      "researchRef": "k7-readonly-research"
     },
-    "contextRef": "mock-nq://decision-pipeline/dryrun",
+    "contextRef": "golden://decision/cancelOrder-attempt",
     "contextSnapshot": {
-      "snapshotId": "snapshot-mock-nq-valid",
+      "snapshotId": "snapshot-k7-policy-blocked",
       "capturedAt": "2026-07-01T00:00:00Z",
       "evidenceRefs": [
-        "evidence://mock-nq/market-regime",
-        "evidence://mock-nq/risk-summary"
+        "evidence://k7/policy-guard"
       ]
     },
     "requestedAt": "2026-07-01T00:00:00Z",
     "schemaVersion": "1.0.0"
   },
   "expectedDecision": {
-    "requestId": "mock-nq-dryrun-valid-1",
-    "traceId": "trace-mock-nq-dryrun-valid-1",
-    "tenantId": "tenant-mock-nq",
+    "requestId": "k7-policy-blocked-1",
+    "traceId": "trace-k7-policy-blocked-1",
+    "tenantId": "tenant-k7-eval",
     "decisionType": "READ_ONLY_RECOMMENDATION",
-    "action": "NO_TRADE",
-    "status": "OBSERVATION_ONLY",
-    "riskLevel": "LOW",
-    "policyStatus": "ALLOWED",
-    "providerStatus": "MOCKED",
+    "action": "ABSTAIN",
+    "status": "BLOCKED",
+    "riskLevel": "BLOCKED",
+    "policyStatus": "DENIED",
+    "providerStatus": "NOT_CALLED",
     "forbiddenActions": [
       "PLACE_ORDER",
       "CANCEL_ORDER",
@@ -44,13 +43,9 @@
       "WRITE_NQ_DB"
     ],
     "reasonCodes": [
-      "MOCK_NO_TRADE",
-      "RISK_OK"
+      "POLICY_DENIED"
     ],
-    "evidenceRefs": [
-      "evidence://mock-nq/market-regime",
-      "evidence://mock-nq/risk-summary"
-    ],
+    "evidenceRefs": [],
     "createdAt": "2026-07-01T00:00:00Z",
     "schemaVersion": "1.0.0"
   },

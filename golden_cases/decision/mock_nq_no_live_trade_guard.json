@@ -1,24 +1,70 @@
 {
-  "requestId": "mock-nq-no-live-trade-guard-1",
-  "traceId": "trace-mock-nq-no-live-trade-guard-1",
-  "tenantId": "tenant-mock-nq",
-  "source": "NQ_MOCK",
-  "decisionType": "READ_ONLY_RECOMMENDATION",
-  "subject": {
-    "symbol": "BTC-USDT",
-    "market": "CRYPTO_SPOT",
-    "timeframe": "1h",
-    "strategyRef": "mock-nq-readonly-strategy",
-    "researchRef": null
+  "caseId": "mock-nq-no-live-trade-guard",
+  "description": "Mock NQ dry-run keeps no-live guard explicit while still returning read-only output.",
+  "input": {
+    "requestId": "mock-nq-no-live-trade-guard-1",
+    "traceId": "trace-mock-nq-no-live-trade-guard-1",
+    "tenantId": "tenant-mock-nq",
+    "source": "NQ_MOCK",
+    "decisionType": "READ_ONLY_RECOMMENDATION",
+    "subject": {
+      "symbol": "BTC-USDT",
+      "market": "CRYPTO_SPOT",
+      "timeframe": "1h",
+      "strategyRef": "mock-nq-readonly-strategy",
+      "researchRef": null
+    },
+    "contextRef": "mock-nq://decision-pipeline/dryrun",
+    "contextSnapshot": {
+      "snapshotId": "snapshot-mock-nq-no-live-trade",
+      "capturedAt": "2026-07-01T00:00:00Z",
+      "evidenceRefs": [
+        "evidence://mock-nq/no-live-trade-guard"
+      ]
+    },
+    "requestedAt": "2026-07-01T00:00:00Z",
+    "schemaVersion": "1.0.0"
   },
-  "contextRef": "mock-nq://decision-pipeline/dryrun",
-  "contextSnapshot": {
-    "snapshotId": "snapshot-mock-nq-no-live-trade",
-    "capturedAt": "2026-07-01T00:00:00Z",
+  "expectedDecision": {
+    "requestId": "mock-nq-no-live-trade-guard-1",
+    "traceId": "trace-mock-nq-no-live-trade-guard-1",
+    "tenantId": "tenant-mock-nq",
+    "decisionType": "READ_ONLY_RECOMMENDATION",
+    "action": "NO_TRADE",
+    "status": "OBSERVATION_ONLY",
+    "riskLevel": "LOW",
+    "policyStatus": "ALLOWED",
+    "providerStatus": "MOCKED",
+    "forbiddenActions": [
+      "PLACE_ORDER",
+      "CANCEL_ORDER",
+      "MUTATE_NQ_STATE",
+      "READ_NQ_DB",
+      "WRITE_NQ_DB"
+    ],
+    "reasonCodes": [
+      "MOCK_NO_TRADE",
+      "RISK_OK"
+    ],
     "evidenceRefs": [
       "evidence://mock-nq/no-live-trade-guard"
-    ]
+    ],
+    "createdAt": "2026-07-01T00:00:00Z",
+    "schemaVersion": "1.0.0"
   },
-  "requestedAt": "2026-07-01T00:00:00Z",
-  "schemaVersion": "1.0.0"
+  "forbiddenAssertions": {
+    "fixedForbiddenActions": true,
+    "noCredentialFields": true,
+    "noAccountFields": true,
+    "noOrderFields": true,
+    "noExecutionIntent": true,
+    "noTradingActionOutput": true
+  },
+  "securityBoundary": {
+    "readOnly": true,
+    "nqRuntime": "NOT_STARTED",
+    "externalRuntime": "FORBIDDEN",
+    "providerRuntime": "FORBIDDEN",
+    "liveState": "DISABLED"
+  }
 }

@@ -1,5 +1,97 @@
 # Decision Hub Testing
 
+## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL
+
+```text
+Scope:
+  - 将 golden_cases/decision 扩展到 12 个 deterministic golden cases。
+  - 新增 K7 eval baseline / golden case / security boundary 回归测试。
+  - 复用 K6 mock NQ dry-run fixtures，并升级为 K7 wrapper，不改 K1-K6 生产合同。
+  - 本轮只修改 golden_cases、dh-usecase test code 与 docs/current；生产代码、API、Controller、migration 均无新增。
+
+Golden case inventory:
+  Total: 12
+  Files:
+    golden_cases/decision/valid_no_trade.json
+    golden_cases/decision/policy_blocked.json
+    golden_cases/decision/provider_timeout_abstain.json
+    golden_cases/decision/provider_budget_exceeded_abstain.json
+    golden_cases/decision/high_risk_abstain.json
+    golden_cases/decision/no_evidence_abstain.json
+    golden_cases/decision/forbidden_action_rejected.json
+    golden_cases/decision/mock_nq_valid_dryrun.json
+    golden_cases/decision/mock_nq_provider_blocked.json
+    golden_cases/decision/mock_nq_no_live_trade_guard.json
+    golden_cases/decision/replay_found_trace.json
+    golden_cases/decision/replay_tenant_mismatch_blocked.json
+  Contract:
+    decisionType = READ_ONLY_RECOMMENDATION
+    action only ABSTAIN / OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS
+    forbiddenActions fixed to PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE / READ_NQ_DB / WRITE_NQ_DB
+
+Focused regression:
+  Command:
+    mvn -ntp -pl dh-usecase -am "-Dtest=DecisionGoldenCaseTest,DecisionEvalBaselineTest,DecisionGoldenCaseSecurityBoundaryTest,MockNqDecisionDryRunContractTest,MockNqDecisionNoLiveTradeContractTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
+  Result:
+    BUILD SUCCESS；K7 golden/eval/security + K6 compatibility 共 14 tests passed。
+
+Impact modules:
+  Command:
+    mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test
+  Result:
+    BUILD SUCCESS；reactor 15/15 passed；PostgresContainerSmokeTest 在该轮实际使用 Docker / PostgreSQL 17 通过。
+
+Full validation:
+  Command:
+    git status --short
+  Result:
+    仅 K7 允许范围内文件变更：golden_cases/decision、dh-usecase test code、docs/current 状态文档。
+
+  Command:
+    git diff --check
+  Result:
+    exit code 0；仅 LF/CRLF warning，无 whitespace error。
+
+  Command:
+    git diff --stat
+  Result:
+    输出 tracked diff stat；未跟踪的 K7 新 golden cases / tests 需结合 git status --short 查看。
+
+  Command:
+    mvn -ntp test
+  Result:
+    BUILD SUCCESS；reactor 19/19 passed。
+    该全量轮次中 PostgresContainerSmokeTest 因 Docker named pipe AccessDeniedException 按 Testcontainers 机制 skip；
+    这属于本机 Docker 访问差异，不是 K7 代码失败。影响模块轮次已经实跑并通过该 smoke。
+
+  Command:
+    mvn -ntp -Pquality validate
+  Result:
+    BUILD SUCCESS；reactor 19/19 passed；Checkstyle 0 violations；Spotless passed。
+    每模块 checkstyle outputFile lookup 提示为既有非阻断噪音，聚合结果成功。
+
+Boundary scan:
+  Command:
+    rg -n "(RealClient|LangGraph|OpenAI|Claude|Gemini|WebClient|RestTemplate|HttpClient|placeOrder|cancelOrder|BUY|SELL|apiSecret|passphrase|accountId|Controller|NqClient|Exchange|Broker|live|LIVE|endpoint|Endpoint|PostMapping|GetMapping|RequestMapping)" dh-domain/src/main dh-domain/src/test dh-usecase/src/main dh-usecase/src/test dh-infra/src/main dh-infra/src/test dh-app/src/main dh-app/src/test dh-api/src/main dh-connector/src/main dh-security/src/main contracts golden_cases docs/current
+  Result:
+    无 K7 生产越界实现。
+    命中集中在既有 Integration-0 negative fixtures/tests、no-outbound/ArchUnit guard、docs/current 边界文字、
+    既有 API controller、历史 Stage 文档、K7 security tests / forbidden assertions。
+
+Readiness:
+  ALLOW_K7_CLOSE: YES
+  ALLOW_K8_ACCEPTANCE_FREEZE: YES
+  ALLOW_INTEGRATION_1_RUNTIME: NO
+  ALLOW_AGENT_PHASE: NO
+  ALLOW_LANGGRAPH_RUNTIME: NO
+  ALLOW_LIVE: NO
+
+Boundary:
+  未新增 API path；未新增 Controller；未新增 migration；未修改生产代码；未真实 HTTP；未真实 NQ 调用；
+  未接真实 provider；未读取 credential/token/cookie/API secret/passphrase；未接 OpenAI/Claude/Gemini/本地模型；
+  未接 LangGraph；未启动 Integration-1 runtime；未开启 LIVE；未修改 NQ 仓库。
+```
+
 ## 2026-06-28 DH-CODE-REALITY-AUDIT-FIX-PACK
 
 ```text

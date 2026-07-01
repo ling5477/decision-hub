@@ -1,24 +1,67 @@
 {
-  "requestId": "mock-nq-provider-blocked-1",
-  "traceId": "trace-mock-nq-provider-blocked-1",
-  "tenantId": "tenant-mock-nq",
-  "source": "NQ_MOCK",
-  "decisionType": "READ_ONLY_RECOMMENDATION",
-  "subject": {
-    "symbol": "BTC-USDT",
-    "market": "CRYPTO_SPOT",
-    "timeframe": "1h",
-    "strategyRef": "mock-nq-readonly-strategy",
-    "researchRef": null
+  "caseId": "mock-nq-provider-blocked",
+  "description": "Mock NQ dry-run request is blocked by provider budget guard and fails closed.",
+  "input": {
+    "requestId": "mock-nq-provider-blocked-1",
+    "traceId": "trace-mock-nq-provider-blocked-1",
+    "tenantId": "tenant-mock-nq",
+    "source": "NQ_MOCK",
+    "decisionType": "READ_ONLY_RECOMMENDATION",
+    "subject": {
+      "symbol": "BTC-USDT",
+      "market": "CRYPTO_SPOT",
+      "timeframe": "1h",
+      "strategyRef": "mock-nq-readonly-strategy",
+      "researchRef": null
+    },
+    "contextRef": "mock-nq://decision-pipeline/dryrun",
+    "contextSnapshot": {
+      "snapshotId": "snapshot-mock-nq-provider-blocked",
+      "capturedAt": "2026-07-01T00:00:00Z",
+      "evidenceRefs": [
+        "evidence://mock-nq/provider-budget"
+      ]
+    },
+    "requestedAt": "2026-07-01T00:00:00Z",
+    "schemaVersion": "1.0.0"
   },
-  "contextRef": "mock-nq://decision-pipeline/dryrun",
-  "contextSnapshot": {
-    "snapshotId": "snapshot-mock-nq-provider-blocked",
-    "capturedAt": "2026-07-01T00:00:00Z",
-    "evidenceRefs": [
-      "evidence://mock-nq/provider-budget"
-    ]
+  "expectedDecision": {
+    "requestId": "mock-nq-provider-blocked-1",
+    "traceId": "trace-mock-nq-provider-blocked-1",
+    "tenantId": "tenant-mock-nq",
+    "decisionType": "READ_ONLY_RECOMMENDATION",
+    "action": "ABSTAIN",
+    "status": "ABSTAINED",
+    "riskLevel": "UNKNOWN",
+    "policyStatus": "REVIEW_REQUIRED",
+    "providerStatus": "BUDGET_EXCEEDED",
+    "forbiddenActions": [
+      "PLACE_ORDER",
+      "CANCEL_ORDER",
+      "MUTATE_NQ_STATE",
+      "READ_NQ_DB",
+      "WRITE_NQ_DB"
+    ],
+    "reasonCodes": [
+      "PROVIDER_BUDGET_EXCEEDED"
+    ],
+    "evidenceRefs": [],
+    "createdAt": "2026-07-01T00:00:00Z",
+    "schemaVersion": "1.0.0"
   },
-  "requestedAt": "2026-07-01T00:00:00Z",
-  "schemaVersion": "1.0.0"
+  "forbiddenAssertions": {
+    "fixedForbiddenActions": true,
+    "noCredentialFields": true,
+    "noAccountFields": true,
+    "noOrderFields": true,
+    "noExecutionIntent": true,
+    "noTradingActionOutput": true
+  },
+  "securityBoundary": {
+    "readOnly": true,
+    "nqRuntime": "NOT_STARTED",
+    "externalRuntime": "FORBIDDEN",
+    "providerRuntime": "FORBIDDEN",
+    "liveState": "DISABLED"
+  }
 }

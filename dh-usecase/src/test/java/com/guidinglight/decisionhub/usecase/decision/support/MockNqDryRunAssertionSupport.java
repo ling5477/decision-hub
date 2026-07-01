@@ -100,6 +100,10 @@ public final class MockNqDryRunAssertionSupport {
     /**
      * 断言 fixture 文本不包含 credential、order 或 execution intent 字段。
      *
+     * <p>K7 会把 K6 fixture 升级为完整 golden case wrapper，`expectedDecision.forbiddenActions` 必须包含
+     * PLACE_ORDER / CANCEL_ORDER 等禁止清单。这里因此只扫描请求/凭证/订单字段和 camelCase 执行意图，不把
+     * forbiddenActions 中的固定禁止值误判为 output action。
+     *
      * @param fixtureBody fixture JSON 文本。
      */
     public static void assertFixtureContainsNoCredentialOrExecutionIntent(
@@ -108,9 +112,6 @@ public final class MockNqDryRunAssertionSupport {
         for (String token : FORBIDDEN_REQUEST_TOKENS) {
             assertFalse(
                     containsIgnoreCase(fixtureBody, token), "fixture must not contain token: " + token);
-        }
-        for (String token : FORBIDDEN_OUTPUT_TOKENS) {
-            assertFalse(fixtureBody.contains(token), "fixture must not contain output token: " + token);
         }
     }
 

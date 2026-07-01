@@ -1,41 +1,40 @@
 {
-  "caseId": "mock-nq-valid-dryrun",
-  "description": "Mock NQ dry-run request returns a read-only no-trade recommendation.",
+  "caseId": "high-risk-abstain",
+  "description": "High risk evidence blocks directional bias and returns abstain.",
   "input": {
-    "requestId": "mock-nq-dryrun-valid-1",
-    "traceId": "trace-mock-nq-dryrun-valid-1",
-    "tenantId": "tenant-mock-nq",
-    "source": "NQ_MOCK",
+    "requestId": "k7-high-risk-abstain-1",
+    "traceId": "trace-k7-high-risk-abstain-1",
+    "tenantId": "tenant-k7-eval",
+    "source": "K7_GOLDEN",
     "decisionType": "READ_ONLY_RECOMMENDATION",
     "subject": {
       "symbol": "BTC-USDT",
       "market": "CRYPTO_SPOT",
       "timeframe": "1h",
-      "strategyRef": "mock-nq-readonly-strategy",
-      "researchRef": null
+      "strategyRef": "k7-readonly-strategy",
+      "researchRef": "k7-readonly-research"
     },
-    "contextRef": "mock-nq://decision-pipeline/dryrun",
+    "contextRef": "golden://decision/high-risk",
     "contextSnapshot": {
-      "snapshotId": "snapshot-mock-nq-valid",
+      "snapshotId": "snapshot-k7-high-risk",
       "capturedAt": "2026-07-01T00:00:00Z",
       "evidenceRefs": [
-        "evidence://mock-nq/market-regime",
-        "evidence://mock-nq/risk-summary"
+        "evidence://k7/HIGH_RISK-drawdown"
       ]
     },
     "requestedAt": "2026-07-01T00:00:00Z",
     "schemaVersion": "1.0.0"
   },
   "expectedDecision": {
-    "requestId": "mock-nq-dryrun-valid-1",
-    "traceId": "trace-mock-nq-dryrun-valid-1",
-    "tenantId": "tenant-mock-nq",
+    "requestId": "k7-high-risk-abstain-1",
+    "traceId": "trace-k7-high-risk-abstain-1",
+    "tenantId": "tenant-k7-eval",
     "decisionType": "READ_ONLY_RECOMMENDATION",
-    "action": "NO_TRADE",
-    "status": "OBSERVATION_ONLY",
-    "riskLevel": "LOW",
-    "policyStatus": "ALLOWED",
-    "providerStatus": "MOCKED",
+    "action": "ABSTAIN",
+    "status": "ABSTAINED",
+    "riskLevel": "HIGH",
+    "policyStatus": "REVIEW_REQUIRED",
+    "providerStatus": "NOT_CALLED",
     "forbiddenActions": [
       "PLACE_ORDER",
       "CANCEL_ORDER",
@@ -44,12 +43,11 @@
       "WRITE_NQ_DB"
     ],
     "reasonCodes": [
-      "MOCK_NO_TRADE",
-      "RISK_OK"
+      "MOCK_LONG_BIAS",
+      "HIGH_RISK"
     ],
     "evidenceRefs": [
-      "evidence://mock-nq/market-regime",
-      "evidence://mock-nq/risk-summary"
+      "evidence://k7/HIGH_RISK-drawdown"
     ],
     "createdAt": "2026-07-01T00:00:00Z",
     "schemaVersion": "1.0.0"
