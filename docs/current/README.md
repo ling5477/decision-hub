@@ -1,12 +1,12 @@
 # Decision Hub Current Docs
 
-> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON / IMPLEMENTED / READY FOR REVIEW
-> 下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED
+> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE / IMPLEMENTED / READY FOR M1
+> 下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED
 > 事实源: docs/current
 >
 > NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 NOT STARTED；no RealClient；no real provider；no trading ability；LIVE DISABLED。
 > Security baseline: FULL；fail-closed state: FULL；P1-4 residual CLOSED；header alignment CLOSED；timestamp alignment CLOSED；code reality audit blockers fixed。
-> Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1 contract freeze review 已 `PASS / CLOSED / ACCEPTED`；K2 DecisionOrchestrator Skeleton 已 `IMPLEMENTED / READY FOR REVIEW`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。当前不允许接 LangGraph、LLM、真实 NQ runtime、真实 provider、真实 HTTP 或 LIVE。
+> Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1 contract freeze review 已 `PASS / CLOSED / ACCEPTED`；K2 DecisionOrchestrator Skeleton 已实现；K3 Audit / Snapshot / Trace Persistence 已 `IMPLEMENTED / READY FOR M1`。K4 Replay Read Model 仍 `NOT STARTED`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。当前不允许接 LangGraph、LLM、真实 NQ runtime、真实 provider、真实 HTTP 或 LIVE。
 
 ## 1. 当前定位
 
@@ -200,7 +200,7 @@ Stage3-B3 DH Backtest Request Adapter IMPL（2026-05-26，DH 端可插拔骨架�
 当前下一步只允许进入：
 
 ```text
-DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW。
+DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW（NOT STARTED；本轮不产出 standalone review doc）。
 
 执行口径：
   - Stage3-B3 DH Backtest Request Adapter IMPL 已于 2026-05-26 完成：
@@ -218,9 +218,11 @@ DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW。
   - K1 Contract Freeze 已 PASS / CLOSED / ACCEPTED。
   - K2 已实现 dh-usecase 内 DecisionOrchestrator skeleton、context builder、policy checker、
     deterministic mock signal provider、risk reviewer、output assembler 与 fail-closed tests。
-  - K2 未新增 API、Controller、Repository、migration、JDBC、audit/snapshot/trace/replay persistence、
-    runtime provider、NQ runtime、真实 HTTP、LangGraph、AI / Agent runtime 或 LIVE。
-  - K3 Audit / Snapshot / Trace Persistence 仍 NOT STARTED，必须等 K2 review 通过后才允许开工。
+  - K3 已实现 DH-owned audit / snapshot / trace persistence：Flyway V5 六张表、
+    dh-usecase persistence port、dh-infra JDBC adapter、dh-app wiring 与 fail-closed tests。
+  - K3 未新增 API、Controller、replay API、真实 provider、NQ runtime、真实 HTTP、LangGraph、
+    AI / Agent runtime 或 LIVE。
+  - K4 Replay Read Model 仍 NOT STARTED；不得跳过 M1 review 直接进入 K4 或 K5-K8。
   - 不接 NQ；不新增 NQ client / RealClient / real provider；不触碰 LIVE trading；
     不修改 NQ 状态；不读取或写入 NQ DB；不启动 Paper Run。
   - Stage3-B2 / NQ Feedback Outbox / 真实 HTTP / event / NQ client / RealClient / real provider

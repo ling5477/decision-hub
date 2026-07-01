@@ -1814,3 +1814,92 @@ Readiness decision:
            未开启 LIVE；未修改 NQ 仓库；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 action enum 或 output action。
 准入决定   K2 Orchestrator Skeleton 已完成 implementation 并通过模块 Maven 测试与 quality validate；下一步只能进入 K2 review，不得直接进入 K3。
 ```
+
+## 48. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE 验证记录（audit / snapshot / trace persistence）
+
+```text
+日期       2026-07-01
+阶段       DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE（CODE_CHANGE + PERSISTENCE + AUDIT_TRACE + DECISION_SNAPSHOT + FAIL_CLOSED + DOCS_SYNC）
+范围       只执行 K3：新增 DH-owned audit / snapshot / trace persistence、usecase port、JDBC adapter、app wiring、K3 tests 和 docs/current sync；不实现 K4-K8、不新增 API / Controller / replay API、不接真实 provider / NQ / HTTP / LangGraph / LIVE
+
+命令       Get-Location
+结果       F:\project\decision-hub
+
+命令       git branch --show-current
+结果       dev
+
+命令       git status --short
+当前范围   K3 允许范围内变更：
+           dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/**
+           dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/DecisionOrchestratorPersistenceTest.java
+           dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/decision/JdbcDecisionAuditRepository.java
+           dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/decision/JdbcDecisionAuditRepositoryTest.java
+           dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
+           dh-app/src/main/resources/db/migration/V5__dh_decision_pipeline_audit.sql
+           dh-app/src/test/java/com/guidinglight/decisionhub/V5DecisionPipelineAuditMigrationPresenceTest.java
+           docs/current/README.md
+           docs/current/STATUS.md
+           docs/current/ROADMAP.md
+           docs/current/WORK_ORDER.md
+           docs/current/TESTING.md
+           docs/current/WORKLOG.md
+
+命令       git diff --check
+结果       通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+
+命令       git diff --stat
+结果       tracked diff 8 files changed, 923 insertions(+), 96 deletions(-)；新增 K3 Java / SQL / test 文件由 `git status --short` 标识为 untracked，未自动 stage。
+
+命令       K3 边界关键词扫描
+范围       K3 changed production/test/docs-adjacent files under dh-usecase decision、dh-infra jdbc decision、dh-app config、V5 migration、V5 migration test
+关键词     RealClient / LangGraph / OpenAI / Claude / Gemini / WebClient / RestTemplate / HttpClient / placeOrder / cancelOrder / BUY / SELL / apiSecret / passphrase / accountId / Controller / NqClient / Exchange / Broker / live / LIVE
+结果       命中项均为禁止说明、migration comment、denylist 或负向测试字符串；未发现真实 runtime provider、HTTP client、Controller、NQ client、Exchange/Broker、BUY/SELL action 实现或 LIVE 启用。
+
+命令       docs/current 当前状态残留扫描
+结果       未发现 current stage / next stage 仍指向 K2 review；未发现 K3 current 写成 NOT STARTED；未发现 ALLOW_K4_IMPLEMENTATION / ALLOW_GATEK_M1_CLOSE_REVIEW / ALLOW_INTEGRATION_1_RUNTIME / ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_LIVE 被写成 YES。
+
+命令       mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -pl dh-usecase,dh-infra -am test
+初始结果   FAILURE；`JdbcDecisionAuditRepositoryTest.saveOutput_targetsOutputTableWithJsonbCast` 暴露 `DecisionOutput.createdAt` 直接序列化依赖 JavaTime module。
+RCA        output_json 不应直接序列化 domain object；K3 改为 usecase 层显式安全 Map，createdAt 使用 ISO 字符串，不暴露内部模型。
+最终结果   BUILD SUCCESS；reactor 11/11 SUCCESS；dh-usecase 102 tests / 0 failures / 0 errors / 0 skipped；dh-infra 26 tests / 0 failures / 0 errors / 3 skipped。
+补充       3 skipped 为既有 JdbcNonceReplayGuardPersistenceTest Docker/Testcontainers 环境项。
+
+命令       mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml test
+结果       BUILD SUCCESS；reactor 19/19 SUCCESS；Surefire 汇总 375 tests / 0 failures / 0 errors / 4 skipped；Total time 41.456 s；Finished at 2026-07-01T17:41:51+08:00。
+补充       skipped 4 = dh-infra JdbcNonceReplayGuardPersistenceTest 3 + dh-app PostgresContainerSmokeTest 1；均为本机无 Docker 的既有 Testcontainers 环境项。
+
+命令       mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality validate
+结果       BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed；Total time 6.740 s；Finished at 2026-07-01T17:42:06+08:00。
+
+K3 新增测试
+           DecisionOrchestratorPersistenceTest 10
+           JdbcDecisionAuditRepositoryTest 9
+           V5DecisionPipelineAuditMigrationPresenceTest 5
+
+K3 覆盖     valid write-through 写 request / snapshot / trace / provider call / output / audit。
+           policy denied 不调用 provider，但仍写 output / audit。
+           provider timeout 写 provider call 并返回 ABSTAIN。
+           high risk directional signal 不允许 LONG_BIAS / SHORT_BIAS，返回 ABSTAIN。
+           request / context snapshot / output / audit persistence failure 均 fail-closed。
+           missing request 使用 unknown IDs 并按 policy fail-closed。
+           request persistence 会脱敏 sensitive token 与 placeOrder / cancelOrder 等 execution-intent token。
+           JDBC SQL 命中六张 K3 表、使用 CAST(? AS jsonb)、DataAccessException / JSON serialization failure 转 DecisionPersistenceException。
+           V5 migration 包含六张表、jsonb、timestamptz、索引、中文 comment、安全约束，且不创建 trading / live / NQ-owned 表。
+
+Readiness decision:
+           ALLOW_K3_CLOSE: YES
+           ALLOW_K4_IMPLEMENTATION: NO
+           ALLOW_GATEK_M1_CLOSE_REVIEW: NO
+           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO
+           ALLOW_INTEGRATION_1_RUNTIME: NO
+           ALLOW_AGENT_PHASE: NO
+           ALLOW_LANGGRAPH_RUNTIME: NO
+           ALLOW_LIVE: NO
+
+边界       未新增 API path；未新增 Controller；未新增 replay API / query endpoint；未实现 K4 Replay Read Model；
+           未接真实 HTTP；未接 NQ runtime；未新增 RealClient；未新增真实 Provider；未接 OpenAI / Claude / Gemini / 本地模型；
+           未接 LangGraph；未实现 mock NQ dry-run contract tests；未读取或输出 credential / token / cookie / API secret / passphrase；
+           未启动 Integration-1 runtime；未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；
+           未开启 LIVE；未修改 NQ 仓库；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 output action。
+准入决定   K3 Audit / Snapshot / Trace Persistence 已完成 implementation 并通过模块 Maven、全仓 Maven 与 quality validate；当前状态为 IMPLEMENTED / READY FOR M1。下一步只能进入 M1 readiness review，不得直接进入 K4。
+```

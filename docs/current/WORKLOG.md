@@ -3420,3 +3420,85 @@ mandatory forbiddenActions 保持固定
 
 ### 下一步
 进入 `DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED`；不得直接进入 K3。
+
+## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE
+
+### 范围
+完成 `DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE` single-batch implementation。K3 只落 DH-owned audit / snapshot / trace persistence，不实现 K4-K8，不新增 API / Controller / replay API，不接真实 provider / NQ / HTTP / LangGraph / LIVE。
+
+### 修改文件
+- 新增 `dh-app/src/main/resources/db/migration/V5__dh_decision_pipeline_audit.sql`：六张 K3 表，含 `decision_id` / `trace_id` / `tenant_id`、`jsonb`、`timestamptz`、索引、check constraint 与中文 comment。
+- 新增 `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DecisionAuditRepository.java`、`DecisionPersistenceRecords.java`、`DecisionPersistenceException.java`、`InMemoryDecisionAuditRepository.java`、`DecisionTraceStepName.java`、`DecisionTraceStepStatus.java`、`DecisionAuditEventType.java`、`DecisionAuditEventStatus.java`。
+- 修改 `DefaultDecisionOrchestrator.java`：接入 request / snapshot / trace / provider call / output / audit 持久化，persistence failure 统一 fail-closed。
+- 修改 `DecisionOutputAssembler.java`：新增 `persistenceFailure(...)` structured output。
+- 新增 `dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/decision/JdbcDecisionAuditRepository.java`：insert-only JDBC adapter，JSONB 使用 `CAST(? AS jsonb)`，数据库/序列化失败转 `DecisionPersistenceException`。
+- 新增 `dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java`：装配 K3 repository 与 `DecisionOrchestrator`，不新增 Controller。
+- 新增 `DecisionOrchestratorPersistenceTest`、`JdbcDecisionAuditRepositoryTest`、`V5DecisionPipelineAuditMigrationPresenceTest`。
+- 更新 `docs/current/README.md`、`STATUS.md`、`ROADMAP.md`、`WORK_ORDER.md`、`TESTING.md`、`WORKLOG.md`。
+
+### Implementation
+- `DefaultDecisionOrchestrator` 正常路径写入 request、policy/context/provider/risk/output/audit trace、context snapshot、mock provider call summary、decision output 和 audit event。
+- audit / snapshot / trace / output 任一写失败都会返回 `ABSTAIN` + `PERSISTENCE_FAILURE`；如果 fail-closed output / audit 也无法写入，仍返回结构化 fail-closed output。
+- `output_json` 不直接序列化 `DecisionOutput` domain object，改为显式安全 Map；`createdAt` 写 ISO 字符串，避免 JavaTime module 依赖和内部模型暴露。
+- request persistence 会脱敏 sensitive token 与 `placeOrder` / `cancelOrder` 等 execution-intent token，避免审计表保存可被误读为执行指令或凭证片段的原始字符串。
+- `provider_call_log.signal_json` 只保存 deterministic mock summary，不保存真实 provider raw response、credential、NQ DB 内容或敏感 header。
+- V5 migration 只创建 DH-owned audit tables，不创建 orders / trades / fills / positions / live / NQ-owned 表。
+
+### Tests
+新增 K3 tests 24 cases：
+
+```text
+DecisionOrchestratorPersistenceTest: 10
+JdbcDecisionAuditRepositoryTest: 9
+V5DecisionPipelineAuditMigrationPresenceTest: 5
+```
+
+覆盖项：
+
+```text
+valid write-through
+policy denied
+provider timeout
+high risk no directional bias
+request / context snapshot / output / audit persistence failure fail-closed
+missing request unknown IDs
+request persistence sensitive / execution-intent redaction
+JDBC SQL target table / JSONB cast / exception mapping
+V5 migration presence / indexes / comments / no trading runtime tables
+```
+
+### 验证
+- `Get-Location`：`F:\project\decision-hub`。
+- `git branch --show-current`：`dev`。
+- `git status --short`：仅 K3 允许范围内的 `dh-usecase` decision、`dh-infra` JDBC decision、`dh-app` V5 migration/wiring/tests 与 `docs/current` 状态文档变更；未自动 stage。
+- `git diff --check`：通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+- `git diff --stat`：tracked diff 8 files changed, 923 insertions(+), 96 deletions(-)；新增 K3 文件由 `git status --short` 标识为 untracked。
+- K3 边界关键词扫描：命中项均为禁止说明、migration comment、denylist 或负向测试字符串；未发现真实 runtime provider、HTTP client、Controller、NQ client、Exchange/Broker、BUY/SELL action 实现或 LIVE 启用。
+- `docs/current` 当前状态残留扫描：未发现 current stage / next stage 仍指向 K2 review；未发现 K3 current 写成 NOT STARTED；未发现 forbidden readiness 写成 YES。
+- `mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -pl dh-usecase,dh-infra -am test`：初始失败一次，RCA 为 `output_json` 直接序列化 `DecisionOutput.createdAt` 依赖 JavaTime module；修复为显式 Map 后 BUILD SUCCESS。
+- `mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml test`：BUILD SUCCESS；reactor 19/19 SUCCESS；Surefire 汇总 375 tests / 0 failures / 0 errors / 4 skipped。
+- `mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。
+- 4 skipped 为本机无 Docker 的既有 Testcontainers 环境项：`JdbcNonceReplayGuardPersistenceTest` 3 + `PostgresContainerSmokeTest` 1。
+
+### Readiness
+- `ALLOW_K3_CLOSE: YES`
+- `ALLOW_K4_IMPLEMENTATION: NO`
+- `ALLOW_GATEK_M1_CLOSE_REVIEW: NO`
+- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`
+- `ALLOW_INTEGRATION_1_RUNTIME: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 边界确认
+未新增 API path；未新增 Controller；未新增 replay API / query endpoint；未实现 K4 Replay Read Model；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient / 真实 Provider；未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；未实现 mock NQ dry-run contract tests；未读取或输出 credential、token、cookie、API secret、passphrase；未启动 Integration-1 runtime；未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；未修改 NQ 仓库。
+
+### 剩余风险
+- M1 readiness review 尚未开始。
+- K4 Replay Read Model 尚未实现。
+- K5 provider health / budget / latency 尚未实现。
+- K6 mock NQ dry-run contract tests 尚未实现。
+- Testcontainers 真实 Postgres 持久化项因本机无 Docker 仍跳过；需要 CI / Docker 环境另行跑。
+
+### 下一步
+进入 `DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED`；不得直接进入 K4。

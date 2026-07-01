@@ -20,9 +20,11 @@ DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE:
 DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW:
               K1 contract review                          [completed / closed]
 DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON:
-              DecisionOrchestrator Skeleton                [implemented / ready for review]
-DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW:
-              K2 orchestrator skeleton review              [next / not started]
+              DecisionOrchestrator Skeleton                [implemented]
+DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE:
+              Audit / Snapshot / Trace Persistence         [implemented / ready for M1]
+DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW:
+              K1-K3 milestone readiness review             [next / not started]
 Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
 Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
@@ -74,7 +76,7 @@ dep-tree.txt 重新生成
 
 ## 4. Integration-0 / Decision Pipeline MVP 当前路线
 
-Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 Contract Freeze review 已 `PASS / CLOSED / ACCEPTED`。K2 DecisionOrchestrator Skeleton 已实现 mock-only usecase 编排骨架，状态为 `IMPLEMENTED / READY FOR REVIEW`。下一步是 `DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW`（NOT STARTED），不得跳过 K2 review 或批次 review 直接进入 K3。
+Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 Contract Freeze review 已 `PASS / CLOSED / ACCEPTED`。K2 DecisionOrchestrator Skeleton 已实现 mock-only usecase 编排骨架。K3 Audit / Snapshot / Trace Persistence 已实现 DH-owned audit tables、usecase port、JDBC adapter、app wiring 与 fail-closed persistence 行为，状态为 `IMPLEMENTED / READY FOR M1`。下一步是 `DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW`（NOT STARTED），不得跳过 M1 review 直接进入 K4。
 
 语言治理补充：后续 DH roadmap、plan、work order、testing、worklog、status 文档正文必须中文为主；工程对象名、enum、JSON/OpenAPI 字段、HTTP header、状态枚举、命令和外部技术名保留英文原样。固定输出字段可以保留英文，但字段内容必须中文为主。
 
@@ -96,9 +98,10 @@ GateK plan status ACCEPTED / CLOSED
 Current GateK work order artifact docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
 Current GateK work order status ACCEPTED / CLOSED
 K1 contract freeze status PASS / CLOSED / ACCEPTED
-K2 DecisionOrchestrator Skeleton IMPLEMENTED / READY FOR REVIEW
-Next concrete action DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED
-K3 Audit / Snapshot / Trace Persistence NOT STARTED
+K2 DecisionOrchestrator Skeleton IMPLEMENTED
+K3 Audit / Snapshot / Trace Persistence IMPLEMENTED / READY FOR M1
+K4 Replay Read Model NOT STARTED
+Next concrete action DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline GateN
 ```

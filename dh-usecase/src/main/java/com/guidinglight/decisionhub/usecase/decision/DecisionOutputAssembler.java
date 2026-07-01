@@ -142,6 +142,18 @@ public final class DecisionOutputAssembler {
         safeTime(createdAt));
   }
 
+  /** 将 audit / snapshot / trace / output 持久化失败转换为结构化 ABSTAIN。 */
+  public DecisionOutput persistenceFailure(final DecisionRequest request, final Instant createdAt) {
+    return DecisionOutput.abstainForRisk(
+        requestId(request),
+        traceId(request),
+        tenantId(request),
+        DecisionRiskLevel.UNKNOWN,
+        List.of("PERSISTENCE_FAILURE"),
+        List.of(),
+        safeTime(createdAt));
+  }
+
   private static List<String> mergedReasonCodes(
       final List<String> signalReasons, final DecisionRiskReview risk, final String fallback) {
     final List<String> merged = new ArrayList<>();
