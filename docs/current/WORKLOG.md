@@ -3502,3 +3502,39 @@ V5 migration presence / indexes / comments / no trading runtime tables
 
 ### 下一步
 进入 `DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED`；不得直接进入 K4。
+
+## 2026-07-01 DH-GATEK-K3-CI-OBJECTMAPPER-FIX
+
+### 范围
+修复 K3 merge 后 GitHub Actions `mvn -B -ntp test` 在 `PostgresContainerSmokeTest.contextLoads` 的 Spring context 启动失败。本轮只处理 CI failure root cause 和回归测试，不推进 M1 readiness review，不实现 K4 Replay Read Model，不新增 API / Controller / replay API，不接真实 provider / NQ / HTTP / LangGraph / LIVE。
+
+### RCA
+CI run `28508807175` / job `84503767630` 失败于 `Build and test`。日志显示 `MappingJackson2HttpMessageConverter` 创建失败，根因是 `ObjectMapper` 注入歧义：
+
+```text
+No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available:
+expected single matching bean but found 2: nqFeedbackObjectMapper,decisionPersistenceObjectMapper
+```
+
+K3 `DecisionPipelineWiringConfig` 把 persistence 专用 `ObjectMapper` 注册成了 Spring bean，导致 WebMVC 默认 HTTP message converter 无法选择唯一 mapper。该问题只在真实 `dh-app` Spring context 启动时暴露；本地无 Docker 时 `PostgresContainerSmokeTest` 会跳过，所以需要新增非 Docker 装配回归测试。
+
+### 修改文件
+- `dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java`：移除 `decisionPersistenceObjectMapper` Spring bean，改为 repository 装配内部创建 K3 专用 mapper，避免污染全局 `ObjectMapper` bean 集合。
+- `dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java`：新增 ApplicationContextRunner 回归测试，断言全局只有一个 `ObjectMapper`、`nqFeedbackObjectMapper` 保持存在、`decisionPersistenceObjectMapper` 不再作为 bean 暴露、`DecisionAuditRepository` 仍可装配。
+- `docs/current/TESTING.md`、`docs/current/WORKLOG.md`：记录 CI RCA、修复与验证结果。
+
+### 验证
+- `Get-Location`：`F:\project\decision-hub`。
+- `git branch --show-current`：`dev`。
+- 初始 `git status --short`：clean。
+- GitHub MCP 读取 CI job log：确认 run `28508807175` / job `84503767630` 失败于 `PostgresContainerSmokeTest.contextLoads`，核心异常为两个 `ObjectMapper` bean 导致 `NoUniqueBeanDefinitionException`。
+- `mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -pl dh-app -am "-DfailIfNoTests=false" "-Dsurefire.failIfNoSpecifiedTests=false" "-Dtest=DecisionPipelineWiringConfigTest" test`：BUILD SUCCESS；新增测试 1/1 passed；reactor 15/15 SUCCESS。
+- `mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml test`：BUILD SUCCESS；reactor 19/19 SUCCESS；本机无有效 Docker，`PostgresContainerSmokeTest` 按 `disabledWithoutDocker=true` skipped；CI 有 Docker 会实际覆盖该启动路径。
+- `mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。
+- `git diff --check`：通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+
+### 边界确认
+未修改 NQ 仓库；未新增 API path；未新增 Controller；未新增 migration；未新增 replay API / query endpoint；未实现 K4 Replay Read Model；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient / 真实 Provider；未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；未读取或输出 credential、token、cookie、API secret、passphrase；未启动 Integration-1 runtime；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 output action。
+
+### 下一步
+当前主线仍为 `DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE / IMPLEMENTED / READY FOR M1`；下一步仍是 `DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED`，不得直接进入 K4。

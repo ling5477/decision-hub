@@ -1903,3 +1903,51 @@ Readiness decision:
            未开启 LIVE；未修改 NQ 仓库；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 output action。
 准入决定   K3 Audit / Snapshot / Trace Persistence 已完成 implementation 并通过模块 Maven、全仓 Maven 与 quality validate；当前状态为 IMPLEMENTED / READY FOR M1。下一步只能进入 M1 readiness review，不得直接进入 K4。
 ```
+
+## 49. 2026-07-01 DH-GATEK-K3-CI-OBJECTMAPPER-FIX 验证记录（CI failure fix）
+
+```text
+日期       2026-07-01
+阶段       DH-GATEK-K3-CI-OBJECTMAPPER-FIX（CI_FIX + REGRESSION）
+范围       只修复 K3 后 CI 中 dh-app Spring context 启动失败；不推进 M1、不实现 K4、不新增 API / Controller / replay API、不接真实 provider / NQ / HTTP / LangGraph / LIVE
+
+CI 失败    GitHub Actions run 28508807175 / job 84503767630
+失败步骤   Build and test
+失败测试   PostgresContainerSmokeTest.contextLoads
+RCA        K3 新增 `decisionPersistenceObjectMapper` Spring bean 后，容器中同时存在 `nqFeedbackObjectMapper`
+           与 `decisionPersistenceObjectMapper` 两个 `ObjectMapper`；Spring WebMVC 创建
+           `mappingJackson2HttpMessageConverter` 时需要单个 `ObjectMapper`，因此抛出
+           `NoUniqueBeanDefinitionException`。
+
+修复       `DecisionPipelineWiringConfig` 不再把 K3 persistence mapper 注册为全局 Spring bean；
+           `DecisionAuditRepository` 内部创建 K3 专用 mapper，避免与 HTTP message converter 竞争。
+回归       新增 `DecisionPipelineWiringConfigTest`，用 ApplicationContextRunner 断言：
+           - 全局 `ObjectMapper` 仍只有一个；
+           - `nqFeedbackObjectMapper` 仍存在；
+           - `decisionPersistenceObjectMapper` 不再作为 Spring bean 暴露；
+           - `DecisionAuditRepository` 仍能装配。
+
+命令       mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -pl dh-app -am "-DfailIfNoTests=false" "-Dsurefire.failIfNoSpecifiedTests=false" "-Dtest=DecisionPipelineWiringConfigTest" test
+结果       BUILD SUCCESS；DecisionPipelineWiringConfigTest 1/1 passed；reactor 15/15 SUCCESS。
+
+命令       mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml test
+结果       BUILD SUCCESS；reactor 19/19 SUCCESS；dh-app 32 tests / 0 failures / 0 errors / 1 skipped；
+           全仓本地可运行测试通过；Finished at 2026-07-01T18:07:01+08:00。
+补充       本机无有效 Docker，`PostgresContainerSmokeTest` 按 `disabledWithoutDocker=true` skipped；
+           CI 有 Docker，会实际覆盖该 contextLoads 路径。
+
+命令       mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -Pquality validate
+结果       BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed；
+           最终一次执行通过。
+
+命令       git diff --check
+结果       通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+
+边界       未修改 NQ 仓库；未新增 API path；未新增 Controller；未新增 migration；未新增 replay API；
+           未接真实 HTTP；未接 NQ runtime；未新增 RealClient；未新增真实 Provider；未接 OpenAI / Claude / Gemini / 本地模型；
+           未接 LangGraph；未读取或输出 credential / token / cookie / API secret / passphrase；
+           未启动 Integration-1 runtime；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；
+           未开启 LIVE；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 output action。
+准入决定   CI failure root cause 已修复并有非 Docker 回归测试保护；当前主线仍为 K3 IMPLEMENTED / READY FOR M1，
+           下一步仍是 M1 readiness review，不得直接进入 K4。
+```

@@ -11,7 +11,6 @@ import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionPolicyChecke
 import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionRiskReviewer;
 import com.guidinglight.decisionhub.usecase.decision.MockDecisionSignalProvider;
 import java.time.Clock;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,26 +25,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @Configuration
 public class DecisionPipelineWiringConfig {
 
-  /** K3 持久化 JSON 序列化器，独立命名避免与既有 NQ feedback ObjectMapper 混淆。 */
-  @Bean
-  @ConditionalOnMissingBean(name = "decisionPersistenceObjectMapper")
-  public ObjectMapper decisionPersistenceObjectMapper() {
-    return new ObjectMapper();
-  }
-
   /**
    * 装配 DH-owned decision audit JDBC repository。
    *
    * @param jdbcTemplate DH 应用 datasource 的 JdbcTemplate。
-   * @param objectMapper K3 专用 JSON 序列化器。
    * @return decision audit repository。
    */
   @Bean
   @ConditionalOnMissingBean
-  public DecisionAuditRepository decisionAuditRepository(
-      final JdbcTemplate jdbcTemplate,
-      @Qualifier("decisionPersistenceObjectMapper") final ObjectMapper objectMapper) {
-    return new JdbcDecisionAuditRepository(jdbcTemplate, objectMapper);
+  public DecisionAuditRepository decisionAuditRepository(final JdbcTemplate jdbcTemplate) {
+    return new JdbcDecisionAuditRepository(jdbcTemplate, decisionPersistenceObjectMapper());
   }
 
   /**
@@ -66,5 +55,9 @@ public class DecisionPipelineWiringConfig {
         new DecisionOutputAssembler(),
         decisionAuditRepository,
         Clock.systemUTC());
+  }
+
+  private static ObjectMapper decisionPersistenceObjectMapper() {
+    return new ObjectMapper();
   }
 }
