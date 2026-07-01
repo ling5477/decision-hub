@@ -79,29 +79,34 @@ docs/current/TESTING.md
 ## 4. 当前阶段
 
 ```text
-Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
-Next stage:    Integration-0-PLAN
+Current stage: Integration-0 safety gate CLOSED / ACCEPTED
+Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-PLAN
 Source of truth: docs/current
 ```
 
 Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架（dh-usecase service + DTO + Repository / dh-connector Fake + Disabled client / dh-app Stage3NqBacktestWiringConfig 三层 gate / ArchUnit 扩到 12 条）；190 tests 全绿；无真实 HTTP；无 RealNqBacktestClient。
 
-当前唯一下一步是 `Integration-0-PLAN`，且只允许做只读边界、契约冻结、权限模型、审计模型、风险清单和验收标准。Stage3-B2 / NQ Feedback Outbox / 真实 HTTP / event / NQ client / RealClient / real provider 均为 historical / superseded / deferred / gated，不是当前 next，不允许作为当前实现任务。任何 NQ 相关实现必须先通过 Integration-0-PLAN。Stage3 规划冻结快照位于 docs/gates/dh-stage3-plan/。
+Integration-0 safety gate 已 `CLOSED / ACCEPTED`；P1-4 residual、header alignment、timestamp alignment、code reality audit blockers 均已关闭或修复。当前下一步主线是 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN`，仅允许规划 Decision Pipeline MVP 的只读建议、证据、策略、审计、snapshot / trace / replay 边界；不允许启动 Integration-1 runtime、真实 NQ runtime、真实 Provider、真实 HTTP、LangGraph runtime、AI / Agent runtime 或 LIVE。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 只能作为 historical reference，当前标记为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。Stage3 规划冻结快照位于 docs/gates/dh-stage3-plan/。
 
 NQ / DH 三轮只读审计（NQ 全仓 / DH 全仓 / NQ-DH 联合边界 + 汇总）已完成，结论同步在 `docs/current/STATUS.md` §1.1。当前口径固定为：
 
 ```text
 NQ-DH:            not integrated；runtime connection none
-Integration-0:    allowed only as contract / mock / documentation work line, not runtime integration
-Allowed work:     docs, contract freeze, mock, stub, contract test, security policy
+Integration-0:    CLOSED / ACCEPTED as contract / mock / documentation work line, not runtime integration
+Allowed work:     docs, contract freeze record, mock, stub, contract test, security policy,
+                  Decision Pipeline MVP planning
 Forbidden work:   real NQ connection, RealClient, real Provider, trading,
                   credential access, NQ DB access, LIVE
-Security baseline: P1-1 / P1-2 / P1-3 closed
-Remaining issue:  P1-4 residual rate limit / memory cap / replay nonce persistence
-                  -> blocks Integration-1, not Integration-0
+Security baseline: FULL
+Fail-closed state: FULL
+P1-4 residual:     CLOSED
+Integration-1:     NOT STARTED
+Runtime integration: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LIVE:              DISABLED
 ```
 
-不得把 Integration-0 写成真实集成；不得把 NQ integration 写成 started；不得把 DH 写成 integrated；不得把 LIVE 写成 enabled。
+不得把 Integration-0 写成真实集成；不得把 Integration-1 写成 started；不得把 NQ integration 写成 started；不得把 DH 写成 integrated；不得把 AI / Agent runtime 写成 started；不得把 LIVE 写成 enabled。
 
 ## 5. 硬边界
 
@@ -300,13 +305,16 @@ PRESENTATION         Presentations + Documents + Canva
 DH 是多 Agent 决策系统，不是交易执行系统。
 DH 当前只允许研究、分析、候选信号、风险解释、审计记录。
 DH 不允许下单、撤单、修改策略状态、启动 Paper Run、访问交易所密钥、直接读写 NQ DB。
-DH 到 NQ 的任何未来接入都必须从 Integration-0-PLAN 开始。
-Integration-0 只能是只读边界、契约冻结、权限模型、审计模型，不允许真实业务打通。
+DH 到 NQ 的任何未来 runtime 接入都必须在 Integration-0 CLOSED / ACCEPTED 之后另起 GateN rebase planning。
+Integration-0 已 CLOSED / ACCEPTED，但仍只是 contract / mock / documentation work line，不允许真实业务打通。
 NQ integration not started.
-Integration-0 not started / plan only.
+Integration-1 NOT STARTED.
+Runtime integration NOT STARTED.
+DH integrated NO.
+AI / Agent runtime NOT STARTED.
 RealClient forbidden.
 real provider forbidden.
-LIVE trading forbidden.
+LIVE DISABLED.
 NQ mutation forbidden.
 ```
 
@@ -319,6 +327,7 @@ docs/current/DH_CODEX_PLUGIN_WORKFLOW.md
 docs/current/DH_WORKFLOW_ROUTER_SKILL.md
 docs/current/DH_CODEX_TASK_TEMPLATES.md
 .agents/skills/nq-dh-workflow-router/SKILL.md
+.agents/skills/dh-docs-writer/SKILL.md
 ```
 
 
@@ -486,21 +495,23 @@ docs/current/DH_CODEX_TASK_TEMPLATES.md
 
 ### 13.1 Active skills（唯一默认启用集合）
 
-当前 active skills 仅允许以下 9 个：
+当前 active skills 仅允许以下 10 个：
 
 1. `nq-dh-workflow-router`
-2. `frontend-product-ui-design`
-3. `ui-visual-system-polish`
-4. `frontend-antd-page-builder`
-5. `frontend-quality-regression`
-6. `java-backend-maintenance`
-7. `java-backend-regression-tests`
-8. `db-schema-migration-review`
-9. `python-ops-tooling`
+2. `dh-docs-writer`
+3. `frontend-product-ui-design`
+4. `ui-visual-system-polish`
+5. `frontend-antd-page-builder`
+6. `frontend-quality-regression`
+7. `java-backend-maintenance`
+8. `java-backend-regression-tests`
+9. `db-schema-migration-review`
+10. `python-ops-tooling`
 
 使用原则：
 
 - `nq-dh-workflow-router` 是所有任务的前置分类 skill；它只做分类、范围收口、插件建议和输出格式统一，不授权业务能力。
+- `dh-docs-writer` 是 DH 文档治理主 skill；docs/current、Gate/Phase/Stage planning、work order、acceptance/freeze/close review、WORKLOG/TESTING/STATUS/ROADMAP/API 同步、DH/NQ 集成文档同步、Decision Pipeline MVP 文档规划和 docs/gates 归档任务必须使用它。
 - 只选择与本轮任务直接相关的 skill，不要一次性激活所有 skills。
 - 一个任务最多一个主 skill；其他 skill 只能作为补充，并说明为什么需要。
 - 如果 skill 路由与当前 Gate 边界、安全边界、技术栈边界冲突，优先遵守 Gate / Freeze / Work Order / 安全 / 技术栈规则。

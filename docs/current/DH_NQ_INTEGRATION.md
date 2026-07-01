@@ -4,23 +4,31 @@
 > Owner: Decision Hub / NexusQuant Integration
 > Created: 2026-05-18
 
-## 0. 当前状态锁定（2026-06-06）
+## 0. 当前状态锁定（2026-07-01）
 
 ```text
-Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
-Next stage:    Integration-0-PLAN
+Current stage: Integration-0 safety gate CLOSED / ACCEPTED
+Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-PLAN
 DH-AUDIT-FIX completed
 NQ integration not started
-Integration-0 not started / plan only
+Integration-1 not started
+Runtime integration not started
+DH integrated NO
+AI / Agent runtime not started
 RealClient forbidden
 real provider forbidden
+real HTTP forbidden
 LIVE trading forbidden
 NQ mutation forbidden
+Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
+NQ current planning baseline: GateN
 ```
 
-当前唯一允许阶段是 `Integration-0-PLAN`。本文件中的 DH -> NQ REST API 控制面、`POST /api/ai/backtest-requests`、真实 HTTP / event、NQ client、RealClient、real provider 等方向均为 historical / superseded / deferred / gated；它们不是当前 next，不是当前 implementation，不允许作为当前开发任务。任何 NQ 相关实现必须先通过 Integration-0-PLAN 的安全审查、契约冻结和人工确认。
+当前唯一允许下一步是 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN`。该计划只允许规划 DH 内部只读 recommendation / evidence / audit / fail-closed 决策管线，不允许真实模型接入、LangGraph runtime、真实 HTTP、NQ runtime integration、RealClient、real provider、NQ mutation 或 LIVE。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须基于 NQ GateN 重新规划后才可进入新的 planning-only audit。
 
-Integration-0-PLAN 只能做：
+Integration-0 safety gate 已 CLOSED / ACCEPTED。若未来重新进入 NQ runtime 相关工作，只能从基于 GateN 的 Integration-1 planning-only audit 开始；本文件中的 DH -> NQ REST API 控制面、`POST /api/ai/backtest-requests`、真实 HTTP / event、NQ client、RealClient、real provider 等方向均为 historical / superseded / deferred / gated，不代表当前 next 或当前 implementation。
+
+未来 Integration-1 planning-only audit 最多只能做：
 
 ```text
 DH -> NQ 只读边界
@@ -37,7 +45,7 @@ risk checklist
 acceptance checklist
 ```
 
-Integration-0-PLAN 明确禁止：
+当前阶段明确禁止：
 
 ```text
 不调用 NQ /api/ai/backtest-requests
@@ -100,7 +108,7 @@ DH 保持独立服务，定位为 NQ 上方的 AI Agent 决策能力层。NQ 保
 
 ## 4. 集成方式（historical / superseded / deferred / gated）
 
-本节保留早期边界冻结阶段的未来集成方向，仅作为历史背景和后续 Integration-0-PLAN 的风险输入，不代表当前 next 或当前 implementation。当前不得据此实现真实 REST、真实 event、NQ client、RealClient 或 real provider。
+本节保留早期边界冻结阶段的未来集成方向，仅作为历史背景和后续 GateN-based Integration-1 planning-only audit 的风险输入，不代表当前 next 或当前 implementation。当前不得据此实现真实 REST、真实 event、NQ client、RealClient 或 real provider。
 
 早期规划采用双通道：
 

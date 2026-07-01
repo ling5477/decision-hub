@@ -1,0 +1,4 @@
+interface:
+  display_name: "DH Docs Writer"
+  short_description: "Govern DH docs and stage facts safely"
+  default_prompt: "Use $dh-docs-writer to update Decision Hub docs/current facts, Gate docs, WORKLOG, TESTING, STATUS, ROADMAP, and API documentation without crossing runtime or LIVE boundaries."

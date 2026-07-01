@@ -1419,3 +1419,43 @@ canonical  RFC3339 / ISO-8601 UTC Z（例 2026-06-15T12:34:56Z）；DH/NQ 均拒
            NQ INT0 scoped test：BUILD SUCCESS；Integration0 6+2+9=17/17
            NQ backend quality profile 探测：backend POM 未检出 quality profile / Spotless / Checkstyle
 ```
+
+## 42. 2026-07-01 DH-DOCS-SKILL-SYNC-FROM-NQ 验证记录（docs / skill only）
+
+```text
+日期       2026-07-01
+阶段       DH-DOCS-SKILL-SYNC-FROM-NQ（DOCS_GOVERNANCE + SKILL_SYNC + PROJECT_RULES_CREATION + WORKFLOW_STANDARDIZATION）
+范围       创建 DH 文档治理 skill，并同步 AGENTS / README / docs/current workflow / STATUS / ROADMAP 入口；不改 Java 生产代码、测试代码、API、migration、runtime 配置、contracts 或 golden_cases
+
+命令       git status --short
+结果       仅允许的文档与 skill 文件变更；新增 .agents/skills/dh-docs-writer/
+
+命令       git diff --check
+结果       通过；仅 Windows LF -> CRLF warning，无 whitespace error
+
+命令       git diff --stat
+结果       输出显示 AGENTS、README 与 docs/current tracked 文档存在 diff；新增 skill 文件为 untracked，另见 git status
+
+命令       git diff -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases
+结果       空 diff；确认未改 DH 生产代码、测试代码、contracts 或 golden_cases
+
+命令       rg 敏感词扫描（token / cookie / API secret / passphrase / private key / exchange key / database password / real credential material）
+结果       仅命中文档禁止清单和安全规则文字；未发现真实凭证值
+
+命令       skill-creator quick_validate.py .agents/skills/dh-docs-writer
+结果       未通过执行环境：bundled Python 缺少 yaml 模块，报 ModuleNotFoundError: No module named 'yaml'
+补充       手工等价检查通过：SKILL.md frontmatter 含 name/description；无模板 TODO；agents/openai.yaml 存在且 default_prompt 使用 $dh-docs-writer
+
+命令       mvn test
+结果       BLOCKED / NOT RUN TO TEST EXECUTION：
+           1) 默认本地仓库 D:\Tool\Maven\maven-repository 在 spring-boot-starter-parent/3.5.10 写 tracking file 时 FileAlreadyExistsException；
+           2) 改用临时本地仓库并修正 Windows 参数解析后，非沙箱重跑进入 reactor，但 Aliyun Maven 依赖下载反复握手中断；
+           3) 最终阻塞在 dh-common 的 maven-resources-plugin 依赖 javax.inject:1 与 org.slf4j:slf4j-api:1.7.36 下载，Remote host terminated the handshake；
+           项目测试未启动，未产生测试失败结论。
+
+命令       mvn -Pquality validate
+结果       BLOCKED / NOT RUN TO QUALITY EXECUTION：非沙箱运行在 dh-bom 下载 maven-checkstyle-plugin:3.3.1 POM 时 Aliyun Maven handshake 中断；quality 未进入 Checkstyle / Spotless。
+
+边界       未修改 NQ 仓库；未改 DH 生产代码；未改 DH 测试代码；未新增 API；未新增 migration；未真实 HTTP；未接 NQ runtime；未接真实 provider；未接 AI / LangGraph；未读取密钥；未开启 LIVE。
+准入决定   docs / skill 变更已完成 Git 级验证；Maven 回归被外部依赖下载阻塞，后续需在依赖仓库可用或本地 Maven 仓库修复后重跑 mvn test / mvn -Pquality validate。
+```

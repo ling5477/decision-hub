@@ -3053,3 +3053,34 @@ timestamp CLOSED 只表示 timestamp 契约收口完成，不授权 Integration-
 - NQ `mvn -f backend/pom.xml test`：BUILD SUCCESS。
 - NQ `mvn -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test`：BUILD SUCCESS；INT0 6+2+9=17/17。
 - NQ backend POM quality profile 探测：未检出 `<id>quality</id>` / `spotless` / `checkstyle`，未伪造 quality gate 成功。
+
+## 2026-07-01 DH-DOCS-SKILL-SYNC-FROM-NQ
+
+### 范围
+完成 `DH-DOCS-SKILL-SYNC-FROM-NQ` 文档治理同步：以 NQ `nq-docs-writer` 为参考，新增 DH 本地 `dh-docs-writer` skill，并把 DH 当前事实源、workflow index、状态入口和 next-stage 口径同步到 `docs/current`。本轮只做 docs / skill / project rules，不改 DH 生产代码、测试代码、API、migration、runtime 配置、contracts、golden_cases 或 NQ 仓库。
+
+### 修改文件
+- 新增 `.agents/skills/dh-docs-writer/SKILL.md`：定义 DH 文档治理规则、事实源优先级、Integration-0 / GateK / GateN / Decision Pipeline 边界、状态词汇、验证要求和禁止跨界项。
+- 新增 `.agents/skills/dh-docs-writer/agents/openai.yaml`：由 `skill-creator` 初始化生成的 skill metadata。
+- 更新 `AGENTS.md`：将 active skills 从 9 个扩展为 10 个，加入 `dh-docs-writer`；同步 current stage、next stage、GateN rebase、Decision Pipeline MVP PLAN 与 no runtime / no LIVE 边界。
+- 更新 `README.md`、`docs/current/README.md`、`docs/current/CODEX_PROJECT_INSTRUCTIONS.md`、`docs/current/CODEX_WORKFLOW_INDEX.md`、`docs/current/DH_CODEX_PLUGIN_WORKFLOW.md`、`docs/current/DH_NQ_INTEGRATION.md`、`docs/current/STATUS.md`、`docs/current/ROADMAP.md`、`docs/current/WORK_ORDER.md`：同步 DH 当前口径、stage 入口、workflow 入口、NQ/DH integration 边界、work order 和旧 GateK plan superseded 说明。
+- 更新 `docs/current/TESTING.md`、`docs/current/WORKLOG.md`：记录本轮验证、阻塞项、边界确认和工作日志。
+
+### 不变量
+Integration-0 safety gate 仍为 CLOSED / ACCEPTED；P1-4 residual rate limit / memory cap / replay nonce persistence、header alignment、timestamp alignment 均保持 CLOSED。Integration-1 / runtime integration / DH integrated / AI / LangGraph / real provider / RealClient / real HTTP / LIVE 均保持 NOT STARTED 或 DISABLED。Decision Pipeline MVP 当前只允许 PLAN：只读 recommendation / evidence / audit / fail-closed 语义，不允许 BUY / SELL / PLACE_ORDER / CANCEL_ORDER / NQ mutation。
+
+### 验证
+- `git status --short`：仅本轮文档与 `.agents/skills/dh-docs-writer/` 变更。
+- `git diff --check`：通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+- `git diff --stat`：已记录 tracked docs 变更统计；新增 skill 文件由 `git status` 标识为 untracked。
+- `git diff -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases`：空 diff。
+- 敏感词扫描：仅命中文档禁止清单和安全规则文字；未发现真实凭证值。
+- `skill-creator quick_validate.py`：被执行环境阻塞，bundled Python 缺少 `yaml` 模块；手工等价检查通过（frontmatter、无模板 TODO、`agents/openai.yaml` 存在且 prompt 使用 `$dh-docs-writer`）。
+- `mvn test`：未进入测试执行；默认 Maven 本地仓库 tracking file 写入报 `FileAlreadyExistsException`，改用临时本地仓库并非沙箱重跑后被 Aliyun Maven 依赖下载 TLS handshake 中断阻塞。
+- `mvn -Pquality validate`：未进入 Checkstyle / Spotless；被 Aliyun Maven 下载 `maven-checkstyle-plugin:3.3.1` TLS handshake 中断阻塞。
+
+### 边界确认
+未修改 NQ 仓库；未改 DH Java production / test code；未新增 API / migration；未改 contracts / golden_cases；未真实 HTTP；未接 NQ runtime；未接真实 provider；未接 AI / LangGraph；未读取密钥；未开启 LIVE。
+
+### 准入
+docs / skill 变更已完成 Git 级验证。Maven 回归受外部依赖下载和本地 Maven 仓库状态阻塞，需在依赖仓库可用或本地 Maven 仓库修复后重跑 `mvn test` 与 `mvn -Pquality validate`。下一步保持 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN`，不得回退到 superseded 的旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK`。

@@ -9,8 +9,8 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
-Next stage:    Integration-0-PLAN
+Current stage: Integration-0 safety gate CLOSED / ACCEPTED
+Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-PLAN
 Source of truth: docs/current
 ```
 
@@ -56,9 +56,10 @@ docs/current/DH_CODEX_PLUGIN_WORKFLOW.md
 docs/current/DH_WORKFLOW_ROUTER_SKILL.md
 docs/current/DH_CODEX_TASK_TEMPLATES.md
 .agents/skills/nq-dh-workflow-router/SKILL.md
+.agents/skills/dh-docs-writer/SKILL.md
 ```
 
-所有 Codex / Agent 任务先使用 `nq-dh-workflow-router` 做任务分类、插件路由、scope 收口和输出格式统一。标准输出字段固定为 `Task classification`、`Plugins selected`、`Scope`、`Files inspected`、`Files changed`、`Findings`、`Validation`、`Risks`、`Next concrete action`；`Summary` 不是必填字段。
+所有 Codex / Agent 任务先使用 `nq-dh-workflow-router` 做任务分类、插件路由、scope 收口和输出格式统一。所有 DH 文档治理、docs/current、Gate/Phase/Stage planning、work order、acceptance/freeze/close review、WORKLOG/TESTING/STATUS/ROADMAP/API 同步和 Decision Pipeline MVP 文档规划任务必须使用 `dh-docs-writer`。标准输出字段固定为 `Task classification`、`Plugins selected`、`Scope`、`Files inspected`、`Files changed`、`Findings`、`Validation`、`Risks`、`Next concrete action`；`Summary` 不是必填字段。
 
 ## 当前工程边界
 
@@ -80,15 +81,21 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-Integration-0-PLAN。
+DH-GATEK-DECISION-PIPELINE-MVP-PLAN。
 - Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架落地（Fake / Disabled 三层 gate，
   无真实 HTTP，无 RealNqBacktestClient；190 tests 全绿 / ArchUnit 12/12）。
-- Integration-0-PLAN 只允许输出只读边界、契约草案、权限模型、审计模型、风险清单和验收标准。
+- Integration-0 safety gate 已 CLOSED / ACCEPTED；P1-4 residual、header alignment、timestamp alignment、
+  code reality audit blockers 已关闭或修复。
+- Decision Pipeline MVP PLAN 只允许规划 DecisionRequest / DecisionOutput / DecisionOrchestrator /
+  Snapshot / Trace / Replay / Audit 的只读建议和 fail-closed 边界。
 - Stage3-B2 / NQ Feedback Outbox / 真实 HTTP / event / NQ client / RealClient / real provider
   均为 historical / superseded / deferred / gated，不是当前 next，不允许作为当前实现任务。
-- NQ integration not started；Integration-0 not started / plan only。
+- 旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK：SUPERSEDED / REBASE_REQUIRED。
+- NQ 已进入 GateN；后续 Integration-1 必须基于 GateN rebase 重新规划。
+- NQ integration not started；Integration-1 NOT STARTED；Runtime integration NOT STARTED；DH integrated NO。
+- AI / Agent runtime NOT STARTED；LangGraph runtime NOT STARTED；LIVE DISABLED。
 - RealClient forbidden；real provider forbidden；LIVE trading forbidden；NQ mutation forbidden。
-严格禁止：接 NQ / 修改 NQ 仓库 / 接实盘 / 自动下单 / 绕风控 / 重写回测核心 / 引入 TradingAgents Python。
+严格禁止：接 NQ runtime / 修改 NQ 仓库 / 接实盘 / 自动下单 / 绕风控 / 重写回测核心 / 引入 TradingAgents Python / 接 LangGraph runtime。
 ```
 
 冻结快照：`docs/gates/dh-stage3-plan/`（33 个文件含 10 份 STAGE3_*.md；不得直接修改）

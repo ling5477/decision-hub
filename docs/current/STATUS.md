@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
-> Next stage:    Integration-0-PLAN
+> Current stage: Integration-0 safety gate CLOSED / ACCEPTED
+> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-PLAN
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -21,11 +21,18 @@ Codex workflow routing 已固化到 `nq-dh-workflow-router` 与 `docs/current/CO
 ```text
 DH-AUDIT-FIX completed.
 NQ integration not started.
-Integration-0 not started / plan only.
+Integration-0 safety gate CLOSED / ACCEPTED.
+Integration-1 NOT STARTED.
+Runtime integration NOT STARTED.
+DH integrated NO.
+AI / Agent runtime NOT STARTED.
 RealClient forbidden.
 real provider forbidden.
-LIVE trading forbidden.
+LIVE DISABLED.
 NQ mutation forbidden.
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN.
+Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
+NQ current planning baseline: GateN.
 ```
 
 ## 1.1 NQ / DH 三轮审计同步（2026-06-11，DOC-SYNC-GATEK-PRE-AND-INT0-REGISTRATION）
@@ -82,7 +89,7 @@ DH integration:       NOT INTEGRATED
 - 验收依据：DH `mvn test` BUILD SUCCESS（dh-domain 86 tests / 0 failures，Integration-0 16 passed，ArchitectureTest 12 条全绿，PostgresContainerSmokeTest 既有环境性 skip）；NQ `mvn -f backend/pom.xml test` BUILD SUCCESS（nq-app 51 tests / 0 failures，Integration-0 16 passed，ArchUnit 全绿）。两侧均覆盖 INT0-T01..T15，含 negative path、audit event shape、forbidden side-effect。
 - 契约范围：10 个契约 contract-only / mock-only / test-protected（无真实 HTTP / 无 RealClient / 无真实 NQ）。
 - Integration-1 前置 blocker：DH P1-4 residual（rate limit / memory cap / replay nonce persistence，修复后须重跑 contract tests，T06 须以持久化 nonce 重跑，并新增 429 限流与 bounded store 测试）；header `X-DH-NQ-*`/`X-NQ-DH-*` 对齐；真实通道安全前置（单独开工 + 设计审计 + staging/paper-only + LIVE disabled + 无凭证落日志 + no trading side-effect + 安全审查）。
-- 下一步只允许：Integration-0 acceptance/归档、Integration-1 planning-only audit、DH P1-4 residual fix planning、NQ GateK-PLAN 文档规划。禁止直接 Integration-1 实现 / 真实只读通道 / 真实 HTTP / RealClient / Provider / LIVE / AI 自动交易。
+- 下一步只允许：DH docs governance / Decision Pipeline MVP planning，或基于 NQ GateN rebase 的 Integration-1 planning-only audit。禁止直接 Integration-1 实现 / 真实只读通道 / 真实 HTTP / RealClient / Provider / LIVE / AI 自动交易 / LangGraph runtime。
 
 ## 1.3 DH P1-4 residual regression close（2026-06-13，CLOSED）
 
@@ -98,7 +105,8 @@ Runtime integration:     NOT STARTED
 DH:                      NOT INTEGRATED
 AI:                      NOT STARTED
 LIVE:                    DISABLED
-header alignment:        NOT DONE（另起独立任务，未 completed）
+header alignment:        CLOSED（2026-06-15，见 DH_NQ_HEADER_ALIGNMENT_PLAN.md）
+timestamp alignment:     CLOSED（2026-06-15，见 DH_NQ_TIMESTAMP_FORMAT_ALIGNMENT_PLAN.md）
 ```
 
 - 验收依据：`mvn test` BUILD SUCCESS、`mvn -Pquality validate` BUILD SUCCESS；关键测试全绿——
@@ -115,6 +123,36 @@ header alignment:        NOT DONE（另起独立任务，未 completed）
 - 非阻塞后续项（均未在本轮处理）：① Docker CI 跑通持久化 nonce IT；② header `X-DH-NQ-*`/`X-NQ-DH-*` 对齐；
   ③ datasource 默认弱口令治理；④ 多实例真实通道集中式（Redis）rate limiter，Integration-1 前设计审查；
   ⑤ rate limit 指标 / counter 可观测性增强；⑥ P1-4 后 Integration-1 planning-only audit。
+
+## 1.4 DH docs governance / Decision Pipeline MVP pre-plan baseline（2026-07-01）
+
+```text
+Integration-0 safety gate: CLOSED / ACCEPTED
+P1-4 residual: CLOSED
+header alignment: CLOSED
+timestamp alignment: CLOSED
+code reality audit blockers: fixed
+DH security state: FULL
+DH fail-closed state: FULL
+Integration-0 contract state: MATCH
+Decision pipeline state: PARTIAL
+Audit state: PARTIAL
+Replay state: PARTIAL
+Integration-1: NOT STARTED
+Runtime integration: NOT STARTED
+DH integrated: NO
+AI / Agent runtime: NOT STARTED
+LIVE: DISABLED
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN
+Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
+NQ current planning baseline: GateN
+```
+
+- 本轮新增 DH 文档治理 skill：`.agents/skills/dh-docs-writer/SKILL.md`。
+- DH 文档任务必须继续以 `docs/current` 为事实源；root `README.md` 只做入口和简要状态。
+- 后续 Decision Pipeline MVP PLAN 可以规划 DecisionRequest / DecisionOutput / DecisionOrchestrator / Snapshot / Trace / Replay / Audit，但未实现前不得写成 done。
+- 第一版 DecisionOutput 必须保持 `READ_ONLY_RECOMMENDATION`；默认无证据或 provider 失败时 `ABSTAIN`；policy denied 与 audit 写失败必须 fail-closed。
+- 当前仍禁止真实 NQ runtime、真实 provider、真实 HTTP、LangGraph runtime、AI / Agent runtime、LIVE、NQ DB 读写、NQ mutation、下单和撤单。
 
 ## 2. 当前已完成
 
@@ -473,25 +511,29 @@ DH-CODEX-WORKFLOW-FINAL-CLEANUP
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（Integration-0-PLAN）
+## 4. 下一阶段（DH-GATEK-DECISION-PIPELINE-MVP-PLAN）
 
 ```text
-唯一下一步是 Integration-0-PLAN。
+唯一下一步是 DH-GATEK-DECISION-PIPELINE-MVP-PLAN。
 
-Integration-0-PLAN 只允许：
-- 输出只读边界规划
-- 输出契约草案
-- 定义 scope token / permission model
-- 定义 audit trail
-- 定义 replay protection / tenant binding / request signing
-- 定义 timestamp / nonce / payload size limit / source allowlist
+Decision Pipeline MVP PLAN 只允许：
+- 输出规划文档
+- 定义 read-only recommendation 边界
+- 定义 evidence / risk / policy / audit trace 字段
+- 定义 DecisionRequest / DecisionResponse / DecisionTrace 草案
+- 定义 ABSTAIN / NO_ACTION / BLOCKED / POLICY_DENIED 语义
+- 定义 forbiddenActions: PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE / READ_NQ_DB / WRITE_NQ_DB
+- 定义 provider unavailable / no evidence / audit write failure fail-closed 规则
 - 定义验收清单和风险清单
 
-Integration-0-PLAN 不允许：
+Decision Pipeline MVP PLAN 不允许：
 - 实现真实 NQ client
 - 实现 RealClient / RealNqBacktestClient
 - 接真实 HTTP / event 到 NQ
 - 调用 NQ /api/ai/research/backtest-requests
+- 接真实 LLM provider
+- 接 LangGraph runtime
+- 输出 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 作为 action
 - 启动 Paper Run
 - 修改 NQ 交易状态
 - 访问交易所密钥
@@ -499,15 +541,19 @@ Integration-0-PLAN 不允许：
 - 读取或写入 NQ DB
 - 新增 API / migration / provider / 交易路径
 
-Stage2-PoC、Stage3-B2/B3/B4 的真实接入、联调、RealClient 或 NQ mutation 方向
-均为 historical / superseded / deferred，不是当前 next，不允许作为当前实现任务。
+Stage2-PoC、Stage3-B2/B3/B4 的真实接入、联调、RealClient 或 NQ mutation 方向均为 historical / superseded / deferred，不是当前 next，不允许作为当前实现任务。旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK 为 SUPERSEDED / REBASE_REQUIRED；如需恢复 NQ runtime 相关 planning，必须基于 NQ GateN 重新规划。
 
 当前状态保持：
 - DH-AUDIT-FIX completed
 - NQ integration not started
-- Integration-0 not started / plan only
+- Integration-0 safety gate CLOSED / ACCEPTED
+- Integration-1 not started
+- Runtime integration not started
+- DH integrated NO
+- AI / Agent runtime not started
 - RealClient forbidden
 - real provider forbidden
+- real HTTP forbidden
 - LIVE trading forbidden
 - NQ mutation forbidden
 ```

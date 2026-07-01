@@ -2,7 +2,7 @@
 
 > Status: active workflow rule
 > Scope: Decision Hub Codex / Agent tasks
-> Integration state: NQ integration not started; Integration-0 not started / plan only
+> Integration state: NQ integration not started; Integration-0 safety gate CLOSED / ACCEPTED; Integration-1 not started
 
 ## 1. 目标
 
@@ -93,8 +93,8 @@ Next concrete action:
 DH 是多 Agent 决策系统。
 DH 当前只允许研究、分析、候选信号、风险解释、审计记录。
 DH 不允许下单、撤单、修改策略状态、启动 Paper Run、访问交易所密钥、直接读写 NQ DB。
-DH 到 NQ 的任何未来接入都必须从 Integration-0-PLAN 开始。
-Integration-0 只能是只读边界、契约冻结、权限模型、审计模型，不允许真实业务打通。
+DH 到 NQ 的任何未来 runtime 接入都必须基于 NQ GateN 重新进入 planning-only audit。
+Integration-0 safety gate 已 CLOSED / ACCEPTED；该结论不授权真实业务打通。
 ```
 
 当前状态保持：
@@ -102,9 +102,17 @@ Integration-0 只能是只读边界、契约冻结、权限模型、审计模型
 ```text
 DH-AUDIT-FIX completed.
 NQ integration not started.
-Integration-0 not started / plan only.
+Integration-0 safety gate CLOSED / ACCEPTED.
+Integration-1 not started.
+Runtime integration not started.
+DH integrated NO.
+AI / Agent runtime not started.
 RealClient forbidden.
 real provider forbidden.
+real HTTP forbidden.
 LIVE trading forbidden.
 NQ mutation forbidden.
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN.
+Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
+NQ current planning baseline: GateN.
 ```

@@ -2,6 +2,7 @@
 
 > Project: Decision Hub
 > Required pre-skill: `nq-dh-workflow-router`
+> Required docs skill: `dh-docs-writer`
 > Source of truth: `docs/current`
 
 ## 1. 前置分类规则
@@ -60,9 +61,11 @@ keystore password
 
 ```text
 不把 archived / historical / superseded 文档当作当前事实源。
-除非用户明确要求历史对照，否则当前状态以 STATUS.md、AGENTS.md、
-CODEX_PROJECT_INSTRUCTIONS.md、WORK_ORDER.md 的当前段落为准。
+除非用户明确要求历史对照，否则当前状态以 docs/current/STATUS.md、
+docs/current/README.md、docs/current/ROADMAP.md、CODEX_PROJECT_INSTRUCTIONS.md
+和 AGENTS.md 的当前段落为准。
 历史 Stage 文档只能作为背景，不得自动转化为当前 next task。
+DH 文档治理任务必须使用 .agents/skills/dh-docs-writer/SKILL.md。
 ```
 
 分类只能从以下集合选择：
@@ -122,11 +125,18 @@ Integration-0 只能是只读边界、契约冻结、权限模型、审计模型
 ```text
 DH-AUDIT-FIX completed.
 NQ integration not started.
-Integration-0 not started / plan only.
+Integration-0 safety gate CLOSED / ACCEPTED.
+Integration-1 NOT STARTED.
+Runtime integration NOT STARTED.
+DH integrated NO.
+AI / Agent runtime NOT STARTED.
 RealClient forbidden.
 real provider forbidden.
-LIVE trading forbidden.
+LIVE DISABLED.
 NQ mutation forbidden.
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN.
+Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
+NQ current planning baseline: GateN.
 ```
 
 ## 6. DOCUMENTATION 任务默认验证
@@ -134,6 +144,7 @@ NQ mutation forbidden.
 ```powershell
 git status --short
 git diff --check
+git diff --stat
 ```
 
 如果用户明确禁止业务代码变更，验证时还必须确认 diff 只落在允许的文档和规则文件。

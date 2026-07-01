@@ -1,26 +1,23 @@
 # Decision Hub Current Work Order
 
-> Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
-> Closed:        DH-CODEX-WORKFLOW conflict cleanup
-> Next stage:    Integration-0-PLAN
+> Current stage: Integration-0 safety gate CLOSED / ACCEPTED
+> Closed:        DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment
+> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-PLAN
 
 ## 1. 当前目标
 
-下一步唯一允许工作内容是 Integration-0-PLAN。
+下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN`。
 
-Integration-0-PLAN 只允许输出规划文档，不允许实现真实接入：
+Decision Pipeline MVP PLAN 只允许输出规划文档，不允许实现真实模型、真实接入或交易能力：
 
 ```text
-只读边界
-契约草案
-权限模型
-审计模型
-replay protection
-tenant binding
-request signing
-timestamp / nonce
-payload size limit
-source allowlist
+READ_ONLY_RECOMMENDATION
+候选建议 / 风险解释 / evidence summary
+DecisionRequest / DecisionResponse / DecisionTrace 文档草案
+Audit event shape 文档草案
+Policy denied / audit write failure / provider unavailable fail-closed 规则
+ABSTAIN / NO_ACTION 语义
+forbiddenActions 固化
 验收清单
 风险清单
 ```
@@ -38,21 +35,21 @@ ArchUnit： 新增 4 条规则保护新边界
 pom：      dh-eval parent 修回 dh-bom
 ```
 
-## 3. Integration-0-PLAN（唯一下一步）
+## 3. DH-GATEK-DECISION-PIPELINE-MVP-PLAN（唯一下一步）
 
-下一份工单只能以 `Integration-0-PLAN` 为主题；启动前必须先在 `docs/current/` 下输出
-Integration-0 规划文档。
+下一份工单只能以 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 为主题；启动前必须先在 `docs/current/` 下输出 Decision Pipeline MVP 规划文档。
 
 允许范围：
 
 ```text
-输出 Integration-0-PLAN 文档
-梳理 DH -> NQ 只读边界
-定义契约草案
-定义 scope token / permission model
-定义 audit trail
-定义 replay protection / tenant binding / request signing
-定义 timestamp / nonce / payload size limit / source allowlist
+输出 Decision Pipeline MVP PLAN 文档
+定义 read-only recommendation 边界
+定义 evidence / risk / policy / audit trace 字段
+定义 DecisionResponse action vocabulary
+定义 ABSTAIN / NO_ACTION / BLOCKED / POLICY_DENIED 语义
+定义 forbiddenActions: PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE / READ_NQ_DB / WRITE_NQ_DB
+定义 audit write failure fail-closed 规则
+定义 provider unavailable / no evidence fail-closed 规则
 定义验收清单
 定义风险清单
 ```
@@ -62,11 +59,18 @@ Integration-0 规划文档。
 ```text
 DH-AUDIT-FIX completed
 NQ integration not started
-Integration-0 not started / plan only
+Integration-0 safety gate CLOSED / ACCEPTED
+Integration-1 not started
+Runtime integration not started
+DH integrated NO
+AI / Agent runtime not started
 RealClient forbidden
 real provider forbidden
+real HTTP forbidden
 LIVE trading forbidden
 NQ mutation forbidden
+Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
+NQ current planning baseline: GateN
 ```
 
 ## 4. Historical / superseded / deferred 内容
@@ -84,7 +88,7 @@ real provider                                   forbidden
 LIVE trading                                    forbidden
 ```
 
-以上内容只保留为历史背景，不是当前 next，不允许作为当前实现任务。后续如需恢复，必须先通过 Integration-0-PLAN 的安全审查、契约冻结和人工确认。
+以上内容只保留为历史背景，不是当前 next，不允许作为当前实现任务。后续如需恢复，必须先基于 NQ GateN 重新进入 planning-only audit，并通过安全审查、契约冻结和人工确认。
 
 ## 5. 不做事项（持续硬约束）
 
@@ -104,17 +108,20 @@ LIVE trading                                    forbidden
 ## 6. 下一轮 Codex 开工提示词草稿
 
 ```text
-你在 decision-hub 仓库 dev 分支上工作。任务名：Integration-0-PLAN。
+你在 decision-hub 仓库 dev 分支上工作。任务名：DH-GATEK-DECISION-PIPELINE-MVP-PLAN。
 
-目标：只输出 DH -> NQ 未来接入前的只读边界、契约草案、权限模型、审计模型、
-replay protection、tenant binding、request signing、timestamp / nonce、payload size limit、
-source allowlist、验收清单和风险清单。
+目标：只输出 DH 内部 Decision Pipeline MVP 的规划文档，定义 read-only recommendation、
+DecisionRequest / DecisionResponse / DecisionTrace、evidence / risk / policy / audit trace、
+ABSTAIN / NO_ACTION / POLICY_DENIED、forbiddenActions 和 fail-closed 验收标准。
 
 禁止：
 - 不实现真实 NQ client
 - 不实现 RealClient
 - 不接真实 HTTP / event 到 NQ
 - 不调用 NQ /api/ai/research/backtest-requests
+- 不接真实 LLM provider
+- 不接 LangGraph runtime
+- 不输出 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 作为 action
 - 不启动 Paper Run
 - 不修改 NQ 交易状态
 - 不访问交易所密钥
@@ -122,5 +129,5 @@ source allowlist、验收清单和风险清单。
 - 不读取或写入 NQ DB
 - 不新增 API / migration / provider / 交易路径
 
-不要写业务代码。本轮只产出 Integration-0-PLAN 文档草案。
+不要写业务代码。本轮只产出 Decision Pipeline MVP PLAN 文档草案。
 ```
