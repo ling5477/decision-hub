@@ -1,14 +1,14 @@
 # Decision Hub 当前工单
 
-> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE / IMPLEMENTED / READY FOR M1
+> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL / IMPLEMENTED / READY FOR NEXT
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment
-> 下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED
+> 下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED
 
 ## 1. 当前目标
 
-下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW`。
+下一步唯一允许工作内容是 `DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY`。
 
-`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 已完成 review 并 `PASS / CLOSED / ACCEPTED`。K2 已完成 mock-only usecase 编排骨架。K3 已完成 audit / snapshot / trace persistence，状态为 `IMPLEMENTED / READY FOR M1`。下一步只允许做 M1 readiness review，不允许跳过 M1 review 直接进入 K4 或全量 implementation：
+`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 已完成 review 并 `PASS / CLOSED / ACCEPTED`。K2 已完成 mock-only usecase 编排骨架。K3 已经 M1 readiness review 关闭。K4 已完成内部 Replay Read Model，只读取 K3 已持久化数据，不新增 API、Controller、migration 或 replay endpoint。下一步只允许进入 K5，不允许跳过 K5 review 连续进入 K6-K8 或全量 implementation：
 
 ```text
 READ_ONLY_RECOMMENDATION
@@ -84,7 +84,7 @@ ALLOW_LIVE: NO
 
 ## 4. DH-GATEK-DECISION-PIPELINE-MVP-WO（工单产物）
 
-本节记录已关闭工单。WO 已授权按 review gate 逐批 implementation；K1 已 `PASS / CLOSED / ACCEPTED`，K2 已 `IMPLEMENTED`，K3 已 `IMPLEMENTED / READY FOR M1`。WO 不授权 K4-K8 连续实施，不授权 Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
+本节记录已关闭工单。WO 已授权按 review gate 逐批 implementation；K1 已 `PASS / CLOSED / ACCEPTED`，K2 已 `IMPLEMENTED`，K3 已 `CLOSED / ACCEPTED after M1`，K4 已 `IMPLEMENTED / READY FOR NEXT`。WO 不授权 K5-K8 连续实施，不授权 Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
 
 工单产物：
 
@@ -93,9 +93,11 @@ docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
 Status: ACCEPTED / CLOSED
 K1 status: PASS / CLOSED / ACCEPTED
 K2 status: IMPLEMENTED
-K3 status: IMPLEMENTED / READY FOR M1
-K4 status: NOT STARTED
-Next: DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED
+K3 status: CLOSED / ACCEPTED after M1
+M1 status: CLOSED / ACCEPTED
+K4 status: IMPLEMENTED / READY FOR NEXT
+K5 status: NOT STARTED
+Next: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED
 ```
 
 批次顺序：
@@ -116,7 +118,8 @@ K8 Acceptance / Freeze
 ```text
 K1 after review before K2
 K2 after review before K3
-K3 after review before K4
+K3 after M1 before K4
+K4 after implementation before K5
 K1-K5 complete before K6
 K1-K7 complete before K8
 Before GateK MVP closed: no Integration-1 runtime, no LangGraph runtime
@@ -169,8 +172,10 @@ NQ mutation forbidden
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
-K3 Audit / Snapshot / Trace Persistence: IMPLEMENTED / READY FOR M1
-K4 Replay Read Model: NOT STARTED
+K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
+M1 Readiness Review: CLOSED / ACCEPTED
+K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
+K5 Provider Health / Budget / Latency: NOT STARTED
 ```
 
 ## 5. DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON（已实现）
@@ -203,9 +208,9 @@ Integration-1 runtime
 LIVE / trading / NQ mutation
 ```
 
-## 6. DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE（IMPLEMENTED / READY FOR M1）
+## 6. DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE（CLOSED / ACCEPTED after M1）
 
-K3 已在 DH 仓库内完成 audit / snapshot / trace persistence。下一步不是 K4 implementation，而是 M1 readiness review。
+K3 已在 DH 仓库内完成 audit / snapshot / trace persistence，并已通过 M1 readiness review 关闭。
 
 K3 实施范围：
 
@@ -240,8 +245,8 @@ K3 readiness：
 
 ```text
 ALLOW_K3_CLOSE: YES
-ALLOW_K4_IMPLEMENTATION: NO
-ALLOW_GATEK_M1_CLOSE_REVIEW: NO
+ALLOW_K4_IMPLEMENTATION: YES
+ALLOW_GATEK_M1_CLOSE_REVIEW: YES
 ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO
 ALLOW_INTEGRATION_1_RUNTIME: NO
 ALLOW_AGENT_PHASE: NO
@@ -249,7 +254,56 @@ ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
 
-## 7. Historical / superseded / deferred 内容
+## 7. DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL（IMPLEMENTED / READY FOR NEXT）
+
+K4 已在 DH 仓库内完成内部 Replay Read Model。该 read model 只读取 K3 已持久化的六类 DH-owned decision 记录，不重跑 provider、不重跑 orchestrator、不调用 NQ、不修改 audit 数据。
+
+K4 实施范围：
+
+```text
+DecisionReplayView / Request / Context / TraceStep / ProviderCall / Output / AuditEvent / Timeline
+DecisionReplayStatus
+DecisionReplayQuery
+DecisionReplayQueryRepository
+DecisionReplayQueryService
+DefaultDecisionReplayQueryService
+JdbcDecisionReplayQueryRepository
+DecisionPipelineWiringConfig replay repository / service wiring
+K4 usecase / JDBC read / wiring tests
+docs/current sync
+```
+
+K4 明确未做：
+
+```text
+replay API / Controller / query endpoint
+new migration
+K5 provider health / budget / latency
+K6 mock NQ dry-run contract tests
+K7 golden cases / eval
+K8 acceptance / freeze
+real provider / OpenAI / Claude / Gemini / local model
+LangGraph runtime
+NQ runtime / real HTTP / RealClient
+Integration-1 runtime
+LIVE / trading / NQ mutation
+NQ DB read/write
+```
+
+K4 readiness：
+
+```text
+ALLOW_K4_CLOSE: YES
+ALLOW_K5_IMPLEMENTATION: YES
+ALLOW_GATEK_M2_CLOSE_REVIEW: NO
+ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+## 8. Historical / superseded / deferred 内容
 
 ```text
 NqFeedbackClient 接通真实 HTTP / event         forbidden / deferred
@@ -266,7 +320,7 @@ LIVE trading                                    forbidden
 
 以上内容只保留为历史背景，不是当前 next，不允许作为当前实现任务。后续如需恢复，必须先基于 NQ GateN 重新进入 planning-only audit，并通过安全审查、契约冻结和人工确认。
 
-## 8. 不做事项（持续硬约束）
+## 9. 不做事项（持续硬约束）
 
 ```text
 不修改 NQ 仓库交易核心
@@ -281,20 +335,19 @@ LIVE trading                                    forbidden
 不读取 token / cookie / exchange secret / production .env / API key / private key / mnemonic / 2FA backup code
 ```
 
-## 9. 下一轮 Codex 开工提示词草稿
+## 10. 下一轮 Codex 开工提示词草稿
 
 ```text
-你在 decision-hub 仓库 dev 分支上工作。任务名：DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW。
+你在 decision-hub 仓库 dev 分支上工作。任务名：DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY。
 
-目标：只读 review K1-K3 是否形成 GateK Decision Pipeline MVP M1 可接受基线；重点审查 K3 audit / snapshot / trace persistence、Flyway V5、usecase port、JDBC adapter、orchestrator fail-closed 行为、docs 和验证证据。
-判断是否允许 K3 close；不要实现 K4。
+目标：只实现 K5 mock-only provider health / budget / latency controls；保持 provider unavailable / timeout / untrusted / budget exceeded fail-closed，不接真实 provider runtime。
+判断是否允许 K5 close；不要实现 K6。
 
 禁止：
 - 不修改生产代码
 - 不修改测试代码
 - 不新增 API
 - 不新增 migration
-- 不实现 K4 replay read model
 - 不新增 replay API / Controller / query endpoint
 - 不实现真实 NQ client
 - 不实现 RealClient

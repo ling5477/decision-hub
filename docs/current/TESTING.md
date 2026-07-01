@@ -1951,3 +1951,81 @@ RCA        K3 新增 `decisionPersistenceObjectMapper` Spring bean 后，容器�
 准入决定   CI failure root cause 已修复并有非 Docker 回归测试保护；当前主线仍为 K3 IMPLEMENTED / READY FOR M1，
            下一步仍是 M1 readiness review，不得直接进入 K4。
 ```
+
+## 50. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL 验证记录
+
+```text
+日期       2026-07-01
+阶段       DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL（CODE_CHANGE + REPLAY_READ_MODEL + DOCS_SYNC）
+范围       只实现内部 replay read model；不新增 API / Controller / migration / replay endpoint；不进入 K5-K8。
+
+K4 新增测试
+  - DecisionReplayQueryServiceTest 8/8：
+    found / not found / tenant mismatch / incomplete / corrupted / repository failure -> BLOCKED /
+    invalid input -> BLOCKED / trace mismatch -> BLOCKED。
+  - JdbcDecisionReplayQueryRepositoryTest 6/6：
+    found + tenant scoped SQL + no write / not found / incomplete / corrupt JSON -> CORRUPTED /
+    DB read failure -> BLOCKED / trace-provider-audit ordering。
+  - DecisionPipelineWiringConfigTest 1/1：
+    ObjectMapper bean 仍唯一；`decisionPersistenceObjectMapper` 不作为 Spring bean 暴露；
+    replay repository / service 可装配。
+
+命令       mvn -ntp -pl dh-usecase,dh-infra,dh-app -am test
+结果       BUILD SUCCESS；reactor 15/15 SUCCESS；dh-app `PostgresContainerSmokeTest` 1 skipped。
+说明       该次为普通 Codex sandbox 执行，Testcontainers 无法访问 Docker named pipe，按既有
+           `disabledWithoutDocker` 语义跳过。K4 usecase / JDBC read / wiring 测试均已通过。
+
+命令       docker info --format '{{.ServerVersion}}'（提权）
+结果       29.5.3；本机 Docker Desktop 可访问。
+
+命令       mvn -ntp -pl dh-usecase,dh-infra,dh-app -am test（提权，允许访问 Docker）
+结果       BUILD FAILURE；失败点为既有 `JdbcNonceReplayGuardPersistenceTest` 拉取 `postgres:17`
+           Docker image 失败，错误为 Docker registry / mirror 下载 EOF；K4 replay tests 在失败前已通过。
+补充       `testcontainers/ryuk:0.11.0` 已成功拉取并启动；`postgres:17` 未能拉取成功。
+
+命令       docker pull postgres:17（提权）
+结果       FAILURE；Docker daemon 经 `hub-mirror.c.163.com` 拉取 `postgres:17` 时 EOF。
+
+命令       docker pull public.ecr.aws/docker/library/postgres:17（提权）
+结果       FAILURE；备用 public ECR 下载 layer 时 EOF。
+
+命令       mvn -ntp test
+结果       BUILD SUCCESS；reactor 19/19 SUCCESS；dh-app `PostgresContainerSmokeTest` 1 skipped。
+说明       普通 sandbox 下 Docker pipe 权限不足，Docker-gated smoke 按既有规则跳过；非 Docker 全仓回归通过。
+
+命令       mvn -ntp -Pquality validate
+结果       BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。
+
+命令       git diff --check
+结果       通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+
+命令       K4 边界关键词扫描
+范围       dh-domain/src/main、dh-usecase/src/main、dh-infra/src/main、dh-app/src/main、dh-api/src/main、
+           dh-connector/src/main、dh-security/src/main、contracts（排除 target）。
+结果       命中项均为既有 Controller、已存在配置、禁止说明、denylist、migration comment、负向安全词或本轮 K4
+           边界注释；未发现本轮新增 API / Controller / replay endpoint / RealClient / real provider / HTTP client /
+           NQ runtime / LangGraph / LIVE / BUY-SELL action 实现。
+
+边界       未新增 API path；未新增 Controller；未新增 migration；未新增 replay API / query endpoint；
+           未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；
+           未新增 RealClient / 真实 Provider；未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；
+           未实现 K5-K8；未读取或输出 credential、token、cookie、API secret、passphrase；
+           未启动 Integration-1 runtime；未把 DH 写成 integrated；未把 Runtime integration 写成 started；
+           未把 AI / Agent runtime 写成 started；未开启 LIVE；未修改 NQ 仓库；
+           未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 output action。
+
+环境项     Docker Desktop 存在且提权可访问；但当前 Docker registry / mirror 无法拉取 `postgres:17`，
+           所以 Docker-gated Testcontainers 真实 Postgres 用例在本轮被镜像拉取阻断。该失败不来自 K4 代码。
+
+Readiness decision
+           ALLOW_K4_CLOSE: YES
+           ALLOW_K5_IMPLEMENTATION: YES
+           ALLOW_GATEK_M2_CLOSE_REVIEW: NO
+           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO
+           ALLOW_INTEGRATION_1_RUNTIME: NO
+           ALLOW_AGENT_PHASE: NO
+           ALLOW_LANGGRAPH_RUNTIME: NO
+           ALLOW_LIVE: NO
+
+下一步     DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED。
+```

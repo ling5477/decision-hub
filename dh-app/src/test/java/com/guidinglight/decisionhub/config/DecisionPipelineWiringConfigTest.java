@@ -4,16 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditRepository;
+import com.guidinglight.decisionhub.usecase.decision.DecisionReplayQueryRepository;
+import com.guidinglight.decisionhub.usecase.decision.DecisionReplayQueryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
- * K3 decision pipeline 装配回归测试。
+ * K3/K4 decision pipeline 装配回归测试。
  *
- * <p>防止 K3 专用 JSON mapper 注册为第二个全局 {@link ObjectMapper} bean，导致 Spring WebMVC
- * HTTP message converter 在应用启动时出现 ObjectMapper 歧义。
+ * <p>防止 K3/K4 专用 JSON mapper 注册为第二个全局 {@link ObjectMapper} bean，导致 Spring WebMVC HTTP
+ * message converter 在应用启动时出现 ObjectMapper 歧义。
  */
 final class DecisionPipelineWiringConfigTest {
 
@@ -30,6 +32,8 @@ final class DecisionPipelineWiringConfigTest {
           assertThat(ctx).hasBean("nqFeedbackObjectMapper");
           assertThat(ctx).doesNotHaveBean("decisionPersistenceObjectMapper");
           assertThat(ctx).hasSingleBean(DecisionAuditRepository.class);
+          assertThat(ctx).hasSingleBean(DecisionReplayQueryRepository.class);
+          assertThat(ctx).hasSingleBean(DecisionReplayQueryService.class);
         });
   }
 

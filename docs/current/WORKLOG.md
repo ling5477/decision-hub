@@ -3538,3 +3538,83 @@ K3 `DecisionPipelineWiringConfig` 把 persistence 专用 `ObjectMapper` 注册�
 
 ### 下一步
 当前主线仍为 `DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE / IMPLEMENTED / READY FOR M1`；下一步仍是 `DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED`，不得直接进入 K4。
+
+## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL
+
+### 范围
+完成 `DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL` single-batch implementation。K4 只实现内部 replay read model，不新增 API / Controller / migration / replay endpoint，不重跑 provider，不重跑 orchestrator，不接 NQ / HTTP / LangGraph / LIVE，也不进入 K5-K8。
+
+### 修改文件
+- 新增 `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionReplay*.java`：K4 replay request / context / trace step / provider call / output / audit event / timeline / aggregate view 与 `DecisionReplayStatus`。
+- 新增 `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DecisionReplayQuery.java`、`DecisionReplayQueryRepository.java`、`DecisionReplayQueryService.java`、`DefaultDecisionReplayQueryService.java`。
+- 新增 `dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/decision/JdbcDecisionReplayQueryRepository.java`：只读读取 K3 六张 DH-owned decision 表。
+- 修改 `dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java`：补充 replay repository / service wiring，复用私有 persistence `ObjectMapper`，不新增全局 `ObjectMapper` bean。
+- 新增 `DecisionReplayQueryServiceTest`、`JdbcDecisionReplayQueryRepositoryTest`；更新 `DecisionPipelineWiringConfigTest`。
+- 更新 `docs/current/README.md`、`STATUS.md`、`ROADMAP.md`、`WORK_ORDER.md`、`TESTING.md`、`WORKLOG.md`。
+
+### Implementation
+- `DecisionReplayView` 聚合 K3 已落库的 request、context snapshot、trace steps、provider call summaries、decision output 和 audit events。
+- `DefaultDecisionReplayQueryService` 对输入非法、repository 异常、tenant mismatch、trace/request mismatch 统一返回结构化 fail-closed 结果，不向调用方抛裸 RuntimeException。
+- `JdbcDecisionReplayQueryRepository` 所有 SQL 均带 `tenant_id = ? and decision_id = ?`；trace / provider / audit 记录按时间和 id 稳定排序。
+- JSON 字段仅解析为安全 `Map` / `List`；JSON、枚举或时间字段不可解析返回 `CORRUPTED`；DB 读取失败返回 `BLOCKED`。
+- K4 只读，不写库、不调用 provider、不调用 orchestrator、不修改 audit 数据、不访问 NQ DB、不保存或返回 credential / token / raw provider sensitive response。
+
+### Tests
+新增/更新 K4 tests 15 cases：
+
+```text
+DecisionReplayQueryServiceTest: 8
+JdbcDecisionReplayQueryRepositoryTest: 6
+DecisionPipelineWiringConfigTest: 1
+```
+
+覆盖项：
+
+```text
+existing decision + tenant -> FOUND
+decisionId missing -> NOT_FOUND
+tenant mismatch -> TENANT_MISMATCH / no data
+critical row missing -> INCOMPLETE
+corrupt JSON -> CORRUPTED
+DB read failure -> BLOCKED
+trace / provider / audit ordering
+tenant-scoped SQL
+no JDBC write
+ObjectMapper bean remains unique
+```
+
+### 验证
+- `mvn -ntp -pl dh-usecase,dh-infra,dh-app -am test`（普通 sandbox）：BUILD SUCCESS；reactor 15/15 SUCCESS；`PostgresContainerSmokeTest` 因 Docker pipe 权限跳过 1。
+- `docker info --format '{{.ServerVersion}}'`（提权）：成功，Docker Desktop 版本 `29.5.3`。
+- `mvn -ntp -pl dh-usecase,dh-infra,dh-app -am test`（提权）：BUILD FAILURE；失败于既有 `JdbcNonceReplayGuardPersistenceTest` 拉取 `postgres:17` 镜像，Docker registry / mirror EOF；K4 replay tests 在失败前已通过。
+- `docker pull postgres:17`（提权）：FAILURE；`hub-mirror.c.163.com` 拉取 `postgres:17` 时 EOF。
+- `docker pull public.ecr.aws/docker/library/postgres:17`（提权）：FAILURE；备用 public ECR 下载 layer 时 EOF。
+- `mvn -ntp test`：BUILD SUCCESS；reactor 19/19 SUCCESS；`PostgresContainerSmokeTest` 因普通 sandbox 无 Docker pipe 权限跳过 1。
+- `mvn -ntp -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。
+- `git diff --check`：通过；仅 Windows LF -> CRLF warning，无 whitespace error。
+- K4 边界关键词扫描：命中均为既有 Controller、配置、禁止说明、denylist、migration comment、负向安全词或 K4 边界注释；未发现本轮新增 API / Controller / replay endpoint / RealClient / real provider / HTTP client / NQ runtime / LangGraph / LIVE / BUY-SELL action 实现。
+
+### 边界确认
+未新增 API path；未新增 Controller；未新增 migration；未新增 replay API / query endpoint；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient / 真实 Provider；未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；未实现 K5-K8；未读取或输出 credential、token、cookie、API secret、passphrase；未启动 Integration-1 runtime；未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；未修改 NQ 仓库；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 output action。
+
+### 剩余风险
+- Provider health / budget / latency 尚未实现。
+- Mock NQ dry-run contract tests 尚未实现。
+- Golden cases / eval 尚未实现。
+- Integration-1 仍需基于 NQ GateN 重新规划。
+- LangGraph 后置。
+- Agent phase 后置。
+- Docker-gated Testcontainers 真实 Postgres 用例当前被 `postgres:17` 镜像拉取 EOF 阻断；需要修复 Docker registry / mirror 后复跑。
+
+### Readiness
+- `ALLOW_K4_CLOSE: YES`
+- `ALLOW_K5_IMPLEMENTATION: YES`
+- `ALLOW_GATEK_M2_CLOSE_REVIEW: NO`
+- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`
+- `ALLOW_INTEGRATION_1_RUNTIME: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 下一步
+进入 `DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED`；不得直接进入 K6-K8、Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。

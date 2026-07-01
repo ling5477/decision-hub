@@ -2,12 +2,16 @@ package com.guidinglight.decisionhub.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionAuditRepository;
+import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionReplayQueryRepository;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditRepository;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOrchestrator;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOutputAssembler;
+import com.guidinglight.decisionhub.usecase.decision.DecisionReplayQueryRepository;
+import com.guidinglight.decisionhub.usecase.decision.DecisionReplayQueryService;
 import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionContextBuilder;
 import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionOrchestrator;
 import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionPolicyChecker;
+import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionReplayQueryService;
 import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionRiskReviewer;
 import com.guidinglight.decisionhub.usecase.decision.MockDecisionSignalProvider;
 import java.time.Clock;
@@ -17,10 +21,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * GateK K3 decision pipeline 装配。
+ * GateK K3/K4 decision pipeline 装配。
  *
- * <p>本配置只接 DH 自身 JDBC 审计表与 mock-only orchestrator；不新增 Controller、不暴露 API、不接真实 provider、
- * 不接 NQ runtime、不启用 LangGraph 或 LIVE。
+ * <p>本配置只接 DH 自身 JDBC 审计表、mock-only orchestrator 与 K4 replay read model；不新增 Controller、不暴露
+ * API、不接真实 provider、不接 NQ runtime、不启用 LangGraph 或 LIVE。
  */
 @Configuration
 public class DecisionPipelineWiringConfig {
@@ -35,6 +39,32 @@ public class DecisionPipelineWiringConfig {
   @ConditionalOnMissingBean
   public DecisionAuditRepository decisionAuditRepository(final JdbcTemplate jdbcTemplate) {
     return new JdbcDecisionAuditRepository(jdbcTemplate, decisionPersistenceObjectMapper());
+  }
+
+  /**
+   * 装配 DH-owned decision replay JDBC read repository。
+   *
+   * @param jdbcTemplate DH 应用 datasource 的 JdbcTemplate。
+   * @return decision replay read repository。
+   */
+  @Bean
+  @ConditionalOnMissingBean
+  public DecisionReplayQueryRepository decisionReplayQueryRepository(
+      final JdbcTemplate jdbcTemplate) {
+    return new JdbcDecisionReplayQueryRepository(jdbcTemplate, decisionPersistenceObjectMapper());
+  }
+
+  /**
+   * 装配 K4 replay read model 查询服务。
+   *
+   * @param decisionReplayQueryRepository 只读 replay repository port。
+   * @return decision replay query service。
+   */
+  @Bean
+  @ConditionalOnMissingBean
+  public DecisionReplayQueryService decisionReplayQueryService(
+      final DecisionReplayQueryRepository decisionReplayQueryRepository) {
+    return new DefaultDecisionReplayQueryService(decisionReplayQueryRepository);
   }
 
   /**

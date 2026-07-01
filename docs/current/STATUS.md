@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE / IMPLEMENTED / READY FOR M1
-> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED
+> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL / IMPLEMENTED / READY FOR NEXT
+> Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -33,11 +33,13 @@ NQ mutation forbidden.
 GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE / IMPLEMENTED / READY FOR M1.
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED.
+M1 Readiness Review: CLOSED / ACCEPTED.
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL / IMPLEMENTED / READY FOR NEXT.
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
-K3 Audit / Snapshot / Trace Persistence: IMPLEMENTED / READY FOR M1.
-K4 Replay Read Model: NOT STARTED.
+K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
+K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT.
+K5 Provider Health / Budget / Latency: NOT STARTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
@@ -153,11 +155,13 @@ LIVE: DISABLED
 GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED
 GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE / IMPLEMENTED / READY FOR M1
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED
+M1 Readiness Review: CLOSED / ACCEPTED
+Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL / IMPLEMENTED / READY FOR NEXT
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
-K3 Audit / Snapshot / Trace Persistence: IMPLEMENTED / READY FOR M1
-K4 Replay Read Model: NOT STARTED
+K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
+K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
+K5 Provider Health / Budget / Latency: NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
@@ -177,9 +181,11 @@ Work order artifact: docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
 Work order status: ACCEPTED / CLOSED
 K1 contract freeze status: PASS / CLOSED / ACCEPTED
 K2 DecisionOrchestrator Skeleton status: IMPLEMENTED
-K3 Audit / Snapshot / Trace Persistence status: IMPLEMENTED / READY FOR M1
-K4 Replay Read Model status: NOT STARTED
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED
+K3 Audit / Snapshot / Trace Persistence status: CLOSED / ACCEPTED after M1
+M1 Readiness Review status: CLOSED / ACCEPTED
+K4 Replay Read Model status: IMPLEMENTED / READY FOR NEXT
+K5 Provider Health / Budget / Latency status: NOT STARTED
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED
 Full decision pipeline runtime: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -202,9 +208,11 @@ Work order status: ACCEPTED / CLOSED
 Source plan: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / ACCEPTED / CLOSED
 K1 contract freeze status: PASS / CLOSED / ACCEPTED
 K2 DecisionOrchestrator Skeleton status: IMPLEMENTED
-K3 Audit / Snapshot / Trace Persistence status: IMPLEMENTED / READY FOR M1
-K4 Replay Read Model status: NOT STARTED
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED
+K3 Audit / Snapshot / Trace Persistence status: CLOSED / ACCEPTED after M1
+M1 Readiness Review status: CLOSED / ACCEPTED
+K4 Replay Read Model status: IMPLEMENTED / READY FOR NEXT
+K5 Provider Health / Budget / Latency status: NOT STARTED
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED
 Full decision pipeline runtime: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -226,9 +234,11 @@ LIVE: DISABLED
 K1 status: PASS / CLOSED / ACCEPTED
 K1 review: PASS / CLOSED / ACCEPTED
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
-K3 Audit / Snapshot / Trace Persistence: IMPLEMENTED / READY FOR M1
-K4 Replay Read Model: NOT STARTED
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED
+K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
+M1 Readiness Review: CLOSED / ACCEPTED
+K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
+K5 Provider Health / Budget / Latency: NOT STARTED
+Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED
 API changes: NONE
 Migration changes: NONE
 Runtime integration: NOT STARTED
@@ -250,11 +260,13 @@ LIVE: DISABLED
 Task: DH-DOCS-LANGUAGE-GOVERNANCE-FIX
 Scope: docs governance / language policy / comment style rules / factsource sync
 Business state change: NONE
-Current main line now: DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE / IMPLEMENTED / READY FOR M1
-Next concrete action now: DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED
+Current main line now: DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL / IMPLEMENTED / READY FOR NEXT
+Next concrete action now: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
-K3 Audit / Snapshot / Trace Persistence: IMPLEMENTED / READY FOR M1
-K4 Replay Read Model: NOT STARTED
+K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
+M1 Readiness Review: CLOSED / ACCEPTED
+K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
+K5 Provider Health / Budget / Latency: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
 DH integrated: NO
@@ -273,9 +285,11 @@ LIVE: DISABLED
 
 ```text
 K2 status: IMPLEMENTED
-Follow-up status: K3 implemented in §1.10
-K3 Audit / Snapshot / Trace Persistence: IMPLEMENTED / READY FOR M1
-K4 Replay Read Model: NOT STARTED
+Follow-up status: K3 closed after M1 in §1.10; K4 implemented in §1.11
+K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
+M1 Readiness Review: CLOSED / ACCEPTED
+K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
+K5 Provider Health / Budget / Latency: NOT STARTED
 API changes: NONE
 Migration changes: NONE
 Repository / JDBC changes: NONE
@@ -293,11 +307,13 @@ LIVE: DISABLED
 - 新增 K2 单元测试 22 cases，覆盖 orchestrator、policy、risk、assembler、mock provider、null / missing evidence / provider failure / high risk / unexpected failure。
 - Readiness decision：`ALLOW_K2_CLOSE: YES`；`ALLOW_K3_IMPLEMENTATION: NO`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
-## 1.10 DH GateK Decision Pipeline MVP K3 Audit / Snapshot / Trace Persistence（2026-07-01，IMPLEMENTED / READY FOR M1）
+## 1.10 DH GateK Decision Pipeline MVP K3 Audit / Snapshot / Trace Persistence（2026-07-01，CLOSED / ACCEPTED after M1）
 
 ```text
-K3 status: IMPLEMENTED / READY FOR M1
-K4 Replay Read Model: NOT STARTED
+K3 status: CLOSED / ACCEPTED after M1
+M1 Readiness Review: CLOSED / ACCEPTED
+K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
+K5 Provider Health / Budget / Latency: NOT STARTED
 API changes: NONE
 Controller changes: NONE
 Replay API: NOT STARTED
@@ -313,8 +329,32 @@ LIVE: DISABLED
 - `DefaultDecisionOrchestrator` 已接入 request、context snapshot、trace step、mock provider call summary、decision output、audit event 持久化；audit / snapshot / trace / output 写失败统一返回 structured `ABSTAIN` + `PERSISTENCE_FAILURE`，即使 fail-closed output 二次写入失败也不返回普通成功或裸异常。
 - K3 `output_json` 使用显式安全 Map 保存 K1 structured fields，不直接序列化 domain object；provider call 只保存 deterministic mock summary，不保存真实 provider raw response、credential、NQ DB 内容或敏感 header。
 - 新增 K3 测试覆盖 valid write-through、policy denied、provider timeout、high risk no directional bias、request/context/output/audit persistence failure、missing request unknown IDs、JDBC SQL / JSONB cast / exception mapping、V5 migration presence 和 no trading table。
-- K4 Replay Read Model、K5 provider health / budget / latency、K6 mock NQ dry-run contract tests、K7 golden cases / eval、K8 acceptance / freeze 均未开始；本轮不允许进入 K4。
-- Readiness decision：`ALLOW_K3_CLOSE: YES`；`ALLOW_K4_IMPLEMENTATION: NO`；`ALLOW_GATEK_M1_CLOSE_REVIEW: NO`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- M1 readiness review 已关闭，K4 Replay Read Model 已实现内部只读 read model；K5 provider health / budget / latency、K6 mock NQ dry-run contract tests、K7 golden cases / eval、K8 acceptance / freeze 均未开始。
+- Readiness decision：`ALLOW_K3_CLOSE: YES`；`ALLOW_K4_IMPLEMENTATION: YES`；`ALLOW_GATEK_M1_CLOSE_REVIEW: YES`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+
+## 1.11 DH GateK Decision Pipeline MVP K4 Replay Read Model（2026-07-01，IMPLEMENTED / READY FOR NEXT）
+
+```text
+K4 status: IMPLEMENTED / READY FOR NEXT
+K5 Provider Health / Budget / Latency: NOT STARTED
+Replay API: NOT STARTED
+API changes: NONE
+Controller changes: NONE
+Migration changes: NONE
+Runtime integration: NOT STARTED
+Integration-1 runtime: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+- 本轮新增 K4 内部 replay read model：`DecisionReplayView` / request / context / trace step / provider call / output / audit event / timeline 只读视图，以及 `DecisionReplayStatus` fail-closed 状态。
+- 本轮新增 usecase port/service：`DecisionReplayQuery`、`DecisionReplayQueryRepository`、`DecisionReplayQueryService`、`DefaultDecisionReplayQueryService`；输入非法、repository 异常、tenant mismatch、trace/request mismatch 均返回结构化 fail-closed 结果。
+- 本轮新增 `JdbcDecisionReplayQueryRepository`，只读取 K3 六张 DH-owned 表：`dh_decision_request`、`dh_decision_context_snapshot`、`dh_decision_trace_step`、`dh_decision_provider_call_log`、`dh_decision_output`、`dh_decision_audit_event`；所有 SQL 均带 `tenant_id = ? and decision_id = ?`，trace / provider / audit 按时间稳定排序。
+- K4 JSON 读取使用内部 `ObjectMapper.readValue` 解析安全 `Map` / `List`；JSON、枚举或时间字段不可解析时返回 `CORRUPTED`，DB 读取失败返回 `BLOCKED`；不写库、不重跑 provider、不重跑 orchestrator、不修改 audit 数据。
+- `DecisionPipelineWiringConfig` 仅补充 replay repository/service bean，复用私有 persistence `ObjectMapper` 方法，未新增全局 `ObjectMapper` bean，也不影响 WebMVC Jackson。
+- 新增 K4 单元/JDBC/wiring 回归测试，覆盖 found、not found、tenant mismatch、incomplete、corrupted、DB failure、trace/provider/audit ordering、tenant-scoped SQL、no JDBC write、ObjectMapper bean 唯一性。
+- Readiness decision：`ALLOW_K4_CLOSE: YES`；`ALLOW_K5_IMPLEMENTATION: YES`；`ALLOW_GATEK_M2_CLOSE_REVIEW: NO`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 2. 当前已完成
 
@@ -673,20 +713,18 @@ DH-CODEX-WORKFLOW-FINAL-CLEANUP
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW）
+## 4. 下一阶段（DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY）
 
 ```text
-唯一下一步是 DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW（NOT STARTED）。
+唯一下一步是 DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY（NOT STARTED）。
 
-M1 readiness review 只允许：
-- 审查 K1 contract freeze、K2 orchestrator skeleton、K3 audit / snapshot / trace persistence 是否形成 M1 可接受基线。
-- 审查 Flyway V5 六张 DH-owned audit 表、usecase port、JDBC adapter、dh-app wiring 和 fail-closed 行为。
-- 审查 K3 validation evidence 与 docs/current 同步。
-- 判断 ALLOW_K3_CLOSE 是否成立。
-- 判断是否仍需补修后再进入 K4。
+K5 只允许：
+- 实现 mock-only provider health / budget / latency controls。
+- 继续保持 provider unavailable / timeout / untrusted / budget exceeded fail-closed。
+- 使用 deterministic mock / disabled provider 语义，不接真实 provider runtime。
+- 补齐 provider health / budget / latency 单元测试和边界扫描。
 
-M1 readiness review 不允许：
-- 直接开始 K4 Replay Read Model implementation。
+K5 不允许：
 - 新增 replay API / Controller / query API。
 - 实现真实 NQ client。
 - 实现 RealClient / RealNqBacktestClient。
@@ -700,7 +738,7 @@ M1 readiness review 不允许：
 - 访问交易所密钥。
 - 触碰 LIVE trading。
 - 读取或写入 NQ DB。
-- 新增 provider / 交易路径。
+- 新增真实 provider / 交易路径。
 
 Stage2-PoC、Stage3-B2/B3/B4 的真实接入、联调、RealClient 或 NQ mutation 方向均为 historical / superseded / deferred，不是当前 next，不允许作为当前实现任务。旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK 为 SUPERSEDED / REBASE_REQUIRED；如需恢复 NQ runtime 相关 planning，必须基于 NQ GateN 重新规划。
 
@@ -712,8 +750,10 @@ Stage2-PoC、Stage3-B2/B3/B4 的真实接入、联调、RealClient 或 NQ mutati
 - DH-GATEK-DECISION-PIPELINE-MVP-WO ACCEPTED / CLOSED
 - DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE PASS / CLOSED / ACCEPTED
 - DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON IMPLEMENTED
-- DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE IMPLEMENTED / READY FOR M1
-- K4 Replay Read Model NOT STARTED
+- DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE CLOSED / ACCEPTED after M1
+- DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW CLOSED / ACCEPTED
+- K4 Replay Read Model IMPLEMENTED / READY FOR NEXT
+- K5 Provider Health / Budget / Latency NOT STARTED
 - Full decision pipeline runtime not started
 - Integration-1 not started
 - Runtime integration not started
