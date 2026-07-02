@@ -1,5 +1,34 @@
 # Decision Hub Worklog
 
+## 2026-07-02 DH-DOCS-SKILL-STAGE-NAMING-AUDIT-FIX
+
+完成 DH 文档治理 skill 与 workflow router 的阶段命名规则修复。本轮只改 docs / skill 规则，不改生产代码、测试代码、contracts、golden_cases、API、Controller、migration，不移动或删除 `docs/gates` 冻结目录，不执行 Stage4 命名 rebase。
+
+### 完成内容
+
+- 在 `.agents/skills/dh-docs-writer/SKILL.md` 增加 Stage Naming Rules，明确 DH 自身阶段使用 Stage 体系，NQ 自身阶段使用 Gate 体系。
+- 在 `.agents/skills/nq-dh-workflow-router/SKILL.md` 增加 Stage Naming Route，要求发现 `DH GateK/GateL/GateN` 或 `DH-GATEK-*` 时先进入命名修复，而不是继续推进业务任务。
+- 在 `AGENTS.md`、`docs/current/CODEX_PROJECT_INSTRUCTIONS.md`、`docs/current/CODEX_WORKFLOW_INDEX.md`、`docs/current/README.md` 同步简短命名治理规则。
+- 在 `docs/current/ROADMAP.md` 记录后续 `DH-STAGE4-NAMING-REBASE-FIX`。
+
+### 命名结论
+
+```text
+NQ stage system: Gate，例如 GateN
+DH stage system: Stage，例如 DH-STAGE4-DECISION-PIPELINE-MVP
+NQ-DH integration wording: 可以引用 NQ GateN rebase，但不得把 DH 自身阶段写成 GateK/GateL/GateN
+Current wrong legacy name: DH-GATEK-DECISION-PIPELINE-MVP
+Correct future name: DH-STAGE4-DECISION-PIPELINE-MVP
+Current wrong legacy dir: docs/gates/dh-gatek-decision-pipeline-mvp/
+Future target dir: docs/gates/dh-stage4-decision-pipeline-mvp/
+```
+
+Decision Pipeline MVP 已 `ACCEPTED / CLOSED` 的事实不变。当前 docs/current 与 docs/gates 中仍存在 `DH-GATEK` / `dh-gatek` 命名残留，本轮只记录为待修复对象；下一任务 `DH-STAGE4-NAMING-REBASE-FIX` 负责批量命名 rebase 与冻结目录处理方案。
+
+### 边界
+
+未改 Java / Kotlin / Python / TypeScript 生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API / Controller / migration；未移动或删除 `docs/gates`；未启动 Integration-1 runtime；未真实 HTTP；未真实 NQ 调用；未接真实 provider；未接 AI / LangGraph；未开启 LIVE；未修改 NQ 仓库。
+
 ## 2026-07-02 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN
 
 完成 NQ-DH Integration-1 dry-run 的 GateN rebase planning。本轮只做 docs-only / plan-only 文档规划与 current factsource 同步，不修改生产代码、测试代码、contracts、golden_cases、API、Controller、migration、runtime client、provider 或 NQ runtime。

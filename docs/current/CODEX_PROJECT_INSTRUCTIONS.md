@@ -79,6 +79,17 @@ Java 包名 / 类名 / 方法名 / 字段名、enum 值、JSON Schema 字段、O
 从 NQ skill 同步规则时，必须改写为 DH 中文主语言风格。
 ```
 
+阶段命名治理规则：
+
+```text
+NQ 自身阶段使用 Gate 体系，例如 GateN。
+DH 自身阶段使用 Stage 体系，例如 DH-STAGE4-DECISION-PIPELINE-MVP。
+NQ-DH 集成任务可以引用 NQ GateN rebase，但不得把 DH 自身阶段写成 GateK/GateL/GateN。
+DH-GATEK-DECISION-PIPELINE-MVP 属于历史错误命名；Decision Pipeline MVP 已 ACCEPTED / CLOSED 的事实不变。
+后续命名 rebase 任务为 DH-STAGE4-NAMING-REBASE-FIX。
+在命名 rebase 完成前，不得继续创建新的 DH-GATEK-* 当前阶段、任务名或冻结目录。
+```
+
 分类只能从以下集合选择：
 
 ```text

@@ -8,6 +8,8 @@
 > Security baseline: FULL；fail-closed state: FULL；P1-4 residual CLOSED；header alignment CLOSED；timestamp alignment CLOSED；code reality audit blockers fixed。
 > Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1-K7 已 `CLOSED`；K8 Acceptance / Freeze 已 `CLOSED / ACCEPTED`。验收报告见 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-gatek-decision-pipeline-mvp/`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`；NQ-DH Integration-1 dry-run 已完成 GateN rebase planning，计划见 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`；下一步只允许 `NQ-DH-I1-P0-FACTSOURCE-REBASE`。当前不允许接 LangGraph、LLM、真实 NQ runtime、真实 provider、真实 HTTP 或 LIVE。
 
+> 阶段命名治理：NQ 自身阶段使用 Gate 体系，例如 `GateN`；DH 自身阶段使用 Stage 体系，例如 `DH-STAGE4-DECISION-PIPELINE-MVP`。当前 `DH-GATEK-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-gatek-decision-pipeline-mvp/` 属于历史错误命名残留，Decision Pipeline MVP 已 `ACCEPTED / CLOSED` 的事实不变；后续由 `DH-STAGE4-NAMING-REBASE-FIX` 执行 current docs 与冻结目录命名 rebase。本轮只修 skill / workflow 规则，不移动冻结目录。
+
 ## 1. 当前定位
 
 Decision Hub 是 NexusQuant 的 AI Agent 决策能力层，不是交易核心系统。

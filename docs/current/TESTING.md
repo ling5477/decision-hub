@@ -1,5 +1,36 @@
 # Decision Hub Testing
 
+## 2026-07-02 DH-DOCS-SKILL-STAGE-NAMING-AUDIT-FIX
+
+```text
+Scope:
+  - 本轮只审查并修正 DH 文档治理 skill / workflow router 的阶段命名规则。
+  - 不修改生产代码、测试代码、contracts、golden_cases、API、Controller、migration。
+  - 不移动、不删除、不重命名 docs/gates 冻结目录。
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS | 变更仅位于 `.agents/skills/**`、`AGENTS.md` 和 `docs/current/**` allowlist。 |
+| `git diff --check` | PASS | 无 whitespace error；仅 Windows 行尾转换 warning。 |
+| `git diff --stat` | PASS | 8 个文件变更，均为 docs / skill 规则文件。 |
+| `git diff --name-only -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases` | PASS / EMPTY | 禁止的生产代码、测试代码、contracts、golden_cases 范围无 diff。 |
+| `rg -n "DH-GATEK\|dh-gatek\|GateK\|GATEL\|GateL\|GATEN\|GateN\|DH Gate" .agents AGENTS.md README.md docs/current docs/gates` | PASS / CLASSIFIED | 命中已分类：NQ `GateN` 合法；skill 规则示例中的 `GateK/GateL/GateN` 禁止项合法；`DH-GATEK-*`、`dh-gatek-*`、`GateK Decision Pipeline` 属历史错误命名残留或 current docs 待修复对象；根 `README.md` 与部分 `docs/current` 仍有 DH 自身阶段写成 GateK 的残留，下一任务修复。 |
+| `mvn -ntp test` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 SUCCESS；`PostgresContainerSmokeTest` 因当前进程访问 `\\.\pipe\docker_engine` 被拒绝而 skip 1 个 Testcontainers smoke，属于 Docker named-pipe 环境可达性问题，不是代码失败。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 SUCCESS；Checkstyle 0 violations；Spotless check passed；保留既有子模块 `unable to find checkstyle:checkstyle outputFile` 信息，聚合结果为 SUCCESS。 |
+
+rg 命中分类：
+
+- NQ GateN：允许，用于 NQ 当前阶段和 NQ-DH Integration-1 rebase 前置语境。
+- 历史错误命名：`DH-GATEK-DECISION-PIPELINE-MVP`、`docs/gates/dh-gatek-decision-pipeline-mvp/`、`GateK Decision Pipeline MVP` 暂时允许保留，但必须指向 `DH-STAGE4-NAMING-REBASE-FIX`。
+- skill 规则示例：`.agents/skills/dh-docs-writer/SKILL.md` 与 `.agents/skills/nq-dh-workflow-router/SKILL.md` 中用于说明禁止项的 `GateK/GateL/GateN` 命中允许。
+- current docs 待修复对象：`AGENTS.md`、根 `README.md`、`docs/current/CODEX_PROJECT_INSTRUCTIONS.md`、`docs/current/CODEX_WORKFLOW_INDEX.md`、`docs/current/API.md`、`docs/current/ROADMAP.md`、`docs/current/STATUS.md`、`docs/current/WORK_ORDER.md`、`docs/current/DH_GATEK_DECISION_PIPELINE_MVP_*` 仍存在 DH 自身阶段 GateK 命名残留，需由 `DH-STAGE4-NAMING-REBASE-FIX` 统一处理。
+- 冻结目录待处理对象：`docs/gates/dh-gatek-decision-pipeline-mvp/**` 本轮未移动、未删除、未重命名，需下一任务制定 rebase / migration / archive 处理方案。
+
+Boundary:
+
+未改 Java / Kotlin / Python / TypeScript 生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API / Controller / migration；未移动或删除 `docs/gates`；未启动 Integration-1 runtime；未真实 HTTP；未真实 NQ 调用；未接真实 provider；未接 AI / LangGraph；未开启 LIVE；未修改 NQ 仓库。
+
 ## 2026-07-02 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN
 
 ```text

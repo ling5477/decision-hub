@@ -16,7 +16,7 @@ Always use `nq-dh-workflow-router` first for task classification, plugin routing
 Use this skill for:
 
 - DH `docs/current` updates.
-- DH Gate / Phase / Stage planning.
+- DH Stage / Phase planning. DH 自身阶段不得使用 Gate 命名。
 - DH work order creation and review.
 - DH acceptance, freeze, close review, and archive documentation.
 - DH and NQ integration documentation synchronization.
@@ -79,9 +79,22 @@ Rules:
 - If a historical snapshot needs correction, add an errata or current-doc clarification; do not rewrite frozen history.
 - `docs/archive`, if present, is historical reference only and must not become the current state source.
 
+## Stage Naming Rules
+
+DH 与 NQ 使用不同阶段命名体系，文档治理必须先区分项目归属，再写阶段名。
+
+- DH 自身开发、DH 自身文档、DH 自身冻结和 DH `docs/gates` 归档必须使用 Stage 体系。
+- DH 阶段 ID 使用 `dh-stage<N>-<topic>`，或沿用已存在的历史兼容形式，例如 `dh-stage1`、`dh-stage2-poc`、`dh-stage3-plan`、`dh-stage4-decision-pipeline-mvp`。
+- NQ 自身开发、NQ 自身冻结和 NQ 当前阶段可以使用 Gate 体系，例如 `GateN`。
+- NQ-DH 集成任务可以写 `NQ GateN rebase`，但不得把 DH 自身阶段写成 `GateK`、`GateL`、`GateN`。
+- DH 文档中出现 `DH-GATEK-*` 时，应标记为错误命名或历史错误，并在后续命名 rebase 中改为 `DH-STAGE4-*`。不要在新的 DH 任务名、当前阶段名或冻结目录名中继续扩散 `DH-GATEK-*`。
+- DH `docs/gates` 冻结目录应使用 DH Stage ID；`docs/gates/dh-gatek-*` 只能作为历史错误残留或待迁移对象，不得作为新的标准冻结路径。
+- 后续 Integration-1 文档前置条件应写 `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED`，不得写 `NQ GateN + DH GateK CLOSED`。
+- 如果本轮任务不是命名 rebase，不要批量重命名现有 current docs 或移动 `docs/gates`；只记录 residual，并把下一步指向 `DH-STAGE4-NAMING-REBASE-FIX`。
+
 ## Current DH Baseline
 
-Baseline captured for the DH GateK documentation line on 2026-07-01. Re-read `docs/current` each turn before repeating these facts.
+Baseline captured for the DH Stage4 naming correction line on 2026-07-02. Re-read `docs/current` each turn before repeating these facts.
 
 ```text
 Integration-0 safety gate: CLOSED / ACCEPTED
@@ -100,11 +113,13 @@ Runtime integration: NOT STARTED
 DH integrated: NO
 AI / Agent runtime: NOT STARTED
 LIVE: DISABLED
-GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED
-GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
-K2 DecisionOrchestrator Skeleton: NOT STARTED
+DH canonical stage: DH-STAGE4-DECISION-PIPELINE-MVP / ACCEPTED / CLOSED
+Legacy erroneous stage name: DH-GATEK-DECISION-PIPELINE-MVP / HISTORICAL_ERROR / PENDING_REBASE
+Legacy erroneous freeze dir: docs/gates/dh-gatek-decision-pipeline-mvp / PENDING_REBASE
+Decision Pipeline MVP PLAN: ACCEPTED / CLOSED
+Decision Pipeline MVP WO: ACCEPTED / CLOSED
+Decision Pipeline MVP K1-K8: CLOSED / ACCEPTED
+Next naming action: DH-STAGE4-NAMING-REBASE-FIX / NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
@@ -258,6 +273,8 @@ Fail-closed defaults:
 - NQ has moved to GateN; do not create new current plans that continue to use NQ GateK as the active phase name.
 - Old GateK Integration-1 plans are historical references only.
 - Mark old `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` as `SUPERSEDED / REBASE_REQUIRED`.
+- DH Decision Pipeline MVP must be referenced as Stage4 in new current wording: `DH-STAGE4-DECISION-PIPELINE-MVP` / `dh-stage4-decision-pipeline-mvp`.
+- Use `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED` as the Integration-1 prerequisite wording.
 - New Integration-1 plans must use GateN rebase wording, for example:
   - `NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN`
   - `NQ-DH-GATEN-INTEGRATION1-DRYRUN-PLAN`

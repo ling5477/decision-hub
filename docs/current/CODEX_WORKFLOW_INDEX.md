@@ -51,6 +51,17 @@ Risks:
 Next concrete action:
 ```
 
+## 3.1 阶段命名治理
+
+```text
+NQ 自身阶段使用 Gate 体系，例如 GateN。
+DH 自身阶段使用 Stage 体系，例如 DH-STAGE4-DECISION-PIPELINE-MVP。
+NQ-DH 集成任务可以引用 NQ GateN rebase，但不得把 DH 自身阶段写成 GateK/GateL/GateN。
+DH-GATEK-DECISION-PIPELINE-MVP 与 docs/gates/dh-gatek-decision-pipeline-mvp/ 属于历史错误命名残留。
+Decision Pipeline MVP 已 ACCEPTED / CLOSED 的事实不变。
+下一步命名修复任务: DH-STAGE4-NAMING-REBASE-FIX。
+```
+
 ## 4. 当前状态锁定
 
 ```text

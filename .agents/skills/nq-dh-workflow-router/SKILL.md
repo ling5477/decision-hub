@@ -88,6 +88,17 @@ PRESENTATION         Presentations + Documents + Canva
 
 Plugin selection does not grant permission to connect external systems, read secrets, access databases, or mutate NQ/DH production state. Use local files first unless the user explicitly authorizes a connector workflow and it is within the current gate.
 
+## Stage Naming Route
+
+Before choosing files or next actions, classify whether the task is DH-owned, NQ-owned, or NQ-DH integration work:
+
+- DH-owned development, DH-owned documentation, DH-owned freeze, and DH `docs/gates` archive work must use Stage naming.
+- NQ-owned development and NQ-owned freeze work may use Gate naming, for example `GateN`.
+- NQ-DH integration work may use `Integration-1` and may reference `NQ GateN rebase`, but it must not rewrite the DH-owned stage as `GateK`, `GateL`, or `GateN`.
+- If a task or fact source uses `DH GateK`, `DH GateL`, `DH GateN`, `DH-GATEK-*`, `DH-GATEL-*`, or `DH-GATEN-*` for DH-owned work, route first to a naming repair task. Do not continue business implementation, freeze, runtime integration, or Integration-1 progress until the naming residual is classified.
+- The canonical DH Decision Pipeline MVP stage is `DH-STAGE4-DECISION-PIPELINE-MVP`; the legacy `DH-GATEK-DECISION-PIPELINE-MVP` wording is a historical error and should be reworked by `DH-STAGE4-NAMING-REBASE-FIX`.
+- DH `docs/gates` directories should use DH Stage IDs such as `dh-stage4-decision-pipeline-mvp`; `docs/gates/dh-gatek-*` is not a standard path for new DH freeze work.
+
 ## DH Safety Boundary
 
 Treat DH as a multi-agent decision system only:
@@ -162,4 +173,5 @@ Findings is used instead of Summary.
 NQ integration is not described as started or completed unless a gate explicitly says so.
 RealClient, real provider, LIVE trading, NQ mutation, NQ DB access, and secret access remain forbidden.
 Business code was not changed for DOCUMENTATION tasks.
+DH-owned stages use Stage naming, NQ-owned stages use Gate naming, and NQ-DH integration wording does not convert DH Stage4 into DH GateK/GateL/GateN.
 ```

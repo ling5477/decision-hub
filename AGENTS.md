@@ -108,6 +108,18 @@ LIVE:              DISABLED
 
 不得把 Integration-0 写成真实集成；不得把 Integration-1 写成 started；不得把 NQ integration 写成 started；不得把 DH 写成 integrated；不得把 AI / Agent runtime 写成 started；不得把 LIVE 写成 enabled。
 
+## 4.1 阶段命名治理（强制）
+
+DH 与 NQ 的阶段命名体系必须分离：
+
+```text
+NQ 自身阶段: Gate 体系，例如 GateN
+DH 自身阶段: Stage 体系，例如 DH-STAGE4-DECISION-PIPELINE-MVP
+NQ-DH 集成任务: 可引用 NQ GateN rebase，但不得把 DH 自身阶段写成 GateK/GateL/GateN
+```
+
+当前文档中的 `DH-GATEK-DECISION-PIPELINE-MVP`、`docs/gates/dh-gatek-decision-pipeline-mvp/` 属于历史错误命名残留。Decision Pipeline MVP 已 `ACCEPTED / CLOSED` 的事实不变；命名应在后续 `DH-STAGE4-NAMING-REBASE-FIX` 中改为 `DH-STAGE4-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-stage4-decision-pipeline-mvp/`。在该 rebase 完成前，不得继续创建新的 `DH-GATEK-*` 任务、current stage 或冻结目录。
+
 ## 5. 硬边界
 
 ```text

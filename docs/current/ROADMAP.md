@@ -44,6 +44,16 @@ Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
 ```
 
+## 1.1 阶段命名治理
+
+```text
+NQ 自身阶段使用 Gate 体系，例如 GateN。
+DH 自身阶段使用 Stage 体系，例如 DH-STAGE4-DECISION-PIPELINE-MVP。
+NQ-DH 集成任务可以引用 NQ GateN rebase，但不得把 DH 自身阶段写成 GateK/GateL/GateN。
+```
+
+当前 `DH-GATEK-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-gatek-decision-pipeline-mvp/` 属于历史错误命名残留。Decision Pipeline MVP 已 `ACCEPTED / CLOSED` 的事实不变；本轮只修 skill / workflow 规则，不执行 current docs 批量改名、不移动冻结目录。下一步应执行 `DH-STAGE4-NAMING-REBASE-FIX`，将 DH 自身阶段统一为 `DH-STAGE4-DECISION-PIPELINE-MVP`，并规划冻结目录从 `dh-gatek-decision-pipeline-mvp` 收口到 `dh-stage4-decision-pipeline-mvp`。在命名 rebase 完成前，不推进新的 Integration-1 dry-run P0 或 implementation。
+
 ## 2. Stage1（已完成）
 
 目标：建立 Agent Runtime Skeleton。
