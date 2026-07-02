@@ -9,8 +9,8 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
-下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
+当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / CLOSED / ACCEPTED
+下一阶段: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
 事实源: docs/current
 ```
 
@@ -83,15 +83,16 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW。
+NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED。
+- GateK Decision Pipeline MVP 已完成 K8 acceptance / freeze，并 `CLOSED / ACCEPTED`。
 - Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架落地（Fake / Disabled 三层 gate，
   无真实 HTTP，无 RealNqBacktestClient；190 tests 全绿 / ArchUnit 12/12）。
 - Integration-0 safety gate 已 CLOSED / ACCEPTED；P1-4 residual、header alignment、timestamp alignment、
   code reality audit blockers 已关闭或修复。
 - Decision Pipeline MVP PLAN 与 WO 已 ACCEPTED / CLOSED。
-- K1 Contract Freeze 已 IMPLEMENTED / READY FOR REVIEW；下一步只允许 K1 review，不得直接进入 K2。
+- K1-K7 已 CLOSED；K8 Acceptance / Freeze 已 CLOSED / ACCEPTED。
 - Stage3-B2 / NQ Feedback Outbox / 真实 HTTP / event / NQ client / RealClient / real provider
-  均为 historical / superseded / deferred / gated，不是当前 next，不允许作为当前实现任务。
+  均为 historical / superseded / deferred / gated，不是当前 runtime 任务。
 - 旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK：SUPERSEDED / REBASE_REQUIRED。
 - NQ 已进入 GateN；后续 Integration-1 必须基于 GateN rebase 重新规划。
 - NQ integration not started；Integration-1 NOT STARTED；Runtime integration NOT STARTED；DH integrated NO。
