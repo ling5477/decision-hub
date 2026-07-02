@@ -1,14 +1,14 @@
 # Decision Hub 当前工单
 
-> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / CLOSED / ACCEPTED
+> 当前阶段: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment
-> 下一阶段: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+> 下一阶段: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 
 ## 1. 当前目标
 
-下一步唯一允许工作内容是 `NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` planning-only rebase。
+下一步唯一允许工作内容是 `NQ-DH-I1-P0-FACTSOURCE-REBASE` docs/factsource rebase。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
 
-`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1-K7 已关闭；K8 acceptance / freeze 已 `CLOSED / ACCEPTED`，报告见 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-gatek-decision-pipeline-mvp/`。下一步只允许基于 NQ GateN 重新规划 Integration-1 dry-run，不允许启动 Integration-1 runtime 或全量 runtime implementation：
+`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1-K7 已关闭；K8 acceptance / freeze 已 `CLOSED / ACCEPTED`，报告见 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-gatek-decision-pipeline-mvp/`。Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase；P0 只允许同步两仓事实源和旧 GateK 口径，不允许启动 Integration-1 runtime 或全量 runtime implementation：
 
 ```text
 READ_ONLY_RECOMMENDATION
@@ -95,12 +95,13 @@ K1 status: PASS / CLOSED / ACCEPTED
 K2 status: IMPLEMENTED
 K3 status: CLOSED / ACCEPTED after M1
 M1 status: CLOSED / ACCEPTED
-K4 status: IMPLEMENTED / READY FOR NEXT
-K5 status: IMPLEMENTED / READY FOR NEXT
-K6 status: IMPLEMENTED / READY FOR NEXT
+K4 status: CLOSED
+K5 status: CLOSED
+K6 status: CLOSED
 K7 status: CLOSED
 K8 status: CLOSED / ACCEPTED
-Next: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+Integration-1 dry-run plan: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+Next: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 ```
 
 批次顺序：
@@ -177,11 +178,13 @@ NQ current planning baseline: GateN
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
 M1 Readiness Review: CLOSED / ACCEPTED
-K4 Replay Read Model: IMPLEMENTED / READY FOR NEXT
-K5 Provider Health / Budget / Latency: IMPLEMENTED / READY FOR NEXT
-K6 Mock NQ Dry-run Contract Tests: IMPLEMENTED / READY FOR NEXT
+K4 Replay Read Model: CLOSED
+K5 Provider Health / Budget / Latency: CLOSED
+K6 Mock NQ Dry-run Contract Tests: CLOSED
 K7 Golden Cases / Eval: CLOSED
 K8 Acceptance / Freeze: CLOSED / ACCEPTED
+NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 ```
 
 ## 5. DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON（已实现）

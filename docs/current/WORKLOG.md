@@ -1,5 +1,76 @@
 # Decision Hub Worklog
 
+## 2026-07-02 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN
+
+完成 NQ-DH Integration-1 dry-run 的 GateN rebase planning。本轮只做 docs-only / plan-only 文档规划与 current factsource 同步，不修改生产代码、测试代码、contracts、golden_cases、API、Controller、migration、runtime client、provider 或 NQ runtime。
+
+### 新增文件
+
+```text
+docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md
+```
+
+### 修改文件
+
+```text
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+```
+
+### Plan result
+
+```text
+NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
+NQ baseline: GateN
+DH baseline: GateK Decision Pipeline MVP CLOSED / ACCEPTED
+Integration-1 dry-run implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+DH integrated: NO
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+本计划定义 dry-run 目标、NQ / DH 职责边界、NQ -> DH request 规划、DH -> NQ response 规划、`X-NQ-DH-*` header / timestamp / nonce / HMAC / payload size / rate limit / fail-closed 安全协议、I1-P0..P5 批次和合同 / no-outbound / no-live-trade / replay / golden case 测试矩阵。
+
+### 验证
+
+- `git status --short`：PASS；计划文档与 docs/current 索引类文档变更可见。
+- `git diff --check`：PASS；无 whitespace error，仅 Windows 行尾转换 warning。
+- `git diff --stat`：PASS；tracked diff 限于 docs/current 文档。
+- `mvn -ntp test`：BUILD SUCCESS；19 个 reactor module 全部 SUCCESS；`PostgresContainerSmokeTest` 因当前进程访问 `\\.\pipe\docker_engine` 被拒绝而 skip 1 个 Testcontainers smoke，属于 Docker named-pipe 环境可达性问题。
+- `mvn -ntp -Pquality validate`：BUILD SUCCESS；19 个 reactor module 全部 SUCCESS；Checkstyle 0 violations；Spotless check passed。
+
+### Readiness decision
+
+```text
+ALLOW_INTEGRATION1_DRYRUN_PLAN_CLOSE: YES
+ALLOW_NQ_DH_I1_P0_FACTSOURCE_REBASE: YES
+ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### 边界确认
+
+未新增 API path / Controller / migration；未修改 Java 生产代码或测试代码；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient / 真实 Provider；未读取或输出 credential、token、cookie、API secret、passphrase；未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；未启动 Integration-1 runtime；未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；未把 dry-run 写成真实联调或实盘准备完成。
+
+### 下一步
+
+进入 `NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED`；只允许同步 NQ / DH 当前事实源并清理旧 GateK Integration-1 当前主线残留，不允许启动 implementation、runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
+
 ## 2026-07-02 DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE
 
 完成 GateK Decision Pipeline MVP 最终验收与冻结。本轮只做 acceptance / freeze / regression validation / security boundary review / docs sync / no-live-trade confirmation，不修改生产代码、测试代码、contracts、golden_cases、API、Controller、migration、runtime client、provider 或 NQ 仓库。

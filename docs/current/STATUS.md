@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / CLOSED / ACCEPTED
-> Next stage:    NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+> Current stage: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+> Next stage:    NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,8 +34,8 @@ GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / CLOSED / ACCEPTED.
-Next concrete action: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED.
+Current main line: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE.
+Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -46,6 +46,32 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.1 NQ-DH Integration-1 Dry-run Plan RebaseN（2026-07-02，PASS / PLAN ONLY）
+
+```text
+Plan artifact: docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md
+Plan status: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+NQ baseline: GateN no-real public marketdata / exchange sandbox baseline frozen and tagged
+DH baseline: GateK Decision Pipeline MVP CLOSED / ACCEPTED
+Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
+Integration-1 dry-run implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+DH integrated: NO
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+```
+
+- 本轮只做 NQ GateN rebase 后的 Integration-1 dry-run 规划，定义 dry-run 目标、NQ/DH 职责边界、request/response 合同规划、安全协议、I1-P0..P5 批次和测试矩阵。
+- dry-run request 以现有 `DecisionRequest` 为基线规划 `source=NQ_DRYRUN`、`decisionType=READ_ONLY_RECOMMENDATION`、`subject`、`contextSnapshot/evidenceRefs`、`requestedAt`、`schemaVersion` 和 `dryRun=true` 语义；`dryRun` 属计划字段，当前 schema 尚未实现，后续如需 wire-level 扩展必须单独 contract review。
+- dry-run response 以现有 `DecisionOutput` 为基线规划 `action in ABSTAIN / OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS`、`riskLevel`、`policyStatus`、`reasonCodes` 和固定五项 `forbiddenActions`；`decisionId / confidence / replayRef / auditRef / dryRun` 属后续 response envelope 规划项，当前不写成已实现字段。
+- NQ 只记录 DH 输出，不执行 DH 输出；DH 不下单、不改 NQ 状态、不读写 NQ DB、不接真实 exchange / broker。
+- `ALLOW_INTEGRATION1_DRYRUN_PLAN_CLOSE: YES`；`ALLOW_NQ_DH_I1_P0_FACTSOURCE_REBASE: YES`；`ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_REAL_HTTP: NO`；`ALLOW_REAL_PROVIDER: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 1.0 DH GateK Decision Pipeline MVP K8 Acceptance / Freeze（2026-07-02，CLOSED / ACCEPTED）
 
@@ -60,7 +86,8 @@ K5 Provider Health / Budget / Latency: CLOSED
 K6 Mock NQ Dry-run Contract Tests: CLOSED
 K7 Golden Cases / Eval: CLOSED
 K8 Acceptance / Freeze: CLOSED
-Next concrete action: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
 DH integrated: NO
@@ -189,8 +216,8 @@ GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED
 GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED
 M1 Readiness Review: CLOSED / ACCEPTED
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / CLOSED / ACCEPTED
-Next concrete action: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+Current main line: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
 K4 Replay Read Model: CLOSED
@@ -219,12 +246,13 @@ K1 contract freeze status: PASS / CLOSED / ACCEPTED
 K2 DecisionOrchestrator Skeleton status: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence status: CLOSED / ACCEPTED after M1
 M1 Readiness Review status: CLOSED / ACCEPTED
-K4 Replay Read Model status: IMPLEMENTED / READY FOR NEXT
-K5 Provider Health / Budget / Latency status: IMPLEMENTED / READY FOR NEXT
-K6 Mock NQ Dry-run Contract Tests status: IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval status: IMPLEMENTED / READY FOR ACCEPTANCE
-K8 Acceptance / Freeze status: NOT STARTED
-Next concrete action: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+K4 Replay Read Model status: CLOSED
+K5 Provider Health / Budget / Latency status: CLOSED
+K6 Mock NQ Dry-run Contract Tests status: CLOSED
+K7 Golden Cases / Eval status: CLOSED
+K8 Acceptance / Freeze status: CLOSED / ACCEPTED
+NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN status: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 Full decision pipeline runtime: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -249,12 +277,13 @@ K1 contract freeze status: PASS / CLOSED / ACCEPTED
 K2 DecisionOrchestrator Skeleton status: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence status: CLOSED / ACCEPTED after M1
 M1 Readiness Review status: CLOSED / ACCEPTED
-K4 Replay Read Model status: IMPLEMENTED / READY FOR NEXT
-K5 Provider Health / Budget / Latency status: IMPLEMENTED / READY FOR NEXT
-K6 Mock NQ Dry-run Contract Tests status: IMPLEMENTED / READY FOR NEXT
-K7 Golden Cases / Eval status: IMPLEMENTED / READY FOR ACCEPTANCE
-K8 Acceptance / Freeze status: NOT STARTED
-Next concrete action: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+K4 Replay Read Model status: CLOSED
+K5 Provider Health / Budget / Latency status: CLOSED
+K6 Mock NQ Dry-run Contract Tests status: CLOSED
+K7 Golden Cases / Eval status: CLOSED
+K8 Acceptance / Freeze status: CLOSED / ACCEPTED
+NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN status: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 Full decision pipeline runtime: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -283,7 +312,8 @@ K5 Provider Health / Budget / Latency: CLOSED
 K6 Mock NQ Dry-run Contract Tests: CLOSED
 K7 Golden Cases / Eval: CLOSED
 K8 Acceptance / Freeze: CLOSED / ACCEPTED
-Next concrete action: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 API changes: NONE
 Migration changes: NONE
 Runtime integration: NOT STARTED
@@ -305,8 +335,8 @@ LIVE: DISABLED
 Task: DH-DOCS-LANGUAGE-GOVERNANCE-FIX
 Scope: docs governance / language policy / comment style rules / factsource sync
 Business state change: NONE
-Current main line now: DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / IMPLEMENTED / READY FOR NEXT
-Next concrete action now: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+Current main line now: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+Next concrete action now: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
 M1 Readiness Review: CLOSED / ACCEPTED
@@ -841,17 +871,19 @@ DH-CODEX-WORKFLOW-FINAL-CLEANUP
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE）
+## 4. 下一阶段（NQ-DH-I1-P0-FACTSOURCE-REBASE）
 
 ```text
-唯一下一步是 DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE（NOT STARTED）。
+唯一下一步是 NQ-DH-I1-P0-FACTSOURCE-REBASE（NOT STARTED）。
 
-K8 只允许：
-- 基于已完成的 K1-K7 evidence，执行 acceptance / freeze 审查与 docs/current freeze 记录。
+P0 只允许：
+- 基于已完成的 NQ GateN rebase dry-run plan，执行 NQ / DH 两仓事实源同步。
+- 将旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK 保持为 SUPERSEDED / REBASE_REQUIRED。
+- 明确 dry-run 不等于 runtime integration、真实 HTTP、真实交易或 LIVE。
 - 继续保持 no real NQ runtime、no real provider、no HTTP、no LIVE。
-- 不把 acceptance / freeze 写成真实 NQ 联调、runtime integration 或 provider 接入。
+- 不把 factsource rebase 写成真实 NQ 联调、runtime integration 或 provider 接入。
 
-K8 不允许：
+P0 不允许：
 - 新增 replay API / Controller / query API。
 - 实现真实 NQ client。
 - 实现 RealClient / RealNqBacktestClient。

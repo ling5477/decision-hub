@@ -1,12 +1,12 @@
 # Decision Hub Current Docs
 
-> 当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / CLOSED / ACCEPTED
-> 下一阶段: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+> 当前阶段: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+> 下一阶段: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 > 事实源: docs/current
 >
 > NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 NOT STARTED；no RealClient；no real provider；no trading ability；LIVE DISABLED。
 > Security baseline: FULL；fail-closed state: FULL；P1-4 residual CLOSED；header alignment CLOSED；timestamp alignment CLOSED；code reality audit blockers fixed。
-> Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1-K7 已 `CLOSED`；K8 Acceptance / Freeze 已 `CLOSED / ACCEPTED`。验收报告见 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-gatek-decision-pipeline-mvp/`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。当前不允许接 LangGraph、LLM、真实 NQ runtime、真实 provider、真实 HTTP 或 LIVE。
+> Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1-K7 已 `CLOSED`；K8 Acceptance / Freeze 已 `CLOSED / ACCEPTED`。验收报告见 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-gatek-decision-pipeline-mvp/`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`；NQ-DH Integration-1 dry-run 已完成 GateN rebase planning，计划见 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`；下一步只允许 `NQ-DH-I1-P0-FACTSOURCE-REBASE`。当前不允许接 LangGraph、LLM、真实 NQ runtime、真实 provider、真实 HTTP 或 LIVE。
 
 ## 1. 当前定位
 
@@ -49,6 +49,7 @@ docs/current/ROADMAP.md
 docs/current/WORKFLOW.md
 docs/current/WORK_ORDER.md
 docs/current/DH_NQ_INTEGRATION.md
+docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md
 docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md
 docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
 docs/current/DH_REFACTOR_STAGE1_STATUS.md

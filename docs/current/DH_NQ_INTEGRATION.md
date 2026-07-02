@@ -4,11 +4,11 @@
 > Owner: Decision Hub / NexusQuant Integration
 > Created: 2026-05-18
 
-## 0. 当前状态锁定（2026-07-01）
+## 0. 当前状态锁定（2026-07-02）
 
 ```text
-Current stage: Integration-0 safety gate CLOSED / ACCEPTED
-Next stage:    DH-GATEK-DECISION-PIPELINE-MVP-PLAN
+Current stage: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+Next stage:    NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 DH-AUDIT-FIX completed
 NQ integration not started
 Integration-1 not started
@@ -24,15 +24,17 @@ Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
 
-当前唯一允许下一步是 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN`。该计划只允许规划 DH 内部只读 recommendation / evidence / audit / fail-closed 决策管线，不允许真实模型接入、LangGraph runtime、真实 HTTP、NQ runtime integration、RealClient、real provider、NQ mutation 或 LIVE。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须基于 NQ GateN 重新规划后才可进入新的 planning-only audit。
+当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。下一步唯一允许进入 `NQ-DH-I1-P0-FACTSOURCE-REBASE`：同步 NQ / DH 当前事实源、移除旧 GateK Integration-1 作为当前主线、确认 dry-run 仍不等于 runtime integration。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
 
 Integration-0 safety gate 已 CLOSED / ACCEPTED。若未来重新进入 NQ runtime 相关工作，只能从基于 GateN 的 Integration-1 planning-only audit 开始；本文件中的 DH -> NQ REST API 控制面、`POST /api/ai/backtest-requests`、真实 HTTP / event、NQ client、RealClient、real provider 等方向均为 historical / superseded / deferred / gated，不代表当前 next 或当前 implementation。
 
-未来 Integration-1 planning-only audit 最多只能做：
+Integration-1 dry-run 后续 P0-P4 最多只能做：
 
 ```text
-DH -> NQ 只读边界
-契约草案
+NQ -> DH dry-run request contract planning
+DH -> NQ dry-run response contract planning
+NQ only records DH output, never executes
+契约草案 / schema extension review
 scope token / permission model
 audit trail
 replay protection
@@ -41,6 +43,8 @@ request signing
 timestamp / nonce
 payload size limit
 source allowlist
+no-outbound guard
+no-live-trade guard
 risk checklist
 acceptance checklist
 ```

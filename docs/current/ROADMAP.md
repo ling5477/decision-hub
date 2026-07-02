@@ -36,7 +36,9 @@ DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL:
 DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE:
               Acceptance / Freeze                          [closed / accepted]
 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN:
-              Integration-1 dry-run plan rebase on NQ GateN [next / not started]
+              Integration-1 dry-run plan rebase on NQ GateN [pass / plan only / ready for P0]
+NQ-DH-I1-P0-FACTSOURCE-REBASE:
+              NQ / DH factsource rebase for Integration-1 dry-run [next / not started]
 Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
 Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
@@ -88,7 +90,7 @@ dep-tree.txt 重新生成
 
 ## 4. Integration-0 / Decision Pipeline MVP 当前路线
 
-Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 Contract Freeze review 已 `PASS / CLOSED / ACCEPTED`。K2 DecisionOrchestrator Skeleton 已实现 mock-only usecase 编排骨架并关闭。K3 Audit / Snapshot / Trace Persistence 已经 M1 readiness review 关闭。K4 Replay Read Model、K5 Provider Health / Budget / Latency、K6 Mock NQ Dry-run Contract Tests、K7 Golden Cases / Eval 均已关闭。K8 Acceptance / Freeze 已 `CLOSED / ACCEPTED`，验收报告见 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-gatek-decision-pipeline-mvp/`。下一步是 `NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN`（NOT STARTED），只允许基于 NQ GateN 重新规划 dry-run，不允许启动 Integration-1 runtime。
+Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 Contract Freeze review 已 `PASS / CLOSED / ACCEPTED`。K2 DecisionOrchestrator Skeleton 已实现 mock-only usecase 编排骨架并关闭。K3 Audit / Snapshot / Trace Persistence 已经 M1 readiness review 关闭。K4 Replay Read Model、K5 Provider Health / Budget / Latency、K6 Mock NQ Dry-run Contract Tests、K7 Golden Cases / Eval 均已关闭。K8 Acceptance / Freeze 已 `CLOSED / ACCEPTED`，验收报告见 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-gatek-decision-pipeline-mvp/`。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only rebase baseline，计划见 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`；下一步只允许 `NQ-DH-I1-P0-FACTSOURCE-REBASE`，且仍不允许启动 Integration-1 runtime。
 
 语言治理补充：后续 DH roadmap、plan、work order、testing、worklog、status 文档正文必须中文为主；工程对象名、enum、JSON/OpenAPI 字段、HTTP header、状态枚举、命令和外部技术名保留英文原样。固定输出字段可以保留英文，但字段内容必须中文为主。
 
@@ -118,7 +120,8 @@ K5 Provider Health / Budget / Latency CLOSED
 K6 Mock NQ Dry-run Contract Tests CLOSED
 K7 Golden Cases / Eval CLOSED
 K8 Acceptance / Freeze CLOSED / ACCEPTED
-Next concrete action NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+Next concrete action NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline GateN
 ```
@@ -142,7 +145,7 @@ audit 写失败 fail-closed
 验收清单与风险清单
 ```
 
-Decision Pipeline MVP PLAN 必须明确禁止：
+Decision Pipeline MVP PLAN 与 Integration-1 dry-run plan 必须明确禁止：
 
 ```text
 不实现真实 NQ client

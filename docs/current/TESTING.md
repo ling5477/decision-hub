@@ -1,5 +1,36 @@
 # Decision Hub Testing
 
+## 2026-07-02 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN
+
+```text
+Scope:
+  - 本轮只做 NQ-DH Integration-1 dry-run 的 GateN rebase planning 与 docs/current 同步。
+  - 不修改生产代码、测试代码、contracts、golden_cases、API、Controller、migration、runtime client、provider 或 NQ runtime。
+
+Plan result:
+  NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+  Next: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+  Integration-1 dry-run implementation: NOT STARTED
+  Integration-1 runtime: NOT STARTED
+  Runtime integration: NOT STARTED
+  DH integrated: NO
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS | 计划文档与 docs/current 索引类文档变更可见；未发现生产代码、测试代码、contracts、golden_cases、API、migration 变更。 |
+| `git diff --check` | PASS | 无 whitespace error；仅 Windows 行尾转换 warning。 |
+| `git diff --stat` | PASS | tracked diff 限于 `docs/current/DH_NQ_INTEGRATION.md`、`README.md`、`ROADMAP.md`、`STATUS.md`、`WORK_ORDER.md`；新计划文档由 `git status --short` 标识。 |
+| `mvn -ntp test` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 SUCCESS；`PostgresContainerSmokeTest` 因当前进程访问 `\\.\pipe\docker_engine` 被拒绝而 skip 1 个 Testcontainers smoke，属于 Docker named-pipe 环境可达性问题，不是代码失败。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 SUCCESS；Checkstyle 0 violations；Spotless check passed；保留既有子模块 `unable to find checkstyle:checkstyle outputFile` 信息，聚合结果仍为 SUCCESS。 |
+
+Boundary:
+
+未新增 API path / Controller / migration；未修改 Java 生产代码或测试代码；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient / 真实 Provider；未读取或输出 credential、token、cookie、API secret、passphrase；未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；未启动 Integration-1 runtime；未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；未把 dry-run 写成真实联调或实盘准备完成。
+
 ## 2026-07-02 DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE
 
 ```text
