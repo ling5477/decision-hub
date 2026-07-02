@@ -1,5 +1,40 @@
 # Decision Hub Testing
 
+## 2026-07-02 NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN final validation
+
+```text
+Scope:
+  - 本轮只做 NQ-DH Integration-1 P2 contract fixtures planning 与验证记录同步。
+  - DH canonical plan: docs/current/DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md。
+  - DH API.md 只记录 planned / not implemented schema gap，不宣称 API 已实现。
+
+Result:
+  NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+  Next: NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN / NOT STARTED
+  Integration-1 implementation: NOT STARTED
+  Integration-1 runtime: NOT STARTED
+  Runtime integration: NOT STARTED
+  Real HTTP: NOT STARTED
+  Real provider: NOT STARTED
+  DH integrated: NO
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS / CHANGES PRESENT | 当前 dirty 仅位于允许的 `docs/current` 文档：P2 fixtures plan、Integration docs、API planning note、current index/status/work order。 |
+| `git diff --check` | PASS | 无 whitespace error；仅 Windows LF/CRLF 工作区提示，非阻断。 |
+| `git diff --stat` | PASS / DOCS-ONLY | tracked diff 限于 `docs/current` 文档；新增 `docs/current/DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md` 由 `git status --short` 标识。 |
+| `git diff --name-only -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases` | PASS / EMPTY | 禁止的生产代码、测试代码、contracts、golden_cases 范围无 diff。 |
+| `mvn -ntp test` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 `SUCCESS`；`PostgresContainerSmokeTest` 因 `\\\\.\\pipe\\docker_engine` AccessDenied / Docker environment unavailable 被 Testcontainers skip 1，属于本地 Docker named-pipe 可达性问题，不是代码失败。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 `SUCCESS`；Checkstyle 0 violations；Spotless check passed；保留子模块 `unable to find checkstyle:checkstyle outputFile` 信息，聚合结果为 SUCCESS。 |
+
+Boundary:
+
+未改 Java / Kotlin / Python / TypeScript 生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path / Controller / migration；未新增 fixture JSON；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient；未新增真实 Provider；未读取或输出 credential / token / cookie / API secret / passphrase；未接 AI / LangGraph；未启动 Integration-1 runtime；未开启 LIVE。
+
 ## 2026-07-02 NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN final validation
 
 ```text

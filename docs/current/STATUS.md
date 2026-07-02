@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-> Next stage:    NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
+> Current stage: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+> Next stage:    NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN / NOT STARTED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,8 +34,8 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED.
-Next concrete action: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED.
+Current main line: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED.
+Next concrete action: NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN / NOT STARTED.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -46,6 +46,32 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.4 NQ-DH I1-P2 Contract Fixtures Plan（2026-07-02，COMPLETED / PLAN ONLY）
+
+```text
+Plan artifact: docs/current/DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md
+Plan status: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+NQ current main line: GateO
+NQ rebase input: GateN no-real public marketdata / exchange sandbox baseline
+DH baseline: DH-STAGE4-DECISION-PIPELINE-MVP / ACCEPTED / CLOSED
+NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+Integration-1 implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NOT STARTED
+Real provider: NOT STARTED
+DH integrated: NO
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+Next concrete action: NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN / NOT STARTED
+```
+
+- 本轮只规划 future request/response fixtures、schema gap、golden case alignment、error taxonomy alignment、no-runtime/no-live fixture boundary 和 P3-P6 后续批次。
+- `dryRun / decisionId / confidence / traceSummary / replayRef / auditRef / X-NQ-DH-Schema-Version` 当前不属于已实现 wire schema；后续如需进入 fixture 或 runtime contract，必须单独 contract review。
+- DH `golden_cases/decision/**` 仍是 DH 内部 deterministic baseline；NQ-DH fixture 是跨仓合同基线，两者不得混作同一种证据。
+- `ALLOW_I1_P2_CONTRACT_FIXTURES_PLAN_CLOSE: YES`；`ALLOW_I1_P3_NQ_DRYRUN_STUB_TEST_PLAN: YES`；`ALLOW_SCHEMA_CHANGE: NO`；`ALLOW_FIXTURE_IMPLEMENTATION: NO`；`ALLOW_CONTRACTS_MODIFICATION: NO`；`ALLOW_GOLDEN_CASES_MODIFICATION: NO`；`ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_REAL_HTTP: NO`；`ALLOW_REAL_PROVIDER: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 1.0.3 NQ-DH I1-P1 Contract Dry-run Plan（2026-07-02，COMPLETED / PLAN ONLY）
 
@@ -953,10 +979,10 @@ DH-CODEX-WORKFLOW-FINAL-CLEANUP
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN）
+## 4. 下一阶段（NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN）
 
 ```text
-唯一下一步是 NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN（NOT STARTED）。
+唯一下一步是 NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN（NOT STARTED）。
 
 P0 已关闭：
 - NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE = CLOSED / ACCEPTED / DOCS-ONLY。
@@ -968,13 +994,18 @@ P1 已关闭：
 - NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN = COMPLETED / PLAN ONLY / NOT IMPLEMENTED。
 - 已规划 NQ -> DH dry-run request、DH -> NQ dry-run response、canonical header、安全协议、error taxonomy、trace / audit / replay 和测试矩阵。
 
-P2 只允许：
-- 规划双仓 fixture、schema gap、golden case 和 forbidden field catalog，不实现 dispatcher、client、Controller、API 或 migration。
-- 明确 request / response fixture、schema extension 是否需要、mock-only validation 和 no-side-effect 断言。
-- 继续保持 no real NQ runtime、no real provider、no HTTP、no LIVE。
-- 不把 fixture plan 写成真实 NQ 联调、runtime integration 或 provider 接入。
+P2 已关闭：
+- NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN = COMPLETED / PLAN ONLY / NOT IMPLEMENTED。
+- 已规划 future request / response fixtures、schema gap、golden case alignment、error taxonomy alignment、no-runtime/no-live fixture boundary 和 P3-P6 后续批次。
+- 未创建 fixture JSON，未修改 schema、contracts、golden_cases、生产代码或测试代码。
 
-P2 不允许：
+P3 只允许：
+- 规划 NQ 侧 stub / no-outbound / no-order 测试，不实现 dispatcher、client、Controller、API 或 migration。
+- 明确 future NQ stub 如何验证 no-outbound、no-order、no-risk-mutation、no-paper-run-start 和 no-live boundary。
+- 继续保持 no real NQ runtime、no real provider、no HTTP、no LIVE。
+- 不把 stub test plan 写成真实 NQ 联调、runtime integration 或 provider 接入。
+
+P3 不允许：
 - 新增 replay API / Controller / query API。
 - 实现真实 NQ client。
 - 实现 RealClient / RealNqBacktestClient。
@@ -1008,7 +1039,7 @@ Stage2-PoC、Stage3-B2/B3/B4 的真实接入、联调、RealClient 或 NQ mutati
 - K7 Golden Cases / Eval CLOSED
 - K8 Acceptance / Freeze CLOSED / ACCEPTED
 - Full decision pipeline runtime not started
-- Integration-1 not started
+- Integration-1 implementation not started
 - Runtime integration not started
 - DH integrated NO
 - AI / Agent runtime not started

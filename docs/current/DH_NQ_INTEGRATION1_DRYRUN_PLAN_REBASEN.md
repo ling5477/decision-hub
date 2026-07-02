@@ -6,6 +6,7 @@
 > 仓库视角：Decision Hub（DH）  
 > 结论：`PLAN BASELINE ACCEPTED / I1-P0 FACTSOURCE REBASE CLOSED`
 > P1 状态：`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED`
+> P2 状态：`NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED`
 
 ## 1. 当前事实重定位
 
@@ -27,6 +28,7 @@ DH security state: FULL.
 DH fail-closed state: FULL.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED.
+NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED.
 Integration-1 implementation: NOT STARTED.
 Runtime integration: NOT STARTED.
 DH integrated: NO.
@@ -279,13 +281,13 @@ P1 不新增 API、Controller、client、provider、Repository、Service、migra
 
 ## 12. 下一步
 
-本计划 baseline、I1-P0 factsource rebase 与 I1-P1 contract dry-run plan 已关闭。下一步只允许进入：
+本计划 baseline、I1-P0 factsource rebase、I1-P1 contract dry-run plan 与 I1-P2 contract fixtures plan 已关闭。下一步只允许进入：
 
 ```text
-NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
+NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN / NOT STARTED
 ```
 
-P2 仍只能规划 contract fixtures / schema / golden case 对齐，不是 runtime implementation。若后续发现 NQ GateN / GateO 与 DH Stage4 facts 仍有 current-source 冲突，则改走：
+P3 仍只能规划 NQ 侧 stub / no-outbound / no-order 测试，不是 runtime implementation。若后续发现 NQ GateN / GateO 与 DH Stage4 facts 仍有 current-source 冲突，则改走：
 
 ```text
 NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN-FIX

@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-下一阶段: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
+当前阶段: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+下一阶段: NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN / NOT STARTED
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -78,7 +78,7 @@ JSON Schema extension: NOT IMPLEMENTED
 Runtime HTTP: NOT STARTED
 ```
 
-计划字段中，`dryRun / decisionId / confidence / replayRef / auditRef` 等仍属于 schema gap / envelope planning；后续若需要 wire-level 字段扩展，必须先进入 `NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN` 与独立 contract review。
+P2 已确认计划字段中 `dryRun / decisionId / confidence / traceSummary / replayRef / auditRef / X-NQ-DH-Schema-Version` 仍属于 schema gap / envelope planning；当前 API、OpenAPI 与 JSON Schema 均未实现这些 wire-level 字段。后续若需要字段扩展或 fixture 落地，必须先进入独立 contract review；不得把 P2 planning 写成已实现 API。
 
 ## 4. Stage1 最小 API 集合（已实现，留作历史记录）
 
