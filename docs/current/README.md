@@ -1,14 +1,14 @@
 # Decision Hub Current Docs
 
-> 当前阶段: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-> 下一阶段: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+> 当前阶段: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED
+> 下一阶段: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 > 事实源: docs/current
 >
 > NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 NOT STARTED；no RealClient；no real provider；no trading ability；LIVE DISABLED。
 > Security baseline: FULL；fail-closed state: FULL；P1-4 residual CLOSED；header alignment CLOSED；timestamp alignment CLOSED；code reality audit blockers fixed。
-> Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1-K7 已 `CLOSED`；K8 Acceptance / Freeze 已 `CLOSED / ACCEPTED`。验收报告见 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-gatek-decision-pipeline-mvp/`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`；NQ-DH Integration-1 dry-run 已完成 GateN rebase planning，计划见 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`；下一步只允许 `NQ-DH-I1-P0-FACTSOURCE-REBASE`。当前不允许接 LangGraph、LLM、真实 NQ runtime、真实 provider、真实 HTTP 或 LIVE。
+> Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1-K7 已 `CLOSED`；K8 Acceptance / Freeze 已 `CLOSED / ACCEPTED`。验收报告见 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-stage4-decision-pipeline-mvp/`。旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与旧冻结目录名 `docs/gates/dh-gatek-decision-pipeline-mvp/` 已 `SUPERSEDED / NAMING_REPLACED`；旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`；NQ-DH Integration-1 dry-run 已完成 GateN rebase planning，计划见 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`；`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已 `CLOSED / ACCEPTED / DOCS-ONLY`；下一步只允许 `NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED`。当前不允许接 LangGraph、LLM、真实 NQ runtime、真实 provider、真实 HTTP 或 LIVE。
 
-> 阶段命名治理：NQ 自身阶段使用 Gate 体系，例如 `GateN`；DH 自身阶段使用 Stage 体系，例如 `DH-STAGE4-DECISION-PIPELINE-MVP`。当前 `DH-GATEK-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-gatek-decision-pipeline-mvp/` 属于历史错误命名残留，Decision Pipeline MVP 已 `ACCEPTED / CLOSED` 的事实不变；后续由 `DH-STAGE4-NAMING-REBASE-FIX` 执行 current docs 与冻结目录命名 rebase。本轮只修 skill / workflow 规则，不移动冻结目录。
+> 阶段命名治理：NQ 自身阶段使用 Gate 体系，例如 `GateN`；DH 自身阶段使用 Stage 体系，例如 `DH-STAGE4-DECISION-PIPELINE-MVP`。当前 canonical 名称为 `DH-STAGE4-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-stage4-decision-pipeline-mvp/`；旧 `DH-GATEK-DECISION-PIPELINE-MVP`、`DH GateK Decision Pipeline MVP` 与 `docs/gates/dh-gatek-decision-pipeline-mvp/` 仅可作为历史错误命名或 `NAMING_REPLACED` 说明出现。后续 Integration-1 前置条件固定为 `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED`。
 
 ## 1. 当前定位
 
@@ -52,8 +52,8 @@ docs/current/WORKFLOW.md
 docs/current/WORK_ORDER.md
 docs/current/DH_NQ_INTEGRATION.md
 docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md
-docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md
-docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
+docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md
+docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md
 docs/current/DH_REFACTOR_STAGE1_STATUS.md
 docs/current/STAGE1_CLOSE_WORKLOG.md
 ```
@@ -216,8 +216,8 @@ NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN（NOT STARTED）。
     * dh-app ArchUnit 扩到 12 条（新增 R11 HTTP 客户端隔离 + R12 backtest 端口隔离）；
     * 8 个 B3 测试类共 39 cases 全绿；190 tests 全绿；
     * 零真实 HTTP；零 NQ 仓库改动；零下单 / 风控旁路 / 实盘 / 前端。
-  - DH-GATEK-DECISION-PIPELINE-MVP-PLAN 已 ACCEPTED / CLOSED。
-  - DH-GATEK-DECISION-PIPELINE-MVP-WO 已 ACCEPTED / CLOSED。
+  - DH-STAGE4-DECISION-PIPELINE-MVP-PLAN 已 ACCEPTED / CLOSED。
+  - DH-STAGE4-DECISION-PIPELINE-MVP-WO 已 ACCEPTED / CLOSED。
   - K1 Contract Freeze 已 PASS / CLOSED / ACCEPTED。
   - K2 已实现 dh-usecase 内 DecisionOrchestrator skeleton、context builder、policy checker、
     deterministic mock signal provider、risk reviewer、output assembler 与 fail-closed tests。

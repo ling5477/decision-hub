@@ -79,14 +79,14 @@ docs/current/TESTING.md
 ## 4. 当前阶段
 
 ```text
-当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW
-下一阶段: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
+当前阶段: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED
+下一阶段: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 事实源: docs/current
 ```
 
 Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架（dh-usecase service + DTO + Repository / dh-connector Fake + Disabled client / dh-app Stage3NqBacktestWiringConfig 三层 gate / ArchUnit 扩到 12 条）；190 tests 全绿；无真实 HTTP；无 RealNqBacktestClient。
 
-Integration-0 safety gate 已 `CLOSED / ACCEPTED`；P1-4 residual、header alignment、timestamp alignment、code reality audit blockers 均已关闭或修复。`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 与 `DH-GATEK-DECISION-PIPELINE-MVP-WO` 已 `ACCEPTED / CLOSED`；K1 Contract Freeze 已实现并等待 review。当前下一步主线只允许 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW`，不得跳过 K1 review 直接进入 K2；不允许启动 Integration-1 runtime、真实 NQ runtime、真实 Provider、真实 HTTP、LangGraph runtime、AI / Agent runtime 或 LIVE。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 只能作为 historical reference，当前标记为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。Stage3 规划冻结快照位于 docs/gates/dh-stage3-plan/。
+Integration-0 safety gate 已 `CLOSED / ACCEPTED`；P1-4 residual、header alignment、timestamp alignment、code reality audit blockers 均已关闭或修复。`DH-STAGE4-DECISION-PIPELINE-MVP-PLAN` 与 `DH-STAGE4-DECISION-PIPELINE-MVP-WO` 已 `ACCEPTED / CLOSED`；K1-K8 已 `CLOSED / ACCEPTED`，Decision Pipeline MVP 已以 DH Stage4 canonical 命名关闭。旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-gatek-decision-pipeline-mvp/` 已标记为 `SUPERSEDED / NAMING_REPLACED`，不得再作为当前阶段、当前任务名或新冻结目录。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 只能作为 historical reference，当前标记为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已 `CLOSED / ACCEPTED / DOCS-ONLY`；当前下一步只允许 `NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED`，且仍为 plan-only；不允许启动 Integration-1 runtime、真实 NQ runtime、真实 Provider、真实 HTTP、LangGraph runtime、AI / Agent runtime 或 LIVE。Stage3 规划冻结快照位于 docs/gates/dh-stage3-plan/。
 
 NQ / DH 三轮只读审计（NQ 全仓 / DH 全仓 / NQ-DH 联合边界 + 汇总）已完成，结论同步在 `docs/current/STATUS.md` §1.1。当前口径固定为：
 
@@ -118,7 +118,7 @@ DH 自身阶段: Stage 体系，例如 DH-STAGE4-DECISION-PIPELINE-MVP
 NQ-DH 集成任务: 可引用 NQ GateN rebase，但不得把 DH 自身阶段写成 GateK/GateL/GateN
 ```
 
-当前文档中的 `DH-GATEK-DECISION-PIPELINE-MVP`、`docs/gates/dh-gatek-decision-pipeline-mvp/` 属于历史错误命名残留。Decision Pipeline MVP 已 `ACCEPTED / CLOSED` 的事实不变；命名应在后续 `DH-STAGE4-NAMING-REBASE-FIX` 中改为 `DH-STAGE4-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-stage4-decision-pipeline-mvp/`。在该 rebase 完成前，不得继续创建新的 `DH-GATEK-*` 任务、current stage 或冻结目录。
+旧 `DH-GATEK-DECISION-PIPELINE-MVP`、`DH GateK Decision Pipeline MVP` 与 `docs/gates/dh-gatek-decision-pipeline-mvp/` 属于历史错误命名，当前 canonical 名称为 `DH-STAGE4-DECISION-PIPELINE-MVP`、`DH Stage4 Decision Pipeline MVP` 与 `docs/gates/dh-stage4-decision-pipeline-mvp/`。Decision Pipeline MVP 已 `ACCEPTED / CLOSED` 的事实不变；旧 GateK 命名只能在历史记录、旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK`、或 naming replacement 说明中出现，并必须标注 `SUPERSEDED / NAMING_REPLACED` 或 `SUPERSEDED / REBASE_REQUIRED`。不得继续创建新的 `DH-GATEK-*` 任务、current stage 或冻结目录。
 
 ## 5. 硬边界
 

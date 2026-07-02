@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-> Next stage:    NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+> Current stage: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED
+> Next stage:    NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -30,12 +30,12 @@ RealClient forbidden.
 real provider forbidden.
 LIVE DISABLED.
 NQ mutation forbidden.
-GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
-GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED.
+DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
+DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE.
-Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED.
+Current main line: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED / DOCS-ONLY.
+Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -47,13 +47,37 @@ Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
 
+## 1.0.0 DH Stage4 命名 rebase（2026-07-02，CLOSED）
+
+```text
+DH-STAGE4-NAMING-REBASE-FIX: CLOSED
+DH-STAGE4-DECISION-PIPELINE-MVP: ACCEPTED / CLOSED
+Legacy DH-GATEK-DECISION-PIPELINE-MVP: SUPERSEDED / NAMING_REPLACED
+Legacy docs/gates/dh-gatek-decision-pipeline-mvp: SUPERSEDED / NAMING_REPLACED
+Correct freeze directory: docs/gates/dh-stage4-decision-pipeline-mvp/
+Integration-1 implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+DH integrated: NO
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+```
+
+- 本轮只修正 DH 自身阶段命名、current docs 事实源引用、验收报告文件名和冻结目录名。
+- `DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`、`DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`、`DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md` 已重命名为 `DH_STAGE4_DECISION_PIPELINE_MVP_*`。
+- `docs/gates/dh-gatek-decision-pipeline-mvp/` 已重命名为 `docs/gates/dh-stage4-decision-pipeline-mvp/`；目录 README 已说明原错误目录名、正确目录名与 `ACCEPTED / CLOSED` 事实不变。
+- 后续 Integration-1 前置条件固定为 `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED`，不得写为 `NQ GateN + DH GateK CLOSED`。
+- 本轮未修改生产代码、测试代码、contracts、golden_cases、API、Controller、migration、runtime client、provider 或 NQ 仓库。
+
 ## 1.0.1 NQ-DH Integration-1 Dry-run Plan RebaseN（2026-07-02，PASS / PLAN ONLY）
 
 ```text
 Plan artifact: docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md
-Plan status: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
+Plan status: PLAN BASELINE ACCEPTED / I1-P0 FACTSOURCE REBASE CLOSED
 NQ baseline: GateN no-real public marketdata / exchange sandbox baseline frozen and tagged
-DH baseline: GateK Decision Pipeline MVP CLOSED / ACCEPTED
+DH baseline: DH Stage4 Decision Pipeline MVP CLOSED / ACCEPTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 Integration-1 dry-run implementation: NOT STARTED
 Integration-1 runtime: NOT STARTED
@@ -64,7 +88,7 @@ DH integrated: NO
 AI / Agent runtime: NOT STARTED
 LangGraph runtime: NOT STARTED
 LIVE: DISABLED
-Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 ```
 
 - 本轮只做 NQ GateN rebase 后的 Integration-1 dry-run 规划，定义 dry-run 目标、NQ/DH 职责边界、request/response 合同规划、安全协议、I1-P0..P5 批次和测试矩阵。
@@ -73,10 +97,33 @@ Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
 - NQ 只记录 DH 输出，不执行 DH 输出；DH 不下单、不改 NQ 状态、不读写 NQ DB、不接真实 exchange / broker。
 - `ALLOW_INTEGRATION1_DRYRUN_PLAN_CLOSE: YES`；`ALLOW_NQ_DH_I1_P0_FACTSOURCE_REBASE: YES`；`ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_REAL_HTTP: NO`；`ALLOW_REAL_PROVIDER: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
-## 1.0 DH GateK Decision Pipeline MVP K8 Acceptance / Freeze（2026-07-02，CLOSED / ACCEPTED）
+## 1.0.2 NQ-DH I1-P0 Factsource Rebase Close（2026-07-02，CLOSED / ACCEPTED）
 
 ```text
-GateK Decision Pipeline MVP: CLOSED / ACCEPTED
+NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE: CLOSED / ACCEPTED / DOCS-ONLY
+Integration-1 dry-run plan baseline: ACCEPTED
+Prerequisite: NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED
+Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+Integration-1 implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NOT STARTED
+Real provider: NOT STARTED
+DH integrated: NO
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+- 本轮只同步 NQ / DH 当前事实源，不新增 API、Controller、migration、production code、test code、contracts 或 golden_cases。
+- NQ GateN 仅作为 Integration-1 dry-run rebase input；NQ 当前 GateO 主线不被 P0 回滚或覆盖。
+- P1 仍是 contract dry-run plan，不是 Integration-1 implementation、runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
+- `ALLOW_I1_P0_CLOSE: YES`；`ALLOW_I1_P1_CONTRACT_PLAN: YES`；`ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_REAL_HTTP: NO`；`ALLOW_REAL_PROVIDER: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+
+## 1.0 DH Stage4 Decision Pipeline MVP K8 Acceptance / Freeze（2026-07-02，CLOSED / ACCEPTED）
+
+```text
+DH Stage4 Decision Pipeline MVP: CLOSED / ACCEPTED
 K1 Contract Freeze: CLOSED
 K2 Orchestrator Skeleton: CLOSED
 K3 Audit / Snapshot / Trace Persistence: CLOSED
@@ -87,7 +134,7 @@ K6 Mock NQ Dry-run Contract Tests: CLOSED
 K7 Golden Cases / Eval: CLOSED
 K8 Acceptance / Freeze: CLOSED
 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
 DH integrated: NO
@@ -96,13 +143,13 @@ LangGraph runtime: NOT STARTED
 LIVE: DISABLED
 ```
 
-- 验收报告：`docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`。
-- 冻结快照：`docs/gates/dh-gatek-decision-pipeline-mvp/`。
+- 验收报告：`docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`。
+- 冻结快照：`docs/gates/dh-stage4-decision-pipeline-mvp/`。
 - K1-K7 已形成只读 Decision Pipeline MVP 闭环：合同冻结、mock-only orchestrator、audit/snapshot/trace persistence、internal replay read model、mock provider guard、mock NQ dry-run contract tests、golden cases/eval baseline。
 - 本次 K8 只做 acceptance / freeze / regression validation / security boundary review / docs sync；未修改生产代码、测试代码、contracts、golden_cases、API、Controller、migration、runtime client、provider 或 NQ 仓库。
 - 验收命令 `mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test`、`mvn -ntp test`、`mvn -ntp -Pquality validate` 均 `BUILD SUCCESS`；当前 sandbox 下 Docker daemon 管道不可用，`PostgresContainerSmokeTest` 按 Testcontainers 机制 skipped 1。
 - 关键词边界扫描未发现生产越界实现；命中均为禁止说明、negative tests、denylist、migration comment、historical/deferred docs 或固定 `forbiddenActions`。
-- `ALLOW_GATEK_CLOSE: YES`；`ALLOW_INTEGRATION1_DRYRUN_PLAN_REBASE_N: YES`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- `ALLOW_STAGE4_CLOSE: YES`；`ALLOW_INTEGRATION1_DRYRUN_PLAN_REBASE_N: YES`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 1.1 NQ / DH 三轮审计同步（2026-06-11，DOC-SYNC-GATEK-PRE-AND-INT0-REGISTRATION）
 
@@ -212,12 +259,12 @@ Runtime integration: NOT STARTED
 DH integrated: NO
 AI / Agent runtime: NOT STARTED
 LIVE: DISABLED
-GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED
-GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED
+DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED
+DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED
 M1 Readiness Review: CLOSED / ACCEPTED
-Current main line: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+Current main line: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED / DOCS-ONLY
+Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
 K4 Replay Read Model: CLOSED
@@ -235,12 +282,12 @@ NQ current planning baseline: GateN
 - 第一版 DecisionOutput 必须保持 `READ_ONLY_RECOMMENDATION`；默认无证据或 provider 失败时 `ABSTAIN`；policy denied 与 audit 写失败必须 fail-closed。
 - 当前仍禁止真实 NQ runtime、真实 provider、真实 HTTP、LangGraph runtime、AI / Agent runtime、LIVE、NQ DB 读写、NQ mutation、下单和撤单。
 
-## 1.5 DH GateK Decision Pipeline MVP PLAN（2026-07-01，ACCEPTED / CLOSED）
+## 1.5 DH Stage4 Decision Pipeline MVP PLAN（2026-07-01，ACCEPTED / CLOSED）
 
 ```text
-Plan artifact: docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md
+Plan artifact: docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md
 Plan status: ACCEPTED / CLOSED
-Work order artifact: docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
+Work order artifact: docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md
 Work order status: ACCEPTED / CLOSED
 K1 contract freeze status: PASS / CLOSED / ACCEPTED
 K2 DecisionOrchestrator Skeleton status: IMPLEMENTED
@@ -252,7 +299,7 @@ K6 Mock NQ Dry-run Contract Tests status: CLOSED
 K7 Golden Cases / Eval status: CLOSED
 K8 Acceptance / Freeze status: CLOSED / ACCEPTED
 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN status: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 Full decision pipeline runtime: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -263,16 +310,16 @@ LIVE: DISABLED
 ```
 
 - 本轮只做 docs-only / plan-only：规划 K0-K7、DecisionRequest / DecisionOutput、DecisionOrchestrator skeleton、snapshot / trace / audit / replay、mock provider、mock NQ dry-run contract tests、provider health / budget / latency、golden cases / eval、acceptance / freeze。
-- Readiness recommendation：`ALLOW_GATEK_PLAN_CLOSE: YES`；`ALLOW_GATEK_WO: YES`；`ALLOW_DECISION_PIPELINE_IMPLEMENTATION: NO`；`ALLOW_INTEGRATION_1_DRYRUN_PLAN_REBASE_N: YES`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- Readiness recommendation：`ALLOW_STAGE4_PLAN_CLOSE: YES`；`ALLOW_STAGE4_WO: YES`；`ALLOW_DECISION_PIPELINE_IMPLEMENTATION: NO`；`ALLOW_INTEGRATION_1_DRYRUN_PLAN_REBASE_N: YES`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 - 旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 继续保持 `SUPERSEDED / REBASE_REQUIRED`，只保留安全边界作为参考；后续 Integration-1 必须基于 NQ GateN 重新规划。
 - 本计划不新增 API path、不新增 migration、不新增 Controller / Service / Repository / Client、不接真实 HTTP、不接真实 provider、不接 AI / LangGraph、不改 NQ、不启动 Integration-1、不启用 LIVE。
 
-## 1.6 DH GateK Decision Pipeline MVP WO（2026-07-01，ACCEPTED / CLOSED）
+## 1.6 DH Stage4 Decision Pipeline MVP WO（2026-07-01，ACCEPTED / CLOSED）
 
 ```text
-Work order artifact: docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
+Work order artifact: docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md
 Work order status: ACCEPTED / CLOSED
-Source plan: DH-GATEK-DECISION-PIPELINE-MVP-PLAN / ACCEPTED / CLOSED
+Source plan: DH-STAGE4-DECISION-PIPELINE-MVP-PLAN / ACCEPTED / CLOSED
 K1 contract freeze status: PASS / CLOSED / ACCEPTED
 K2 DecisionOrchestrator Skeleton status: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence status: CLOSED / ACCEPTED after M1
@@ -283,7 +330,7 @@ K6 Mock NQ Dry-run Contract Tests status: CLOSED
 K7 Golden Cases / Eval status: CLOSED
 K8 Acceptance / Freeze status: CLOSED / ACCEPTED
 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN status: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 Full decision pipeline runtime: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -293,13 +340,13 @@ LangGraph runtime: NOT STARTED
 LIVE: DISABLED
 ```
 
-- 本轮只做 docs-only / work-order-only：新增 GateK Decision Pipeline MVP K1-K8 工单拆解，不写生产代码、不写测试代码、不新增 API、不新增 migration、不新增 Controller / Service / Repository / Client、不接 provider、不接 NQ、不接 AI / LangGraph、不启用 LIVE。
+- 本轮只做 docs-only / work-order-only：新增 DH Stage4 Decision Pipeline MVP K1-K8 工单拆解，不写生产代码、不写测试代码、不新增 API、不新增 migration、不新增 Controller / Service / Repository / Client、不接 provider、不接 NQ、不接 AI / LangGraph、不启用 LIVE。
 - K1-K8 顺序锁定：K1 review 后才允许 K2；K2 review 后才允许 K3；K3 review 后才允许 K4；K1-K5 完成后才允许 K6；K1-K7 完成后才允许 K8。
 - DecisionOutput hardening 固化为 `READ_ONLY_RECOMMENDATION`，action 仅允许 `ABSTAIN / OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS`，默认 `ABSTAIN`；no evidence / provider failure -> `ABSTAIN`；policy denied -> `BLOCKED` or `ABSTAIN` fail-closed；high risk 禁止 `LONG_BIAS / SHORT_BIAS`。
 - `forbiddenActions` 必须包含 `PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE / READ_NQ_DB / WRITE_NQ_DB`；最终输出必须是 structured JSON，不允许 free-text final output，不允许真实交易指令。
-- Readiness decision：`ALLOW_WO_CLOSE: YES`；`ALLOW_K1_IMPLEMENTATION: YES`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- Readiness decision：`ALLOW_WO_CLOSE: YES`；`ALLOW_K1_IMPLEMENTATION: YES`；`ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
-## 1.7 DH GateK Decision Pipeline MVP K1 Contract Freeze（2026-07-01，PASS / CLOSED / ACCEPTED）
+## 1.7 DH Stage4 Decision Pipeline MVP K1 Contract Freeze（2026-07-01，PASS / CLOSED / ACCEPTED）
 
 ```text
 K1 status: PASS / CLOSED / ACCEPTED
@@ -313,7 +360,7 @@ K6 Mock NQ Dry-run Contract Tests: CLOSED
 K7 Golden Cases / Eval: CLOSED
 K8 Acceptance / Freeze: CLOSED / ACCEPTED
 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 API changes: NONE
 Migration changes: NONE
 Runtime integration: NOT STARTED
@@ -327,7 +374,7 @@ LIVE: DISABLED
 - 新增 JSON Schema：`contracts/json-schema/dh-decision-request.schema.json`、`contracts/json-schema/dh-decision-output.schema.json`。
 - 新增 K1 contract tests：schema 存在性、required 字段、`additionalProperties=false`、Java enum 与 schema enum 一致、action 禁止 `BUY / SELL / PLACE_ORDER / CANCEL_ORDER / MARKET_ORDER / LIMIT_ORDER`、`decisionType` 仅允许 `READ_ONLY_RECOMMENDATION`、`forbiddenActions` 固定五项、request schema 不含 credential / execution intent 字段、output schema 不含 free-text final output 或 execution command 字段。
 - K1 已通过 review 并关闭；K1 只冻结 domain contract / JSON schema / contract tests，未授权 API、migration、repository、client、NQ runtime、AI / LangGraph 或 LIVE。
-- K1 review decision：`ALLOW_K1_CLOSE: YES`；`ALLOW_K2_IMPLEMENTATION: YES`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- K1 review decision：`ALLOW_K1_CLOSE: YES`；`ALLOW_K2_IMPLEMENTATION: YES`；`ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 1.8 DH Docs Language Governance Fix（2026-07-01，DOCS-ONLY / READY FOR REVIEW）
 
@@ -336,7 +383,7 @@ Task: DH-DOCS-LANGUAGE-GOVERNANCE-FIX
 Scope: docs governance / language policy / comment style rules / factsource sync
 Business state change: NONE
 Current main line now: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action now: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+Next concrete action now: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
 M1 Readiness Review: CLOSED / ACCEPTED
@@ -357,9 +404,9 @@ LIVE: DISABLED
 - `dh-docs-writer` 已新增语言规则：DH 文档正文、架构说明、阶段计划、Worklog、Testing、Roadmap、Status 默认中文为主；DH 代码注释 / Javadoc 默认中文为主。
 - 允许保留英文的范围：Java 包名 / 类名 / 方法名 / 字段名、enum 值、JSON Schema 字段、OpenAPI 字段、HTTP header、状态枚举、命令、外部技术名和固定输出字段。
 - 固定输出字段可保留英文，但字段内容必须中文为主；不得新增英文长段落；不得把中文业务概念翻译成不稳定英文术语后反复使用；从 NQ skill 同步规则时必须改写为 DH 中文主语言风格。
-- 已修正 `DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md` 的明显英文标题、说明段落和表格列名漂移；保留工程名词、enum、schema key、状态词和命令原样。
+- 已修正 `DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md` 的明显英文标题、说明段落和表格列名漂移；保留工程名词、enum、schema key、状态词和命令原样。
 
-## 1.9 DH GateK Decision Pipeline MVP K2 Orchestrator Skeleton（2026-07-01，IMPLEMENTED / READY FOR REVIEW）
+## 1.9 DH Stage4 Decision Pipeline MVP K2 Orchestrator Skeleton（2026-07-01，IMPLEMENTED / READY FOR REVIEW）
 
 ```text
 K2 status: IMPLEMENTED
@@ -386,9 +433,9 @@ LIVE: DISABLED
 - K2 fail-closed 路径：missing request / forbidden execution intent -> `BLOCKED`；no evidence -> `ABSTAIN`；provider failure / timeout / untrusted -> `ABSTAIN`；high risk -> `ABSTAIN`；内部异常 -> structured `ABSTAIN`。
 - 本轮只在 K1 domain output 中补充 observation / risk factory，以便 K2 复用已冻结输出合同；未新增第二套 response model。
 - 新增 K2 单元测试 22 cases，覆盖 orchestrator、policy、risk、assembler、mock provider、null / missing evidence / provider failure / high risk / unexpected failure。
-- Readiness decision：`ALLOW_K2_CLOSE: YES`；`ALLOW_K3_IMPLEMENTATION: NO`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- Readiness decision：`ALLOW_K2_CLOSE: YES`；`ALLOW_K3_IMPLEMENTATION: NO`；`ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
-## 1.10 DH GateK Decision Pipeline MVP K3 Audit / Snapshot / Trace Persistence（2026-07-01，CLOSED / ACCEPTED after M1）
+## 1.10 DH Stage4 Decision Pipeline MVP K3 Audit / Snapshot / Trace Persistence（2026-07-01，CLOSED / ACCEPTED after M1）
 
 ```text
 K3 status: CLOSED / ACCEPTED after M1
@@ -414,9 +461,9 @@ LIVE: DISABLED
 - K3 `output_json` 使用显式安全 Map 保存 K1 structured fields，不直接序列化 domain object；provider call 只保存 deterministic mock summary，不保存真实 provider raw response、credential、NQ DB 内容或敏感 header。
 - 新增 K3 测试覆盖 valid write-through、policy denied、provider timeout、high risk no directional bias、request/context/output/audit persistence failure、missing request unknown IDs、JDBC SQL / JSONB cast / exception mapping、V5 migration presence 和 no trading table。
 - M1 readiness review 已关闭，K4 Replay Read Model 已实现内部只读 read model；K5 provider health / budget / latency 已实现；K6 mock NQ dry-run contract tests 已完成；K7 golden cases / eval 已实现；K8 acceptance / freeze 仍未开始。
-- Readiness decision：`ALLOW_K3_CLOSE: YES`；`ALLOW_K4_IMPLEMENTATION: YES`；`ALLOW_GATEK_M1_CLOSE_REVIEW: YES`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- Readiness decision：`ALLOW_K3_CLOSE: YES`；`ALLOW_K4_IMPLEMENTATION: YES`；`ALLOW_STAGE4_M1_CLOSE_REVIEW: YES`；`ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
-## 1.11 DH GateK Decision Pipeline MVP K4 Replay Read Model（2026-07-01，IMPLEMENTED / READY FOR NEXT）
+## 1.11 DH Stage4 Decision Pipeline MVP K4 Replay Read Model（2026-07-01，IMPLEMENTED / READY FOR NEXT）
 
 ```text
 K4 status: IMPLEMENTED / READY FOR NEXT
@@ -441,9 +488,9 @@ LIVE: DISABLED
 - K4 JSON 读取使用内部 `ObjectMapper.readValue` 解析安全 `Map` / `List`；JSON、枚举或时间字段不可解析时返回 `CORRUPTED`，DB 读取失败返回 `BLOCKED`；不写库、不重跑 provider、不重跑 orchestrator、不修改 audit 数据。
 - `DecisionPipelineWiringConfig` 仅补充 replay repository/service bean，复用私有 persistence `ObjectMapper` 方法，未新增全局 `ObjectMapper` bean，也不影响 WebMVC Jackson。
 - 新增 K4 单元/JDBC/wiring 回归测试，覆盖 found、not found、tenant mismatch、incomplete、corrupted、DB failure、trace/provider/audit ordering、tenant-scoped SQL、no JDBC write、ObjectMapper bean 唯一性。
-- Readiness decision：`ALLOW_K4_CLOSE: YES`；`ALLOW_K5_IMPLEMENTATION: YES`；`ALLOW_GATEK_M2_CLOSE_REVIEW: NO`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- Readiness decision：`ALLOW_K4_CLOSE: YES`；`ALLOW_K5_IMPLEMENTATION: YES`；`ALLOW_STAGE4_M2_CLOSE_REVIEW: NO`；`ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
-## 1.12 DH GateK Decision Pipeline MVP K5 Provider Health / Budget / Latency（2026-07-01，IMPLEMENTED / READY FOR NEXT）
+## 1.12 DH Stage4 Decision Pipeline MVP K5 Provider Health / Budget / Latency（2026-07-01，IMPLEMENTED / READY FOR NEXT）
 
 ```text
 K5 status: IMPLEMENTED / READY FOR NEXT
@@ -467,9 +514,9 @@ LIVE: DISABLED
 - K4 replay read model 可继续读取 provider call summary；`JdbcDecisionReplayQueryRepositoryTest` 已覆盖 `failureClass`、`latencyMs`、`errorCode` 经 replay provider call view 可见。
 - `DecisionPipelineWiringConfig` 已补充 K5 guard wiring，并保持全局 `ObjectMapper` 仍唯一，不污染 WebMVC。
 - 新增 / 更新 K5 tests 覆盖 health evaluator、budget guard、latency recorder、provider guard、orchestrator fail-closed、mock provider K5 failure hooks、no outbound runtime scan、replay provider guard view regression 和 app wiring。
-- Readiness decision：`ALLOW_K5_CLOSE: YES`；`ALLOW_K6_IMPLEMENTATION: YES`；`ALLOW_GATEK_M2_CLOSE_REVIEW: NO`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- Readiness decision：`ALLOW_K5_CLOSE: YES`；`ALLOW_K6_IMPLEMENTATION: YES`；`ALLOW_STAGE4_M2_CLOSE_REVIEW: NO`；`ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
-## 1.13 DH GateK Decision Pipeline MVP K6 Mock NQ Dry-run Contract Tests（2026-07-01，IMPLEMENTED / READY FOR NEXT）
+## 1.13 DH Stage4 Decision Pipeline MVP K6 Mock NQ Dry-run Contract Tests（2026-07-01，IMPLEMENTED / READY FOR NEXT）
 
 ```text
 K6 status: IMPLEMENTED / READY FOR NEXT
@@ -490,9 +537,9 @@ LIVE: DISABLED
 - 新增 `MockNqDecisionRequestFactory`、`MockNqDryRunFixtures`、`MockNqDryRunAssertionSupport` 与 test-only `RecordingDecisionAuditReplayRepository`，用于生成 mock NQ 只读 `DecisionRequest`、读取 fixture、统一合同断言，并证明 K3 写入能被 K4 replay read model 读回。
 - 新增 K6 tests 覆盖 valid mock NQ request -> structured `DecisionOutput`、`READ_ONLY_RECOMMENDATION`、allowed action vocabulary、mandatory forbiddenActions、credential / execution intent 禁止字段、provider disabled / budget exceeded / timeout fail-closed、persistence / replay / tenant isolation、no-live-trade source scan。
 - 新增最小 fixture：`mock_nq_valid_dryrun.json`、`mock_nq_provider_blocked.json`、`mock_nq_no_live_trade_guard.json`；fixture 仅作为 K6 contract test 输入，不进入 K7 eval framework，不含真实账户、凭证或交易指令。
-- Readiness decision：`ALLOW_K6_CLOSE: YES`；`ALLOW_K7_IMPLEMENTATION: YES`；`ALLOW_GATEK_ACCEPTANCE_REVIEW: NO`；`ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_ACCEPTANCE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- Readiness decision：`ALLOW_K6_CLOSE: YES`；`ALLOW_K7_IMPLEMENTATION: YES`；`ALLOW_STAGE4_ACCEPTANCE_REVIEW: NO`；`ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_ACCEPTANCE_REVIEW: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
-## 1.14 DH GateK Decision Pipeline MVP K7 Golden Cases / Eval（2026-07-01，IMPLEMENTED / READY FOR ACCEPTANCE）
+## 1.14 DH Stage4 Decision Pipeline MVP K7 Golden Cases / Eval（2026-07-01，IMPLEMENTED / READY FOR ACCEPTANCE）
 
 ```text
 K7 status: IMPLEMENTED / READY FOR ACCEPTANCE
@@ -871,19 +918,24 @@ DH-CODEX-WORKFLOW-FINAL-CLEANUP
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（NQ-DH-I1-P0-FACTSOURCE-REBASE）
+## 4. 下一阶段（NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN）
 
 ```text
-唯一下一步是 NQ-DH-I1-P0-FACTSOURCE-REBASE（NOT STARTED）。
+唯一下一步是 NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN（NOT STARTED）。
 
-P0 只允许：
-- 基于已完成的 NQ GateN rebase dry-run plan，执行 NQ / DH 两仓事实源同步。
-- 将旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK 保持为 SUPERSEDED / REBASE_REQUIRED。
-- 明确 dry-run 不等于 runtime integration、真实 HTTP、真实交易或 LIVE。
+P0 已关闭：
+- NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE = CLOSED / ACCEPTED / DOCS-ONLY。
+- NQ / DH 当前事实源已统一到 NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED。
+- 旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK 保持 SUPERSEDED / REBASE_REQUIRED。
+- dry-run 不等于 runtime integration、真实 HTTP、真实交易或 LIVE。
+
+P1 只允许：
+- 规划 NQ dry-run request contract，不实现 dispatcher、client、Controller、API 或 migration。
+- 明确 request 字段、禁止字段、schema 扩展策略、fail-closed 和 audit 边界。
 - 继续保持 no real NQ runtime、no real provider、no HTTP、no LIVE。
-- 不把 factsource rebase 写成真实 NQ 联调、runtime integration 或 provider 接入。
+- 不把 contract plan 写成真实 NQ 联调、runtime integration 或 provider 接入。
 
-P0 不允许：
+P1 不允许：
 - 新增 replay API / Controller / query API。
 - 实现真实 NQ client。
 - 实现 RealClient / RealNqBacktestClient。
@@ -905,12 +957,12 @@ Stage2-PoC、Stage3-B2/B3/B4 的真实接入、联调、RealClient 或 NQ mutati
 - DH-AUDIT-FIX completed
 - NQ integration not started
 - Integration-0 safety gate CLOSED / ACCEPTED
-- DH-GATEK-DECISION-PIPELINE-MVP-PLAN ACCEPTED / CLOSED
-- DH-GATEK-DECISION-PIPELINE-MVP-WO ACCEPTED / CLOSED
-- DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE PASS / CLOSED / ACCEPTED
-- DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON IMPLEMENTED
-- DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE CLOSED / ACCEPTED after M1
-- DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW CLOSED / ACCEPTED
+- DH-STAGE4-DECISION-PIPELINE-MVP-PLAN ACCEPTED / CLOSED
+- DH-STAGE4-DECISION-PIPELINE-MVP-WO ACCEPTED / CLOSED
+- DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE PASS / CLOSED / ACCEPTED
+- DH-STAGE4-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON IMPLEMENTED
+- DH-STAGE4-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE CLOSED / ACCEPTED after M1
+- DH-STAGE4-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW CLOSED / ACCEPTED
 - K4 Replay Read Model CLOSED
 - K5 Provider Health / Budget / Latency CLOSED
 - K6 Mock NQ Dry-run Contract Tests CLOSED

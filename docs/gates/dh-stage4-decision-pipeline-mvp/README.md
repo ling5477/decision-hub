@@ -1,21 +1,27 @@
-# DH GateK Decision Pipeline MVP Freeze Snapshot
+# DH Stage4 Decision Pipeline MVP Freeze Snapshot
 
 > 冻结时间: 2026-07-02T19:45+08:00  
-> 冻结阶段: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE  
-> 冻结结论: GateK Decision Pipeline MVP `ACCEPTED / CLOSED`  
+> 冻结阶段: DH-STAGE4-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE
+> 冻结结论: DH Stage4 Decision Pipeline MVP `ACCEPTED / CLOSED`
 > 来源: `docs/current`  
-> 快照路径: `docs/gates/dh-gatek-decision-pipeline-mvp/`
+> 快照路径: `docs/gates/dh-stage4-decision-pipeline-mvp/`
+
+## 0. 命名修正声明
+
+本目录原错误目录名为 `dh-gatek-decision-pipeline-mvp`，正确目录名为 `dh-stage4-decision-pipeline-mvp`。本次 `DH-STAGE4-NAMING-REBASE-FIX` 只修正 DH 自身阶段命名和冻结目录命名，不改变原冻结快照的验收事实。
+
+冻结快照原本验收结论仍为 `ACCEPTED / CLOSED`。目录内部分历史文件名、历史命令输出和冻结时刻记录仍可能保留 `DH_GATEK`、`DH-GATEK`、`GateK` 或 `dh-gatek` 字样；这些只代表原始历史记录或旧错误命名，不得作为当前事实源。当前事实源以 `docs/current` 中的 `DH-STAGE4-DECISION-PIPELINE-MVP` 和 `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED` 为准。
 
 ## 1. 冻结范围
 
-本目录是 `docs/current` 在 GateK Decision Pipeline MVP K8 acceptance / freeze 关闭时的历史快照，包含当前事实源文档、GateK plan/work order、acceptance report、测试记录、工作日志、API 事实说明、Integration-0 安全文档和 Stage 历史上下文。
+本目录是 `docs/current` 在 DH Stage4 Decision Pipeline MVP K8 acceptance / freeze 关闭时的历史快照，包含当前事实源文档、Stage4 plan/work order、acceptance report、测试记录、工作日志、API 事实说明、Integration-0 安全文档和 Stage 历史上下文。
 
 本次冻结只归档文档事实源，不表示新增 runtime 能力；不授权真实 NQ、真实 provider、HTTP、LLM、LangGraph、Integration-1 runtime 或 LIVE。
 
 ## 2. 验收结论
 
 ```text
-GateK Decision Pipeline MVP: ACCEPTED / CLOSED
+DH Stage4 Decision Pipeline MVP: ACCEPTED / CLOSED
 K1 Contract Freeze: CLOSED
 K2 Orchestrator Skeleton: CLOSED
 K3 Audit / Snapshot / Trace Persistence: CLOSED
@@ -25,7 +31,7 @@ K5 Provider Health / Budget / Latency: CLOSED
 K6 Mock NQ Dry-run Contract Tests: CLOSED
 K7 Golden Cases / Eval: CLOSED
 K8 Acceptance / Freeze: CLOSED
-Next: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+Next: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
 DH integrated: NO
@@ -103,11 +109,11 @@ mvn -ntp -Pquality validate
   BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。
 
 Boundary scan
-  未发现 GateK production 越界实现；命中均为禁止说明、negative tests、denylist、
+  未发现 DH Stage4 production 越界实现；命中均为禁止说明、negative tests、denylist、
   migration comment、historical/deferred docs 或固定 forbiddenActions。
 ```
 
-当前本地 sandbox 中 Docker daemon 管道不可用，`PostgresContainerSmokeTest` 在 Maven 测试中按 Testcontainers 机制 skipped 1；该项属于环境未覆盖项，不是 GateK 代码失败。
+当前本地 sandbox 中 Docker daemon 管道不可用，`PostgresContainerSmokeTest` 在 Maven 测试中按 Testcontainers 机制 skipped 1；该项属于环境未覆盖项，不是 Stage4 代码失败。
 
 ## 5. 不可修改历史快照声明
 
@@ -118,7 +124,7 @@ Boundary scan
 ## 6. 后续边界
 
 ```text
-ALLOW_GATEK_CLOSE: YES
+ALLOW_STAGE4_CLOSE: YES
 ALLOW_INTEGRATION1_DRYRUN_PLAN_REBASE_N: YES
 ALLOW_INTEGRATION_1_RUNTIME: NO
 ALLOW_AGENT_PHASE: NO
@@ -126,4 +132,4 @@ ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
 
-下一步只允许 `NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED`，且只能做基于 NQ GateN 的 planning-only rebase；仍不得启动 Integration-1 runtime、真实 NQ runtime、真实 provider、LangGraph runtime、AI / Agent runtime 或 LIVE。
+下一步只允许 `NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / NOT STARTED`，且只能做基于 NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED 的 factsource rebase；仍不得启动 Integration-1 runtime、真实 NQ runtime、真实 provider、LangGraph runtime、AI / Agent runtime 或 LIVE。

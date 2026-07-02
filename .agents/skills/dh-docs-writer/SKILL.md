@@ -114,12 +114,12 @@ DH integrated: NO
 AI / Agent runtime: NOT STARTED
 LIVE: DISABLED
 DH canonical stage: DH-STAGE4-DECISION-PIPELINE-MVP / ACCEPTED / CLOSED
-Legacy erroneous stage name: DH-GATEK-DECISION-PIPELINE-MVP / HISTORICAL_ERROR / PENDING_REBASE
-Legacy erroneous freeze dir: docs/gates/dh-gatek-decision-pipeline-mvp / PENDING_REBASE
+Legacy erroneous stage name: DH-GATEK-DECISION-PIPELINE-MVP / HISTORICAL_ERROR / NAMING_REPLACED
+Legacy erroneous freeze dir: docs/gates/dh-gatek-decision-pipeline-mvp / NAMING_REPLACED
 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED
 Decision Pipeline MVP WO: ACCEPTED / CLOSED
 Decision Pipeline MVP K1-K8: CLOSED / ACCEPTED
-Next naming action: DH-STAGE4-NAMING-REBASE-FIX / NOT STARTED
+Next naming action: DH-STAGE4-NAMING-REBASE-FIX / CLOSED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```

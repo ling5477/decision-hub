@@ -1,20 +1,20 @@
-# DH GateK Decision Pipeline MVP 工单
+# DH Stage4 Decision Pipeline MVP 工单
 
-> 任务：DH-GATEK-DECISION-PIPELINE-MVP-WO
+> 任务：DH-STAGE4-DECISION-PIPELINE-MVP-WO
 > 状态：ACCEPTED / CLOSED
-> 来源计划：`docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`
+> 来源计划：`docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md`
 > 日期：2026-07-01
 > 范围：docs-only / work-order-only
 
 ## 1. 阶段锁定
 
-本工单是 GateK Decision Pipeline MVP 的批次执行计划。它只授权按批次、按 review 推进；不得据此跳过批次 review 做连续实现。
+本工单是 DH Stage4 Decision Pipeline MVP 的批次执行计划。它只授权按批次、按 review 推进；不得据此跳过批次 review 做连续实现。
 
 当前已接受事实：
 
 ```text
-DH-GATEK-DECISION-PIPELINE-MVP-PLAN: ACCEPTED / CLOSED
-DH-GATEK-DECISION-PIPELINE-MVP-WO: ACCEPTED / CLOSED
+DH-STAGE4-DECISION-PIPELINE-MVP-PLAN: ACCEPTED / CLOSED
+DH-STAGE4-DECISION-PIPELINE-MVP-WO: ACCEPTED / CLOSED
 Integration-0 safety gate: CLOSED / ACCEPTED
 NQ integration: not started
 Integration-1: NOT STARTED
@@ -31,8 +31,8 @@ NQ current planning baseline: GateN
 
 ```text
 K1 Decision Contract Freeze: IMPLEMENTED / READY FOR REVIEW
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED
-K2 DecisionOrchestrator Skeleton: NOT STARTED
+Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / NOT STARTED
+K1-K8: CLOSED / ACCEPTED
 ```
 
 本工单只允许后续按小批次推进：
@@ -43,7 +43,7 @@ K1-K5 complete before K6
 K1-K7 complete before K8
 ```
 
-GateK MVP 关闭前，以下能力始终禁止：
+Stage4 MVP 关闭前，以下能力始终禁止：
 
 ```text
 Integration-1 runtime
@@ -62,7 +62,7 @@ LIVE trading
 
 ## 2. 共享 DecisionOutput 合同
 
-所有 GateK 批次必须保持以下输出合同：
+所有 Stage4 批次必须保持以下输出合同：
 
 ```text
 decisionType = READ_ONLY_RECOMMENDATION
@@ -112,7 +112,7 @@ direct NQ mutation instructions
 | K5 | Mock Provider / Provider Health / Budget / Latency | 增加 mock-only provider controls | K4 reviewed |
 | K6 | Mock NQ Dry-run Contract Tests | 只用 mock NQ fixtures 验证边界 | K1-K5 complete |
 | K7 | Golden Cases / Eval 基线 | 锁定 deterministic eval baseline | K6 reviewed |
-| K8 | Acceptance / Freeze | 关闭 GateK MVP 并准备 freeze | K1-K7 complete |
+| K8 | Acceptance / Freeze | 关闭 Stage4 MVP 并准备 freeze | K1-K7 complete |
 
 ## 4. K1 Decision Contract Freeze
 
@@ -726,7 +726,7 @@ K6 Mock NQ Dry-run Contract Tests after K1-K5 complete.
 目标：
 
 ```text
-证明 GateK DecisionOutput 只能 against mock NQ dry-run fixtures 做合同校验，不会调用 NQ runtime、NQ DB、NQ HTTP、Paper Run、orders 或 state mutation。
+证明 Stage4 DecisionOutput 只能 against mock NQ dry-run fixtures 做合同校验，不会调用 NQ runtime、NQ DB、NQ HTTP、Paper Run、orders 或 state mutation。
 ```
 
 允许文件：
@@ -947,20 +947,20 @@ K8 Acceptance / Freeze after K1-K7 complete.
 目标：
 
 ```text
-review K1-K7 evidence；只有当 contracts、tests、audit、replay、mock provider controls 和 golden cases 均通过时，才允许 close GateK Decision Pipeline MVP，并准备 docs/current freeze package。
+review K1-K7 evidence；只有当 contracts、tests、audit、replay、mock provider controls 和 golden cases 均通过时，才允许 close DH Stage4 Decision Pipeline MVP，并准备 docs/current freeze package。
 ```
 
 允许文件：
 
 ```text
-docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md
+docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md
 docs/current/README.md
 docs/current/STATUS.md
 docs/current/ROADMAP.md
 docs/current/WORK_ORDER.md
 docs/current/TESTING.md
 docs/current/WORKLOG.md
-docs/gates/dh-gatek-decision-pipeline-mvp/** only after explicit freeze/archive authorization
+docs/gates/dh-stage4-decision-pipeline-mvp/** only after explicit freeze/archive authorization
 ```
 
 禁止文件：
@@ -1028,7 +1028,7 @@ Acceptance 仅 docs-only。
 ```text
 K1-K7 均已 reviewed and accepted。
 TESTING.md 必须包含 passing mvn test 和 mvn -Pquality validate evidence。
-STATUS.md 只能在 evidence 存在后声明 GateK MVP closed。
+STATUS.md 只能在 evidence 存在后声明 Stage4 MVP closed。
 WORKLOG.md 必须记录 exact batch completion evidence。
 只有明确授权时才创建 freeze snapshot。
 ```
@@ -1042,7 +1042,7 @@ WORKLOG.md 必须记录 exact batch completion evidence。
 下一批次：
 
 ```text
-GateL 或后续 planning。LangGraph runtime 属于 GateL 或更晚阶段，不属于 GateK MVP。
+GateL 或后续 planning。LangGraph runtime 属于 GateL 或更晚阶段，不属于 Stage4 MVP。
 Integration-1 runtime 在 GateN-rebased planning package reviewed and accepted 前保持 blocked。
 ```
 
@@ -1066,7 +1066,7 @@ Integration-1 runtime 在 GateN-rebased planning package reviewed and accepted �
 ```text
 ALLOW_WO_CLOSE: YES
 ALLOW_K1_IMPLEMENTATION: YES
-ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO
+ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO
 ALLOW_INTEGRATION_1_RUNTIME: NO
 ALLOW_AGENT_PHASE: NO
 ALLOW_LANGGRAPH_RUNTIME: NO
@@ -1088,7 +1088,7 @@ ALLOW_K1_IMPLEMENTATION: YES 仅表示 WO accepted 后可以启动 K1。
 ```text
 你在 F:\project\decision-hub 仓库 dev 分支上工作。
 
-任务名：DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW。
+任务名：DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW。
 
 目标：只读 review K1 Decision Contract Freeze 的 domain contract、JSON Schema、contract tests、docs 与验证证据。
 判断是否允许 K1 close；不要实现 K2。

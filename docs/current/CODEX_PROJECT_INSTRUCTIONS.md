@@ -85,9 +85,9 @@ Java 包名 / 类名 / 方法名 / 字段名、enum 值、JSON Schema 字段、O
 NQ 自身阶段使用 Gate 体系，例如 GateN。
 DH 自身阶段使用 Stage 体系，例如 DH-STAGE4-DECISION-PIPELINE-MVP。
 NQ-DH 集成任务可以引用 NQ GateN rebase，但不得把 DH 自身阶段写成 GateK/GateL/GateN。
-DH-GATEK-DECISION-PIPELINE-MVP 属于历史错误命名；Decision Pipeline MVP 已 ACCEPTED / CLOSED 的事实不变。
-后续命名 rebase 任务为 DH-STAGE4-NAMING-REBASE-FIX。
-在命名 rebase 完成前，不得继续创建新的 DH-GATEK-* 当前阶段、任务名或冻结目录。
+DH-STAGE4-DECISION-PIPELINE-MVP 是当前 canonical DH 阶段名；旧 DH-GATEK-DECISION-PIPELINE-MVP 属于历史错误命名。
+DH-STAGE4-NAMING-REBASE-FIX 已将 current docs 与冻结目录命名收口；旧 GateK 名称只能作为 SUPERSEDED / NAMING_REPLACED 历史说明保留。
+不得继续创建新的 DH-GATEK-* 当前阶段、任务名或冻结目录。
 ```
 
 分类只能从以下集合选择：
@@ -156,11 +156,11 @@ RealClient forbidden.
 real provider forbidden.
 LIVE DISABLED.
 NQ mutation forbidden.
-GateK Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
-GateK Decision Pipeline MVP WO: ACCEPTED / CLOSED.
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / IMPLEMENTED / READY FOR REVIEW.
-Next concrete action: DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED.
-K2 DecisionOrchestrator Skeleton: NOT STARTED.
+DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
+DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
+DH Stage4 Decision Pipeline MVP K1-K8: CLOSED / ACCEPTED.
+Current main line: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED / DOCS-ONLY.
+Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```

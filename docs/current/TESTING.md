@@ -1,5 +1,67 @@
 # Decision Hub Testing
 
+## 2026-07-02 NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE
+
+```text
+Scope:
+  - 本轮只做 NQ / DH Integration-1 dry-run P0 factsource rebase close。
+  - 同步当前事实源为 NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED。
+  - P1 只允许进入 contract dry-run plan，不是 implementation、runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
+
+Result:
+  NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE: CLOSED / ACCEPTED / DOCS-ONLY
+  Next: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+  Integration-1 implementation: NOT STARTED
+  Integration-1 runtime: NOT STARTED
+  Runtime integration: NOT STARTED
+  DH integrated: NO
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS / CHANGES PRESENT | 当前 worktree 有既有 docs / skill / gate snapshot 改动；本 P0 未新增生产代码、测试代码、contracts 或 golden_cases diff。 |
+| `git diff --check` | PASS | 无 whitespace error；仅 Git LF/CRLF 工作区提示。 |
+| `git diff --stat` | PASS | diff 面为 docs / skill 文档；无 Java / Kotlin / Python / TypeScript 生产代码或测试代码改动。 |
+| `rg -n "DH-GATEK\|dh-gatek\|DH GateK\|GateK\|GateL\|GateN\|GATEN" .agents AGENTS.md README.md docs/current docs/gates` | PASS / CLASSIFIED | 命中已分类：NQ `GateN` 合法；旧 `DH-GATEK-*` / `dh-gatek-*` 为 `SUPERSEDED / NAMING_REPLACED`、历史记录、skill 禁止示例或 `docs/gates/**` 冻结快照内部历史字样；当前前置条件为 `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED`。 |
+| `mvn -ntp test` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 `SUCCESS`；`PostgresContainerSmokeTest` 因 `\\.\pipe\docker_engine` AccessDenied / Docker environment unavailable 被 Testcontainers skip 1，属于本地 Docker named-pipe 可达性问题，不是代码失败。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 `SUCCESS`；Checkstyle 0 violations；Spotless check passed；保留子模块 `unable to find checkstyle:checkstyle outputFile` 信息，聚合结果为 SUCCESS。 |
+
+Boundary:
+
+未改 Java / Kotlin / Python / TypeScript 生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path / Controller / migration；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient；未新增真实 Provider；未读取或输出 credential / token / cookie / API secret / passphrase；未接 AI / LangGraph；未启动 Integration-1 runtime；未开启 LIVE。
+
+## 2026-07-02 DH-STAGE4-NAMING-REBASE-FIX
+
+```text
+Scope:
+  - 本轮只做 DH Stage4 命名 rebase、current factsource 同步、验收报告重命名和冻结目录重命名。
+  - 不修改生产代码、测试代码、contracts、golden_cases、API、Controller、migration。
+  - 不启动 Integration-1 runtime、真实 HTTP、真实 NQ 调用、真实 provider、AI / LangGraph 或 LIVE。
+
+Result:
+  DH-STAGE4-NAMING-REBASE-FIX: CLOSED
+  DH-STAGE4-DECISION-PIPELINE-MVP: ACCEPTED / CLOSED
+  DH-GATEK-DECISION-PIPELINE-MVP: SUPERSEDED / NAMING_REPLACED
+  docs/gates/dh-gatek-decision-pipeline-mvp: SUPERSEDED / NAMING_REPLACED
+  Next: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / NOT STARTED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS | 变更位于 root/current docs、`.agents/skills/**`、`docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_*` rename 和 `docs/gates/dh-stage4-decision-pipeline-mvp/` rename；无生产代码、测试代码、contracts、golden_cases diff。 |
+| `git diff --check` | PASS | 无 whitespace error；仅 Git LF/CRLF 工作区提示。第一次执行曾发现 4 行 Markdown trailing whitespace，已修复并重跑通过。 |
+| `git diff --stat` | PASS | 非 rename 内容 diff 为 20 个文件、434 insertions / 332 deletions；目录与文件 rename 由 `git status --short` 单独体现。 |
+| `rg -n "DH-GATEK\|dh-gatek\|DH GateK\|GateK\|GateL\|GateN\|GATEN" .agents AGENTS.md README.md docs/current docs/gates` | PASS / CLASSIFIED | 命中已分类：NQ `GateN` 合法；skill 禁止示例合法；旧 `DH-GATEK-*` 与 `dh-gatek-*` 仅作为 `SUPERSEDED / NAMING_REPLACED`、历史 WORKLOG/TESTING 或冻结快照原始内容；`docs/gates/dh-stage4-decision-pipeline-mvp/README.md` 已说明原错误目录名与正确目录名。 |
+| `mvn -ntp test` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 SUCCESS；Total time 37.877 s；`PostgresContainerSmokeTest` 因 `\\.\pipe\docker_engine` AccessDenied / Docker environment unavailable 被 Testcontainers skip 1，属于本地 Docker named-pipe 可达性问题，不是代码失败。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 SUCCESS；Checkstyle 0 violations；Spotless check passed；Total time 3.656 s。 |
+
+Boundary:
+
+未改 Java / Kotlin / Python / TypeScript 生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path / Controller / migration；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient；未新增真实 Provider；未读取或输出 credential / token / cookie / API secret / passphrase；未接 AI / LangGraph；未启动 Integration-1 runtime；未开启 LIVE；未修改 NQ 仓库。
+
 ## 2026-07-02 DH-DOCS-SKILL-STAGE-NAMING-AUDIT-FIX
 
 ```text
@@ -22,7 +84,7 @@ Scope:
 rg 命中分类：
 
 - NQ GateN：允许，用于 NQ 当前阶段和 NQ-DH Integration-1 rebase 前置语境。
-- 历史错误命名：`DH-GATEK-DECISION-PIPELINE-MVP`、`docs/gates/dh-gatek-decision-pipeline-mvp/`、`GateK Decision Pipeline MVP` 暂时允许保留，但必须指向 `DH-STAGE4-NAMING-REBASE-FIX`。
+- 历史错误命名：`DH-GATEK-DECISION-PIPELINE-MVP`、`docs/gates/dh-gatek-decision-pipeline-mvp/`、`DH GateK Decision Pipeline MVP` 暂时允许保留，但必须指向 `DH-STAGE4-NAMING-REBASE-FIX`。
 - skill 规则示例：`.agents/skills/dh-docs-writer/SKILL.md` 与 `.agents/skills/nq-dh-workflow-router/SKILL.md` 中用于说明禁止项的 `GateK/GateL/GateN` 命中允许。
 - current docs 待修复对象：`AGENTS.md`、根 `README.md`、`docs/current/CODEX_PROJECT_INSTRUCTIONS.md`、`docs/current/CODEX_WORKFLOW_INDEX.md`、`docs/current/API.md`、`docs/current/ROADMAP.md`、`docs/current/STATUS.md`、`docs/current/WORK_ORDER.md`、`docs/current/DH_GATEK_DECISION_PIPELINE_MVP_*` 仍存在 DH 自身阶段 GateK 命名残留，需由 `DH-STAGE4-NAMING-REBASE-FIX` 统一处理。
 - 冻结目录待处理对象：`docs/gates/dh-gatek-decision-pipeline-mvp/**` 本轮未移动、未删除、未重命名，需下一任务制定 rebase / migration / archive 处理方案。
@@ -40,7 +102,7 @@ Scope:
 
 Plan result:
   NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-  Next: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+  Next: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / NOT STARTED
   Integration-1 dry-run implementation: NOT STARTED
   Integration-1 runtime: NOT STARTED
   Runtime integration: NOT STARTED
@@ -62,15 +124,15 @@ Boundary:
 
 未新增 API path / Controller / migration；未修改 Java 生产代码或测试代码；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient / 真实 Provider；未读取或输出 credential、token、cookie、API secret、passphrase；未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；未启动 Integration-1 runtime；未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；未把 dry-run 写成真实联调或实盘准备完成。
 
-## 2026-07-02 DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE
+## 2026-07-02 DH-STAGE4-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE
 
 ```text
 Scope:
-  - GateK Decision Pipeline MVP 最终验收、冻结、回归验证、安全边界复核和 docs/current 同步。
+  - DH Stage4 Decision Pipeline MVP 最终验收、冻结、回归验证、安全边界复核和 docs/current 同步。
   - 本轮只改文档与 docs/gates 冻结快照；不修改生产代码、测试代码、contracts、golden_cases、API、Controller 或 migration。
 
 Acceptance:
-  GateK Decision Pipeline MVP: ACCEPTED / CLOSED
+  DH Stage4 Decision Pipeline MVP: ACCEPTED / CLOSED
   K1-K7: CLOSED
   K8: CLOSED
   Next: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
@@ -108,7 +170,7 @@ Boundary scan:
     rg -n "(RealClient|LangGraph|OpenAI|Claude|Gemini|WebClient|RestTemplate|HttpClient|placeOrder|cancelOrder|BUY|SELL|apiSecret|passphrase|accountId|Controller|NqClient|Exchange|Broker|live|LIVE|endpoint|Endpoint|PostMapping|GetMapping|RequestMapping)" dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision dh-domain/src/test/java/com/guidinglight/decisionhub/domain/decision dh-domain/src/test/java/com/guidinglight/decisionhub/contracts dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/decision dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/decision dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java dh-app/src/main/resources/db/migration/V5__dh_decision_pipeline_audit.sql contracts/json-schema/dh-decision-request.schema.json contracts/json-schema/dh-decision-output.schema.json golden_cases/decision docs/current
   Result:
     完整允许范围命中均为文档说明、negative tests、denylist、migration comment、historical/deferred
-    docs 或固定 forbiddenActions；未发现 GateK 生产越界实现。
+    docs 或固定 forbiddenActions；未发现 Stage4 生产越界实现。
 
   Command:
     rg -n "BUY|SELL|PLACE_ORDER|CANCEL_ORDER|MARKET_ORDER|LIMIT_ORDER"
@@ -124,7 +186,7 @@ Boundary scan:
     dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/decision
     dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
   Result:
-    exit code 1；GateK decision pipeline 生产范围无新增 Controller 或 mapping annotation。
+    exit code 1；Stage4 decision pipeline 生产范围无新增 Controller 或 mapping annotation。
 
 Validation:
   Command:
@@ -133,8 +195,8 @@ Validation:
     clean before K8 docs/freeze edits.
   Final result:
     modified README.md and docs/current status docs; untracked
-    docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md and
-    docs/gates/dh-gatek-decision-pipeline-mvp/.
+    docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md and
+    docs/gates/dh-stage4-decision-pipeline-mvp/.
 
   Command:
     git diff --check
@@ -155,7 +217,7 @@ Validation:
     BUILD SUCCESS；reactor 15/15 SUCCESS；Total time 18.980 s；Finished at 2026-07-02T19:39:15+08:00。
   Note:
     当前 sandbox 下 Testcontainers 找不到可用 Docker 环境，PostgresContainerSmokeTest skipped 1；
-    这是环境未覆盖项，不是 GateK 代码失败。
+    这是环境未覆盖项，不是 Stage4 代码失败。
 
   Command:
     mvn -ntp test
@@ -176,7 +238,7 @@ Validation:
     FAILURE；npipe:////./pipe/dockerDesktopLinuxEngine 不存在，Docker daemon 当前未运行或未暴露该管道。
 
 Readiness:
-  ALLOW_GATEK_CLOSE: YES
+  ALLOW_STAGE4_CLOSE: YES
   ALLOW_INTEGRATION1_DRYRUN_PLAN_REBASE_N: YES
   ALLOW_INTEGRATION_1_RUNTIME: NO
   ALLOW_AGENT_PHASE: NO
@@ -190,7 +252,7 @@ Boundary:
   未开启 LIVE；未修改 NQ 仓库。
 ```
 
-## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL
+## 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL
 
 ```text
 Scope:
@@ -1742,11 +1804,11 @@ canonical  RFC3339 / ISO-8601 UTC Z（例 2026-06-15T12:34:56Z）；DH/NQ 均拒
 准入决定   docs / skill 变更已完成 Git 级验证；Maven 回归被外部依赖下载阻塞，后续需在依赖仓库可用或本地 Maven 仓库修复后重跑 mvn test / mvn -Pquality validate。
 ```
 
-## 43. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-PLAN 验证记录（docs-only / plan-only）
+## 43. 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-PLAN 验证记录（docs-only / plan-only）
 
 ```text
 日期       2026-07-01
-阶段       DH-GATEK-DECISION-PIPELINE-MVP-PLAN（ARCHITECTURE_PLAN + CONTRACT_PLAN + DECISION_PIPELINE_PLAN + AUDIT_REPLAY_PLAN + SECURITY_BOUNDARY + NO_LIVE_TRADE）
+阶段       DH-STAGE4-DECISION-PIPELINE-MVP-PLAN（ARCHITECTURE_PLAN + CONTRACT_PLAN + DECISION_PIPELINE_PLAN + AUDIT_REPLAY_PLAN + SECURITY_BOUNDARY + NO_LIVE_TRADE）
 范围       新增 Decision Pipeline MVP 计划并同步 docs/current 当前事实源；不改 Java 生产代码、测试代码、API、migration、contracts、golden_cases、runtime 配置或 NQ 仓库
 
 命令       Get-Location
@@ -1756,7 +1818,7 @@ canonical  RFC3339 / ISO-8601 UTC Z（例 2026-06-15T12:34:56Z）；DH/NQ 均拒
 结果       dev
 
 命令       git status --short
-结果       仅 docs/current 计划与状态同步文件变更；新增 docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md；未出现代码、测试、contracts、golden_cases 或 migration 变更
+结果       仅 docs/current 计划与状态同步文件变更；新增 docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md；未出现代码、测试、contracts、golden_cases 或 migration 变更
 
 命令       git diff --check
 结果       通过；仅 Windows LF -> CRLF warning，无 whitespace error
@@ -1783,15 +1845,15 @@ canonical  RFC3339 / ISO-8601 UTC Z（例 2026-06-15T12:34:56Z）；DH/NQ 均拒
 结果       BUILD SUCCESS；reactor 19/19 SUCCESS；Total time 02:14；Finished at 2026-07-01T12:10:43+08:00
 
 边界       未修改 NQ 仓库；未改 DH Java production / test code；未新增 API / migration；未改 contracts / golden_cases；未真实 HTTP；未接 NQ runtime；未接真实 provider；未接 AI / LangGraph runtime；未读取密钥；未开启 LIVE。
-准入决定   DH-GATEK-DECISION-PIPELINE-MVP-PLAN 已完成 docs-only 计划产物并通过 Git / Maven / quality 验证；下一步仅允许进入 DH-GATEK-DECISION-PIPELINE-MVP-WO，不允许直接实现 runtime。
+准入决定   DH-STAGE4-DECISION-PIPELINE-MVP-PLAN 已完成 docs-only 计划产物并通过 Git / Maven / quality 验证；下一步仅允许进入 DH-STAGE4-DECISION-PIPELINE-MVP-WO，不允许直接实现 runtime。
 ```
 
-## 44. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-WO 验证记录（docs-only / work-order-only）
+## 44. 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-WO 验证记录（docs-only / work-order-only）
 
 ```text
 日期       2026-07-01
-阶段       DH-GATEK-DECISION-PIPELINE-MVP-WO（WORK_ORDER + IMPLEMENTATION_BATCH_DESIGN + CONTRACT_FREEZE_PREP + AUDIT_REPLAY_PLANNING + SECURITY_BOUNDARY + NO_LIVE_TRADE）
-范围       新增 GateK Decision Pipeline MVP K1-K8 可执行工单，并同步 docs/current 当前事实源；不改 Java 生产代码、测试代码、API、migration、contracts、golden_cases、runtime 配置或 NQ 仓库
+阶段       DH-STAGE4-DECISION-PIPELINE-MVP-WO（WORK_ORDER + IMPLEMENTATION_BATCH_DESIGN + CONTRACT_FREEZE_PREP + AUDIT_REPLAY_PLANNING + SECURITY_BOUNDARY + NO_LIVE_TRADE）
+范围       新增 DH Stage4 Decision Pipeline MVP K1-K8 可执行工单，并同步 docs/current 当前事实源；不改 Java 生产代码、测试代码、API、migration、contracts、golden_cases、runtime 配置或 NQ 仓库
 
 命令       Get-Location
 结果       F:\project\decision-hub
@@ -1800,7 +1862,7 @@ canonical  RFC3339 / ISO-8601 UTC Z（例 2026-06-15T12:34:56Z）；DH/NQ 均拒
 结果       dev
 
 命令       git status --short
-结果       仅 docs/current 文档变更；新增 docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md；未出现代码、测试、contracts、golden_cases 或 migration 变更
+结果       仅 docs/current 文档变更；新增 docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md；未出现代码、测试、contracts、golden_cases 或 migration 变更
 
 命令       git diff --check
 结果       通过；仅 Windows LF -> CRLF warning，无 whitespace error
@@ -1815,7 +1877,7 @@ canonical  RFC3339 / ISO-8601 UTC Z（例 2026-06-15T12:34:56Z）；DH/NQ 均拒
 结果       未发现把当前阶段写回 PLAN / READY FOR REVIEW 或 WO / NOT STARTED 的残留；历史记录段落未作为当前事实源使用
 
 命令       rg readiness forbidden YES 扫描
-结果       未发现 ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: YES、ALLOW_INTEGRATION_1_RUNTIME: YES、ALLOW_AGENT_PHASE: YES、ALLOW_LANGGRAPH_RUNTIME: YES 或 ALLOW_LIVE: YES
+结果       未发现 ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: YES、ALLOW_INTEGRATION_1_RUNTIME: YES、ALLOW_AGENT_PHASE: YES、ALLOW_LANGGRAPH_RUNTIME: YES 或 ALLOW_LIVE: YES
 
 命令       mvn test
 初始结果   未进入测试执行；本机全局 Maven settings / repository 阻断：
@@ -1840,21 +1902,21 @@ Work order result:
 Readiness decision:
            ALLOW_WO_CLOSE: YES
            ALLOW_K1_IMPLEMENTATION: YES
-           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO
+           ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO
            ALLOW_INTEGRATION_1_RUNTIME: NO
            ALLOW_AGENT_PHASE: NO
            ALLOW_LANGGRAPH_RUNTIME: NO
            ALLOW_LIVE: NO
 
 边界       未修改 NQ 仓库；未改 DH Java production / test code；未新增 API / migration；未改 contracts / golden_cases；未真实 HTTP；未接 NQ runtime；未接真实 provider；未接 AI / LangGraph runtime；未读取密钥；未开启 LIVE。
-准入决定   DH-GATEK-DECISION-PIPELINE-MVP-WO 已完成 docs-only 工单产物并通过 Git / Maven / quality 复验；下一步仅允许进入 K1 Decision Contract Freeze，且必须单批 review，不允许全量 GateK implementation。
+准入决定   DH-STAGE4-DECISION-PIPELINE-MVP-WO 已完成 docs-only 工单产物并通过 Git / Maven / quality 复验；下一步仅允许进入 K1 Decision Contract Freeze，且必须单批 review，不允许全量 GateK implementation。
 ```
 
-## 45. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE 验证记录（contract / domain / schema / tests）
+## 45. 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE 验证记录（contract / domain / schema / tests）
 
 ```text
 日期       2026-07-01
-阶段       DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE（CONTRACT_FREEZE + DOMAIN_MODEL + JSON_SCHEMA + CONTRACT_TESTS + SECURITY_BOUNDARY + NO_LIVE_TRADE）
+阶段       DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE（CONTRACT_FREEZE + DOMAIN_MODEL + JSON_SCHEMA + CONTRACT_TESTS + SECURITY_BOUNDARY + NO_LIVE_TRADE）
 范围       只执行 K1：冻结 Decision Pipeline MVP 的 domain contract、enum、JSON Schema 与 contract tests；不实现 K2-K8，不新增 API / migration / runtime / provider / client
 
 命令       Get-Location
@@ -1921,7 +1983,7 @@ Readiness decision:
 Readiness decision:
            ALLOW_K1_CLOSE: YES
            ALLOW_K2_IMPLEMENTATION: NO
-           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO
+           ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO
            ALLOW_INTEGRATION_1_RUNTIME: NO
            ALLOW_AGENT_PHASE: NO
            ALLOW_LANGGRAPH_RUNTIME: NO
@@ -1961,8 +2023,8 @@ Readiness decision:
            docs/current/API.md
            docs/current/CODEX_PROJECT_INSTRUCTIONS.md
            docs/current/CODEX_WORKFLOW_INDEX.md
-           docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md
-           docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
+           docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md
+           docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md
            docs/current/README.md
            docs/current/ROADMAP.md
            docs/current/STATUS.md
@@ -1994,7 +2056,7 @@ Readiness decision:
 结果       BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check 通过；Total time 7.526 s；Finished at 2026-07-01T14:14:06+08:00
 
 语言治理   dh-docs-writer 已新增语言规则；AGENTS / README / CODEX_PROJECT_INSTRUCTIONS / CODEX_WORKFLOW_INDEX / docs/current/README 已同步。
-           DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md 与 DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md 已改为中文主体；
+           DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md 与 DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md 已改为中文主体；
            保留 DecisionOutput / DecisionOrchestrator / enum / JSON Schema 字段 / HTTP header / 状态词 / 命令等稳定工程标识。
 
 边界       未修改 Java 生产代码；未修改测试代码；未修改 contracts；未修改 golden_cases；未新增 API；未新增 migration；
@@ -2003,11 +2065,11 @@ Readiness decision:
 准入决定   本轮语言治理修复已完成并通过 Git / rg / Maven / quality 验证。当前主线仍为 K1 review，不得直接进入 K2。
 ```
 
-## 47. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON 验证记录（mock-only usecase skeleton）
+## 47. 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON 验证记录（mock-only usecase skeleton）
 
 ```text
 日期       2026-07-01
-阶段       DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON（ORCHESTRATOR_SKELETON + DECISION_PIPELINE_MVP + MOCK_ONLY + SECURITY_BOUNDARY + NO_LIVE_TRADE）
+阶段       DH-STAGE4-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON（ORCHESTRATOR_SKELETON + DECISION_PIPELINE_MVP + MOCK_ONLY + SECURITY_BOUNDARY + NO_LIVE_TRADE）
 范围       只执行 K2：dh-usecase 内 mock-only DecisionOrchestrator skeleton、context builder、policy checker、mock signal provider、risk reviewer、output assembler 与 K2 unit tests；不实现 K3-K8、不新增 API / Controller / Repository / JDBC / migration、不接真实 provider / NQ / HTTP / LangGraph / LIVE
 
 命令       Get-Location
@@ -2083,7 +2145,7 @@ K2 覆盖     正常 mock 输出 -> READ_ONLY_RECOMMENDATION / OBSERVATION_ONLY 
 Readiness decision:
            ALLOW_K2_CLOSE: YES
            ALLOW_K3_IMPLEMENTATION: NO
-           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO
+           ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO
            ALLOW_INTEGRATION_1_RUNTIME: NO
            ALLOW_AGENT_PHASE: NO
            ALLOW_LANGGRAPH_RUNTIME: NO
@@ -2097,11 +2159,11 @@ Readiness decision:
 准入决定   K2 Orchestrator Skeleton 已完成 implementation 并通过模块 Maven 测试与 quality validate；下一步只能进入 K2 review，不得直接进入 K3。
 ```
 
-## 48. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE 验证记录（audit / snapshot / trace persistence）
+## 48. 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE 验证记录（audit / snapshot / trace persistence）
 
 ```text
 日期       2026-07-01
-阶段       DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE（CODE_CHANGE + PERSISTENCE + AUDIT_TRACE + DECISION_SNAPSHOT + FAIL_CLOSED + DOCS_SYNC）
+阶段       DH-STAGE4-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE（CODE_CHANGE + PERSISTENCE + AUDIT_TRACE + DECISION_SNAPSHOT + FAIL_CLOSED + DOCS_SYNC）
 范围       只执行 K3：新增 DH-owned audit / snapshot / trace persistence、usecase port、JDBC adapter、app wiring、K3 tests 和 docs/current sync；不实现 K4-K8、不新增 API / Controller / replay API、不接真实 provider / NQ / HTTP / LangGraph / LIVE
 
 命令       Get-Location
@@ -2138,7 +2200,7 @@ Readiness decision:
 结果       命中项均为禁止说明、migration comment、denylist 或负向测试字符串；未发现真实 runtime provider、HTTP client、Controller、NQ client、Exchange/Broker、BUY/SELL action 实现或 LIVE 启用。
 
 命令       docs/current 当前状态残留扫描
-结果       未发现 current stage / next stage 仍指向 K2 review；未发现 K3 current 写成 NOT STARTED；未发现 ALLOW_K4_IMPLEMENTATION / ALLOW_GATEK_M1_CLOSE_REVIEW / ALLOW_INTEGRATION_1_RUNTIME / ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_LIVE 被写成 YES。
+结果       未发现 current stage / next stage 仍指向 K2 review；未发现 K3 current 写成 NOT STARTED；未发现 ALLOW_K4_IMPLEMENTATION / ALLOW_STAGE4_M1_CLOSE_REVIEW / ALLOW_INTEGRATION_1_RUNTIME / ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_LIVE 被写成 YES。
 
 命令       mvn -ntp -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml -pl dh-usecase,dh-infra -am test
 初始结果   FAILURE；`JdbcDecisionAuditRepositoryTest.saveOutput_targetsOutputTableWithJsonbCast` 暴露 `DecisionOutput.createdAt` 直接序列化依赖 JavaTime module。
@@ -2171,8 +2233,8 @@ K3 覆盖     valid write-through 写 request / snapshot / trace / provider call
 Readiness decision:
            ALLOW_K3_CLOSE: YES
            ALLOW_K4_IMPLEMENTATION: NO
-           ALLOW_GATEK_M1_CLOSE_REVIEW: NO
-           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO
+           ALLOW_STAGE4_M1_CLOSE_REVIEW: NO
+           ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO
            ALLOW_INTEGRATION_1_RUNTIME: NO
            ALLOW_AGENT_PHASE: NO
            ALLOW_LANGGRAPH_RUNTIME: NO
@@ -2234,11 +2296,11 @@ RCA        K3 新增 `decisionPersistenceObjectMapper` Spring bean 后，容器�
            下一步仍是 M1 readiness review，不得直接进入 K4。
 ```
 
-## 50. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL 验证记录
+## 50. 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL 验证记录
 
 ```text
 日期       2026-07-01
-阶段       DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL（CODE_CHANGE + REPLAY_READ_MODEL + DOCS_SYNC）
+阶段       DH-STAGE4-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL（CODE_CHANGE + REPLAY_READ_MODEL + DOCS_SYNC）
 范围       只实现内部 replay read model；不新增 API / Controller / migration / replay endpoint；不进入 K5-K8。
 
 K4 新增测试
@@ -2302,21 +2364,21 @@ K4 新增测试
 Readiness decision
            ALLOW_K4_CLOSE: YES
            ALLOW_K5_IMPLEMENTATION: YES
-           ALLOW_GATEK_M2_CLOSE_REVIEW: NO
-           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO
+           ALLOW_STAGE4_M2_CLOSE_REVIEW: NO
+           ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO
            ALLOW_INTEGRATION_1_RUNTIME: NO
            ALLOW_AGENT_PHASE: NO
            ALLOW_LANGGRAPH_RUNTIME: NO
            ALLOW_LIVE: NO
 
-下一步     DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED。
+下一步     DH-STAGE4-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED。
 ```
 
-## 51. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY 验证记录
+## 51. 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY 验证记录
 
 ```text
 日期       2026-07-01
-阶段       DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY
+阶段       DH-STAGE4-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY
 类型       CODE_CHANGE + PROVIDER_GUARD + HEALTH_MODEL + BUDGET_GUARD + LATENCY_TRACKING + SECURITY_BOUNDARY + DOCS_SYNC
 范围       只实现 K5 mock-only provider health / budget / latency；不新增 API / Controller / migration；
            不新增 provider health / budget / latency 表；不接真实 provider / HTTP / NQ / LLM / LangGraph / LIVE。
@@ -2394,8 +2456,8 @@ K5 新增/更新测试
 Readiness decision
            ALLOW_K5_CLOSE: YES
            ALLOW_K6_IMPLEMENTATION: YES
-           ALLOW_GATEK_M2_CLOSE_REVIEW: NO
-           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO
+           ALLOW_STAGE4_M2_CLOSE_REVIEW: NO
+           ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO
            ALLOW_INTEGRATION_1_RUNTIME: NO
            ALLOW_AGENT_PHASE: NO
            ALLOW_LANGGRAPH_RUNTIME: NO
@@ -2413,11 +2475,11 @@ Readiness decision
            Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
 ```
 
-## 52. 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS 验证记录
+## 52. 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS 验证记录
 
 ```text
 日期       2026-07-01
-阶段       DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS
+阶段       DH-STAGE4-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS
 类型       CODE_CHANGE + CONTRACT_TESTS + MOCK_NQ_DRYRUN + SECURITY_BOUNDARY + NO_LIVE_TRADE + DOCS_SYNC
 范围       只实现 K6 mock NQ dry-run contract tests、test-support 与最小 fixture；不新增 API / Controller / migration；
            不修改生产代码；不真实 HTTP；不接真实 NQ runtime / real provider / LLM / LangGraph / LIVE。
@@ -2480,8 +2542,8 @@ K6 新增测试
 Readiness decision
            ALLOW_K6_CLOSE: YES
            ALLOW_K7_IMPLEMENTATION: YES
-           ALLOW_GATEK_ACCEPTANCE_REVIEW: NO
-           ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_ACCEPTANCE_REVIEW: NO
+           ALLOW_STAGE4_ACCEPTANCE_REVIEW: NO
+           ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_ACCEPTANCE_REVIEW: NO
            ALLOW_INTEGRATION_1_RUNTIME: NO
            ALLOW_AGENT_PHASE: NO
            ALLOW_LANGGRAPH_RUNTIME: NO
@@ -2494,5 +2556,5 @@ Readiness decision
            未把 DH 写成 integrated；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；
            未开启 LIVE；未修改 NQ 仓库；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 output action。
 
-下一步     DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED。
+下一步     DH-STAGE4-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED。
 ```

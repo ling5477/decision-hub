@@ -4,8 +4,8 @@
 > 类型：`PLAN_ONLY + NQ_GATE_N_REBASE + INTEGRATION1_DRYRUN_BOUNDARY + CONTRACT_PLANNING + SECURITY_BOUNDARY + NO_RUNTIME + NO_LIVE`  
 > 日期：2026-07-02  
 > 仓库视角：Decision Hub（DH）  
-> 结论：`PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE`  
-> 下一步：`NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED`
+> 结论：`PLAN BASELINE ACCEPTED / I1-P0 FACTSOURCE REBASE CLOSED`
+> 下一步：`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED`
 
 ## 1. 当前事实重定位
 
@@ -16,7 +16,7 @@
 ```text
 NQ current planning baseline: GateN no-real public marketdata / exchange sandbox baseline frozen and tagged.
 NQ GateO O-1 controlled public outbound guard: PASS / ACCEPTED / FROZEN; GateO stage NOT COMPLETED.
-DH GateK Decision Pipeline MVP: CLOSED / ACCEPTED.
+DH Stage4 Decision Pipeline MVP: CLOSED / ACCEPTED.
 DH K1-K8: CLOSED.
 Integration-0 safety gate: CLOSED / ACCEPTED.
 P1-4 residual: CLOSED.
@@ -246,7 +246,7 @@ P0-P4 关闭前，`ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION` 必须保持 `NO`�
 
 ```text
 NQ 当前阶段明确为 GateN 后的 current fact rebase input，且 GateO 当前事实不被覆盖。
-DH 当前阶段明确为 GateK Decision Pipeline MVP CLOSED / ACCEPTED。
+DH 当前阶段明确为 DH Stage4 Decision Pipeline MVP CLOSED / ACCEPTED。
 旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK 标记 SUPERSEDED / REBASE_REQUIRED。
 Integration-1 第一阶段仅为 dry-run planning。
 合同字段、禁止字段、安全协议、批次、测试矩阵已定义。
@@ -259,6 +259,8 @@ Readiness decision 明确阻断 implementation / runtime / real HTTP / real prov
 ```text
 ALLOW_INTEGRATION1_DRYRUN_PLAN_CLOSE: YES
 ALLOW_NQ_DH_I1_P0_FACTSOURCE_REBASE: YES
+ALLOW_I1_P0_CLOSE: YES
+ALLOW_I1_P1_CONTRACT_PLAN: YES
 ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO
 ALLOW_INTEGRATION_1_RUNTIME: NO
 ALLOW_REAL_HTTP: NO
@@ -270,14 +272,14 @@ ALLOW_LIVE: NO
 
 ## 11. 下一步
 
-如果本计划验证通过，下一步只允许进入：
+本计划 baseline 与 I1-P0 factsource rebase 已关闭。下一步只允许进入：
 
 ```text
-NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 ```
 
-P0 仍是 docs/factsource rebase，不是 runtime implementation。若后续发现 NQ GateN / GateO 与 DH GateK facts 仍有 current-source 冲突，则改走：
+P1 仍是 contract dry-run plan，不是 runtime implementation。若后续发现 NQ GateN / GateO 与 DH Stage4 facts 仍有 current-source 冲突，则改走：
 
 ```text
-NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN-FIX
+NQ-DH-I1-P0-FACTSOURCE-REBASE-FIX-2
 ```

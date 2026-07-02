@@ -11,34 +11,36 @@ DH-REFIT-1:   文档结构与边界统一                          [completed]
 Stage1:       Boundary Freeze + Agent Runtime Skeleton    [completed]
 Stage1-CLOSE: 旧链路 @Deprecated + 文档单源 + ArchUnit    [completed]
 Integration-0: 只读边界、契约冻结、权限模型、审计模型        [closed / accepted]
-DH-GATEK-DECISION-PIPELINE-MVP-PLAN:
+DH-STAGE4-DECISION-PIPELINE-MVP-PLAN:
               只读 Decision Pipeline MVP 规划               [accepted / closed]
-DH-GATEK-DECISION-PIPELINE-MVP-WO:
+DH-STAGE4-DECISION-PIPELINE-MVP-WO:
               Decision Pipeline MVP 可执行工单               [accepted / closed]
-DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE:
+DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE:
               Decision Contract Freeze                     [pass / closed / accepted]
-DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW:
+DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW:
               K1 contract review                          [completed / closed]
-DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON:
+DH-STAGE4-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON:
               DecisionOrchestrator Skeleton                [implemented]
-DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE:
+DH-STAGE4-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE:
               Audit / Snapshot / Trace Persistence         [closed / accepted after M1]
-DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW:
+DH-STAGE4-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW:
               K1-K3 milestone readiness review             [closed / accepted]
-DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL:
+DH-STAGE4-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL:
               Replay Read Model                           [implemented / ready for next]
-DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY:
+DH-STAGE4-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY:
               Provider Health / Budget / Latency           [implemented / ready for next]
-DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS:
+DH-STAGE4-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS:
               Mock NQ Dry-run Contract Tests               [implemented / ready for next]
-DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL:
+DH-STAGE4-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL:
               Golden Cases / Eval                          [closed]
-DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE:
+DH-STAGE4-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE:
               Acceptance / Freeze                          [closed / accepted]
 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN:
-              Integration-1 dry-run plan rebase on NQ GateN [pass / plan only / ready for P0]
-NQ-DH-I1-P0-FACTSOURCE-REBASE:
-              NQ / DH factsource rebase for Integration-1 dry-run [next / not started]
+              Integration-1 dry-run plan rebase on NQ GateN [plan baseline accepted]
+NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE:
+              NQ / DH factsource rebase for Integration-1 dry-run [closed / accepted / docs-only]
+NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN:
+              NQ dry-run request contract planning          [next / not started]
 Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
 Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
@@ -52,7 +54,7 @@ DH 自身阶段使用 Stage 体系，例如 DH-STAGE4-DECISION-PIPELINE-MVP。
 NQ-DH 集成任务可以引用 NQ GateN rebase，但不得把 DH 自身阶段写成 GateK/GateL/GateN。
 ```
 
-当前 `DH-GATEK-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-gatek-decision-pipeline-mvp/` 属于历史错误命名残留。Decision Pipeline MVP 已 `ACCEPTED / CLOSED` 的事实不变；本轮只修 skill / workflow 规则，不执行 current docs 批量改名、不移动冻结目录。下一步应执行 `DH-STAGE4-NAMING-REBASE-FIX`，将 DH 自身阶段统一为 `DH-STAGE4-DECISION-PIPELINE-MVP`，并规划冻结目录从 `dh-gatek-decision-pipeline-mvp` 收口到 `dh-stage4-decision-pipeline-mvp`。在命名 rebase 完成前，不推进新的 Integration-1 dry-run P0 或 implementation。
+旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-gatek-decision-pipeline-mvp/` 属于历史错误命名，当前已由 `DH-STAGE4-NAMING-REBASE-FIX` 收口为 `DH-STAGE4-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-stage4-decision-pipeline-mvp/`。Decision Pipeline MVP 已 `ACCEPTED / CLOSED` 的事实不变；旧 GateK 名称只能作为 `SUPERSEDED / NAMING_REPLACED` 历史说明保留。后续 Integration-1 前置条件必须写为 `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED`，不得写成 `NQ GateN + DH GateK CLOSED`。
 
 ## 2. Stage1（已完成）
 
@@ -100,7 +102,7 @@ dep-tree.txt 重新生成
 
 ## 4. Integration-0 / Decision Pipeline MVP 当前路线
 
-Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-GATEK-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-GATEK-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 Contract Freeze review 已 `PASS / CLOSED / ACCEPTED`。K2 DecisionOrchestrator Skeleton 已实现 mock-only usecase 编排骨架并关闭。K3 Audit / Snapshot / Trace Persistence 已经 M1 readiness review 关闭。K4 Replay Read Model、K5 Provider Health / Budget / Latency、K6 Mock NQ Dry-run Contract Tests、K7 Golden Cases / Eval 均已关闭。K8 Acceptance / Freeze 已 `CLOSED / ACCEPTED`，验收报告见 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-gatek-decision-pipeline-mvp/`。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only rebase baseline，计划见 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`；下一步只允许 `NQ-DH-I1-P0-FACTSOURCE-REBASE`，且仍不允许启动 Integration-1 runtime。
+Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-STAGE4-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-STAGE4-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 Contract Freeze review 已 `PASS / CLOSED / ACCEPTED`。K2 DecisionOrchestrator Skeleton 已实现 mock-only usecase 编排骨架并关闭。K3 Audit / Snapshot / Trace Persistence 已经 M1 readiness review 关闭。K4 Replay Read Model、K5 Provider Health / Budget / Latency、K6 Mock NQ Dry-run Contract Tests、K7 Golden Cases / Eval 均已关闭。K8 Acceptance / Freeze 已 `CLOSED / ACCEPTED`，验收报告见 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-stage4-decision-pipeline-mvp/`。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only rebase baseline，计划见 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`；`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已 `CLOSED / ACCEPTED / DOCS-ONLY`；下一步只允许 `NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED`，且仍不允许启动 Integration-1 runtime。
 
 语言治理补充：后续 DH roadmap、plan、work order、testing、worklog、status 文档正文必须中文为主；工程对象名、enum、JSON/OpenAPI 字段、HTTP header、状态枚举、命令和外部技术名保留英文原样。固定输出字段可以保留英文，但字段内容必须中文为主。
 
@@ -117,10 +119,10 @@ RealClient forbidden
 real provider forbidden
 LIVE DISABLED
 NQ mutation forbidden
-GateK plan artifact docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md
-GateK plan status ACCEPTED / CLOSED
-Current GateK work order artifact docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
-Current GateK work order status ACCEPTED / CLOSED
+Stage4 plan artifact docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md
+Stage4 plan status ACCEPTED / CLOSED
+Current Stage4 work order artifact docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md
+Current Stage4 work order status ACCEPTED / CLOSED
 K1 contract freeze status PASS / CLOSED / ACCEPTED
 K2 DecisionOrchestrator Skeleton IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence CLOSED / ACCEPTED after M1
@@ -130,8 +132,9 @@ K5 Provider Health / Budget / Latency CLOSED
 K6 Mock NQ Dry-run Contract Tests CLOSED
 K7 Golden Cases / Eval CLOSED
 K8 Acceptance / Freeze CLOSED / ACCEPTED
-NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN PLAN BASELINE ACCEPTED
+NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE CLOSED / ACCEPTED / DOCS-ONLY
+Next concrete action NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline GateN
 ```
@@ -173,10 +176,10 @@ Decision Pipeline MVP PLAN 与 Integration-1 dry-run plan 必须明确禁止：
 不输出 BUY / SELL / PLACE_ORDER / CANCEL_ORDER
 ```
 
-GateK WO 验收：
+Stage4 WO 验收：
 
 ```text
-已输出 DH-GATEK-DECISION-PIPELINE-MVP-WO 文档
+已输出 DH-STAGE4-DECISION-PIPELINE-MVP-WO 文档
 已拆分 K1-K8 implementation batches
 已明确每批 allowed / forbidden files、生产/测试/API/migration 权限、测试、验收和回滚
 已固化 DecisionOutput READ_ONLY_RECOMMENDATION 与 ABSTAIN / fail-closed 规则

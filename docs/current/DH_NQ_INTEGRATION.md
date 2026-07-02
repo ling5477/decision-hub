@@ -7,8 +7,8 @@
 ## 0. 当前状态锁定（2026-07-02）
 
 ```text
-Current stage: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next stage:    NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+Current stage: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED
+Next stage:    NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 DH-AUDIT-FIX completed
 NQ integration not started
 Integration-1 not started
@@ -24,7 +24,7 @@ Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
 
-当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。下一步唯一允许进入 `NQ-DH-I1-P0-FACTSOURCE-REBASE`：同步 NQ / DH 当前事实源、移除旧 GateK Integration-1 作为当前主线、确认 dry-run 仍不等于 runtime integration。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
+当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已完成两仓当前事实源同步、旧 GateK Integration-1 当前主线移除和 dry-run boundary 确认；下一步唯一允许进入 `NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
 
 Integration-0 safety gate 已 CLOSED / ACCEPTED。若未来重新进入 NQ runtime 相关工作，只能从基于 GateN 的 Integration-1 planning-only audit 开始；本文件中的 DH -> NQ REST API 控制面、`POST /api/ai/backtest-requests`、真实 HTTP / event、NQ client、RealClient、real provider 等方向均为 historical / superseded / deferred / gated，不代表当前 next 或当前 implementation。
 
@@ -157,7 +157,7 @@ PostMortemCreated
 
 ## 5. 数据流（historical / superseded / deferred / gated）
 
-以下数据流只保留为历史背景，不代表当前系统已经开始集成，也不是当前 implementation。当前唯一下一步仍是 Integration-0-PLAN。
+以下数据流只保留为历史背景，不代表当前系统已经开始集成，也不是当前 implementation。当前唯一下一步是 `NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED`，且仍为 plan-only。
 
 ```text
 User / NQ Console

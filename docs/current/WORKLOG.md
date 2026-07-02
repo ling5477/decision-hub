@@ -1,5 +1,84 @@
 # Decision Hub Worklog
 
+## 2026-07-02 NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE
+
+完成 NQ-DH Integration-1 dry-run P0 factsource rebase close。本轮只做 docs-only / factsource-only 收口：把 DH 当前事实源从 “P0 NOT STARTED” 推进为 “P0 CLOSED / ACCEPTED”，并把唯一下一步收口到 `NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED`。
+
+### 修改内容
+
+- 同步 `AGENTS.md`、`README.md`、`docs/current/README.md`、`docs/current/STATUS.md`、`docs/current/ROADMAP.md`、`docs/current/WORK_ORDER.md`、`docs/current/DH_NQ_INTEGRATION.md`、`docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md` 和 Codex workflow 入口的 current-state wording。
+- 固定 Integration-1 前置条件为 `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED`。
+- 明确 `NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN` 仍是 plan-only，不授权 implementation、runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
+- 保留历史 `WORKLOG` / `TESTING` 与 `docs/gates/**` 冻结快照内部 GateK 字样，只作为历史记录或 `SUPERSEDED / NAMING_REPLACED` 说明。
+
+### 结果
+
+```text
+NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE: CLOSED / ACCEPTED / DOCS-ONLY
+Integration-1 dry-run plan baseline: ACCEPTED
+Prerequisite: NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED
+Next: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+Integration-1 implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NOT STARTED
+Real provider: NOT STARTED
+DH integrated: NO
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+### 验证
+
+- `git diff --check`：PASS，仅 LF/CRLF warning。
+- GateK/GateN residual scan：已分类；当前前置条件未写成 `NQ GateN + DH GateK CLOSED`。
+- `mvn -ntp test`：PASS / BUILD SUCCESS；19 个 reactor module SUCCESS，`PostgresContainerSmokeTest` 因 Docker named-pipe AccessDenied 被 Testcontainers skip 1。
+- `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS；Checkstyle 0 violations；Spotless check passed。
+
+### 边界确认
+
+未改生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API、Controller、migration、runtime client、provider 或 RealClient；未真实 HTTP；未真实 NQ / DH runtime；未读取 credential；未接 AI / LangGraph；未启动 Integration-1 runtime；未开启 LIVE。
+
+## 2026-07-02 DH-STAGE4-NAMING-REBASE-FIX
+
+完成 DH Stage4 命名 rebase。本轮只做 docs-only / naming-fix-only：修正 DH 当前事实源中的 Stage 命名、验收报告文件名、冻结目录命名和后续 Integration-1 前置条件；不修改生产代码、测试代码、contracts、golden_cases、API、Controller、migration、runtime client、provider 或 NQ 仓库。
+
+### 文件重命名
+
+```text
+docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md
+  -> docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md
+docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md
+  -> docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md
+docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md
+  -> docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md
+docs/gates/dh-gatek-decision-pipeline-mvp/
+  -> docs/gates/dh-stage4-decision-pipeline-mvp/
+```
+
+### 命名结论
+
+```text
+DH-STAGE4-DECISION-PIPELINE-MVP: ACCEPTED / CLOSED
+DH-GATEK-DECISION-PIPELINE-MVP: SUPERSEDED / NAMING_REPLACED
+dh-gatek-decision-pipeline-mvp: SUPERSEDED / NAMING_REPLACED
+Integration-1 implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+DH integrated: NO
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / NOT STARTED
+```
+
+后续 Integration-1 前置条件固定为 `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 仍只作为 historical reference，保持 `SUPERSEDED / REBASE_REQUIRED`。
+
+### 边界确认
+
+未改 Java / Kotlin / Python / TypeScript 生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API / Controller / migration；未启动 Integration-1 runtime；未真实 HTTP；未真实 NQ 调用；未接真实 provider；未接 AI / LangGraph；未开启 LIVE；未修改 NQ 仓库；未读取或输出 credential、token、cookie、API secret 或 passphrase。
+
 ## 2026-07-02 DH-DOCS-SKILL-STAGE-NAMING-AUDIT-FIX
 
 完成 DH 文档治理 skill 与 workflow router 的阶段命名规则修复。本轮只改 docs / skill 规则，不改生产代码、测试代码、contracts、golden_cases、API、Controller、migration，不移动或删除 `docs/gates` 冻结目录，不执行 Stage4 命名 rebase。
@@ -17,9 +96,9 @@
 NQ stage system: Gate，例如 GateN
 DH stage system: Stage，例如 DH-STAGE4-DECISION-PIPELINE-MVP
 NQ-DH integration wording: 可以引用 NQ GateN rebase，但不得把 DH 自身阶段写成 GateK/GateL/GateN
-Current wrong legacy name: DH-GATEK-DECISION-PIPELINE-MVP
+Current wrong legacy name at that time: DH-GATEK-DECISION-PIPELINE-MVP
 Correct future name: DH-STAGE4-DECISION-PIPELINE-MVP
-Current wrong legacy dir: docs/gates/dh-gatek-decision-pipeline-mvp/
+Current wrong legacy dir at that time: docs/gates/dh-gatek-decision-pipeline-mvp/
 Future target dir: docs/gates/dh-stage4-decision-pipeline-mvp/
 ```
 
@@ -55,10 +134,10 @@ docs/current/WORKLOG.md
 
 ```text
 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED
+Next concrete action: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ baseline: GateN
-DH baseline: GateK Decision Pipeline MVP CLOSED / ACCEPTED
+DH baseline: DH Stage4 Decision Pipeline MVP CLOSED / ACCEPTED
 Integration-1 dry-run implementation: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -98,17 +177,17 @@ ALLOW_LIVE: NO
 
 ### 下一步
 
-进入 `NQ-DH-I1-P0-FACTSOURCE-REBASE / NOT STARTED`；只允许同步 NQ / DH 当前事实源并清理旧 GateK Integration-1 当前主线残留，不允许启动 implementation、runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
+进入 `NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / NOT STARTED`；只允许同步 NQ / DH 当前事实源并清理旧 GateK Integration-1 当前主线残留，不允许启动 implementation、runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
 
-## 2026-07-02 DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE
+## 2026-07-02 DH-STAGE4-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE
 
-完成 GateK Decision Pipeline MVP 最终验收与冻结。本轮只做 acceptance / freeze / regression validation / security boundary review / docs sync / no-live-trade confirmation，不修改生产代码、测试代码、contracts、golden_cases、API、Controller、migration、runtime client、provider 或 NQ 仓库。
+完成 DH Stage4 Decision Pipeline MVP 最终验收与冻结。本轮只做 acceptance / freeze / regression validation / security boundary review / docs sync / no-live-trade confirmation，不修改生产代码、测试代码、contracts、golden_cases、API、Controller、migration、runtime client、provider 或 NQ 仓库。
 
 ### 新增文件
 
 ```text
-docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md
-docs/gates/dh-gatek-decision-pipeline-mvp/**
+docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md
+docs/gates/dh-stage4-decision-pipeline-mvp/**
 ```
 
 ### 修改文件
@@ -127,7 +206,7 @@ docs/current/API.md
 ### 验收结论
 
 ```text
-GateK Decision Pipeline MVP: ACCEPTED / CLOSED
+DH Stage4 Decision Pipeline MVP: ACCEPTED / CLOSED
 K1 Contract Freeze: CLOSED
 K2 Orchestrator Skeleton: CLOSED
 K3 Audit / Snapshot / Trace Persistence: CLOSED
@@ -177,8 +256,8 @@ K7:
 ```text
 git status --short
   开工前为空；最终显示 README.md 与 docs/current 状态文档变更，并新增
-  docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md 与
-  docs/gates/dh-gatek-decision-pipeline-mvp/。
+  docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md 与
+  docs/gates/dh-stage4-decision-pipeline-mvp/。
 
 git diff --check
   开工前和最终均 exit code 0；无 whitespace error；仅 Windows LF -> CRLF warning。
@@ -228,7 +307,7 @@ docker info --format '{{.ServerVersion}}'
 未把 AI / Agent runtime 写成 started。
 未开启 LIVE。
 未修改 NQ 仓库。
-未把 GateK 完成写成允许真实交易。
+未把 Stage4 完成写成允许真实交易。
 未把 mock NQ dry-run 写成真实 NQ runtime。
 未把 replay read model 写成 replay API。
 未把 golden cases 写成真实交易验证。
@@ -237,7 +316,7 @@ docker info --format '{{.ServerVersion}}'
 ### Readiness decision
 
 ```text
-ALLOW_GATEK_CLOSE: YES
+ALLOW_STAGE4_CLOSE: YES
 ALLOW_INTEGRATION1_DRYRUN_PLAN_REBASE_N: YES
 ALLOW_INTEGRATION_1_RUNTIME: NO
 ALLOW_AGENT_PHASE: NO
@@ -253,7 +332,7 @@ NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED。
 真实 NQ runtime、真实 provider、LangGraph runtime、AI / Agent runtime 或 LIVE。
 ```
 
-## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL
+## 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL
 
 K7 已完成 deterministic golden cases / eval baseline / security boundary tests。本轮只做 K7 Golden Cases / Eval，不进入 K8 acceptance / freeze，不启动 Integration-1 runtime。
 
@@ -417,7 +496,7 @@ ALLOW_LIVE: NO
 ### 下一步
 
 ```text
-进入 DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / NOT STARTED。
+进入 DH-STAGE4-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / NOT STARTED。
 K8 只能基于 K1-K7 evidence 做 acceptance / freeze，不得启动 Integration-1 runtime、真实 NQ runtime、
 真实 provider、LangGraph runtime、AI / Agent runtime 或 LIVE。
 ```
@@ -3485,7 +3564,7 @@ timestamp CLOSED 只表示 timestamp 契约收口完成，不授权 Integration-
 - 新增 `.agents/skills/dh-docs-writer/SKILL.md`：定义 DH 文档治理规则、事实源优先级、Integration-0 / GateK / GateN / Decision Pipeline 边界、状态词汇、验证要求和禁止跨界项。
 - 新增 `.agents/skills/dh-docs-writer/agents/openai.yaml`：由 `skill-creator` 初始化生成的 skill metadata。
 - 更新 `AGENTS.md`：将 active skills 从 9 个扩展为 10 个，加入 `dh-docs-writer`；同步 current stage、next stage、GateN rebase、Decision Pipeline MVP PLAN 与 no runtime / no LIVE 边界。
-- 更新 `README.md`、`docs/current/README.md`、`docs/current/CODEX_PROJECT_INSTRUCTIONS.md`、`docs/current/CODEX_WORKFLOW_INDEX.md`、`docs/current/DH_CODEX_PLUGIN_WORKFLOW.md`、`docs/current/DH_NQ_INTEGRATION.md`、`docs/current/STATUS.md`、`docs/current/ROADMAP.md`、`docs/current/WORK_ORDER.md`：同步 DH 当前口径、stage 入口、workflow 入口、NQ/DH integration 边界、work order 和旧 GateK plan superseded 说明。
+- 更新 `README.md`、`docs/current/README.md`、`docs/current/CODEX_PROJECT_INSTRUCTIONS.md`、`docs/current/CODEX_WORKFLOW_INDEX.md`、`docs/current/DH_CODEX_PLUGIN_WORKFLOW.md`、`docs/current/DH_NQ_INTEGRATION.md`、`docs/current/STATUS.md`、`docs/current/ROADMAP.md`、`docs/current/WORK_ORDER.md`：同步 DH 当前口径、stage 入口、workflow 入口、NQ/DH integration 边界、work order 和旧 Stage4 plan superseded 说明。
 - 更新 `docs/current/TESTING.md`、`docs/current/WORKLOG.md`：记录本轮验证、阻塞项、边界确认和工作日志。
 
 ### 不变量
@@ -3505,26 +3584,26 @@ Integration-0 safety gate 仍为 CLOSED / ACCEPTED；P1-4 residual rate limit / 
 未修改 NQ 仓库；未改 DH Java production / test code；未新增 API / migration；未改 contracts / golden_cases；未真实 HTTP；未接 NQ runtime；未接真实 provider；未接 AI / LangGraph；未读取密钥；未开启 LIVE。
 
 ### 准入
-docs / skill 变更已完成 Git 级验证。Maven 回归受外部依赖下载和本地 Maven 仓库状态阻塞，需在依赖仓库可用或本地 Maven 仓库修复后重跑 `mvn test` 与 `mvn -Pquality validate`。下一步保持 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN`，不得回退到 superseded 的旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK`。
+docs / skill 变更已完成 Git 级验证。Maven 回归受外部依赖下载和本地 Maven 仓库状态阻塞，需在依赖仓库可用或本地 Maven 仓库修复后重跑 `mvn test` 与 `mvn -Pquality validate`。下一步保持 `DH-STAGE4-DECISION-PIPELINE-MVP-PLAN`，不得回退到 superseded 的旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK`。
 
-## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-PLAN
+## 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-PLAN
 
 ### 范围
-完成 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN` docs-only / plan-only 规划：新增 Decision Pipeline MVP 当前计划文档，并同步附件允许范围内的 `docs/current` 入口、状态、路线图、工单、API 说明、验证记录和工作日志。本轮不改 Java 生产代码、测试代码、API、migration、contracts、golden_cases、runtime 配置或 NQ 仓库。
+完成 `DH-STAGE4-DECISION-PIPELINE-MVP-PLAN` docs-only / plan-only 规划：新增 Decision Pipeline MVP 当前计划文档，并同步附件允许范围内的 `docs/current` 入口、状态、路线图、工单、API 说明、验证记录和工作日志。本轮不改 Java 生产代码、测试代码、API、migration、contracts、golden_cases、runtime 配置或 NQ 仓库。
 
 ### 修改文件
-- 新增 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`：定义 K0-K7 分批计划、Decision contract、audit / snapshot / trace / replay、mock provider、mock NQ dry-run contract test、golden cases、安全矩阵、验收与 readiness gate。
-- 更新 `docs/current/README.md`：把当前阶段同步为 `DH-GATEK-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW`，下一阶段同步为 `DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED`，并加入新计划文档入口。
-- 更新 `docs/current/STATUS.md`、`docs/current/ROADMAP.md`、`docs/current/WORK_ORDER.md`：同步 GateK plan ready 状态、K0-K7 范围、next concrete action 和禁止直接实现 runtime 的边界。
+- 新增 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md`：定义 K0-K7 分批计划、Decision contract、audit / snapshot / trace / replay、mock provider、mock NQ dry-run contract test、golden cases、安全矩阵、验收与 readiness gate。
+- 更新 `docs/current/README.md`：把当前阶段同步为 `DH-STAGE4-DECISION-PIPELINE-MVP-PLAN / READY FOR REVIEW`，下一阶段同步为 `DH-STAGE4-DECISION-PIPELINE-MVP-WO / NOT STARTED`，并加入新计划文档入口。
+- 更新 `docs/current/STATUS.md`、`docs/current/ROADMAP.md`、`docs/current/WORK_ORDER.md`：同步 Stage4 plan ready 状态、K0-K7 范围、next concrete action 和禁止直接实现 runtime 的边界。
 - 更新 `docs/current/API.md`：明确 Decision Pipeline API / runtime 仍 NOT IMPLEMENTED，旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 仍 `SUPERSEDED / REBASE_REQUIRED`。
 - 更新 `docs/current/TESTING.md`、`docs/current/WORKLOG.md`：记录本轮真实验证结果、Maven 配置 RCA、边界确认和工作日志。
 
 ### Plan result
-计划产物将 GateK MVP 拆成 K0-K7：Factsource Sync、Decision Contract Freeze、DecisionOrchestrator Skeleton Plan、Audit / Snapshot / Trace / Replay Plan、Mock Provider / Provider Health Plan、Mock NQ Dry-run Contract Test Plan、Golden Cases / Eval Plan、Acceptance / Freeze Plan。目标 contract 只允许 `READ_ONLY_RECOMMENDATION`，候选动作限定为 `ABSTAIN | OBSERVE | NO_TRADE | LONG_BIAS | SHORT_BIAS`，禁止 `BUY / SELL / PLACE_ORDER / CANCEL_ORDER / NQ mutation`。
+计划产物将 Stage4 MVP 拆成 K0-K7：Factsource Sync、Decision Contract Freeze、DecisionOrchestrator Skeleton Plan、Audit / Snapshot / Trace / Replay Plan、Mock Provider / Provider Health Plan、Mock NQ Dry-run Contract Test Plan、Golden Cases / Eval Plan、Acceptance / Freeze Plan。目标 contract 只允许 `READ_ONLY_RECOMMENDATION`，候选动作限定为 `ABSTAIN | OBSERVE | NO_TRADE | LONG_BIAS | SHORT_BIAS`，禁止 `BUY / SELL / PLACE_ORDER / CANCEL_ORDER / NQ mutation`。
 
 ### Readiness
-- `ALLOW_GATEK_PLAN_CLOSE: YES`
-- `ALLOW_GATEK_WO: YES`
+- `ALLOW_STAGE4_PLAN_CLOSE: YES`
+- `ALLOW_STAGE4_WO: YES`
 - `ALLOW_DECISION_PIPELINE_IMPLEMENTATION: NO`
 - `ALLOW_INTEGRATION_1_DRYRUN_PLAN_REBASE_N: YES`
 - `ALLOW_INTEGRATION_1_RUNTIME: NO`
@@ -3533,7 +3612,7 @@ docs / skill 变更已完成 Git 级验证。Maven 回归受外部依赖下载�
 - `ALLOW_LIVE: NO`
 
 ### 验证
-- `git status --short`：仅 `docs/current` 计划与状态同步文件变更；新增 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`。
+- `git status --short`：仅 `docs/current` 计划与状态同步文件变更；新增 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md`。
 - `git diff --check`：通过；仅 Windows LF -> CRLF warning，无 whitespace error。
 - `git diff -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases`：空 diff。
 - 敏感词扫描：仅命中文档禁止清单和安全边界文字；未发现真实凭证值。
@@ -3544,18 +3623,18 @@ docs / skill 变更已完成 Git 级验证。Maven 回归受外部依赖下载�
 Integration-0 仍 `CLOSED / ACCEPTED`，但只代表 contract / mock / documentation work line；Integration-1 `NOT STARTED`；Runtime integration `NOT STARTED`；DH integrated `NO`；AI / Agent runtime `NOT STARTED`；LIVE `DISABLED`。未接真实 NQ runtime、真实 provider、RealClient、真实 HTTP、交易、NQ DB 或凭证。
 
 ### 下一步
-进入 `DH-GATEK-DECISION-PIPELINE-MVP-WO / NOT STARTED` 的 work order 评审与冻结；不得跳过 WO 直接实现 Decision Pipeline runtime。
+进入 `DH-STAGE4-DECISION-PIPELINE-MVP-WO / NOT STARTED` 的 work order 评审与冻结；不得跳过 WO 直接实现 Decision Pipeline runtime。
 
-## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-WO
+## 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-WO
 
 ### 范围
-完成 `DH-GATEK-DECISION-PIPELINE-MVP-WO` docs-only / work-order-only 工单设计：基于已 `ACCEPTED / CLOSED` 的 GateK plan，新增 K1-K8 可执行批次，并同步 `docs/current` 入口、状态、路线图、当前工单、验证记录和工作日志。本轮不改 Java 生产代码、测试代码、API、migration、contracts、golden_cases、runtime 配置或 NQ 仓库。
+完成 `DH-STAGE4-DECISION-PIPELINE-MVP-WO` docs-only / work-order-only 工单设计：基于已 `ACCEPTED / CLOSED` 的 Stage4 plan，新增 K1-K8 可执行批次，并同步 `docs/current` 入口、状态、路线图、当前工单、验证记录和工作日志。本轮不改 Java 生产代码、测试代码、API、migration、contracts、golden_cases、runtime 配置或 NQ 仓库。
 
 ### 修改文件
-- 新增 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`：定义 K1-K8 批次目标、allowed / forbidden files、生产/测试/API/migration 权限、主要类/接口、schema/table、测试、验证命令、边界、退出条件、回滚方式和下一批次。
-- 更新 `docs/current/README.md`：把当前阶段同步为 `DH-GATEK-DECISION-PIPELINE-MVP-WO / READY FOR REVIEW`，下一阶段同步为 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED`，并加入 WO 文档入口。
-- 更新 `docs/current/STATUS.md`：把 GateK plan 标记为 `ACCEPTED / CLOSED`，新增 §1.6 WO ready 记录、K1 next、DecisionOutput hardening 和 readiness decision。
-- 更新 `docs/current/ROADMAP.md`：把路线推进到 WO ready / K1 next，并替换 GateK WO 验收条件。
+- 新增 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md`：定义 K1-K8 批次目标、allowed / forbidden files、生产/测试/API/migration 权限、主要类/接口、schema/table、测试、验证命令、边界、退出条件、回滚方式和下一批次。
+- 更新 `docs/current/README.md`：把当前阶段同步为 `DH-STAGE4-DECISION-PIPELINE-MVP-WO / READY FOR REVIEW`，下一阶段同步为 `DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED`，并加入 WO 文档入口。
+- 更新 `docs/current/STATUS.md`：把 Stage4 plan 标记为 `ACCEPTED / CLOSED`，新增 §1.6 WO ready 记录、K1 next、DecisionOutput hardening 和 readiness decision。
+- 更新 `docs/current/ROADMAP.md`：把路线推进到 WO ready / K1 next，并替换 Stage4 WO 验收条件。
 - 更新 `docs/current/WORK_ORDER.md`：把当前工单入口从“产出 WO”切换为“K1 Contract Freeze”，补充 WO artifact、批次顺序、DecisionOutput hardening、readiness decision 和 K1 开工提示词。
 - 更新 `docs/current/TESTING.md`、`docs/current/WORKLOG.md`：记录本轮真实验证结果、Maven 本机环境 RCA、边界确认和工作日志。
 
@@ -3581,7 +3660,7 @@ K2 after review before K3
 K3 after review before K4
 K1-K5 complete before K6
 K1-K7 complete before K8
-Before GateK MVP closed: no Integration-1 runtime, no LangGraph runtime
+Before Stage4 MVP closed: no Integration-1 runtime, no LangGraph runtime
 LangGraph GateL or later
 ```
 
@@ -3595,7 +3674,7 @@ LangGraph GateL or later
 ### Readiness
 - `ALLOW_WO_CLOSE: YES`
 - `ALLOW_K1_IMPLEMENTATION: YES`
-- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`
+- `ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`
 - `ALLOW_INTEGRATION_1_RUNTIME: NO`
 - `ALLOW_AGENT_PHASE: NO`
 - `ALLOW_LANGGRAPH_RUNTIME: NO`
@@ -3604,11 +3683,11 @@ LangGraph GateL or later
 ### 验证
 - `Get-Location`：`F:\project\decision-hub`。
 - `git branch --show-current`：`dev`。
-- `git status --short`：仅 docs/current 文档变更；新增 `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`。
+- `git status --short`：仅 docs/current 文档变更；新增 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md`。
 - `git diff --check`：通过；仅 Windows LF -> CRLF warning，无 whitespace error。
 - `git diff --stat`：执行成功；tracked docs/current 文件存在 diff，新增 WO 文件由 `git status` 标识为 untracked。
 - 状态残留扫描：未发现把当前阶段写回 PLAN ready 或 WO not started 的残留。
-- readiness forbidden YES 扫描：未发现 `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: YES`、`ALLOW_INTEGRATION_1_RUNTIME: YES`、`ALLOW_AGENT_PHASE: YES`、`ALLOW_LANGGRAPH_RUNTIME: YES` 或 `ALLOW_LIVE: YES`。
+- readiness forbidden YES 扫描：未发现 `ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: YES`、`ALLOW_INTEGRATION_1_RUNTIME: YES`、`ALLOW_AGENT_PHASE: YES`、`ALLOW_LANGGRAPH_RUNTIME: YES` 或 `ALLOW_LIVE: YES`。
 - 裸 `mvn test`：被本机全局 Maven settings / repository 阻断，未进入测试执行；关键错误为 `settings.xml` line 227 `Unrecognised tag: profiles` 与 `FileAlreadyExistsException`。
 - `mvn -gs target/codex-maven-settings.xml -s target/codex-maven-settings.xml test`：BUILD SUCCESS；reactor 19/19 SUCCESS；既有 `PostgresContainerSmokeTest` 因本机无可用 Docker 环境 skipped 1。
 - 裸 `mvn -Pquality validate`：被同一本机 Maven 环境问题阻断，未进入 quality 执行。
@@ -3618,12 +3697,12 @@ LangGraph GateL or later
 Integration-0 仍 `CLOSED / ACCEPTED`，但只代表 contract / mock / documentation work line；Integration-1 `NOT STARTED`；Runtime integration `NOT STARTED`；DH integrated `NO`；AI / Agent runtime `NOT STARTED`；LangGraph runtime `NOT STARTED`；LIVE `DISABLED`。未接真实 NQ runtime、真实 provider、RealClient、真实 HTTP、交易、NQ DB 或凭证。
 
 ### 下一步
-进入 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED`，只允许单批执行 K1 Decision Contract Freeze；不得跳过 K1 review 或全量 GateK implementation。
+进入 `DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE / NOT STARTED`，只允许单批执行 K1 Decision Contract Freeze；不得跳过 K1 review 或全量 GateK implementation。
 
-## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE
+## 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE
 
 ### 范围
-完成 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE` single-batch implementation。K1 只冻结 Decision Pipeline MVP 的 domain contract、enum、JSON Schema 和 contract tests；不实现 K2-K8，不新增 API、migration、runtime、provider、client、repository、service、controller 或 NQ 集成。
+完成 `DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE` single-batch implementation。K1 只冻结 Decision Pipeline MVP 的 domain contract、enum、JSON Schema 和 contract tests；不实现 K2-K8，不新增 API、migration、runtime、provider、client、repository、service、controller 或 NQ 集成。
 
 ### 修改文件
 - 新增 `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/`：
@@ -3694,7 +3773,7 @@ domain no evidence / provider failure / policy denied / high risk fail-closed �
 ### Readiness
 - `ALLOW_K1_CLOSE: YES`
 - `ALLOW_K2_IMPLEMENTATION: NO`
-- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`
+- `ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`
 - `ALLOW_INTEGRATION_1_RUNTIME: NO`
 - `ALLOW_AGENT_PHASE: NO`
 - `ALLOW_LANGGRAPH_RUNTIME: NO`
@@ -3713,7 +3792,7 @@ domain no evidence / provider failure / policy denied / high risk fail-closed �
 - Agent phase 后置。
 
 ### 下一步
-进入 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED`；不得直接进入 K2。
+进入 `DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED`；不得直接进入 K2。
 
 ## 2026-07-01 DH-DOCS-LANGUAGE-GOVERNANCE-FIX
 
@@ -3727,9 +3806,9 @@ domain no evidence / provider failure / policy denied / high risk fail-closed �
 - `AGENTS.md`：同步当前 K1 review 入口，新增语言治理规则，明确从 NQ skill 同步时必须改写为 DH 中文主语言风格。
 - `README.md`、`docs/current/README.md`：同步当前 K1 review 入口和语言治理规则。
 - `docs/current/CODEX_PROJECT_INSTRUCTIONS.md`、`docs/current/CODEX_WORKFLOW_INDEX.md`：同步 language policy 与当前主线。
-- `docs/current/API.md`：修正 stale GateK PLAN 状态，明确 K1 已落 domain/schema 合同但 Decision Pipeline API 仍 `NOT IMPLEMENTED`。
-- `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md`：把文档主体、章节标题、表格列名和说明段落改为中文，保留稳定工程名词、enum、schema key、状态词和命令。
-- `docs/current/DH_GATEK_DECISION_PIPELINE_MVP_WORK_ORDER.md`：把工单主体、批次字段、表格列名和说明段落改为中文，并把下一轮提示改为 K1 review。
+- `docs/current/API.md`：修正 stale Stage4 PLAN 状态，明确 K1 已落 domain/schema 合同但 Decision Pipeline API 仍 `NOT IMPLEMENTED`。
+- `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md`：把文档主体、章节标题、表格列名和说明段落改为中文，保留稳定工程名词、enum、schema key、状态词和命令。
+- `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md`：把工单主体、批次字段、表格列名和说明段落改为中文，并把下一轮提示改为 K1 review。
 - `docs/current/STATUS.md`、`docs/current/ROADMAP.md`、`docs/current/WORK_ORDER.md`：追加语言治理状态与规则，不改变 K1 review 主线。
 - `docs/current/TESTING.md`、`docs/current/WORKLOG.md`：记录本轮验证和边界确认。
 
@@ -3759,12 +3838,12 @@ DH 文档正文、架构说明、阶段计划、WORKLOG、TESTING、ROADMAP、ST
 `docs/current` 历史记录与冻结快照中仍可能存在历史英文术语、命令、状态枚举或 fixed output labels；本轮只修正当前允许文件中的明显漂移，不改历史 gate snapshot。当前附件写明“暂停 K1 / K1 NOT STARTED”，但工作区与 `docs/current/STATUS.md` 在预检时已是 K1 `IMPLEMENTED / READY FOR REVIEW`；本轮保留当前事实源，不回退既有 K1 变更。
 
 ### 下一步
-进入 `DH-GATEK-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED`；不得直接进入 K2。
+进入 `DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW / NOT STARTED`；不得直接进入 K2。
 
-## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON
+## 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON
 
 ### 范围
-完成 `DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON` single-batch implementation。K2 只在 `dh-usecase` 落 mock-only DecisionOrchestrator skeleton，并补 K2 单元测试与 `docs/current` 状态同步；不实现 K3-K8、不新增 API / Controller / Repository / JDBC / migration、不接真实 provider / NQ / HTTP / LangGraph / LIVE。
+完成 `DH-STAGE4-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON` single-batch implementation。K2 只在 `dh-usecase` 落 mock-only DecisionOrchestrator skeleton，并补 K2 单元测试与 `docs/current` 状态同步；不实现 K3-K8、不新增 API / Controller / Repository / JDBC / migration、不接真实 provider / NQ / HTTP / LangGraph / LIVE。
 
 ### 修改文件
 - `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionOutput.java`：补充 `observation(...)` 与 `abstainForRisk(...)` 工厂方法，供 K2 复用 K1 output contract，不新增第二套 response model。
@@ -3824,7 +3903,7 @@ mandatory forbiddenActions 保持固定
 ### Readiness
 - `ALLOW_K2_CLOSE: YES`
 - `ALLOW_K3_IMPLEMENTATION: NO`
-- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`
+- `ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_BATCH_REVIEW: NO`
 - `ALLOW_INTEGRATION_1_RUNTIME: NO`
 - `ALLOW_AGENT_PHASE: NO`
 - `ALLOW_LANGGRAPH_RUNTIME: NO`
@@ -3841,12 +3920,12 @@ mandatory forbiddenActions 保持固定
 - Direct Spotless check 被既有全仓格式漂移阻断；本轮未做跨范围格式化。
 
 ### 下一步
-进入 `DH-GATEK-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED`；不得直接进入 K3。
+进入 `DH-STAGE4-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON-REVIEW / NOT STARTED`；不得直接进入 K3。
 
-## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE
+## 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE
 
 ### 范围
-完成 `DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE` single-batch implementation。K3 只落 DH-owned audit / snapshot / trace persistence，不实现 K4-K8，不新增 API / Controller / replay API，不接真实 provider / NQ / HTTP / LangGraph / LIVE。
+完成 `DH-STAGE4-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE` single-batch implementation。K3 只落 DH-owned audit / snapshot / trace persistence，不实现 K4-K8，不新增 API / Controller / replay API，不接真实 provider / NQ / HTTP / LangGraph / LIVE。
 
 ### 修改文件
 - 新增 `dh-app/src/main/resources/db/migration/V5__dh_decision_pipeline_audit.sql`：六张 K3 表，含 `decision_id` / `trace_id` / `tenant_id`、`jsonb`、`timestamptz`、索引、check constraint 与中文 comment。
@@ -3905,8 +3984,8 @@ V5 migration presence / indexes / comments / no trading runtime tables
 ### Readiness
 - `ALLOW_K3_CLOSE: YES`
 - `ALLOW_K4_IMPLEMENTATION: NO`
-- `ALLOW_GATEK_M1_CLOSE_REVIEW: NO`
-- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`
+- `ALLOW_STAGE4_M1_CLOSE_REVIEW: NO`
+- `ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`
 - `ALLOW_INTEGRATION_1_RUNTIME: NO`
 - `ALLOW_AGENT_PHASE: NO`
 - `ALLOW_LANGGRAPH_RUNTIME: NO`
@@ -3923,7 +4002,7 @@ V5 migration presence / indexes / comments / no trading runtime tables
 - Testcontainers 真实 Postgres 持久化项因本机无 Docker 仍跳过；需要 CI / Docker 环境另行跑。
 
 ### 下一步
-进入 `DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED`；不得直接进入 K4。
+进入 `DH-STAGE4-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED`；不得直接进入 K4。
 
 ## 2026-07-01 DH-GATEK-K3-CI-OBJECTMAPPER-FIX
 
@@ -3959,12 +4038,12 @@ K3 `DecisionPipelineWiringConfig` 把 persistence 专用 `ObjectMapper` 注册�
 未修改 NQ 仓库；未新增 API path；未新增 Controller；未新增 migration；未新增 replay API / query endpoint；未实现 K4 Replay Read Model；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient / 真实 Provider；未接 OpenAI / Claude / Gemini / 本地模型；未接 LangGraph；未读取或输出 credential、token、cookie、API secret、passphrase；未启动 Integration-1 runtime；未把 Runtime integration 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；未把 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 放进 output action。
 
 ### 下一步
-当前主线仍为 `DH-GATEK-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE / IMPLEMENTED / READY FOR M1`；下一步仍是 `DH-GATEK-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED`，不得直接进入 K4。
+当前主线仍为 `DH-STAGE4-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE / IMPLEMENTED / READY FOR M1`；下一步仍是 `DH-STAGE4-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW / NOT STARTED`，不得直接进入 K4。
 
-## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL
+## 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL
 
 ### 范围
-完成 `DH-GATEK-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL` single-batch implementation。K4 只实现内部 replay read model，不新增 API / Controller / migration / replay endpoint，不重跑 provider，不重跑 orchestrator，不接 NQ / HTTP / LangGraph / LIVE，也不进入 K5-K8。
+完成 `DH-STAGE4-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL` single-batch implementation。K4 只实现内部 replay read model，不新增 API / Controller / migration / replay endpoint，不重跑 provider，不重跑 orchestrator，不接 NQ / HTTP / LangGraph / LIVE，也不进入 K5-K8。
 
 ### 修改文件
 - 新增 `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionReplay*.java`：K4 replay request / context / trace step / provider call / output / audit event / timeline / aggregate view 与 `DecisionReplayStatus`。
@@ -4031,20 +4110,20 @@ ObjectMapper bean remains unique
 ### Readiness
 - `ALLOW_K4_CLOSE: YES`
 - `ALLOW_K5_IMPLEMENTATION: YES`
-- `ALLOW_GATEK_M2_CLOSE_REVIEW: NO`
-- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`
+- `ALLOW_STAGE4_M2_CLOSE_REVIEW: NO`
+- `ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`
 - `ALLOW_INTEGRATION_1_RUNTIME: NO`
 - `ALLOW_AGENT_PHASE: NO`
 - `ALLOW_LANGGRAPH_RUNTIME: NO`
 - `ALLOW_LIVE: NO`
 
 ### 下一步
-进入 `DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED`；不得直接进入 K6-K8、Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
+进入 `DH-STAGE4-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY / NOT STARTED`；不得直接进入 K6-K8、Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
 
-## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY
+## 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY
 
 ### 范围
-完成 `DH-GATEK-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY` single-batch implementation。K5 只强化 K2/K3/K4 既有 Decision Pipeline 的 mock-only provider health、budget、latency 和 fail-closed guard，不新增 API、Controller、migration、provider health/budget/latency 表、真实 provider、HTTP、NQ runtime、LLM、LangGraph 或 LIVE。
+完成 `DH-STAGE4-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY` single-batch implementation。K5 只强化 K2/K3/K4 既有 Decision Pipeline 的 mock-only provider health、budget、latency 和 fail-closed guard，不新增 API、Controller、migration、provider health/budget/latency 表、真实 provider、HTTP、NQ runtime、LLM、LangGraph 或 LIVE。
 
 ### 新增文件
 - `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/decision/DecisionProviderHealth.java`
@@ -4124,8 +4203,8 @@ ObjectMapper bean 仍唯一
 ### Readiness
 - `ALLOW_K5_CLOSE: YES`
 - `ALLOW_K6_IMPLEMENTATION: YES`
-- `ALLOW_GATEK_M2_CLOSE_REVIEW: NO`
-- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`
+- `ALLOW_STAGE4_M2_CLOSE_REVIEW: NO`
+- `ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_MILESTONE_REVIEW: NO`
 - `ALLOW_INTEGRATION_1_RUNTIME: NO`
 - `ALLOW_AGENT_PHASE: NO`
 - `ALLOW_LANGGRAPH_RUNTIME: NO`
@@ -4143,13 +4222,13 @@ ObjectMapper bean 仍唯一
 - Agent phase 后置。
 
 ### 下一步
-进入 `DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS / NOT STARTED`；不得直接进入 K7-K8、M2 close review、Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
+进入 `DH-STAGE4-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS / NOT STARTED`；不得直接进入 K7-K8、M2 close review、Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
 
-## 2026-07-01 DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS
+## 2026-07-01 DH-STAGE4-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS
 
 ### 范围
 
-完成 `DH-GATEK-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS` single-batch implementation。K6 只新增 mock NQ dry-run contract tests、test-support 和最小 fixture，不新增 API、Controller、migration、replay endpoint、真实 HTTP、NQ runtime、real provider、LLM、LangGraph 或 LIVE；不修改生产代码。
+完成 `DH-STAGE4-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS` single-batch implementation。K6 只新增 mock NQ dry-run contract tests、test-support 和最小 fixture，不新增 API、Controller、migration、replay endpoint、真实 HTTP、NQ runtime、real provider、LLM、LangGraph 或 LIVE；不修改生产代码。
 
 ### 新增文件
 
@@ -4224,8 +4303,8 @@ DecisionAction no BUY / SELL / PLACE_ORDER / CANCEL_ORDER
 
 - `ALLOW_K6_CLOSE: YES`
 - `ALLOW_K7_IMPLEMENTATION: YES`
-- `ALLOW_GATEK_ACCEPTANCE_REVIEW: NO`
-- `ALLOW_FULL_GATEK_IMPLEMENTATION_WITHOUT_ACCEPTANCE_REVIEW: NO`
+- `ALLOW_STAGE4_ACCEPTANCE_REVIEW: NO`
+- `ALLOW_FULL_STAGE4_IMPLEMENTATION_WITHOUT_ACCEPTANCE_REVIEW: NO`
 - `ALLOW_INTEGRATION_1_RUNTIME: NO`
 - `ALLOW_AGENT_PHASE: NO`
 - `ALLOW_LANGGRAPH_RUNTIME: NO`
@@ -4245,4 +4324,4 @@ DecisionAction no BUY / SELL / PLACE_ORDER / CANCEL_ORDER
 
 ### 下一步
 
-进入 `DH-GATEK-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED`；不得直接进入 K8、GateK acceptance / freeze、Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
+进入 `DH-STAGE4-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED`；不得直接进入 K8、GateK acceptance / freeze、Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。

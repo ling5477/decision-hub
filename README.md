@@ -9,8 +9,8 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-当前阶段: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE / CLOSED / ACCEPTED
-下一阶段: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED
+当前阶段: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED
+下一阶段: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 事实源: docs/current
 ```
 
@@ -83,8 +83,10 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED。
-- GateK Decision Pipeline MVP 已完成 K8 acceptance / freeze，并 `CLOSED / ACCEPTED`。
+NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED。
+- NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE 已完成 docs-only / factsource-only 收口，并 `CLOSED / ACCEPTED`。
+- DH Stage4 Decision Pipeline MVP 已完成 K8 acceptance / freeze，并 `CLOSED / ACCEPTED`。
+- 旧 DH-GATEK-DECISION-PIPELINE-MVP 与旧冻结目录名已 `SUPERSEDED / NAMING_REPLACED`。
 - Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架落地（Fake / Disabled 三层 gate，
   无真实 HTTP，无 RealNqBacktestClient；190 tests 全绿 / ArchUnit 12/12）。
 - Integration-0 safety gate 已 CLOSED / ACCEPTED；P1-4 residual、header alignment、timestamp alignment、
@@ -95,6 +97,8 @@ NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED。
   均为 historical / superseded / deferred / gated，不是当前 runtime 任务。
 - 旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK：SUPERSEDED / REBASE_REQUIRED。
 - NQ 已进入 GateN；后续 Integration-1 必须基于 GateN rebase 重新规划。
+- 后续 Integration-1 前置条件固定为 NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED。
+- P1 仍是 contract dry-run plan，不是 implementation、runtime、真实 HTTP、real provider 或 LIVE。
 - NQ integration not started；Integration-1 NOT STARTED；Runtime integration NOT STARTED；DH integrated NO。
 - AI / Agent runtime NOT STARTED；LangGraph runtime NOT STARTED；LIVE DISABLED。
 - RealClient forbidden；real provider forbidden；LIVE trading forbidden；NQ mutation forbidden。

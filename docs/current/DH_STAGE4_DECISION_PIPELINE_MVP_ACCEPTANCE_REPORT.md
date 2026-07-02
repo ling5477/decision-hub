@@ -1,13 +1,13 @@
-# DH GateK Decision Pipeline MVP Acceptance Report
+# DH Stage4 Decision Pipeline MVP Acceptance Report
 
-> 任务: DH-GATEK-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE  
+> 任务: DH-STAGE4-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE
 > 日期: 2026-07-02  
-> 结论: GateK Decision Pipeline MVP `ACCEPTED / CLOSED`  
-> 下一步: `NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / NOT STARTED`
+> 结论: DH Stage4 Decision Pipeline MVP `ACCEPTED / CLOSED`
+> 下一步: `NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED`（后续进入 `NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED`）
 
 ## 1. 任务范围
 
-本轮只执行 GateK Decision Pipeline MVP 的最终验收、回归验证、安全边界复核和文档冻结。
+本轮只执行 DH Stage4 Decision Pipeline MVP 的最终验收、回归验证、安全边界复核和文档冻结。
 
 本轮未修改生产代码、测试代码、contracts、golden_cases、API path、Controller、migration、Repository、Service、Client 或 provider 实现；未接真实 NQ、真实 provider、HTTP、LLM、LangGraph 或 LIVE。
 
@@ -26,7 +26,7 @@
 ## 3. 验收结论
 
 ```text
-GateK Decision Pipeline MVP: ACCEPTED / CLOSED
+DH Stage4 Decision Pipeline MVP: ACCEPTED / CLOSED
 K1-K7: CLOSED
 K8 Acceptance / Freeze: CLOSED
 Integration-1 runtime: NOT STARTED
@@ -69,7 +69,7 @@ Docker 探测：
 docker info --format '{{.ServerVersion}}'
   结果: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine；
         named pipe 不存在，说明当前 Docker daemon 未运行或未暴露该管道。
-  判定: 环境未覆盖项，不是 GateK 代码回归失败。
+  判定: 环境未覆盖项，不是 Stage4 代码回归失败。
 ```
 
 ## 5. 质量门结果
@@ -91,7 +91,7 @@ endpoint / Endpoint / PostMapping / GetMapping / RequestMapping
 
 - 生产范围命中仅来自禁止说明、migration comment、脱敏/denylist 和配置注释。
 - 完整允许范围命中集中在文档说明、负向测试断言、denylist、historical/deferred 说明、migration comment 与固定 `forbiddenActions`。
-- 未发现 GateK Decision Pipeline 新增 API、Controller、mapping annotation、HTTP client、RealClient、real provider、NQ runtime、LangGraph runtime、LIVE 或 BUY/SELL action 生产实现。
+- 未发现 DH Stage4 Decision Pipeline 新增 API、Controller、mapping annotation、HTTP client、RealClient、real provider、NQ runtime、LangGraph runtime、LIVE 或 BUY/SELL action 生产实现。
 
 ## 7. 禁止项确认
 
@@ -118,7 +118,7 @@ endpoint / Endpoint / PostMapping / GetMapping / RequestMapping
 未把 AI / Agent runtime 写成 started
 未开启 LIVE
 未修改 NQ 仓库
-未把 GateK 完成写成允许真实交易
+未把 Stage4 完成写成允许真实交易
 未把 mock NQ dry-run 写成真实 NQ runtime
 未把 replay read model 写成 replay API
 未把 golden cases 写成真实交易验证
@@ -129,7 +129,7 @@ endpoint / Endpoint / PostMapping / GetMapping / RequestMapping
 冻结路径：
 
 ```text
-docs/gates/dh-gatek-decision-pipeline-mvp/
+docs/gates/dh-stage4-decision-pipeline-mvp/
 ```
 
 冻结范围：`docs/current` 当前事实源全量快照，含本验收报告。冻结快照为历史记录；后续若发现措辞或事实需要修正，只能在 `docs/current` 写 errata 或 clarification，不得直接修改历史快照冒充原始事实。
@@ -147,7 +147,7 @@ docs/gates/dh-gatek-decision-pipeline-mvp/
 ## 10. Readiness decision
 
 ```text
-ALLOW_GATEK_CLOSE: YES
+ALLOW_STAGE4_CLOSE: YES
 ALLOW_INTEGRATION1_DRYRUN_PLAN_REBASE_N: YES
 ALLOW_INTEGRATION_1_RUNTIME: NO
 ALLOW_AGENT_PHASE: NO

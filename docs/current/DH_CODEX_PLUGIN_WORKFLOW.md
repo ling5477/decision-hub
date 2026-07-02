@@ -112,7 +112,9 @@ real provider forbidden.
 real HTTP forbidden.
 LIVE trading forbidden.
 NQ mutation forbidden.
-Current main line: DH-GATEK-DECISION-PIPELINE-MVP-PLAN.
+Current main line: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED / DOCS-ONLY.
+DH Stage4 Decision Pipeline MVP: CLOSED / ACCEPTED.
+Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```

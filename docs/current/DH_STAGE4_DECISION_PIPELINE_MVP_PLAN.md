@@ -1,13 +1,13 @@
-# DH GateK Decision Pipeline MVP 计划
+# DH Stage4 Decision Pipeline MVP 计划
 
-> 任务：DH-GATEK-DECISION-PIPELINE-MVP-PLAN
+> 任务：DH-STAGE4-DECISION-PIPELINE-MVP-PLAN
 > 状态：ACCEPTED / CLOSED
 > 范围：docs-only / plan-only
 > 日期：2026-07-01
 
 ## 0. 范围与边界
 
-本文规划 Decision Hub GateK Decision Pipeline MVP。本文只定义只读决策管线的合同、审计、回放、mock provider 和验收边界；不实现生产代码、测试代码、API path、migration、runtime client、真实 provider、AI runtime、LangGraph runtime、NQ runtime integration 或 LIVE 行为。
+本文规划 Decision Hub DH Stage4 Decision Pipeline MVP。本文只定义只读决策管线的合同、审计、回放、mock provider 和验收边界；不实现生产代码、测试代码、API path、migration、runtime client、真实 provider、AI runtime、LangGraph runtime、NQ runtime integration 或 LIVE 行为。
 
 当前允许规划：
 
@@ -59,7 +59,7 @@ NQ repository changes
 当前阶段：
 
 ```text
-DH GateK Decision Pipeline MVP planning
+DH Stage4 Decision Pipeline MVP planning
 ```
 
 当前目标能力：
@@ -141,7 +141,7 @@ NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN
 NQ-DH-GATEN-INTEGRATION1-DRYRUN-PLAN
 ```
 
-## 3. GateK 批次计划
+## 3. Stage4 批次计划
 
 ### K0: Factsource Sync / Docs Rebase
 
@@ -172,7 +172,7 @@ docs/current/WORKLOG.md
 成功标准：
 
 ```text
-Current docs 一致确认 GateK Decision Pipeline MVP planning 是当前线。
+Current docs 一致确认 DH Stage4 Decision Pipeline MVP planning 是当前线。
 旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK 保持 SUPERSEDED / REBASE_REQUIRED。
 NQ GateN 记录为未来 Integration-1 rebase baseline。
 ```
@@ -408,14 +408,14 @@ invalid_contract_fail_closed
 规划验收产物：
 
 ```text
-docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md
+docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md
 ```
 
 Acceptance 必须判定：
 
 ```text
-GateK plan 是否可 close
-GateK WO 是否可 start
+Stage4 plan 是否可 close
+Stage4 WO 是否可 start
 Decision Pipeline implementation 是否可 start
 Integration-1 dry-run planning 是否可在 GateN rebase 后 start
 runtime / agent / LangGraph / LIVE 能力是否仍保持 forbidden
@@ -425,7 +425,7 @@ runtime / agent / LangGraph / LIVE 能力是否仍保持 forbidden
 
 ```text
 WO 接受前，任何 implementation batch 不得开始。
-本 GateK plan 不得启动 Integration-1 runtime。
+本 Stage4 plan 不得启动 Integration-1 runtime。
 ```
 
 ## 4. 目标合同约束
@@ -581,7 +581,7 @@ createdAt
 规则：
 
 ```text
-real provider mode is forbidden in GateK MVP
+real provider mode is forbidden in Stage4 MVP
 provider failure -> ABSTAIN
 provider signal never bypasses policy or risk review
 ```
@@ -740,7 +740,7 @@ Decision Pipeline MVP 仍保持 Java 21 / Spring Boot 3.5.x modular monolith，�
 
 说明：
 
-- 现有 `dh-providers` 是仓库历史 / legacy module name。GateK MVP 不得用它引入真实 provider。
+- 现有 `dh-providers` 是仓库历史 / legacy module name。Stage4 MVP 不得用它引入真实 provider。
 - `dh-policy`、`dh-audit` 和 `dh-contract` 是规划边界。新增 Maven module 必须另起已接受 WO。
 - 任何未来 DB table 都必须先经过 migration review task。
 
@@ -749,7 +749,7 @@ Decision Pipeline MVP 仍保持 Java 21 / Spring Boot 3.5.x modular monolith，�
 | 风险 | 等级 | 触发场景 | 影响 | 防御设计 | 验收测试 |
 | --- | --- | --- | --- | --- | --- |
 | prompt injection | P1 | evidence text 要求 DH 忽略 policy | unsafe recommendation | evidence 始终按 untrusted data 处理，policy 先于 provider output trust | malicious evidence -> ABSTAIN / BLOCKED |
-| tool injection | P1 | provider output 请求 tool call 或 NQ mutation | side-effect attempt | GateK 不执行 tool；始终执行 forbiddenActions | provider signal with PLACE_ORDER -> reject |
+| tool injection | P1 | provider output 请求 tool call 或 NQ mutation | side-effect attempt | Stage4 不执行 tool；始终执行 forbiddenActions | provider signal with PLACE_ORDER -> reject |
 | provider spoofing | P1 | fake provider id 声称是 trusted real provider | trust bypass | provider registry allowlist，mode 仅 MOCK/DISABLED | unknown provider -> fail closed |
 | replay attack | P1 | duplicate signed request 或 nonce reuse | duplicate decision/audit confusion | nonce replay guard + idempotency key + audit event | same nonce -> reject / duplicate contract behavior |
 | timestamp bypass | P1 | old/future timestamp 或非 UTC 格式 | replay window bypass | RFC3339 UTC Z + bounded window | epoch / offset / expired timestamp -> reject |
@@ -757,7 +757,7 @@ Decision Pipeline MVP 仍保持 Java 21 / Spring Boot 3.5.x modular monolith，�
 | source forgery | P1 | untrusted source 发送 signed-like request | untrusted input accepted | source allowlist + HMAC + audit | unknown source -> reject |
 | model hallucination | P1 | provider 编造 evidence 或 action | unsafe output | evidence refs required；no evidence -> ABSTAIN | missing evidence -> ABSTAIN |
 | unsafe autonomous trading | P0 | output action 变成 trading instruction | real trading risk | action enum 排除交易语义；forbiddenActions 固定 | BUY / SELL / PLACE_ORDER / CANCEL_ORDER rejected |
-| over-permission tool call | P1 | pipeline 尝试 MCP/write/NQ tool | unauthorized side effect | GateK 无 tool runtime；静态 forbidden scope | tool-call field -> fail closed |
+| over-permission tool call | P1 | pipeline 尝试 MCP/write/NQ tool | unauthorized side effect | Stage4 无 tool runtime；静态 forbidden scope | tool-call field -> fail closed |
 | unbounded memory/context growth | P2 | 大 evidence/context snapshot | memory exhaustion | payload cap、evidence ref limits、page/read limits | oversize context -> reject |
 | cost explosion | P2 | provider loop 或过量调用 | budget overrun | provider budget guard 与 max call count | budget exceeded -> ABSTAIN |
 | latency spike | P2 | provider 卡住或下游慢 | request saturation | timeout guard，无 infinite retry | timeout -> ABSTAIN with audit |
@@ -782,7 +782,7 @@ Decision Pipeline MVP 仍保持 Java 21 / Spring Boot 3.5.x modular monolith，�
 未来 acceptance report：
 
 ```text
-docs/current/DH_GATEK_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md
+docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md
 ```
 
 未来 acceptance checks：
@@ -807,8 +807,8 @@ readiness decisions recorded
 ## 9. Readiness Decision
 
 ```text
-ALLOW_GATEK_PLAN_CLOSE: YES
-ALLOW_GATEK_WO: YES
+ALLOW_STAGE4_PLAN_CLOSE: YES
+ALLOW_STAGE4_WO: YES
 ALLOW_DECISION_PIPELINE_IMPLEMENTATION: NO
 ALLOW_INTEGRATION_1_DRYRUN_PLAN_REBASE_N: YES
 ALLOW_INTEGRATION_1_RUNTIME: NO
@@ -819,8 +819,8 @@ ALLOW_LIVE: NO
 
 解释：
 
-- `ALLOW_GATEK_PLAN_CLOSE: YES` 表示本 planning document 可作为 GateK Plan close candidate 接受 review。
-- `ALLOW_GATEK_WO: YES` 表示下一轮文档任务可以产出 `DH-GATEK-DECISION-PIPELINE-MVP-WO`。
+- `ALLOW_STAGE4_PLAN_CLOSE: YES` 表示本 planning document 可作为 Stage4 Plan close candidate 接受 review。
+- `ALLOW_STAGE4_WO: YES` 表示下一轮文档任务可以产出 `DH-STAGE4-DECISION-PIPELINE-MVP-WO`。
 - `ALLOW_DECISION_PIPELINE_IMPLEMENTATION: NO` 表示 WO 写完、review、accepted 之前不得开工实现。
 - `ALLOW_INTEGRATION_1_DRYRUN_PLAN_REBASE_N: YES` 表示之后可单独准备基于 GateN 的 planning-only dry-run Integration-1 文档。
 - 所有 runtime、agent、LangGraph、LIVE 决策仍保持 `NO`。
@@ -844,7 +844,7 @@ mvn -Pquality validate
 回滚按文件级执行：
 
 ```powershell
-git restore --worktree -- docs/current/DH_GATEK_DECISION_PIPELINE_MVP_PLAN.md docs/current/README.md docs/current/STATUS.md docs/current/ROADMAP.md docs/current/WORK_ORDER.md docs/current/API.md docs/current/TESTING.md docs/current/WORKLOG.md
+git restore --worktree -- docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md docs/current/README.md docs/current/STATUS.md docs/current/ROADMAP.md docs/current/WORK_ORDER.md docs/current/API.md docs/current/TESTING.md docs/current/WORKLOG.md
 ```
 
 执行前必须确认同一文件没有用户在本计划更新之后追加的新改动。
