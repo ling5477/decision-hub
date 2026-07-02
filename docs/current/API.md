@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED
-下一阶段: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+当前阶段: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+下一阶段: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -26,7 +26,7 @@ AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为 API 单源；DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`，本轮命名 rebase 不新增 API path、不新增 Controller、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但尚未成为已实现 API；replay API 仍未实现。
+OpenAPI 仍为 API 单源；DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`，本轮 P1 contract dry-run plan 不新增 API path、不新增 Controller、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但尚未成为已实现 API；replay API 仍未实现。
 
 ## 2. 已实现端点
 
@@ -63,6 +63,22 @@ GET  /api/ai/research-runs/{runId}/checkpoints    -> CheckpointEntry[]
 ```
 
 DH Stage4 Decision Pipeline MVP 的 API 层仍未实现；只有后续已接受 WO 明确授权后，才允许新增 API / OpenAPI / migration / controller 相关变更。
+
+## 3.1 Planned dry-run contract（未实现 API）
+
+`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN` 仅规划 future dry-run contract，不新增已实现 API。当前不得把下列内容写成已实现 endpoint：
+
+```text
+NQ -> DH dry-run request: planned only
+DH -> NQ dry-run response: planned only
+Dry-run Controller: NOT IMPLEMENTED
+Dry-run API path: NOT IMPLEMENTED
+OpenAPI extension: NOT IMPLEMENTED
+JSON Schema extension: NOT IMPLEMENTED
+Runtime HTTP: NOT STARTED
+```
+
+计划字段中，`dryRun / decisionId / confidence / replayRef / auditRef` 等仍属于 schema gap / envelope planning；后续若需要 wire-level 字段扩展，必须先进入 `NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN` 与独立 contract review。
 
 ## 4. Stage1 最小 API 集合（已实现，留作历史记录）
 

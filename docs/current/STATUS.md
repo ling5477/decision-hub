@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED
-> Next stage:    NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+> Current stage: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+> Next stage:    NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -22,7 +22,7 @@ Codex workflow routing 已固化到 `nq-dh-workflow-router` 与 `docs/current/CO
 DH-AUDIT-FIX completed.
 NQ integration not started.
 Integration-0 safety gate CLOSED / ACCEPTED.
-Integration-1 NOT STARTED.
+Integration-1 implementation NOT STARTED.
 Runtime integration NOT STARTED.
 DH integrated NO.
 AI / Agent runtime NOT STARTED.
@@ -34,8 +34,8 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED / DOCS-ONLY.
-Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED.
+Current main line: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED.
+Next concrete action: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -46,6 +46,33 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.3 NQ-DH I1-P1 Contract Dry-run Plan（2026-07-02，COMPLETED / PLAN ONLY）
+
+```text
+Plan artifact: docs/current/DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md
+Plan status: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+NQ current main line: GateO
+NQ rebase input: GateN no-real public marketdata / exchange sandbox baseline
+DH baseline: DH-STAGE4-DECISION-PIPELINE-MVP / ACCEPTED / CLOSED
+NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE: CLOSED / ACCEPTED / DOCS-ONLY
+Integration-1 implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NOT STARTED
+Real provider: NOT STARTED
+DH integrated: NO
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+Next concrete action: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
+```
+
+- 本轮只规划 NQ -> DH dry-run request、DH -> NQ dry-run response、canonical `X-NQ-DH-*` header、timestamp / nonce / HMAC、tenant / trace / requestId binding、error taxonomy、trace / audit / replay、后续批次和测试矩阵。
+- `DecisionRequest` 当前 schema 已覆盖 `requestId / traceId / tenantId / source / decisionType / subject / contextSnapshot / requestedAt / schemaVersion`；`dryRun / runRef / 顶层 evidenceRefs` 属计划字段或映射问题，不在本轮改 schema。
+- `DecisionOutput` 当前 schema 已覆盖 `requestId / traceId / tenantId / decisionType / action / status / riskLevel / policyStatus / providerStatus / forbiddenActions / reasonCodes / evidenceRefs / createdAt / schemaVersion`；`decisionId / confidence / replayRef / auditRef / dryRun` 属 response envelope 规划项，不写成已实现字段。
+- `LONG_BIAS / SHORT_BIAS` 只能作为只读倾向，不是 `BUY / SELL`，不得进入 order、risk mutation、ledger、position、Paper Run、LIVE 或 private trading path。
+- `ALLOW_I1_P1_CONTRACT_PLAN_CLOSE: YES`；`ALLOW_I1_P2_CONTRACT_FIXTURES_PLAN: YES`；`ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_REAL_HTTP: NO`；`ALLOW_REAL_PROVIDER: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 1.0.0 DH Stage4 命名 rebase（2026-07-02，CLOSED）
 
@@ -62,7 +89,8 @@ DH integrated: NO
 AI / Agent runtime: NOT STARTED
 LangGraph runtime: NOT STARTED
 LIVE: DISABLED
-Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+P1 follow-up consumed: YES, by NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY.
+Current next concrete action: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 ```
 
 - 本轮只修正 DH 自身阶段命名、current docs 事实源引用、验收报告文件名和冻结目录名。
@@ -88,7 +116,8 @@ DH integrated: NO
 AI / Agent runtime: NOT STARTED
 LangGraph runtime: NOT STARTED
 LIVE: DISABLED
-Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+P1 follow-up consumed: YES, by NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY.
+Current next concrete action: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 ```
 
 - 本轮只做 NQ GateN rebase 后的 Integration-1 dry-run 规划，定义 dry-run 目标、NQ/DH 职责边界、request/response 合同规划、安全协议、I1-P0..P5 批次和测试矩阵。
@@ -103,7 +132,8 @@ Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
 NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE: CLOSED / ACCEPTED / DOCS-ONLY
 Integration-1 dry-run plan baseline: ACCEPTED
 Prerequisite: NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED
-Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+P1 follow-up consumed: YES, by NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY.
+Current next concrete action: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 Integration-1 implementation: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -134,7 +164,8 @@ K6 Mock NQ Dry-run Contract Tests: CLOSED
 K7 Golden Cases / Eval: CLOSED
 K8 Acceptance / Freeze: CLOSED
 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+P1 follow-up consumed: YES, by NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY.
+Current next concrete action: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
 DH integrated: NO
@@ -254,7 +285,7 @@ Integration-0 contract state: MATCH
 Decision pipeline state: PARTIAL
 Audit state: PARTIAL
 Replay state: PARTIAL
-Integration-1: NOT STARTED
+Integration-1 implementation: NOT STARTED
 Runtime integration: NOT STARTED
 DH integrated: NO
 AI / Agent runtime: NOT STARTED
@@ -263,8 +294,8 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED
 M1 Readiness Review: CLOSED / ACCEPTED
-Current main line: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED / DOCS-ONLY
-Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+Current main line: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+Next concrete action: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
 K4 Replay Read Model: CLOSED
@@ -299,7 +330,8 @@ K6 Mock NQ Dry-run Contract Tests status: CLOSED
 K7 Golden Cases / Eval status: CLOSED
 K8 Acceptance / Freeze status: CLOSED / ACCEPTED
 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN status: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+P1 follow-up consumed: YES, by NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY.
+Current next concrete action: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 Full decision pipeline runtime: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -330,7 +362,8 @@ K6 Mock NQ Dry-run Contract Tests status: CLOSED
 K7 Golden Cases / Eval status: CLOSED
 K8 Acceptance / Freeze status: CLOSED / ACCEPTED
 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN status: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+P1 follow-up consumed: YES, by NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY.
+Current next concrete action: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 Full decision pipeline runtime: NOT STARTED
 Integration-1 runtime: NOT STARTED
 Runtime integration: NOT STARTED
@@ -360,7 +393,8 @@ K6 Mock NQ Dry-run Contract Tests: CLOSED
 K7 Golden Cases / Eval: CLOSED
 K8 Acceptance / Freeze: CLOSED / ACCEPTED
 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN: PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+P1 follow-up consumed: YES, by NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY.
+Current next concrete action: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 API changes: NONE
 Migration changes: NONE
 Runtime integration: NOT STARTED
@@ -383,7 +417,8 @@ Task: DH-DOCS-LANGUAGE-GOVERNANCE-FIX
 Scope: docs governance / language policy / comment style rules / factsource sync
 Business state change: NONE
 Current main line now: NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN / PASS / PLAN ONLY / READY FOR P0 FACTSOURCE REBASE
-Next concrete action now: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+P1 follow-up consumed now: YES, by NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY.
+Current next concrete action now: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1
 M1 Readiness Review: CLOSED / ACCEPTED
@@ -918,10 +953,10 @@ DH-CODEX-WORKFLOW-FINAL-CLEANUP
 不引入 TradingAgents Python 代码 / graph scheduler / 复杂 agent graph runtime
 ```
 
-## 4. 下一阶段（NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN）
+## 4. 下一阶段（NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN）
 
 ```text
-唯一下一步是 NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN（NOT STARTED）。
+唯一下一步是 NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN（NOT STARTED）。
 
 P0 已关闭：
 - NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE = CLOSED / ACCEPTED / DOCS-ONLY。
@@ -929,13 +964,17 @@ P0 已关闭：
 - 旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK 保持 SUPERSEDED / REBASE_REQUIRED。
 - dry-run 不等于 runtime integration、真实 HTTP、真实交易或 LIVE。
 
-P1 只允许：
-- 规划 NQ dry-run request contract，不实现 dispatcher、client、Controller、API 或 migration。
-- 明确 request 字段、禁止字段、schema 扩展策略、fail-closed 和 audit 边界。
-- 继续保持 no real NQ runtime、no real provider、no HTTP、no LIVE。
-- 不把 contract plan 写成真实 NQ 联调、runtime integration 或 provider 接入。
+P1 已关闭：
+- NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN = COMPLETED / PLAN ONLY / NOT IMPLEMENTED。
+- 已规划 NQ -> DH dry-run request、DH -> NQ dry-run response、canonical header、安全协议、error taxonomy、trace / audit / replay 和测试矩阵。
 
-P1 不允许：
+P2 只允许：
+- 规划双仓 fixture、schema gap、golden case 和 forbidden field catalog，不实现 dispatcher、client、Controller、API 或 migration。
+- 明确 request / response fixture、schema extension 是否需要、mock-only validation 和 no-side-effect 断言。
+- 继续保持 no real NQ runtime、no real provider、no HTTP、no LIVE。
+- 不把 fixture plan 写成真实 NQ 联调、runtime integration 或 provider 接入。
+
+P2 不允许：
 - 新增 replay API / Controller / query API。
 - 实现真实 NQ client。
 - 实现 RealClient / RealNqBacktestClient。

@@ -1,12 +1,12 @@
 # Decision Hub 当前工单
 
-> 当前阶段: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED
-> 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase
-> 下一阶段: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+> 当前阶段: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+> 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan
+> 下一阶段: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 
 ## 1. 当前目标
 
-`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已完成 docs/factsource rebase，并 `CLOSED / ACCEPTED / DOCS-ONLY`。下一步唯一允许工作内容是 `NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED`；P1 仍是 contract dry-run plan，不是 implementation、runtime、真实 HTTP、real provider 或 LIVE。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已完成 docs/factsource rebase，并 `CLOSED / ACCEPTED / DOCS-ONLY`。`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN` 已完成 planning-only 合同规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md`。下一步唯一允许工作内容是 `NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED`；P2 仍是 fixture / schema / golden case planning，不是 implementation、runtime、真实 HTTP、real provider 或 LIVE。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
 
 `DH-STAGE4-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-STAGE4-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1-K7 已关闭；K8 acceptance / freeze 已 `CLOSED / ACCEPTED`，报告见 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-stage4-decision-pipeline-mvp/`。Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase；P0 只允许同步两仓事实源和旧 GateK 口径，不允许启动 Integration-1 runtime 或全量 runtime implementation：
 
@@ -102,7 +102,8 @@ K7 status: CLOSED
 K8 status: CLOSED / ACCEPTED
 Integration-1 dry-run plan: PLAN BASELINE ACCEPTED
 I1-P0 factsource rebase: CLOSED / ACCEPTED / DOCS-ONLY
-Next: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+I1-P1 contract dry-run plan: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+Next: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 ```
 
 批次顺序：
@@ -165,7 +166,7 @@ ALLOW_LIVE: NO
 DH-AUDIT-FIX completed
 NQ integration not started
 Integration-0 safety gate CLOSED / ACCEPTED
-Integration-1 not started
+Integration-1 implementation not started
 Runtime integration not started
 DH integrated NO
 AI / Agent runtime not started
@@ -186,7 +187,8 @@ K7 Golden Cases / Eval: CLOSED
 K8 Acceptance / Freeze: CLOSED / ACCEPTED
 NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN: PLAN BASELINE ACCEPTED
 NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE: CLOSED / ACCEPTED / DOCS-ONLY
-Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+Next concrete action: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 ```
 
 ## 5. DH-STAGE4-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON（已实现）

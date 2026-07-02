@@ -5,7 +5,7 @@
 > 日期：2026-07-02  
 > 仓库视角：Decision Hub（DH）  
 > 结论：`PLAN BASELINE ACCEPTED / I1-P0 FACTSOURCE REBASE CLOSED`
-> 下一步：`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED`
+> P1 状态：`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED`
 
 ## 1. 当前事实重定位
 
@@ -26,7 +26,8 @@ Code reality audit blockers: fixed.
 DH security state: FULL.
 DH fail-closed state: FULL.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
-Integration-1: NOT STARTED.
+NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED.
+Integration-1 implementation: NOT STARTED.
 Runtime integration: NOT STARTED.
 DH integrated: NO.
 AI / Agent runtime: NOT STARTED.
@@ -270,16 +271,22 @@ ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
 
-## 11. 下一步
+## 11. P1 contract dry-run plan
 
-本计划 baseline 与 I1-P0 factsource rebase 已关闭。下一步只允许进入：
+P1 contract dry-run plan 见 `DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md`。该文档只规划 NQ -> DH dry-run request、DH -> NQ dry-run response、canonical `X-NQ-DH-*` header、timestamp / nonce / HMAC、tenant / trace / requestId binding、error taxonomy、trace / audit / replay、测试矩阵和后续批次。
+
+P1 不新增 API、Controller、client、provider、Repository、Service、migration、测试代码、fixture 文件或真实 HTTP。P1 关闭不代表 implementation 或 runtime started。
+
+## 12. 下一步
+
+本计划 baseline、I1-P0 factsource rebase 与 I1-P1 contract dry-run plan 已关闭。下一步只允许进入：
 
 ```text
-NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
 ```
 
-P1 仍是 contract dry-run plan，不是 runtime implementation。若后续发现 NQ GateN / GateO 与 DH Stage4 facts 仍有 current-source 冲突，则改走：
+P2 仍只能规划 contract fixtures / schema / golden case 对齐，不是 runtime implementation。若后续发现 NQ GateN / GateO 与 DH Stage4 facts 仍有 current-source 冲突，则改走：
 
 ```text
-NQ-DH-I1-P0-FACTSOURCE-REBASE-FIX-2
+NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN-FIX
 ```

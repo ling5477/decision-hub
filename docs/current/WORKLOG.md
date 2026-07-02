@@ -1,5 +1,65 @@
 # Decision Hub Worklog
 
+## 2026-07-02 NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN final validation
+
+完成 NQ-DH Integration-1 P1 contract dry-run plan 收口。本轮只做 docs-only / plan-only：新增 DH canonical contract plan，并把 current docs 指向 `NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED`；不实现 runtime、API、Controller、Client、Provider、migration、测试代码或真实 HTTP。
+
+### 新增文件
+
+```text
+docs/current/DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md
+```
+
+### 修改文件
+
+```text
+docs/current/API.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+```
+
+### 结果
+
+```text
+NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+Canonical plan: docs/current/DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md
+Next: NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN / NOT STARTED
+ALLOW_I1_P1_CONTRACT_PLAN_CLOSE: YES
+ALLOW_I1_P2_CONTRACT_FIXTURES_PLAN: YES
+ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### 规划摘要
+
+- 规划 NQ -> DH dry-run `DecisionRequest`：`schemaVersion`、`requestId`、`traceId`、`tenantId`、`source=NQ_DRYRUN`、`decisionType=READ_ONLY_RECOMMENDATION`、`dryRun=true`、subject、contextSnapshot、evidence refs；`dryRun` 等字段仍是 schema gap，不是已实现字段。
+- 规划 DH -> NQ read-only `DecisionOutput`：`ABSTAIN / OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS` 只读 action、固定 `forbiddenActions`、reason/evidence/provider/trace/audit/replay summary；`decisionId / confidence / replayRef / auditRef / dryRun` 等仍是 schema gap。
+- 规划 canonical `X-NQ-DH-*` header、UTC `Z` timestamp、nonce replay、HMAC signatureMaterial、payload size gate、rate limit、error taxonomy、trace / audit / replay、测试矩阵和后续 P2-P6 批次。
+
+### 验证
+
+- `git status --short`：PASS / CHANGES PRESENT；dirty 限于允许的 `docs/current` 文档。
+- `git diff --check`：PASS；无 whitespace error，仅 Windows LF/CRLF warning。
+- `git diff --stat`：PASS / DOCS-ONLY。
+- forbidden diff：`dh-domain` / `dh-usecase` / `dh-memory` / `dh-eval` / `dh-connector` / `dh-api` / `dh-app` / `dh-infra` / `contracts` / `golden_cases` 均为空。
+- `mvn -ntp test`：PASS / BUILD SUCCESS；19 个 reactor module SUCCESS；`PostgresContainerSmokeTest` 因 Docker named-pipe AccessDenied 被 Testcontainers skip 1，属于本地环境可达性问题。
+- `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS；Checkstyle 0 violations；Spotless check passed。
+
+### 边界确认
+
+未改生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path、Controller、Client、Repository、Service、migration、fixture 文件或 CI workflow；未真实 HTTP；未启动 NQ/DH runtime；未读取 credential；未接 real provider、AI 或 LangGraph；未开启 LIVE；未让 DH 输出进入 order、risk mutation、ledger mutation、Paper Run 或 private trading 路径。
+
 ## 2026-07-02 NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE
 
 完成 NQ-DH Integration-1 dry-run P0 factsource rebase close。本轮只做 docs-only / factsource-only 收口：把 DH 当前事实源从 “P0 NOT STARTED” 推进为 “P0 CLOSED / ACCEPTED”，并把唯一下一步收口到 `NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED`。
