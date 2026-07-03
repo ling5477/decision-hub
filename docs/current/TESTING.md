@@ -1,5 +1,48 @@
 # Decision Hub Testing
 
+## 2026-07-03 NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO final validation
+
+```text
+Scope:
+  - 本轮只关闭 M0 contract gap close work order。
+  - 新增 DH M0 工单并同步 DH current docs 状态到 M1 next。
+  - 同步 NQ dry-run worktree M0 工单与 current docs 状态。
+  - NQ dev 只读；未修改 NQ dev 文件。
+  - 不修改 production/test code、contracts、golden_cases、fixture JSON、API、migration 或 runtime wiring。
+
+Result:
+  NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO: COMPLETED / WORK_ORDER_ONLY / CONTRACT_GAP_CLOSED / NOT IMPLEMENTED
+  Current next: NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO / NOT STARTED
+  WORKSTREAM_MIXED_BLOCKED: NO
+  Integration-1 implementation: NOT STARTED
+  Integration-1 runtime: NOT STARTED
+  Runtime integration: NOT STARTED
+  Real HTTP: NOT STARTED
+  Real provider: NOT STARTED
+  DH integrated: NO
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS / CHANGES PRESENT | 当前 dirty 限于允许的 `docs/current` 文档和新增 M0 WO。 |
+| `git branch --show-current` | PASS / `dev` | DH 当前分支为 `dev`。 |
+| `git rev-parse HEAD` | PASS / `6a806a7148712b06b8a4712ed1050da7bebcba0c` | 基线为上一轮 dry-run mock implementation WO close commit。 |
+| `git diff --check` | PASS | 退出码 0；仅 Windows LF/CRLF 工作区提示，非阻断。 |
+| `git diff --stat` | PASS / DOCS-ONLY | tracked diff 限于 `docs/current` 文档；新增 M0 WO 由 `git status --short` 标识。 |
+| `git diff --name-only -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases` | PASS / EMPTY | 禁止的生产代码、测试代码、contracts、golden_cases 范围无 diff。 |
+| NQ dry-run worktree `git diff --name-only -- backend frontend research scripts deploy .github "backend/**/db/migration"` | PASS / EMPTY | NQ 禁止代码、前端、脚本、workflow、migration 范围无 diff。 |
+| NQ dev `git diff --name-only -- "docs/current/*NQ_DH*" "docs/current/*INTEGRATION1*"` | PASS / EMPTY | NQ dev 无 NQ-DH / Integration1 unstaged diff；`WORKSTREAM_MIXED_BLOCKED: NO`。 |
+| NQ dev `git diff --name-only --cached -- "docs/current/*NQ_DH*" "docs/current/*INTEGRATION1*"` | PASS / EMPTY | NQ dev 无 staged NQ-DH / Integration1 diff。 |
+| `mvn -ntp test` | PASS / BUILD SUCCESS | 19 个 DH reactor module 全部 `SUCCESS`；Docker/Testcontainers 不可用导致 Docker-gated smoke tests skipped，非代码失败。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 DH reactor module 全部 `SUCCESS`；Checkstyle 0 violations；Spotless check passed。 |
+
+Boundary:
+
+未改 Java / Kotlin / Python / TypeScript 生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path / Controller / migration；未新增 fixture JSON；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient；未新增真实 Provider；未读取或输出 credential / token / cookie / API secret / passphrase；未接 AI / LangGraph；未启动 Integration-1 runtime；未开启 LIVE；未让 DH 输出进入 order、risk mutation、ledger mutation、Paper Run 或 private trading 路径。
+
 ## 2026-07-03 NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO final validation
 
 ```text

@@ -54,7 +54,7 @@ NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
 NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
 NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX: COMPLETED / DOCS-ONLY / GATE-FIX
 NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO: COMPLETED / WORK_ORDER_ONLY / NOT IMPLEMENTED
-Next concrete action: NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO / NOT STARTED
+Next concrete action: NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO / NOT STARTED
 ```
 
 Schema / contract reality：
@@ -126,7 +126,8 @@ M0 -> M1 -> M2 -> M3 -> M4
 ```text
 Batch: NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO
 Type: CONTRACT_REVIEW_WO + DOCS_ONLY + NO_CODE
-Status: NOT STARTED
+Status: COMPLETED / WORK_ORDER_ONLY / CONTRACT_GAP_CLOSED / NOT IMPLEMENTED
+Artifact: docs/current/DH_NQ_INTEGRATION1_M0_CONTRACT_GAP_CLOSE_WO.md
 ```
 
 目标：
@@ -199,6 +200,28 @@ M1 / M2 / M3 entry conditions recorded
 revert M0 docs changes
 ```
 
+M0 close decision：
+
+```text
+NQ_DRYRUN source allowlist: NEEDS_SECURITY_CONTRACT_CHANGE
+dry-run endpoint shape: Option C / test-support mock-only, no runtime endpoint
+DOC_ONLY_ALIAS fields: dryRun / decisionId / confidence / traceSummary / replayRef / auditRef / X-NQ-DH-Schema-Version
+ALLOW_M0_WO_CLOSE: YES
+ALLOW_I1_M1_DH_DRYRUN_CONTRACT_ENTRY_MOCK_WO: YES
+ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_CODE: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_FIXTURE_IMPLEMENTATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_API_CONTROLLER: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
 Review：
 
 ```text
@@ -214,7 +237,7 @@ real HTTP / runtime / provider / LIVE allowed: NO
 ```text
 Batch: NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK
 Type: DH_TEST_SUPPORT_OR_MOCK_ONLY
-Status: BLOCKED_BY_M0
+Status: NOT STARTED / WORK_ORDER_ONLY_ALLOWED
 ```
 
 目标：
@@ -292,7 +315,8 @@ Review：
 
 ```text
 M1 requires separate review: YES
-implementation code allowed: YES, only after M0, only mock/test-support scope
+implementation code allowed by current next: NO, M1 is work-order/mock-contract planning first
+future implementation code allowed: only after M1 review, only mock/test-support scope
 schema / contracts / golden_cases / fixture JSON allowed: NO
 API / Controller allowed: NO unless M0 creates and closes a separate API review
 real HTTP / runtime / provider / LIVE allowed: NO
@@ -303,7 +327,7 @@ real HTTP / runtime / provider / LIVE allowed: NO
 ```text
 Batch: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER
 Type: NQ_TEST_SUPPORT_OR_MOCK_ONLY
-Status: BLOCKED_BY_M0
+Status: BLOCKED_BY_M1
 ```
 
 目标：
@@ -365,7 +389,7 @@ Review：
 
 ```text
 M2 requires separate review: YES
-implementation code allowed: YES, only after M0, only NQ mock/test-support scope
+implementation code allowed: YES, only after M1 review, only NQ mock/test-support scope
 schema / contracts / golden_cases allowed: NO
 fixture JSON allowed: NO, unless M3 separately authorizes fixture files
 API / Controller allowed: NO
@@ -377,7 +401,7 @@ real HTTP / runtime / provider / LIVE allowed: NO
 ```text
 Batch: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-CONTRACT-TESTS
 Type: CROSS_REPO_MOCK_CONTRACT_TESTS
-Status: BLOCKED_BY_M0_M1_M2
+Status: BLOCKED_BY_M1_M2
 ```
 
 目标：
@@ -525,7 +549,8 @@ real HTTP / runtime / provider / LIVE allowed: NO
 
 ```text
 ALLOW_WORK_ORDER_CLOSE: YES
-ALLOW_I1_M0_CONTRACT_GAP_CLOSE_WO: YES
+ALLOW_I1_M0_CONTRACT_GAP_CLOSE_WO: YES / COMPLETED
+ALLOW_I1_M1_DH_DRYRUN_CONTRACT_ENTRY_MOCK_WO: YES
 ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_CODE_THIS_TURN: NO
 ALLOW_SCHEMA_CHANGE_THIS_TURN: NO
 ALLOW_FIXTURE_JSON_THIS_TURN: NO
@@ -545,7 +570,7 @@ ALLOW_LIVE_THIS_TURN: NO
 唯一下一步：
 
 ```text
-NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO / NOT STARTED
+NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO / NOT STARTED
 ```
 
-M0 仍是 work order / contract review 文档任务，不是 code implementation。
+M1 仍是 work order / mock contract planning 文档任务，不是 code implementation。
