@@ -1,5 +1,44 @@
 # Decision Hub Testing
 
+## 2026-07-04 NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT final validation
+
+```text
+Scope:
+  - 本轮实现集中在 NQ dry-run worktree test scope。
+  - DH 只同步 docs/current current-state、API 边界、TESTING 与 WORKLOG。
+  - NQ dev 只做 NQ-DH / Integration-1 dirty diff 边界确认，未写入。
+  - 不修改 DH 代码、DH contracts、DH golden_cases、fixture JSON、OpenAPI、Controller、migration 或 runtime wiring。
+
+Result:
+  NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT: VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS
+  Next: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME
+  WORKSTREAM_MIXED_BLOCKED: NO
+  Integration-1 runtime: NOT STARTED
+  Real HTTP: NOT STARTED
+  Real provider: NOT STARTED
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| DH `git status --short` | PASS / CHANGES PRESENT | DH dirty 限于允许的 `docs/current` 文档。 |
+| DH `git diff --check` | PASS | 退出码 0。 |
+| DH `git diff --stat` | PASS / DOCS-ONLY | tracked diff 限于 `docs/current` 文档。 |
+| DH forbidden diff：`git diff --name-only -- dh-domain/src/main dh-usecase/src/main dh-memory/src/main dh-eval/src/main dh-connector/src/main dh-api/src/main dh-app/src/main dh-infra/src/main contracts golden_cases` | PASS / EMPTY | 未触达 DH 生产代码、contracts 或 golden_cases。 |
+| DH `mvn -ntp test` | PASS / BUILD SUCCESS | 19 个 reactor module SUCCESS；surefire reports 汇总 451 tests，0 failures，0 errors，4 skipped；Docker/Testcontainers 不可用导致 Docker-gated smoke skipped，非代码失败。 |
+| DH `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | quality profile validate 通过。 |
+| NQ dry-run worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=NqDhIntegration1StubRecorderNoSideEffectTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | PASS | `NqDhIntegration1StubRecorderNoSideEffectTest` 6 tests，0 failures，0 errors，0 skipped。 |
+| NQ dry-run worktree `mvn -ntp -f backend/pom.xml test` | PASS / BUILD SUCCESS | 23 个 backend reactor module SUCCESS；surefire reports 汇总 628 tests，0 failures，0 errors，4 skipped；仅保留既有 SLF4J / Mockito dynamic agent / unchecked / deprecation warning。 |
+| NQ dry-run worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test` | PASS | Integration-0 scoped tests 通过；不代表 Integration-1 runtime started。 |
+| NQ dry-run worktree `mvn -ntp -f backend/pom.xml -pl nq-app spotless:apply` | NOT AVAILABLE | Maven 未配置 `spotless` prefix；未将格式化写成已执行成功。 |
+| NQ dev pathspec diff | PASS / EMPTY | `docs/current/*NQ_DH*` 与 `docs/current/*INTEGRATION1*` 无 unstaged / staged diff；`WORKSTREAM_MIXED_BLOCKED: NO`。 |
+
+Boundary:
+
+未改 DH 代码；未改 DH `contracts/**`、`golden_cases/**` 或 fixture JSON；未新增 DH API path、Controller、migration、RealClient、provider、runtime wiring、AI / LangGraph 或 LIVE。NQ 侧实现仅在 dry-run worktree test scope；NQ production code、NQ dev、真实 HTTP、credential、order、risk、ledger、Paper Run、LIVE trading 均未触达。
+
 ## 2026-07-03 NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO 验证记录
 
 ```text

@@ -4,11 +4,11 @@
 > Owner: Decision Hub / NexusQuant Integration
 > Created: 2026-05-18
 
-## 0. 当前状态锁定（2026-07-03）
+## 0. 当前状态锁定（2026-07-04）
 
 ```text
-Current stage: NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_VALIDATION
-Next stage:    NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY
+Current stage: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS
+Next stage:    NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME
 DH-AUDIT-FIX completed
 NQ integration not started
 Integration-1 runtime implementation not started
@@ -24,7 +24,7 @@ Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
 
-当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成 planning / work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION` 已完成受控 test-support / mock-only guard implementation。`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY` 已完成 DH 侧 test-support dry-run entry harness 与 validation chain 测试支撑：覆盖 canonical header、tenant/request/trace binding、source allowlist、UTC `Z` timestamp、nonce replay、HMAC、contract shape、forbidden fields、mock-only orchestrator/provider boundary、safe summary 和 fail-closed normalization；不改 schema/contracts/golden_cases/fixture JSON，不新增 runtime endpoint、Controller、真实 HTTP、real provider、AI / LangGraph 或 LIVE。下一步唯一允许进入 `NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
+当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成 planning / work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION` 已完成受控 test-support / mock-only guard implementation。`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY` 已完成 DH 侧 test-support dry-run entry harness 与 validation chain 测试支撑。`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 已在 NQ dry-run worktree 测试范围新增 stub / recorder / no-side-effect guard：覆盖 request builder 安全形状、readonly recorder summary、forbidden execution / credential / HTTP shape、readonly bias、fail-closed record-only 与 production token scan；不改 DH 代码、schema/contracts/golden_cases/fixture JSON，不新增 runtime endpoint、Controller、真实 HTTP、real provider、AI / LangGraph 或 LIVE。下一步唯一允许进入 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
 
 Integration-0 safety gate 已 CLOSED / ACCEPTED。若未来重新进入 NQ runtime 相关工作，只能从基于 GateN 的 Integration-1 planning-only audit 开始；本文件中的 DH -> NQ REST API 控制面、`POST /api/ai/backtest-requests`、真实 HTTP / event、NQ client、RealClient、real provider 等方向均为 historical / superseded / deferred / gated，不代表当前 next 或当前 implementation。
 
@@ -157,7 +157,7 @@ PostMortemCreated
 
 ## 5. 数据流（historical / superseded / deferred / gated）
 
-以下数据流只保留为历史背景，不代表当前系统已经开始集成，也不是当前 runtime implementation。当前唯一下一步是 `NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY`，且仅限 NQ worktree test-support / no-side-effect stub recorder，不是 runtime implementation。
+以下数据流只保留为历史背景，不代表当前系统已经开始集成，也不是当前 runtime implementation。当前唯一下一步是 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME`，且仅限 joint mock contract tests，不是 runtime implementation。
 
 ```text
 User / NQ Console

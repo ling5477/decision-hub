@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_VALIDATION
-> Next stage:    NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY
+> Current stage: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS
+> Next stage:    NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,8 +34,8 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_VALIDATION.
-Next concrete action: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY.
+Current main line: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS.
+Next concrete action: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -46,6 +46,30 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.14 NQ-DH I1-IMP2 NQ Stub Recorder No-side-effect（2026-07-04，VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS）
+
+```text
+Task: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT
+Task type: CONTROLLED_IMPLEMENTATION + NQ_TEST_SUPPORT_STUB_RECORDER + NO_SIDE_EFFECT_GUARDS + WORKTREE_ONLY + MOCK_ONLY + NO_RUNTIME + NO_LIVE
+NQ test support: E:\Project\nexus-quant-i1-dryrun\backend\nq-app\src\test\java\com\guidinglight\nexusquant\app\integration1\NqDhIntegration1StubRecorderNoSideEffectTest.java
+DH code change: NONE
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NOT STARTED
+Real provider: NOT STARTED
+API / Controller: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+ALLOW_IMP2_CLOSE: YES
+ALLOW_I1_IMP3_JOINT_MOCK_CONTRACT_TESTS: YES
+Next concrete action: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME
+```
+
+- 本轮只在 NQ dry-run worktree 测试范围新增 stub / recorder / no-side-effect guard：覆盖 dry-run request builder 允许字段、forbidden execution / credential / HTTP shape、readonly recorder summary、`LONG_BIAS / SHORT_BIAS` 不映射 `BUY / SELL`、provider failure / high risk / no evidence / fail-closed / duplicate requestId record-only、生产路径无 `NQ_DRYRUN` / real dry-run client token。
+- 本轮未改 DH 代码、DH contracts、DH golden_cases、DH fixture JSON、OpenAPI、Controller、migration 或 runtime wiring；DH current docs 仅同步 IMP2 状态与下一步。
+- IMP2 不授权 `NQ_DRYRUN` 进入生产 source allowlist，不授权 dry-run endpoint、真实 HTTP client、RealClient、real provider、AI / LangGraph runtime、NQ mutation 或 LIVE。
 
 ## 1.0.13 NQ-DH I1-IMP1 DH Dry-run Test-support Entry（2026-07-03，IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_VALIDATION）
 
@@ -64,7 +88,7 @@ LangGraph runtime: NOT STARTED
 LIVE: DISABLED
 ALLOW_IMP1_CLOSE: YES
 ALLOW_I1_IMP2_NQ_STUB_RECORDER_NO_SIDE_EFFECT: YES
-Next concrete action: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY
+Next concrete action consumed: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS
 ```
 
 - 本轮只新增 DH 侧 test-support dry-run entry harness 与 validation chain 测试：payload size gate、canonical header、requestId / traceId / tenantId binding、source allowlist guard、UTC `Z` timestamp、nonce replay、value-based HMAC、schema/contract shape、forbidden fields、DecisionOrchestrator mock-only、provider guard、audit / trace / replay safe summary、structured `DecisionOutput` assembly 与 fail-closed normalization。

@@ -1,5 +1,57 @@
 # Decision Hub Worklog
 
+## 2026-07-04 NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT
+
+完成 `NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 的 DH 侧 current docs 同步与验证记录收口。实现集中在 NQ dry-run worktree test scope；DH 本轮不新增或修改生产 / 测试代码，不修改 contracts、golden_cases、fixture JSON、OpenAPI、Controller、migration 或 runtime wiring。
+
+### 修改文件
+
+```text
+docs/current/API.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### 结果
+
+```text
+NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT: VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS
+Next: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME
+ALLOW_IMP2_CLOSE: YES
+ALLOW_I1_IMP3_JOINT_MOCK_CONTRACT_TESTS: YES
+ALLOW_PRODUCTION_CODE_CHANGE: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_FIXTURE_IMPLEMENTATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_API_CONTROLLER_CHANGE: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### 验证
+
+- DH `git diff --check`：PASS。
+- DH forbidden diff：`dh-domain/src/main` / `dh-usecase/src/main` / `dh-memory/src/main` / `dh-eval/src/main` / `dh-connector/src/main` / `dh-api/src/main` / `dh-app/src/main` / `dh-infra/src/main` / `contracts` / `golden_cases` 均为空。
+- DH `mvn -ntp test`：PASS / BUILD SUCCESS；19 个 reactor module SUCCESS；surefire reports 汇总 451 tests，0 failures，0 errors，4 skipped；Docker/Testcontainers 不可用导致 Docker-gated smoke skipped，非代码失败。
+- DH `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS。
+- NQ targeted test：`NqDhIntegration1StubRecorderNoSideEffectTest` PASS；6 tests，0 failures，0 errors，0 skipped。
+- NQ full backend test：PASS / BUILD SUCCESS；23 个 backend reactor module SUCCESS；surefire reports 汇总 628 tests，0 failures，0 errors，4 skipped。
+- NQ dev pathspec diff：PASS / EMPTY；`WORKSTREAM_MIXED_BLOCKED: NO`。
+
+### 边界确认
+
+未改 DH 代码；未改 DH `contracts/**` 或 `golden_cases/**`；未新增 fixture JSON、API path、Controller、migration、runtime wiring、RealClient、real provider、AI / LangGraph 或 LIVE。未读取 credential / token / cookie / API secret / passphrase。IMP3 仍为下一步单独授权的 joint mock contract tests，不得据此启动 Integration-1 runtime。
+
 ## 2026-07-03 NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO
 
 完成 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO`。本轮只做 `WORK_ORDER_ONLY`：新增 joint mock fixture family 与 contract test batch 的实现前工单，冻结 M3 为 IMP0 前最后一个规划 WO，并将下一步切换为 `NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED`。NQ dev 仅只读检查，未写入。
