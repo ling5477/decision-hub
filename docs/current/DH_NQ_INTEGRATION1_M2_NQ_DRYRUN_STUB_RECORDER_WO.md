@@ -70,7 +70,7 @@ Implementation code allowed by M2: NO
 NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY
 ```
 
-M3 仍不得直接创建 fixture JSON、测试代码、schema/contracts/golden_cases、API、Controller、runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。M3 只允许进一步规划 joint mock fixtures and contract tests；若需要真正创建 fixture 或测试，必须在后续 implementation task 中单独授权。
+M3 已完成 work-order-only 收口，且未创建 fixture JSON、测试代码、schema/contracts/golden_cases、API、Controller、runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。M3 之后若需要真正创建 fixture 或测试，只能在受控 IMP0 或后续独立授权任务中执行。
 
 ## 6. Readiness decision
 
@@ -95,10 +95,20 @@ ALLOW_LIVE: NO
 
 DH 未新增 API path、Controller、OpenAPI、schema、contracts、golden_cases、fixture JSON、production code、test code、runtime endpoint、HTTP client、provider、AI runtime 或 LangGraph runtime。DH 不连接 NQ runtime、不访问 NQ DB、不修改 NQ 状态、不读取 credential、不输出 BUY / SELL / PLACE_ORDER / CANCEL_ORDER。
 
-## 8. 下一步
+## 8. M3 后续收口
+
+`NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已于 2026-07-03 完成 work-order-only 收口。M3 只规划 future fixture family 与 future contract test batch；未创建 fixture JSON，未写测试代码，未修改 schema、contracts、golden_cases、API、Controller、runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
+
+下一步不再继续创建 M4/M5 大规划工单，只允许进入：
 
 ```text
-NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY
+NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED
 ```
 
-下一步仍是 docs-only / work-order-only；不得直接进入 implementation。
+## 9. 下一步
+
+```text
+NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED
+```
+
+下一步是受控 test-support implementation batch，不是 runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。

@@ -1,12 +1,43 @@
 # Decision Hub 当前工单
 
-> 当前阶段: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / COMPLETED / WORK_ORDER_ONLY / NQ_DRYRUN_STUB_RECORDER_PLANNED / NOT IMPLEMENTED
-> 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order
-> 下一阶段: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED
+> 当前阶段: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED
+> 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order
+> 下一阶段: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED
 
 ## 1. 当前目标
 
-`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已完成 docs/factsource rebase，并 `CLOSED / ACCEPTED / DOCS-ONLY`。`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN` 已完成 planning-only 合同规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md`。`NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN` 已完成 planning-only fixture/schema/golden case 对齐规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md`。`NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN` 已完成 planning-only readiness 规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md`，并合并原 NQ stub / DH entry / joint mock validation 三个计划项。`NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX` 已完成 docs-only gate-fix：双仓 P3 提交状态已复核，schema gap 已归类。`NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO` 已完成 work-order-only 批次拆分，工单为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_MOCK_IMPLEMENTATION_WO.md`。`NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO` 已完成 contract gap close work order，工单为 `docs/current/DH_NQ_INTEGRATION1_M0_CONTRACT_GAP_CLOSE_WO.md`。`NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO` 已完成 DH dry-run contract entry mock work order，工单为 `docs/current/DH_NQ_INTEGRATION1_M1_DH_DRYRUN_CONTRACT_ENTRY_MOCK_WO.md`。`NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO` 已完成 NQ dry-run stub recorder work order，工单为 `docs/current/DH_NQ_INTEGRATION1_M2_NQ_DRYRUN_STUB_RECORDER_WO.md`。下一步唯一允许工作内容是 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED`。下一步仍只能写 joint mock fixtures and contract tests work order，不是 implementation code、runtime、真实 HTTP、real provider 或 LIVE。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已完成 docs/factsource rebase，并 `CLOSED / ACCEPTED / DOCS-ONLY`。`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN` 已完成 planning-only 合同规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md`。`NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN` 已完成 planning-only fixture/schema/golden case 对齐规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md`。`NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN` 已完成 planning-only readiness 规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md`，并合并原 NQ stub / DH entry / joint mock validation 三个计划项。`NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX` 已完成 docs-only gate-fix：双仓 P3 提交状态已复核，schema gap 已归类。`NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO` 已完成 work-order-only 批次拆分，工单为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_MOCK_IMPLEMENTATION_WO.md`。`NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO` 已完成 contract gap close work order，工单为 `docs/current/DH_NQ_INTEGRATION1_M0_CONTRACT_GAP_CLOSE_WO.md`。`NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO` 已完成 DH dry-run contract entry mock work order，工单为 `docs/current/DH_NQ_INTEGRATION1_M1_DH_DRYRUN_CONTRACT_ENTRY_MOCK_WO.md`。`NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO` 已完成 NQ dry-run stub recorder work order，工单为 `docs/current/DH_NQ_INTEGRATION1_M2_NQ_DRYRUN_STUB_RECORDER_WO.md`。`NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成 final work-order-only 收口，工单为 `docs/current/DH_NQ_INTEGRATION1_M3_JOINT_MOCK_FIXTURES_AND_CONTRACT_TESTS_WO.md`。下一步唯一允许工作内容是 `NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED`；不再继续创建 M4/M5 大规划文档。下一步仍不是 runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+
+## 0.0B NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO（COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED）
+
+工单产物：
+
+```text
+docs/current/DH_NQ_INTEGRATION1_M3_JOINT_MOCK_FIXTURES_AND_CONTRACT_TESTS_WO.md
+```
+
+本工单只规划 future joint mock fixture families 与 contract test batches。结论如下：
+
+```text
+Fixture families planned: 23
+Contract test batches planned: 14
+ALLOW_M3_WO_CLOSE: YES
+ALLOW_I1_IMP0_CONTRACT_GAP_TEST_SUPPORT_IMPLEMENTATION: YES
+ALLOW_MORE_PLANNING_WO: NO
+ALLOW_I1_RUNTIME: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_FIXTURE_IMPLEMENTATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_API_CONTROLLER_CHANGE: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+下一步唯一允许动作是 `NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED`。IMP0 只允许 test-support / mock-only source handling、canonical error mapping test-support 与 fixture schema support guard；不得创建 M4/M5 大规划文档，不得启动 runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
 
 ## 0.0A NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO（COMPLETED / WORK_ORDER_ONLY / NQ_DRYRUN_STUB_RECORDER_PLANNED / NOT IMPLEMENTED）
 
@@ -39,7 +70,7 @@ ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
 
-下一步唯一允许动作是 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED`。M3 仍是 work order，不允许直接创建 fixture JSON、测试代码、schema/contracts/golden_cases、API、Controller、runtime、真实 HTTP、real provider 或 LIVE。
+M3 已完成 work-order-only 收口，当前下一步唯一允许动作是 `NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED`。IMP0 仍不允许直接创建 runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
 
 ## 0.0 NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO（COMPLETED / WORK_ORDER_ONLY / DH_DRYRUN_ENTRY_PLANNED / NOT IMPLEMENTED）
 
@@ -72,7 +103,7 @@ ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
 
-M2 已完成 NQ dry-run stub recorder work order planning。当前唯一允许动作是 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED`。M3 仍是 work order，不允许直接 implementation。
+M2 已完成 NQ dry-run stub recorder work order planning，M3 已完成 final work-order-only 收口。当前唯一允许动作是 `NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED`；不得直接进入 runtime implementation。
 
 ## 0. NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO（COMPLETED / WORK_ORDER_ONLY / CONTRACT_GAP_CLOSED / NOT IMPLEMENTED）
 

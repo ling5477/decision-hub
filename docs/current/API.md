@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / COMPLETED / WORK_ORDER_ONLY / NQ_DRYRUN_STUB_RECORDER_PLANNED / NOT IMPLEMENTED
-下一阶段: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED
+当前阶段: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED
+下一阶段: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -87,6 +87,8 @@ M0 contract gap close 结论：dry-run endpoint shape 的推荐形态为 `Option
 M1 dry-run contract entry mock work order 结论：`RECOMMENDED_ENTRY_SHAPE = Option C / test-support mock-only / no runtime endpoint`；M1 只规划 contract validation chain、source allowlist、error taxonomy、audit / trace / replay 边界和 fail-closed normalization。若未来新增 dry-run HTTP endpoint、Controller、OpenAPI path、schema header 或 envelope field，必须另起 API / contract / security review；当前 API 文档不得把 M1 写成已实现 endpoint。
 
 M2 NQ dry-run stub recorder work order 结论：`RECOMMENDED_STUB_SHAPE = test-support mock-only stub + in-memory recorder plan, no runtime HTTP client`。M2 不新增 DH API，不新增 NQ client，不新增 HTTP endpoint，不修改 OpenAPI 或 JSON Schema；request builder / recorder 仅为后续 test-support planning。若未来需要真实 client 或 endpoint，必须另起 API / contract / security / no-side-effect review。
+
+M3 joint mock fixtures and contract tests work order 结论：M3 只规划 23 类 future fixture family 与 14 个 future contract test batch，不新增 API / endpoint / Controller，不修改 OpenAPI、JSON Schema、`contracts/**` 或 `golden_cases/**`，不创建 fixture JSON，不写测试代码。下一步 IMP0 只允许 test-support / mock-only source handling、canonical error mapping test-support 与 fixture schema support guard；任何 dry-run HTTP endpoint、Controller 或 OpenAPI 变更仍必须另起 API / contract / security review。
 
 ## 4. Stage1 最小 API 集合（已实现，留作历史记录）
 

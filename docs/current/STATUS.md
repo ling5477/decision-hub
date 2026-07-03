@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / COMPLETED / WORK_ORDER_ONLY / NQ_DRYRUN_STUB_RECORDER_PLANNED / NOT IMPLEMENTED
-> Next stage:    NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED
+> Current stage: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED
+> Next stage:    NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,8 +34,8 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / COMPLETED / WORK_ORDER_ONLY / NQ_DRYRUN_STUB_RECORDER_PLANNED / NOT IMPLEMENTED.
-Next concrete action: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED.
+Current main line: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED.
+Next concrete action: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -46,6 +46,34 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.11 NQ-DH I1-M3 Joint Mock Fixtures And Contract Tests WO（2026-07-03，COMPLETED / WORK_ORDER_ONLY）
+
+```text
+Task: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO
+Task type: WORK_ORDER_ONLY + JOINT_MOCK_FIXTURE_TEST_PLANNING + CONTRACT_TEST_BATCH_DESIGN + FINAL_WO_BEFORE_IMPLEMENTATION + SECURITY_BOUNDARY + NO_RUNTIME + NO_LIVE
+Artifact: docs/current/DH_NQ_INTEGRATION1_M3_JOINT_MOCK_FIXTURES_AND_CONTRACT_TESTS_WO.md
+DH dev precheck: clean
+NQ dry-run worktree precheck: clean
+NQ dev precheck: NQ_MAINLINE_DIRTY_ALLOWED
+NQ dev NQ-DH / Integration-1 dirty diff: none
+WORKSTREAM_MIXED_BLOCKED: NO
+Integration-1 implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NOT STARTED
+Real provider: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+Next concrete action: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED
+```
+
+- 本轮只生成 joint mock fixtures and contract tests 的 M3 工作订单；不写 production code / test code，不创建 fixture JSON，不改 `contracts/**` 或 `golden_cases/**`，不新增 OpenAPI path / Controller / migration，不启动 runtime，不真实 HTTP，不接 real provider，不接 AI / Agent runtime / LangGraph / LIVE。
+- M3 固化 23 类 future fixture family：valid dry-run request、valid readonly response、invalid/missing signature、timestamp skew、nonce replay、source denied、payload too large、rate limited、tenant mismatch、forbidden credential/order/account/trade fields、provider disabled/timeout/budget exceeded、risk blocked、no evidence fail-closed、internal fail-closed、long/short bias readonly、no real URL、no credential、no outbound。
+- M3 固化 14 个 future contract test batch：DH validator shape、NQ request builder shape、NQ recorder no-side-effect、joint fixture parse、forbidden field fail-closed、source denied、UTC Z timestamp、HMAC material、tenant/requestId/traceId binding、error taxonomy、no-order/no-risk/no-ledger/no-paper/no-live scan、no real HTTP/no outbound、no credential logging/persistence、DH golden_cases compatibility smoke。
+- `ALLOW_M3_WO_CLOSE: YES`；`ALLOW_I1_IMP0_CONTRACT_GAP_TEST_SUPPORT_IMPLEMENTATION: YES`；`ALLOW_MORE_PLANNING_WO: NO`；`ALLOW_I1_RUNTIME: NO`；`ALLOW_REAL_HTTP: NO`；`ALLOW_REAL_PROVIDER: NO`；`ALLOW_SCHEMA_CHANGE: NO`；`ALLOW_CONTRACTS_MODIFICATION: NO`；`ALLOW_FIXTURE_IMPLEMENTATION: NO`；`ALLOW_GOLDEN_CASES_MODIFICATION: NO`；`ALLOW_API_CONTROLLER_CHANGE: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- 下一步只允许 `NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`，且只允许 test-support / mock-only source handling、canonical error mapping test-support 与 fixture schema support guard；不得创建 M4/M5 大规划文档。
 
 ## 1.0.10 NQ-DH I1-M2 NQ Dry-run Stub Recorder WO（2026-07-03，COMPLETED / WORK_ORDER_ONLY）
 
@@ -66,7 +94,7 @@ Real provider: NOT STARTED
 AI / Agent runtime: NOT STARTED
 LangGraph runtime: NOT STARTED
 LIVE: DISABLED
-Next concrete action: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED
+Next concrete action after M2: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED
 ```
 
 - 本轮只记录 NQ 侧 dry-run stub / request builder / recorder 的 M2 工作订单和 DH 只读依赖；不写 production code / test code，不创建 fixture JSON，不改 `contracts/**` 或 `golden_cases/**`，不新增 OpenAPI path / Controller / migration，不启动 runtime，不真实 HTTP，不接 real provider，不接 AI / Agent runtime / LangGraph / LIVE。

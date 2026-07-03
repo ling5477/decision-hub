@@ -1,5 +1,49 @@
 # Decision Hub Testing
 
+## 2026-07-03 NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO 验证记录
+
+```text
+Scope:
+  - 本轮只完成 M3 joint mock fixtures and contract tests work order。
+  - 新增 DH M3 工单并同步 DH current docs 到 IMP0 next。
+  - 同步 NQ dry-run worktree M3 工单与 current docs 状态。
+  - NQ dev 只读；未修改 NQ dev 文件。
+  - 不修改 production/test code、contracts、golden_cases、fixture JSON、API、migration 或 runtime wiring。
+
+Result:
+  NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO: COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED
+  Next: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED
+  WORKSTREAM_MIXED_BLOCKED: NO
+  Integration-1 runtime: NOT STARTED
+  Real HTTP: NOT STARTED
+  Real provider: NOT STARTED
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS / CHANGES PRESENT | DH dirty 限于允许的 current docs 和新增 M3 WO；NQ dry-run worktree dirty 限于允许的 current docs 和新增 M3 WO。 |
+| `git branch --show-current` | PASS | DH 分支为 `dev`；NQ dry-run worktree 分支为 `nq-dh-i1-dryrun`；NQ dev 分支为 `dev`。 |
+| `git rev-parse HEAD` | PASS | Precheck snapshot：DH HEAD `c8166f2ff63933604808343db5e535bc3d9267a9`；NQ dry-run worktree HEAD `c651110890e79609ad1ac56f3b98955a4b4708e9`；NQ dev HEAD `78542b6032802553a00b61294cad2a6df052d154`。Final spot-check：NQ dev HEAD `91c4abecf497f196f861fa3a4dc89d23d1d58427`；本轮未写 NQ dev。 |
+| DH `git diff --check` | PASS | 退出码 0；仅 Windows LF/CRLF 工作区提示，非阻断。 |
+| NQ dry-run worktree `git diff --check` | PASS | 退出码 0；仅 Windows LF/CRLF 工作区提示，非阻断。 |
+| DH `git diff --stat` | PASS / DOCS-ONLY | tracked diff 限于文档；新增 M3 WO 由 `git status --short` 标识。 |
+| NQ dry-run worktree `git diff --stat` | PASS / DOCS-ONLY | tracked diff 限于文档；新增 M3 WO 由 `git status --short` 标识。 |
+| DH `git diff --name-only -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases` | PASS / EMPTY | 禁止的生产代码、测试代码、contracts、golden_cases 范围无 diff。 |
+| NQ dry-run worktree `git diff --name-only -- backend frontend research scripts deploy .github "backend/**/db/migration"` | PASS / EMPTY | NQ backend、frontend、research、scripts、deploy、workflow、migration 范围无 diff。 |
+| NQ dev `git diff --name-only -- "docs/current/*NQ_DH*" "docs/current/*INTEGRATION1*"` | PASS / EMPTY | NQ dev 无 NQ-DH / Integration1 unstaged diff；`WORKSTREAM_MIXED_BLOCKED: NO`。 |
+| NQ dev `git diff --name-only --cached -- "docs/current/*NQ_DH*" "docs/current/*INTEGRATION1*"` | PASS / EMPTY | NQ dev 无 NQ-DH / Integration1 staged diff；初始 precheck 曾观察到非 NQ-DH dirty，final spot-check `git status --short` 返回空；本轮未写 NQ dev。 |
+| DH `mvn -ntp test` | PASS / BUILD SUCCESS | 19 个 DH reactor module 全部 `SUCCESS`；Docker/Testcontainers 不可用导致 Docker-gated smoke tests skipped，非代码失败。 |
+| DH `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 DH reactor module 全部 `SUCCESS`；Checkstyle 0 violations；Spotless check passed。 |
+| NQ dry-run worktree `mvn -ntp -f backend/pom.xml test` | PASS / BUILD SUCCESS | 23 个 backend reactor module 全部 `SUCCESS`；`nq-app` 86 tests 中 2 skipped；既有 SLF4J / Mockito dynamic agent / unchecked / deprecation warning 非阻断。 |
+| NQ dry-run worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test` | PASS / BUILD SUCCESS | Integration-0 contract/security/no-side-effect 3 个测试类共 17 tests，0 failures / 0 errors / 0 skipped；不代表 Integration-1 runtime started。 |
+
+Boundary:
+
+未改 Java / Kotlin / Python / TypeScript 生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path / Controller / migration；未新增 fixture JSON；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient；未新增真实 Provider；未读取或输出 credential / token / cookie / API secret / passphrase；未接 AI / LangGraph；未启动 Integration-1 runtime；未开启 LIVE；未让 DH 输出进入 order、risk mutation、ledger mutation、Paper Run 或 private trading 路径。
+
 ## 2026-07-03 NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO final validation
 
 ```text

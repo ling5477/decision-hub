@@ -1,5 +1,75 @@
 # Decision Hub Worklog
 
+## 2026-07-03 NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO
+
+完成 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO`。本轮只做 `WORK_ORDER_ONLY`：新增 joint mock fixture family 与 contract test batch 的实现前工单，冻结 M3 为 IMP0 前最后一个规划 WO，并将下一步切换为 `NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED`。NQ dev 仅只读检查，未写入。
+
+### 新增文件
+
+```text
+docs/current/DH_NQ_INTEGRATION1_M3_JOINT_MOCK_FIXTURES_AND_CONTRACT_TESTS_WO.md
+```
+
+### 修改文件
+
+```text
+README.md
+docs/current/API.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/DH_NQ_INTEGRATION1_DRYRUN_MOCK_IMPLEMENTATION_WO.md
+docs/current/DH_NQ_INTEGRATION1_M2_NQ_DRYRUN_STUB_RECORDER_WO.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### 结果
+
+```text
+NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO: COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED
+Next: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED
+ALLOW_M3_WO_CLOSE: YES
+ALLOW_I1_IMP0_CONTRACT_GAP_TEST_SUPPORT_IMPLEMENTATION: YES
+ALLOW_MORE_PLANNING_WO: NO
+ALLOW_I1_RUNTIME: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_FIXTURE_IMPLEMENTATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_API_CONTROLLER_CHANGE: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### M3 范围
+
+- 规划 23 类 joint mock fixtures，覆盖 valid dry-run、readonly response、签名缺失/错误、timestamp skew、nonce replay、source denied、payload too large、rate limited、tenant mismatch、credential/order/account/quantity/price/leverage/BUY/SELL forbidden field、provider disabled/timeout/budget exceeded、risk blocked、no evidence fail-closed、internal fail-closed、long/short bias readonly、no real URL、no credential、no outbound。
+- 规划 14 组 contract test batches，覆盖 DH contract validator、NQ request builder、NQ recorder no-side-effect、joint fixture parse、forbidden field fail-closed、source denied、UTC `Z` timestamp、HMAC signature material、tenant/requestId/traceId binding、error taxonomy mapping、no-order/no-risk/no-ledger/no-paper/no-live scan、no real HTTP/no outbound、credential logging/persistence、golden_cases compatibility smoke。
+- 明确 M3 不创建 fixture JSON、不改 schema/contracts/golden_cases、不新增 API/controller/migration/runtime/provider/AI/LangGraph/LIVE。
+
+### 验证
+
+- `git status --short`：PASS / CHANGES PRESENT；DH dirty 限于允许的 current docs 和新增 M3 WO。
+- `git diff --check`：PASS；退出码 0，仅 Windows LF/CRLF warning。
+- `git diff --stat`：PASS / DOCS-ONLY；tracked diff 限于文档。
+- forbidden diff：`dh-domain` / `dh-usecase` / `dh-memory` / `dh-eval` / `dh-connector` / `dh-api` / `dh-app` / `dh-infra` / `contracts` / `golden_cases` 均为空。
+- NQ dry-run worktree forbidden diff：`backend` / `frontend` / `research` / `scripts` / `deploy` / `.github` / migration 均为空。
+- NQ dev pathspec diff：PASS / EMPTY；`docs/current/*NQ_DH*` 与 `docs/current/*INTEGRATION1*` 无 unstaged 或 staged diff，`WORKSTREAM_MIXED_BLOCKED: NO`。初始 precheck 曾观察到非 NQ-DH dirty，final spot-check `git status --short` 返回空；本轮未写 NQ dev。
+- DH `mvn -ntp test`：PASS / BUILD SUCCESS；19 个 DH reactor module SUCCESS；Docker/Testcontainers 不可用导致 Docker-gated smoke tests skipped，非代码失败。
+- DH `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS；19 个 DH reactor module SUCCESS；Checkstyle 0 violations；Spotless check passed。
+- NQ dry-run worktree `mvn -ntp -f backend/pom.xml test`：PASS / BUILD SUCCESS；23 个 backend reactor module SUCCESS；`nq-app` 86 tests 中 2 skipped。
+- NQ dry-run worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test`：PASS / BUILD SUCCESS；Integration-0 contract/security/no-side-effect 3 个测试类共 17 tests，0 failures / 0 errors / 0 skipped。
+
+### 边界确认
+
+未改生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path、Controller、Client、Repository、Service、migration、fixture JSON 或 CI workflow；未真实 HTTP；未启动 NQ/DH runtime；未读取 credential；未接 RealClient、real provider、AI 或 LangGraph；未开启 LIVE；未让 DH 输出进入 order、risk mutation、ledger mutation、Paper Run 或 private trading 路径。
+
 ## 2026-07-03 NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO final validation
 
 完成 `NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO`。本轮只做 `WORK_ORDER_ONLY`：关闭 `NQ_DRYRUN` source allowlist、canonical error taxonomy、dry-run endpoint shape、schema alias / envelope gap 的 before-code 裁决；同步 DH current docs 与 NQ dry-run worktree current docs；NQ dev 仅只读检查，未写入。
