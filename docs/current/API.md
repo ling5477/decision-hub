@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-下一阶段: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+当前阶段: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX
+下一阶段: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -26,7 +26,7 @@ AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为 API 单源；DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`，本轮 P3 dry-run implementation readiness plan 不新增 API path、不新增 Controller、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但尚未成为已实现 API；replay API 仍未实现。DH dry-run entry 是否需要新 endpoint 仍为 `REVIEW_REQUIRED`，必须在 P4 或后续 API review 中单独裁决。
+OpenAPI 仍为 API 单源；DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`，P4 gate-fix 不新增 API path、不新增 Controller、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但尚未成为已实现 API；replay API 仍未实现。DH dry-run entry 是否需要新 endpoint 仍为 `REVIEW_REQUIRED`，必须在后续 API / contract review 中单独裁决；`NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO` 不授权新增 endpoint。
 
 ## 2. 已实现端点
 
@@ -79,6 +79,8 @@ Runtime HTTP: NOT STARTED
 ```
 
 P2 已确认计划字段中 `dryRun / decisionId / confidence / traceSummary / replayRef / auditRef / X-NQ-DH-Schema-Version` 仍属于 schema gap / envelope planning；当前 API、OpenAPI 与 JSON Schema 均未实现这些 wire-level 字段。后续若需要字段扩展或 fixture 落地，必须先进入独立 contract review；不得把 P2 planning 写成已实现 API。
+
+P4 gate-fix 结论：上述 gap 字段在下一步 `NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO` 中只能作为 `DOC_ONLY_ALIAS` 或 future envelope planning，不进入 required fixture、OpenAPI、JSON Schema 或 Controller；`X-NQ-DH-Schema-Version` header 也未实现。`source=NQ_DRYRUN`、canonical error code names 与 dry-run endpoint shape 仍需 contract review before code，不得写成已实现 API。
 
 ## 4. Stage1 最小 API 集合（已实现，留作历史记录）
 

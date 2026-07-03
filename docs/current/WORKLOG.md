@@ -1,8 +1,65 @@
 # Decision Hub Worklog
 
+## 2026-07-03 NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX final validation
+
+完成 NQ-DH Integration-1 P4 implementation gate review fix。本轮只做 docs-only / gate-fix：确认双仓 P3 docs 已提交并可继续；把 `dryRun / decisionId / confidence / traceSummary / replayRef / auditRef / X-NQ-DH-Schema-Version` 归为 `DOC_ONLY_ALIAS` 或 future envelope planning；把 `NQ_DRYRUN` source allowlist、canonical error code names、dry-run endpoint shape 归为 `NEEDS_CONTRACT_REVIEW_BEFORE_CODE`；确认 `DecisionAction` whitelist 和 fixed `ForbiddenAction` list 为 `EXISTS_NOW`；确认 trading executable fields 继续 `PROHIBITED`。
+
+### 修改文件
+
+```text
+docs/current/API.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md
+docs/current/DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md
+docs/current/DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md
+docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### 结果
+
+```text
+NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX: COMPLETED / DOCS-ONLY / GATE-FIX
+Current next: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
+ALLOW_I1_P4_IMPLEMENTATION_GATE_REVIEW_FIX_CLOSE: YES
+ALLOW_I1_P4_RETRY: YES
+ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_CODE: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_FIXTURE_IMPLEMENTATION: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### 验证
+
+- `git status --short`：PASS / CHANGES PRESENT；dirty 限于允许的 `docs/current` 文档。
+- `git diff --check`：PASS；退出码 0，仅 Windows LF/CRLF warning。
+- `git diff --stat`：PASS / DOCS-ONLY。
+- forbidden diff：`dh-domain` / `dh-usecase` / `dh-memory` / `dh-eval` / `dh-connector` / `dh-api` / `dh-app` / `dh-infra` / `contracts` / `golden_cases` 均为空。
+- stale old next scan：PASS / EMPTY；`docs/current` 无旧 P4 not-started next 残留。
+- `mvn -ntp test`：PASS / BUILD SUCCESS；19 个 reactor module SUCCESS；`PostgresContainerSmokeTest` 因本地 Docker/Testcontainers 环境不可用 skip 1，非代码失败。
+- `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS；Checkstyle 0 violations；Spotless check passed。
+
+### 边界确认
+
+未改生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path、Controller、Client、Repository、Service、migration、fixture JSON 或 CI workflow；未真实 HTTP；未启动 NQ/DH runtime；未读取 credential；未接 real provider、AI 或 LangGraph；未开启 LIVE；未让 DH 输出进入 order、risk mutation、ledger mutation、Paper Run 或 private trading 路径。
+
 ## 2026-07-03 NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN final validation
 
-完成 NQ-DH Integration-1 P3 dry-run implementation readiness plan 收口。本轮只做 docs-only / plan-only：新增 DH canonical readiness plan；合并原 `NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN`、`NQ-DH-I1-P4-DH-DRYRUN-ENTRY-PLAN`、`NQ-DH-I1-P5-JOINT-MOCK-VALIDATION-PLAN` 三个后续 planning 任务；当前 next 为 `NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED`；不创建 fixture JSON，不修改 contracts、golden_cases、生产代码、测试代码、API、migration、runtime client、provider 或真实 HTTP。
+完成 NQ-DH Integration-1 P3 dry-run implementation readiness plan 收口。本轮只做 docs-only / plan-only：新增 DH canonical readiness plan；合并原 `NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN`、`NQ-DH-I1-P4-DH-DRYRUN-ENTRY-PLAN`、`NQ-DH-I1-P5-JOINT-MOCK-VALIDATION-PLAN` 三个后续 planning 任务；该 P3 next 已由 `NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX` 消费，当前 next 为 `NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED`；不创建 fixture JSON，不修改 contracts、golden_cases、生产代码、测试代码、API、migration、runtime client、provider 或真实 HTTP。
 
 ### 新增文件
 
@@ -31,7 +88,8 @@ docs/current/WORKLOG.md
 ```text
 NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
 Canonical plan: docs/current/DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md
-Current next: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+P3 next consumed by: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX
+Current next: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
 ALLOW_I1_P3_DRYRUN_IMPLEMENTATION_READINESS_PLAN_CLOSE: YES
 ALLOW_I1_P4_IMPLEMENTATION_GATE_REVIEW: YES
 ALLOW_SCHEMA_CHANGE: NO
@@ -63,7 +121,7 @@ ALLOW_LIVE: NO
 
 ## 2026-07-02 NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN final validation
 
-完成 NQ-DH Integration-1 P2 contract fixtures plan 收口。本轮只做 docs-only / plan-only：新增 DH canonical fixtures plan；原 P2 next 已由 `NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED` 消费，当前 next 为 `NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED`；不创建 fixture JSON，不修改 contracts、golden_cases、生产代码、测试代码、API、migration、runtime client、provider 或真实 HTTP。
+完成 NQ-DH Integration-1 P2 contract fixtures plan 收口。本轮只做 docs-only / plan-only：新增 DH canonical fixtures plan；原 P2 next 已由 `NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED` 与 `NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX` 消费，当前 next 为 `NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED`；不创建 fixture JSON，不修改 contracts、golden_cases、生产代码、测试代码、API、migration、runtime client、provider 或真实 HTTP。
 
 ### 新增文件
 
@@ -92,7 +150,8 @@ docs/current/WORKLOG.md
 NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
 Canonical plan: docs/current/DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md
 P2 next consumed by: NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-Current next: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+P2 next consumed by: NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN and NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX
+Current next: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
 ALLOW_I1_P2_CONTRACT_FIXTURES_PLAN_CLOSE: YES
 ALLOW_I1_P3_DRYRUN_IMPLEMENTATION_READINESS_PLAN: YES / COMPLETED / PLAN ONLY
 ALLOW_I1_P4_IMPLEMENTATION_GATE_REVIEW: YES

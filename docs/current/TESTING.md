@@ -1,5 +1,41 @@
 # Decision Hub Testing
 
+## 2026-07-03 NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX final validation
+
+```text
+Scope:
+  - 本轮只做 NQ-DH Integration-1 P4 implementation gate review fix。
+  - DH current docs 同步 P4 gate-fix 结论、schema gap 分类和下一步 WO。
+  - 不修改 production/test code、contracts、golden_cases、fixture JSON、API、migration 或 runtime wiring。
+
+Result:
+  NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX: COMPLETED / DOCS-ONLY / GATE-FIX
+  Current next: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
+  Integration-1 implementation: NOT STARTED
+  Integration-1 runtime: NOT STARTED
+  Runtime integration: NOT STARTED
+  Real HTTP: NOT STARTED
+  Real provider: NOT STARTED
+  DH integrated: NO
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS / CHANGES PRESENT | 当前 dirty 限于允许的 `docs/current` 文档。 |
+| `git diff --check` | PASS | 退出码 0；仅 Windows LF/CRLF 工作区提示，非阻断。 |
+| `git diff --stat` | PASS / DOCS-ONLY | tracked diff 限于 `docs/current` 文档。 |
+| `git diff --name-only -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases` | PASS / EMPTY | 禁止的生产代码、测试代码、contracts、golden_cases 范围无 diff。 |
+| stale old-next scan | PASS / EMPTY | current docs 已无旧 P4 not-started next 残留；验证记录不保留完整旧 next 字符串，避免后续自匹配。 |
+| `mvn -ntp test` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 `SUCCESS`；`PostgresContainerSmokeTest` 因本地 Docker/Testcontainers 环境不可用 skip 1，非代码失败。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 `SUCCESS`；Checkstyle 0 violations；Spotless check passed。 |
+
+Boundary:
+
+未改 Java / Kotlin / Python / TypeScript 生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path / Controller / migration；未新增 fixture JSON；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient；未新增真实 Provider；未读取或输出 credential / token / cookie / API secret / passphrase；未接 AI / LangGraph；未启动 Integration-1 runtime；未开启 LIVE。
+
 ## 2026-07-03 NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN final validation
 
 ```text
@@ -10,7 +46,8 @@ Scope:
 
 Result:
   NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-  Current next: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+  P3 next consumed by: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX
+  Current next: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
   Integration-1 implementation: NOT STARTED
   Integration-1 runtime: NOT STARTED
   Runtime integration: NOT STARTED
@@ -47,7 +84,8 @@ Scope:
 Result:
   NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
   P2 next consumed by: NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-  Current next: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+  P2 next consumed by: NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN and NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX
+  Current next: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
   Integration-1 implementation: NOT STARTED
   Integration-1 runtime: NOT STARTED
   Runtime integration: NOT STARTED

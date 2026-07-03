@@ -280,13 +280,13 @@ P1 不新增 API、Controller、client、provider、Repository、Service、migra
 
 ## 12. 下一步
 
-本计划 baseline、I1-P0 factsource rebase、I1-P1 contract dry-run plan、I1-P2 contract fixtures plan 与 I1-P3 dry-run implementation readiness plan 已关闭。下一步只允许进入：
+本计划 baseline、I1-P0 factsource rebase、I1-P1 contract dry-run plan、I1-P2 contract fixtures plan、I1-P3 dry-run implementation readiness plan 与 I1-P4 implementation gate review fix 已关闭。下一步只允许进入：
 
 ```text
-NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
 ```
 
-P4 仍只能做 implementation gate review，不是 runtime implementation。若后续发现 NQ GateN / GateO 与 DH Stage4 facts 仍有 current-source 冲突，则改走：
+下一步仍只能写 mock/stub/test-support work order，不是 runtime implementation。若后续发现 NQ GateN / GateO 与 DH Stage4 facts 仍有 current-source 冲突，则改走：
 
 ```text
 NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN-FIX

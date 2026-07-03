@@ -4,11 +4,11 @@
 > Owner: Decision Hub / NexusQuant Integration
 > Created: 2026-05-18
 
-## 0. 当前状态锁定（2026-07-02）
+## 0. 当前状态锁定（2026-07-03）
 
 ```text
-Current stage: NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-Next stage:    NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+Current stage: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX
+Next stage:    NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
 DH-AUDIT-FIX completed
 NQ integration not started
 Integration-1 implementation not started
@@ -24,11 +24,11 @@ Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
 
-当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已完成两仓当前事实源同步、旧 GateK Integration-1 当前主线移除和 dry-run boundary 确认；`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN` 已完成 plan-only 合同规划，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md`；`NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN` 已完成 plan-only fixtures / schema gap / golden case alignment 规划，计划文档为 `DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md`；`NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN` 已完成 plan-only readiness 规划，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md`，并合并原 NQ stub / DH entry / joint mock validation 三个计划项。下一步唯一允许进入 `NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED`，且仍为 gate review，不是 implementation。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
+当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已完成两仓当前事实源同步、旧 GateK Integration-1 当前主线移除和 dry-run boundary 确认；`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN` 已完成 plan-only 合同规划，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md`；`NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN` 已完成 plan-only fixtures / schema gap / golden case alignment 规划，计划文档为 `DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md`；`NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN` 已完成 plan-only readiness 规划，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md`，并合并原 NQ stub / DH entry / joint mock validation 三个计划项。`NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX` 已完成 docs-only gate-fix 与 schema gap 分类；下一步唯一允许进入 `NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED`，且仍为 work order，不是 implementation。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
 
 Integration-0 safety gate 已 CLOSED / ACCEPTED。若未来重新进入 NQ runtime 相关工作，只能从基于 GateN 的 Integration-1 planning-only audit 开始；本文件中的 DH -> NQ REST API 控制面、`POST /api/ai/backtest-requests`、真实 HTTP / event、NQ client、RealClient、real provider 等方向均为 historical / superseded / deferred / gated，不代表当前 next 或当前 implementation。
 
-Integration-1 dry-run 后续 P4 最多只能做：
+Integration-1 dry-run 后续 work order 最多只能规划：
 
 ```text
 NQ -> DH dry-run request contract planning
@@ -157,7 +157,7 @@ PostMortemCreated
 
 ## 5. 数据流（historical / superseded / deferred / gated）
 
-以下数据流只保留为历史背景，不代表当前系统已经开始集成，也不是当前 implementation。当前唯一下一步是 `NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED`，且仍为 gate review，不是 runtime implementation。
+以下数据流只保留为历史背景，不代表当前系统已经开始集成，也不是当前 implementation。当前唯一下一步是 `NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED`，且仍为 work order，不是 runtime implementation。
 
 ```text
 User / NQ Console

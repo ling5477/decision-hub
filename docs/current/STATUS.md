@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-> Next stage:    NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+> Current stage: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX
+> Next stage:    NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,8 +34,8 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED.
-Next concrete action: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED.
+Current main line: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX.
+Next concrete action: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -46,6 +46,30 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.6 NQ-DH I1-P4 Implementation Gate Review Fix（2026-07-03，COMPLETED / DOCS-ONLY）
+
+```text
+Task: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX
+Task type: DOCS_ONLY + GATE_REVIEW_FIX + SCHEMA_GAP_CONTRACT_REVIEW + CROSS_REPO_BOUNDARY_RECHECK + NO_RUNTIME + NO_LIVE
+DH P3 commit status: CLEAN / SUBMITTED at 1fb16c20613411b42a2e9df3880d04d220fe1f36
+NQ P3 commit status: CLEAN / SUBMITTED at 5c6bc895cb63e0990fd662c11cd3cfc6b7df2d05
+P0/P1/P2/P3 docs: SUBMITTED / CLOSED-FOR-P4-GATE
+Integration-1 implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NOT STARTED
+Real provider: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+Next concrete action: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
+```
+
+- P4 fix 只关闭上一轮 gate review 的文档阻塞和 schema gap review 阻塞；不实施代码、不新增测试、不改 `contracts/**`、不改 `golden_cases/**`、不创建 fixture JSON、不新增 API path / Controller / migration。
+- Contract review 结论：`DecisionAction` vocabulary 与固定 `ForbiddenAction` list 为 `EXISTS_NOW`；`dryRun`、`decisionId`、`confidence`、`traceSummary`、`replayRef`、`auditRef`、`X-NQ-DH-Schema-Version` 当前不进入 required fixture / schema / code，只能作为 `DOC_ONLY_ALIAS` 或 future envelope planning；`NQ_DRYRUN` source、canonical error code names 与 dry-run endpoint shape 只允许作为后续 WO 的 mock/test-support 约束，不得写成已实现 runtime。
+- P4 fix 不要求 schema change；后续 WO 只能基于现有 `DecisionRequest` / `DecisionOutput` schema 字段、现有 `source` 字段、固定 action vocabulary、固定 forbiddenActions 与文档 alias 编写 mock/stub/test-support 计划。任何 wire-level gap 字段、schema header、真实 endpoint 或 canonical error enum 落地都必须另起 contract/schema review。
+- `ALLOW_I1_P4_IMPLEMENTATION_GATE_REVIEW_FIX_CLOSE: YES`；`ALLOW_I1_P4_RETRY: YES`；`ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_WORK_ORDER: YES`；`ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_CODE: NO`；`ALLOW_SCHEMA_CHANGE: NO`；`ALLOW_FIXTURE_IMPLEMENTATION: NO`；`ALLOW_CONTRACTS_MODIFICATION: NO`；`ALLOW_GOLDEN_CASES_MODIFICATION: NO`；`ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_REAL_HTTP: NO`；`ALLOW_REAL_PROVIDER: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 1.0.5 NQ-DH I1-P3 Dry-run Implementation Readiness Plan（2026-07-03，COMPLETED / PLAN ONLY）
 
@@ -66,11 +90,11 @@ DH integrated: NO
 AI / Agent runtime: NOT STARTED
 LangGraph runtime: NOT STARTED
 LIVE: DISABLED
-Next concrete action: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+Next concrete action: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
 ```
 
 - 本轮只规划 NQ dry-run stub readiness、DH dry-run entry readiness、joint mock validation readiness、security boundary 和 P4 implementation gate checklist。
-- 原 `I1-P3-NQ-DRYRUN-STUB-TEST-PLAN`、`I1-P4-DH-DRYRUN-ENTRY-PLAN`、`I1-P5-JOINT-MOCK-VALIDATION-PLAN` 已 `MERGED_INTO_NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN`；原 `I1-P6-IMPLEMENTATION-GATE-REVIEW` 重新编号为 `NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED`。
+- 原 `I1-P3-NQ-DRYRUN-STUB-TEST-PLAN`、`I1-P4-DH-DRYRUN-ENTRY-PLAN`、`I1-P5-JOINT-MOCK-VALIDATION-PLAN` 已 `MERGED_INTO_NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN`；原 `I1-P6-IMPLEMENTATION-GATE-REVIEW` 已重新编号并由 `NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX` 关闭。
 - `dryRun / decisionId / confidence / traceSummary / replayRef / auditRef / X-NQ-DH-Schema-Version / NQ_DRYRUN source` 仍为 review-gated gap，不得写成已实现。
 - `ALLOW_I1_P3_DRYRUN_IMPLEMENTATION_READINESS_PLAN_CLOSE: YES`；`ALLOW_I1_P4_IMPLEMENTATION_GATE_REVIEW: YES`；`ALLOW_SCHEMA_CHANGE: NO`；`ALLOW_FIXTURE_IMPLEMENTATION: NO`；`ALLOW_CONTRACTS_MODIFICATION: NO`；`ALLOW_GOLDEN_CASES_MODIFICATION: NO`；`ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_REAL_HTTP: NO`；`ALLOW_REAL_PROVIDER: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 

@@ -45,8 +45,10 @@ NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN:
               双仓 fixture / schema / golden case 对齐规划      [completed / plan only / not implemented]
 NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN:
               NQ stub + DH entry + joint mock readiness planning [completed / plan only / not implemented]
-NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW:
-              Implementation gate review                    [next / not started]
+NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX:
+              Implementation gate review fix                 [completed / docs-only / gate-fix]
+NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO:
+              Dry-run mock implementation work order          [next / not started]
 Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
 Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
@@ -108,7 +110,7 @@ dep-tree.txt 重新生成
 
 ## 4. Integration-0 / Decision Pipeline MVP 当前路线
 
-Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-STAGE4-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-STAGE4-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 Contract Freeze review 已 `PASS / CLOSED / ACCEPTED`。K2 DecisionOrchestrator Skeleton 已实现 mock-only usecase 编排骨架并关闭。K3 Audit / Snapshot / Trace Persistence 已经 M1 readiness review 关闭。K4 Replay Read Model、K5 Provider Health / Budget / Latency、K6 Mock NQ Dry-run Contract Tests、K7 Golden Cases / Eval 均已关闭。K8 Acceptance / Freeze 已 `CLOSED / ACCEPTED`，验收报告见 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-stage4-decision-pipeline-mvp/`。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only rebase baseline，计划见 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`；`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已 `CLOSED / ACCEPTED / DOCS-ONLY`；`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN`、`NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN` 与 `NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN` 均已 `COMPLETED / PLAN ONLY / NOT IMPLEMENTED`，P3 计划见 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md`；下一步只允许 `NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED`，且仍不允许启动 Integration-1 runtime。
+Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-STAGE4-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-STAGE4-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 Contract Freeze review 已 `PASS / CLOSED / ACCEPTED`。K2 DecisionOrchestrator Skeleton 已实现 mock-only usecase 编排骨架并关闭。K3 Audit / Snapshot / Trace Persistence 已经 M1 readiness review 关闭。K4 Replay Read Model、K5 Provider Health / Budget / Latency、K6 Mock NQ Dry-run Contract Tests、K7 Golden Cases / Eval 均已关闭。K8 Acceptance / Freeze 已 `CLOSED / ACCEPTED`，验收报告见 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-stage4-decision-pipeline-mvp/`。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only rebase baseline，计划见 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`；`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已 `CLOSED / ACCEPTED / DOCS-ONLY`；`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN`、`NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN` 与 `NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN` 均已 `COMPLETED / PLAN ONLY / NOT IMPLEMENTED`，P3 计划见 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md`；`NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX` 已 `COMPLETED / DOCS-ONLY / GATE-FIX`，schema gap 与双仓 P3 提交状态已复核；下一步只允许 `NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED`，且仍不允许启动 Integration-1 runtime。
 
 语言治理补充：后续 DH roadmap、plan、work order、testing、worklog、status 文档正文必须中文为主；工程对象名、enum、JSON/OpenAPI 字段、HTTP header、状态枚举、命令和外部技术名保留英文原样。固定输出字段可以保留英文，但字段内容必须中文为主。
 
@@ -143,7 +145,8 @@ NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE CLOSED / ACCEPTED / DOCS-ONLY
 NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN COMPLETED / PLAN ONLY / NOT IMPLEMENTED
 NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN COMPLETED / PLAN ONLY / NOT IMPLEMENTED
 NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-Next concrete action NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX COMPLETED / DOCS-ONLY / GATE-FIX
+Next concrete action NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline GateN
 ```

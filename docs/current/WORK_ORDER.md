@@ -1,12 +1,12 @@
 # Decision Hub 当前工单
 
-> 当前阶段: NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-> 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan
-> 下一阶段: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+> 当前阶段: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX
+> 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix
+> 下一阶段: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
 
 ## 1. 当前目标
 
-`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已完成 docs/factsource rebase，并 `CLOSED / ACCEPTED / DOCS-ONLY`。`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN` 已完成 planning-only 合同规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md`。`NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN` 已完成 planning-only fixture/schema/golden case 对齐规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md`。`NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN` 已完成 planning-only readiness 规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md`，并合并原 NQ stub / DH entry / joint mock validation 三个计划项。下一步唯一允许工作内容是 `NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED`；P4 只做 implementation gate review，不是 implementation、runtime、真实 HTTP、real provider 或 LIVE。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已完成 docs/factsource rebase，并 `CLOSED / ACCEPTED / DOCS-ONLY`。`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN` 已完成 planning-only 合同规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md`。`NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN` 已完成 planning-only fixture/schema/golden case 对齐规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md`。`NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN` 已完成 planning-only readiness 规划，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md`，并合并原 NQ stub / DH entry / joint mock validation 三个计划项。`NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX` 已完成 docs-only gate-fix：双仓 P3 提交状态已复核，schema gap 已归类，下一步唯一允许工作内容是 `NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED`。下一步仍只能写 work order，不是 implementation code、runtime、真实 HTTP、real provider 或 LIVE。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
 
 `DH-STAGE4-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-STAGE4-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1-K7 已关闭；K8 acceptance / freeze 已 `CLOSED / ACCEPTED`，报告见 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-stage4-decision-pipeline-mvp/`。Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase；P0 只允许同步两仓事实源和旧 GateK 口径，不允许启动 Integration-1 runtime 或全量 runtime implementation：
 
@@ -104,7 +104,9 @@ Integration-1 dry-run plan: PLAN BASELINE ACCEPTED
 I1-P0 factsource rebase: CLOSED / ACCEPTED / DOCS-ONLY
 I1-P1 contract dry-run plan: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
 I1-P2 contract fixtures plan: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-Next: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+I1-P3 dry-run implementation readiness plan: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+I1-P4 implementation gate review fix: COMPLETED / DOCS-ONLY / GATE-FIX
+Next: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
 ```
 
 批次顺序：
@@ -191,7 +193,8 @@ NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE: CLOSED / ACCEPTED / DOCS-ONLY
 NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
 NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
 NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-Next concrete action: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX: COMPLETED / DOCS-ONLY / GATE-FIX
+Next concrete action: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
 ```
 
 ## 5. DH-STAGE4-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON（已实现）
