@@ -216,11 +216,10 @@ Integration-1 dry-run 必须继续沿用 Integration-0 已冻结的安全边界�
 | I1-P0 | NQ / DH factsource rebase | 同步两仓当前事实源，移除旧 GateK Integration-1 作为当前主线 | docs/current 同步、旧口径标记 `SUPERSEDED / REBASE_REQUIRED` | runtime、API、代码、测试 | 两仓状态均指向 GateN rebase dry-run line |
 | I1-P1 | NQ dry-run request contract plan | 规划 NQ 如何构造 `DecisionRequest` | docs / contract / test-support plan | runtime dispatcher、真实 HTTP、NQ client | request 字段、禁止字段、schema 扩展策略明确 |
 | I1-P2 | DH dry-run receive boundary plan | 规划 DH 是否复用未来入口或需要新入口 | docs-only API boundary plan | 新增 API / Controller / migration | API 变更是否需要单独 review 明确 |
-| I1-P3 | NQ mock dispatcher / no-outbound guard plan | 规划 test-support dispatcher 与 no-outbound guard | mock / fixture / test-support plan | real outbound、真实 DH 调用、执行输出 | NQ 只记录不执行、no real outbound guard 明确 |
-| I1-P4 | DH mock dry-run validation plan | 复用 DH K6 mock NQ dry-run tests 并补 GateN 语境 | mock-only validation plan | runtime、真实 NQ、真实 HTTP | GateN context、replay、golden regression 计划明确 |
-| I1-P5 | joint dry-run implementation gate | 定义 P0-P4 关闭后的 implementation 入场门槛 | gate review / acceptance criteria | LIVE、real provider、下单、runtime integration 默认放行 | P0-P4 全部关闭且 implementation 仍单独授权 |
+| I1-P3 | Dry-run implementation readiness plan | 合并 NQ stub、DH entry、joint mock validation readiness | docs-only readiness plan | real outbound、真实 DH 调用、执行输出、runtime | NQ/DH/joint readiness、security boundary、P4 gate checklist 明确 |
+| I1-P4 | implementation gate review | 定义 P0-P3 关闭后的 implementation 入场门槛 | gate review / acceptance criteria | LIVE、real provider、下单、runtime integration 默认放行 | P0-P3 全部关闭且 implementation 仍单独授权 |
 
-P0-P4 关闭前，`ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION` 必须保持 `NO`。P5 即使允许 implementation，也仍不允许 LIVE、真实 provider、真实交易、NQ DB、AI / LangGraph runtime 或 DH 输出驱动交易。
+P0-P3 关闭前，`ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION` 必须保持 `NO`。P4 即使允许 implementation，也仍不允许 LIVE、真实 provider、真实交易、NQ DB、AI / LangGraph runtime 或 DH 输出驱动交易。
 
 ## 8. 测试规划矩阵
 
@@ -281,13 +280,13 @@ P1 不新增 API、Controller、client、provider、Repository、Service、migra
 
 ## 12. 下一步
 
-本计划 baseline、I1-P0 factsource rebase、I1-P1 contract dry-run plan 与 I1-P2 contract fixtures plan 已关闭。下一步只允许进入：
+本计划 baseline、I1-P0 factsource rebase、I1-P1 contract dry-run plan、I1-P2 contract fixtures plan 与 I1-P3 dry-run implementation readiness plan 已关闭。下一步只允许进入：
 
 ```text
-NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN / NOT STARTED
+NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
 ```
 
-P3 仍只能规划 NQ 侧 stub / no-outbound / no-order 测试，不是 runtime implementation。若后续发现 NQ GateN / GateO 与 DH Stage4 facts 仍有 current-source 冲突，则改走：
+P4 仍只能做 implementation gate review，不是 runtime implementation。若后续发现 NQ GateN / GateO 与 DH Stage4 facts 仍有 current-source 冲突，则改走：
 
 ```text
 NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN-FIX

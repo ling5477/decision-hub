@@ -1,8 +1,69 @@
 # Decision Hub Worklog
 
+## 2026-07-03 NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN final validation
+
+完成 NQ-DH Integration-1 P3 dry-run implementation readiness plan 收口。本轮只做 docs-only / plan-only：新增 DH canonical readiness plan；合并原 `NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN`、`NQ-DH-I1-P4-DH-DRYRUN-ENTRY-PLAN`、`NQ-DH-I1-P5-JOINT-MOCK-VALIDATION-PLAN` 三个后续 planning 任务；当前 next 为 `NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED`；不创建 fixture JSON，不修改 contracts、golden_cases、生产代码、测试代码、API、migration、runtime client、provider 或真实 HTTP。
+
+### 新增文件
+
+```text
+docs/current/DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md
+```
+
+### 修改文件
+
+```text
+docs/current/API.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md
+docs/current/DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md
+docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+```
+
+### 结果
+
+```text
+NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+Canonical plan: docs/current/DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md
+Current next: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+ALLOW_I1_P3_DRYRUN_IMPLEMENTATION_READINESS_PLAN_CLOSE: YES
+ALLOW_I1_P4_IMPLEMENTATION_GATE_REVIEW: YES
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_FIXTURE_IMPLEMENTATION: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### 验证
+
+- `git status --short`：PASS / CHANGES PRESENT；dirty 限于允许的 `docs/current` 文档。
+- `git diff --check`：PASS；无 whitespace error，仅 Windows LF/CRLF warning。
+- `git diff --stat`：PASS / DOCS-ONLY。
+- stale old next scan：PASS / EMPTY；旧 P3/P4/P5 active next 已合并到 P3 readiness plan，当前 next 统一为 P4 implementation gate review。
+- forbidden diff：`dh-domain` / `dh-usecase` / `dh-memory` / `dh-eval` / `dh-connector` / `dh-api` / `dh-app` / `dh-infra` / `contracts` / `golden_cases` 均为空。
+- `mvn -ntp test`：PASS / BUILD SUCCESS；19 个 reactor module SUCCESS；`PostgresContainerSmokeTest` 因本地 Docker/Testcontainers 环境不可用 skip 1，非代码失败。
+- `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS；Checkstyle 0 violations；Spotless check passed。
+
+### 边界确认
+
+未改生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path、Controller、Client、Repository、Service、migration、fixture JSON 或 CI workflow；未真实 HTTP；未启动 NQ/DH runtime；未读取 credential；未接 real provider、AI 或 LangGraph；未开启 LIVE；未让 DH 输出进入 order、risk mutation、ledger mutation、Paper Run 或 private trading 路径。
+
 ## 2026-07-02 NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN final validation
 
-完成 NQ-DH Integration-1 P2 contract fixtures plan 收口。本轮只做 docs-only / plan-only：新增 DH canonical fixtures plan，并把 current docs 指向 `NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN / NOT STARTED`；不创建 fixture JSON，不修改 contracts、golden_cases、生产代码、测试代码、API、migration、runtime client、provider 或真实 HTTP。
+完成 NQ-DH Integration-1 P2 contract fixtures plan 收口。本轮只做 docs-only / plan-only：新增 DH canonical fixtures plan；原 P2 next 已由 `NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED` 消费，当前 next 为 `NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED`；不创建 fixture JSON，不修改 contracts、golden_cases、生产代码、测试代码、API、migration、runtime client、provider 或真实 HTTP。
 
 ### 新增文件
 
@@ -30,9 +91,11 @@ docs/current/WORKLOG.md
 ```text
 NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
 Canonical plan: docs/current/DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md
-Next: NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN / NOT STARTED
+P2 next consumed by: NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+Current next: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
 ALLOW_I1_P2_CONTRACT_FIXTURES_PLAN_CLOSE: YES
-ALLOW_I1_P3_NQ_DRYRUN_STUB_TEST_PLAN: YES
+ALLOW_I1_P3_DRYRUN_IMPLEMENTATION_READINESS_PLAN: YES / COMPLETED / PLAN ONLY
+ALLOW_I1_P4_IMPLEMENTATION_GATE_REVIEW: YES
 ALLOW_SCHEMA_CHANGE: NO
 ALLOW_FIXTURE_IMPLEMENTATION: NO
 ALLOW_CONTRACTS_MODIFICATION: NO

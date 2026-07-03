@@ -1,5 +1,41 @@
 # Decision Hub Testing
 
+## 2026-07-03 NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN final validation
+
+```text
+Scope:
+  - 本轮只做 NQ-DH Integration-1 P3 dry-run implementation readiness planning 与验证记录同步。
+  - DH canonical plan: docs/current/DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md。
+  - P3 合并原 P3 NQ dry-run stub test plan、P4 DH dry-run entry plan、P5 joint mock validation plan。
+
+Result:
+  NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+  Current next: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
+  Integration-1 implementation: NOT STARTED
+  Integration-1 runtime: NOT STARTED
+  Runtime integration: NOT STARTED
+  Real HTTP: NOT STARTED
+  Real provider: NOT STARTED
+  DH integrated: NO
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS / CHANGES PRESENT | 当前 dirty 仅位于允许的 `docs/current` 文档：P3 readiness plan、current index/status/work order、API planning note、Integration docs 与验证记录。 |
+| `git diff --check` | PASS | 无 whitespace error；仅 Windows LF/CRLF 工作区提示，非阻断。 |
+| `git diff --stat` | PASS / DOCS-ONLY | tracked diff 限于 `docs/current` 文档；新增 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md` 由 `git status --short` 标识。 |
+| `git diff --name-only -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases` | PASS / EMPTY | 禁止的生产代码、测试代码、contracts、golden_cases 范围无 diff。 |
+| `rg` stale old next scan | PASS / EMPTY | 未发现旧 `NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN / NOT STARTED` 或旧 active next 标识残留在 `docs/current` 当前口径中。 |
+| `mvn -ntp test` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 `SUCCESS`；`PostgresContainerSmokeTest` 因本地 Docker/Testcontainers 环境不可用 skip 1，非代码失败。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 reactor module 全部 `SUCCESS`；Checkstyle 0 violations；Spotless check passed。 |
+
+Boundary:
+
+未改 Java / Kotlin / Python / TypeScript 生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path / Controller / migration；未新增 fixture JSON；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient；未新增真实 Provider；未读取或输出 credential / token / cookie / API secret / passphrase；未接 AI / LangGraph；未启动 Integration-1 runtime；未开启 LIVE。
+
 ## 2026-07-02 NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN final validation
 
 ```text
@@ -10,7 +46,8 @@ Scope:
 
 Result:
   NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN: COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-  Next: NQ-DH-I1-P3-NQ-DRYRUN-STUB-TEST-PLAN / NOT STARTED
+  P2 next consumed by: NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN / COMPLETED / PLAN ONLY / NOT IMPLEMENTED
+  Current next: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW / NOT STARTED
   Integration-1 implementation: NOT STARTED
   Integration-1 runtime: NOT STARTED
   Runtime integration: NOT STARTED
