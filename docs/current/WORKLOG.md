@@ -4741,3 +4741,57 @@ DecisionAction no BUY / SELL / PLACE_ORDER / CANCEL_ORDER
 ### 推荐下一步
 
 进入 `NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / NOT STARTED / WORK_ORDER_ONLY`，执行目录限定为 `F:\worktrees\nexus-quant-i1-dryrun`；不得在 `F:\project\nexus-quant` mainline dev worktree 改 Integration-1 文档或代码。
+
+---
+
+## NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO
+
+日期：2026-07-03
+
+### 本轮目标
+
+关闭 M2 work order，规划 NQ dry-run stub recorder 的 test-support mock-only 形态、请求 builder 字段边界、in-memory recorder 字段边界、no-side-effect 测试矩阵和 M3 准入判断。本轮为 `WORK_ORDER_ONLY + NQ_DRYRUN_STUB_RECORDER_PLANNING + NO_SIDE_EFFECT_TEST_DESIGN + WORKTREE_ONLY + SECURITY_BOUNDARY + NO_RUNTIME + NO_LIVE`。
+
+### 完成内容
+
+- 新增 `docs/current/DH_NQ_INTEGRATION1_M2_NQ_DRYRUN_STUB_RECORDER_WO.md`。
+- 同步 `docs/current/README.md`、`STATUS.md`、`ROADMAP.md`、`WORK_ORDER.md`、`DH_NQ_INTEGRATION.md`、`API.md`、M0/M1 work order 与 dry-run mock implementation placeholder。
+- 明确 M2 推荐 stub shape 为 `test-support mock-only stub + in-memory recorder plan, no runtime HTTP client`。
+- 明确 NQ request builder 只允许 read-only、脱敏、无执行意图字段；禁止 `accountId`、订单、仓位、凭证、BUY/SELL、数量、价格、杠杆、下单/撤单、风控/账务 mutation、Paper/LIVE run start 与 raw prompt/provider response。
+- 明确 recorder 只能记录 request/trace/tenant/action whitelist/risk/policy/provider/fail-closed/audit summary，不得调用 execution、risk、ledger、paper/live 或外部 provider。
+- 明确 `decisionId`、`confidence`、`traceSummary`、`replayRef`、`auditRef`、`X-NQ-DH-Schema-Version` 仍为 `DOC_ONLY_ALIAS`。
+- 在 NQ dry-run worktree 同步对应 M2 work order，并确认下一步只允许 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / WORK_ORDER_ONLY`。
+
+### 验证
+
+- DH `git status --short` / `git diff --check` / forbidden-scope diff：通过；仅 docs/current 变更；未改代码、contracts、golden_cases。
+- DH `mvn -ntp test`：BUILD SUCCESS；reactor 19/19 SUCCESS；Docker/Testcontainers 不可用导致既有环境相关 4 skips。
+- DH `mvn -ntp -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。
+- NQ worktree `mvn -ntp -f backend/pom.xml test`：BUILD SUCCESS；reactor 23/23 SUCCESS；`nq-infra` 1 skip、`nq-app` 2 skips 为既有环境/guard 条件。
+- NQ worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test`：BUILD SUCCESS；Integration0 17 tests / 0 failures / 0 errors / 0 skipped。
+- NQ dev worktree 仅做 read-only git guard；终检存在非本任务 GateO/current dirty diff，但 `docs/current/*NQ_DH*` 与 `docs/current/*INTEGRATION1*` 无 dirty diff，未触发 `WORKSTREAM_MIXED_BLOCKED`。
+
+### 边界
+
+未改生产代码；未改测试代码；未新增或修改 Controller/API、migration、schema、contracts、golden_cases、fixture JSON、runtime、provider、RealClient、真实 HTTP、AI/LangGraph 或 LIVE；未读取或输出 credential、token、cookie、API secret、passphrase；未触达 NQ DB、NQ mutation、订单、撤单、持仓、账务、Paper Run 或真实交易链路；未把 DH 写成 integrated；未把 Integration-1 runtime 写成 started。
+
+### Readiness
+
+- `ALLOW_M2_WO_CLOSE: YES`
+- `ALLOW_I1_M3_JOINT_MOCK_FIXTURES_AND_CONTRACT_TESTS_WO: YES`
+- `ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_CODE: NO`
+- `ALLOW_SCHEMA_CHANGE: NO`
+- `ALLOW_CONTRACTS_MODIFICATION: NO`
+- `ALLOW_FIXTURE_IMPLEMENTATION: NO`
+- `ALLOW_GOLDEN_CASES_MODIFICATION: NO`
+- `ALLOW_API_CONTROLLER_CHANGE: NO`
+- `ALLOW_REAL_HTTP: NO`
+- `ALLOW_REAL_PROVIDER: NO`
+- `ALLOW_INTEGRATION_1_RUNTIME: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 推荐下一步
+
+进入 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY`；不得提前实现 fixture、contracts、golden_cases、contract tests、runtime、API、真实 HTTP、real provider、AI/LangGraph 或 LIVE。

@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO / COMPLETED / WORK_ORDER_ONLY / DH_DRYRUN_ENTRY_PLANNED / NOT IMPLEMENTED
-> Next stage:    NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED
+> Current stage: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / COMPLETED / WORK_ORDER_ONLY / NQ_DRYRUN_STUB_RECORDER_PLANNED / NOT IMPLEMENTED
+> Next stage:    NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,8 +34,8 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO / COMPLETED / WORK_ORDER_ONLY / DH_DRYRUN_ENTRY_PLANNED / NOT IMPLEMENTED.
-Next concrete action: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED.
+Current main line: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / COMPLETED / WORK_ORDER_ONLY / NQ_DRYRUN_STUB_RECORDER_PLANNED / NOT IMPLEMENTED.
+Next concrete action: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -46,6 +46,35 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.10 NQ-DH I1-M2 NQ Dry-run Stub Recorder WO（2026-07-03，COMPLETED / WORK_ORDER_ONLY）
+
+```text
+Task: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO
+Task type: WORK_ORDER_ONLY + NQ_DRYRUN_STUB_RECORDER_PLANNING + NO_SIDE_EFFECT_TEST_DESIGN + WORKTREE_ONLY + SECURITY_BOUNDARY + NO_RUNTIME + NO_LIVE
+Artifact: docs/current/DH_NQ_INTEGRATION1_M2_NQ_DRYRUN_STUB_RECORDER_WO.md
+DH dev precheck: clean
+NQ dry-run worktree precheck: clean
+NQ dev precheck: clean
+NQ dev NQ-DH / Integration-1 dirty diff: none
+WORKSTREAM_MIXED_BLOCKED: NO
+Integration-1 implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NOT STARTED
+Real provider: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+Next concrete action: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED
+```
+
+- 本轮只记录 NQ 侧 dry-run stub / request builder / recorder 的 M2 工作订单和 DH 只读依赖；不写 production code / test code，不创建 fixture JSON，不改 `contracts/**` 或 `golden_cases/**`，不新增 OpenAPI path / Controller / migration，不启动 runtime，不真实 HTTP，不接 real provider，不接 AI / Agent runtime / LangGraph / LIVE。
+- M2 推荐 NQ stub 形态为 `test-support mock-only stub + in-memory recorder plan, no runtime HTTP client`；若未来需要真实 client，必须另起 API / contract / security / source allowlist / error taxonomy / no-side-effect / runtime isolation review。
+- request builder 只允许 `requestId / traceId / tenantId / source / timestamp / nonce / signature / decisionType / subject / contextSnapshot / evidence summary` 等脱敏只读字段；`accountId / orderId / credential / BUY / SELL / quantity / price / leverage / placeOrder / cancelOrder / paperRunStart / liveRunStart` 等字段一律 forbidden 并 fail-closed。
+- recorder 只记录只读 summary，不执行交易、不触发风控或账务修改、不启动 Paper Run / LIVE；`LONG_BIAS / SHORT_BIAS` 仍是只读 bias，不是 `BUY / SELL`。
+- M2 只规划 no-side-effect 测试矩阵，不新增测试代码；未来必须覆盖 no-real-http、no-order、no-cancel-order、no-risk-mutation、no-ledger-mutation、no-paper-run-start、no-live、no-credential、forbidden field、idempotency、tenant mismatch、source denied、provider failure 和 bias-not-buy-sell。
+- `ALLOW_M2_WO_CLOSE: YES`；`ALLOW_I1_M3_JOINT_MOCK_FIXTURES_AND_CONTRACT_TESTS_WO: YES`；`ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_CODE: NO`；`ALLOW_SCHEMA_CHANGE: NO`；`ALLOW_CONTRACTS_MODIFICATION: NO`；`ALLOW_FIXTURE_IMPLEMENTATION: NO`；`ALLOW_GOLDEN_CASES_MODIFICATION: NO`；`ALLOW_API_CONTROLLER_CHANGE: NO`；`ALLOW_REAL_HTTP: NO`；`ALLOW_REAL_PROVIDER: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 1.0.9 NQ-DH I1-M1 DH Dry-run Contract Entry Mock WO（2026-07-03，COMPLETED / WORK_ORDER_ONLY）
 
@@ -66,7 +95,7 @@ Real provider: NOT STARTED
 AI / Agent runtime: NOT STARTED
 LangGraph runtime: NOT STARTED
 LIVE: DISABLED
-Next concrete action: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED
+Next concrete action after M1: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / COMPLETED / WORK_ORDER_ONLY
 ```
 
 - 本轮只生成 DH 侧 dry-run contract entry mock 的 M1 工作订单；不写 production code / test code，不创建 fixture JSON，不改 `contracts/**` 或 `golden_cases/**`，不新增 OpenAPI path / Controller / migration，不启动 runtime，不真实 HTTP，不接 real provider，不接 AI / Agent runtime / LangGraph / LIVE。
@@ -75,7 +104,7 @@ Next concrete action: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / NOT STARTED / WOR
 - `NQ_DRYRUN` source 仍为 `NEEDS_SECURITY_CONTRACT_CHANGE`，未通过 review 前只能作为 future source plan；`SOURCE_DENIED` 必须 fail-closed，source allowlist 不能被测试绕过。
 - canonical error code names 尚未全部实现；M1 只规划 error normalization，不新增 enum / schema / code；所有错误路径 fail-closed，NQ 不得根据 error response 执行交易。
 - `decisionId`、`replayRef`、`auditRef`、`traceSummary` 与 `X-NQ-DH-Schema-Version` 仍为 `DOC_ONLY_ALIAS` 或 future envelope planning，不得写入 required fixture 或 OpenAPI。
-- `ALLOW_M1_WO_CLOSE: YES`；`ALLOW_I1_M2_NQ_DRYRUN_STUB_RECORDER_WO: YES`；`ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_CODE: NO`；`ALLOW_SCHEMA_CHANGE: NO`；`ALLOW_CONTRACTS_MODIFICATION: NO`；`ALLOW_FIXTURE_IMPLEMENTATION: NO`；`ALLOW_GOLDEN_CASES_MODIFICATION: NO`；`ALLOW_API_CONTROLLER_CHANGE: NO`；`ALLOW_REAL_HTTP: NO`；`ALLOW_REAL_PROVIDER: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
+- `ALLOW_M1_WO_CLOSE: YES`；`ALLOW_I1_M2_NQ_DRYRUN_STUB_RECORDER_WO: YES / COMPLETED`；`ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_CODE: NO`；`ALLOW_SCHEMA_CHANGE: NO`；`ALLOW_CONTRACTS_MODIFICATION: NO`；`ALLOW_FIXTURE_IMPLEMENTATION: NO`；`ALLOW_GOLDEN_CASES_MODIFICATION: NO`；`ALLOW_API_CONTROLLER_CHANGE: NO`；`ALLOW_REAL_HTTP: NO`；`ALLOW_REAL_PROVIDER: NO`；`ALLOW_INTEGRATION_1_RUNTIME: NO`；`ALLOW_AGENT_PHASE: NO`；`ALLOW_LANGGRAPH_RUNTIME: NO`；`ALLOW_LIVE: NO`。
 
 ## 1.0.8 NQ-DH I1-M0 Contract Gap Close WO（2026-07-03，COMPLETED / WORK_ORDER_ONLY）
 

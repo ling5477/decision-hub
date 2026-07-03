@@ -202,4 +202,4 @@ NQ dry-run worktree 与 NQ dev 必须分别执行对应边界检查；结果写�
 NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO / COMPLETED / WORK_ORDER_ONLY / DH_DRYRUN_ENTRY_PLANNED / NOT IMPLEMENTED
 ```
 
-M1 已按 M0 准入进入并完成 work-order-only planning；M1 继续采用 `Option C / test-support mock-only / no runtime endpoint`，不允许直接 implementation。后续唯一允许动作是 `NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED`。
+M1 与 M2 已按 M0 准入完成 work-order-only planning；M1 继续采用 `Option C / test-support mock-only / no runtime endpoint`，M2 继续采用 test-support mock-only stub / recorder planning，不允许直接 implementation。后续唯一允许动作是 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED`。

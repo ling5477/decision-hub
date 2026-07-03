@@ -329,7 +329,7 @@ no production code / test code / contracts / golden_cases / API / migration chan
 ## 14. 下一步
 
 ```text
-NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / NOT STARTED / WORK_ORDER_ONLY
+NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / COMPLETED / WORK_ORDER_ONLY / NQ_DRYRUN_STUB_RECORDER_PLANNED / NOT IMPLEMENTED
 ```
 
-下一步只能输出 NQ worktree 侧 stub / recorder 工作订单；不得在 NQ dev 执行；不得直接写 implementation code。
+M2 已完成 NQ dry-run stub / recorder work order planning；未进入 NQ backend implementation。当前下一步只能输出 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY`；不得直接创建 fixture JSON、测试代码、schema/contracts/golden_cases、API、Controller、runtime、真实 HTTP、real provider 或 LIVE。

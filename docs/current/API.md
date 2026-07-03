@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO / COMPLETED / WORK_ORDER_ONLY / DH_DRYRUN_ENTRY_PLANNED / NOT IMPLEMENTED
-下一阶段: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED
+当前阶段: NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / COMPLETED / WORK_ORDER_ONLY / NQ_DRYRUN_STUB_RECORDER_PLANNED / NOT IMPLEMENTED
+下一阶段: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -26,7 +26,7 @@ AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为 API 单源；DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`，P4 gate-fix、`NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO`、`NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO` 与 `NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO` 均不新增 API path、不新增 Controller、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但尚未成为已实现 API；replay API 仍未实现。M0 已裁决 dry-run endpoint 推荐形态为 `Option C / test-support mock-only, no runtime endpoint`；M1 已确认 DH dry-run contract entry 仍采用 test-support / mock-only / no runtime endpoint，不授权新增 endpoint。
+OpenAPI 仍为 API 单源；DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`，P4 gate-fix、`NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO`、`NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO`、`NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO` 与 `NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO` 均不新增 API path、不新增 Controller、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但尚未成为已实现 API；replay API 仍未实现。M0 已裁决 dry-run endpoint 推荐形态为 `Option C / test-support mock-only, no runtime endpoint`；M1 已确认 DH dry-run contract entry 仍采用 test-support / mock-only / no runtime endpoint；M2 仅规划 NQ test-support stub / recorder，不授权新增 DH endpoint 或 NQ HTTP client。
 
 ## 2. 已实现端点
 
@@ -85,6 +85,8 @@ P4 gate-fix 结论：上述 gap 字段在下一步 `NQ-DH-I1-DRYRUN-MOCK-IMPLEME
 M0 contract gap close 结论：dry-run endpoint shape 的推荐形态为 `Option C / test-support mock-only, no runtime endpoint`；`POST /api/ai/feedback/nq` 是 feedback ingest，不得复用为 decision dry-run endpoint；如未来需要 HTTP endpoint，必须另起 API / contract / security review。`NQ_DRYRUN` source 仍为 `NEEDS_SECURITY_CONTRACT_CHANGE`，`dryRun / decisionId / confidence / traceSummary / replayRef / auditRef / X-NQ-DH-Schema-Version` 仍为 `DOC_ONLY_ALIAS` 或 future envelope planning，不得作为 OpenAPI / JSON Schema / Controller 已实现字段。
 
 M1 dry-run contract entry mock work order 结论：`RECOMMENDED_ENTRY_SHAPE = Option C / test-support mock-only / no runtime endpoint`；M1 只规划 contract validation chain、source allowlist、error taxonomy、audit / trace / replay 边界和 fail-closed normalization。若未来新增 dry-run HTTP endpoint、Controller、OpenAPI path、schema header 或 envelope field，必须另起 API / contract / security review；当前 API 文档不得把 M1 写成已实现 endpoint。
+
+M2 NQ dry-run stub recorder work order 结论：`RECOMMENDED_STUB_SHAPE = test-support mock-only stub + in-memory recorder plan, no runtime HTTP client`。M2 不新增 DH API，不新增 NQ client，不新增 HTTP endpoint，不修改 OpenAPI 或 JSON Schema；request builder / recorder 仅为后续 test-support planning。若未来需要真实 client 或 endpoint，必须另起 API / contract / security / no-side-effect review。
 
 ## 4. Stage1 最小 API 集合（已实现，留作历史记录）
 
