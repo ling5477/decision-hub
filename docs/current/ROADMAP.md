@@ -58,7 +58,9 @@ NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO:
 NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO:
               Joint mock fixtures and contract tests work order [completed / work-order-only / final WO before implementation]
 NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION:
-              Contract gap test-support implementation         [next / controlled implementation batch allowed]
+              Contract gap test-support implementation         [implemented / test-support-only / mock-only / ready for review]
+NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY:
+              DH dry-run test-support entry                    [next / test-support-only / mock-only]
 Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
 Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
@@ -161,7 +163,8 @@ NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO COMPLETED / WORK_ORDER_ONLY / CONTRACT_GAP_CLO
 NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO COMPLETED / WORK_ORDER_ONLY / DH_DRYRUN_ENTRY_PLANNED / NOT IMPLEMENTED
 NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO COMPLETED / WORK_ORDER_ONLY / NQ_DRYRUN_STUB_RECORDER_PLANNED / NOT IMPLEMENTED
 NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED
-Next concrete action NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED
+NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_REVIEW
+Next concrete action NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / NOT STARTED / TEST_SUPPORT_ONLY / MOCK_ONLY
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline GateN
 ```

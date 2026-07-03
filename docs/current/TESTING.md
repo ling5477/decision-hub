@@ -2908,3 +2908,38 @@ ALLOW_LIVE: NO
 ```
 
 边界确认：未触达生产环境、真实交易、真实交易所私有 API、NQ DB、NQ mutation、credential、token、cookie、API secret、passphrase；未把 DH 写成 integrated；未把 Integration-1 runtime 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；M3 仅允许作为 work-order-only 进入，不允许提前创建 fixture、contracts、golden_cases 或测试代码。
+
+## 2026-07-03 NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION 验证记录
+
+结论：**PASS / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_REVIEW**。
+
+本轮只验证 contract gap test-support guard implementation；未改 DH / NQ production code、Controller/API、migration、schema、contracts、golden_cases、fixture JSON、runtime、provider、RealClient、真实 HTTP、AI/LangGraph 或 LIVE。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| DH `mvn -ntp -pl dh-domain -am "-Dtest=DecisionContractGapGuardTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | **BUILD SUCCESS** | 新增 DH contract gap guard 6 tests / 0 failures / 0 errors / 0 skipped；Finished at 2026-07-03T20:21:19+08:00。 |
+| NQ worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=NqDhIntegration1ContractGapGuardTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | **BUILD SUCCESS** | 新增 NQ Integration-1 guard 5 tests / 0 failures / 0 errors / 0 skipped；Finished at 2026-07-03T20:21:36+08:00。 |
+| DH `mvn -ntp test` | **BUILD SUCCESS** | reactor 19/19 SUCCESS；Finished at 2026-07-03T20:39:38+08:00；输出显示 `PostgresContainerSmokeTest` 因本机 Docker/Testcontainers 不可用跳过 1 项。 |
+| DH `mvn -ntp -Pquality validate` | **BUILD SUCCESS** | reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed；Finished at 2026-07-03T20:41:13+08:00。 |
+| NQ worktree `mvn -ntp -f backend/pom.xml test` | **BUILD SUCCESS** | reactor 23/23 SUCCESS；Finished at 2026-07-03T20:40:48+08:00；输出显示既有环境/guard 条件 skips：`nq-adapter-binance` 1、`nq-app` 2。 |
+| NQ worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test` | **BUILD SUCCESS** | Integration0 定向验证 17 tests / 0 failures / 0 errors / 0 skipped；Finished at 2026-07-03T20:41:36+08:00。 |
+
+IMP0 readiness：
+
+```text
+ALLOW_IMP0_CLOSE: YES
+ALLOW_I1_IMP1_DH_DRYRUN_TEST_SUPPORT_ENTRY: YES
+ALLOW_I1_RUNTIME: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_FIXTURE_IMPLEMENTATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_API_CONTROLLER_CHANGE: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+边界确认：未触达生产环境、真实交易、真实交易所私有 API、NQ DB、NQ mutation、credential、token、cookie、API secret、passphrase；未把 DH 写成 integrated；未把 Integration-1 runtime 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；下一步仅允许 `NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / NOT STARTED / TEST_SUPPORT_ONLY / MOCK_ONLY`。

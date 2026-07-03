@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED
-> Next stage:    NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED
+> Current stage: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_REVIEW
+> Next stage:    NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / NOT STARTED / TEST_SUPPORT_ONLY / MOCK_ONLY
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -22,7 +22,7 @@ Codex workflow routing 已固化到 `nq-dh-workflow-router` 与 `docs/current/CO
 DH-AUDIT-FIX completed.
 NQ integration not started.
 Integration-0 safety gate CLOSED / ACCEPTED.
-Integration-1 implementation NOT STARTED.
+Integration-1 runtime implementation NOT STARTED.
 Runtime integration NOT STARTED.
 DH integrated NO.
 AI / Agent runtime NOT STARTED.
@@ -34,8 +34,8 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED.
-Next concrete action: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED.
+Current main line: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_REVIEW.
+Next concrete action: NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / NOT STARTED / TEST_SUPPORT_ONLY / MOCK_ONLY.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -46,6 +46,29 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.12 NQ-DH I1-IMP0 Contract Gap Test-support Implementation（2026-07-03，IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_REVIEW）
+
+```text
+Task: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION
+Task type: CONTROLLED_IMPLEMENTATION + TEST_SUPPORT_ONLY + CONTRACT_GAP_GUARD_IMPLEMENTATION + MOCK_ONLY + NO_RUNTIME + NO_LIVE
+DH test support: dh-domain/src/test/java/com/guidinglight/decisionhub/contracts/DecisionContractGapGuardTest.java
+NQ test support: F:\worktrees\nexus-quant-i1-dryrun\backend\nq-app\src\test\java\com\guidinglight\nexusquant\app\integration1\NqDhIntegration1ContractGapGuardTest.java
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NOT STARTED
+Real provider: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+ALLOW_IMP0_CLOSE: YES
+ALLOW_I1_IMP1_DH_DRYRUN_TEST_SUPPORT_ENTRY: YES
+Next concrete action: NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / NOT STARTED / TEST_SUPPORT_ONLY / MOCK_ONLY
+```
+
+- 本轮只新增 DH / NQ 双侧 test-support guard：DH 侧防止 `NQ_DRYRUN`、dry-run runtime endpoint、DOC_ONLY_ALIAS、BUY/SELL/订单/账户/凭证字段和 canonical error names 提前进入当前生产契约；NQ dry-run worktree 侧验证 future `NQ_DRYRUN` source、request builder、summary-only recorder、read-only LONG/SHORT bias、no real URL / credential / HTTP / order / risk / ledger / Paper / LIVE side effect。
+- 未修改 DH Java production code、NQ Java production code、schema/contracts/golden_cases/fixture JSON、OpenAPI、Controller、migration、runtime 配置、provider、RealClient、真实 HTTP、AI/LangGraph 或 LIVE。
+- 验证已通过：DH 窄口 6 tests、NQ 新增窄口 5 tests、DH 全量 `mvn -ntp test`、DH `mvn -ntp -Pquality validate`、NQ worktree `mvn -ntp -f backend/pom.xml test`、NQ worktree Integration0 17 tests 均为 BUILD SUCCESS。
 
 ## 1.0.11 NQ-DH I1-M3 Joint Mock Fixtures And Contract Tests WO（2026-07-03，COMPLETED / WORK_ORDER_ONLY）
 
