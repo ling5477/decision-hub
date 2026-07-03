@@ -4916,3 +4916,54 @@ DecisionAction no BUY / SELL / PLACE_ORDER / CANCEL_ORDER
 ### 推荐下一步
 
 进入 `NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / NOT STARTED / TEST_SUPPORT_ONLY / MOCK_ONLY`；不得提前实现 runtime endpoint、真实 HTTP、real provider、schema/contracts/golden_cases/fixture JSON、OpenAPI、Controller、migration、AI/LangGraph 或 LIVE。
+
+---
+
+## NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY
+
+日期：2026-07-03
+
+### 本轮目标
+
+落地 DH 侧 dry-run test-support entry / validation harness，用于验证未来 dry-run entry 的合同验证链路、fail-closed 行为、forbidden field 拦截、DecisionOrchestrator mock-only 边界、provider guard 边界和 audit / trace / replay safe-summary 边界。
+
+### 完成内容
+
+- 新增 `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/integration1/support/DhDryRunTestSupportEntry.java`。
+- 新增 `dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/integration1/DhDryRunTestSupportEntryTest.java`。
+- validation chain 覆盖 payload size gate、canonical header、requestId / traceId / tenantId binding、source allowlist、UTC `Z` timestamp、nonce replay、value-based HMAC、schema/contract shape、forbidden fields、DecisionOrchestrator mock-only、provider guard、safe summary、structured `DecisionOutput` assembly 和 fail-closed normalization。
+- 同步 DH `docs/current/README.md`、`STATUS.md`、`ROADMAP.md`、`WORK_ORDER.md`、`DH_NQ_INTEGRATION.md`、`API.md`、`TESTING.md`、`WORKLOG.md`。
+- 在 `E:\Project\nexus-quant-i1-dryrun` 仅同步 NQ worktree `docs/current/README.md`、`STATUS.md`、`ROADMAP.md`、`WORK_ORDER.md`、`TESTING.md`、`WORKLOG.md`。
+
+### 验证
+
+- DH narrow `mvn -ntp -pl dh-usecase -am -Dtest=DhDryRunTestSupportEntryTest "-Dsurefire.failIfNoSpecifiedTests=false" test`：BUILD SUCCESS；12 tests / 0 failures / 0 errors。
+- DH `mvn -ntp test`：BUILD SUCCESS；reactor 19/19 SUCCESS；`PostgresContainerSmokeTest` 因当前 Docker/Testcontainers 环境不可用跳过 1 项。
+- DH `mvn -ntp -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。
+- NQ worktree `mvn -ntp -f backend/pom.xml test`：BUILD SUCCESS；reactor 23/23 SUCCESS；`nq-app` 2 skipped 为既有环境/guard 条件。
+- NQ worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test`：BUILD SUCCESS；Integration0 17 tests / 0 failures / 0 errors / 0 skipped。
+
+### 边界
+
+未改 DH / NQ production code；未改 schema、contracts、golden_cases、fixture JSON、OpenAPI、Controller、migration、runtime 配置、provider、RealClient、真实 HTTP、AI/LangGraph 或 LIVE；未读取或输出 credential、token、cookie、API secret、passphrase；未触达 NQ DB、NQ mutation、订单、撤单、持仓、账务、Paper Run 或真实交易链路；未把 DH 写成 integrated；未把 Integration-1 runtime 写成 started。
+
+### Readiness
+
+- `ALLOW_IMP1_CLOSE: YES`
+- `ALLOW_I1_IMP2_NQ_STUB_RECORDER_NO_SIDE_EFFECT: YES`
+- `ALLOW_PRODUCTION_CODE_CHANGE: NO`
+- `ALLOW_SCHEMA_CHANGE: NO`
+- `ALLOW_CONTRACTS_MODIFICATION: NO`
+- `ALLOW_FIXTURE_IMPLEMENTATION: NO`
+- `ALLOW_GOLDEN_CASES_MODIFICATION: NO`
+- `ALLOW_API_CONTROLLER_CHANGE: NO`
+- `ALLOW_REAL_HTTP: NO`
+- `ALLOW_REAL_PROVIDER: NO`
+- `ALLOW_INTEGRATION_1_RUNTIME: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 推荐下一步
+
+进入 `NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY`；不得提前实现 runtime endpoint、真实 HTTP、real provider、schema/contracts/golden_cases/fixture JSON、OpenAPI、Controller、migration、AI/LangGraph 或 LIVE。

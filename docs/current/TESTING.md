@@ -2943,3 +2943,41 @@ ALLOW_LIVE: NO
 ```
 
 边界确认：未触达生产环境、真实交易、真实交易所私有 API、NQ DB、NQ mutation、credential、token、cookie、API secret、passphrase；未把 DH 写成 integrated；未把 Integration-1 runtime 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；下一步仅允许 `NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / NOT STARTED / TEST_SUPPORT_ONLY / MOCK_ONLY`。
+
+## 2026-07-03 NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY 验证记录
+
+结论：**PASS / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_VALIDATION**。
+
+本轮只验证 DH dry-run test-support entry harness 与 validation chain 测试支撑；未改 DH production code、Controller/API、migration、schema、contracts、golden_cases、fixture JSON、runtime、provider、RealClient、真实 HTTP、AI/LangGraph 或 LIVE。NQ worktree 仅同步 docs/current 状态，未改 NQ code。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| DH narrow `mvn -ntp -pl dh-usecase -am -Dtest=DhDryRunTestSupportEntryTest "-Dsurefire.failIfNoSpecifiedTests=false" test` | **BUILD SUCCESS** | IMP1 新增 validation-chain 测试 12 tests / 0 failures / 0 errors / 0 skipped。 |
+| DH `git diff --check` | **PASS** | exit 0；仅 Windows LF/CRLF 转换 warning；无 whitespace error。 |
+| DH forbidden-scope diff | **PASS / EMPTY** | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-memory/src/main`、`dh-eval/src/main`、`dh-connector/src/main`、`dh-api/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`contracts`、`golden_cases` 无 diff。 |
+| DH `mvn -ntp test` | **BUILD SUCCESS** | reactor 19/19 SUCCESS；Finished at 2026-07-03T23:17:49+08:00；`PostgresContainerSmokeTest` 因当前 Docker/Testcontainers 环境不可用跳过 1 项。 |
+| DH `mvn -ntp -Pquality validate` | **BUILD SUCCESS** | reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed；Finished at 2026-07-03T23:18:16+08:00。 |
+| NQ worktree `mvn -ntp -f backend/pom.xml test` | **BUILD SUCCESS** | reactor 23/23 SUCCESS；Finished at 2026-07-03T23:19:48+08:00；`nq-app` 2 skipped 为既有环境/guard 条件。 |
+| NQ worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test` | **BUILD SUCCESS** | Integration0 定向验证 17 tests / 0 failures / 0 errors / 0 skipped；Finished at 2026-07-03T23:20:08+08:00。 |
+| NQ dev worktree read-only diff guard | **PASS** | `E:\Project\nexus-quant` 存在非本任务 GateO/current dirty diff，但 NQ-DH / Integration-1 路径无 dirty diff；`WORKSTREAM_MIXED_BLOCKED: NO`。 |
+
+IMP1 readiness：
+
+```text
+ALLOW_IMP1_CLOSE: YES
+ALLOW_I1_IMP2_NQ_STUB_RECORDER_NO_SIDE_EFFECT: YES
+ALLOW_PRODUCTION_CODE_CHANGE: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_FIXTURE_IMPLEMENTATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_API_CONTROLLER_CHANGE: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+边界确认：未触达生产环境、真实交易、真实交易所私有 API、NQ DB、NQ mutation、credential、token、cookie、API secret、passphrase；未把 DH 写成 integrated；未把 Integration-1 runtime 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；下一步仅允许 `NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY`。

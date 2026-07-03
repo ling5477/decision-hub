@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_REVIEW
-> Next stage:    NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / NOT STARTED / TEST_SUPPORT_ONLY / MOCK_ONLY
+> Current stage: NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_VALIDATION
+> Next stage:    NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,8 +34,8 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_REVIEW.
-Next concrete action: NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / NOT STARTED / TEST_SUPPORT_ONLY / MOCK_ONLY.
+Current main line: NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_VALIDATION.
+Next concrete action: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -46,6 +46,30 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.13 NQ-DH I1-IMP1 DH Dry-run Test-support Entry（2026-07-03，IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_VALIDATION）
+
+```text
+Task: NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY
+Task type: CONTROLLED_IMPLEMENTATION + DH_TEST_SUPPORT_ENTRY + CONTRACT_VALIDATION_CHAIN_TESTS + MOCK_ONLY + NO_RUNTIME + NO_LIVE
+DH test support: dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/integration1/support/DhDryRunTestSupportEntry.java
+DH tests: dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/integration1/DhDryRunTestSupportEntryTest.java
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NOT STARTED
+Real provider: NOT STARTED
+API / Controller: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+ALLOW_IMP1_CLOSE: YES
+ALLOW_I1_IMP2_NQ_STUB_RECORDER_NO_SIDE_EFFECT: YES
+Next concrete action: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY
+```
+
+- 本轮只新增 DH 侧 test-support dry-run entry harness 与 validation chain 测试：payload size gate、canonical header、requestId / traceId / tenantId binding、source allowlist guard、UTC `Z` timestamp、nonce replay、value-based HMAC、schema/contract shape、forbidden fields、DecisionOrchestrator mock-only、provider guard、audit / trace / replay safe summary、structured `DecisionOutput` assembly 与 fail-closed normalization。
+- `NQ_DRYRUN` 仍保持 review-gated，不进入生产 allowlist；`LONG_BIAS` / `SHORT_BIAS` 只作为 read-only bias，不映射为 BUY / SELL；unknown error 统一 fail-closed 到 `ABSTAIN`。
+- 未修改 DH Java production code、NQ Java production code、schema/contracts/golden_cases/fixture JSON、OpenAPI、Controller、migration、runtime 配置、provider、RealClient、真实 HTTP、AI/LangGraph 或 LIVE。
 
 ## 1.0.12 NQ-DH I1-IMP0 Contract Gap Test-support Implementation（2026-07-03，IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_REVIEW）
 

@@ -1,12 +1,42 @@
 # Decision Hub 当前工单
 
-> 当前阶段: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_REVIEW
+> 当前阶段: NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_VALIDATION
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation
-> 下一阶段: NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / NOT STARTED / TEST_SUPPORT_ONLY / MOCK_ONLY
+> 下一阶段: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY
 
 ## 1. 当前目标
 
-`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成计划与 work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION` 已完成受控 test-support / mock-only guard implementation，并进入 `READY_FOR_REVIEW`。本轮只新增 DH / NQ 双侧测试支撑 guard，不启动 runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE，不修改 schema/contracts/golden_cases/fixture JSON、OpenAPI、Controller、migration 或 production code。下一步唯一允许工作内容是 `NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY / NOT STARTED / TEST_SUPPORT_ONLY / MOCK_ONLY`。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成计划与 work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION` 已完成受控 test-support / mock-only guard implementation，并进入 `READY_FOR_REVIEW`。`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY` 已完成 DH 侧 test-support dry-run entry harness 与 validation chain 测试支撑，并进入 `READY_FOR_VALIDATION`。本轮不启动 runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE，不修改 schema/contracts/golden_cases/fixture JSON、OpenAPI、Controller、migration 或 production code。下一步唯一允许工作内容是 `NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY`。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+
+## 0.0D NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY（IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_VALIDATION）
+
+本轮产物：
+
+```text
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/integration1/support/DhDryRunTestSupportEntry.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/integration1/DhDryRunTestSupportEntryTest.java
+```
+
+IMP1 只实现 DH test-support / mock-only validation harness，不实现 runtime entry、Controller、OpenAPI path、schema alias、fixture JSON 或真实 HTTP。结论如下：
+
+```text
+ALLOW_IMP1_CLOSE: YES
+ALLOW_I1_IMP2_NQ_STUB_RECORDER_NO_SIDE_EFFECT: YES
+ALLOW_PRODUCTION_CODE_CHANGE: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_FIXTURE_IMPLEMENTATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_API_CONTROLLER_CHANGE: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+下一步唯一允许动作是 `NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY`。IMP2 仍只能在 NQ Integration worktree 内做 no-side-effect stub / recorder 支撑，不得启动 runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
 
 ## 0.0C NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION（IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_REVIEW）
 
