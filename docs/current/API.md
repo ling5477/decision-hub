@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX
-下一阶段: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
+当前阶段: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / COMPLETED / WORK_ORDER_ONLY / NOT IMPLEMENTED
+下一阶段: NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO / NOT STARTED
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -26,7 +26,7 @@ AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为 API 单源；DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`，P4 gate-fix 不新增 API path、不新增 Controller、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但尚未成为已实现 API；replay API 仍未实现。DH dry-run entry 是否需要新 endpoint 仍为 `REVIEW_REQUIRED`，必须在后续 API / contract review 中单独裁决；`NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO` 不授权新增 endpoint。
+OpenAPI 仍为 API 单源；DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`，P4 gate-fix 与 `NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO` 均不新增 API path、不新增 Controller、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但尚未成为已实现 API；replay API 仍未实现。DH dry-run entry 是否需要新 endpoint 仍为 `REVIEW_REQUIRED`，必须在后续 M0 API / contract review 中单独裁决；当前唯一下一步 `NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO` 仍不授权新增 endpoint。
 
 ## 2. 已实现端点
 

@@ -1,5 +1,63 @@
 # Decision Hub Worklog
 
+## 2026-07-03 NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO final validation
+
+完成上一轮中断后的 `NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO` 复核与补齐。本轮只做 `WORK_ORDER_ONLY`：确认 DH current docs 与 NQ worktree current docs 已同步 dry-run mock implementation WO；修正 NQ dev clean precheck 规则为 NQ-DH / Integration1 相关 pathspec clean，而不是全局 clean；确认 NQ dev 当前无相关 dirty diff，因此 `WORKSTREAM_MIXED_BLOCKED: NO`。
+
+### 新增文件
+
+```text
+docs/current/DH_NQ_INTEGRATION1_DRYRUN_MOCK_IMPLEMENTATION_WO.md
+```
+
+### 修改文件
+
+```text
+docs/current/API.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### 结果
+
+```text
+NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO: COMPLETED / WORK_ORDER_ONLY / NOT IMPLEMENTED
+Current next: NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO / NOT STARTED
+ALLOW_WORK_ORDER_CLOSE: YES
+ALLOW_I1_M0_CONTRACT_GAP_CLOSE_WO: YES
+ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_CODE: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_FIXTURE_IMPLEMENTATION: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_INTEGRATION1_DRYRUN_IMPLEMENTATION: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### 验证
+
+- `git status --short`：PASS / CHANGES PRESENT；dirty 限于允许的 `docs/current` 文档和新增 WO。
+- `git diff --check`：PASS；退出码 0，仅 Windows LF/CRLF warning。
+- `git diff --stat`：PASS / DOCS-ONLY；tracked diff 限于 `docs/current` 文档。
+- forbidden diff：`dh-domain` / `dh-usecase` / `dh-memory` / `dh-eval` / `dh-connector` / `dh-api` / `dh-app` / `dh-infra` / `contracts` / `golden_cases` 均为空。
+- NQ dev pathspec diff：PASS / EMPTY；`docs/current/*NQ_DH*` 与 `docs/current/*INTEGRATION1*` 无 unstaged 或 staged diff，`WORKSTREAM_MIXED_BLOCKED: NO`。
+- `mvn -ntp test`：PASS / BUILD SUCCESS；19 个 reactor module SUCCESS；Docker/Testcontainers 不可用导致 4 个 Docker-gated smoke tests skipped，非代码失败。
+- `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS；19 个 reactor module SUCCESS；Checkstyle 0 violations；Spotless check passed。
+
+### 边界确认
+
+未改生产代码；未改测试代码；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path、Controller、Client、Repository、Service、migration、fixture JSON 或 CI workflow；未真实 HTTP；未启动 NQ/DH runtime；未读取 credential；未接 real provider、AI 或 LangGraph；未开启 LIVE；未让 DH 输出进入 order、risk mutation、ledger mutation、Paper Run 或 private trading 路径。
+
 ## 2026-07-03 NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX final validation
 
 完成 NQ-DH Integration-1 P4 implementation gate review fix。本轮只做 docs-only / gate-fix：确认双仓 P3 docs 已提交并可继续；把 `dryRun / decisionId / confidence / traceSummary / replayRef / auditRef / X-NQ-DH-Schema-Version` 归为 `DOC_ONLY_ALIAS` 或 future envelope planning；把 `NQ_DRYRUN` source allowlist、canonical error code names、dry-run endpoint shape 归为 `NEEDS_CONTRACT_REVIEW_BEFORE_CODE`；确认 `DecisionAction` whitelist 和 fixed `ForbiddenAction` list 为 `EXISTS_NOW`；确认 trading executable fields 继续 `PROHIBITED`。

@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX
-> Next stage:    NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED
+> Current stage: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / COMPLETED / WORK_ORDER_ONLY / NOT IMPLEMENTED
+> Next stage:    NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO / NOT STARTED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,8 +34,8 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX / COMPLETED / DOCS-ONLY / GATE-FIX.
-Next concrete action: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / NOT STARTED.
+Current main line: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO / COMPLETED / WORK_ORDER_ONLY / NOT IMPLEMENTED.
+Next concrete action: NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO / NOT STARTED.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -46,6 +46,33 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.7 NQ-DH I1 Dry-run Mock Implementation WO（2026-07-03，COMPLETED / WORK_ORDER_ONLY）
+
+```text
+Task: NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO
+Task type: WORK_ORDER_ONLY + PRECHECK_RULE_FIX + DRYRUN_MOCK_IMPLEMENTATION_PLANNING + CROSS_REPO_BATCH_DESIGN + SECURITY_BOUNDARY + NO_RUNTIME + NO_LIVE
+Artifact: docs/current/DH_NQ_INTEGRATION1_DRYRUN_MOCK_IMPLEMENTATION_WO.md
+DH dev precheck: clean
+NQ dry-run worktree precheck: clean
+NQ dev precheck: NQ_MAINLINE_DIRTY_ALLOWED
+NQ dev NQ-DH / Integration-1 dirty diff: none
+WORKSTREAM_MIXED_BLOCKED: NO
+Integration-1 implementation: NOT STARTED
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NOT STARTED
+Real provider: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+Next concrete action: NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO / NOT STARTED
+```
+
+- 本轮只产出 dry-run mock implementation work order，修正前置预检口径：NQ dev 仅当存在 `docs/current/*NQ_DH*` 或 `docs/current/*INTEGRATION1*` dirty diff 时阻断；marketdata / API / Gate 主线 dirty diff 记录为 `NQ_MAINLINE_DIRTY_ALLOWED`，不得覆盖或回滚。
+- 工单拆分为 M0-M4：M0 contract gap close WO、M1 DH dry-run contract entry mock、M2 NQ dry-run stub recorder、M3 joint mock fixtures and contract tests、M4 close review。M0 仍是下一步唯一允许动作，且为 work order / contract review 文档任务。
+- 本轮不写 production code / test code，不创建 fixture JSON，不改 `contracts/**` 或 `golden_cases/**`，不新增 OpenAPI path / Controller / migration，不启动 runtime，不真实 HTTP，不接 real provider，不接 AI / Agent runtime / LangGraph / LIVE。
+- `ALLOW_WORK_ORDER_CLOSE: YES`；`ALLOW_I1_M0_CONTRACT_GAP_CLOSE_WO: YES`；`ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_CODE_THIS_TURN: NO`；`ALLOW_SCHEMA_CHANGE_THIS_TURN: NO`；`ALLOW_FIXTURE_JSON_THIS_TURN: NO`；`ALLOW_CONTRACTS_MODIFICATION_THIS_TURN: NO`；`ALLOW_GOLDEN_CASES_MODIFICATION_THIS_TURN: NO`；`ALLOW_API_CONTROLLER_THIS_TURN: NO`；`ALLOW_RUNTIME_THIS_TURN: NO`；`ALLOW_REAL_HTTP_THIS_TURN: NO`；`ALLOW_REAL_PROVIDER_THIS_TURN: NO`；`ALLOW_AI_AGENT_RUNTIME_THIS_TURN: NO`；`ALLOW_LANGGRAPH_RUNTIME_THIS_TURN: NO`；`ALLOW_LIVE_THIS_TURN: NO`。
 
 ## 1.0.6 NQ-DH I1-P4 Implementation Gate Review Fix（2026-07-03，COMPLETED / DOCS-ONLY）
 
