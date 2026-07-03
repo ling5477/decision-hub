@@ -4687,3 +4687,57 @@ DecisionAction no BUY / SELL / PLACE_ORDER / CANCEL_ORDER
 ### 下一步
 
 进入 `DH-STAGE4-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED`；不得直接进入 K8、GateK acceptance / freeze、Integration-1 runtime、Agent phase、LangGraph runtime 或 LIVE。
+
+---
+
+## NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO
+
+日期：2026-07-03
+
+### 本轮目标
+
+关闭 M1 work order，规划 DH dry-run contract entry 的 mock-only 入口形态、安全验证链、失败链路、source allowlist/error taxonomy 评审点和 M2 准入判断。本轮为 `WORK_ORDER_ONLY + DH_DRYRUN_ENTRY_PLANNING + CONTRACT_VALIDATION_CHAIN + SECURITY_CHAIN_DESIGN + TEST_SUPPORT_ONLY + NO_RUNTIME + NO_LIVE`。
+
+### 完成内容
+
+- 新增 `docs/current/DH_NQ_INTEGRATION1_M1_DH_DRYRUN_CONTRACT_ENTRY_MOCK_WO.md`。
+- 同步 `docs/current/README.md`、`STATUS.md`、`ROADMAP.md`、`WORK_ORDER.md`、`DH_NQ_INTEGRATION.md`、`API.md`、M0 work order 与 dry-run mock implementation placeholder。
+- 明确 M1 推荐入口形态为 `Option C / test-support mock-only / no runtime endpoint`。
+- 明确 `NQ_DRYRUN` source allowlist 仍未实现，必须在后续安全契约评审后才允许进入代码。
+- 明确 `decisionId`、`confidence`、`traceSummary`、`replayRef`、`auditRef`、`X-NQ-DH-Schema-Version` 仍为 `DOC_ONLY_ALIAS`，不得写入当前 schema/contracts/OpenAPI/fixture。
+- 规划 14 步 contract validation chain：payload size、canonical header、requestId/traceId/tenantId binding、source allowlist、RFC3339 UTC timestamp、nonce replay、HMAC value-based signature material、schema shape、forbidden fields、mock-only orchestrator boundary、provider guard、audit/trace/replay boundary、structured DecisionOutput、fail-closed response normalization。
+- 在 NQ dry-run worktree 同步对应 M1 result consumed work order，并确认下一步只允许 `NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO`。
+
+### 验证
+
+- DH `git status --short` / `git diff --check` / forbidden-scope diff：通过；仅 docs/current 变更；未改代码、contracts、golden_cases。
+- DH `mvn -ntp test`：BUILD SUCCESS；reactor 19/19 SUCCESS；Docker/Testcontainers 不可用导致既有环境相关 4 skips。
+- DH `mvn -ntp -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。
+- NQ worktree `mvn -ntp -f backend/pom.xml test`：BUILD SUCCESS；reactor 23/23 SUCCESS；`nq-app` 86 tests 中 2 skips 为既有环境/guard 条件。
+- NQ worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test`：BUILD SUCCESS；Integration0 17 tests / 0 failures / 0 errors / 0 skipped。
+- NQ dev worktree 仅做 read-only git guard；存在非本任务 mainline dirty 文件，但 `docs/current/*NQ_DH*` 与 `docs/current/*INTEGRATION1*` 无 dirty diff，未触发 `WORKSTREAM_MIXED_BLOCKED`。
+
+### 边界
+
+未改生产代码；未改测试代码；未新增或修改 Controller/API、migration、schema、contracts、golden_cases、fixture JSON、runtime、provider、RealClient、真实 HTTP、AI/LangGraph 或 LIVE；未读取或输出 credential、token、cookie、API secret、passphrase；未触达 NQ DB、NQ mutation、订单、撤单、持仓、账务、Paper Run 或真实交易链路；未把 DH 写成 integrated；未把 Integration-1 runtime 写成 started。
+
+### Readiness
+
+- `ALLOW_M1_WO_CLOSE: YES`
+- `ALLOW_I1_M2_NQ_DRYRUN_STUB_RECORDER_WO: YES`
+- `ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_CODE: NO`
+- `ALLOW_SCHEMA_CHANGE: NO`
+- `ALLOW_CONTRACTS_MODIFICATION: NO`
+- `ALLOW_FIXTURE_IMPLEMENTATION: NO`
+- `ALLOW_GOLDEN_CASES_MODIFICATION: NO`
+- `ALLOW_API_CONTROLLER_CHANGE: NO`
+- `ALLOW_REAL_HTTP: NO`
+- `ALLOW_REAL_PROVIDER: NO`
+- `ALLOW_INTEGRATION_1_RUNTIME: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 推荐下一步
+
+进入 `NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / NOT STARTED / WORK_ORDER_ONLY`，执行目录限定为 `F:\worktrees\nexus-quant-i1-dryrun`；不得在 `F:\project\nexus-quant` mainline dev worktree 改 Integration-1 文档或代码。

@@ -2788,3 +2788,41 @@ Readiness decision
 
 下一步     DH-STAGE4-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL / NOT STARTED。
 ```
+
+## 2026-07-03 NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO 验证记录
+
+结论：**PASS / WORK_ORDER_ONLY / DH_DRYRUN_ENTRY_PLANNED / NO_RUNTIME**。
+
+本轮只验证 M1 work order 与 docs/current 同步结果；未改生产代码、测试代码、Controller/API、migration、schema、contracts、golden_cases、fixture JSON、runtime、provider、RealClient、真实 HTTP、AI/LangGraph 或 LIVE。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short` | **PASS** | DH worktree 仅显示允许的 `docs/current` 修改与新增 M1 work order 文档，未 stage。 |
+| `git diff --check` | **PASS** | exit 0；仅 Windows LF/CRLF 转换 warning；无 whitespace error。 |
+| `git diff --name-only -- dh-domain dh-usecase dh-memory dh-eval dh-connector dh-api dh-app dh-infra contracts golden_cases` | **PASS / EMPTY** | 禁止范围无 diff；未改代码、契约、golden cases。 |
+| `mvn -ntp test` | **BUILD SUCCESS** | reactor 19/19 SUCCESS；Finished at 2026-07-03T17:43:39+08:00；Docker/Testcontainers 不可用导致既有环境相关 4 skips：`JdbcNonceReplayGuardPersistenceTest` 3 skips、`PostgresContainerSmokeTest` 1 skip。 |
+| `mvn -ntp -Pquality validate` | **BUILD SUCCESS** | reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed；Finished at 2026-07-03T17:46:57+08:00。 |
+| NQ worktree `mvn -ntp -f backend/pom.xml test` | **BUILD SUCCESS** | 在 `F:\worktrees\nexus-quant-i1-dryrun` 执行；reactor 23/23 SUCCESS；Finished at 2026-07-03T17:45:27+08:00；`nq-app` 86 tests 中 2 skips 为既有环境/guard 条件。 |
+| NQ worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test` | **BUILD SUCCESS** | Integration0 定向验证 17 tests / 0 failures / 0 errors / 0 skipped；Finished at 2026-07-03T17:47:23+08:00。 |
+| NQ dev worktree read-only diff guard | **PASS** | `F:\project\nexus-quant` 仅做 git status/branch/log/diff；存在非本任务 mainline dirty 文件，但 `docs/current/*NQ_DH*` 与 `docs/current/*INTEGRATION1*` 无 dirty diff；`WORKSTREAM_MIXED_BLOCKED: NO`。 |
+
+M1 readiness：
+
+```text
+ALLOW_M1_WO_CLOSE: YES
+ALLOW_I1_M2_NQ_DRYRUN_STUB_RECORDER_WO: YES
+ALLOW_I1_DRYRUN_MOCK_IMPLEMENTATION_CODE: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_FIXTURE_IMPLEMENTATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_API_CONTROLLER_CHANGE: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+边界确认：未触达生产环境、真实交易、真实交易所私有 API、NQ DB、NQ mutation、credential、token、cookie、API secret、passphrase；未把 DH 写成 integrated；未把 Integration-1 runtime 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE。

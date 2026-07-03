@@ -7,8 +7,8 @@
 ## 0. 当前状态锁定（2026-07-03）
 
 ```text
-Current stage: NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO / COMPLETED / WORK_ORDER_ONLY / CONTRACT_GAP_CLOSED / NOT IMPLEMENTED
-Next stage:    NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO / NOT STARTED
+Current stage: NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO / COMPLETED / WORK_ORDER_ONLY / DH_DRYRUN_ENTRY_PLANNED / NOT IMPLEMENTED
+Next stage:    NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED
 DH-AUDIT-FIX completed
 NQ integration not started
 Integration-1 implementation not started
@@ -24,7 +24,7 @@ Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
 
-当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已完成两仓当前事实源同步、旧 GateK Integration-1 当前主线移除和 dry-run boundary 确认；`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN` 已完成 plan-only 合同规划，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md`；`NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN` 已完成 plan-only fixtures / schema gap / golden case alignment 规划，计划文档为 `DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md`；`NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN` 已完成 plan-only readiness 规划，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md`，并合并原 NQ stub / DH entry / joint mock validation 三个计划项。`NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX` 已完成 docs-only gate-fix 与 schema gap 分类；`NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO` 已完成 work-order-only 批次拆分，工单为 `DH_NQ_INTEGRATION1_DRYRUN_MOCK_IMPLEMENTATION_WO.md`；`NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO` 已完成 contract gap close work order，工单为 `DH_NQ_INTEGRATION1_M0_CONTRACT_GAP_CLOSE_WO.md`。下一步唯一允许进入 `NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO / NOT STARTED`，且仍为 work order / mock contract planning，不是 implementation。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
+当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已完成两仓当前事实源同步、旧 GateK Integration-1 当前主线移除和 dry-run boundary 确认；`NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN` 已完成 plan-only 合同规划，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_CONTRACT_PLAN.md`；`NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN` 已完成 plan-only fixtures / schema gap / golden case alignment 规划，计划文档为 `DH_NQ_INTEGRATION1_CONTRACT_FIXTURES_PLAN.md`；`NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN` 已完成 plan-only readiness 规划，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_IMPLEMENTATION_READINESS_PLAN.md`，并合并原 NQ stub / DH entry / joint mock validation 三个计划项。`NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX` 已完成 docs-only gate-fix 与 schema gap 分类；`NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO` 已完成 work-order-only 批次拆分，工单为 `DH_NQ_INTEGRATION1_DRYRUN_MOCK_IMPLEMENTATION_WO.md`；`NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO` 已完成 contract gap close work order，工单为 `DH_NQ_INTEGRATION1_M0_CONTRACT_GAP_CLOSE_WO.md`；`NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO` 已完成 DH dry-run contract entry mock work order，工单为 `DH_NQ_INTEGRATION1_M1_DH_DRYRUN_CONTRACT_ENTRY_MOCK_WO.md`。下一步唯一允许进入 `NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED`，且仍为 work order / mock contract planning，不是 implementation。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
 
 Integration-0 safety gate 已 CLOSED / ACCEPTED。若未来重新进入 NQ runtime 相关工作，只能从基于 GateN 的 Integration-1 planning-only audit 开始；本文件中的 DH -> NQ REST API 控制面、`POST /api/ai/backtest-requests`、真实 HTTP / event、NQ client、RealClient、real provider 等方向均为 historical / superseded / deferred / gated，不代表当前 next 或当前 implementation。
 
@@ -157,7 +157,7 @@ PostMortemCreated
 
 ## 5. 数据流（historical / superseded / deferred / gated）
 
-以下数据流只保留为历史背景，不代表当前系统已经开始集成，也不是当前 implementation。当前唯一下一步是 `NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO / NOT STARTED`，且仍为 work order / mock contract planning，不是 runtime implementation。
+以下数据流只保留为历史背景，不代表当前系统已经开始集成，也不是当前 implementation。当前唯一下一步是 `NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO / NOT STARTED / WORK_ORDER_ONLY_ALLOWED`，且仍为 work order / mock contract planning，不是 runtime implementation。
 
 ```text
 User / NQ Console
