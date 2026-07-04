@@ -1,0 +1,13 @@
+decisionhub:
+  integration1:
+    runtime:
+      # test profile 可由测试显式 override enabled=true；默认关闭并保持 fail-closed。
+      enabled: false
+      production-enabled: false
+      allowed-sources: NQ_DRYRUN
+      allowed-tenant-source-pairs: ""
+  security:
+    nq-feedback:
+      replay:
+        # test profile 使用有界 in-memory replay guard，避免测试依赖外部 DB。
+        guard-type: in-memory

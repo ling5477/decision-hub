@@ -1,5 +1,113 @@
 # Decision Hub Worklog
 
+## 2026-07-04 NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION
+
+完成 `NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 的 DH-only limited inbound endpoint 最小闭环。Endpoint 为 `POST /api/ai/decision-dry-runs`，默认关闭，仅 dev/test profile 可显式启用；production profile disabled，kill switch fail-closed。本轮不实现 NQ runtime client、不调用 NQ、不新增真实 outbound HTTP、不接 real provider、不接 Agent / LangGraph runtime、不启用 LIVE。
+
+### 新增文件
+
+```text
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunController.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunRequest.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunSuccessResponse.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunErrorResponse.java
+dh-api/src/test/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunControllerWebMvcTest.java
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionDryRunRuntimeWiringConfig.java
+dh-app/src/main/resources/application-test.yml
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/HmacNqDryRunAuthenticator.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDryRunAuthRequest.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDryRunAuthResult.java
+dh-security/src/test/java/com/guidinglight/decisionhub/security/nq/HmacNqDryRunAuthenticatorTest.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/*
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/dryrun/*
+```
+
+### 修改文件
+
+```text
+dh-api/src/main/java/com/guidinglight/decisionhub/api/security/DhApiAuthenticationFilter.java
+dh-app/src/main/resources/application.yml
+dh-app/src/main/resources/application-dev.yml
+dh-app/src/main/resources/application-prod.yml
+dh-domain/src/test/java/com/guidinglight/decisionhub/contracts/DecisionContractGapGuardTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/integration1/DhDryRunTestSupportEntryTest.java
+docs/current/API.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+```
+
+### 结果
+
+```text
+NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION: IMPLEMENTED / PENDING_CLOSE_REVIEW / DH_ONLY
+Endpoint: POST /api/ai/decision-dry-runs
+Feature flag: default disabled / dev-test explicit enable only / production disabled
+NQ_DRYRUN source: dev-test tenant/source allowlist only / not in production allowlist
+Runtime integration: NOT STARTED
+NQ runtime client: NOT STARTED
+Real HTTP outbound: NO
+Real provider: NO
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+NEXT_ACTION: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW
+```
+
+### Implementation
+
+- `DecisionDryRunController` 新增 DH inbound endpoint，读取 raw body 用于 HMAC body hash，走 canonical `X-NQ-DH-*` header、API tenant context、rate limit、HMAC dry-run authenticator 与 usecase。payload cap 在 JSON 解析前 fail-closed，避免超大 payload 被误映射成普通 policy error。
+- `HmacNqDryRunAuthenticator` 校验 method/path/source/tenant/requestId/traceId/timestamp/nonce/schemaVersion/bodySha256 签名材料，强制 secret、tenant/source pair、UTC `Z` timestamp、±300s window、payload cap、signature 和 nonce replay guard。
+- `DefaultDecisionDryRunService` 负责 feature flag、production disabled、kill switch、dryRun=true、必填 envelope、forbidden material、forbiddenCapabilities、memory cap、policy gate、audit / trace / replay 写入和 fail-closed normalization。
+- response 只返回 read-only snapshot，action 仅允许 `OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS`；内部 `ABSTAIN` 对外映射为 `NO_TRADE`，reason 记录 `INTERNAL_ABSTAIN_MAPPED`。
+- `application.yml` 默认 disabled；`application-dev.yml` 与 `application-test.yml` 可显式启用 `NQ_DRYRUN`；`application-prod.yml` 明确 disabled、kill switch true、allowed sources empty。
+- `DhApiAuthenticationFilter` 将 `/api/ai/decision-dry-runs` 纳入 DH API bearer 认证保护。
+
+### Tests
+
+- `HmacNqDryRunAuthenticatorTest` 覆盖 valid signature、invalid timestamp、out-of-window、replay nonce、tenant/source denial 和 payload too large。
+- `DefaultDecisionDryRunServiceTest` 覆盖 feature flag disabled、valid dry-run、dryRun=false、forbidden execution material、memory limit、audit failure、provider disabled / timeout / budget fail-closed 和 ABSTAIN mapping。
+- `DecisionDryRunControllerWebMvcTest` 覆盖 API auth、valid signed request、feature flag disabled、missing/invalid signature、timestamp shape、timestamp window、nonce replay、source denied、tenant mismatch、dryRun=false、forbidden executable material、payload too large、rate limited 和 audit write failure。
+- `DecisionContractGapGuardTest` 与 `DhDryRunTestSupportEntryTest` 已更新为允许本轮 limited endpoint，同时继续阻断 contracts/schema/golden_cases、NQ runtime client、real provider、真实 HTTP、LIVE 和 executable trading tokens。
+
+### 验证
+
+- `mvn -ntp -pl dh-api -am test`：PASS / BUILD SUCCESS；`DecisionDryRunControllerWebMvcTest` 11 tests；dh-api 53 tests，0 failures，0 errors。
+- `mvn -ntp -pl dh-usecase -am test`：PASS / BUILD SUCCESS；dh-usecase 179 tests，0 failures，0 errors。
+- `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS；Checkstyle 0 violations；Spotless check passed。
+- `mvn -ntp test`：PASS / BUILD SUCCESS；19 个 reactor module SUCCESS；`PostgresContainerSmokeTest` 因 Docker named pipe access denied 被测试自身 skip 1 项，非本轮代码失败。
+- `git diff --check`：PASS；仅 Windows LF/CRLF warning；无 whitespace error。
+- forbidden diff：`contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 均为空。
+- boundary `rg`：已用 PowerShell 原生展开 `dh-*` 后重跑；命中分类为 endpoint token、dev/test `NQ_DRYRUN` 配置、测试负向断言、既有安全 denylist、文档禁令、migration 注释或 historical contract；未发现 NQ client、真实 HTTP、real provider、Agent/LangGraph runtime、LIVE 或可执行订单实现。
+- NQ dev 只读：存在 unrelated untracked trading preflight 文件；NQ-DH / Integration-1 scoped unstaged 与 staged diff 均为空。
+- NQ dry-run worktree 只读：branch=`nq-dh-i1-runtime-api-contract-review`；status clean；diff stat empty。
+
+### 边界确认
+
+未修改 NQ dev；未修改 NQ dry-run worktree；未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**`、fixture JSON 或 migration；未新增 NQ runtime client、RealClient、真实 outbound HTTP client、real provider、Agent / LangGraph runtime 或 LIVE；未读取或输出 credential、token、cookie、API secret、passphrase；未写 order / execution / ledger / account / trading 状态；未输出 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 或 executable order instruction；未把 DH 写成 integrated；未把 Runtime integration 写成 started。
+
+### Readiness
+
+- `ALLOW_DH_LIMITED_RUNTIME_ENDPOINT_IMPLEMENTATION_CLOSE: YES`
+- `ALLOW_DH_ENDPOINT_CLOSE_REVIEW: YES`
+- `ALLOW_NQ_RUNTIME_CLIENT_WO: NO`
+- `ALLOW_NQ_RUNTIME_CLIENT_IMPLEMENTATION_NOW: NO`
+- `ALLOW_REAL_HTTP: NO`
+- `ALLOW_REAL_PROVIDER: NO`
+- `ALLOW_SCHEMA_CHANGE_NOW: NO`
+- `ALLOW_CONTRACTS_MODIFICATION_NOW: NO`
+- `ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 下一步
+
+进入 `NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_NQ_RUNTIME_CLIENT / NO_REAL_PROVIDER / NO_LIVE`；不得直接进入 NQ runtime client WO、NQ runtime client implementation、schema/contracts/golden_cases 修改、真实 HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
+
 ## 2026-07-04 NQ-DH-I1-DH-RUNTIME-API-WO
 
 完成 `NQ-DH-I1-DH-RUNTIME-API-WO` 的 work-order-only 收口。本轮只写 DH scoped limited dry-run runtime API implementation work order，不实现 runtime，不新增 API / Controller，不修改 production code、test code、contracts、golden_cases、fixture JSON、migration、OpenAPI、Client、Service、Repository 或 runtime wiring。

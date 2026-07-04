@@ -1,5 +1,67 @@
 # Decision Hub Testing
 
+## 2026-07-04 NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION validation
+
+```text
+Scope:
+  - 本轮只实现 DH 侧 limited dry-run inbound endpoint：POST /api/ai/decision-dry-runs。
+  - endpoint 默认关闭；dev/test profile 可显式启用；production disabled / kill switch fail-closed。
+  - 不修改 NQ dev / NQ dry-run worktree；不新增 NQ runtime client；不调用 NQ；不新增真实 outbound HTTP client、RealClient、real provider、Agent / LangGraph runtime 或 LIVE。
+  - 不修改 contracts/openapi.yaml、contracts/json-schema/**、golden_cases/**、fixture JSON 或 migration。
+
+Result:
+  NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION: IMPLEMENTED / PENDING_CLOSE_REVIEW / DH_ONLY
+  Endpoint: POST /api/ai/decision-dry-runs
+  Feature flag: default disabled / dev-test explicit enable only / production disabled
+  NQ_DRYRUN source: dev-test allowlist only / not in production allowlist
+  Runtime integration: NOT STARTED
+  NQ runtime client: NOT STARTED
+  Real HTTP outbound: NO
+  Real provider: NO
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| DH `mvn -ntp -pl dh-api -am test` | PASS / BUILD SUCCESS | 覆盖 `DecisionDryRunControllerWebMvcTest` 11 tests；dh-api 模块 53 tests，0 failures，0 errors；依赖模块同步通过。 |
+| DH `mvn -ntp -pl dh-usecase -am test` | PASS / BUILD SUCCESS | dh-usecase 模块 179 tests，0 failures，0 errors；覆盖 `DefaultDecisionDryRunServiceTest` 8 tests 与既有 Integration-1 mock/test-support guard。 |
+| DH `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 reactor module SUCCESS；Checkstyle 0 violations；Spotless check passed。 |
+| DH `mvn -ntp test` | PASS / BUILD SUCCESS | 19 个 reactor module SUCCESS；`PostgresContainerSmokeTest` 因 Docker named pipe `\\.\pipe\docker_engine` access denied 被测试自身 skip 1 项；非本轮代码失败，不代表 Docker/Testcontainers 已真实通过。 |
+| DH `git status --short` | PASS / CHANGES PRESENT | Dirty 限于本轮允许的 DH code/test/config/docs 文件；未 stage。 |
+| DH `git diff --check` | PASS | 退出码 0；仅 Windows LF/CRLF warning；无 whitespace error。 |
+| DH `git diff --stat` | PASS / REVIEWED | tracked diff 覆盖 DH endpoint、安全、usecase、config、test guard 与 docs/current；untracked 新文件由 `git status --short` 标识。 |
+| DH forbidden diff：`git diff --name-only -- contracts golden_cases "dh-*/src/main/resources/db/migration"` | PASS / EMPTY | 未修改 contracts、golden_cases 或 Flyway migration。 |
+| DH boundary scan：PowerShell-expanded `rg -n "decision-dry-runs|NQ_DRYRUN|BUY|SELL|PLACE_ORDER|CANCEL_ORDER|LangGraph|AutoGen|CrewAI|WebClient|RestTemplate|OkHttp|HttpClient|apiKey|apiSecret|passphrase|credential|token|cookie|live|placeOrder|cancelOrder" dh-* docs/current contracts golden_cases` | PASS / REVIEWED | 附件原始 `dh-*` glob 在 PowerShell 下不展开，首跑出现路径语法错误；已用 `Get-ChildItem -Directory -Filter 'dh-*'` 原生展开后重跑。命中项分类为：本轮 endpoint token、dev/test `NQ_DRYRUN` 配置、测试负向断言、既有安全 denylist、文档禁令、migration 注释或 historical contract；未发现 NQ client、真实 HTTP、real provider、Agent/LangGraph runtime、LIVE 或可执行订单实现。 |
+| NQ dev `git status --short` | REVIEWED / UNRELATED UNTRACKED PRESENT | 只读检查；存在既有 untracked `backend/nq-api/.../TradingPreflightController.java` 与 `backend/nq-core/.../preflight/`，与本轮 NQ-DH scope 无关；本轮未修改 NQ dev。 |
+| NQ dev `git diff --stat` | PASS / EMPTY | 只读检查；unstaged tracked diff 为空。 |
+| NQ dev scoped diff：`git diff --name-only -- docs/current/*NQ_DH* docs/current/*INTEGRATION1*` and cached variant | PASS / EMPTY | NQ-DH / Integration-1 scoped unstaged 与 staged diff 均为空。 |
+| NQ worktree `git status --short` | PASS / CLEAN | 只读检查；未修改 `E:\Project\nexus-quant-i1-dryrun`。 |
+| NQ worktree `git branch --show-current` | PASS / REVIEWED | branch=`nq-dh-i1-runtime-api-contract-review`。 |
+| NQ worktree `git diff --stat` | PASS / EMPTY | 只读检查；diff stat 无输出。 |
+
+Readiness:
+
+```text
+ALLOW_DH_LIMITED_RUNTIME_ENDPOINT_IMPLEMENTATION_CLOSE: YES
+ALLOW_DH_ENDPOINT_CLOSE_REVIEW: YES
+ALLOW_NQ_RUNTIME_CLIENT_WO: NO
+ALLOW_NQ_RUNTIME_CLIENT_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_CHANGE_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+Boundary:
+
+未改 NQ dev；未改 NQ dry-run worktree；未改 contracts、golden_cases、fixture JSON 或 migration；未新增 NQ runtime client、RealClient、真实 HTTP outbound client、real provider、Agent / LangGraph runtime 或 LIVE；未读取 credential、token、cookie、API secret、passphrase；未写 order / execution / ledger / account / trading 状态；未输出 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 或 executable order instruction。
+
 ## 2026-07-04 NQ-DH-I1-DH-RUNTIME-API-WO validation
 
 ```text

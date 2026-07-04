@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-DH-RUNTIME-API-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
-> Next stage:    NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> Current stage: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / IMPLEMENTED / PENDING_CLOSE_REVIEW / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> Next stage:    NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_NQ_RUNTIME_CLIENT / NO_REAL_PROVIDER / NO_LIVE
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,10 +34,10 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-DH-RUNTIME-API-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION.
+Current main line: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / IMPLEMENTED / PENDING_CLOSE_REVIEW / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
-Next concrete action: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Next concrete action: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_NQ_RUNTIME_CLIENT / NO_REAL_PROVIDER / NO_LIVE.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -49,6 +49,41 @@ Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
 
+## 1.0.19 NQ-DH I1 DH Limited Runtime Endpoint Implementation（2026-07-04，IMPLEMENTED / PENDING_CLOSE_REVIEW / DH_ONLY）
+
+```text
+Task: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION
+Task type: DH_SCOPED_RUNTIME_ENDPOINT_IMPLEMENTATION + SECURITY_GATE_ENFORCEMENT + DRY_RUN_ONLY + NO_NQ_RUNTIME_CLIENT + NO_REAL_PROVIDER + NO_LIVE
+Endpoint: POST /api/ai/decision-dry-runs
+Endpoint state: IMPLEMENTED / DH_ONLY / DEFAULT_DISABLED / DEV_TEST_ENABLE_ONLY / PRODUCTION_DISABLED
+NQ_DRYRUN source: DEV_TEST_ONLY / NOT_IN_PRODUCTION_ALLOWLIST
+Runtime integration: NOT STARTED
+NQ runtime client: NOT STARTED
+Real HTTP outbound: NO
+Real provider: NO
+Agent / LangGraph runtime: NO
+LIVE: DISABLED
+ALLOW_DH_LIMITED_RUNTIME_ENDPOINT_IMPLEMENTATION_CLOSE: YES
+ALLOW_DH_ENDPOINT_CLOSE_REVIEW: YES
+ALLOW_NQ_RUNTIME_CLIENT_WO: NO
+ALLOW_NQ_RUNTIME_CLIENT_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_CHANGE_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+Next concrete action: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_NQ_RUNTIME_CLIENT / NO_REAL_PROVIDER / NO_LIVE
+```
+
+- 本轮只实现 DH 侧 limited dry-run inbound endpoint；未修改 NQ dev 或 NQ dry-run worktree，未新增 NQ runtime client，未调用 NQ，未新增真实 outbound HTTP client、RealClient、real provider、Agent / LangGraph runtime 或 LIVE。
+- endpoint 默认关闭；dev/test profile 可显式启用 `NQ_DRYRUN`，production profile disabled、kill switch fail-closed，且 `NQ_DRYRUN` 不进入 production allowlist。
+- request gate 覆盖 HMAC signature、canonical `X-NQ-DH-*` headers、UTC `Z` timestamp、±300s window、nonce replay、tenant/source pair allowlist、requestId / traceId / tenantId binding、payload cap、rate limit、memory cap、forbidden material、policy gate 与 audit fail-closed。
+- response 只返回 read-only decision snapshot；action 仅允许 `OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS`。内部 `ABSTAIN` 对外映射为 `NO_TRADE`，并记录 `INTERNAL_ABSTAIN_MAPPED` reason；不输出 `BUY / SELL / PLACE_ORDER / CANCEL_ORDER`、quantity、leverage 或 order instruction。
+- 本轮未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**`、fixture JSON 或 migration。OpenAPI/schema 兼容性与是否提升为正式 wire contract 必须由后续 close review 或独立 schema review 决定。
+
 ## 1.0.18 NQ-DH I1 DH Runtime API WO（2026-07-04，CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION）
 
 ```text
@@ -56,7 +91,7 @@ Task: NQ-DH-I1-DH-RUNTIME-API-WO
 Task type: WORK_ORDER_ONLY + DH_SCOPED_RUNTIME_API_IMPLEMENTATION_PLAN + SECURITY_BOUNDARY_FREEZE + NO_RUNTIME_IMPLEMENTATION + NO_LIVE
 DH artifact: docs/current/DH_NQ_INTEGRATION1_DH_RUNTIME_API_WO.md
 Future endpoint candidate: POST /api/ai/decision-dry-runs
-Endpoint state now: NOT IMPLEMENTED
+Endpoint state at WO close: NOT IMPLEMENTED
 NQ_DRYRUN source: REVIEW_GATED / NOT_IN_PRODUCTION_ALLOWLIST
 ALLOW_DH_RUNTIME_API_WO_CLOSE: YES
 ALLOW_DH_LIMITED_RUNTIME_ENDPOINT_IMPLEMENTATION_WO: YES
@@ -70,11 +105,11 @@ ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
 ALLOW_AGENT_PHASE: NO
 ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
-Next concrete action: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+Next concrete action at WO close: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 ```
 
 - 本轮只写 DH limited dry-run runtime API implementation work order；未新增 Controller、API implementation、Client、Service、Repository、migration、schema、contracts、golden_cases、fixture JSON、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
-- Work order 冻结 future endpoint `POST /api/ai/decision-dry-runs`，但 endpoint 当前仍为 `NOT IMPLEMENTED`，不得写入已实现 API、OpenAPI path 或 Controller。
+- Work order 冻结 future endpoint `POST /api/ai/decision-dry-runs`；WO 关闭时 endpoint 仍为 `NOT IMPLEMENTED`，后续实现状态以 §1.0.19 为准。
 - 下一轮 implementation 必须默认 feature flag disabled、dev/test only、production disabled，强制 HMAC、UTC `Z` timestamp、±300s replay window、persistent nonce replay guard、tenant/source allowlist、requestId / traceId / tenantId binding、payload cap、rate limit、memory cap、fail-closed、redacted audit logging 和 kill switch。
 - `NQ_DRYRUN` 当前仍为 review-gated source，不得直接进入 production allowlist；如下一轮允许，只能先限 dev/test profile，并要求 tenant + source pair allowlist。
 - request envelope 仅允许 read-only dry-run 字段；禁止 credential、apiKey、apiSecret、passphrase、accountSecret、executableOrder、BUY/SELL order instruction、quantity/leverage/order price executable instruction。

@@ -221,16 +221,16 @@ final class DhDryRunTestSupportEntryTest {
     }
 
     @Test
-    void dryRunRuntimeEndpointControllerRealProviderAgentAndLangGraphAreNotAdded() throws Exception {
-        assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "NQ_DRYRUN");
-        assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "dry-run");
-        assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "dryrun");
+    void limitedRuntimeEndpointDoesNotAddNqClientRealProviderAgentOrLangGraph() throws Exception {
         assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "RealNqDryRun");
+        assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "NqDhDryRunClient");
+        assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "RealNqDhDryRunClient");
         assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "OpenAI");
         assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "Claude");
         assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "Gemini");
-        assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "@PostMapping(\"/dry");
-        assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "@RequestMapping(\"/dry");
+        assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "NqDhLangGraphDryRun");
+        assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "@PostMapping(\"/api/nq-dh");
+        assertNoProductionToken(List.of("dh-api/src/main/java", "dh-app/src/main/java"), "@RequestMapping(\"/api/nq-dh");
     }
 
     private static DhDryRunTestSupportEntry defaultEntry() {

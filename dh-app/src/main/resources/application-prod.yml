@@ -8,6 +8,14 @@ spring:
       url: ${REDIS_URL}
 
 decisionhub:
+  integration1:
+    runtime:
+      # production 明确禁用 NQ_DRYRUN endpoint；不得通过 base 默认值误开启。
+      enabled: false
+      production-enabled: false
+      kill-switch-enabled: true
+      allowed-sources: ""
+      allowed-tenant-source-pairs: ""
   security:
     nq-feedback:
       replay:

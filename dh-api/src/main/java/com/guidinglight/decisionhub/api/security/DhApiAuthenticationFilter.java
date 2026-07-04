@@ -16,8 +16,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 /**
  * DH AI API 最小认证 filter。
  *
- * <p>保护范围覆盖当前所有 DH API 多租户入口：ResearchRun API、NQ feedback API 与 deprecated legacy run
- * API。认证结果写入 request attribute，controller 只能从该可信上下文解析 tenant。
+ * <p>保护范围覆盖当前所有 DH API 多租户入口：ResearchRun API、NQ feedback API、limited dry-run API 与
+ * deprecated legacy run API。认证结果写入 request attribute，controller 只能从该可信上下文解析 tenant。
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 20)
@@ -27,6 +27,7 @@ public final class DhApiAuthenticationFilter extends OncePerRequestFilter {
   private static final String BEARER_PREFIX = "Bearer ";
   private static final String RESEARCH_PATH = "/api/ai/research-runs";
   private static final String NQ_FEEDBACK_PATH = "/api/ai/feedback/nq";
+  private static final String DECISION_DRY_RUN_PATH = "/api/ai/decision-dry-runs";
   private static final String LEGACY_RUN_PATH = "/legacy/runs";
 
   private final TokenVerifier tokenVerifier;
@@ -42,6 +43,7 @@ public final class DhApiAuthenticationFilter extends OncePerRequestFilter {
     return !(path.equals(RESEARCH_PATH)
         || path.startsWith(RESEARCH_PATH + "/")
         || path.equals(NQ_FEEDBACK_PATH)
+        || path.equals(DECISION_DRY_RUN_PATH)
         || path.equals(LEGACY_RUN_PATH)
         || path.startsWith(LEGACY_RUN_PATH + "/"));
   }

@@ -21,10 +21,12 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 /**
- * IMP0 contract gap guard：只验证当前 DH dry-run 相关 gap 仍保持 test-support / review-gated。
+ * Integration-1 contract gap guard。
  *
- * <p>本测试不得成为 runtime 授权。若未来要落地 source allowlist、canonical error enum、wire-level alias 或
- * dry-run endpoint，必须先删除或改写本测试，并经过独立 contract / API / security review。
+ * <p>本测试跟随 `NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 更新：允许 DH 内部出现受限
+ * `POST /api/ai/decision-dry-runs` 入站 endpoint、dev/test `NQ_DRYRUN` source 与 endpoint-local error
+ * taxonomy；仍禁止把这些内容写入 formal schema、production allowlist、NQ client、真实 provider、真实 HTTP 或
+ * LIVE 路径。
  */
 class DecisionContractGapGuardTest {
 
@@ -45,16 +47,25 @@ class DecisionContractGapGuardTest {
 
     private static final Set<String> CANONICAL_ERROR_MAPPING_CANDIDATES =
             Set.of(
-                    "AUTH_FAILED",
-                    "CONTRACT_INVALID",
-                    "TIMESTAMP_SKEW",
+                    "SIGNATURE_INVALID",
+                    "TIMESTAMP_INVALID",
+                    "TIMESTAMP_OUT_OF_WINDOW",
                     "NONCE_REPLAY",
+                    "TENANT_MISMATCH",
                     "SOURCE_DENIED",
-                    "INTERNAL_FAIL_CLOSED");
+                    "PAYLOAD_TOO_LARGE",
+                    "RATE_LIMITED",
+                    "MEMORY_LIMIT_EXCEEDED",
+                    "POLICY_DENIED",
+                    "PROVIDER_DISABLED",
+                    "PROVIDER_TIMEOUT",
+                    "BUDGET_EXCEEDED",
+                    "UNKNOWN_ERROR");
 
     private static final List<Path> MAIN_SOURCE_ROOTS =
             List.of(
                     Path.of("src", "main", "java"),
+                    Path.of("..", "dh-security", "src", "main", "java"),
                     Path.of("..", "dh-usecase", "src", "main", "java"),
                     Path.of("..", "dh-api", "src", "main", "java"),
                     Path.of("..", "dh-app", "src", "main", "java"),
@@ -65,21 +76,38 @@ class DecisionContractGapGuardTest {
                     Path.of("..", "dh-api", "src", "main", "java"),
                     Path.of("..", "dh-app", "src", "main", "java"));
 
+    private static final List<String> LIMITED_RUNTIME_ENDPOINT_ALLOWED_PATH_PARTS =
+            List.of(
+                    "/dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/DecisionDryRun",
+                    "/dh-api/src/main/java/com/guidinglight/decisionhub/api/security/DhApiAuthenticationFilter.java",
+                    "/dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionDryRunRuntimeWiringConfig.java",
+                    "/dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/HmacNqDryRunAuthenticator.java",
+                    "/dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDryRunAuthRequest.java",
+                    "/dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDryRunAuthResult.java",
+                    "/dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DecisionDryRun",
+                    "/dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DefaultDecisionDryRunService.java");
+
     @Test
     void sourceNqDryrunRemainsReviewGatedAndIsNotProductionAllowlisted() throws Exception {
         final JsonNode sourceProperty = schema("dh-decision-request.schema.json").path("properties").path("source");
 
         assertFalse(enumValues(sourceProperty).contains("NQ_DRYRUN"));
         assertFalse(sourceProperty.path("const").asText("").equals("NQ_DRYRUN"));
-        assertNoJavaSourceToken("NQ_DRYRUN", MAIN_SOURCE_ROOTS);
+        assertJavaSourceTokenOnlyInAllowedLimitedRuntimeFiles("NQ_DRYRUN", MAIN_SOURCE_ROOTS);
+        assertProductionProfileKeepsLimitedRuntimeDisabled();
     }
 
     @Test
-    void dryRunEndpointShapeRemainsNoRuntimeEndpoint() throws Exception {
-        assertNoJavaSourceToken("NQ_DRYRUN", RUNTIME_ENDPOINT_SOURCE_ROOTS);
-        assertNoJavaSourceToken("dry-run", RUNTIME_ENDPOINT_SOURCE_ROOTS);
-        assertNoJavaSourceToken("dryrun", RUNTIME_ENDPOINT_SOURCE_ROOTS);
-        assertNoJavaSourceToken("dryRun", RUNTIME_ENDPOINT_SOURCE_ROOTS);
+    void limitedDryRunEndpointRemainsInboundOnlyAndDoesNotAddNqRuntimeClient() throws Exception {
+        assertJavaSourceContains(
+                Path.of("..", "dh-api", "src", "main", "java", "com", "guidinglight", "decisionhub", "api",
+                        "decision", "DecisionDryRunController.java"),
+                "@PostMapping(\"/decision-dry-runs\")");
+        assertNoJavaSourceToken("NqDhDryRunClient", RUNTIME_ENDPOINT_SOURCE_ROOTS);
+        assertNoJavaSourceToken("RealNqDryRun", RUNTIME_ENDPOINT_SOURCE_ROOTS);
+        assertNoJavaSourceToken("NqDhLangGraphDryRun", RUNTIME_ENDPOINT_SOURCE_ROOTS);
+        assertNoJavaSourceToken("@RequestMapping(\"/api/nq-dh", RUNTIME_ENDPOINT_SOURCE_ROOTS);
+        assertNoJavaSourceToken("@PostMapping(\"/api/nq-dh", RUNTIME_ENDPOINT_SOURCE_ROOTS);
     }
 
     @Test
@@ -126,9 +154,17 @@ class DecisionContractGapGuardTest {
     }
 
     @Test
-    void canonicalErrorNamesRemainMappingCandidatesNotProductionEnums() throws Exception {
+    void canonicalErrorNamesAreImplementedInEndpointLocalEnum() throws Exception {
+        final Path errorCodeFile =
+                Path.of("..", "dh-usecase", "src", "main", "java", "com", "guidinglight", "decisionhub", "usecase",
+                                "decision", "dryrun", "DecisionDryRunErrorCode.java")
+                        .toAbsolutePath()
+                        .normalize();
+        final String errorCodeSource = Files.readString(errorCodeFile);
         for (String errorName : CANONICAL_ERROR_MAPPING_CANDIDATES) {
-            assertNoJavaSourceToken(errorName, MAIN_SOURCE_ROOTS);
+            assertTrue(
+                    errorCodeSource.contains(errorName),
+                    errorName + " must be present in endpoint-local DecisionDryRunErrorCode");
         }
     }
 
@@ -190,6 +226,52 @@ class DecisionContractGapGuardTest {
                 }
             }
         }
+    }
+
+    private static void assertJavaSourceTokenOnlyInAllowedLimitedRuntimeFiles(final String token, final List<Path> roots)
+            throws IOException {
+        for (Path root : roots) {
+            final Path normalizedRoot = root.toAbsolutePath().normalize();
+            if (!Files.exists(normalizedRoot)) {
+                continue;
+            }
+            try (Stream<Path> files = Files.walk(normalizedRoot)) {
+                for (Path file : files.filter(Files::isRegularFile).filter(DecisionContractGapGuardTest::isJavaFile).toList()) {
+                    final String content = Files.readString(file);
+                    if (content.contains(token)) {
+                        assertTrue(
+                                isAllowedLimitedRuntimeEndpointFile(file),
+                                "production Java source may contain "
+                                        + token
+                                        + " only in limited dry-run endpoint files, found in "
+                                        + file);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void assertJavaSourceContains(final Path path, final String token) throws IOException {
+        final Path normalized = path.toAbsolutePath().normalize();
+        assertTrue(Files.exists(normalized), "expected Java source does not exist: " + normalized);
+        assertTrue(Files.readString(normalized).contains(token), "expected source token not found: " + token);
+    }
+
+    private static void assertProductionProfileKeepsLimitedRuntimeDisabled() throws IOException {
+        final Path prodConfig =
+                Path.of("..", "dh-app", "src", "main", "resources", "application-prod.yml")
+                        .toAbsolutePath()
+                        .normalize();
+        final String content = Files.readString(prodConfig);
+        assertTrue(content.contains("enabled: false"), "prod profile must keep limited runtime endpoint disabled");
+        assertTrue(content.contains("production-enabled: false"), "prod profile must not permit runtime enablement");
+        assertTrue(content.contains("kill-switch-enabled: true"), "prod profile must keep kill switch active");
+        assertTrue(content.contains("allowed-sources: \"\""), "prod profile must not allowlist NQ_DRYRUN");
+    }
+
+    private static boolean isAllowedLimitedRuntimeEndpointFile(final Path file) {
+        final String normalized = file.toAbsolutePath().normalize().toString().replace('\\', '/');
+        return LIMITED_RUNTIME_ENDPOINT_ALLOWED_PATH_PARTS.stream().anyMatch(normalized::contains);
     }
 
     private static boolean isJavaFile(final Path path) {

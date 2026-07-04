@@ -32,6 +32,23 @@ management:
       show-details: always
 
 decisionhub:
+  integration1:
+    runtime:
+      # Integration-1 limited dry-run endpoint 默认关闭；无配置时 fail-closed。
+      enabled: false
+      # prod / non-dev-test profile 即使误设 enabled=true，也必须另行显式授权；默认禁止。
+      production-enabled: false
+      # emergency kill switch；true 时 endpoint 立即 fail-closed。
+      kill-switch-enabled: false
+      # NQ_DRYRUN 仅作为 dev/test review-gated source，不进入 production allowlist。
+      allowed-sources: NQ_DRYRUN
+      # 必须显式配置 tenant/source pair，例如 tenant-a:NQ_DRYRUN；缺失时 source denied。
+      allowed-tenant-source-pairs: ""
+      # dry-run 专用 HMAC secret，只能通过环境变量注入，禁止写入仓库。
+      hmac-secret: ${DH_I1_DRYRUN_HMAC_SECRET:}
+      max-payload-bytes: 65536
+      max-clock-skew-seconds: 300
+      memory-cap-bytes: 32768
   security:
     nq-feedback:
       replay:
