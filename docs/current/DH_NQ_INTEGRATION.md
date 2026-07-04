@@ -7,8 +7,8 @@
 ## 0. 当前状态锁定（2026-07-04）
 
 ```text
-Current stage: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / CLOSED / ACCEPTED / REVIEW_ONLY / DH_ONLY / NO_NQ_CHANGE / NO_LIVE
-Next stage:    NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+Current stage: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NQ_WORKTREE_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+Next stage:    NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / DEFAULT_DISABLED / DEV_TEST_ONLY / NO_LIVE
 DH-AUDIT-FIX completed
 NQ integration not started
 Integration-1 runtime implementation not started
@@ -24,11 +24,11 @@ Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
 
-当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成 planning / work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线；mock close review 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 已评估受限 runtime planning，结论为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`；mock/test-support baseline PR 已合并到 NQ dev；`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 与 `NQ-DH-I1-DH-RUNTIME-API-WO` 均已关闭。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已完成 DH-only limited inbound endpoint `POST /api/ai/decision-dry-runs`：默认关闭，仅 dev/test profile 可显式启用，production disabled，kill switch fail-closed。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY`，确认 endpoint 可关闭并允许进入下一轮 `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY`。它不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime、LIVE 或 NQ mutation；旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
+当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成 planning / work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线；mock close review 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 已评估受限 runtime planning，结论为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`；mock/test-support baseline PR 已合并到 NQ dev；`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 与 `NQ-DH-I1-DH-RUNTIME-API-WO` 均已关闭。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已完成 DH-only limited inbound endpoint `POST /api/ai/decision-dry-runs`：默认关闭，仅 dev/test profile 可显式启用，production disabled，kill switch fail-closed。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY`。`NQ-DH-I1-NQ-RUNTIME-CLIENT-WO` 已在 NQ integration worktree 关闭为 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`，只冻结下一轮 NQ limited dry-run runtime client implementation 的安全边界、request/response、HMAC/header、fail-closed、audit/logging、error taxonomy、测试与回滚要求。它不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime、LIVE 或 NQ mutation；旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
 
 Integration-0 safety gate 已 CLOSED / ACCEPTED。若未来重新进入 NQ runtime 相关工作，只能从基于 GateN 的 Integration-1 planning-only audit 开始；本文件中的 DH -> NQ REST API 控制面、`POST /api/ai/backtest-requests`、真实 HTTP / event、NQ client、RealClient、real provider 等方向均为 historical / superseded / deferred / gated，不代表当前 next 或当前 implementation。
 
-Integration-1 dry-run 后续 work order 最多只能规划：
+Integration-1 dry-run 后续 work order / implementation 最多只能在单独授权后规划或实现：
 
 ```text
 NQ -> DH dry-run request contract planning
@@ -47,6 +47,9 @@ no-outbound guard
 no-live-trade guard
 risk checklist
 acceptance checklist
+default-disabled limited NQ dry-run client
+dev/test-only client enablement
+kill switch and fail-closed recorder
 ```
 
 当前阶段明确禁止：
@@ -63,6 +66,8 @@ acceptance checklist
 不访问交易所密钥
 不修改 NQ 交易状态
 不触碰 LIVE trading
+不把 NQ runtime client WO close 写成 runtime integration started
+不把 LONG_BIAS / SHORT_BIAS 写成 BUY / SELL
 ```
 
 ## 1. 结论

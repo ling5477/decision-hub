@@ -3312,3 +3312,21 @@ ALLOW_LIVE: NO
 ```
 
 边界确认：未触达生产环境、真实交易、真实交易所私有 API、NQ DB、NQ mutation、credential、token、cookie、API secret、passphrase；未把 DH 写成 integrated；未把 Integration-1 runtime 写成 started；未把 AI / Agent runtime 写成 started；未开启 LIVE；下一步仅允许 `NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY`。
+
+## 2026-07-04 NQ-DH-I1-NQ-RUNTIME-CLIENT-WO 验证记录
+
+结论：**PASS / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE**。
+
+本轮 DH 侧仅做 `docs/current` 最小状态同步；NQ work order 实际产物位于 `E:\Project\nexus-quant-i1-dryrun\docs\current\NQ_DH_INTEGRATION1_NQ_RUNTIME_CLIENT_WO.md`。未改 DH Java、测试代码、contracts、OpenAPI、JSON Schema、golden_cases、fixture JSON 或 migration。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| DH `git status --short` | **PASS** | 仅允许的 `docs/current` 状态同步文件有 diff。 |
+| DH `git diff --check` | **PASS** | exit 0；仅 LF/CRLF 转换 warning，无 whitespace error。 |
+| DH `git diff --stat` | **REVIEWED** | diff 限于 `docs/current/DH_NQ_INTEGRATION.md`、`ROADMAP.md`、`STATUS.md`、`WORK_ORDER.md`，以及本记录。 |
+| DH forbidden-scope diff | **PASS / EMPTY** | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-security/src/main`、`dh-api/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`contracts`、`golden_cases` 无 diff。 |
+| DH `mvn -ntp -Pquality validate` | **BUILD SUCCESS** | 19/19 reactor SUCCESS；0 Checkstyle violations；Spotless check passed。 |
+| NQ worktree docs/boundary validation | **PASS / REVIEWED** | 分支 `nq-dh-i1-nq-runtime-client-wo`；forbidden-scope diff 为空；`rg` 命中均为既有 docs/backend 业务词、历史/禁止语境或本轮边界说明；NQ Maven 未跑，未声明 PASS。 |
+| NQ dev read-only guard | **PASS / SCOPED EMPTY** | `E:\Project\nexus-quant` 分支 `dev`；最终只读 status 显示既有 `research/py` dirty/untracked 变更，但 NQ-DH scoped unstaged 与 staged diff 均为空；本轮未修改 NQ dev。 |
+
+边界确认：未实现 NQ runtime client；未新增 HTTP client；未真实调用 DH；未改 DH Java；未改 contracts / OpenAPI / JSON Schema / golden_cases / fixture JSON / migration；未读取或输出 credential、token、cookie、apiKey、apiSecret、passphrase；未触碰 NQ order / execution / risk / ledger / account / paper / live；未接 real provider、Agent / LangGraph；未开启 LIVE；未把 Runtime integration 写成 started；未把 DH 写成 integrated。

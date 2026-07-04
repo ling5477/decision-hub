@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / CLOSED / ACCEPTED / REVIEW_ONLY / DH_ONLY / NO_NQ_CHANGE / NO_LIVE
-> Next stage:    NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> Current stage: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NQ_WORKTREE_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> Next stage:    NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / DEFAULT_DISABLED / DEV_TEST_ONLY / NO_LIVE
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,10 +34,11 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / CLOSED / ACCEPTED / REVIEW_ONLY / DH_ONLY / NO_NQ_CHANGE / NO_LIVE.
+Current main line: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NQ_WORKTREE_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
-Next concrete action: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Next concrete action: NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / DEFAULT_DISABLED / DEV_TEST_ONLY / NO_LIVE.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -48,6 +49,41 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.21 NQ-DH I1 NQ Runtime Client Work Order（2026-07-04，CLOSED / ACCEPTED / WORK_ORDER_ONLY）
+
+```text
+Task: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO
+Task type: WORK_ORDER_ONLY + NQ_SCOPED_RUNTIME_CLIENT_IMPLEMENTATION_PLAN + CROSS_REPO_BOUNDARY_FREEZE + NO_CLIENT_IMPLEMENTATION + NO_REAL_HTTP + NO_REAL_PROVIDER + NO_LIVE
+NQ artifact: E:\Project\nexus-quant-i1-dryrun\docs\current\NQ_DH_INTEGRATION1_NQ_RUNTIME_CLIENT_WO.md
+DH endpoint: POST /api/ai/decision-dry-runs
+Endpoint scope: DH-only inbound limited dry-run
+NQ runtime client: NOT STARTED
+Real outbound HTTP: NO
+Real provider: NO
+Runtime integration: NOT STARTED
+DH integrated: NO
+Agent / LangGraph runtime: NO
+LIVE: DISABLED
+ALLOW_NQ_RUNTIME_CLIENT_WO_CLOSE: YES
+ALLOW_NQ_LIMITED_RUNTIME_CLIENT_IMPLEMENTATION_WO: YES
+ALLOW_NQ_RUNTIME_CLIENT_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_DH_CODE_CHANGE_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+Next concrete action: NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / DEFAULT_DISABLED / DEV_TEST_ONLY / NO_LIVE
+```
+
+- 本轮只在 NQ integration worktree 写 work order，并对 DH `docs/current` 做最小状态同步；未改 DH Java、未改 DH contracts / OpenAPI / JSON Schema / golden_cases / fixture JSON / migration。
+- NQ work order 冻结下一轮 limited runtime client 的 default disabled、dev/test only、production disabled、kill switch、fail-closed、request envelope、canonical `X-NQ-DH-*` header、HMAC value material、timeout/retry/idempotency、response validation、audit/logging redaction、error taxonomy、测试矩阵和回滚要求。
+- `NQ_DRYRUN` 仍为 review-gated source，不进入 production allowlist；`LONG_BIAS / SHORT_BIAS` 只能作为 readonly bias，不得映射为 `BUY / SELL`。
+- 下一步只允许用户单独授权 NQ limited runtime client implementation；不得把本 WO close 解读为 runtime integration started、DH integrated、real HTTP allowed、real provider allowed、Agent / LangGraph runtime started 或 LIVE enabled。
 
 ## 1.0.20 NQ-DH I1 DH Limited Runtime Endpoint Close Review（2026-07-04，CLOSED / ACCEPTED / REVIEW_ONLY）
 
@@ -74,7 +110,7 @@ ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
 ALLOW_AGENT_PHASE: NO
 ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
-Next concrete action: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+Next concrete action at close-review time: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / CONSUMED_BY_1.0.21 / CLOSED / ACCEPTED / WORK_ORDER_ONLY
 ```
 
 - Close review 逐项复核 API boundary、security gate、error taxonomy、audit / trace / replay、feature flag、no-side-effect boundary 与 test coverage；结论为 `PASS / CLOSED / ACCEPTED`。
@@ -207,12 +243,12 @@ ALLOW_GOLDEN_CASES_MODIFICATION: NO
 ALLOW_AGENT_PHASE: NO
 ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
-Next concrete action: NQ-DH-I1-MOCK-BASELINE-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_RUNTIME
+Next concrete action at plan-close time: NQ-DH-I1-MOCK-BASELINE-PR-PREP / CONSUMED_BY_POST_PR_BASELINE / CLOSED / MERGED / NO_RUNTIME
 ```
 
 - 本轮只生成 limited dry-run runtime planning 文档；未写生产代码、测试代码、API、Controller、Client、migration、schema、contracts、golden_cases、fixture JSON、runtime wiring、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
-- `NQ_DRYRUN` 仍为 review-gated test-support source；canonical error enum / error schema 未正式冻结；dry-run endpoint / API / Controller 不存在；schema alias 仍为 `DOC_ONLY_ALIAS` / future envelope planning；NQ 侧没有 runtime DH client。
-- 推荐方向：先进入 `NQ-DH-I1-MOCK-BASELINE-PR-PREP` 固定 mock/test-support baseline，再单独进入 API / contract / security / source allowlist / error taxonomy / no-side-effect / rollback review；不得直接进入 runtime implementation。
+- `NQ_DRYRUN` 在该 plan close 当时仍为 review-gated test-support source；canonical error enum / error schema 未正式冻结；dry-run endpoint / API / Controller 当时不存在；schema alias 仍为 `DOC_ONLY_ALIAS` / future envelope planning；NQ 侧没有 runtime DH client。
+- 该 plan 的推荐方向已被后续 mock baseline PR、runtime API contract review、DH endpoint work order / implementation / close review 和 `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO` 消费；当前不得把该历史推荐误读为 current next。
 
 ## 1.0.15 NQ-DH I1-IMP3 Joint Mock Contract Tests（2026-07-04，IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW）
 

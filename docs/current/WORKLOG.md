@@ -5477,3 +5477,56 @@ DecisionAction no BUY / SELL / PLACE_ORDER / CANCEL_ORDER
 ### 推荐下一步
 
 进入 `NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / NOT STARTED / NQ_WORKTREE_ONLY / MOCK_ONLY`；不得提前实现 runtime endpoint、真实 HTTP、real provider、schema/contracts/golden_cases/fixture JSON、OpenAPI、Controller、migration、AI/LangGraph 或 LIVE。
+
+---
+
+## NQ-DH-I1-NQ-RUNTIME-CLIENT-WO
+
+日期：2026-07-04
+
+### 本轮目标
+
+在 NQ integration worktree 编写 limited dry-run runtime client implementation work order，并在 DH dev 仅做 `docs/current` 最小状态同步。本轮为 `WORK_ORDER_ONLY + NQ_SCOPED_RUNTIME_CLIENT_IMPLEMENTATION_PLAN + CROSS_REPO_BOUNDARY_FREEZE + NO_CLIENT_IMPLEMENTATION + NO_REAL_HTTP + NO_REAL_PROVIDER + NO_LIVE`。
+
+### 完成内容
+
+- NQ worktree 新增 `docs/current/NQ_DH_INTEGRATION1_NQ_RUNTIME_CLIENT_WO.md`。
+- NQ worktree 同步 `docs/current/README.md`、`STATUS.md`、`ROADMAP.md`、`WORK_ORDER.md`、`API.md`、`TESTING.md`、`WORKLOG.md`。
+- DH dev 最小同步 `docs/current/DH_NQ_INTEGRATION.md`、`STATUS.md`、`ROADMAP.md`、`WORK_ORDER.md`、`TESTING.md`、`WORKLOG.md`。
+- 冻结下一轮 NQ limited client 的 default disabled、dev/test only、production disabled、kill switch fail-closed、request/response envelope、canonical `X-NQ-DH-*` header、HMAC value material、timeout/retry/idempotency、response validation、audit/logging redaction、error taxonomy、测试矩阵、no-side-effect integration point 和回滚要求。
+- 明确 DH endpoint `POST /api/ai/decision-dry-runs` 仍是 DH-only inbound limited dry-run；NQ client implementation 未启动，runtime integration 未启动。
+
+### 验证
+
+- DH `git status --short`：PASS；仅 `docs/current` 同步文件有 diff。
+- DH `git diff --check`：PASS；仅 LF/CRLF warning，无 whitespace error。
+- DH forbidden-scope diff：PASS / EMPTY；未改 DH Java main、contracts 或 golden_cases。
+- DH `mvn -ntp -Pquality validate`：BUILD SUCCESS；19/19 reactor SUCCESS；0 Checkstyle violations；Spotless check passed。
+- NQ worktree branch：PASS；`nq-dh-i1-nq-runtime-client-wo`。
+- NQ worktree forbidden-scope diff：PASS / EMPTY；未改 backend / frontend / research / scripts / deploy / `.github` / migration。
+- NQ boundary `rg`：PASS / REVIEWED；命中为既有 docs/backend 业务词、历史/禁止语境或本轮边界说明。
+- NQ dev read-only guard：PASS / SCOPED EMPTY；`dev` 分支最终只读 status 显示既有 `research/py` dirty/untracked 变更，但 NQ-DH scoped diff 为空；本轮未修改 NQ dev。
+- 未运行 NQ Maven full / targeted Integration0 / targeted Integration1；原因是本轮 docs-only / work-order-only，不声明 NQ Maven PASS。
+
+### 边界
+
+未实现 NQ runtime client；未新增 HTTP client；未真实调用 DH；未真实 outbound HTTP；未接 real provider；未读取或输出 credential、token、cookie、apiKey、apiSecret、passphrase；未修改 NQ dev；未改 DH Java；未改 contracts / OpenAPI / JSON Schema / golden_cases / fixture JSON / migration；未触碰 order / execution / risk / ledger / account / paper / live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`；未接 Agent / LangGraph；未开启 LIVE。
+
+### Readiness
+
+- `ALLOW_NQ_RUNTIME_CLIENT_WO_CLOSE: YES`
+- `ALLOW_NQ_LIMITED_RUNTIME_CLIENT_IMPLEMENTATION_WO: YES`
+- `ALLOW_NQ_RUNTIME_CLIENT_IMPLEMENTATION_NOW: NO`
+- `ALLOW_REAL_HTTP_NOW: NO`
+- `ALLOW_REAL_PROVIDER: NO`
+- `ALLOW_SCHEMA_FORMALIZATION_NOW: NO`
+- `ALLOW_CONTRACTS_MODIFICATION_NOW: NO`
+- `ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO`
+- `ALLOW_DH_CODE_CHANGE_NOW: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 推荐下一步
+
+`NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / DEFAULT_DISABLED / DEV_TEST_ONLY / NO_LIVE`。该下一步必须另起实现任务；不得把本 WO close 解释为 runtime integration started、DH integrated、real HTTP allowed、real provider allowed 或 LIVE enabled。
