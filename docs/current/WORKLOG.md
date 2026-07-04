@@ -1,5 +1,82 @@
 # Decision Hub Worklog
 
+## 2026-07-04 NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW
+
+完成 `NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW`。本轮为 `REVIEW_ONLY + DH_RUNTIME_ENDPOINT_SECURITY_REVIEW + API_BOUNDARY_REVIEW + NO_CODE_CHANGE + NO_NQ_CHANGE + NO_LIVE`，只审查 DH limited dry-run inbound endpoint `POST /api/ai/decision-dry-runs` 是否可以关闭，并判断是否允许进入下一步 `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO`。
+
+### 新增文件
+
+```text
+docs/current/DH_NQ_INTEGRATION1_DH_ENDPOINT_CLOSE_REVIEW.md
+```
+
+### 修改文件
+
+```text
+docs/current/API.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+```
+
+### Review result
+
+```text
+NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW: CLOSED / ACCEPTED / REVIEW_ONLY
+Endpoint: POST /api/ai/decision-dry-runs
+Endpoint boundary: DH_ONLY_INBOUND_LIMITED_DRY_RUN
+Runtime integration: NOT STARTED
+NQ runtime client: NOT STARTED
+Real HTTP outbound: NO
+Real provider: NO
+Agent / LangGraph runtime: NO
+LIVE: DISABLED
+ALLOW_DH_LIMITED_RUNTIME_ENDPOINT_CLOSE: YES
+ALLOW_NQ_RUNTIME_CLIENT_WO: YES
+ALLOW_NQ_RUNTIME_CLIENT_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### Findings
+
+- API boundary：`DecisionDryRunController` 只注册 DH inbound endpoint；未发现 NQ runtime client、RealClient、真实 HTTP outbound、real provider、Agent / LangGraph runtime、LIVE 或 NQ mutation。
+- Security gate：feature flag 默认关闭；production disabled；kill switch fail-closed；HMAC、UTC `Z` timestamp、±300s window、nonce replay、tenant/source pair、payload cap、rate limit、memory cap、forbidden field/capability 均有实现与测试覆盖。
+- Error taxonomy：`SIGNATURE_INVALID / TIMESTAMP_INVALID / TIMESTAMP_OUT_OF_WINDOW / NONCE_REPLAY / TENANT_MISMATCH / SOURCE_DENIED / PAYLOAD_TOO_LARGE / RATE_LIMITED / MEMORY_LIMIT_EXCEEDED / POLICY_DENIED / PROVIDER_DISABLED / PROVIDER_TIMEOUT / BUDGET_EXCEEDED / UNKNOWN_ERROR` 为 endpoint-local stable taxonomy；security/provider/policy/unknown/audit failure 均 fail-closed。
+- Audit / trace / replay：成功与拒绝均写 DH-owned redacted audit；audit 写失败 fail-closed；不保存 raw credential、raw prompt、provider raw response、raw payload、token、cookie 或 API secret。
+- Test review：Controller/usecase/security/contract guard 覆盖 valid dry-run、feature disabled、signature、timestamp、nonce replay、source/tenant、dryRun=false、forbidden execution material、payload/rate/memory limit、audit failure、provider disabled/timeout/budget、ABSTAIN mapping 与 no outbound/no provider/no LIVE guard。
+
+### Validation
+
+- `git status --short`：PASS / docs-current only；新增 close-review 文档。
+- `git diff --check`：PASS；仅 LF/CRLF warning；无 whitespace error。
+- `git diff --name-only -- contracts golden_cases "dh-*/src/main/resources/db/migration"`：PASS / EMPTY。
+- boundary `rg`：PASS / REVIEWED；命中分类为 endpoint token、dev/test `NQ_DRYRUN` 配置、测试负向断言、既有 denylist、文档禁令、migration 注释、fixture / golden case 安全样例或 historical contract；未发现本轮新增真实 outbound/NQ client/provider/LIVE。
+- `mvn -ntp -pl dh-api -am test`：PASS / BUILD SUCCESS；dh-api 53 tests；`DecisionDryRunControllerWebMvcTest` 11 tests。
+- `mvn -ntp -pl dh-usecase -am test`：PASS / BUILD SUCCESS；dh-usecase 179 tests；`DefaultDecisionDryRunServiceTest` 8 tests。
+- `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS；19 reactor module SUCCESS；Checkstyle 0 violations；Spotless check passed。
+- `mvn -ntp test`：PASS / BUILD SUCCESS；`PostgresContainerSmokeTest` 因 Docker named pipe `\\.\pipe\docker_engine` access denied 被测试自身 skip 1 项；该结果不是 Docker/Testcontainers PASS。
+- NQ dev 只读：存在非本轮 dirty / untracked，但 NQ-DH / Integration-1 scoped unstaged 与 staged diff 均为空；本轮未写入。
+- NQ dry-run worktree 只读：branch=`nq-dh-i1-runtime-api-contract-review`；status clean；diff stat empty。
+
+### 边界确认
+
+未改 Java 生产代码；未改测试代码；未改 NQ dev；未改 NQ dry-run worktree；未改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**`、fixture JSON 或 migration；未新增真实 outbound HTTP、NQ runtime client、RealClient、real provider、Agent / LangGraph runtime 或 LIVE；未读取 credential、token、cookie、API secret 或 passphrase；未写 order / execution / ledger / account / trading / live；未把 Runtime integration 写成 started；未把 DH 写成 integrated。
+
+### 下一步
+
+进入 `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。该下一步只允许写工单，不允许直接实现 NQ client、真实 HTTP、real provider、schema/contracts/golden_cases 修改、Agent / LangGraph runtime 或 LIVE。
+
 ## 2026-07-04 NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION
 
 完成 `NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 的 DH-only limited inbound endpoint 最小闭环。Endpoint 为 `POST /api/ai/decision-dry-runs`，默认关闭，仅 dev/test profile 可显式启用；production profile disabled，kill switch fail-closed。本轮不实现 NQ runtime client、不调用 NQ、不新增真实 outbound HTTP、不接 real provider、不接 Agent / LangGraph runtime、不启用 LIVE。

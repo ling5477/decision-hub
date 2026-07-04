@@ -1,5 +1,52 @@
 # Decision Hub Testing
 
+## 2026-07-04 NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW validation
+
+```text
+Scope:
+  - 本轮只做 DH limited dry-run inbound endpoint close review。
+  - 只修改允许的 docs/current 文档。
+  - 不修改 Java 生产代码、测试代码、contracts/OpenAPI/json-schema/golden_cases/fixture JSON/migration。
+  - NQ dev 与 NQ dry-run worktree 只读确认，未写入。
+
+Result:
+  NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW: CLOSED / ACCEPTED / REVIEW_ONLY
+  Endpoint: POST /api/ai/decision-dry-runs
+  ALLOW_DH_LIMITED_RUNTIME_ENDPOINT_CLOSE: YES
+  ALLOW_NQ_RUNTIME_CLIENT_WO: YES
+  ALLOW_NQ_RUNTIME_CLIENT_IMPLEMENTATION_NOW: NO
+  ALLOW_REAL_HTTP_NOW: NO
+  ALLOW_REAL_PROVIDER: NO
+  ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+  ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+  ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+  ALLOW_AGENT_PHASE: NO
+  ALLOW_LANGGRAPH_RUNTIME: NO
+  ALLOW_LIVE: NO
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| DH `git status --short` | PASS / DOCS-ONLY CHANGES PRESENT | Dirty 限于允许的 `docs/current` 文档；新增 `docs/current/DH_NQ_INTEGRATION1_DH_ENDPOINT_CLOSE_REVIEW.md`。 |
+| DH `git diff --check` | PASS | 退出码 0；仅 LF/CRLF warning；无 whitespace error。 |
+| DH `git diff --stat` | PASS / REVIEWED | tracked diff 限于允许的 `docs/current` 文件；新增 close-review 文档由 `git status` 标识。 |
+| DH forbidden diff：`git diff --name-only -- contracts golden_cases "dh-*/src/main/resources/db/migration"` | PASS / EMPTY | 未修改 contracts、golden_cases 或 Flyway migration。 |
+| DH boundary scan：PowerShell-expanded `rg -n "decision-dry-runs|NQ_DRYRUN|BUY|SELL|PLACE_ORDER|CANCEL_ORDER|LangGraph|AutoGen|CrewAI|WebClient|RestTemplate|OkHttp|HttpClient|apiKey|apiSecret|passphrase|credential|token|cookie|live|placeOrder|cancelOrder" dh-* docs/current contracts golden_cases` | PASS / REVIEWED | 命中项分类为 endpoint token、dev/test `NQ_DRYRUN` 配置、测试负向断言、既有 security denylist、文档禁令、migration 注释、fixture / golden case 安全样例或 historical contract；未发现本轮新增 NQ runtime client、真实 HTTP、real provider、Agent/LangGraph runtime、LIVE 或可执行订单实现。 |
+| DH `mvn -ntp -pl dh-api -am test` | PASS / BUILD SUCCESS | Reactor 11/11 SUCCESS；dh-api 53 tests，0 failures，0 errors；`DecisionDryRunControllerWebMvcTest` 11 tests。 |
+| DH `mvn -ntp -pl dh-usecase -am test` | PASS / BUILD SUCCESS | Reactor 9/9 SUCCESS；dh-usecase 179 tests，0 failures，0 errors；`DefaultDecisionDryRunServiceTest` 8 tests，Integration-1 guard tests 通过。 |
+| DH `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 reactor module SUCCESS；Checkstyle 0 violations；Spotless check passed。 |
+| DH `mvn -ntp test` | PASS / BUILD SUCCESS WITH SKIP | 19 个 reactor module SUCCESS；`PostgresContainerSmokeTest` 因 Docker named pipe `\\.\pipe\docker_engine` access denied 被测试自身 skip 1 项。该结果不是 Docker/Testcontainers PASS。 |
+| NQ dev `git status --short` | REVIEWED / UNRELATED DIRTY PRESENT | 只读检查；存在非本轮 dirty：`docs/current/API.md`、`README.md`、`STATUS.md`、`TESTING.md`、`WORKLOG.md`，以及 trading preflight 相关 untracked 文件；本轮未修改 NQ dev。 |
+| NQ dev `git diff --stat` | REVIEWED / UNRELATED DOCS DIFF PRESENT | 只读检查；5 个 `docs/current` 文件已有 diff，非本轮产生。 |
+| NQ dev scoped diff：`git diff --name-only -- docs/current/*NQ_DH* docs/current/*INTEGRATION1*` and cached variant | PASS / EMPTY | NQ-DH / Integration-1 scoped unstaged 与 staged diff 均为空。 |
+| NQ worktree `git status --short` | PASS / CLEAN | 只读检查；未修改 `E:\Project\nexus-quant-i1-dryrun`。 |
+| NQ worktree `git branch --show-current` | PASS / REVIEWED | branch=`nq-dh-i1-runtime-api-contract-review`。 |
+| NQ worktree `git diff --stat` | PASS / EMPTY | 只读检查；diff stat 无输出。 |
+
+Boundary:
+
+未改 Java 生产代码；未改测试代码；未改 NQ dev；未改 NQ dry-run worktree；未改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**`、fixture JSON 或 migration；未新增真实 outbound HTTP、NQ runtime client、RealClient、real provider、Agent / LangGraph runtime 或 LIVE；未读取 credential、token、cookie、API secret 或 passphrase；未把 Runtime integration 写成 started；未把 DH 写成 integrated。
+
 ## 2026-07-04 NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION validation
 
 ```text

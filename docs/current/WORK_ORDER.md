@@ -1,12 +1,50 @@
 # Decision Hub 当前工单
 
-> 当前阶段: NQ-DH-I1-DH-RUNTIME-API-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
-> 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation; I1-IMP1 DH dry-run test-support entry; I1 runtime API contract review; I1 DH runtime API work order
-> 下一阶段: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> 当前阶段: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / CLOSED / ACCEPTED / REVIEW_ONLY / DH_ONLY / NO_NQ_CHANGE / NO_LIVE
+> 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation; I1-IMP1 DH dry-run test-support entry; I1 runtime API contract review; I1 DH runtime API work order; I1 DH limited runtime endpoint implementation; I1 DH limited runtime endpoint close review
+> 下一阶段: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 
 ## 1. 当前目标
 
-`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成计划与 work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线，mock close review 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 已关闭为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`；mock/test-support baseline PR 已合并到 NQ dev；`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 已完成 review-only 收口；`NQ-DH-I1-DH-RUNTIME-API-WO` 已完成 work-order-only 收口，允许下一轮单独进入 DH limited runtime endpoint implementation，但当前仍不启动 runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE，不修改 schema/contracts/golden_cases、OpenAPI、Controller、migration 或 production code。下一步推荐 `NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成计划与 work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线，mock close review 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 已关闭为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`；mock/test-support baseline PR 已合并到 NQ dev；`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 已完成 review-only 收口；`NQ-DH-I1-DH-RUNTIME-API-WO` 已完成 work-order-only 收口；`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已完成 DH-only limited inbound endpoint；`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY`。下一步只允许 `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY`，当前仍不允许 NQ client implementation、runtime integration、真实 HTTP、real provider、AI / LangGraph、LIVE、schema/contracts/golden_cases/OpenAPI/fixture JSON/migration 修改。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+
+## 0.0J NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW（CLOSED / ACCEPTED / REVIEW_ONLY）
+
+本轮产物：
+
+```text
+docs/current/DH_NQ_INTEGRATION1_DH_ENDPOINT_CLOSE_REVIEW.md
+```
+
+结论：
+
+```text
+ENDPOINT: POST /api/ai/decision-dry-runs
+ENDPOINT_SCOPE: DH_ONLY_INBOUND_LIMITED_DRY_RUN
+ALLOW_DH_LIMITED_RUNTIME_ENDPOINT_CLOSE: YES
+ALLOW_NQ_RUNTIME_CLIENT_WO: YES
+ALLOW_NQ_RUNTIME_CLIENT_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+关键边界：
+
+- close review 只审查 DH endpoint；未改 Java 生产代码、测试代码、contracts/OpenAPI/json-schema/golden_cases/fixture JSON/migration，未改 NQ dev 或 NQ dry-run worktree。
+- endpoint 仍是 DH-only inbound limited dry-run，不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime、LIVE 或 NQ mutation。
+- 下一步 `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO` 必须保持 work-order-only；不得夹带 NQ client implementation、真实 HTTP、real provider、schema/contracts/golden_cases 修改或 LIVE。
+
+下一步唯一推荐：
+
+```text
+NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+```
 
 ## 0.0I NQ-DH-I1-DH-RUNTIME-API-WO（CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION）
 

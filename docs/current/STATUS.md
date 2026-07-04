@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / IMPLEMENTED / PENDING_CLOSE_REVIEW / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
-> Next stage:    NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_NQ_RUNTIME_CLIENT / NO_REAL_PROVIDER / NO_LIVE
+> Current stage: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / CLOSED / ACCEPTED / REVIEW_ONLY / DH_ONLY / NO_NQ_CHANGE / NO_LIVE
+> Next stage:    NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,10 +34,10 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / IMPLEMENTED / PENDING_CLOSE_REVIEW / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Current main line: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / CLOSED / ACCEPTED / REVIEW_ONLY / DH_ONLY / NO_NQ_CHANGE / NO_LIVE.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
-Next concrete action: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_NQ_RUNTIME_CLIENT / NO_REAL_PROVIDER / NO_LIVE.
+Next concrete action: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -48,6 +48,40 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.20 NQ-DH I1 DH Limited Runtime Endpoint Close Review（2026-07-04，CLOSED / ACCEPTED / REVIEW_ONLY）
+
+```text
+Task: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW
+Task type: REVIEW_ONLY + DH_RUNTIME_ENDPOINT_SECURITY_REVIEW + API_BOUNDARY_REVIEW + NO_CODE_CHANGE + NO_NQ_CHANGE + NO_LIVE
+Artifact: docs/current/DH_NQ_INTEGRATION1_DH_ENDPOINT_CLOSE_REVIEW.md
+Endpoint: POST /api/ai/decision-dry-runs
+Endpoint state: IMPLEMENTED / DH_ONLY / DEFAULT_DISABLED / DEV_TEST_ENABLE_ONLY / PRODUCTION_DISABLED / CLOSE_REVIEW_ACCEPTED
+Runtime integration: NOT STARTED
+NQ runtime client: NOT STARTED
+Real HTTP outbound: NO
+Real provider: NO
+Agent / LangGraph runtime: NO
+LIVE: DISABLED
+ALLOW_DH_LIMITED_RUNTIME_ENDPOINT_CLOSE: YES
+ALLOW_NQ_RUNTIME_CLIENT_WO: YES
+ALLOW_NQ_RUNTIME_CLIENT_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+Next concrete action: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+```
+
+- Close review 逐项复核 API boundary、security gate、error taxonomy、audit / trace / replay、feature flag、no-side-effect boundary 与 test coverage；结论为 `PASS / CLOSED / ACCEPTED`。
+- endpoint 只保持 DH inbound limited dry-run；未新增或修改 Java 生产代码、测试代码、contracts/OpenAPI/json-schema/golden_cases/fixture JSON/migration，未修改 NQ dev 或 NQ dry-run worktree。
+- `UNKNOWN_ERROR`、security error、provider disabled / timeout / budget exceeded、policy denied、audit write failure 均 fail-closed；error envelope 不回显 secret、signature、raw body、raw prompt、provider raw response、token、cookie 或 credential。
+- `mvn -ntp test` 中 `PostgresContainerSmokeTest` 因 Docker named pipe 权限不可用由测试自身 skip；该 skip 不阻断 endpoint close，但不得写成 Docker/Testcontainers PASS。
+- 下一步只允许进入 `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO`，且该下一步仍是 work-order-only；不得直接进入 NQ runtime client implementation、真实 HTTP、real provider、schema/contracts/golden_cases 修改、Agent / LangGraph runtime 或 LIVE。
 
 ## 1.0.19 NQ-DH I1 DH Limited Runtime Endpoint Implementation（2026-07-04，IMPLEMENTED / PENDING_CLOSE_REVIEW / DH_ONLY）
 
