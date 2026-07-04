@@ -1,12 +1,41 @@
 # Decision Hub 当前工单
 
-> 当前阶段: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW
+> 当前阶段: NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN / CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation; I1-IMP1 DH dry-run test-support entry
-> 下一阶段: NQ-DH-I1-MOCK-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_RUNTIME
+> 下一阶段: NQ-DH-I1-MOCK-BASELINE-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_RUNTIME
 
 ## 1. 当前目标
 
-`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成计划与 work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION` 已完成受控 test-support / mock-only guard implementation。`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY` 已完成 DH 侧 test-support dry-run entry harness 与 validation chain 测试支撑。`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 已在 NQ worktree 测试范围新增 stub / recorder / no-side-effect guard。`NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已在 DH 与 NQ dry-run worktree 测试范围新增 joint mock fixture / contract tests，并完成目标验证收口。本轮不启动 runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE，不修改 schema/contracts/golden_cases、OpenAPI、Controller、migration 或 production code。下一步唯一允许工作内容是 `NQ-DH-I1-MOCK-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成计划与 work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线，mock close review 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 本轮只做受限 runtime planning 评估，结论为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`；允许后续单独进入 mock baseline PR prep 与 runtime API / contract / security review，但不允许 runtime implementation。本轮不启动 runtime、真实 HTTP、real provider、AI / LangGraph 或 LIVE，不修改 schema/contracts/golden_cases、OpenAPI、Controller、migration 或 production code。下一步推荐 `NQ-DH-I1-MOCK-BASELINE-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_RUNTIME`。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+
+## 0.0G NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN（CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME）
+
+本轮产物：
+
+```text
+docs/current/DH_NQ_INTEGRATION1_LIMITED_DRYRUN_RUNTIME_PLAN.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\NQ_DH_INTEGRATION1_LIMITED_DRYRUN_RUNTIME_PLAN.md
+```
+
+结论：
+
+```text
+ALLOW_LIMITED_DRYRUN_RUNTIME_PLAN_CLOSE: YES
+ALLOW_RUNTIME_IMPLEMENTATION: NO
+ALLOW_RUNTIME_API_CONTRACT_REVIEW: YES
+ALLOW_MOCK_BASELINE_PR_PREP: YES
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_API_CONTROLLER_CHANGE: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+保留 review-gated 项：`NQ_DRYRUN` 未进入 production allowlist；canonical error enum / schema、dry-run endpoint shape、schema alias/envelope 字段和 NQ runtime client 均未通过独立 review。下一步是 mock baseline PR prep，不是 runtime work order。
 
 ## 0.0F NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS（IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW）
 

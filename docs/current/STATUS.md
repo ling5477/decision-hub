@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW
-> Next stage:    NQ-DH-I1-MOCK-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_RUNTIME
+> Current stage: NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN / CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME
+> Next stage:    NQ-DH-I1-MOCK-BASELINE-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_RUNTIME
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,8 +34,9 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW.
-Next concrete action: NQ-DH-I1-MOCK-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_RUNTIME.
+Current main line: NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN / CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME.
+Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
+Next concrete action: NQ-DH-I1-MOCK-BASELINE-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_RUNTIME.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -46,6 +47,36 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.16 NQ-DH I1 Limited Dry-run Runtime Plan（2026-07-04，CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME）
+
+```text
+Task: NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN
+Task type: PLAN_ONLY + LIMITED_DRYRUN_RUNTIME_PLANNING + CROSS_REPO_RUNTIME_BOUNDARY_DESIGN + API_CONTRACT_REVIEW_PREP + NO_RUNTIME_IMPLEMENTATION + NO_LIVE
+DH artifact: docs/current/DH_NQ_INTEGRATION1_LIMITED_DRYRUN_RUNTIME_PLAN.md
+NQ artifact: E:\Project\nexus-quant-i1-dryrun\docs\current\NQ_DH_INTEGRATION1_LIMITED_DRYRUN_RUNTIME_PLAN.md
+Mock close review evidence: CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME
+NQ dev scoped NQ-DH / Integration-1 dirty diff: none
+WORKSTREAM_MIXED_BLOCKED: NO
+ALLOW_LIMITED_DRYRUN_RUNTIME_PLAN_CLOSE: YES
+ALLOW_RUNTIME_IMPLEMENTATION: NO
+ALLOW_RUNTIME_API_CONTRACT_REVIEW: YES
+ALLOW_MOCK_BASELINE_PR_PREP: YES
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_API_CONTROLLER_CHANGE: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+Next concrete action: NQ-DH-I1-MOCK-BASELINE-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_RUNTIME
+```
+
+- 本轮只生成 limited dry-run runtime planning 文档；未写生产代码、测试代码、API、Controller、Client、migration、schema、contracts、golden_cases、fixture JSON、runtime wiring、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
+- `NQ_DRYRUN` 仍为 review-gated test-support source；canonical error enum / error schema 未正式冻结；dry-run endpoint / API / Controller 不存在；schema alias 仍为 `DOC_ONLY_ALIAS` / future envelope planning；NQ 侧没有 runtime DH client。
+- 推荐方向：先进入 `NQ-DH-I1-MOCK-BASELINE-PR-PREP` 固定 mock/test-support baseline，再单独进入 API / contract / security / source allowlist / error taxonomy / no-side-effect / rollback review；不得直接进入 runtime implementation。
 
 ## 1.0.15 NQ-DH I1-IMP3 Joint Mock Contract Tests（2026-07-04，IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW）
 

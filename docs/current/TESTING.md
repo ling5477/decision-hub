@@ -1,5 +1,48 @@
 # Decision Hub Testing
 
+## 2026-07-04 NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN validation
+
+```text
+Scope:
+  - 本轮只做 limited dry-run runtime planning 文档同步。
+  - DH 与 NQ dry-run worktree 只改 docs/current 允许文件。
+  - NQ dev 只做 git status / diff 边界确认，未写入。
+  - 不修改 production code、test code、contracts、golden_cases、OpenAPI、Controller、migration、runtime wiring、real HTTP、provider、AI / LangGraph 或 LIVE。
+
+Result:
+  NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN: CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME
+  Next: NQ-DH-I1-MOCK-BASELINE-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_RUNTIME
+  WORKSTREAM_MIXED_BLOCKED: NO
+  Integration-1 runtime: NOT STARTED
+  Real HTTP: NOT STARTED
+  Real provider: NOT STARTED
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| DH `git status --short` | PASS / CHANGES PRESENT | Dirty 限于允许的 `docs/current` 文档；新增 `docs/current/DH_NQ_INTEGRATION1_LIMITED_DRYRUN_RUNTIME_PLAN.md`。 |
+| DH `git diff --check` | PASS | 退出码 0；仅有 LF/CRLF warning。 |
+| DH `git diff --stat` | PASS / DOCS-ONLY | tracked diff 限于 `docs/current/API.md`、`DH_NQ_INTEGRATION.md`、`README.md`、`ROADMAP.md`、`STATUS.md`、`WORK_ORDER.md`；新 plan 文件为 untracked。 |
+| DH forbidden diff：`git diff --name-only -- dh-domain/src/main dh-usecase/src/main dh-memory/src/main dh-eval/src/main dh-connector/src/main dh-api/src/main dh-app/src/main dh-infra/src/main contracts golden_cases` | PASS / EMPTY | 未触达 DH 生产代码、contracts 或 golden_cases。 |
+| DH production token scan | PASS / NO RUNTIME ENDPOINT | `dh-api/src/main` 仅命中既有 `NqFeedbackController` / `NqDhHeader*` feedback header 处理；未发现 dry-run runtime endpoint。 |
+| DH `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 reactor module SUCCESS；Checkstyle 0 violations；Spotless check passed。 |
+| DH `mvn -ntp test` | TIMEOUT / NOT PASSED | 并行尝试约 184s timeout，串行重跑约 364s timeout；未取得 BUILD SUCCESS/FAILURE。残留 Surefire Java 进程已清理。 |
+| DH `mvn -ntp "-Dtest=!PostgresContainerSmokeTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | TIMEOUT / NOT PASSED | 仓库 README 建议的 Docker-gated smoke 排除版约 304s timeout；未写成通过。残留 Java 进程已清理。 |
+| NQ worktree `git status --short` | PASS / CHANGES PRESENT | Dirty 限于允许的 `docs/current` 文档；新增 `docs/current/NQ_DH_INTEGRATION1_LIMITED_DRYRUN_RUNTIME_PLAN.md`。 |
+| NQ worktree `git diff --check` | PASS | 退出码 0；仅有 LF/CRLF warning。 |
+| NQ worktree forbidden diff：`git diff --name-only -- backend/**/src/main frontend research scripts deploy .github "backend/**/db/migration"` | PASS / EMPTY | 未触达 NQ production code、frontend、research、scripts、deploy、CI 或 migration。 |
+| NQ production token scan | PASS / NO NQ-DH RUNTIME CLIENT | `backend/**/src/main/**` 未命中 `NQ_DRYRUN`、`NqDhIntegration1`、DH runtime client 或 `/dry-run` runtime token；仅命中既有 credential permission probe DTO 的普通 `dryRun` 字段。 |
+| NQ worktree `mvn -ntp -f backend/pom.xml test` | PASS / BUILD SUCCESS | 23 个 backend reactor module SUCCESS；`nq-app` 104 tests，0 failures，0 errors，2 skipped；保留既有 SLF4J / Mockito dynamic agent warnings。 |
+| NQ worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test` | PASS / BUILD SUCCESS | 串行重跑通过；Integration-0 scoped tests 17 tests，0 failures，0 errors，0 skipped。并行首跑曾与 full backend test 竞争 target/test-classes 导致 test-compile 符号解析失败，已由串行重跑消除。 |
+| NQ dev scoped diff | PASS / EMPTY | `docs/current/*NQ_DH*` 与 `docs/current/*INTEGRATION1*` 无 unstaged / staged diff；`WORKSTREAM_MIXED_BLOCKED: NO`。 |
+
+Boundary:
+
+未改 DH / NQ production code；未改测试代码；未改 `contracts/**`、`golden_cases/**`、fixture JSON、OpenAPI、Controller、migration 或 CI workflow；未新增 RealClient、real provider、真实 HTTP、AI / LangGraph 或 LIVE；未读取 credential / token / cookie / API secret / passphrase；未修改 NQ dev。
+
 ## 2026-07-04 NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS final validation
 
 ```text

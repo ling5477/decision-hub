@@ -1,5 +1,68 @@
 # Decision Hub Worklog
 
+## 2026-07-04 NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN
+
+完成 `NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 的 docs-only / plan-only 收口。结论为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`：允许后续单独进入 `NQ-DH-I1-MOCK-BASELINE-PR-PREP` 与 `NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW`，但不允许 runtime implementation。
+
+### 新增文件
+
+```text
+docs/current/DH_NQ_INTEGRATION1_LIMITED_DRYRUN_RUNTIME_PLAN.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\NQ_DH_INTEGRATION1_LIMITED_DRYRUN_RUNTIME_PLAN.md
+```
+
+### 修改文件
+
+```text
+docs/current/API.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\README.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\ROADMAP.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\STATUS.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\TESTING.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\WORKLOG.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\WORK_ORDER.md
+```
+
+### 结果
+
+```text
+ALLOW_LIMITED_DRYRUN_RUNTIME_PLAN_CLOSE: YES
+ALLOW_RUNTIME_IMPLEMENTATION: NO
+ALLOW_RUNTIME_API_CONTRACT_REVIEW: YES
+ALLOW_MOCK_BASELINE_PR_PREP: YES
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_API_CONTROLLER_CHANGE: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+NEXT_ACTION: NQ-DH-I1-MOCK-BASELINE-PR-PREP
+```
+
+### 验证
+
+- DH `git diff --check`：PASS；forbidden-scope diff 为空。
+- DH `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS。
+- DH `mvn -ntp test`：TIMEOUT，未取得 BUILD SUCCESS/FAILURE；Docker-gated smoke 排除版同样 timeout，残留 Java 进程已清理。
+- NQ worktree `git diff --check`：PASS；forbidden-scope diff 为空。
+- NQ worktree `mvn -ntp -f backend/pom.xml test`：PASS / BUILD SUCCESS。
+- NQ worktree Integration0 scoped test：PASS / BUILD SUCCESS；17 tests，0 failures，0 errors，0 skipped。
+- NQ dev pathspec diff：PASS / EMPTY；`WORKSTREAM_MIXED_BLOCKED: NO`。
+
+### 边界确认
+
+未改 DH / NQ production code；未改测试代码；未改 `contracts/**`、`golden_cases/**`、fixture JSON、OpenAPI、Controller、migration 或 CI workflow；未新增 RealClient、real provider、真实 HTTP、AI / LangGraph 或 LIVE。未读取 credential / token / cookie / API secret / passphrase。NQ dev 未修改。
+
 ## 2026-07-04 NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS
 
 完成 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 的 joint mock fixture / contract tests。实现集中在 DH 与 NQ dry-run worktree test scope；本轮不修改 production code、contracts、golden_cases、OpenAPI、Controller、migration 或 runtime wiring。
