@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS
-> Next stage:    NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME
+> Current stage: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW
+> Next stage:    NQ-DH-I1-MOCK-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_RUNTIME
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,8 +34,8 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS.
-Next concrete action: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME.
+Current main line: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW.
+Next concrete action: NQ-DH-I1-MOCK-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_RUNTIME.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -46,6 +46,32 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.15 NQ-DH I1-IMP3 Joint Mock Contract Tests（2026-07-04，IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW）
+
+```text
+Task: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS
+Task type: CONTROLLED_IMPLEMENTATION + JOINT_MOCK_CONTRACT_TESTS + TEST_RESOURCE_FIXTURES + NO_SIDE_EFFECT_GUARDS + MOCK_ONLY + NO_RUNTIME + NO_LIVE
+DH fixture: dh-usecase/src/test/resources/nq-dh/integration1/joint_mock_contract_fixtures.json
+DH test: dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/integration1/DhIntegration1JointMockContractFixtureTest.java
+NQ fixture: E:\Project\nexus-quant-i1-dryrun\backend\nq-app\src\test\resources\nq-dh\integration1\joint_mock_contract_fixtures.json
+NQ test: E:\Project\nexus-quant-i1-dryrun\backend\nq-app\src\test\java\com\guidinglight\nexusquant\app\integration1\NqDhIntegration1JointMockContractFixtureTest.java
+Integration-1 runtime: NOT STARTED
+Runtime integration: NOT STARTED
+Real HTTP: NOT STARTED
+Real provider: NOT STARTED
+API / Controller: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+ALLOW_IMP3_CLOSE: YES
+ALLOW_I1_MOCK_CLOSE_REVIEW: YES
+Next concrete action: NQ-DH-I1-MOCK-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_RUNTIME
+```
+
+- 本轮只在 DH 与 NQ dry-run worktree 测试范围新增 joint mock fixture / contract tests。request family 覆盖 valid read-only recommendation、missing / invalid signature、timestamp skew、nonce replay、source denied、tenant mismatch、forbidden credential / order-account / execution intent；response family 覆盖 abstain、observe、no-trade、long / short bias、provider timeout、risk blocked、internal fail-closed。
+- Fixture family 名称双仓一致，fixture 文件分别归属各自 `src/test/resources/nq-dh/integration1/**`；当前不要求 hash 相同，但字段语义保持一致。Fixture 不包含真实 URL、credential、BUY / SELL、quantity / price / leverage、placeOrder / cancelOrder、paper/live start 或 mutation 字段；forbidden request 用测试侧 synthetic mutation 触发 fail-closed。
+- 本轮未修改 DH / NQ `src/main`、`contracts/**`、`golden_cases/**`、OpenAPI、Controller、migration、runtime wiring、provider、RealClient、真实 HTTP、AI / LangGraph 或 LIVE。`NQ_DRYRUN` 仍是 review-gated，不进入 production allowlist；schema alias 仍不进入 current schema required/property。
 
 ## 1.0.14 NQ-DH I1-IMP2 NQ Stub Recorder No-side-effect（2026-07-04，VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS）
 
@@ -64,7 +90,7 @@ LangGraph runtime: NOT STARTED
 LIVE: DISABLED
 ALLOW_IMP2_CLOSE: YES
 ALLOW_I1_IMP3_JOINT_MOCK_CONTRACT_TESTS: YES
-Next concrete action: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME
+Next concrete action consumed: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW
 ```
 
 - 本轮只在 NQ dry-run worktree 测试范围新增 stub / recorder / no-side-effect guard：覆盖 dry-run request builder 允许字段、forbidden execution / credential / HTTP shape、readonly recorder summary、`LONG_BIAS / SHORT_BIAS` 不映射 `BUY / SELL`、provider failure / high risk / no evidence / fail-closed / duplicate requestId record-only、生产路径无 `NQ_DRYRUN` / real dry-run client token。

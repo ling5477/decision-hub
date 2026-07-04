@@ -1,5 +1,64 @@
 # Decision Hub Worklog
 
+## 2026-07-04 NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS
+
+完成 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 的 joint mock fixture / contract tests。实现集中在 DH 与 NQ dry-run worktree test scope；本轮不修改 production code、contracts、golden_cases、OpenAPI、Controller、migration 或 runtime wiring。
+
+### 新增文件
+
+```text
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/integration1/DhIntegration1JointMockContractFixtureTest.java
+dh-usecase/src/test/resources/nq-dh/integration1/joint_mock_contract_fixtures.json
+E:\Project\nexus-quant-i1-dryrun\backend\nq-app\src\test\java\com\guidinglight\nexusquant\app\integration1\NqDhIntegration1JointMockContractFixtureTest.java
+E:\Project\nexus-quant-i1-dryrun\backend\nq-app\src\test\resources\nq-dh\integration1\joint_mock_contract_fixtures.json
+```
+
+### 修改文件
+
+```text
+docs/current/API.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### 结果
+
+```text
+NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS: IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW
+Next: NQ-DH-I1-MOCK-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_RUNTIME
+ALLOW_IMP3_CLOSE: YES
+ALLOW_I1_MOCK_CLOSE_REVIEW: YES
+ALLOW_PRODUCTION_CODE_CHANGE: NO
+ALLOW_SCHEMA_CHANGE: NO
+ALLOW_CONTRACTS_MODIFICATION: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_API_CONTROLLER_CHANGE: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_INTEGRATION_1_RUNTIME: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### 验证
+
+- DH targeted test：`DhIntegration1JointMockContractFixtureTest` PASS；6 tests，0 failures，0 errors，0 skipped。
+- NQ targeted test：`NqDhIntegration1JointMockContractFixtureTest` PASS；7 tests，0 failures，0 errors，0 skipped。
+- DH `mvn -ntp test`：PASS / BUILD SUCCESS；19 个 reactor module SUCCESS；Docker/Testcontainers 不可用导致 Docker-gated smoke skipped，非代码失败。
+- DH `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS；Checkstyle 0 violations；Spotless check passed。
+- NQ full backend test：PASS / BUILD SUCCESS；23 个 backend reactor module SUCCESS。
+- NQ Integration-0 scoped test：PASS；17 tests，0 failures，0 errors，0 skipped。
+
+### 边界确认
+
+未改 DH / NQ `src/main`；未改 `contracts/**` 或 `golden_cases/**`；未新增 API path、Controller、migration、runtime wiring、RealClient、real provider、真实 HTTP、AI / LangGraph 或 LIVE。未读取 credential / token / cookie / API secret / passphrase。IMP3 只支持 mock close review，不得据此启动 Integration-1 runtime。
+
 ## 2026-07-04 NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT
 
 完成 `NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 的 DH 侧 current docs 同步与验证记录收口。实现集中在 NQ dry-run worktree test scope；DH 本轮不新增或修改生产 / 测试代码，不修改 contracts、golden_cases、fixture JSON、OpenAPI、Controller、migration 或 runtime wiring。
@@ -21,7 +80,7 @@ docs/current/WORK_ORDER.md
 
 ```text
 NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT: VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS
-Next: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME
+Next consumed: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW
 ALLOW_IMP2_CLOSE: YES
 ALLOW_I1_IMP3_JOINT_MOCK_CONTRACT_TESTS: YES
 ALLOW_PRODUCTION_CODE_CHANGE: NO

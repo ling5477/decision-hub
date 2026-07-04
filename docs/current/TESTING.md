@@ -1,5 +1,39 @@
 # Decision Hub Testing
 
+## 2026-07-04 NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS final validation
+
+```text
+Scope:
+  - 本轮实现集中在 DH 与 NQ dry-run worktree test scope。
+  - DH / NQ fixture family 名称一致，分别归属各自 test resources。
+  - NQ dev 只做 NQ-DH / Integration-1 dirty diff 边界确认，未写入。
+  - 不修改 DH/NQ production code、contracts、golden_cases、OpenAPI、Controller、migration 或 runtime wiring。
+
+Result:
+  NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS: IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW
+  Next: NQ-DH-I1-MOCK-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_RUNTIME
+  WORKSTREAM_MIXED_BLOCKED: NO
+  Integration-1 runtime: NOT STARTED
+  Real HTTP: NOT STARTED
+  Real provider: NOT STARTED
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| DH `mvn -ntp -pl dh-usecase -am "-Dtest=DhIntegration1JointMockContractFixtureTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | PASS | 新增 DH IMP3 joint mock contract fixture test 6 tests，0 failures，0 errors，0 skipped。 |
+| DH `mvn -ntp test` | PASS / BUILD SUCCESS | 19 个 reactor module SUCCESS；Docker/Testcontainers 不可用导致 Docker-gated smoke skipped，非代码失败。 |
+| DH `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | Checkstyle 0 violations；Spotless check passed。 |
+| NQ dry-run worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=NqDhIntegration1JointMockContractFixtureTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | PASS | 新增 NQ IMP3 joint mock contract fixture test 7 tests，0 failures，0 errors，0 skipped。 |
+| NQ dry-run worktree `mvn -ntp -f backend/pom.xml test` | PASS / BUILD SUCCESS | 23 个 backend reactor module SUCCESS；`nq-app` 104 tests 中 2 skipped；保留既有 SLF4J / Mockito dynamic agent / unchecked / deprecation warning。 |
+| NQ dry-run worktree `mvn -ntp -f backend/pom.xml -pl nq-app -am "-Dtest=*Integration0*" "-Dsurefire.failIfNoSpecifiedTests=false" test` | PASS | Integration-0 scoped tests 17 tests，0 failures，0 errors，0 skipped；不代表 Integration-1 runtime started。 |
+
+Boundary:
+
+未改 DH / NQ `src/main`；未改 DH / NQ `contracts/**`、`golden_cases/**`、OpenAPI、Controller、migration 或 runtime wiring；未新增 RealClient、real provider、真实 HTTP、AI / LangGraph 或 LIVE。Fixture 不包含真实 URL、credential、BUY / SELL、quantity / price / leverage、placeOrder / cancelOrder、paper/live start 或 mutation 字段。`NQ_DRYRUN` 仍为 review-gated，不进入 production allowlist；schema alias 仍未进入 current schema required/property。
+
 ## 2026-07-04 NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT final validation
 
 ```text
@@ -11,7 +45,7 @@ Scope:
 
 Result:
   NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT: VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS
-  Next: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME
+  Next consumed: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW
   WORKSTREAM_MIXED_BLOCKED: NO
   Integration-1 runtime: NOT STARTED
   Real HTTP: NOT STARTED

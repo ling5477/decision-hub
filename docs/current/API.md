@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT / VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS
-下一阶段: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / NOT STARTED / MOCK_ONLY / NO_RUNTIME
+当前阶段: NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS / IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW
+下一阶段: NQ-DH-I1-MOCK-CLOSE-REVIEW / NOT STARTED / REVIEW_ONLY / NO_RUNTIME
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -26,7 +26,7 @@ AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为 API 单源；DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`，P4 gate-fix、`NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO`、`NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO`、`NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO`、`NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO`、`NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO`、`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY` 与 `NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 均不新增 API path、不新增 Controller、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但尚未成为已实现 API；replay API 仍未实现。M0 已裁决 dry-run endpoint 推荐形态为 `Option C / test-support mock-only, no runtime endpoint`；M1 已确认 DH dry-run contract entry 仍采用 test-support / mock-only / no runtime endpoint；M2/M3 仅规划 NQ test-support stub / recorder 与 joint mock validation，不授权新增 DH endpoint 或 NQ HTTP client。IMP1 只新增 DH test-support harness 与 JUnit validation chain，不修改 OpenAPI 或生产 API；IMP2 只在 NQ worktree test scope 新增 stub / recorder / no-side-effect guard，不修改 DH OpenAPI 或生产 API。
+OpenAPI 仍为 API 单源；DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`，P4 gate-fix、`NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO`、`NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO`、`NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO`、`NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO`、`NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO`、`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 均不新增 API path、不新增 Controller、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但尚未成为已实现 API；replay API 仍未实现。M0 已裁决 dry-run endpoint 推荐形态为 `Option C / test-support mock-only, no runtime endpoint`；M1 已确认 DH dry-run contract entry 仍采用 test-support / mock-only / no runtime endpoint；M2/M3 规划 NQ test-support stub / recorder 与 joint mock validation；IMP1 / IMP2 / IMP3 只新增测试支撑和测试资源，不修改 DH OpenAPI 或生产 API，不授权新增 DH endpoint 或 NQ HTTP client。
 
 ## 2. 已实现端点
 
@@ -93,6 +93,8 @@ M3 joint mock fixtures and contract tests work order 结论：M3 只规划 23 �
 IMP1 DH dry-run test-support entry 结论：`DhDryRunTestSupportEntry` 只位于 `dh-usecase/src/test/**`，用于验证未来 dry-run entry 的 mock-only validation chain。它不是 Spring bean，不暴露 Controller，不注册 runtime endpoint，不修改 OpenAPI / JSON Schema / contracts / golden_cases / fixture JSON，也不授权 `NQ_DRYRUN` 进入生产 source allowlist。任何未来 dry-run HTTP endpoint、Controller、OpenAPI path、schema alias 或 runtime wiring 仍必须另起 API / contract / security review。
 
 IMP2 NQ stub recorder no-side-effect 结论：`NqDhIntegration1StubRecorderNoSideEffectTest` 只位于 NQ dry-run worktree `backend/nq-app/src/test/**`，用于验证 future NQ request builder / readonly recorder / no-side-effect guard。它不是 DH API，不是 NQ runtime client，不暴露 Controller，不注册 endpoint，不修改 DH OpenAPI / JSON Schema / contracts / golden_cases / fixture JSON，也不授权真实 HTTP 或 `NQ_DRYRUN` production allowlist。
+
+IMP3 joint mock contract tests 结论：`DhIntegration1JointMockContractFixtureTest` 与 `NqDhIntegration1JointMockContractFixtureTest` 只消费各自 `src/test/resources/nq-dh/integration1/joint_mock_contract_fixtures.json`，用于验证双方对 mock dry-run request / response / forbidden fields / fail-closed / no-side-effect 的理解一致。Fixture 和测试不是 API，不是 Controller，不注册 endpoint，不修改 OpenAPI / JSON Schema / `contracts/**` / `golden_cases/**`，也不授权真实 HTTP、RealClient、real provider、AI / LangGraph runtime 或 `NQ_DRYRUN` production allowlist。
 
 ## 4. Stage1 最小 API 集合（已实现，留作历史记录）
 
