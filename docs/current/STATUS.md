@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN / CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME
-> Next stage:    NQ-DH-I1-MOCK-BASELINE-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_RUNTIME
+> Current stage: NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW / CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME
+> Next stage:    NQ-DH-I1-DH-RUNTIME-API-WO / NOT STARTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,9 +34,10 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN / CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME.
+Current main line: NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW / CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
-Next concrete action: NQ-DH-I1-MOCK-BASELINE-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_RUNTIME.
+Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
+Next concrete action: NQ-DH-I1-DH-RUNTIME-API-WO / NOT STARTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -47,6 +48,39 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.17 NQ-DH I1 Runtime API Contract Review（2026-07-04，CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME）
+
+```text
+Task: NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW
+Task type: REVIEW_ONLY + RUNTIME_API_CONTRACT_SECURITY_REVIEW + CROSS_REPO_BOUNDARY_REVIEW + POST_PR_MERGE_BASELINE + NO_RUNTIME_IMPLEMENTATION + NO_LIVE
+DH artifact: docs/current/DH_NQ_INTEGRATION1_RUNTIME_API_CONTRACT_REVIEW.md
+NQ artifact: E:\Project\nexus-quant-i1-dryrun\docs\current\NQ_DH_INTEGRATION1_RUNTIME_API_CONTRACT_REVIEW.md
+NQ dev post-PR baseline: PR #12 merge commit 578eb65e is present as ancestor of current dev / origin/dev b856cf07155de26f87fad9c21234c1a8a07b964a
+Recommended option: Option D / freeze API contract, error taxonomy, envelope before split implementation
+ALLOW_RUNTIME_API_CONTRACT_REVIEW_CLOSE: YES
+ALLOW_DH_RUNTIME_API_WO: YES
+ALLOW_NQ_RUNTIME_CLIENT_WO: YES
+ALLOW_RUNTIME_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_API_CONTROLLER_CHANGE_NOW: NO
+ALLOW_SCHEMA_CHANGE_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+Next concrete action: NQ-DH-I1-DH-RUNTIME-API-WO / NOT STARTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
+```
+
+- 本轮只做 runtime API / contract / security review；final read-only check 显示当前 NQ dev / origin/dev 为 `b856cf07155de26f87fad9c21234c1a8a07b964a`，PR #12 merge commit `578eb65e` 是其 ancestor，且 NQ-DH / Integration-1 scoped diff 为空；未写生产代码、测试代码、API、Controller、Client、migration、schema、contracts、golden_cases、fixture JSON、runtime wiring、真实 HTTP、real provider、AI / LangGraph 或 LIVE。
+- 推荐 future DH endpoint 形态为 `POST /api/ai/decision-dry-runs`，但当前仍是 `NOT IMPLEMENTED`，不得写入已实现 API。future request 必须 signed / timestamped / nonce / tenant-bound，future response 只能是 readonly `DecisionOutput` envelope。
+- `NQ_DRYRUN` 当前仍为 review-gated source，不允许本轮进入 production allowlist；进入 allowlist 前必须冻结 tenant/source pair allowlist、profile isolation、persistent nonce、rate limit、payload cap、memory cap、HMAC、schema version、kill switch 和 logging redaction。
+- canonical error taxonomy 必须先冻结为正式 enum / contract；unknown / provider timeout / budget exceeded / policy denied / source denied / signature invalid / nonce replay / tenant mismatch 均必须 fail-closed，NQ 只记录不执行。
+- `dryRun / decisionId / confidence / traceSummary / replayRef / auditRef / X-NQ-DH-Schema-Version` 当前仍是 `DOC_ONLY_ALIAS` 或 future envelope planning；本 review 允许后续合同将其提升为正式字段，但不允许本轮改 schema/contracts/golden_cases。
+- HMAC signature material 必须在 implementation 前正式冻结；推荐 material 包含 method、path、source、tenantId、requestId、traceId、timestamp、nonce、schemaVersion 与 canonical body hash。
+- 后续必须拆成 DH runtime API WO、DH endpoint implementation、NQ limited client WO、NQ client implementation、joint runtime tests 和 runtime close review；不得合并成一个大实现任务。
 
 ## 1.0.16 NQ-DH I1 Limited Dry-run Runtime Plan（2026-07-04，CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME）
 

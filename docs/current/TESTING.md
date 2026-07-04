@@ -1,5 +1,54 @@
 # Decision Hub Testing
 
+## 2026-07-04 NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW validation
+
+```text
+Scope:
+  - 本轮只做 limited dry-run runtime 的 API / contract / security review。
+  - DH 只修改允许的 docs/current 文档，不新增 API / Controller / Client / Repository / Service / migration / runtime wiring。
+  - NQ dev 只读；NQ worktree 只写 docs/current review 文档与状态同步。
+  - 不修改 production code、test code、contracts、golden_cases、fixture JSON、OpenAPI、CI workflow、real HTTP、provider、AI / LangGraph 或 LIVE。
+
+Result:
+  NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW: CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME
+  Recommended option: Option D / freeze API contract, error taxonomy, and envelope before split DH/NQ implementation
+  Next: NQ-DH-I1-DH-RUNTIME-API-WO / NOT STARTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
+  Integration-1 runtime: NOT STARTED
+  Real HTTP: NOT STARTED
+  Real provider: NOT STARTED
+  API / Controller implementation: NOT STARTED
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| DH `git status --short` | PASS / CHANGES PRESENT | Dirty 限于允许的 `docs/current` 文档；新增 `docs/current/DH_NQ_INTEGRATION1_RUNTIME_API_CONTRACT_REVIEW.md`。 |
+| DH `git diff --check` | PASS | 退出码 0；仅有 LF/CRLF warning。 |
+| DH `git diff --stat` | PASS / DOCS-ONLY | tracked diff 限于 `docs/current/API.md`、`DH_NQ_INTEGRATION.md`、`README.md`、`ROADMAP.md`、`STATUS.md`、`WORK_ORDER.md`；本条记录追加后包含 `TESTING.md` / `WORKLOG.md`。 |
+| DH forbidden diff：`git diff --name-only -- dh-domain/src/main dh-usecase/src/main dh-memory/src/main dh-eval/src/main dh-connector/src/main dh-api/src/main dh-app/src/main dh-infra/src/main contracts golden_cases` | PASS / EMPTY | 未触达 DH production code、contracts 或 golden_cases。 |
+| DH security scan：`rg -n "NQ_DRYRUN|Controller|RequestMapping|PostMapping|RealClient|HttpClient|WebClient|RestTemplate|OkHttp|LangGraph|Agent|provider|apiKey|apiSecret|passphrase|credential|token|cookie|BUY|SELL|quantity|price|leverage|placeOrder|cancelOrder" dh-* docs/current contracts golden_cases` | PASS / REVIEWED | 命中分类为 docs prohibition、test guard、existing unrelated code 或既有 DH API / provider / security 模块；未发现本轮 actual risk。 |
+| DH `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 reactor module SUCCESS；Checkstyle 0 violations；Spotless check passed。 |
+| DH targeted `DecisionContractGapGuardTest` | PASS | 6 tests，0 failures，0 errors。 |
+| DH targeted `DhDryRunTestSupportEntryTest` | PASS | 12 tests，0 failures，0 errors。 |
+| DH targeted `DhIntegration1JointMockContractFixtureTest` | PASS | 6 tests，0 failures，0 errors。 |
+| DH `mvn -ntp test` | TIMEOUT / NOT PASSED | 20 分钟 timeout，未取得 BUILD SUCCESS/FAILURE；不写成通过。 |
+| DH README baseline `mvn -ntp test "-Dtest=!PostgresContainerSmokeTest" "-Dsurefire.failIfNoSpecifiedTests=false"` | TIMEOUT / NOT PASSED | 20 分钟 timeout，未取得 BUILD SUCCESS/FAILURE；不写成通过。 |
+| Java process inspection | REVIEWED / STALE PROCESSES PRESENT | 观察到本机仍有 Java 进程；本轮未继续运行 Maven，未强制结束可能属于其他会话的进程。 |
+| NQ worktree `git status --short` | PASS / CHANGES PRESENT | Dirty 限于允许的 `docs/current` 文档；新增 `docs/current/NQ_DH_INTEGRATION1_RUNTIME_API_CONTRACT_REVIEW.md`。 |
+| NQ worktree `git diff --check` | PASS | 退出码 0；仅有 LF/CRLF warning。 |
+| NQ worktree forbidden diff：`git diff --name-only -- backend/**/src/main frontend research scripts deploy .github "backend/**/db/migration"` | PASS / EMPTY | 未触达 NQ production code、frontend、research、scripts、deploy、CI 或 migration。 |
+| NQ security scan：`rg -n "NQ_DRYRUN|RealClient|HttpClient|WebClient|RestTemplate|OkHttp|placeOrder|cancelOrder|paperRunStart|liveRunStart|mutateRisk|mutateLedger|apiKey|apiSecret|passphrase|credential|token|cookie|BUY|SELL|quantity|price|leverage" backend docs/current` | PASS / REVIEWED | 命中分类为 docs prohibition、test guard、existing unrelated code 或既有 NQ trading / adapter / public-marketdata 代码；未发现 NQ-DH runtime actual risk。 |
+| NQ worktree `mvn -ntp -f backend/pom.xml test` | PASS / BUILD SUCCESS | 23 个 backend reactor module SUCCESS；`nq-app` 105 tests，0 failures，0 errors，3 skipped。 |
+| NQ worktree Integration0 scoped test | PASS / BUILD SUCCESS | 17 tests，0 failures，0 errors。 |
+| NQ worktree Integration1 scoped test | PASS / BUILD SUCCESS | 18 tests，0 failures，0 errors。 |
+| NQ dev post-PR baseline | PASS / READ-ONLY | 当前 `dev` / `origin/dev` 为 `b856cf07155de26f87fad9c21234c1a8a07b964a`；PR #12 merge commit `578eb65e851086d0668bbebef74c319df1e5d63c` 是当前 dev ancestor；scoped NQ-DH / Integration-1 unstaged 与 staged diff 均为空。 |
+
+Boundary:
+
+未改 DH / NQ production code；未改测试代码；未改 `contracts/**`、`golden_cases/**`、fixture JSON、OpenAPI、Controller、migration 或 CI workflow；未新增 RealClient、real provider、真实 HTTP、AI / LangGraph 或 LIVE；未读取 credential / token / cookie / API secret / passphrase；未修改 NQ dev。
+
 ## 2026-07-04 NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN validation
 
 ```text

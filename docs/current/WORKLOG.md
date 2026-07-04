@@ -1,5 +1,87 @@
 # Decision Hub Worklog
 
+## 2026-07-04 NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW
+
+完成 `NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 的 review-only 收口。本轮只审查 PR #12 合并后的 limited dry-run runtime API / contract / security 前置条件，不实现 runtime，不新增 API / Controller，不修改 production code、test code、contracts、golden_cases、fixture JSON、migration、OpenAPI 或 CI workflow。
+
+### 新增文件
+
+```text
+docs/current/DH_NQ_INTEGRATION1_RUNTIME_API_CONTRACT_REVIEW.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\NQ_DH_INTEGRATION1_RUNTIME_API_CONTRACT_REVIEW.md
+```
+
+### 修改文件
+
+```text
+docs/current/API.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\README.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\ROADMAP.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\STATUS.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\TESTING.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\WORKLOG.md
+E:\Project\nexus-quant-i1-dryrun\docs\current\WORK_ORDER.md
+```
+
+### 结果
+
+```text
+NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW: CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME
+Recommended option: Option D / freeze API contract, error taxonomy, and envelope before split DH/NQ implementation
+Future endpoint candidate: POST /api/ai/decision-dry-runs / NOT IMPLEMENTED
+NQ_DRYRUN source: REVIEW_GATED / NOT_IN_PRODUCTION_ALLOWLIST
+dryRun / decisionId / confidence / traceSummary / replayRef / auditRef / X-NQ-DH-Schema-Version: FUTURE_ENVELOPE_FIELDS / NOT_SCHEMA_CHANGE_NOW
+ALLOW_RUNTIME_API_CONTRACT_REVIEW_CLOSE: YES
+ALLOW_DH_RUNTIME_API_WO: YES
+ALLOW_NQ_RUNTIME_CLIENT_WO: YES
+ALLOW_RUNTIME_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_API_CONTROLLER_CHANGE_NOW: NO
+ALLOW_SCHEMA_CHANGE_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+NEXT_ACTION: NQ-DH-I1-DH-RUNTIME-API-WO
+```
+
+### 核心评审结论
+
+- DH 可以在后续单独 work order 中规划 limited dry-run API / Controller，但本轮不新增 endpoint；future candidate 为 `POST /api/ai/decision-dry-runs`。
+- DH future request 必须 signed / timestamped / nonce / tenant-bound，并且 fail-closed；禁止 provider / Agent / LangGraph / NQ DB / executable trading instruction。
+- `NQ_DRYRUN` 仍为 review-gated source，不进入 production allowlist；进入 allowlist 前必须冻结 tenant/source pair、profile isolation、persistent nonce replay、rate limit、payload cap、memory cap、HMAC 和 audit policy。
+- canonical error taxonomy、schema envelope、HMAC signature material、timestamp / nonce / replay guard / tenant binding / requestId / traceId 规则必须先冻结，再进入实现。
+- NQ future client 不得触发 order / execution / risk mutation / ledger mutation / Paper Run / LIVE；`LONG_BIAS` / `SHORT_BIAS` 不得映射为 `BUY` / `SELL`。
+- runtime failure 必须 fail-closed；audit / trace / replay 只能保存 redacted summary，不保存 credential、raw prompt、raw provider response 或敏感 header/body。
+- 后续 implementation 必须拆成 DH runtime API contract WO、DH limited runtime endpoint implementation、NQ limited dry-run client implementation、joint runtime dry-run tests 与 runtime close review，不允许合并成一个大实现任务。
+
+### 验证
+
+- DH `git diff --check`：PASS；forbidden-scope diff 为空。
+- DH security scan：PASS / REVIEWED；命中均归类为 docs prohibition、test guard、existing unrelated code 或既有模块，未发现 actual risk。
+- DH `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS。
+- DH targeted Integration-1 guard / support tests：PASS；`DecisionContractGapGuardTest` 6 tests、`DhDryRunTestSupportEntryTest` 12 tests、`DhIntegration1JointMockContractFixtureTest` 6 tests，均 0 failures / 0 errors。
+- DH `mvn -ntp test` 与 README baseline smoke-excluded full test：TIMEOUT / NOT PASSED；均未取得 BUILD SUCCESS/FAILURE，未写成通过。
+- NQ worktree `git diff --check`：PASS；forbidden-scope diff 为空。
+- NQ security scan：PASS / REVIEWED；未发现 NQ-DH runtime actual risk。
+- NQ worktree full backend test：PASS / BUILD SUCCESS；23 modules，`nq-app` 105 tests，0 failures，0 errors，3 skipped。
+- NQ worktree Integration0 scoped test：PASS；17 tests，0 failures，0 errors。
+- NQ worktree Integration1 scoped test：PASS；18 tests，0 failures，0 errors。
+- NQ dev post-PR baseline：PASS / READ-ONLY；当前 `dev` / `origin/dev` 为 `b856cf07155de26f87fad9c21234c1a8a07b964a`，PR #12 merge commit `578eb65e851086d0668bbebef74c319df1e5d63c` 是当前 dev ancestor，scoped NQ-DH / Integration-1 diff 为空。
+
+### 边界确认
+
+未改 DH / NQ production code；未改测试代码；未改 `contracts/**`、`golden_cases/**`、fixture JSON、OpenAPI、Controller、Client、Repository、Service、migration、runtime wiring 或 CI workflow；未真实 HTTP；未真实 NQ 调用；未真实 DH runtime integration；未真实交易所调用；未新增 RealClient；未新增真实 Provider；未读取或输出 credential、token、cookie、API secret、passphrase；未接 AI / LangGraph；未启动 Integration-1 runtime；未开启 LIVE；未修改 NQ dev。
+
 ## 2026-07-04 NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN
 
 完成 `NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 的 docs-only / plan-only 收口。结论为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`：允许后续单独进入 `NQ-DH-I1-MOCK-BASELINE-PR-PREP` 与 `NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW`，但不允许 runtime implementation。
