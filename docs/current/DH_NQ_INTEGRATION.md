@@ -7,8 +7,8 @@
 ## 0. 当前状态锁定（2026-07-04）
 
 ```text
-Current stage: NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW / CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME
-Next stage:    NQ-DH-I1-DH-RUNTIME-API-WO / NOT STARTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
+Current stage: NQ-DH-I1-DH-RUNTIME-API-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
+Next stage:    NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 DH-AUDIT-FIX completed
 NQ integration not started
 Integration-1 runtime implementation not started
@@ -24,7 +24,7 @@ Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED
 NQ current planning baseline: GateN
 ```
 
-当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成 planning / work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线；mock close review 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 已评估受限 runtime planning，结论为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`；mock/test-support baseline PR 已合并到 NQ dev；`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 已完成 API / contract / security review-only 收口，结论为 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。它只允许后续拆出 DH runtime API work order 与 NQ limited dry-run client work order，不允许 runtime implementation。下一步推荐 `NQ-DH-I1-DH-RUNTIME-API-WO / NOT STARTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION`；旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
+当前 Integration-1 dry-run plan 已基于 NQ GateN 完成 rebase，计划文档为 `DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成 planning / work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线；mock close review 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 已评估受限 runtime planning，结论为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`；mock/test-support baseline PR 已合并到 NQ dev；`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 已完成 API / contract / security review-only 收口，结论为 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`；`NQ-DH-I1-DH-RUNTIME-API-WO` 已完成 DH scoped work-order-only 收口，结论为 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION`。它只允许后续单独进入 DH limited runtime endpoint implementation，不允许本轮 runtime implementation。下一步推荐 `NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`；旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 不是当前 next，必须保持 `SUPERSEDED / REBASE_REQUIRED`。
 
 Integration-0 safety gate 已 CLOSED / ACCEPTED。若未来重新进入 NQ runtime 相关工作，只能从基于 GateN 的 Integration-1 planning-only audit 开始；本文件中的 DH -> NQ REST API 控制面、`POST /api/ai/backtest-requests`、真实 HTTP / event、NQ client、RealClient、real provider 等方向均为 historical / superseded / deferred / gated，不代表当前 next 或当前 implementation。
 
@@ -157,7 +157,7 @@ PostMortemCreated
 
 ## 5. 数据流（historical / superseded / deferred / gated）
 
-以下数据流只保留为历史背景，不代表当前系统已经开始集成，也不是当前 runtime implementation。当前 runtime API contract review 已关闭为 `REVIEW_ONLY / NO_RUNTIME`；下一步是 `NQ-DH-I1-DH-RUNTIME-API-WO / NOT STARTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION`。该 work order 只能冻结 future endpoint / request / response / error taxonomy / feature flag / rollback，不得直接实现 runtime。
+以下数据流只保留为历史背景，不代表当前系统已经开始集成，也不是当前 runtime implementation。当前 runtime API contract review 已关闭为 `REVIEW_ONLY / NO_RUNTIME`；`NQ-DH-I1-DH-RUNTIME-API-WO` 已关闭为 `WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION`。该 work order 只冻结 future endpoint / request / response / error taxonomy / feature flag / rollback；下一步 DH limited endpoint implementation 仍必须 default disabled、no real HTTP、no provider、no LIVE，且不得把 Runtime integration 写成 started。
 
 ```text
 User / NQ Console

@@ -1,5 +1,74 @@
 # Decision Hub Worklog
 
+## 2026-07-04 NQ-DH-I1-DH-RUNTIME-API-WO
+
+完成 `NQ-DH-I1-DH-RUNTIME-API-WO` 的 work-order-only 收口。本轮只写 DH scoped limited dry-run runtime API implementation work order，不实现 runtime，不新增 API / Controller，不修改 production code、test code、contracts、golden_cases、fixture JSON、migration、OpenAPI、Client、Service、Repository 或 runtime wiring。
+
+### 新增文件
+
+```text
+docs/current/DH_NQ_INTEGRATION1_DH_RUNTIME_API_WO.md
+```
+
+### 修改文件
+
+```text
+docs/current/API.md
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### 结果
+
+```text
+NQ-DH-I1-DH-RUNTIME-API-WO: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
+Future endpoint candidate: POST /api/ai/decision-dry-runs
+Future endpoint state now: NOT IMPLEMENTED
+NQ_DRYRUN source: REVIEW_GATED / NOT_IN_PRODUCTION_ALLOWLIST
+ALLOW_DH_RUNTIME_API_WO_CLOSE: YES
+ALLOW_DH_LIMITED_RUNTIME_ENDPOINT_IMPLEMENTATION_WO: YES
+ALLOW_DH_RUNTIME_IMPLEMENTATION_NOW: NO
+ALLOW_NQ_RUNTIME_CLIENT_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_CHANGE_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+NEXT_ACTION: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION
+```
+
+### 核心工单结论
+
+- Future endpoint 固定为 `POST /api/ai/decision-dry-runs`，但当前仍为 `NOT IMPLEMENTED`，不得写入已实现 API、OpenAPI path 或 Controller。
+- 下一轮 implementation 必须默认 feature flag disabled、dev/test only、production disabled，并强制 HMAC、UTC `Z` timestamp、±300s replay window、persistent nonce replay guard、tenant/source allowlist、requestId / traceId / tenantId binding、payload cap、rate limit、memory cap、fail-closed、redacted audit logging 和 kill switch。
+- `NQ_DRYRUN` 仍是 review-gated source，不得直接进入 production allowlist；如下一轮允许，只能先限 dev/test profile，并要求 tenant + source pair allowlist。
+- request envelope 只允许 read-only dry-run 字段；禁止 credential、apiKey、apiSecret、passphrase、accountSecret、executableOrder、BUY/SELL order instruction、quantity/leverage/order price executable instruction。
+- response envelope 只能是 read-only decision snapshot；`LONG_BIAS / SHORT_BIAS` 只是 bias，不是 `BUY / SELL`；NQ 只能记录，不执行。
+- error taxonomy 冻结为 `SIGNATURE_INVALID / TIMESTAMP_INVALID / TIMESTAMP_OUT_OF_WINDOW / NONCE_REPLAY / TENANT_MISMATCH / SOURCE_DENIED / PAYLOAD_TOO_LARGE / RATE_LIMITED / MEMORY_LIMIT_EXCEEDED / POLICY_DENIED / PROVIDER_DISABLED / PROVIDER_TIMEOUT / BUDGET_EXCEEDED / UNKNOWN_ERROR`。
+- 后续必须拆成 DH limited endpoint implementation、DH runtime endpoint tests、NQ limited dry-run client work order、NQ client implementation、joint runtime dry-run tests 与 runtime close review，不得把 DH endpoint 和 NQ client 合并为一个大实现任务。
+
+### 验证
+
+- DH `git diff --check`：PASS；仅 LF/CRLF warning；无 whitespace error。
+- DH forbidden-scope diff：PASS / EMPTY；未触达 `dh-*/src/main`、`contracts` 或 `golden_cases`。
+- DH OpenAPI/schema scan：PASS / NO HIT；`contracts/openapi.yaml` 与 `contracts/json-schema` 未出现 `decision-dry-runs`。
+- DH `mvn -ntp -Pquality validate`：PASS / BUILD SUCCESS；19 个 reactor module SUCCESS；Checkstyle 0 violations；Spotless check passed。
+- DH `mvn test`：NOT RUN；本轮为 work-order-only docs scope，未声称 full test pass。
+- NQ dev read-only：存在既有 GateO/current dirty/rename，但 NQ-DH / Integration-1 scoped unstaged 与 staged diff 为空；本轮未修改 NQ dev。
+- NQ worktree read-only：branch=`nq-dh-i1-runtime-api-contract-review`；status 与 diff stat 无输出；本轮未修改 NQ worktree。
+
+### 边界确认
+
+未改 DH production code；未改 DH test code；未新增 API / Controller；未新增 Client、Service、Repository 或 migration；未改 `contracts/**`、`golden_cases/**`、fixture JSON 或 OpenAPI；未真实 HTTP；未启动 runtime；未读取或输出 credential、token、cookie、API secret、passphrase；未接 provider；未接 AI / LangGraph；未修改 NQ dev 或 NQ worktree；未开启 LIVE；未把 Runtime integration 写成 started；未把 DH 写成 integrated。
+
 ## 2026-07-04 NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW
 
 完成 `NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 的 review-only 收口。本轮只审查 PR #12 合并后的 limited dry-run runtime API / contract / security 前置条件，不实现 runtime，不新增 API / Controller，不修改 production code、test code、contracts、golden_cases、fixture JSON、migration、OpenAPI 或 CI workflow。

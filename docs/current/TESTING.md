@@ -1,5 +1,62 @@
 # Decision Hub Testing
 
+## 2026-07-04 NQ-DH-I1-DH-RUNTIME-API-WO validation
+
+```text
+Scope:
+  - 本轮只写 DH limited dry-run runtime API implementation work order。
+  - DH 只修改允许的 docs/current 文档。
+  - NQ dev 与 NQ dry-run worktree 只读确认，未写入。
+  - 不修改 production code、test code、contracts、golden_cases、fixture JSON、OpenAPI、Controller、migration、runtime wiring、real HTTP、provider、AI / LangGraph 或 LIVE。
+
+Result:
+  NQ-DH-I1-DH-RUNTIME-API-WO: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
+  Future endpoint candidate: POST /api/ai/decision-dry-runs / NOT IMPLEMENTED
+  Next: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+  Integration-1 runtime: NOT STARTED
+  Runtime integration: NOT STARTED
+  Real HTTP: NO
+  Real provider: NO
+  API / Controller implementation now: NO
+  AI / Agent runtime: NOT STARTED
+  LangGraph runtime: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| DH `git status --short` | PASS / CHANGES PRESENT | Dirty 限于允许的 `docs/current` 文档；新增 `docs/current/DH_NQ_INTEGRATION1_DH_RUNTIME_API_WO.md`。 |
+| DH `git diff --check` | PASS | 退出码 0；仅有 LF/CRLF warning；无 whitespace error。 |
+| DH `git diff --stat` | PASS / DOCS-ONLY | tracked diff 限于 `docs/current/API.md`、`DH_NQ_INTEGRATION.md`、`README.md`、`ROADMAP.md`、`STATUS.md`、`WORK_ORDER.md`；本条记录追加后包含 `TESTING.md` / `WORKLOG.md`；新 WO 文件由 `git status` 标识为 untracked。 |
+| DH forbidden diff：`git diff --name-only -- dh-domain/src/main dh-usecase/src/main dh-memory/src/main dh-eval/src/main dh-connector/src/main dh-api/src/main dh-app/src/main dh-infra/src/main contracts golden_cases` | PASS / EMPTY | 未触达 DH production code、contracts 或 golden_cases。 |
+| DH OpenAPI/schema scan：`rg -n "decision-dry-runs" contracts/openapi.yaml contracts/json-schema` | PASS / NO HIT | 未把 future endpoint 写入 OpenAPI 或 JSON Schema。 |
+| DH `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | 19 个 reactor module SUCCESS；Checkstyle 0 violations；Spotless check passed；Finished at 2026-07-04T21:39:30+08:00。 |
+| DH `mvn test` | NOT RUN | 本轮是 WORK_ORDER_ONLY docs scope，用户指定验证链为 `mvn -ntp -Pquality validate`；未声称 full test pass。 |
+| NQ dev read-only `git status --short` / `git diff --stat` | REVIEWED / UNRELATED DIRTY PRESENT | 当前 NQ dev 存在既有 GateO/current 文档 dirty/rename；本轮未修改 NQ dev。 |
+| NQ dev scoped diff：`git diff --name-only -- docs/current/*NQ_DH* docs/current/*INTEGRATION1*` and cached variant | PASS / EMPTY | NQ dev 的 NQ-DH / Integration-1 scoped unstaged 与 staged diff 均为空。 |
+| NQ worktree read-only `git status --short` / `git branch --show-current` / `git diff --stat` | PASS / CLEAN | branch=`nq-dh-i1-runtime-api-contract-review`；status 与 diff stat 无输出；本轮未修改 NQ worktree。 |
+
+Readiness:
+
+```text
+ALLOW_DH_RUNTIME_API_WO_CLOSE: YES
+ALLOW_DH_LIMITED_RUNTIME_ENDPOINT_IMPLEMENTATION_WO: YES
+ALLOW_DH_RUNTIME_IMPLEMENTATION_NOW: NO
+ALLOW_NQ_RUNTIME_CLIENT_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_CHANGE_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+Boundary:
+
+未改 DH production code；未改 DH test code；未新增 API / Controller；未新增 Client、Service、Repository 或 migration；未改 `contracts/**`、`golden_cases/**`、fixture JSON 或 OpenAPI；未真实 HTTP；未启动 runtime；未读取 credential / token / cookie / API secret / passphrase；未接 provider；未接 AI / LangGraph；未修改 NQ dev 或 NQ worktree；未开启 LIVE。
+
 ## 2026-07-04 NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW validation
 
 ```text

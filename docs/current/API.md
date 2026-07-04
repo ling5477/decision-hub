@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW / CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME
-下一阶段: NQ-DH-I1-DH-RUNTIME-API-WO / NOT STARTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
+当前阶段: NQ-DH-I1-DH-RUNTIME-API-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
+下一阶段: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -22,13 +22,14 @@ K1-K8 Stage4 MVP:      CLOSED / ACCEPTED
 Decision pipeline API: NOT IMPLEMENTED
 Limited runtime plan: CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME
 Runtime API contract review: CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME
+DH runtime API WO: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
 Integration-1:        NOT STARTED
 Runtime integration:  NOT STARTED
 AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为 API 单源；DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`，P4 gate-fix、`NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO`、`NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO`、`NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO`、`NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO`、`NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO`、`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT`、`NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS`、`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 与 `NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 均不新增 API path、不新增 Controller、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但尚未成为已实现 API；replay API 仍未实现。runtime API contract review 推荐 future endpoint candidate 为 `POST /api/ai/decision-dry-runs`，但它仍是 `NOT IMPLEMENTED`，不得写入已实现端点、OpenAPI path 或 Controller；`NQ_DRYRUN` production source allowlist 仍未生产化。
+OpenAPI 仍为 API 单源；DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`，P4 gate-fix、`NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO`、`NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO`、`NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO`、`NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO`、`NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO`、`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT`、`NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS`、`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN`、`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 与 `NQ-DH-I1-DH-RUNTIME-API-WO` 均不新增 API path、不新增 Controller、不新增 migration、不新增 RealClient / provider，不启动 Integration-1 runtime。`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但尚未成为已实现 API；replay API 仍未实现。runtime API work order 冻结 future endpoint candidate 为 `POST /api/ai/decision-dry-runs`，但它仍是 `NOT IMPLEMENTED`，不得写入已实现端点、OpenAPI path 或 Controller；`NQ_DRYRUN` production source allowlist 仍未生产化。
 
 ## 2. 已实现端点
 
@@ -101,6 +102,8 @@ IMP3 joint mock contract tests 结论：`DhIntegration1JointMockContractFixtureT
 Limited dry-run runtime plan 结论：`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 只评估受限 runtime 前置条件，当前为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`。本计划允许后续单独进入 `NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW`，但不允许本轮新增 dry-run runtime endpoint、Controller、OpenAPI path、schema alias、`NQ_DRYRUN` production allowlist、NQ runtime client 或真实 HTTP；如未来需要实现，必须先关闭 API / contract / security / source allowlist / error taxonomy / no-side-effect review。
 
 Runtime API contract review 结论：`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。推荐 future endpoint candidate 为 `POST /api/ai/decision-dry-runs`，只接受 signed / timestamped / nonce / tenant-bound `NQ_DRYRUN` request，并只返回 readonly `DecisionOutput` envelope；但该 endpoint 当前仍未实现。本 review 允许后续进入 `NQ-DH-I1-DH-RUNTIME-API-WO / WORK_ORDER_ONLY`，不允许当前新增 Controller、OpenAPI path、schema/contracts/golden_cases、runtime wiring、real HTTP、real provider、Agent / LangGraph 或 LIVE。`dryRun / decisionId / confidence / traceSummary / replayRef / auditRef / X-NQ-DH-Schema-Version` 仍未进入当前正式 API schema；如后续转正式字段，必须另起 schema/envelope compatibility review。
+
+DH runtime API work order 结论：`NQ-DH-I1-DH-RUNTIME-API-WO` 已 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION`。该 work order 只冻结 future `POST /api/ai/decision-dry-runs` 的 endpoint 边界、security gate、`NQ_DRYRUN` source allowlist 策略、request/response envelope、error taxonomy、audit/trace/replay、feature flag、kill switch、validation 和 rollback；endpoint 当前仍为 `NOT IMPLEMENTED`。下一轮 implementation 仍不得接 real HTTP、real provider、NQ runtime client、Agent / LangGraph 或 LIVE，且 `LONG_BIAS / SHORT_BIAS` 不得映射为 `BUY / SELL`。
 
 ## 4. Stage1 最小 API 集合（已实现，留作历史记录）
 
