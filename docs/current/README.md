@@ -1,10 +1,10 @@
 # Decision Hub Current Docs
 
-> 当前阶段: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW / PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
-> 下一阶段: NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> 当前阶段: NQ-DH-I1-MOCK-RUNTIME-PR-PREP / READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> 下一阶段: NQ-DH-I1-MOCK-RUNTIME-PR-CREATE / NOT STARTED / PR_CREATE_ONLY / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 > 事实源: docs/current
 >
-> NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 runtime implementation NOT STARTED。DH limited endpoint、NQ limited client、joint runtime dry-run test WO、joint runtime dry-run test implementation blocker fix 与 close review 均已按 no-real / fake-transport / MockMvc / review-only 边界收口；当前只允许下一步进入 `NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW`。no RealClient；no real provider；no real HTTP；no trading ability；LIVE DISABLED。
+> NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 runtime implementation NOT STARTED。DH limited endpoint、NQ limited client、joint runtime dry-run test WO、joint runtime dry-run test implementation blocker fix、joint close review 与 mock runtime milestone close review 均已按 no-real / fake-transport / MockMvc / review-only 边界收口；NQ PR prep 已完成为 `READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE`。no RealClient；no real provider；no real HTTP；no trading ability；LIVE DISABLED。
 > Security baseline: FULL；fail-closed state: FULL；P1-4 residual CLOSED；header alignment CLOSED；timestamp alignment CLOSED；code reality audit blockers fixed。
 > Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1-K8 已 `CLOSED / ACCEPTED`。旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与旧冻结目录名 `docs/gates/dh-gatek-decision-pipeline-mvp/` 已 `SUPERSEDED / NAMING_REPLACED`；旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`。NQ-DH Integration-1 dry-run 已完成 GateN rebase planning、mock/test-support baseline、limited runtime planning、runtime API contract review、DH endpoint、NQ limited client、joint runtime dry-run test implementation 与 blocker fix；`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW` 已 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY`。该关闭不修改 OpenAPI/schema/contracts/golden_cases，不新增真实 HTTP、real provider、LangGraph、LLM、LIVE 或 NQ mutation。下一步只允许 `NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW`；当前仍不允许把 Runtime integration 写成 started。
 
@@ -65,6 +65,7 @@ docs/current/DH_NQ_INTEGRATION1_RUNTIME_API_CONTRACT_REVIEW.md
 docs/current/DH_NQ_INTEGRATION1_DH_RUNTIME_API_WO.md
 docs/current/DH_NQ_INTEGRATION1_DH_ENDPOINT_CLOSE_REVIEW.md
 docs/current/DH_NQ_INTEGRATION1_JOINT_RUNTIME_DRYRUN_TEST_CLOSE_REVIEW.md
+docs/current/STATUS.md
 docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md
 docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md
 docs/current/DH_REFACTOR_STAGE1_STATUS.md

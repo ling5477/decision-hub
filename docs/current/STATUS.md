@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW / PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
-> Next stage:    NQ-DH-I1-MOCK-RUNTIME-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> Current stage: NQ-DH-I1-MOCK-RUNTIME-PR-PREP / READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> Next stage:    NQ-DH-I1-MOCK-RUNTIME-PR-CREATE / NOT STARTED / PR_CREATE_ONLY / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,7 +34,7 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW / PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Current main line: NQ-DH-I1-MOCK-RUNTIME-PR-PREP / READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
 NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
@@ -45,7 +45,8 @@ Joint runtime dry-run test implementation: IMPLEMENTED / FULL_VALIDATION_PASS / 
 Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH FIXED; SCHEMA_VERSION_MISMATCH FIXED.
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: NQ-DH-I1-MOCK-RUNTIME-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Integration-1 mock runtime PR prep: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Next concrete action: NQ-DH-I1-MOCK-RUNTIME-PR-CREATE / NOT STARTED / PR_CREATE_ONLY / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -56,6 +57,37 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.27 NQ-DH I1 Mock Runtime PR Prep（2026-07-05，READY / PR_PREP_ONLY）
+
+```text
+Task: NQ-DH-I1-MOCK-RUNTIME-PR-PREP
+Task type: PR_PREP_ONLY + CROSS_REPO_DIFF_REVIEW + MILESTONE_MERGE_BOUNDARY_REVIEW + SECURITY_BOUNDARY_RECHECK + NO_CODE_CHANGE + NO_REAL_DH_CALL + NO_REAL_HTTP + NO_REAL_PROVIDER + NO_LIVE
+Result: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE
+Runtime integration: NOT STARTED
+DH integrated: NO
+Agent / LangGraph runtime: NO
+LIVE: DISABLED
+ALLOW_NQ_MOCK_RUNTIME_PR_CREATE: YES
+ALLOW_NQ_MOCK_RUNTIME_PR_MERGE_NOW: NO
+ALLOW_REAL_DH_CALL_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_DH_CODE_CHANGE_NOW: NO
+ALLOW_NQ_CODE_CHANGE_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+本轮只准备 NQ worktree `nq-dh-i1-joint-runtime-dryrun-test-impl` 到 NQ `origin/dev` 的 PR 材料。NQ PR diff 初始范围 `origin/dev...HEAD` 已分类为 allowed isolated `integration/dh` package、allowed tests、disabled-by-default config 与 docs/current；forbidden migration、contracts、golden_cases、frontend、research、scripts、deploy、`.github` 与 uncategorized diff 均为空。NQ PR title 固定为 `test(nq-dh): add Integration-1 mock dry-run runtime boundary`。DH dev 本轮只做 PR companion status 同步，不改 DH Java、测试、contracts、golden_cases 或 migration。
+
+安全边界复核通过：无真实 DH call、无真实 HTTP、无 provider、无 credential forwarding、无 order / execution / risk / ledger / account / paper / live side effect；`LONG_BIAS / SHORT_BIAS` 仍 bias-only，不映射为 `BUY / SELL`。DH HMAC wire-level source fix、DH endpoint close review、joint runtime dry-run test close review 与 mock runtime milestone close review 已提交；NQ `DEFAULT_SCHEMA_VERSION=1.0.0` 与 DH endpoint response `schemaVersion=1.0.0` 一致。contracts/OpenAPI/json-schema/golden_cases 未 formalize，本 PR 不声称 formalized。
+
+本轮未重跑 Maven：`Maven：未重跑；沿用 mock runtime close review 前一轮已记录结果。` NQ `quality` profile missing / not effective quality gate，不得写成 quality PASS。NQ dev 最终只读复核为 `## dev...origin/dev`，NQ-DH / Integration-1 scoped diff 为空；本轮未修改 NQ dev。下一步只允许 `NQ-DH-I1-MOCK-RUNTIME-PR-CREATE / PR_CREATE_ONLY`；不允许 merge、real DH call、real HTTP、provider、schema/contracts/golden_cases formalization、DH code change、NQ code change、Agent / LangGraph 或 LIVE。
 
 ## 1.0.26 NQ-DH I1 Integration-1 Mock Runtime Close Review（2026-07-05，PASS / CLOSED / ACCEPTED）
 

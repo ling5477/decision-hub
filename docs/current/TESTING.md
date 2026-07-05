@@ -1,5 +1,35 @@
 # Decision Hub Testing
 
+## 2026-07-05 NQ-DH-I1-MOCK-RUNTIME-PR-PREP validation
+
+```text
+Scope:
+  - 本轮只做 PR prep companion status sync。
+  - DH dev 不改 Java 生产代码，不改测试代码，不改 contracts / golden_cases / migration。
+  - NQ dev 只读；NQ worktree 生成 PR prep 文档和 PR body。
+  - 不真实调用 DH，不真实 HTTP，不接 provider，不开启 LIVE。
+
+Result:
+  NQ-DH-I1-MOCK-RUNTIME-PR-PREP: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE
+  ALLOW_NQ_MOCK_RUNTIME_PR_CREATE: YES
+  ALLOW_NQ_MOCK_RUNTIME_PR_MERGE_NOW: NO
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| DH `git status --short`; `git branch --show-current`; `git log --oneline -12` | PASS / CLEAN BEFORE WRITE | 写入前 status 无输出；branch=`dev`；HEAD=`b5803bc`，上一轮 close review docs 已提交。 |
+| DH `git diff --check`; `git diff --stat` | PASS / EMPTY BEFORE WRITE | 写入前无 diff；写入后仅本轮 docs/current companion sync。 |
+| DH forbidden-scope diff | PASS / EMPTY | 写入前 `dh-domain/src/main`、`dh-usecase/src/main`、`dh-security/src/main`、`dh-api/src/main`、`dh-app/src/main`、`dh-infra/src/main`、contracts、golden_cases、migration 无 diff。 |
+| DH boundary `rg` | REVIEWED | 原始 `dh-*` path glob 在 Windows 下按字面路径失败；已用显式 DH module directories 重跑。命中项为既有 docs/tests/contracts/golden forbidden context，不是本 PR 启用 runtime。 |
+| NQ worktree PR prep checks | PASS / REVIEWED | PR diff 只包含 allowed isolated `integration/dh` package、allowed tests、disabled-by-default config 与 docs/current；forbidden path diff 为空。 |
+| NQ dev read-only | PASS / FINAL CLEAN / SCOPED EMPTY | 最终只读复核 NQ dev 为 `## dev...origin/dev`；NQ-DH / Integration-1 scoped unstaged/staged diff 为空；本轮未修改 NQ dev。 |
+| Maven | NOT RERUN | `Maven：未重跑；沿用 mock runtime close review 前一轮已记录结果。` |
+| NQ quality profile | MISSING / NOT EFFECTIVE QUALITY GATE | NQ `quality` profile missing，不得写成 quality PASS。 |
+
+Boundary:
+
+未改 DH Java 生产代码；未改 DH 测试代码；未改 NQ dev；未真实调用 DH；未真实 HTTP；未接 provider；未修改 contracts / golden_cases / migration；未接 Agent / LangGraph；未开启 LIVE。
+
 ## 2026-07-05 NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW validation
 
 ```text

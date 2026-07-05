@@ -1,5 +1,71 @@
 # Decision Hub Worklog
 
+## 2026-07-05 NQ-DH-I1-MOCK-RUNTIME-PR-PREP
+
+完成 `NQ-DH-I1-MOCK-RUNTIME-PR-PREP` 的 DH companion status sync。本轮主交付在 NQ worktree `E:/Project/nexus-quant-i1-dryrun`，DH 只同步 current docs 的 PR companion 状态。
+
+### 新增文件
+
+```text
+无
+```
+
+### 修改文件
+
+```text
+docs/current/DH_NQ_INTEGRATION.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### Result
+
+```text
+NQ-DH-I1-MOCK-RUNTIME-PR-PREP: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE
+ALLOW_NQ_MOCK_RUNTIME_PR_CREATE: YES
+ALLOW_NQ_MOCK_RUNTIME_PR_MERGE_NOW: NO
+ALLOW_REAL_DH_CALL_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_DH_CODE_CHANGE_NOW: NO
+ALLOW_NQ_CODE_CHANGE_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### Findings
+
+- NQ PR diff review 确认 allowed isolated `integration/dh` package、allowed tests、disabled-by-default config 与 docs/current；forbidden migration / contracts / golden_cases / frontend / research / scripts / deploy / `.github` diff 为空。
+- DH companion commits 已存在：DH endpoint close review、HMAC wire-level source fix、joint runtime dry-run close review 与 mock runtime milestone close review 均已提交。
+- 本轮 DH dev 未改 Java、测试、contracts、golden_cases 或 migration。
+- Runtime integration 仍 `NOT STARTED`；DH integrated 仍 `NO`；LIVE 仍 `DISABLED`。
+
+### Validation
+
+- DH 写入前 `git status --short`：PASS / clean。
+- DH forbidden-scope diff：PASS / empty。
+- DH boundary `rg`：reviewed；命中为既有 docs/tests/contracts/golden forbidden context。
+- Maven：未重跑；沿用 mock runtime close review 前一轮已记录结果。
+- NQ dev 只读：最终复核为 `## dev...origin/dev`；NQ-DH / Integration-1 scoped diff empty。
+
+### Boundary confirmation
+
+未改 DH Java 生产代码；未改 DH 测试代码；未改 NQ dev；未真实调用 DH；未真实 HTTP；未接 provider；未修改 contracts / golden_cases / migration；未接 Agent / LangGraph；未开启 LIVE；未触碰 order / execution / risk / ledger / account / paper / live。
+
+### Next
+
+```text
+NQ-DH-I1-MOCK-RUNTIME-PR-CREATE
+```
+
 ## 2026-07-04 NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW
 
 完成 `NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW`。本轮为 `REVIEW_ONLY + DH_RUNTIME_ENDPOINT_SECURITY_REVIEW + API_BOUNDARY_REVIEW + NO_CODE_CHANGE + NO_NQ_CHANGE + NO_LIVE`，只审查 DH limited dry-run inbound endpoint `POST /api/ai/decision-dry-runs` 是否可以关闭，并判断是否允许进入下一步 `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO`。

@@ -94,7 +94,9 @@ NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW:
 NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW:
               Integration-1 mock runtime close review               [pass / closed / accepted / review-only / mock runtime milestone closed / no real dh call / no real http / no provider / no live]
 NQ-DH-I1-MOCK-RUNTIME-PR-PREP:
-              Mock runtime milestone PR preparation                 [next / pr-prep-only / no real dh call / no real http / no provider / no live]
+              Mock runtime milestone PR preparation                 [ready / pr-prep-only / nq pr create allowed / no merge / no real dh call / no real http / no provider / no live]
+NQ-DH-I1-MOCK-RUNTIME-PR-CREATE:
+              Mock runtime milestone PR creation                    [not started / pr-create-only / no merge / no real dh call / no real http / no provider / no live]
 Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
 Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
