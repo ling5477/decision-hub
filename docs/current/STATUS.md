@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NQ_WORKTREE_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
-> Next stage:    NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / DEFAULT_DISABLED / DEV_TEST_ONLY / NO_LIVE
+> Current stage: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_TEST_IMPLEMENTATION / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> Next stage:    NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION / NOT STARTED / TEST_ONLY / FAKE_TRANSPORT_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,11 +34,14 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NQ_WORKTREE_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Current main line: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_TEST_IMPLEMENTATION / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
 NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / DEFAULT_DISABLED / DEV_TEST_ONLY / NO_LIVE.
+NQ limited runtime client implementation: IMPLEMENTED / TARGETED_TEST_PASS / DEFAULT_DISABLED / FAKE_TRANSPORT_ONLY.
+NQ limited runtime client close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Joint runtime dry-run test work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_TEST_IMPLEMENTATION / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Next concrete action: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION / NOT STARTED / TEST_ONLY / FAKE_TRANSPORT_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -49,6 +52,45 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.22 NQ-DH I1 Joint Runtime Dry-run Test WO（2026-07-05，CLOSED / ACCEPTED / WORK_ORDER_ONLY）
+
+```text
+Task: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO
+Task type: WORK_ORDER_ONLY + JOINT_RUNTIME_DRYRUN_TEST_PLAN + CROSS_REPO_TEST_BOUNDARY_FREEZE + NO_TEST_IMPLEMENTATION + NO_REAL_DH_CALL + NO_REAL_HTTP + NO_REAL_PROVIDER + NO_LIVE
+NQ artifact: E:\Project\nexus-quant-i1-dryrun\docs\current\NQ_DH_INTEGRATION1_JOINT_RUNTIME_DRYRUN_TEST_WO.md
+DH artifact: docs/current/DH_NQ_INTEGRATION1_JOINT_RUNTIME_DRYRUN_TEST_WO.md
+DH endpoint: POST /api/ai/decision-dry-runs
+NQ limited client: CLOSED / ACCEPTED / DEFAULT_DISABLED / FAKE_TRANSPORT_ONLY
+Joint test implementation: NOT STARTED
+Real DH call: NO
+Real HTTP: NO
+Real provider: NO
+Runtime integration: NOT STARTED
+DH integrated: NO
+Agent / LangGraph runtime: NO
+LIVE: DISABLED
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_WO_CLOSE: YES
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_IMPLEMENTATION: NO
+ALLOW_REAL_DH_CALL_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_DH_CODE_CHANGE_NOW: NO
+ALLOW_NQ_PRODUCTION_CODE_CHANGE_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+Next concrete action: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION / NOT STARTED / TEST_ONLY / FAKE_TRANSPORT_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+```
+
+- 本轮只写 joint runtime dry-run test implementation work order；未实现测试，未修改 Java 生产代码或测试代码，未改 contracts/OpenAPI/json-schema/golden_cases/fixture JSON/migration。
+- Work order 冻结下一轮测试目标：NQ limited dry-run client -> fake / in-memory / MockMvc / test-only transport -> DH `POST /api/ai/decision-dry-runs` -> DH readonly decision envelope -> NQ response validation -> NQ record-only dry-run result。
+- 下一轮只能使用 fake transport、in-memory adapter、MockMvc、test-only request/response vector 或 isolated test support module；禁止 real outbound HTTP、真实 DH 地址、localhost 真实服务、外网、provider、LIVE 或交易副作用。
+- 成功矩阵覆盖 signed request、canonical `X-NQ-DH-*` header、UTC `Z` timestamp、nonce、`dryRun=true`、`source=NQ_DRYRUN`、`OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS` record-only / bias-only；失败矩阵覆盖 DH side security fail-closed 与 NQ side client/response fail-closed。
+- `LONG_BIAS / SHORT_BIAS` 只能作为 bias，不得映射 `BUY / SELL`；DH error 不得转为 NQ trading signal；NQ client failure 不得触发交易行为。
 
 ## 1.0.21 NQ-DH I1 NQ Runtime Client Work Order（2026-07-04，CLOSED / ACCEPTED / WORK_ORDER_ONLY）
 

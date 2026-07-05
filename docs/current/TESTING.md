@@ -3330,3 +3330,33 @@ ALLOW_LIVE: NO
 | NQ dev read-only guard | **PASS / SCOPED EMPTY** | `E:\Project\nexus-quant` 分支 `dev`；最终只读 status 显示既有 `research/py` dirty/untracked 变更，但 NQ-DH scoped unstaged 与 staged diff 均为空；本轮未修改 NQ dev。 |
 
 边界确认：未实现 NQ runtime client；未新增 HTTP client；未真实调用 DH；未改 DH Java；未改 contracts / OpenAPI / JSON Schema / golden_cases / fixture JSON / migration；未读取或输出 credential、token、cookie、apiKey、apiSecret、passphrase；未触碰 NQ order / execution / risk / ledger / account / paper / live；未接 real provider、Agent / LangGraph；未开启 LIVE；未把 Runtime integration 写成 started；未把 DH 写成 integrated。
+
+## 2026-07-05 NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO 验证记录
+
+结论：**PASS / WORK_ORDER_ONLY / NO_TEST_IMPLEMENTATION / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE**。
+
+本轮只编写并同步 joint runtime dry-run test implementation work order。DH 侧仅修改允许的 `docs/current` 文档；NQ work order 实际产物位于 `E:\Project\nexus-quant-i1-dryrun\docs\current\NQ_DH_INTEGRATION1_JOINT_RUNTIME_DRYRUN_TEST_WO.md`。未改 DH Java 生产代码、测试代码、endpoint、contracts、OpenAPI、JSON Schema、golden_cases、fixture JSON 或 migration。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| DH `git status --short` | **PASS / DOCS-ONLY CHANGES PRESENT** | Dirty 限于允许的 `docs/current` 文档；新增 `docs/current/DH_NQ_INTEGRATION1_JOINT_RUNTIME_DRYRUN_TEST_WO.md`。 |
+| DH `git diff --check` | **PASS** | exit 0；仅 LF/CRLF 转换 warning，无 whitespace error。 |
+| DH `git diff --stat` | **REVIEWED** | diff 限于允许的 `docs/current` 文件；新建 WO 文件由 `git status --short` 标识。 |
+| DH forbidden-scope diff | **PASS / EMPTY** | `contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 无 diff。 |
+| DH boundary `rg` scan | **PASS / REVIEWED** | 命中分类为既有 docs 禁令、test guard、安全 denylist、endpoint token 或本轮 WO 边界说明；未发现本轮新增真实 HTTP、real provider、Agent/LangGraph runtime、LIVE 或交易实现。 |
+| NQ worktree branch | **PASS** | `nq-dh-i1-joint-runtime-dryrun-test-wo`。 |
+| NQ worktree docs/boundary validation | **PASS / REVIEWED** | Dirty 限于允许的 `docs/current` 文档；forbidden-scope diff 为空；boundary `rg` 命中为既有 docs/backend 业务词、历史/禁止语境或本轮 WO 边界说明。 |
+| NQ dev read-only guard | **PASS / SCOPED EMPTY** | `E:\Project\nexus-quant` 分支 `dev`；只读 status 显示既有非本轮 dirty 文档变更，但 NQ-DH / Integration-1 scoped unstaged 与 staged diff 均为空；本轮未修改 NQ dev。 |
+
+Not run：
+
+- 未运行 DH `mvn -ntp -pl dh-api -am test`。
+- 未运行 DH `mvn -ntp -pl dh-usecase -am test`。
+- 未运行 DH `mvn -ntp -Pquality validate`。
+- 未运行 NQ `mvn -ntp -f backend/pom.xml test`。
+- 未运行 NQ targeted Integration0 / Integration1 / DhDryRun* Maven commands。
+- 未运行 NQ `mvn -ntp -f backend/pom.xml -Pquality validate`。
+
+原因：本轮为 docs-only / work-order-only，未修改 Java 生产代码、测试代码、runtime wiring、contracts、fixture、golden_cases 或 migration；不声明 Maven full test、targeted tests 或 quality profile PASS。
+
+边界确认：未实现测试；未修改 Java 生产代码；未修改测试代码；未改 DH endpoint；未改 NQ client；未修改 NQ dev；未真实调用 DH；未真实 HTTP；未改 contracts / golden_cases / migration；未读取或输出 credential、token、cookie、apiKey、apiSecret、passphrase；未接 provider；未接 AI / LangGraph；未开启 LIVE；未触碰 order / execution / risk / ledger / account / paper / live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`。

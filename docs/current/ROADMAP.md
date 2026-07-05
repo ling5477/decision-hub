@@ -80,7 +80,13 @@ NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW:
 NQ-DH-I1-NQ-RUNTIME-CLIENT-WO:
               NQ runtime client work order                        [closed / accepted / work-order-only / no client implementation / no real http / no provider / no live]
 NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION:
-              NQ limited runtime client implementation             [next / controlled implementation / default disabled / dev-test only / no live]
+              NQ limited runtime client implementation             [implemented / targeted-test-pass / default disabled / fake-transport-only]
+NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-CLOSE-REVIEW:
+              NQ limited runtime client close review                [pass / closed / accepted / review-only / no real http / no provider / no live]
+NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO:
+              Joint runtime dry-run test work order                 [closed / accepted / work-order-only / no test implementation / no real dh call / no real http / no provider / no live]
+NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION:
+              Joint runtime dry-run test implementation             [next / test-only / fake-transport-only / no real http / no provider / no live]
 Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
 Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
@@ -96,7 +102,8 @@ DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
 - `NQ_DRYRUN` 只允许 dev/test profile + tenant/source pair allowlist，不进入 production allowlist；schema/contracts/golden_cases、fixture JSON、migration、NQ runtime client、真实 HTTP、real provider、AI / LangGraph 与 LIVE 仍未实现。
 - `NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY`；结论允许进入下一轮 `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO`，但只允许 work-order-only，不允许 NQ client implementation、真实 HTTP、real provider、schema/contracts/golden_cases 修改、Agent / LangGraph runtime 或 LIVE。
 - `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO` 已 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`；NQ work order 已冻结 default disabled、dev/test only、production disabled、kill switch、fail-closed、request/response、HMAC/header、audit/logging、error taxonomy、测试和回滚要求。当前仍不得把 Runtime integration 写成 started，不得把 DH 写成 integrated，不得开启 LIVE。
-- 当前下一步为 `NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / DEFAULT_DISABLED / DEV_TEST_ONLY / NO_LIVE`，必须由用户单独授权后才能改 NQ 代码。
+- `NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION` 已在 NQ integration worktree 完成 isolated limited client，实现状态为 `IMPLEMENTED / TARGETED_TEST_PASS / DEFAULT_DISABLED / FAKE_TRANSPORT_ONLY`；close review 已 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。
+- `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO` 已 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_TEST_IMPLEMENTATION / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`；当前只允许下一轮单独授权 `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION / NOT STARTED / TEST_ONLY / FAKE_TRANSPORT_ONLY / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`，不得真实联调。
 
 ## 1.2 阶段命名治理
 
