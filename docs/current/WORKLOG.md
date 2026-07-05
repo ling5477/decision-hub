@@ -5587,3 +5587,119 @@ DecisionAction no BUY / SELL / PLACE_ORDER / CANCEL_ORDER
 ### 推荐下一步
 
 进入 `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION`；该任务必须由用户单独授权，且只能做 test-only / fake-transport / no-real-http 联合验证，不得真实联调。
+
+---
+
+## NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX
+
+日期：2026-07-05
+
+### 本轮目标
+
+只修复 joint runtime dry-run test implementation close review 前的两个 blocker：`SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH` 与 `SCHEMA_VERSION_MISMATCH`。本轮不扩大范围，不真实调用 DH，不真实 HTTP，不接 provider，不修改 contracts / golden_cases / migration，不开启 LIVE。
+
+### 根因与修复
+
+- `SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH` 根因：NQ signing material 使用 wire value `NQ_DRYRUN`，DH `HmacNqDryRunAuthenticator` 先前对 source 做 lowercase normalization 后参与 HMAC material，导致 NQ-generated signature 与 DH verification material 不一致。本轮 DH HMAC 验签材料改为使用 wire-level canonical source value；source allowlist 改为验签后 exact match；tenant/source pair 校验使用 wire source；lowercase / alias source 不得通过；signature material mismatch 仍 `SIGNATURE_INVALID`。
+- `SCHEMA_VERSION_MISMATCH` 根因：DH endpoint 当前返回 `schemaVersion=1.0.0`，NQ response validator / tests 先前期望 `nq-dh-i1-dryrun-v1`。本轮以 DH endpoint 实际返回值为 source of truth；NQ response validator / joint tests 已对齐 `1.0.0`；invalid schemaVersion 仍 fail-closed。
+
+### 完成内容
+
+- 最小修改 DH `dh-security` HMAC dry-run authenticator 的 source material / allowlist / tenant-source pair 行为。
+- 更新 DH HMAC 与 MockMvc tests，覆盖 wire source、lowercase / alias denied、signature mismatch invalid、readonly envelope 与 no-side-effect边界。
+- 同步 `docs/current/DH_NQ_INTEGRATION.md`、`DH_NQ_INTEGRATION1_JOINT_RUNTIME_DRYRUN_TEST_WO.md`、`STATUS.md`、`WORK_ORDER.md`、`TESTING.md`、`WORKLOG.md`。
+
+### 验证
+
+- DH `git status --short`：PASS / ALLOWED DIRTY；dirty 限于允许的 DH HMAC source alignment、DH tests 与 `docs/current`。
+- DH `git diff --check`：PASS；仅 LF/CRLF warning，无 whitespace error。
+- DH forbidden-scope diff：PASS / EMPTY；excluding allowed `dh-security/src/main`，`dh-domain/src/main`、`dh-usecase/src/main`、`dh-api/src/main`、`dh-app/src/main`、`dh-infra/src/main`、contracts、golden_cases 与 migration 无 diff；显式 `dh-security/src/main` diff 仅 `HmacNqDryRunAuthenticator.java`。
+- DH boundary `rg`：PASS / REVIEWED；命中为既有测试占位符、禁令、denylist、endpoint token 或本轮测试断言。
+- DH `mvn -ntp -pl dh-api -am test`：BUILD SUCCESS；11/11 reactor SUCCESS；dh-api module 55 tests；`DecisionDryRunControllerWebMvcTest` 13 tests。
+- DH `mvn -ntp -pl dh-usecase -am test`：BUILD SUCCESS；9/9 reactor SUCCESS；dh-usecase module 179 tests。
+- DH `mvn -ntp -Pquality validate`：BUILD SUCCESS；19/19 reactor SUCCESS；0 Checkstyle violations；Spotless check passed。
+- NQ worktree Maven / boundary results 记录于 `E:\Project\nexus-quant-i1-dryrun\docs\current\TESTING.md`。
+- NQ dev read-only guard：PASS / SCOPED EMPTY WITH UNRELATED DIRTY；`E:\Project\nexus-quant` 分支 `dev`，最终只读 `git status --short` 显示非本轮 `README.md`、`docs/current/API.md`、`docs/current/README.md`、`docs/current/STATUS.md`、`docs/current/TESTING.md`、`docs/current/WORKLOG.md` 修改，以及 paper shadow comparison untracked 文件；`docs/current/*NQ_DH*` 与 `docs/current/*INTEGRATION1*` unstaged、staged scoped diff 均为空；本轮未修改 NQ dev。
+
+### 边界
+
+未修改 NQ dev；未真实调用 DH；未真实 HTTP；未接 provider；未读取或输出 credential、token、cookie、apiKey、apiSecret、passphrase；未修改 contracts / golden_cases / migration；未接 Agent / LangGraph；未开启 LIVE；未触碰 NQ order / execution / risk / ledger / account / paper / live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`。
+
+### Readiness
+
+- `ALLOW_JOINT_RUNTIME_DRYRUN_TEST_BLOCKER_FIX_CLOSE: YES`
+- `ALLOW_JOINT_RUNTIME_DRYRUN_TEST_CLOSE_REVIEW: YES / READY_FOR_CLOSE_REVIEW`
+- `ALLOW_REAL_DH_CALL_NOW: NO`
+- `ALLOW_REAL_HTTP_NOW: NO`
+- `ALLOW_REAL_PROVIDER: NO`
+- `ALLOW_SCHEMA_FORMALIZATION_NOW: NO`
+- `ALLOW_CONTRACTS_MODIFICATION_NOW: NO`
+- `ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO`
+- `ALLOW_DH_PRODUCTION_CODE_CHANGE_NOW: YES / LIMITED_TO_HMAC_SOURCE_WIRE_VALUE_ALIGNMENT_ONLY`
+- `ALLOW_NQ_PRODUCTION_CODE_CHANGE_NOW: YES / LIMITED_TO_ISOLATED_CLIENT_SCHEMA_VERSION_ALIGNMENT_ONLY`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 推荐下一步
+
+进入 `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW`；若 close review 发现新阻断，再进入 `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX-2`。
+
+---
+
+## NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION
+
+日期：2026-07-05
+
+### 本轮目标
+
+实现 DH / NQ joint runtime dry-run test-only 验证中的 DH 侧 MockMvc、HMAC、fail-closed 与 docs/current 同步。本轮不改 DH production code，不真实调用 DH 服务，不真实 HTTP，不接 real provider，不开启 LIVE。
+
+### 完成内容
+
+- 扩展 `dh-api/src/test/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunControllerWebMvcTest.java`。
+- 扩展 `dh-security/src/test/java/com/guidinglight/decisionhub/security/nq/HmacNqDryRunAuthenticatorTest.java`。
+- MockMvc 覆盖 signed dry-run request、readonly response envelope、`auditRef / replayRef / traceSummary`、canonical error taxonomy、payload/rate/memory/provider/audit fail-closed。
+- HMAC 测试覆盖 UTC `Z` timestamp、±300s window、nonce replay、tenant/source allowlist、payload cap、missing/invalid signature，并固化 NQ uppercase source signature material 与 DH lowercase normalization 的 blocker。
+- 同步 `docs/current/DH_NQ_INTEGRATION1_JOINT_RUNTIME_DRYRUN_TEST_WO.md`、`DH_NQ_INTEGRATION.md`、`STATUS.md`、`ROADMAP.md`、`WORK_ORDER.md`、`TESTING.md`、`WORKLOG.md`。
+
+### 阻断项
+
+- `SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH`：DH current HMAC material 对 source 做 lowercase normalization；NQ signing 使用 uppercase `NQ_DRYRUN`。本轮只用测试证明 fail-closed，不改生产代码。
+- `SCHEMA_VERSION_MISMATCH`：DH response schemaVersion 当前为 `1.0.0`，NQ expected schema 为 `nq-dh-i1-dryrun-v1`。NQ 正确 fail-closed，不能进入 close review。
+
+### 验证
+
+- DH `git status --short`：PASS / ALLOWED DIRTY；dirty 限于允许的 tests 与 `docs/current`。
+- DH `git diff --check`：PASS；仅 LF/CRLF warning，无 whitespace error。
+- DH forbidden-scope diff：PASS / EMPTY；未改 DH `src/main`、contracts、golden_cases 或 migration。
+- DH boundary `rg`：PASS / REVIEWED；PowerShell 显式枚举 `dh-*` 后扫描，命中为既有测试占位符、禁令、denylist、endpoint token 或本轮测试断言。
+- DH `mvn -ntp -pl dh-api -am test`：BUILD SUCCESS；11/11 reactor SUCCESS；dh-api module 55 tests。
+- DH `mvn -ntp -pl dh-usecase -am test`：BUILD SUCCESS；9/9 reactor SUCCESS；dh-usecase module 179 tests。
+- DH `mvn -ntp -Pquality validate`：BUILD SUCCESS；19/19 reactor SUCCESS；0 Checkstyle violations；Spotless check passed。
+- NQ worktree Maven / boundary results 记录于 `E:\Project\nexus-quant-i1-dryrun\docs\current\TESTING.md`。
+- NQ dev read-only guard：PASS / EMPTY；`E:\Project\nexus-quant` 分支 `dev`，status 与 scoped diff 均为空。
+
+### 边界
+
+未修改 DH production code；未修改 NQ production code；未修改 NQ dev；未改 contracts / OpenAPI / JSON Schema / golden_cases / migration；未真实调用 DH；未真实 HTTP；未访问 localhost 真实服务或外网；未接 real provider；未读取或输出 credential、token、cookie、apiKey、apiSecret、passphrase；未接 Agent / LangGraph；未开启 LIVE；未触碰 NQ order / execution / risk / ledger / account / paper / live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`。
+
+### Readiness
+
+- `ALLOW_JOINT_RUNTIME_DRYRUN_TEST_IMPLEMENTATION_CLOSE: NO`
+- `ALLOW_JOINT_RUNTIME_DRYRUN_TEST_CLOSE_REVIEW: NO`
+- `ALLOW_REAL_DH_CALL_NOW: NO`
+- `ALLOW_REAL_HTTP_NOW: NO`
+- `ALLOW_REAL_PROVIDER: NO`
+- `ALLOW_SCHEMA_FORMALIZATION_NOW: NO`
+- `ALLOW_CONTRACTS_MODIFICATION_NOW: NO`
+- `ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO`
+- `ALLOW_DH_PRODUCTION_CODE_CHANGE_NOW: NO`
+- `ALLOW_NQ_PRODUCTION_CODE_CHANGE_NOW: NO`
+- `ALLOW_AGENT_PHASE: NO`
+- `ALLOW_LANGGRAPH_RUNTIME: NO`
+- `ALLOW_LIVE: NO`
+
+### 推荐下一步
+
+`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX`：先对齐 signature material source normalization 与 response schemaVersion；仍保持 test-only / no-real-http / no-provider / no-live 边界。

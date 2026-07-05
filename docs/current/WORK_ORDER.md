@@ -1,12 +1,82 @@
 # Decision Hub 当前工单
 
-> 当前阶段: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_TEST_IMPLEMENTATION / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> 当前阶段: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX / IMPLEMENTED / FULL_VALIDATION_PASS / BLOCKER_FIX_APPLIED / READY_FOR_CLOSE_REVIEW / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation; I1-IMP1 DH dry-run test-support entry; I1 runtime API contract review; I1 DH runtime API work order; I1 DH limited runtime endpoint implementation; I1 DH limited runtime endpoint close review; I1 NQ runtime client work order
-> 下一阶段: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION / NOT STARTED / TEST_ONLY / FAKE_TRANSPORT_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> 下一阶段: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW / READY_FOR_CLOSE_REVIEW / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 
 ## 1. 当前目标
 
-`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成计划与 work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线，mock close review 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 已关闭为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`；mock/test-support baseline PR 已合并到 NQ dev；`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 已完成 review-only 收口；`NQ-DH-I1-DH-RUNTIME-API-WO` 已完成 work-order-only 收口；`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已完成 DH-only limited inbound endpoint；`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY`。`NQ-DH-I1-NQ-RUNTIME-CLIENT-WO` 已在 NQ integration worktree 关闭为 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`，并由 NQ limited runtime client implementation / close review 消费；NQ limited client 当前为 `IMPLEMENTED / TARGETED_TEST_PASS / DEFAULT_DISABLED / FAKE_TRANSPORT_ONLY`，close review 为 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。本轮 `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO` 已关闭为 work-order-only，只冻结下一轮 joint test 的 test-only / fake-transport / no-real-http 边界。下一步只允许用户单独授权 `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION / NOT STARTED / TEST_ONLY / FAKE_TRANSPORT_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`；当前仍不允许本轮实现测试、runtime integration、真实 DH call、真实 HTTP、real provider、AI / LangGraph、LIVE、schema/contracts/golden_cases/OpenAPI/fixture JSON/migration 修改。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成计划与 work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线，mock close review 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 已关闭为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`；mock/test-support baseline PR 已合并到 NQ dev；`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 已完成 review-only 收口；`NQ-DH-I1-DH-RUNTIME-API-WO` 已完成 work-order-only 收口；`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已完成 DH-only limited inbound endpoint；`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY`。`NQ-DH-I1-NQ-RUNTIME-CLIENT-WO` 已在 NQ integration worktree 关闭为 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`，并由 NQ limited runtime client implementation / close review 消费；NQ limited client 当前为 `IMPLEMENTED / TARGETED_TEST_PASS / DEFAULT_DISABLED / FAKE_TRANSPORT_ONLY`，close review 为 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO` 已关闭为 work-order-only；`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION` 已新增 test-only / fake-transport / MockMvc / in-memory 测试证据；`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX` 已最小修复两个 close review blocker 并完成完整验证，允许进入 close review。当前仍不允许 runtime integration、真实 DH call、真实 HTTP、real provider、AI / LangGraph、LIVE、schema/contracts/golden_cases/OpenAPI/fixture JSON/migration 修改。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+
+## 0.0N NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX（IMPLEMENTED / FULL_VALIDATION_PASS / READY_FOR_CLOSE_REVIEW）
+
+本轮只修复 source normalization 与 schemaVersion 两个 blocker。DH 侧 HMAC 验签材料已改为使用 wire-level canonical source value；source allowlist 改为验签后 exact match；tenant/source pair 校验使用 wire source；lowercase / alias source 不得通过；signature material mismatch 仍 `SIGNATURE_INVALID`。DH endpoint 当前 response `schemaVersion=1.0.0` 仍为 runtime test source of truth；NQ response validator / tests 已对齐该值；invalid schemaVersion 仍 fail-closed。
+
+结论：
+
+```text
+BLOCKER_SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH: FIXED
+BLOCKER_SCHEMA_VERSION_MISMATCH: FIXED
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_BLOCKER_FIX_CLOSE: YES
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_CLOSE_REVIEW: YES / READY_FOR_CLOSE_REVIEW
+ALLOW_REAL_DH_CALL_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_DH_PRODUCTION_CODE_CHANGE_NOW: YES / LIMITED_TO_HMAC_SOURCE_WIRE_VALUE_ALIGNMENT_ONLY
+ALLOW_NQ_PRODUCTION_CODE_CHANGE_NOW: YES / LIMITED_TO_ISOLATED_CLIENT_SCHEMA_VERSION_ALIGNMENT_ONLY
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+## 0.0M NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION（IMPLEMENTED / BLOCKER_FIX_APPLIED_BY_0.0N）
+
+本轮产物：
+
+```text
+dh-api/src/test/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunControllerWebMvcTest.java
+dh-security/src/test/java/com/guidinglight/decisionhub/security/nq/HmacNqDryRunAuthenticatorTest.java
+E:\Project\nexus-quant-i1-dryrun\backend\nq-app\src\test\java\com\guidinglight\nexusquant\integration\dh\DhDryRunJointRuntimeDryRunTest.java
+E:\Project\nexus-quant-i1-dryrun\backend\nq-app\src\test\java\com\guidinglight\nexusquant\integration\dh\DhDryRunResponseHandlingTest.java
+E:\Project\nexus-quant-i1-dryrun\backend\nq-app\src\test\java\com\guidinglight\nexusquant\integration\dh\DhDryRunTestSupport.java
+```
+
+结论：
+
+```text
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_BLOCKER_FIX_CLOSE: YES
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_CLOSE_REVIEW: YES / READY_FOR_CLOSE_REVIEW
+BLOCKER_SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH: FIXED_BY_0.0N
+BLOCKER_SCHEMA_VERSION_MISMATCH: FIXED_BY_0.0N
+ALLOW_REAL_DH_CALL_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_DH_PRODUCTION_CODE_CHANGE_NOW: NO
+ALLOW_NQ_PRODUCTION_CODE_CHANGE_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+关键边界：
+
+- 本轮只实现测试与 docs/current 同步；未改 DH / NQ 生产代码。
+- DH 侧仅扩展 MockMvc 与 HMAC authenticator 回归；NQ 侧仅扩展 fake transport / response validation / test support 类型 seam。
+- 未真实调用 DH，未真实 HTTP，未访问 localhost 真实服务，未接 provider，未接 AI / LangGraph，未开启 LIVE。
+- 未修改 contracts / OpenAPI / JSON Schema / golden_cases / migration。
+- 未触碰 order / execution / risk / ledger / account / paper / live。
+
+下一步唯一推荐：
+
+```text
+NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW / READY_FOR_CLOSE_REVIEW / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+```
 
 ## 0.0L NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO（CLOSED / ACCEPTED / WORK_ORDER_ONLY）
 
@@ -41,7 +111,7 @@ ALLOW_LIVE: NO
 - 下一轮只允许验证 NQ limited dry-run client 经 fake / in-memory / MockMvc / test-only transport 调用 DH `POST /api/ai/decision-dry-runs` 的 readonly envelope，并由 NQ 做 response validation 与 record-only result。
 - 下一轮必须覆盖成功矩阵、DH side fail-closed、NQ side fail-closed、no-side-effect、audit / trace / record 与 error taxonomy；禁止 real outbound HTTP、真实 DH 地址、localhost 真实服务、外网、provider、Agent / LangGraph、LIVE 和交易副作用。
 
-下一步唯一推荐：
+该 WO 已被 implementation 消费；当时下一步为：
 
 ```text
 NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION / NOT STARTED / TEST_ONLY / FAKE_TRANSPORT_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE

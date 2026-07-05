@@ -5,6 +5,7 @@
 > 日期：2026-07-05
 > 仓库视角：Decision Hub dev
 > 状态：`CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_TEST_IMPLEMENTATION / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`
+> Implementation follow-up（2026-07-05）：`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION` 已按 test-only / fake-transport / MockMvc / in-memory 边界落地目标测试证据；`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX` 已最小修复 `SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH` 与 `SCHEMA_VERSION_MISMATCH` 并完成完整验证，允许进入 close review；仍不得启动 real DH call、real HTTP、provider、schema formalization、contracts/golden_cases 修改或 LIVE。
 
 ## 1. 目标
 
@@ -313,3 +314,67 @@ NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION
 ```
 
 该下一轮仍必须是 `test-only / fake-transport / no-real-http` 联合验证，不得真实联调。
+
+## 14. Implementation follow-up（2026-07-05）
+
+`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION` 已执行，但不允许关闭：
+
+```text
+Status: IMPLEMENTED / FULL_VALIDATION_PASS / TEST_ONLY / FAKE_TRANSPORT_ONLY / BLOCKER_FIX_APPLIED / READY_FOR_CLOSE_REVIEW
+DH changed test scope: dh-api/src/test/**, dh-security/src/test/**
+NQ changed test scope: E:\Project\nexus-quant-i1-dryrun\backend\nq-app\src\test\java\com\guidinglight\nexusquant\integration\dh\**
+Production code change: YES / LIMITED_TO_HMAC_SOURCE_WIRE_VALUE_ALIGNMENT_ONLY
+Real DH call: NO
+Real HTTP: NO
+Real provider: NO
+Runtime integration: NOT STARTED
+DH integrated: NO
+LIVE: DISABLED
+```
+
+已覆盖的测试证据：
+
+- DH MockMvc / security gates：valid signed request、readonly envelope、`auditRef`、`replayRef`、`traceSummary`、schemaVersion assertion、missing / invalid signature、epoch seconds / milliseconds、non-UTC-Z、window、replay nonce、source denied、tenant mismatch、`dryRun=false`、forbidden execution material、payload too large、rate limit、memory cap、provider disabled / timeout / budget、audit failure fail-closed。
+- DH HMAC compatibility regression：uppercase-source NQ-style signature material 会被当前 DH verifier 拒绝，暴露 source normalization mismatch。
+- NQ request / response validation：canonical `X-NQ-DH-*` headers、无 legacy `X-DH-NQ-*`、UTC `Z` timestamp、unique nonce、`dryRun=true`、`source=NQ_DRYRUN`、`forbiddenCapabilities`、`OBSERVE` / `NO_TRADE` record-only，`LONG_BIAS` / `SHORT_BIAS` bias-only，forbidden trading/executable response fail-closed。
+- Audit / record：NQ record 保留 requestId、traceId、tenantId、decisionId、auditRef；fail-closed reason 可追踪；record 不暴露 HMAC secret、token、cookie、apiKey、apiSecret、passphrase、raw credential 或 executable order payload。
+
+Close review 阻断项修复：
+
+```text
+SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH: FIXED
+  DH HmacNqDryRunAuthenticator 验签材料已改为使用 wire-level canonical source value；
+  source allowlist 改为验签后 exact match；
+  tenant/source pair 校验使用 wire source；
+  lowercase / alias source 不得通过；
+  signature material mismatch 仍 SIGNATURE_INVALID。
+
+SCHEMA_VERSION_MISMATCH: FIXED
+  DH endpoint 当前返回 schemaVersion = 1.0.0；
+  NQ response validator / joint tests 已按 DH endpoint 实际返回值对齐；
+  invalid schemaVersion 仍 fail-closed。
+```
+
+Readiness:
+
+```text
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_BLOCKER_FIX_CLOSE: YES
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_CLOSE_REVIEW: YES / READY_FOR_CLOSE_REVIEW
+ALLOW_REAL_DH_CALL_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_DH_PRODUCTION_CODE_CHANGE_NOW: YES / LIMITED_TO_HMAC_SOURCE_WIRE_VALUE_ALIGNMENT_ONLY
+ALLOW_NQ_PRODUCTION_CODE_CHANGE_NOW: YES / LIMITED_TO_ISOLATED_CLIENT_SCHEMA_VERSION_ALIGNMENT_ONLY
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+Next concrete action:
+
+```text
+NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW（待完整 validation 后进入）
+```

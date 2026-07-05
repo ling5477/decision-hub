@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_TEST_IMPLEMENTATION / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
-> Next stage:    NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION / NOT STARTED / TEST_ONLY / FAKE_TRANSPORT_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> Current stage: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX / IMPLEMENTED / FULL_VALIDATION_PASS / BLOCKER_FIX_APPLIED / READY_FOR_CLOSE_REVIEW / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> Next stage:    NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW / READY_FOR_CLOSE_REVIEW / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,14 +34,16 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO / CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_TEST_IMPLEMENTATION / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Current main line: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX / IMPLEMENTED / FULL_VALIDATION_PASS / BLOCKER_FIX_APPLIED / READY_FOR_CLOSE_REVIEW / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
 NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 NQ limited runtime client implementation: IMPLEMENTED / TARGETED_TEST_PASS / DEFAULT_DISABLED / FAKE_TRANSPORT_ONLY.
 NQ limited runtime client close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Joint runtime dry-run test work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_TEST_IMPLEMENTATION / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION / NOT STARTED / TEST_ONLY / FAKE_TRANSPORT_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Joint runtime dry-run test implementation: IMPLEMENTED / FULL_VALIDATION_PASS / TEST_ONLY / FAKE_TRANSPORT_ONLY / BLOCKER_FIX_APPLIED / READY_FOR_CLOSE_REVIEW.
+Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH FIXED; SCHEMA_VERSION_MISMATCH FIXED.
+Next concrete action: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW / READY_FOR_CLOSE_REVIEW / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -52,6 +54,78 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.24 NQ-DH I1 Joint Runtime Dry-run Test Blocker Fix（2026-07-05，IMPLEMENTED / FULL_VALIDATION_PASS / READY_FOR_CLOSE_REVIEW）
+
+```text
+Task: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX
+Task type: BLOCKER_FIX + CROSS_REPO_CONTRACT_ALIGNMENT + TEST_ONLY_OR_MINIMAL_RUNTIME_ALIGNMENT + NO_REAL_DH_CALL + NO_REAL_HTTP + NO_REAL_PROVIDER + NO_LIVE
+Blocker 1: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH / FIXED
+Blocker 2: SCHEMA_VERSION_MISMATCH / FIXED
+DH HMAC material source: wire-level canonical value
+DH source allowlist: exact match after signature verification
+DH tenant/source pair: wire source
+lowercase / alias source: denied
+signature material mismatch: SIGNATURE_INVALID
+DH response schemaVersion: 1.0.0
+Runtime integration: NOT STARTED
+DH integrated: NO
+Agent / LangGraph runtime: NO
+LIVE: DISABLED
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_BLOCKER_FIX_CLOSE: YES
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_CLOSE_REVIEW: YES / READY_FOR_CLOSE_REVIEW
+ALLOW_REAL_DH_CALL_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_DH_PRODUCTION_CODE_CHANGE_NOW: YES / LIMITED_TO_HMAC_SOURCE_WIRE_VALUE_ALIGNMENT_ONLY
+ALLOW_NQ_PRODUCTION_CODE_CHANGE_NOW: YES / LIMITED_TO_ISOLATED_CLIENT_SCHEMA_VERSION_ALIGNMENT_ONLY
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+本轮最小修改 DH `HmacNqDryRunAuthenticator` 与对应回归测试，使 HMAC signature material 使用 request wire-level source value；allowlist 与 tenant/source pair 校验在验签后使用 exact source。NQ worktree 对齐 `DEFAULT_SCHEMA_VERSION=1.0.0`，以 DH endpoint 实际返回值为 runtime test source of truth。DH `dh-api`、`dh-usecase` 与 `-Pquality validate` 均通过；NQ full backend、Integration0、Integration1、dry-run targeted tests 均通过，NQ `-Pquality validate` 为 profile missing / not effective quality gate。invalid signature、source denied、invalid schemaVersion、BUY / SELL / PLACE_ORDER / CANCEL_ORDER 均保持 fail-closed；contracts、golden_cases、migration 不修改。
+
+## 1.0.23 NQ-DH I1 Joint Runtime Dry-run Test Implementation（2026-07-05，IMPLEMENTED / BLOCKER_FIX_APPLIED_BY_1.0.24）
+
+```text
+Task: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION
+Task type: JOINT_RUNTIME_DRYRUN_TEST_IMPLEMENTATION + TEST_ONLY + CROSS_REPO_FAKE_TRANSPORT_VALIDATION + NO_PRODUCTION_CODE_CHANGE + NO_REAL_DH_CALL + NO_REAL_HTTP + NO_REAL_PROVIDER + NO_LIVE
+NQ test scope: E:\Project\nexus-quant-i1-dryrun\backend\nq-app\src\test\java\com\guidinglight\nexusquant\integration\dh
+DH test scope: dh-api/src/test/**, dh-security/src/test/**
+Implementation state: IMPLEMENTED / TARGETED_TEST_PASS / TEST_ONLY / FAKE_TRANSPORT_ONLY
+Close review state: READY_FOR_CLOSE_REVIEW_AFTER_BLOCKER_FIX
+Blocker 1: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH / FIXED_BY_1.0.24
+Blocker 2: SCHEMA_VERSION_MISMATCH / FIXED_BY_1.0.24
+Real DH call: NO
+Real HTTP: NO
+Real provider: NO
+Runtime integration: NOT STARTED
+DH integrated: NO
+Agent / LangGraph runtime: NO
+LIVE: DISABLED
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_BLOCKER_FIX_CLOSE: YES
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_CLOSE_REVIEW: YES / READY_FOR_CLOSE_REVIEW
+ALLOW_REAL_DH_CALL_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_DH_PRODUCTION_CODE_CHANGE_NOW: YES / LIMITED_TO_HMAC_SOURCE_WIRE_VALUE_ALIGNMENT_ONLY
+ALLOW_NQ_PRODUCTION_CODE_CHANGE_NOW: YES / LIMITED_TO_ISOLATED_CLIENT_SCHEMA_VERSION_ALIGNMENT_ONLY
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+Next concrete action: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW / READY_FOR_CLOSE_REVIEW
+```
+
+- DH side 新增/扩展 MockMvc 与 HMAC authenticator 回归：valid signed request、readonly envelope、`auditRef`、`replayRef`、`traceSummary`、canonical fail-closed errors、memory cap、provider disabled / timeout / budget、audit failure fail-closed，以及 uppercase-source NQ-style signature 被当前 DH verifier 拒绝的回归。
+- NQ side 新增 fake transport / DH-style validator evidence 与 response policy 扩展：NQ signed dry-run request 生成、canonical header、UTC `Z` timestamp、nonce、`dryRun=true`、`source=NQ_DRYRUN`、forbiddenCapabilities、response `OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS` record-only / bias-only、forbidden trading/executable response fail-closed、error taxonomy fail-closed、record 脱敏。
+- 该条记录 implementation 当轮发现的 test-close blocker；当前 1.0.24 已将 DH HMAC source material 对齐为 wire-level value，并由 NQ worktree 将 response schemaVersion 对齐 DH endpoint 实际值 `1.0.0`。完整 validation 已通过，允许进入 close review；本轮未执行 close review。
 
 ## 1.0.22 NQ-DH I1 Joint Runtime Dry-run Test WO（2026-07-05，CLOSED / ACCEPTED / WORK_ORDER_ONLY）
 

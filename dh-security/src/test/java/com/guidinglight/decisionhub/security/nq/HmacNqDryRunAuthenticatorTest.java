@@ -113,6 +113,131 @@ class HmacNqDryRunAuthenticatorTest {
     assertEquals(413, result.status());
   }
 
+  @Test
+  void nqUppercaseSourceSignatureMaterialMatchesWireValueAndPasses() {
+    final NqDryRunAuthRequest unsigned =
+        new NqDryRunAuthRequest(
+            "POST",
+            "/api/ai/decision-dry-runs",
+            "NQ_DRYRUN",
+            "NQ_DRYRUN",
+            "tenant-a",
+            "tenant-a",
+            NOW.toString(),
+            "nonce-nq-uppercase-source",
+            "",
+            "req-1",
+            "trace-1",
+            "1.0.0",
+            BODY,
+            BODY.length(),
+            NOW);
+    final String nqStyleMaterial =
+        String.join(
+            "\n",
+            "POST",
+            "/api/ai/decision-dry-runs",
+            "NQ_DRYRUN",
+            "tenant-a",
+            "req-1",
+            "trace-1",
+            NOW.toString(),
+            "nonce-nq-uppercase-source",
+            "1.0.0",
+            sha256Hex(BODY));
+    final NqDryRunAuthRequest nqSigned =
+        new NqDryRunAuthRequest(
+            unsigned.method(),
+            unsigned.path(),
+            unsigned.sourceHeader(),
+            unsigned.sourceSystem(),
+            unsigned.authenticatedTenantId(),
+            unsigned.tenantId(),
+            unsigned.timestampHeader(),
+            unsigned.nonce(),
+            HmacNqDryRunAuthenticator.hmacSha256Hex(SECRET, nqStyleMaterial),
+            unsigned.requestId(),
+            unsigned.traceId(),
+            unsigned.schemaVersion(),
+            unsigned.rawBody(),
+            unsigned.contentLength(),
+            unsigned.now());
+
+    final NqDryRunAuthResult result = authenticator().authenticate(nqSigned);
+
+    assertEquals(nqStyleMaterial, HmacNqDryRunAuthenticator.signatureMaterial(unsigned));
+    assertTrue(result.allowed());
+  }
+
+  @Test
+  void lowercaseSourceAndAliasAreDeniedEvenWhenSignedWithWireValue() {
+    final NqDryRunAuthResult lowercase =
+        authenticator().authenticate(signedWithSource("nq_dryrun", "tenant-a", "nonce-lowercase-source"));
+    final NqDryRunAuthResult alias =
+        authenticator().authenticate(signedWithSource("NQ-DRYRUN", "tenant-a", "nonce-alias-source"));
+
+    assertEquals("SOURCE_DENIED", lowercase.errorCode());
+    assertEquals(403, lowercase.status());
+    assertEquals("SOURCE_DENIED", alias.errorCode());
+    assertEquals(403, alias.status());
+  }
+
+  @Test
+  void signatureMaterialMismatchStillReturnsSignatureInvalid() {
+    final NqDryRunAuthRequest unsigned =
+        new NqDryRunAuthRequest(
+            "POST",
+            "/api/ai/decision-dry-runs",
+            "NQ_DRYRUN",
+            "NQ_DRYRUN",
+            "tenant-a",
+            "tenant-a",
+            NOW.toString(),
+            "nonce-mismatched-material",
+            "",
+            "req-1",
+            "trace-1",
+            "1.0.0",
+            BODY,
+            BODY.length(),
+            NOW);
+    final String mismatchedMaterial =
+        String.join(
+            "\n",
+            "POST",
+            "/api/ai/decision-dry-runs",
+            "nq_dryrun",
+            "tenant-a",
+            "req-1",
+            "trace-1",
+            NOW.toString(),
+            "nonce-mismatched-material",
+            "1.0.0",
+            sha256Hex(BODY));
+    final NqDryRunAuthRequest signedWithMismatchedMaterial =
+        new NqDryRunAuthRequest(
+            unsigned.method(),
+            unsigned.path(),
+            unsigned.sourceHeader(),
+            unsigned.sourceSystem(),
+            unsigned.authenticatedTenantId(),
+            unsigned.tenantId(),
+            unsigned.timestampHeader(),
+            unsigned.nonce(),
+            HmacNqDryRunAuthenticator.hmacSha256Hex(SECRET, mismatchedMaterial),
+            unsigned.requestId(),
+            unsigned.traceId(),
+            unsigned.schemaVersion(),
+            unsigned.rawBody(),
+            unsigned.contentLength(),
+            unsigned.now());
+
+    final NqDryRunAuthResult result = authenticator().authenticate(signedWithMismatchedMaterial);
+
+    assertEquals("SIGNATURE_INVALID", result.errorCode());
+    assertEquals(401, result.status());
+  }
+
   private static HmacNqDryRunAuthenticator authenticator() {
     return new HmacNqDryRunAuthenticator(
         Set.of("NQ_DRYRUN"),
@@ -191,5 +316,20 @@ class HmacNqDryRunAuthenticatorTest {
 
   private static Clock fixedClock() {
     return Clock.fixed(NOW, ZoneOffset.UTC);
+  }
+
+  private static String sha256Hex(final String value) {
+    try {
+      final java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+      final byte[] hash =
+          digest.digest(value.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      final StringBuilder sb = new StringBuilder(hash.length * 2);
+      for (final byte b : hash) {
+        sb.append(String.format("%02x", b));
+      }
+      return sb.toString();
+    } catch (final java.security.NoSuchAlgorithmException error) {
+      throw new IllegalStateException("SHA-256 not available", error);
+    }
   }
 }

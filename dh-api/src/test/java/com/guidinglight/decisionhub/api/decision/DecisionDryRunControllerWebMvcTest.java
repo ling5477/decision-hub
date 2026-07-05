@@ -18,6 +18,8 @@ import com.guidinglight.decisionhub.security.nq.InMemoryRateLimiter;
 import com.guidinglight.decisionhub.security.nq.NqDryRunAuthRequest;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditRepository;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOutputAssembler;
+import com.guidinglight.decisionhub.domain.decision.DecisionOutput;
+import com.guidinglight.decisionhub.domain.decision.ProviderSignalStatus;
 import com.guidinglight.decisionhub.usecase.decision.DecisionPersistenceRecords;
 import com.guidinglight.decisionhub.usecase.decision.DecisionProviderGuard;
 import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionContextBuilder;
@@ -28,6 +30,7 @@ import com.guidinglight.decisionhub.usecase.decision.MockDecisionSignalProvider;
 import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionProviderGuard;
 import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionProviderLatencyRecorder;
 import com.guidinglight.decisionhub.usecase.decision.InMemoryDecisionAuditRepository;
+import com.guidinglight.decisionhub.usecase.decision.DecisionOrchestrator;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunRuntimeProperties;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DefaultDecisionDryRunService;
 import java.nio.charset.StandardCharsets;
@@ -101,6 +104,8 @@ class DecisionDryRunControllerWebMvcTest {
             .andExpect(jsonPath("$.dryRun").value(true))
             .andExpect(jsonPath("$.auditRef").exists())
             .andExpect(jsonPath("$.replayRef").exists())
+            .andExpect(jsonPath("$.traceSummary").isArray())
+            .andExpect(jsonPath("$.schemaVersion").value("1.0.0"))
             .andExpect(header().exists("X-Trace-Id"))
             .andReturn();
 
@@ -239,6 +244,29 @@ class DecisionDryRunControllerWebMvcTest {
   }
 
   @Test
+  void memoryCapExceededReturnsMemoryLimitExceeded() throws Exception {
+    mockMvc = newMockMvc(true, new InMemoryDecisionAuditRepository(), 4096, 1000, 64);
+    final Map<String, Object> envelope = legalEnvelope("req-memory-cap");
+    final Map<String, Object> context = new LinkedHashMap<>(context(envelope));
+    context.put("padding", "x".repeat(512));
+    envelope.put("decisionContext", context);
+    final String body = objectMapper.writeValueAsString(envelope);
+
+    mockMvc
+        .perform(signedPost(envelope, body))
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.errorCode").value("MEMORY_LIMIT_EXCEEDED"))
+        .andExpect(jsonPath("$.auditRef").exists());
+  }
+
+  @Test
+  void providerFailuresReturnCanonicalFailClosedErrors() throws Exception {
+    assertProviderFailure(ProviderSignalStatus.DISABLED, 503, "PROVIDER_DISABLED", "req-provider-disabled");
+    assertProviderFailure(ProviderSignalStatus.TIMEOUT, 504, "PROVIDER_TIMEOUT", "req-provider-timeout");
+    assertProviderFailure(ProviderSignalStatus.BUDGET_EXCEEDED, 429, "BUDGET_EXCEEDED", "req-provider-budget");
+  }
+
+  @Test
   void auditWriteFailureFailsClosed() throws Exception {
     mockMvc = newMockMvc(true, new FailingAuditRepository(), 2048, 1000);
     final Map<String, Object> envelope = legalEnvelope("req-audit-fail");
@@ -255,21 +283,55 @@ class DecisionDryRunControllerWebMvcTest {
       final DecisionAuditRepository repository,
       final long maxPayloadBytes,
       final int maxRequests) {
+    return newMockMvc(enabled, repository, maxPayloadBytes, maxRequests, 32768);
+  }
+
+  private MockMvc newMockMvc(
+      final boolean enabled,
+      final DecisionAuditRepository repository,
+      final long maxPayloadBytes,
+      final int maxRequests,
+      final int memoryCapBytes) {
     final DecisionDryRunRuntimeProperties properties =
         new DecisionDryRunRuntimeProperties(
-            enabled, false, false, true, Set.of("NQ_DRYRUN"), Set.of("tenant-a:NQ_DRYRUN"), 32768);
-    final DecisionProviderGuard providerGuard = new DefaultDecisionProviderGuard();
-    final DefaultDecisionOrchestrator orchestrator =
-        new DefaultDecisionOrchestrator(
-            new DefaultDecisionContextBuilder(),
-            new DefaultDecisionPolicyChecker(),
-            new MockDecisionSignalProvider(),
-            new DefaultDecisionRiskReviewer(),
-            new DecisionOutputAssembler(),
-            repository,
-            providerGuard,
-            new DefaultDecisionProviderLatencyRecorder(),
-            CLOCK);
+            enabled,
+            false,
+            false,
+            true,
+            Set.of("NQ_DRYRUN"),
+            Set.of("tenant-a:NQ_DRYRUN"),
+            memoryCapBytes);
+    return newMockMvc(enabled, repository, maxPayloadBytes, maxRequests, properties, defaultOrchestrator(repository));
+  }
+
+  private MockMvc newMockMvc(
+      final boolean enabled,
+      final DecisionAuditRepository repository,
+      final long maxPayloadBytes,
+      final int maxRequests,
+      final int memoryCapBytes,
+      final DecisionOrchestrator orchestrator) {
+    final DecisionDryRunRuntimeProperties properties =
+        new DecisionDryRunRuntimeProperties(
+            enabled,
+            false,
+            false,
+            true,
+            Set.of("NQ_DRYRUN"),
+            Set.of("tenant-a:NQ_DRYRUN"),
+            memoryCapBytes);
+    return newMockMvc(enabled, repository, maxPayloadBytes, maxRequests, properties, orchestrator);
+  }
+
+  private MockMvc newMockMvc(
+      final boolean enabled,
+      final DecisionAuditRepository repository,
+      final long maxPayloadBytes,
+      final int maxRequests,
+      final DecisionDryRunRuntimeProperties properties,
+      final DecisionOrchestrator orchestrator) {
+    // enabled 参数保留在签名中，便于测试调用点直接表达 feature gate 场景；实际 gate 值已在 properties 中冻结。
+    assert enabled == properties.enabled();
     final DecisionDryRunController controller =
         new DecisionDryRunController(
             new DefaultDecisionDryRunService(orchestrator, repository, properties, CLOCK),
@@ -295,6 +357,20 @@ class DecisionDryRunControllerWebMvcTest {
                         ? new AuthContext("user-a", "tenant-a", Set.of("DH_API"))
                         : null))
         .build();
+  }
+
+  private static DecisionOrchestrator defaultOrchestrator(final DecisionAuditRepository repository) {
+    final DecisionProviderGuard providerGuard = new DefaultDecisionProviderGuard();
+    return new DefaultDecisionOrchestrator(
+            new DefaultDecisionContextBuilder(),
+            new DefaultDecisionPolicyChecker(),
+            new MockDecisionSignalProvider(),
+            new DefaultDecisionRiskReviewer(),
+            new DecisionOutputAssembler(),
+            repository,
+            providerGuard,
+            new DefaultDecisionProviderLatencyRecorder(),
+            CLOCK);
   }
 
   private static Map<String, Object> legalEnvelope(final String requestId) {
@@ -328,6 +404,41 @@ class DecisionDryRunControllerWebMvcTest {
         "forbiddenCapabilities",
         List.of("PLACE_ORDER", "CANCEL_ORDER", "MUTATE_NQ_STATE", "READ_NQ_DB", "WRITE_NQ_DB"));
     return m;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Map<String, Object> context(final Map<String, Object> envelope) {
+    return (Map<String, Object>) envelope.get("decisionContext");
+  }
+
+  private void assertProviderFailure(
+      final ProviderSignalStatus providerStatus,
+      final int status,
+      final String errorCode,
+      final String requestId)
+      throws Exception {
+    mockMvc =
+        newMockMvc(
+            true,
+            new InMemoryDecisionAuditRepository(),
+            2048,
+            1000,
+            32768,
+            providerFailureOrchestrator(providerStatus));
+    final Map<String, Object> envelope = legalEnvelope(requestId);
+    final String body = objectMapper.writeValueAsString(envelope);
+
+    mockMvc
+        .perform(signedPost(envelope, body))
+        .andExpect(status().is(status))
+        .andExpect(jsonPath("$.errorCode").value(errorCode))
+        .andExpect(jsonPath("$.auditRef").exists());
+  }
+
+  private static DecisionOrchestrator providerFailureOrchestrator(final ProviderSignalStatus status) {
+    return request ->
+        DecisionOutput.abstainForProviderFailure(
+            request.getRequestId(), request.getTraceId(), request.getTenantId(), status, NOW);
   }
 
   private MockHttpServletRequestBuilder signedPost(

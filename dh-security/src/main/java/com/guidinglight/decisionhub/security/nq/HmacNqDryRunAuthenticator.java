@@ -37,7 +37,7 @@ public final class HmacNqDryRunAuthenticator {
   /**
    * 创建 dry-run HMAC authenticator。
    *
-   * @param allowedSources 允许的 source 名称；source 会按小写归一化。
+   * @param allowedSources 允许的 source 名称；配置值可去除首尾空白，但 request wire value 必须精确匹配。
    * @param allowedTenantSourcePairs 允许的 tenant/source pair，格式支持 tenant:NQ_DRYRUN 或 tenant::NQ_DRYRUN。
    * @param secret HMAC secret；为空时 fail-closed。
    * @param maxClockSkew timestamp 最大偏移窗口。
@@ -56,7 +56,7 @@ public final class HmacNqDryRunAuthenticator {
             ? Set.of()
             : allowedSources.stream()
                 .filter(s -> !isBlank(s))
-                .map(HmacNqDryRunAuthenticator::normalizeSource)
+                .map(HmacNqDryRunAuthenticator::normalizeConfiguredSource)
                 .collect(Collectors.toUnmodifiableSet());
     this.allowedTenantSourcePairs =
         allowedTenantSourcePairs == null
@@ -75,6 +75,9 @@ public final class HmacNqDryRunAuthenticator {
   /**
    * 校验 dry-run request 的 source、tenant、timestamp、signature 与 nonce。
    *
+   * <p>source allowlist 与 tenant/source pair 使用验签后的 wire value 做精确匹配；验签材料本身不得被
+   * lowercase、alias 或 fallback source 改写，否则 NQ 与 DH 会重新出现 HMAC material drift。
+   *
    * @param request dry-run auth request。
    * @return 通过或 fail-closed 结果。
    */
@@ -92,16 +95,8 @@ public final class HmacNqDryRunAuthenticator {
       return NqDryRunAuthResult.rejected(
           403, "TENANT_MISMATCH", "body tenant does not match authenticated tenant");
     }
-    final String source = normalizeSource(request.sourceSystem());
-    final String sourceHeader = normalizeSource(request.sourceHeader());
-    if (source.isBlank() || !source.equals(sourceHeader) || !allowedSources.contains(source)) {
-      return NqDryRunAuthResult.rejected(403, "SOURCE_DENIED", "dry-run source is denied");
-    }
-    final String pair = normalizePair(request.tenantId(), source);
-    if (!allowedTenantSourcePairs.contains(pair)) {
-      return NqDryRunAuthResult.rejected(
-          403, "SOURCE_DENIED", "tenant/source pair is not allowlisted");
-    }
+    final String source = wireValue(request.sourceSystem());
+    final String sourceHeader = wireValue(request.sourceHeader());
     final TimestampCheck timestamp =
         parseTimestamp(request.timestampHeader(), request.now(), maxClockSkew);
     if (timestamp.status() != TimestampStatus.OK) {
@@ -121,6 +116,14 @@ public final class HmacNqDryRunAuthenticator {
     }
     if (!verifySignature(request)) {
       return NqDryRunAuthResult.rejected(401, "SIGNATURE_INVALID", "bad dry-run signature");
+    }
+    if (source.isBlank() || !source.equals(sourceHeader) || !allowedSources.contains(source)) {
+      return NqDryRunAuthResult.rejected(403, "SOURCE_DENIED", "dry-run source is denied");
+    }
+    final String pair = normalizePair(request.tenantId(), source);
+    if (!allowedTenantSourcePairs.contains(pair)) {
+      return NqDryRunAuthResult.rejected(
+          403, "SOURCE_DENIED", "tenant/source pair is not allowlisted");
     }
     final String replayKey =
         normalizePair(request.tenantId(), source)
@@ -156,7 +159,8 @@ public final class HmacNqDryRunAuthenticator {
    * 生成 dry-run 签名材料。
    *
    * <p>签名材料固定为 method/path/source/tenant/requestId/traceId/timestamp/nonce/schemaVersion/bodySha256，
-   * 其中 body 使用 SHA-256 hash 而非原文，避免签名工具或日志误带 raw body。
+   * 其中 source 使用 request 的 wire-level 精确值，body 使用 SHA-256 hash 而非原文，避免签名工具或日志误带 raw
+   * body。
    *
    * @param request dry-run auth request。
    * @return 稳定签名材料。
@@ -166,7 +170,7 @@ public final class HmacNqDryRunAuthenticator {
         "\n",
         value(request.method()).toUpperCase(Locale.ROOT),
         value(request.path()),
-        normalizeSource(request.sourceSystem()),
+        wireValue(request.sourceSystem()),
         value(request.tenantId()),
         value(request.requestId()),
         value(request.traceId()),
@@ -251,15 +255,19 @@ public final class HmacNqDryRunAuthenticator {
     if (parts.length != 2) {
       return "";
     }
-    return normalizePair(parts[0], parts[1]);
+    return value(parts[0]).trim() + "::" + normalizeConfiguredSource(parts[1]);
   }
 
   private static String normalizePair(final String tenantId, final String source) {
-    return value(tenantId).trim() + "::" + normalizeSource(source);
+    return value(tenantId).trim() + "::" + wireValue(source);
   }
 
-  private static String normalizeSource(final String value) {
-    return value(value).trim().toLowerCase(Locale.ROOT);
+  private static String normalizeConfiguredSource(final String value) {
+    return value(value).trim();
+  }
+
+  private static String wireValue(final String value) {
+    return value == null ? "" : value;
   }
 
   private static long utf8Size(final String value) {
