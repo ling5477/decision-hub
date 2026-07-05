@@ -92,7 +92,9 @@ NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX:
 NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW:
               Joint runtime dry-run close review                    [pass / closed / accepted / review-only / no real dh call / no real http / no provider / no live]
 NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW:
-              Integration-1 mock runtime close review               [next / review-only / no real dh call / no real http / no provider / no live]
+              Integration-1 mock runtime close review               [pass / closed / accepted / review-only / mock runtime milestone closed / no real dh call / no real http / no provider / no live]
+NQ-DH-I1-MOCK-RUNTIME-PR-PREP:
+              Mock runtime milestone PR preparation                 [next / pr-prep-only / no real dh call / no real http / no provider / no live]
 Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
 Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
@@ -113,6 +115,7 @@ DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
 - `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION` 已 `IMPLEMENTED / FULL_VALIDATION_PASS / TEST_ONLY / FAKE_TRANSPORT_ONLY / BLOCKER_FIX_APPLIED / CLOSED_BY_CLOSE_REVIEW`。
 - `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX` 已 `IMPLEMENTED / FULL_VALIDATION_PASS / CLOSED_BY_CLOSE_REVIEW`。
 - `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW` 已 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`；当前只允许下一轮单独授权 `NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW / REVIEW_ONLY`，不得真实联调、真实 HTTP、provider、schema/contracts/golden_cases 修改、Agent / LangGraph 或 LIVE。
+- `NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW` 已 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`；当前只允许下一步 `NQ-DH-I1-MOCK-RUNTIME-PR-PREP / PR_PREP_ONLY`，不得新增 implementation WO、真实 DH call、真实 HTTP、provider、schema/contracts/golden_cases formalization、Agent / LangGraph 或 LIVE。
 
 ## 1.2 阶段命名治理
 

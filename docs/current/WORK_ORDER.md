@@ -1,12 +1,42 @@
 # Decision Hub 当前工单
 
-> 当前阶段: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW / PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> 当前阶段: NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW / PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation; I1-IMP1 DH dry-run test-support entry; I1 runtime API contract review; I1 DH runtime API work order; I1 DH limited runtime endpoint implementation; I1 DH limited runtime endpoint close review; I1 NQ runtime client work order
-> 下一阶段: NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> 下一阶段: NQ-DH-I1-MOCK-RUNTIME-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 
 ## 1. 当前目标
 
-`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成计划与 work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线，mock close review 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 已关闭为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`；mock/test-support baseline PR 已合并到 NQ dev；`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 已完成 review-only 收口；`NQ-DH-I1-DH-RUNTIME-API-WO` 已完成 work-order-only 收口；`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已完成 DH-only limited inbound endpoint；`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY`。`NQ-DH-I1-NQ-RUNTIME-CLIENT-WO` 已在 NQ integration worktree 关闭为 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`，并由 NQ limited runtime client implementation / close review 消费；NQ limited client 当前为 `IMPLEMENTED / TARGETED_TEST_PASS / DEFAULT_DISABLED / FAKE_TRANSPORT_ONLY`，close review 为 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO` 已关闭为 work-order-only；`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION` 与 `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX` 已由本轮 close review 审查为 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY`。当前仍不允许 runtime integration、真实 DH call、真实 HTTP、real provider、AI / LangGraph、LIVE、schema/contracts/golden_cases/OpenAPI/fixture JSON/migration 修改。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成计划与 work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线，mock close review 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 已关闭为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`；mock/test-support baseline PR 已合并到 NQ dev；`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 已完成 review-only 收口；`NQ-DH-I1-DH-RUNTIME-API-WO` 已完成 work-order-only 收口；`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已完成 DH-only limited inbound endpoint；`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY`。`NQ-DH-I1-NQ-RUNTIME-CLIENT-WO` 已在 NQ integration worktree 关闭为 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`，并由 NQ limited runtime client implementation / close review 消费；NQ limited client 当前为 `IMPLEMENTED / TARGETED_TEST_PASS / DEFAULT_DISABLED / FAKE_TRANSPORT_ONLY`，close review 为 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO` 已关闭为 work-order-only；`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION` 与 `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX` 已由 close review 审查为 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY`。`NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW` 已关闭为 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED`。当前仍不允许 runtime integration、真实 DH call、真实 HTTP、real provider、AI / LangGraph、LIVE、schema/contracts/golden_cases/OpenAPI/fixture JSON/migration 修改。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+
+## 0.0P NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW（PASS / CLOSED / ACCEPTED）
+
+本轮只做 Integration-1 mock runtime / test-only 里程碑关闭审查与工作纪律复位，不新增 WO，不实现功能，不修改 Java 生产代码或测试代码，不改 contracts / OpenAPI / JSON Schema / golden_cases / migration，不真实调用 DH，不真实 HTTP，不接 provider，不开启 LIVE。
+
+结论：
+
+```text
+ALLOW_INTEGRATION1_MOCK_RUNTIME_CLOSE: YES
+ALLOW_MOCK_RUNTIME_PR_PREP: YES
+ALLOW_REAL_DH_CALL_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_DH_PRODUCTION_CODE_CHANGE_NOW: NO
+ALLOW_NQ_PRODUCTION_CODE_CHANGE_NOW: NO
+ALLOW_DH_TEST_CODE_CHANGE_NOW: NO
+ALLOW_NQ_TEST_CODE_CHANGE_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+下一步唯一推荐：
+
+```text
+NQ-DH-I1-MOCK-RUNTIME-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+```
 
 ## 0.0O NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW（PASS / CLOSED / ACCEPTED）
 

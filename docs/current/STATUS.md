@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW / PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
-> Next stage:    NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> Current stage: NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW / PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> Next stage:    NQ-DH-I1-MOCK-RUNTIME-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,7 +34,7 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW / PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Current main line: NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW / PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
 NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
@@ -44,7 +44,8 @@ Joint runtime dry-run test work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_
 Joint runtime dry-run test implementation: IMPLEMENTED / FULL_VALIDATION_PASS / TEST_ONLY / FAKE_TRANSPORT_ONLY / BLOCKER_FIX_APPLIED / CLOSED_BY_CLOSE_REVIEW.
 Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH FIXED; SCHEMA_VERSION_MISMATCH FIXED.
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Next concrete action: NQ-DH-I1-MOCK-RUNTIME-PR-PREP / NOT STARTED / PR_PREP_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -55,6 +56,41 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.26 NQ-DH I1 Integration-1 Mock Runtime Close Review（2026-07-05，PASS / CLOSED / ACCEPTED）
+
+```text
+Task: NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW
+Task type: REVIEW_ONLY + MILESTONE_CLOSE_REVIEW + WORKSTREAM_DISCIPLINE_RESET + CROSS_REPO_SECURITY_BOUNDARY_REVIEW + NO_CODE_CHANGE + NO_REAL_DH_CALL + NO_REAL_HTTP + NO_REAL_PROVIDER + NO_LIVE
+Result: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED
+Runtime integration: NOT STARTED
+DH integrated: NO
+Agent / LangGraph runtime: NO
+LIVE: DISABLED
+ALLOW_INTEGRATION1_MOCK_RUNTIME_CLOSE: YES
+ALLOW_MOCK_RUNTIME_PR_PREP: YES
+ALLOW_REAL_DH_CALL_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_DH_PRODUCTION_CODE_CHANGE_NOW: NO
+ALLOW_NQ_PRODUCTION_CODE_CHANGE_NOW: NO
+ALLOW_DH_TEST_CODE_CHANGE_NOW: NO
+ALLOW_NQ_TEST_CODE_CHANGE_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+本轮只做 mock runtime / test-only 里程碑关闭审查和工作纪律复位。审查确认 phase chain 已完成并提交；上一轮 close review 为 docs-only commit；blocker fix 为独立 test / code alignment commit；本轮写入前 DH dev 与 NQ worktree 均无未提交 close-review docs；NQ dev 只读 status 显示 unrelated backend untracked 文件，但 NQ-DH / Integration-1 scoped unstaged 与 staged diff 为空。当前证据仍限定为 fake transport / in-memory / MockMvc / test-only validation；不得解释为 real runtime integration started、DH integrated、NQ integrated、LIVE ready、production ready 或 real HTTP ready。
+
+安全边界复核通过：HMAC source wire value 已对齐，`source=NQ_DRYRUN` 不被 lowercase / alias / fallback 重写，source allowlist 与 tenant/source pair 在验签后 exact match，lowercase / alias source denied，signature material mismatch 返回 `SIGNATURE_INVALID`；NQ `DEFAULT_SCHEMA_VERSION=1.0.0` 对齐 DH endpoint 实际 response `schemaVersion=1.0.0`，invalid schemaVersion 仍 fail-closed；`BUY / SELL / PLACE_ORDER / CANCEL_ORDER` fail-closed，`LONG_BIAS / SHORT_BIAS` 仅 bias-only，不映射为 `BUY / SELL`。
+
+本 review 未重跑 Maven，沿用并接受上一轮记录的测试证据。NQ backend full、Integration0 scoped、Integration1 scoped 与 dry-run targeted tests 均已记录 `BUILD SUCCESS`；NQ `-Pquality validate` 因 `quality` profile missing，不是有效 quality gate，不得写成 quality PASS。DH `dh-api`、`dh-usecase` 与 `-Pquality validate` 已记录 `BUILD SUCCESS`。
+
+下一步只允许 `NQ-DH-I1-MOCK-RUNTIME-PR-PREP / PR_PREP_ONLY`；不得新增 implementation WO，不得真实调用 DH，不得真实 HTTP，不得接 provider，不得 schema / contracts / golden_cases formalization，不得进入 Agent / LangGraph 或 LIVE。
 
 ## 1.0.25 NQ-DH I1 Joint Runtime Dry-run Test Close Review（2026-07-05，PASS / CLOSED / ACCEPTED）
 
@@ -529,7 +565,7 @@ Task type: WORK_ORDER_ONLY + NQ_DRYRUN_STUB_RECORDER_PLANNING + NO_SIDE_EFFECT_T
 Artifact: docs/current/DH_NQ_INTEGRATION1_M2_NQ_DRYRUN_STUB_RECORDER_WO.md
 DH dev precheck: clean
 NQ dry-run worktree precheck: clean
-NQ dev precheck: clean
+NQ dev precheck: NQ-DH / Integration-1 scoped diff empty; whole-worktree zero-diff not asserted
 NQ dev NQ-DH / Integration-1 dirty diff: none
 WORKSTREAM_MIXED_BLOCKED: NO
 Integration-1 implementation: NOT STARTED
@@ -588,7 +624,7 @@ Task type: WORK_ORDER_ONLY + CONTRACT_GAP_CLOSE_PLANNING + SOURCE_ALLOWLIST_REVI
 Artifact: docs/current/DH_NQ_INTEGRATION1_M0_CONTRACT_GAP_CLOSE_WO.md
 DH dev precheck: clean
 NQ dry-run worktree precheck: clean
-NQ dev precheck: clean
+NQ dev precheck: NQ-DH / Integration-1 scoped diff empty; whole-worktree zero-diff not asserted
 NQ dev NQ-DH / Integration-1 dirty diff: none
 WORKSTREAM_MIXED_BLOCKED: NO
 Integration-1 implementation: NOT STARTED
