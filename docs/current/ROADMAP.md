@@ -88,9 +88,11 @@ NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO:
 NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION:
               Joint runtime dry-run test implementation             [implemented / full-validation-pass / test-only / fake-transport-only / blocker-fix-applied / ready-for-close-review]
 NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX:
-              Joint runtime dry-run blocker fix                     [implemented / full-validation-pass / ready-for-close-review / no real dh call / no real http / no provider / no live]
+              Joint runtime dry-run blocker fix                     [implemented / full-validation-pass / closed-by-close-review / no real dh call / no real http / no provider / no live]
 NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW:
-              Joint runtime dry-run close review                    [next / review-only / no real dh call / no real http / no provider / no live]
+              Joint runtime dry-run close review                    [pass / closed / accepted / review-only / no real dh call / no real http / no provider / no live]
+NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW:
+              Integration-1 mock runtime close review               [next / review-only / no real dh call / no real http / no provider / no live]
 Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
 Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
@@ -108,8 +110,9 @@ DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
 - `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO` 已 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`；NQ work order 已冻结 default disabled、dev/test only、production disabled、kill switch、fail-closed、request/response、HMAC/header、audit/logging、error taxonomy、测试和回滚要求。当前仍不得把 Runtime integration 写成 started，不得把 DH 写成 integrated，不得开启 LIVE。
 - `NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION` 已在 NQ integration worktree 完成 isolated limited client，实现状态为 `IMPLEMENTED / TARGETED_TEST_PASS / DEFAULT_DISABLED / FAKE_TRANSPORT_ONLY`；close review 已 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。
 - `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO` 已 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_TEST_IMPLEMENTATION / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。
-- `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION` 已 `IMPLEMENTED / FULL_VALIDATION_PASS / TEST_ONLY / FAKE_TRANSPORT_ONLY / BLOCKER_FIX_APPLIED / READY_FOR_CLOSE_REVIEW`。
-- `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX` 已 `IMPLEMENTED / FULL_VALIDATION_PASS / READY_FOR_CLOSE_REVIEW`；当前只允许下一轮单独授权 `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`，不得真实联调。
+- `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION` 已 `IMPLEMENTED / FULL_VALIDATION_PASS / TEST_ONLY / FAKE_TRANSPORT_ONLY / BLOCKER_FIX_APPLIED / CLOSED_BY_CLOSE_REVIEW`。
+- `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX` 已 `IMPLEMENTED / FULL_VALIDATION_PASS / CLOSED_BY_CLOSE_REVIEW`。
+- `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW` 已 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`；当前只允许下一轮单独授权 `NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW / REVIEW_ONLY`，不得真实联调、真实 HTTP、provider、schema/contracts/golden_cases 修改、Agent / LangGraph 或 LIVE。
 
 ## 1.2 阶段命名治理
 

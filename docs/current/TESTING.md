@@ -11,7 +11,7 @@ Scope:
   - 不修改 contracts/golden_cases/migration。
 
 Result:
-  NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX: PASS / IMPLEMENTED / FULL_VALIDATION_PASS / READY_FOR_CLOSE_REVIEW
+  NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX: PASS / IMPLEMENTED / FULL_VALIDATION_PASS / CLOSED_BY_CLOSE_REVIEW
   SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MISMATCH: FIXED
   SCHEMA_VERSION_MISMATCH: FIXED
 ```
@@ -3443,3 +3443,42 @@ ALLOW_LIVE: NO
 ```
 
 边界确认：未修改 DH production code；未修改 NQ production code；未修改 NQ dev；未改 contracts / OpenAPI / JSON Schema / golden_cases / migration；未真实调用 DH；未真实 HTTP；未访问 localhost 真实服务或外网；未接 real provider；未读取或输出 credential、token、cookie、apiKey、apiSecret、passphrase；未接 AI / LangGraph；未开启 LIVE；未触碰 NQ order / execution / risk / ledger / account / paper / live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`。
+
+## 2026-07-05 NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW 验证记录
+
+结论：**PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE**。
+
+本轮只做 close review 文档收口；未修改 DH Java production code、测试代码、contracts、OpenAPI、JSON Schema、golden_cases、migration 或 runtime wiring。NQ worktree 详尽验证记录见 `E:\Project\nexus-quant-i1-dryrun\docs\current\TESTING.md`。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| DH `git status --short` | **PASS** | close review 写入前为空；写入后仅允许 `docs/current` 文档变更。 |
+| DH `git diff --check` | **PASS** | exit 0；无 whitespace error。 |
+| DH `git diff --stat` | **REVIEWED** | close review 前无 tracked diff；写入后仅允许 docs/current。 |
+| DH forbidden-scope diff | **PASS / EMPTY** | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-api/src/main`、`dh-app/src/main`、`dh-infra/src/main`、contracts、golden_cases、migration 无 diff。 |
+| DH boundary `rg` scan | **REVIEWED / NO NEW VIOLATION** | broad scan 命中约 1615 行，为既有 docs 禁令、测试占位、denylist、endpoint token 或边界说明；未发现本轮真实 HTTP、provider、Agent/LangGraph、LIVE 或交易实现。 |
+| `mvn -ntp -pl dh-api -am test` | **BUILD SUCCESS** | 11/11 reactor SUCCESS；`dh-api` 55 tests / 0 failures / 0 errors / 0 skipped。 |
+| `mvn -ntp -pl dh-usecase -am test` | **BUILD SUCCESS** | 9/9 reactor SUCCESS；`dh-usecase` 179 tests / 0 failures / 0 errors / 0 skipped。 |
+| `mvn -ntp -Pquality validate` | **BUILD SUCCESS** | 19/19 reactor SUCCESS；Checkstyle / Spotless gate 通过。 |
+| NQ validation | **BUILD SUCCESS / PROFILE MISSING NOTED** | NQ full backend、Integration0、Integration1、dry-run targeted tests 均通过；NQ `-Pquality validate` profile missing，不声明 NQ quality PASS。 |
+| NQ dev read-only guard | **SCOPED EMPTY / NOT CLEAN GATE** | 任务输入声明存在非本轮 unrelated dirty；本轮只确认 NQ-DH / Integration-1 scoped diff 为空，未修改 NQ dev。 |
+
+Readiness：
+
+```text
+ALLOW_JOINT_RUNTIME_DRYRUN_TEST_CLOSE: YES
+ALLOW_INTEGRATION1_MOCK_RUNTIME_CLOSE_REVIEW: YES
+ALLOW_REAL_DH_CALL_NOW: NO
+ALLOW_REAL_HTTP_NOW: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_SCHEMA_FORMALIZATION_NOW: NO
+ALLOW_CONTRACTS_MODIFICATION_NOW: NO
+ALLOW_GOLDEN_CASES_MODIFICATION_NOW: NO
+ALLOW_DH_PRODUCTION_CODE_CHANGE_NOW: NO
+ALLOW_NQ_PRODUCTION_CODE_CHANGE_NOW: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+边界确认：未修改 DH Java production code；未修改 NQ Java production code；本 review 未修改测试代码；未修改 NQ dev；未改 contracts / OpenAPI / JSON Schema / golden_cases / migration；未真实调用 DH；未真实 HTTP；未访问 localhost 真实服务或外网；未接 real provider；未读取或输出 credential、token、cookie、apiKey、apiSecret、passphrase；未接 Agent / LangGraph；未开启 LIVE；未触碰 NQ order / execution / risk / ledger / account / paper / live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`。
