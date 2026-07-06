@@ -98,7 +98,7 @@ NQ-DH-I1-MOCK-RUNTIME-PR-PREP:
 stage-qdr-1:
               Quant Decision Review Core Baseline                   [closed / accepted / decision core tables + dry-run收口 / no agent / no live]
 stage-qdr-2:
-              Audit Trace Read Model + Human Approval Packet        [b4 human approval API/audit implemented by validation / partial implementation / b5 not started / no agent / no live]
+              Audit Trace Read Model + Human Approval Packet        [implemented pending close review / b1-b4 closed accepted committed / b5 ready not started / no agent / no live]
 stage-qdr-3:
               Model Gateway Mock + Prompt/Model Version Baseline    [not started / mock provider only / no real provider]
 stage-qdr-4:
@@ -122,9 +122,10 @@ stage-qdr-1:
 
 stage-qdr-2:
   目标：Audit Trace Read Model + Human Approval Packet。
-  范围：B1 已完成 usecase-level read model DTO / query contract；B2 已完成 tenant-bound read repository / read-only API；B3 已完成 human approval migration / domain / repository；B4 已完成 tenant-bound approval API / audit。
-  状态：B1 DONE / IMPLEMENTED_BY_VALIDATION；B2 CLOSED / ACCEPTED；B3 CLOSED / ACCEPTED；B4 DONE / IMPLEMENTED_BY_VALIDATION；overall PARTIAL；B5 NOT STARTED。
+  范围：B1 已完成 usecase-level read model DTO / query contract；B2 已完成 tenant-bound read repository / read-only API；B3 已完成 human approval migration / domain / repository；B4 已完成 tenant-bound approval API / audit；discipline closeout 已同步路径、工具风险和 review 触发规则。
+  状态：B1 CLOSED / ACCEPTED / COMMITTED；B2 CLOSED / ACCEPTED / COMMITTED；B3 CLOSED / ACCEPTED / COMMITTED；B4 CLOSED / ACCEPTED / COMMITTED；overall IMPLEMENTED_PENDING_CLOSE_REVIEW；B5 READY / NOT STARTED。
   退出条件：人工能查看 trace 并记录审批状态；approval 只改变 DH 内部审批状态，不触发 NQ mutation、真实 HTTP、real provider、order、risk、ledger、paper 或 live。
+  下一步：DH-STAGE-QDR-2-B5-CLOSE-REVIEW。B5 只做 close review / acceptance，不新增功能；stage-qdr-3 不得在 B5 前启动。
 
 stage-qdr-3:
   目标：Model Gateway Mock + Prompt/Model Version Baseline。

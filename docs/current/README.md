@@ -1,12 +1,12 @@
 # Decision Hub Current Docs
 
-> 当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / WORK_ORDER_READY / NOT_IMPLEMENTED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-> 下一阶段: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_ONLY
+> 当前阶段: DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT / DONE / DOCS_AND_TOOLING_DISCIPLINE / NO_BUSINESS_CODE_CHANGE
+> 下一阶段: DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY
 > 事实源: docs/current
 >
-> NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 runtime implementation NOT STARTED。DH limited endpoint、NQ limited client、joint runtime dry-run test WO、joint runtime dry-run test implementation blocker fix、joint close review 与 mock runtime milestone close review 均已按 no-real / fake-transport / MockMvc / review-only 边界收口。stage-qdr-1 Quant Decision Review Core Baseline 已 `CLOSED / ACCEPTED`：limited Integration-1 dry-run endpoint 已存在，NQ feedback endpoint 已存在，V5 decision audit tables 已保留，V6 已新增 decision_request / decision_run / quant_signal / quant_decision，dry-run 成功路径已写入 QDR 四表。当前 stage-qdr-2 只完成 Work Order，implementation 仍 `NOT STARTED`。no RealClient；no real provider；no real HTTP；no trading ability；LIVE DISABLED。
+> 当前 DH 实际工作区固定为 `E:/Project/decision-hub`；`F:/project/decision-hub` 只能作为历史路径出现，后续任务不得自动切换。NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 runtime implementation NOT STARTED。stage-qdr-1 Quant Decision Review Core Baseline 已 `CLOSED / ACCEPTED`。stage-qdr-2 B1/B2/B3/B4 已 `CLOSED / ACCEPTED / COMMITTED`，B4 commit 为 `1e3acf4 feat(qdr): add stage-qdr-2 human approval API`。stage-qdr-2 当前为 `IMPLEMENTED_PENDING_CLOSE_REVIEW`；B5 close review `READY / NOT STARTED`；stage-qdr-3 `NOT STARTED`。no RealClient；no real provider；no real HTTP；no Agent / LangGraph runtime；no trading ability；LIVE DISABLED。
 > Security baseline: FULL；fail-closed state: FULL；P1-4 residual CLOSED；header alignment CLOSED；timestamp alignment CLOSED；code reality audit blockers fixed。
-> Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1-K8 已 `CLOSED / ACCEPTED`。stage-qdr-2 Work Order 入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`。旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与旧冻结目录名 `docs/gates/dh-gatek-decision-pipeline-mvp/` 已 `SUPERSEDED / NAMING_REPLACED`；旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`。后续 DH 当前阶段必须使用 stage* 命名，不得新建 GateK / GateL / GateM 文档或状态。当前仍不允许把 Runtime integration 写成 started，不允许 Agent / LangGraph runtime、真实 provider、真实 HTTP 或 LIVE。
+> Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1-K8 已 `CLOSED / ACCEPTED`。stage-qdr-2 Work Order 入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`；本轮 discipline closeout 入口为 `docs/current/DH_STAGE_QDR_2_DISCIPLINE_CLOSEOUT.md`。旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与旧冻结目录名 `docs/gates/dh-gatek-decision-pipeline-mvp/` 已 `SUPERSEDED / NAMING_REPLACED`；旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`。后续 DH 当前阶段必须使用 stage* 命名，不得新建 GateK / GateL / GateM 文档或状态。当前仍不允许把 Runtime integration 写成 started，不允许 Agent / LangGraph runtime、真实 provider、真实 HTTP 或 LIVE。
 
 > 阶段命名治理：NQ 自身阶段使用 Gate 体系，例如 `GateN`；DH 自身阶段使用 Stage 体系，例如 `DH-STAGE4-DECISION-PIPELINE-MVP`。当前 canonical 名称为 `DH-STAGE4-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-stage4-decision-pipeline-mvp/`；旧 `DH-GATEK-DECISION-PIPELINE-MVP`、`DH GateK Decision Pipeline MVP` 与 `docs/gates/dh-gatek-decision-pipeline-mvp/` 仅可作为历史错误命名或 `NAMING_REPLACED` 说明出现。后续 Integration-1 前置条件固定为 `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED`。
 
@@ -66,6 +66,7 @@ docs/current/DH_NQ_INTEGRATION1_DH_RUNTIME_API_WO.md
 docs/current/DH_NQ_INTEGRATION1_DH_ENDPOINT_CLOSE_REVIEW.md
 docs/current/DH_NQ_INTEGRATION1_JOINT_RUNTIME_DRYRUN_TEST_CLOSE_REVIEW.md
 docs/current/DH_STAGE_QDR_2_WORK_ORDER.md
+docs/current/DH_STAGE_QDR_2_DISCIPLINE_CLOSEOUT.md
 docs/current/STATUS.md
 docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md
 docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md
@@ -218,39 +219,22 @@ Stage3-B3 DH Backtest Request Adapter IMPL（2026-05-26，DH 端可插拔骨架�
 当前下一步只允许进入：
 
 ```text
-NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN（NOT STARTED）。
+DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY。
 
 执行口径：
-  - Stage3-B3 DH Backtest Request Adapter IMPL 已于 2026-05-26 完成：
-    * dh-usecase 新增 backtest 包（DhBacktestRequestService + Default + Command + Result +
-      Outcome + ErrorCode + Repository + InMemory），共 9 个生产类；
-    * dh-connector 扩展 NqBacktestClient typed submit + 新增 DisabledNqBacktestClient +
-      NqBacktestSubmitResult/Status，共 4 个生产类；
-    * dh-app 新增 NqBacktestClientProperties + Stage3NqBacktestWiringConfig（三层 gate
-      互斥 SpEL 条件，默认 Fake 兜底；fake-mode=false 仍走 Fake 兜底，无 RealClient）；
-    * dh-app ArchUnit 扩到 12 条（新增 R11 HTTP 客户端隔离 + R12 backtest 端口隔离）；
-    * 8 个 B3 测试类共 39 cases 全绿；190 tests 全绿；
-    * 零真实 HTTP；零 NQ 仓库改动；零下单 / 风控旁路 / 实盘 / 前端。
-  - DH-STAGE4-DECISION-PIPELINE-MVP-PLAN 已 ACCEPTED / CLOSED。
-  - DH-STAGE4-DECISION-PIPELINE-MVP-WO 已 ACCEPTED / CLOSED。
-  - K1 Contract Freeze 已 PASS / CLOSED / ACCEPTED。
-  - K2 已实现 dh-usecase 内 DecisionOrchestrator skeleton、context builder、policy checker、
-    deterministic mock signal provider、risk reviewer、output assembler 与 fail-closed tests。
-  - K3 已实现 DH-owned audit / snapshot / trace persistence：Flyway V5 六张表、
-    dh-usecase persistence port、dh-infra JDBC adapter、dh-app wiring 与 fail-closed tests，并已通过 M1 readiness review 关闭。
-  - K3 未新增 API、Controller、replay API、真实 provider、NQ runtime、真实 HTTP、LangGraph、
-    AI / Agent runtime 或 LIVE。
-  - K4 Replay Read Model 已实现内部 usecase / repository read model；只读取 K3 六张 DH-owned 表，不新增 API、Controller、migration 或 replay endpoint。
-  - K5 Provider Health / Budget / Latency 已实现 mock-only health / budget / latency guard；K6 Mock NQ Dry-run Contract Tests 已实现 mock-only dry-run contract tests；K7 Golden Cases / Eval 已实现 deterministic golden cases、eval baseline 与 security boundary tests；K8 Acceptance / Freeze 已 CLOSED / ACCEPTED。
-  - 不接 NQ；不新增 NQ client / RealClient / real provider；不触碰 LIVE trading；
-    不修改 NQ 状态；不读取或写入 NQ DB；不启动 Paper Run。
-  - Stage3-B2 / NQ Feedback Outbox / 真实 HTTP / event / NQ client / RealClient / real provider
-    均为 historical / superseded / deferred / gated，不是当前 next，不允许作为当前实现任务。
+  - stage-qdr-2 B1/B2/B3/B4 已 CLOSED / ACCEPTED / COMMITTED。
+  - B5 只做 close review / acceptance，不是 implementation batch。
+  - stage-qdr-3 NOT STARTED，不得在 B5 前启动。
+  - replay execution API / model gateway / tool registry 均 NOT STARTED。
+  - Agent / LangGraph runtime NOT STARTED；real HTTP / real provider 均 NO；LIVE DISABLED。
+  - 当前 DH 实际工作区为 E:/Project/decision-hub；F:/project/decision-hub 只保留为历史路径。
+  - mvnw.cmd 当前 UNUSABLE / P2 TOOLING RISK；系统 Maven mvn 是当前替代验证工具。
+  - Docker CLI daemon 可用，但 Testcontainers 本机访问 \\.\pipe\docker_engine 被拒绝；skip 不得写成 PASS。
 
 严格禁止：
-  接 NQ / 修改 NQ 仓库 / 接实盘 / 自动下单 / 绕风控 / 重写 NQ 回测核心 /
-  引入 TradingAgents Python / 接真实 Kronos / 接真实 global-stock-data /
-  新增 API / migration / provider / NQ client / RealClient / 交易路径。
+  补新功能进入 B5 / 启动 stage-qdr-3 / 修改 NQ 仓库 / 新增 API 或 migration /
+  新增 replay execution / 接真实 provider / 接真实 HTTP / 接 LangGraph runtime /
+  开启 LIVE / 触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation。
 ```
 
 Stage3 规划冻结快照（不得修改）：

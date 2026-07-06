@@ -1,12 +1,12 @@
 # Decision Hub 当前工单
 
-> 当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B4_HUMAN_APPROVAL_API_AUDIT_IMPLEMENTED_BY_VALIDATION / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+> 当前阶段: DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT / DONE / DOCS_AND_TOOLING_DISCIPLINE / NO_BUSINESS_CODE_CHANGE
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation; I1-IMP1 DH dry-run test-support entry; I1 runtime API contract review; I1 DH runtime API work order; I1 DH limited runtime endpoint implementation; I1 DH limited runtime endpoint close review; I1 NQ runtime client work order
-> 下一阶段: DH-STAGE-QDR-2-B4-REVIEW-FREEZE / READY / REVIEW_ONLY / NO_B5_CLOSE_REVIEW_YET
+> 下一阶段: DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY / NO_NEW_FEATURE
 
 ## 1. 当前目标
 
-`stage-qdr-2 = Audit Trace Read Model + Human Approval Packet` 当前已完成 Work Order、B1 read model DTO / query contract、B2 tenant-bound read repository / read-only API、B3 human approval migration / domain / repository，以及 B4 human approval API / audit。完整工单入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`。stage-qdr-2 implementation overall 仍为 `PARTIAL`；B4 只新增 tenant-bound approval create / get / decision API、approval command service、audit event 写入、WebMvc/service tests、wiring 与 architecture guard，未新增 migration，未修改 V7，未新增 replay execution API、model/provider/runtime 或 LIVE。
+`stage-qdr-2 = Audit Trace Read Model + Human Approval Packet` 当前已完成 Work Order、B1 read model DTO / query contract、B2 tenant-bound read repository / read-only API、B3 human approval migration / domain / repository，以及 B4 human approval API / audit；B1-B4 均已 `CLOSED / ACCEPTED / COMMITTED`。完整工单入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`，discipline closeout 入口为 `docs/current/DH_STAGE_QDR_2_DISCIPLINE_CLOSEOUT.md`。stage-qdr-2 implementation overall 为 `IMPLEMENTED_PENDING_CLOSE_REVIEW`；B5 只允许做 close review / acceptance，不得补新功能。
 
 stage-qdr-1 已按当前前置状态关闭：
 
@@ -21,11 +21,11 @@ V5 dh_decision_* audit chain: retained
 stage-qdr-2 Work Order 后续拆分为：
 
 ```text
-Batch 1: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / DONE / IMPLEMENTED_BY_VALIDATION
-Batch 2: DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API / DONE / IMPLEMENTED / READ_ONLY
-Batch 3: DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN / DONE / IMPLEMENTED / NO_API
-Batch 4: DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT / DONE / IMPLEMENTED_BY_VALIDATION
-Batch 5: DH-STAGE-QDR-2-B5-STAGE-QDR-2-CLOSE-REVIEW / NOT STARTED
+Batch 1: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / CLOSED / ACCEPTED / COMMITTED
+Batch 2: DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API / CLOSED / ACCEPTED / COMMITTED
+Batch 3: DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN / CLOSED / ACCEPTED / COMMITTED / NO_API
+Batch 4: DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT / CLOSED / ACCEPTED / COMMITTED
+Batch 5: DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY
 ```
 
 stage-qdr-2 Work Order 不授权一次性全量实现，不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI、Agent runtime、NQ mutation 或 LIVE。
@@ -65,6 +65,33 @@ mvn -ntp -Pquality validate
 ```
 
 若本机 `mvnw` wrapper 不可用，允许使用已安装 Maven `mvn` 执行同等命令，并在验证记录中说明降级原因。
+
+## 0.0U DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT（DONE / B5 READY）
+
+本轮只关闭 B4 freeze 后、B5 close review 前的工程纪律缺口；不实现 B5，不新增业务代码、测试代码、API、Controller、migration、replay execution、provider、真实 HTTP、Agent / LangGraph runtime 或 LIVE。
+
+```text
+Current DH workspace: E:/Project/decision-hub
+Historical path only: F:/project/decision-hub
+stage-qdr-2 B1: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-2 B2: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-2 B3: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-2 B4: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-2 B5: READY / NOT STARTED / REVIEW_ONLY
+stage-qdr-2 overall: IMPLEMENTED_PENDING_CLOSE_REVIEW
+stage-qdr-3: NOT STARTED
+mvnw.cmd: UNUSABLE / P2 TOOLING RISK
+Docker CLI: PASS / daemon reachable
+Testcontainers: ENVIRONMENT_SKIP / named pipe access denied
+```
+
+后续 review 触发条件只保留 migration / 表结构变化、API / Controller 变化、auth / tenant / HMAC / nonce / source allowlist 变化、audit fail-closed / approval / replay 变化、stage close / acceptance、P0/P1 blocker fix。普通批次只要求 implementation、tests、boundary scan、minimal docs/current sync 和 commit。
+
+下一步唯一允许动作：
+
+```text
+DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY
+```
 
 ## 0.0T DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT（DONE / IMPLEMENTED_BY_VALIDATION）
 

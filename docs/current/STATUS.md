@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B4_BLOCKER_FIX_DONE / FREEZE_PENDING_RETRY / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-> Next stage:    DH-STAGE-QDR-2-B4-REVIEW-FREEZE / PENDING_RETRY / REVIEW_ONLY / NO_B5_CLOSE_REVIEW_YET
+> Current stage: DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT / DONE / DOCS_AND_TOOLING_DISCIPLINE / NO_BUSINESS_CODE_CHANGE
+> Next stage:    DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,22 +34,27 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B4_HUMAN_APPROVAL_API_AUDIT_IMPLEMENTED_BY_VALIDATION / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
+Current workspace: E:/Project/decision-hub.
+Historical path only: F:/project/decision-hub.
+Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / IMPLEMENTED_PENDING_CLOSE_REVIEW / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
 stage-qdr-1 implementation: DONE.
 stage-qdr-1 freeze: CLOSED / ACCEPTED.
 stage-qdr-2 Work Order: DONE / WORK_ORDER_READY.
-stage-qdr-2 B1: DONE / IMPLEMENTED_BY_VALIDATION / READMODEL_DTO_QUERY_CONTRACT_ONLY.
+stage-qdr-2 B1: CLOSED / ACCEPTED / COMMITTED / READMODEL_DTO_QUERY_CONTRACT_ONLY.
 stage-qdr-2 B2: CLOSED / ACCEPTED / TENANT_BOUND_READ_REPOSITORY_AND_READONLY_API.
 stage-qdr-2 B3: CLOSED / ACCEPTED / HUMAN_APPROVAL_MIGRATION_DOMAIN_REPOSITORY / NO_API.
-stage-qdr-2 B4: DONE / IMPLEMENTED_BY_VALIDATION / HUMAN_APPROVAL_API_AUDIT / TENANT_BOUND / NO_REPLAY_EXECUTION.
-stage-qdr-2 B4 blocker fix: DONE / INVALID_APPROVAL_DECISION_REDACTION / APPROVAL_DECISION_INVALID / FREEZE_PENDING_RETRY.
-stage-qdr-2 B4 freeze: PENDING / RETRY_ALLOWED_AFTER_BLOCKER_FIX.
-stage-qdr-2 implementation overall: PARTIAL.
+stage-qdr-2 B4: CLOSED / ACCEPTED / COMMITTED / HUMAN_APPROVAL_API_AUDIT / TENANT_BOUND / NO_REPLAY_EXECUTION.
+stage-qdr-2 B4 blocker fix: DONE / INVALID_APPROVAL_DECISION_REDACTION / APPROVAL_DECISION_INVALID.
+stage-qdr-2 B4 freeze: CLOSED / ACCEPTED / COMMITTED.
+stage-qdr-2 B5: READY / NOT STARTED / REVIEW_ONLY.
+stage-qdr-2 implementation overall: IMPLEMENTED_PENDING_CLOSE_REVIEW.
 human_approval_packet: MIGRATION_ADDED.
 approval API: IMPLEMENTED_BY_VALIDATION.
 approval write endpoint: IMPLEMENTED_BY_VALIDATION.
 replay execution API: NOT STARTED.
 model gateway: NOT STARTED.
+tool registry: NOT STARTED.
+stage-qdr-3: NOT STARTED.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
 NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
@@ -61,7 +66,7 @@ Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MIS
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime PR prep: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: DH-STAGE-QDR-2-B4-REVIEW-FREEZE / REVIEW_ONLY / PENDING_RETRY / NO_B5_CLOSE_REVIEW / NO_REAL_HTTP / NO_PROVIDER.
+Next concrete action: DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY / NO_NEW_FEATURE / NO_REAL_HTTP / NO_PROVIDER.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -73,7 +78,45 @@ Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
 
-## 1.0.34 DH-STAGE-QDR-2-B4 Blocker Fix（2026-07-06，DONE / FREEZE_PENDING_RETRY）
+## 1.0.35 DH-STAGE-QDR-2 Discipline Closeout（2026-07-06，DONE / B5 READY）
+
+```text
+Task: DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT
+Task type: DOCUMENTATION + TOOLING_REVIEW + PROCESS_DISCIPLINE_CLOSEOUT + STAGE_STATE_ALIGNMENT + NO_BUSINESS_CODE_CHANGE + NO_API_CHANGE + NO_DB_MIGRATION + NO_RUNTIME + NO_PROVIDER + NO_AGENT + NO_LIVE
+stage-qdr-2 B1: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-2 B2: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-2 B3: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-2 B4: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-2 B5: READY / NOT STARTED / REVIEW_ONLY
+stage-qdr-2 overall: IMPLEMENTED_PENDING_CLOSE_REVIEW
+stage-qdr-3: NOT STARTED
+Replay execution API: NOT STARTED
+Model gateway: NOT STARTED
+Tool registry: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+本轮只做 B4 freeze 后、B5 close review 前的工程纪律收口：统一当前工作路径为 `E:/Project/decision-hub`，把 `F:/project/decision-hub` 限定为历史路径；同步 root README 与 `docs/current` 阶段入口；把 `mvnw.cmd` 不可用记录为 `UNUSABLE / P2 TOOLING RISK`；把 Docker CLI 可用但 Testcontainers named pipe access denied 记录为环境型 skip；并固化后续 review 触发规则。
+
+B5 只允许做 close review / acceptance，不允许补新功能；stage-qdr-3 不得在 B5 之前启动。后续普通 batch 不再默认 standalone 长 review，只有 migration / API / auth-tenant-HMAC-nonce-source allowlist / audit fail-closed-approval-replay / stage close-acceptance / P0-P1 blocker fix 触发 review。
+
+Readiness:
+
+```text
+STAGE_QDR_2_DISCIPLINE_CLOSEOUT: DONE
+ALLOW_STAGE_QDR_2_B5_CLOSE_REVIEW: YES
+ALLOW_STAGE_QDR_3_START: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+## 1.0.34 DH-STAGE-QDR-2-B4 Blocker Fix（2026-07-06，DONE / SUPERSEDED_BY_1.0.35）
 
 ```text
 Task: DH-STAGE-QDR-2-B4-BLOCKER-FIX
@@ -82,7 +125,8 @@ stage-qdr-2 B4 implementation: DONE
 stage-qdr-2 B4 freeze: PENDING / RETRY_ALLOWED_AFTER_BLOCKER_FIX
 P1 blocker: invalid approval decision enum error response may echo raw enum cause
 Fix status: DONE / APPROVAL_DECISION_INVALID / FIXED_SAFE_MESSAGE
-B5 close review: NOT STARTED
+B4 freeze follow-up: CONSUMED_BY_1.0.35 / CLOSED
+B5 close review: READY / NOT STARTED
 Real HTTP: NO
 Real provider: NO
 Agent / LangGraph runtime: NOT STARTED
@@ -91,7 +135,7 @@ LIVE: DISABLED
 
 B4 blocker fix 将 approval decision request parsing 从 raw enum parsing 收口到安全 parser：`APPROVED`、`REJECTED`、`NEEDS_REVIEW` 通过，`BUY`、`SELL`、`PLACE_ORDER`、`CANCEL_ORDER`、null、blank、unknown 均 fail-closed。非法 decision API response 固定为 `code=APPROVAL_DECISION_INVALID` 与 `message=Invalid approval decision.`，不回显 raw request value、`No enum constant`、enum class 名或交易动作词。
 
-本轮仅为 B4 blocker fix，不新增 API endpoint，不新增 Controller，不新增 migration，不修改 V7 或 V1-V6 migration，不新增 replay execution、真实 HTTP outbound、real provider、LangGraph / AutoGen / CrewAI、NQ mutation、交易链路或 LIVE。B4 freeze 仍为 `PENDING`，下一步只允许重新进入 `DH-STAGE-QDR-2-B4-REVIEW-FREEZE`；B5 仍 `NOT STARTED`。
+本轮仅为 B4 blocker fix，不新增 API endpoint，不新增 Controller，不新增 migration，不修改 V7 或 V1-V6 migration，不新增 replay execution、真实 HTTP outbound、real provider、LangGraph / AutoGen / CrewAI、NQ mutation、交易链路或 LIVE。当时 B4 freeze 仍为 `PENDING`；该 pending next 已由 1.0.35 discipline closeout 消费并关闭，当前下一步为 `DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED`。
 
 ## 1.0.33 DH-STAGE-QDR-2-B4 Human Approval API / Audit（2026-07-06，DONE / IMPLEMENTED_BY_VALIDATION）
 
@@ -121,7 +165,7 @@ B4 新增 `HumanApprovalPacketCommandService`、`ApprovalWriteBoundary`、tenant
 
 approval write 只改变 DH 内部 `human_approval_packet.approval_status`，提交路径必须走 B3 状态机；repository write 和 audit write 处于同一个 fail-closed 写入边界，audit 失败不得返回 success。审计事件复用既有 `dh_decision_audit_event`，记录 tenantId、traceId、requestId、decisionRunId、approvalPacketId、approvalKey、oldStatus、newStatus、reviewerId、occurredAt 和脱敏 reason。
 
-B4 未新增 migration，未修改 V7 或 V1-V6 历史 migration；未新增 replay execution API；未接真实 HTTP outbound、real provider、OpenAI / Anthropic / Gemini / Ollama SDK、LangGraph / AutoGen / CrewAI、NQ mutation、交易链路或 LIVE。`APPROVED` 不等于 `BUY`，`REJECTED` 不等于 `SELL`，`approval_status` 不得作为 execution signal。下一步只能进入 `DH-STAGE-QDR-2-B4-REVIEW-FREEZE`；B5 仍 `NOT STARTED`。
+B4 未新增 migration，未修改 V7 或 V1-V6 历史 migration；未新增 replay execution API；未接真实 HTTP outbound、real provider、OpenAI / Anthropic / Gemini / Ollama SDK、LangGraph / AutoGen / CrewAI、NQ mutation、交易链路或 LIVE。`APPROVED` 不等于 `BUY`，`REJECTED` 不等于 `SELL`，`approval_status` 不得作为 execution signal。该 B4 implementation next 已由后续 B4 freeze / discipline closeout 消费，当前下一步为 `DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED`。
 
 ## 1.0.32 DH-STAGE-QDR-2-B3 Human Approval Migration / Domain / Repository（2026-07-06，DONE / IMPLEMENTED）
 

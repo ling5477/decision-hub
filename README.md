@@ -9,8 +9,8 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-当前阶段: NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO / COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED
-下一阶段: NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED
+当前阶段: DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT / DONE / DOCS_AND_TOOLING_DISCIPLINE / NO_BUSINESS_CODE_CHANGE
+下一阶段: DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY
 事实源: docs/current
 ```
 
@@ -83,26 +83,16 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED。
-- NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE 已完成 docs-only / factsource-only 收口，并 `CLOSED / ACCEPTED`。
-- DH Stage4 Decision Pipeline MVP 已完成 K8 acceptance / freeze，并 `CLOSED / ACCEPTED`。
-- 旧 DH-GATEK-DECISION-PIPELINE-MVP 与旧冻结目录名已 `SUPERSEDED / NAMING_REPLACED`。
-- Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架落地（Fake / Disabled 三层 gate，
-  无真实 HTTP，无 RealNqBacktestClient；190 tests 全绿 / ArchUnit 12/12）。
-- Integration-0 safety gate 已 CLOSED / ACCEPTED；P1-4 residual、header alignment、timestamp alignment、
-  code reality audit blockers 已关闭或修复。
-- Decision Pipeline MVP PLAN 与 WO 已 ACCEPTED / CLOSED。
-- K1-K7 已 CLOSED；K8 Acceptance / Freeze 已 CLOSED / ACCEPTED。
-- Stage3-B2 / NQ Feedback Outbox / 真实 HTTP / event / NQ client / RealClient / real provider
-  均为 historical / superseded / deferred / gated，不是当前 runtime 任务。
-- 旧 NQ-DH-GATEK-INTEGRATION1-PLAN-PACK：SUPERSEDED / REBASE_REQUIRED。
-- NQ 已进入 GateN；后续 Integration-1 必须基于 GateN rebase 重新规划。
-- 后续 Integration-1 前置条件固定为 NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED。
-- P1 仍是 contract dry-run plan，不是 implementation、runtime、真实 HTTP、real provider 或 LIVE。
-- NQ integration not started；Integration-1 NOT STARTED；Runtime integration NOT STARTED；DH integrated NO。
-- AI / Agent runtime NOT STARTED；LangGraph runtime NOT STARTED；LIVE DISABLED。
-- RealClient forbidden；real provider forbidden；LIVE trading forbidden；NQ mutation forbidden。
-严格禁止：接 NQ runtime / 修改 NQ 仓库 / 接实盘 / 自动下单 / 绕风控 / 重写回测核心 / 引入 TradingAgents Python / 接 LangGraph runtime。
+DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY。
+- 当前 DH 实际工作区固定为 `E:/Project/decision-hub`；`F:/project/decision-hub` 只能作为历史路径出现。
+- stage-qdr-2 B1/B2/B3/B4 均已完成、freeze/acceptance 通过并提交；B4 HEAD 为 `feat(qdr): add stage-qdr-2 human approval API`。
+- B5 是 stage-qdr-2 close review / acceptance，不是新功能实现，不允许补新 API、migration、provider 或 runtime。
+- stage-qdr-3 仍 `NOT STARTED`。
+- replay execution API / model gateway / tool registry 均 `NOT STARTED`。
+- real HTTP / real provider / Agent runtime / LangGraph runtime 均未启动；LIVE DISABLED。
+- `mvnw.cmd` 当前为 `UNUSABLE / P2 TOOLING RISK`；使用系统 Maven `mvn` 作为当前替代验证工具。
+- Docker daemon CLI 可用，但本机 Java/Testcontainers 访问 `\\.\pipe\docker_engine` 被拒绝；Docker-gated tests skip 只能记录为环境型 skip，不得写成 PASS。
+- 严格禁止：修改 NQ 仓库 / 接实盘 / 自动下单 / 绕风控 / 重写回测核心 / 接真实 provider / 接 LangGraph runtime / 开启 LIVE。
 ```
 
 冻结快照：`docs/gates/dh-stage3-plan/`（33 个文件含 10 份 STAGE3_*.md；不得直接修改）

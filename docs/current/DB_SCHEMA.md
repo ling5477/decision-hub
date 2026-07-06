@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B4_HUMAN_APPROVAL_API_AUDIT_IMPLEMENTED_BY_VALIDATION / PARTIAL_IMPLEMENTATION
-Next stage:    DH-STAGE-QDR-2-B4-REVIEW-FREEZE / READY
+Current stage: DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT / DONE / DOCS_AND_TOOLING_DISCIPLINE / NO_BUSINESS_CODE_CHANGE
+Next stage:    DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY
 ```
 
 Flyway 迁移：
@@ -19,21 +19,22 @@ V6__qdr_decision_core_baseline.sql stage-qdr-1 Decision Core baseline
 V7__human_approval_packet.sql      stage-qdr-2 B3 Human Approval Packet
 stage-qdr-2 B1 readmodel DTO   DONE / NO DB SCHEMA CHANGE / NO MIGRATION
 stage-qdr-2 B2 read repository/API DONE / NO DB SCHEMA CHANGE / NO MIGRATION
-stage-qdr-2 B4 approval API/audit DONE / NO DB SCHEMA CHANGE / NO MIGRATION
+stage-qdr-2 B4 approval API/audit CLOSED / ACCEPTED / COMMITTED / NO DB SCHEMA CHANGE / NO MIGRATION
+stage-qdr-2 B5 close review READY / NOT STARTED / NO DB SCHEMA CHANGE
 human_approval_packet            MIGRATION_ADDED / B3 / NOT_TRADING_AUTHORIZATION
 ```
 
 ## 1.0 stage-qdr-2 B1/B2/B3/B4 schema impact
 
-B1 只新增 `dh-usecase` read model DTO / projection 与 tenant-bound query contract；B2 新增只读 JDBC adapter 与 authenticated read-only API。B1/B2 均不新增 DB schema，不新增 Flyway migration，不修改 V5 / V6 migration。B3 新增 `V7__human_approval_packet.sql`，只新增 `human_approval_packet` 表，不修改 V1-V6 历史 migration，不 ALTER 旧表，不 DROP 表。B4 只新增 API / command service / audit integration / tests / wiring，不新增 migration，不修改 V7，不修改 V1-V6。
+B1 只新增 `dh-usecase` read model DTO / projection 与 tenant-bound query contract；B2 新增只读 JDBC adapter 与 authenticated read-only API。B1/B2 均不新增 DB schema，不新增 Flyway migration，不修改 V5 / V6 migration。B3 新增 `V7__human_approval_packet.sql`，只新增 `human_approval_packet` 表，不修改 V1-V6 历史 migration，不 ALTER 旧表，不 DROP 表。B4 只新增 API / command service / audit integration / tests / wiring，不新增 migration，不修改 V7，不修改 V1-V6。B5 只能做 close review / acceptance，不得新增 schema。
 
 ```text
 Read model DTO/query contract: DONE / USECASE_ONLY
 Read repository: DONE / JDBC_READONLY / EXISTING_V5_V6_TABLES_ONLY
 API implementation: DONE / READ_ONLY / NO_OPENAPI_FORMALIZATION
 human_approval_packet: MIGRATION_ADDED / V7
-Approval API: IMPLEMENTED_BY_VALIDATION / NO_SCHEMA_CHANGE
-Approval write endpoint: IMPLEMENTED_BY_VALIDATION / NO_SCHEMA_CHANGE
+Approval API: CLOSED / ACCEPTED / COMMITTED / NO_SCHEMA_CHANGE
+Approval write endpoint: CLOSED / ACCEPTED / COMMITTED / NO_SCHEMA_CHANGE
 Replay execution API: NOT STARTED
 ```
 

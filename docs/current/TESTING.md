@@ -1,5 +1,51 @@
 # Decision Hub Testing
 
+## 2026-07-06 DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT validation
+
+```text
+Scope:
+  - 本轮只做 stage-qdr-2 B4 freeze 后、B5 close review 前的文档与工具纪律收口。
+  - 不修改 Java 生产代码、Java 测试代码、migration、contracts、golden_cases、API contract 或 runtime wiring。
+  - 不启动 B5 close review；只判断是否允许下一步进入 B5。
+
+Result:
+  STAGE_QDR_2_DISCIPLINE_CLOSEOUT: DONE
+  ALLOW_STAGE_QDR_2_B5_CLOSE_REVIEW: YES
+  ALLOW_STAGE_QDR_3_START: NO
+  ALLOW_REAL_HTTP: NO
+  ALLOW_REAL_PROVIDER: NO
+  ALLOW_AGENT_PHASE: NO
+  ALLOW_LANGGRAPH_RUNTIME: NO
+  ALLOW_LIVE: NO
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| workspace guard | PASS | `E:\Project\decision-hub` exists；`F:\project\decision-hub` does not exist。 |
+| `git status --short` before write | PASS / CLEAN | B4 已提交；开工前无 dirty、untracked 或 staged 文件。 |
+| `git branch --show-current` | PASS | 当前分支 `dev`。 |
+| `git log --oneline -8` | PASS / B4 COMMITTED | HEAD `1e3acf4 feat(qdr): add stage-qdr-2 human approval API`。 |
+| `git diff --check` before write | PASS | 开工前无 diff。 |
+| `git diff --stat` before write | PASS / EMPTY | 开工前无 tracked diff。 |
+| `git diff --name-only` before write | PASS / EMPTY | 开工前无 tracked diff。 |
+| `git ls-files --others --exclude-standard` before write | PASS / EMPTY | 开工前无 untracked 文件。 |
+| `git diff --cached --name-only` before write | PASS / EMPTY | 开工前无 staged 文件。 |
+| `mvn -ntp -pl dh-domain -am test` | BUILD SUCCESS | 136 tests / 0 failures / 0 errors / 0 skipped。 |
+| `mvn -ntp -pl dh-usecase -am test` | BUILD SUCCESS | 226 tests / 0 failures / 0 errors / 0 skipped。 |
+| `mvn -ntp -pl dh-infra -am test` | BUILD SUCCESS WITH TESTCONTAINERS SKIP | 53 tests / 0 failures / 0 errors / 3 skipped；`JdbcNonceReplayGuardPersistenceTest` 因 `\\.\pipe\docker_engine` access denied skip。 |
+| `mvn -ntp -pl dh-api -am test` | BUILD SUCCESS | 77 tests / 0 failures / 0 errors / 0 skipped。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS WITH TESTCONTAINERS SKIP | 54 tests / 0 failures / 0 errors / 1 skipped；`PostgresContainerSmokeTest` 因 `\\.\pipe\docker_engine` access denied skip。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出包含 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 wrapper PASS。 |
+| `docker version` | PASS / CLI DAEMON REACHABLE | Docker Desktop 4.80.0；Engine 29.6.1。 |
+| `docker info` | PASS / CLI DAEMON REACHABLE | Docker daemon reachable；不代表 Java/Testcontainers 可用。 |
+| forbidden scan | REVIEWED / NO PRODUCTION RISK | 1603 hits；分类为 docs prohibition、test guard、enum constraint/redaction/security code、contract/golden constraint、V7 check constraint 与 V1 token usage metadata。 |
+| skip flags | PASS / NOT USED | full Maven tests 与 quality validation 未使用 `-DskipTests` 或 `-DskipITs`。 |
+
+Boundary:
+
+未修改业务代码；未修改测试代码；未新增 migration；未修改历史 migration；未新增 API；未新增 replay execution；未新增真实 HTTP outbound；未新增真实 provider；未修改 NQ；未接 LangGraph；未接 AutoGen / CrewAI；未开启 LIVE；未触碰交易链路；未把 approval API 写成 trading authorization；未把 approval_status 写成 execution signal。
+
 ## 2026-07-06 DH-STAGE-QDR-2-B4-BLOCKER-FIX validation
 
 ```text

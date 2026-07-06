@@ -1,5 +1,57 @@
 # Decision Hub Worklog
 
+## 2026-07-06 DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT
+
+执行 `DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT`。本轮为 `DOCUMENTATION + TOOLING_REVIEW + PROCESS_DISCIPLINE_CLOSEOUT + STAGE_STATE_ALIGNMENT + NO_BUSINESS_CODE_CHANGE + NO_API_CHANGE + NO_DB_MIGRATION + NO_RUNTIME + NO_PROVIDER + NO_AGENT + NO_LIVE`，只做 stage-qdr-2 B4 freeze 后、B5 close review 前的工程纪律收口。
+
+### 修改文件
+
+```text
+README.md
+docs/current/API.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/DB_SCHEMA.md
+docs/current/DH_STAGE_QDR_2_DISCIPLINE_CLOSEOUT.md
+docs/current/DH_STAGE_QDR_2_WORK_ORDER.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### Result
+
+```text
+STAGE_QDR_2_DISCIPLINE_CLOSEOUT: DONE
+stage-qdr-2 B1: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-2 B2: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-2 B3: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-2 B4: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-2 B5: READY / NOT STARTED / REVIEW_ONLY
+stage-qdr-2 overall: IMPLEMENTED_PENDING_CLOSE_REVIEW
+stage-qdr-3: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+### Findings
+
+- 当前 DH 实际工作区统一为 `E:/Project/decision-hub`；`F:/project/decision-hub` 只能作为历史路径出现。
+- root README 与 `docs/current` 入口已从 B4 freeze retry 同步到 B5 close review ready。
+- `mvnw.cmd` 仍不可用，记录为 `UNUSABLE / P2 TOOLING RISK`；当前验证使用系统 Maven `mvn`。
+- Docker CLI daemon 可用，但本机 Java/Testcontainers 访问 `\\.\pipe\docker_engine` 被拒绝；`JdbcNonceReplayGuardPersistenceTest` 与 `PostgresContainerSmokeTest` skip 只能写成环境型 skip，不写 PASS。
+- 后续 review 触发条件收口为 migration/API/auth-tenant-HMAC-nonce-source/audit-approval-replay/stage close/P0-P1 blocker fix；普通 batch 不再默认 standalone 长 review。
+
+### Next
+
+```text
+DH-STAGE-QDR-2-B5-CLOSE-REVIEW
+```
+
 ## 2026-07-06 DH-STAGE-QDR-2-B4-BLOCKER-FIX
 
 执行 `DH-STAGE-QDR-2-B4-BLOCKER-FIX`。本轮为 `CODE_CHANGE + TEST + SECURITY_FIX + ERROR_REDACTION_FIX + HUMAN_APPROVAL_API_HARDENING + STAGE_QDR_2_B4_BLOCKER_FIX + NO_NEW_FEATURE + NO_DB_MIGRATION + NO_REPLAY_EXECUTION + NO_REAL_HTTP + NO_PROVIDER + NO_AGENT`，只修复 B4 freeze review 发现的 P1 blocker：invalid approval decision enum error response 可能回显 raw enum cause 或交易动作词。

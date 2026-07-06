@@ -28,6 +28,14 @@ excluded files
 expected output
 ```
 
+当前 DH 实际工作区固定为：
+
+```text
+E:/Project/decision-hub
+```
+
+`F:/project/decision-hub` 只能作为历史路径出现。后续任务如果发现两个路径同时存在，必须先停止并做路径澄清，不得自动切换工作区。
+
 默认不得扫描：
 
 ```text
@@ -159,8 +167,14 @@ NQ mutation forbidden.
 DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP K1-K8: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED / DOCS-ONLY.
-Next concrete action: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED.
+Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / IMPLEMENTED_PENDING_CLOSE_REVIEW.
+stage-qdr-2 B1/B2/B3/B4: CLOSED / ACCEPTED / COMMITTED.
+stage-qdr-2 B5: READY / NOT STARTED / REVIEW_ONLY.
+stage-qdr-3: NOT STARTED.
+Replay execution API: NOT STARTED.
+Model gateway: NOT STARTED.
+Tool registry: NOT STARTED.
+Next concrete action: DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
