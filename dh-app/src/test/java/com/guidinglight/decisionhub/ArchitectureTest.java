@@ -360,4 +360,42 @@ public class ArchitectureTest {
                         "org.springframework.ai..")
                 .check(importMainClasses());
     }
+
+    // ============================================================================
+    // stage-qdr-2 B1：Audit Trace Read Model contract 边界
+    // ============================================================================
+
+    /**
+     * stage-qdr-2 B1：QDR readmodel 只允许作为 usecase-level DTO / query contract。
+     *
+     * <p>readmodel 包不得依赖 API、infra、Spring Web、JDBC/JPA、真实 provider SDK 或 Agent runtime。
+     * B1 不实现 Controller、JDBC repository、external HTTP、LangGraph / AutoGen / CrewAI。
+     */
+    @Test
+    void stageQdr2B1_rule15_qdrReadmodelDoesNotDependOnApiInfraWebJdbcProviderOrAgentRuntime() {
+        noClasses()
+                .that()
+                .resideInAPackage("..usecase.qdr.readmodel..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage(
+                        "..api..",
+                        "..infra..",
+                        "org.springframework.web..",
+                        "org.springframework.jdbc..",
+                        "java.sql..",
+                        "javax.sql..",
+                        "jakarta.persistence..",
+                        "javax.persistence..",
+                        "org.hibernate..",
+                        "com.openai..",
+                        "com.anthropic..",
+                        "com.google.genai..",
+                        "dev.langchain4j..",
+                        "org.springframework.ai..",
+                        "langgraph..",
+                        "autogen..",
+                        "crewai..")
+                .check(importMainClasses());
+    }
 }

@@ -98,7 +98,7 @@ NQ-DH-I1-MOCK-RUNTIME-PR-PREP:
 stage-qdr-1:
               Quant Decision Review Core Baseline                   [closed / accepted / decision core tables + dry-run收口 / no agent / no live]
 stage-qdr-2:
-              Audit Trace Read Model + Human Approval Packet        [work order ready / not implemented / no agent / no live]
+              Audit Trace Read Model + Human Approval Packet        [b1 readmodel contract done / partial implementation / b2-b4 not started / no agent / no live]
 stage-qdr-3:
               Model Gateway Mock + Prompt/Model Version Baseline    [not started / mock provider only / no real provider]
 stage-qdr-4:
@@ -122,8 +122,8 @@ stage-qdr-1:
 
 stage-qdr-2:
   目标：Audit Trace Read Model + Human Approval Packet。
-  范围：GET decision run、GET trace、approval packet、approval API。
-  状态：WORK_ORDER_READY / NOT_IMPLEMENTED。
+  范围：B1 已完成 usecase-level read model DTO / query contract；B2 才做 read repository / API；B3/B4 才做 approval packet / approval API。
+  状态：B1 DONE / IMPLEMENTED_BY_VALIDATION；overall PARTIAL；B2/B3/B4 NOT STARTED。
   退出条件：人工能查看 trace 并记录审批状态；approval 只改变 DH 内部审批状态，不触发 NQ mutation、真实 HTTP、real provider、order、risk、ledger、paper 或 live。
 
 stage-qdr-3:
@@ -142,7 +142,7 @@ stage-agent-preview:
   退出条件：只有 stage-qdr-1 到 stage-qdr-4 全部完成后才允许评估。
 ```
 
-`stage-qdr-1` 的当前事实基线：limited Integration-1 dry-run endpoint 已存在；NQ feedback endpoint 已存在；V5 `dh_decision_*` audit tables 已存在；V6 `decision_request` / `decision_run` / `quant_signal` / `quant_decision` 已完成并关闭。当前缺口变为 stage-qdr-2 的 Audit Trace Read Model 与 Human Approval Packet；`human_approval_packet`、approval API、replay read API、model_call、prompt version、tool registry 均仍为 `NOT IMPLEMENTED`。本路线不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI / Semantic Kernel、OpenAI / Anthropic / Gemini / Ollama SDK、NQ mutation 或 LIVE。
+`stage-qdr-1` 的当前事实基线：limited Integration-1 dry-run endpoint 已存在；NQ feedback endpoint 已存在；V5 `dh_decision_*` audit tables 已存在；V6 `decision_request` / `decision_run` / `quant_signal` / `quant_decision` 已完成并关闭。stage-qdr-2 已推进到 B1：Audit Trace Read Model 的 DTO / projection 与 tenant-bound query contract 已落地；当前缺口变为 B2 read repository / API、B3/B4 `human_approval_packet` 与 approval API。`human_approval_packet`、approval API、replay read API、model_call、prompt version、tool registry 均仍为 `NOT IMPLEMENTED`。本路线不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI / Semantic Kernel、OpenAI / Anthropic / Gemini / Ollama SDK、NQ mutation 或 LIVE。
 
 ## 1.1 当前受限 runtime planning 结论
 

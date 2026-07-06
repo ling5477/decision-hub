@@ -1,5 +1,48 @@
 # Decision Hub Testing
 
+## 2026-07-06 DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO validation
+
+```text
+Scope:
+  - 本轮只实现 stage-qdr-2 B1 read model DTO / projection / query contract。
+  - 新增 unit tests 与 qdr readmodel architecture guard。
+  - 不新增 Controller、OpenAPI path、API implementation、JDBC read repository、migration、approval write 或 replay API。
+  - 不修改 NQ，不真实 HTTP，不接 real provider，不接 Agent / LangGraph，不启用 LIVE。
+
+Result:
+  STAGE_QDR_2_B1: DONE
+  STAGE_QDR_2_IMPLEMENTATION_OVERALL: PARTIAL
+  ALLOW_STAGE_QDR_2_B2_WO_OR_IMPLEMENTATION: YES
+  ALLOW_STAGE_QDR_2_FULL_IMPLEMENTATION_NOW: NO
+  ALLOW_API_IMPLEMENTATION: NO
+  ALLOW_DB_MIGRATION: NO
+  ALLOW_APPROVAL_WRITE: NO
+  ALLOW_REAL_HTTP: NO
+  ALLOW_REAL_PROVIDER: NO
+  ALLOW_AGENT_PHASE: NO
+  ALLOW_LANGGRAPH_RUNTIME: NO
+  ALLOW_LIVE: NO
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| preflight `git status --short` | DIRTY_WITH_B1_DRAFT / USER_AUTHORIZED_CONTINUE | 开工时仅有 untracked `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/`；用户随后授权“继续接管实现”。 |
+| preflight `git branch --show-current` | PASS | 当前分支 `dev`。 |
+| preflight `git log --oneline -5` | PASS / WO COMMITTED | HEAD 包含 `94a07bf docs(qdr): define stage-qdr-2 audit and approval work order`；stage-qdr-2 WO 已提交。 |
+| `mvn -ntp -pl dh-usecase -am test` | FIRST RUN ENV OOM；FINAL BUILD SUCCESS | 首次 forked VM 因 native memory allocation failed 退出，0 tests run；复跑通过，reactor 9/9 SUCCESS，`dh-usecase` 200 tests / 0 failures / 0 errors / 0 skipped。 |
+| targeted B1 tests | BUILD SUCCESS | `DecisionRunReadQueryTest`、`DecisionRunDetailViewTest`、`DecisionTraceTimelineViewTest`、`DecisionEvidenceViewTest` 共 18 tests / 0 failures / 0 errors。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS | reactor 15/15 SUCCESS；`ArchitectureTest` 15 tests / 0 failures / 0 errors；`dh-app` 40 tests / 0 failures / 0 errors / 1 skipped。 |
+| Docker/Testcontainers | SKIPPED / NOT PASS | `JdbcNonceReplayGuardPersistenceTest` skip 3；`PostgresContainerSmokeTest` skip 1；日志显示 no valid Docker environment。skip 不等于 PASS。 |
+| forbidden scan original command | COMMAND SHAPE FAILED ON WINDOWS | 用户给定 `dh-*` 在 PowerShell 下按字面路径传给 `rg`，返回 `rg: dh-* ... os error 123`。 |
+| forbidden scan with PowerShell-expanded `dh-*` directories | PASS / CLASSIFIED | 命中分类为 redaction/security code、enum constraint、test guard、docs prohibition、unrelated historical text；B1 readmodel 生产命中仅为 summary/ref 安全注释与 fail-closed forbidden action constants；未发现 production risk。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed；Finished at 2026-07-06T14:23:48+08:00。 |
+| Maven settings warning | NON-BLOCKING WARNING | 系统 Maven 仍输出 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml` line 227 `Unrecognised tag: profiles`；本轮未修改 Maven 配置。 |
+| `.\mvnw.cmd -v` | UNUSABLE DESPITE EXIT 0 | 输出 `\ is not recognized as an internal or external command` 与 `.mvn\wrapper\maven-wrapper.jar 没有主清单属性`；wrapper 仍不可用，不能写成 PASS。 |
+
+Boundary:
+
+未修改 NQ；未新增 migration；未修改 V5 / V6 migration；未新增 API 实现；未新增 Controller；未新增 approval 表；未新增 approval API；未新增 replay API；未新增 JDBC read repository；未新增真实 HTTP；未新增真实 provider；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`。
+
 ## 2026-07-06 DH-STAGE-QDR-2-AUDIT-TRACE-READMODEL-AND-HUMAN-APPROVAL-WO validation
 
 ```text

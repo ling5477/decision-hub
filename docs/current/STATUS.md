@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / WORK_ORDER_READY / NOT_IMPLEMENTED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-> Next stage:    DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_ONLY
+> Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B1_READMODEL_CONTRACT_DONE / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+> Next stage:    DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_REPOSITORY_AND_API
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,11 +34,16 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / WORK_ORDER_READY / NOT_IMPLEMENTED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
+Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B1_READMODEL_CONTRACT_DONE / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
 stage-qdr-1 implementation: DONE.
 stage-qdr-1 freeze: CLOSED / ACCEPTED.
 stage-qdr-2 Work Order: DONE / WORK_ORDER_READY.
-stage-qdr-2 implementation: NOT STARTED.
+stage-qdr-2 B1: DONE / IMPLEMENTED_BY_VALIDATION / READMODEL_DTO_QUERY_CONTRACT_ONLY.
+stage-qdr-2 implementation overall: PARTIAL.
+human_approval_packet: NOT STARTED.
+approval API: NOT STARTED.
+replay read API: NOT STARTED.
+model gateway: NOT STARTED.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
 NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
@@ -50,7 +55,7 @@ Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MIS
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime PR prep: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / NOT STARTED / READMODEL_ONLY / NO_APPROVAL_WRITE.
+Next concrete action: DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API / NOT STARTED / NO_APPROVAL_WRITE / NO_DB_MIGRATION.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -61,6 +66,34 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.30 DH-STAGE-QDR-2-B1 Read Model DTO / Query Contract（2026-07-06，DONE / IMPLEMENTED_BY_VALIDATION）
+
+```text
+Task: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO
+Task type: CODE_CHANGE + TEST + DOCUMENTATION + READMODEL_DTO + QUERY_CONTRACT + SECURITY_BOUNDARY_PRESERVATION + NO_API_IMPLEMENTATION + NO_DB_MIGRATION + NO_APPROVAL_WRITE
+stage-qdr-2 WO: DONE / WORK_ORDER_READY
+stage-qdr-2 B1: DONE / IMPLEMENTED_BY_VALIDATION
+stage-qdr-2 implementation overall: PARTIAL
+Audit Trace Read Model DTO / projection: IMPLEMENTED
+Tenant-bound query contract: IMPLEMENTED
+Read repository / API: NOT STARTED
+human_approval_packet: NOT STARTED
+approval API: NOT STARTED
+replay read API: NOT STARTED
+model gateway: NOT STARTED
+model_call: NOT STARTED
+prompt version: NOT STARTED
+tool registry: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+B1 只新增 `dh-usecase` 的 read model DTO / projection、query record 与 query port contract，并补充 unit tests 与 architecture guard。查询 contract 必须 tenant-bound，read model 只读，不触发 replay execution、approval write、外部 HTTP、real provider、Agent runtime、LangGraph / AutoGen / CrewAI、NQ mutation 或 LIVE。
+
+B1 未新增 Controller、OpenAPI path、API implementation、JDBC read repository、migration、`human_approval_packet`、approval API 或 replay API。B2 才允许在单独授权下实现 read repository / API；B3/B4 仍 `NOT STARTED`。
 
 ## 1.0.29 stage-qdr-2 Audit Trace Read Model + Human Approval Packet WO（2026-07-06，WORK_ORDER_READY）
 

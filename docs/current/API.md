@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / WORK_ORDER_READY / NOT_IMPLEMENTED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-下一阶段: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_ONLY
+当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B1_READMODEL_CONTRACT_DONE / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+下一阶段: DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_REPOSITORY_AND_API
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -25,6 +25,7 @@ Runtime API contract review: CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME
 DH runtime API WO: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
 DH limited runtime endpoint: IMPLEMENTED / DH_ONLY / DEFAULT_DISABLED / DEV_TEST_ENABLE_ONLY / CLOSE_REVIEW_ACCEPTED / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 Decision Core baseline: CLOSED / ACCEPTED / decision_request + decision_run + quant_signal + quant_decision
+stage-qdr-2 read model DTO/query contract: IMPLEMENTED / USECASE_ONLY / NO_ENDPOINT
 stage-qdr-2 API drafts: PLANNED / NOT IMPLEMENTED
 Integration-1:        NOT STARTED
 Runtime integration:  NOT STARTED
@@ -32,7 +33,7 @@ AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为正式契约单源；本轮未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 仅规划只读查询 API 与审批 API 草案，全部标记为 `PLANNED / NOT IMPLEMENTED`；`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
+OpenAPI 仍为正式契约单源；B1 未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 B1 仅落地 usecase-level read model DTO / query contract；只读查询 API 与审批 API 草案仍全部标记为 `PLANNED / NOT IMPLEMENTED`；`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
 
 ## 2. 已实现端点
 
@@ -92,7 +93,7 @@ quant_decision:
 
 ## 2.2 stage-qdr-2 planned API draft（PLANNED / NOT IMPLEMENTED）
 
-以下 API 只属于 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md` 的合同草案。当前未新增 Controller、OpenAPI path、Service、Repository 或测试代码。
+以下 API 只属于 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md` 的合同草案。B1 已新增 usecase-level DTO / query port 与 unit tests；当前仍未新增 Controller、OpenAPI path、API Service implementation、Repository、JDBC implementation 或 WebMvc API 测试。
 
 ```text
 GET  /api/ai/decision-runs/{decisionRunId}                  PLANNED / NOT IMPLEMENTED
@@ -100,6 +101,20 @@ GET  /api/ai/decision-runs/{decisionRunId}/trace            PLANNED / NOT IMPLEM
 GET  /api/ai/approval-packets/{approvalPacketId}            PLANNED / NOT IMPLEMENTED
 POST /api/ai/decision-runs/{decisionRunId}/approval-packets PLANNED / NOT IMPLEMENTED
 POST /api/ai/approval-packets/{approvalPacketId}/decision   PLANNED / NOT IMPLEMENTED
+```
+
+B1 已实现的 planned response / query model 名称如下，当前仅作为 usecase read model contract，不是对外 API contract：
+
+```text
+DecisionRunDetailView
+DecisionTraceTimelineView
+DecisionTraceStepView
+DecisionEvidenceView
+RedactionStatus
+DecisionRunReadQuery
+DecisionTraceReadQuery
+DecisionEvidenceReadQuery
+DecisionReadModelQueryPort
 ```
 
 合同要求：

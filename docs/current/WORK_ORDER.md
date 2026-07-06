@@ -1,12 +1,12 @@
 # Decision Hub 当前工单
 
-> 当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / WORK_ORDER_READY / NOT_IMPLEMENTED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+> 当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B1_READMODEL_CONTRACT_DONE / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation; I1-IMP1 DH dry-run test-support entry; I1 runtime API contract review; I1 DH runtime API work order; I1 DH limited runtime endpoint implementation; I1 DH limited runtime endpoint close review; I1 NQ runtime client work order
-> 下一阶段: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_ONLY
+> 下一阶段: DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_REPOSITORY_AND_API
 
 ## 1. 当前目标
 
-`stage-qdr-2 = Audit Trace Read Model + Human Approval Packet` 当前只完成 Work Order。完整工单入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`。stage-qdr-2 implementation 仍为 `NOT STARTED`；本轮未新增 Java 生产代码、测试代码、migration、API 实现、repository、service 或 controller。
+`stage-qdr-2 = Audit Trace Read Model + Human Approval Packet` 当前已完成 Work Order 与 B1 read model DTO / query contract。完整工单入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`。stage-qdr-2 implementation overall 为 `PARTIAL`；B1 只新增 usecase-level read model 类型、tenant-bound query contract、unit tests 与 architecture guard，未新增 migration、API 实现、Controller、JDBC read repository、approval write 或 replay read API。
 
 stage-qdr-1 已按当前前置状态关闭：
 
@@ -21,11 +21,11 @@ V5 dh_decision_* audit chain: retained
 stage-qdr-2 Work Order 后续拆分为：
 
 ```text
-Batch 1: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO
-Batch 2: DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API
-Batch 3: DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN
-Batch 4: DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT
-Batch 5: DH-STAGE-QDR-2-B5-STAGE-QDR-2-CLOSE-REVIEW
+Batch 1: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / DONE / IMPLEMENTED_BY_VALIDATION
+Batch 2: DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API / NOT STARTED
+Batch 3: DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN / NOT STARTED
+Batch 4: DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT / NOT STARTED
+Batch 5: DH-STAGE-QDR-2-B5-STAGE-QDR-2-CLOSE-REVIEW / NOT STARTED
 ```
 
 stage-qdr-2 Work Order 不授权一次性全量实现，不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI、Agent runtime、NQ mutation 或 LIVE。
@@ -33,8 +33,6 @@ stage-qdr-2 Work Order 不授权一次性全量实现，不授权真实 provider
 ### 当前禁止项
 
 ```text
-禁止修改 Java 生产代码
-禁止修改 Java 测试代码
 禁止新增 migration
 禁止修改 V6 migration
 禁止新增 human_approval_packet 表
@@ -46,6 +44,7 @@ stage-qdr-2 Work Order 不授权一次性全量实现，不授权真实 provider
 禁止修改 NQ 仓库
 禁止触碰交易、订单、撤单、账户、ledger、risk、paper、live mutation
 禁止把 LONG_BIAS / SHORT_BIAS 映射为 BUY / SELL
+禁止把 B2/B3/B4 写成已实现
 ```
 
 ### 验收命令
@@ -64,6 +63,43 @@ mvn -ntp -Pquality validate
 ```
 
 若本机 `mvnw` wrapper 不可用，允许使用已安装 Maven `mvn` 执行同等命令，并在验证记录中说明降级原因。
+
+## 0.0R DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO（DONE / IMPLEMENTED_BY_VALIDATION）
+
+本轮只实现 stage-qdr-2 第一个批次 B1：usecase-level Audit Trace Read Model DTO / projection、tenant-bound query contract、fail-closed validation、unit tests、architecture guard 与 docs/current 最小同步。
+
+实现边界：
+
+```text
+DecisionRunDetailView: IMPLEMENTED / READMODEL_ONLY
+DecisionTraceTimelineView: IMPLEMENTED / READMODEL_ONLY
+DecisionTraceStepView: IMPLEMENTED / READMODEL_ONLY
+DecisionEvidenceView: IMPLEMENTED / REDACTED_REFS_ONLY
+RedactionStatus: IMPLEMENTED / NO_RAW_UNREDACTED_VALUES
+DecisionRunReadQuery: IMPLEMENTED / TENANT_BOUND
+DecisionTraceReadQuery: IMPLEMENTED / TENANT_BOUND / NO_REPLAY_EXECUTION
+DecisionEvidenceReadQuery: IMPLEMENTED / TENANT_BOUND / DEFAULT_REDACTED
+DecisionReadModelQueryPort: IMPLEMENTED / CONTRACT_ONLY / NO_JDBC_IMPLEMENTATION
+```
+
+结论：
+
+```text
+STAGE_QDR_2_B1: DONE
+STAGE_QDR_2_IMPLEMENTATION_OVERALL: PARTIAL
+ALLOW_STAGE_QDR_2_B2_WO_OR_IMPLEMENTATION: YES
+ALLOW_STAGE_QDR_2_FULL_IMPLEMENTATION_NOW: NO
+ALLOW_API_IMPLEMENTATION: NO
+ALLOW_DB_MIGRATION: NO
+ALLOW_APPROVAL_WRITE: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+B1 未新增 Controller、OpenAPI path、API implementation、JDBC read repository、migration、`human_approval_packet`、approval API、replay API、真实 HTTP、real provider、LangGraph / AutoGen / CrewAI、NQ 修改或 LIVE。B2 才允许在单独授权下实现 read repository / API。
 
 ## 0.0Q NQ-DH-I1-MOCK-RUNTIME-PR-PREP（READY / PR_PREP_ONLY）
 

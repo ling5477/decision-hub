@@ -1,5 +1,94 @@
 # Decision Hub Worklog
 
+## 2026-07-06 DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO
+
+执行 `DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO`。本轮为 `CODE_CHANGE + TEST + DOCUMENTATION + READMODEL_DTO + QUERY_CONTRACT + SECURITY_BOUNDARY_PRESERVATION + NO_API_IMPLEMENTATION + NO_DB_MIGRATION + NO_APPROVAL_WRITE`，只实现 stage-qdr-2 B1 read model DTO / projection / query contract。
+
+### 新增文件
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionEvidenceView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionReadModelQueryPort.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionTraceStepView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionTraceTimelineView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/ReadModelValidation.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionEvidenceViewTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionRunDetailViewTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionRunReadQueryTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionTraceTimelineViewTest.java
+```
+
+### 修改文件
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionEvidenceReadQuery.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionRunDetailView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionRunReadQuery.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionTraceReadQuery.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/RedactionStatus.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+docs/current/API.md
+docs/current/DB_SCHEMA.md
+docs/current/DH_STAGE_QDR_2_WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### Result
+
+```text
+stage-qdr-2 WO: DONE / WORK_ORDER_READY
+stage-qdr-2 B1: DONE / IMPLEMENTED_BY_VALIDATION
+stage-qdr-2 implementation overall: PARTIAL
+Read model DTO / projection: IMPLEMENTED
+Tenant-bound query contract: IMPLEMENTED
+Read repository / API: NOT STARTED
+human_approval_packet: NOT STARTED
+approval API: NOT STARTED
+replay read API: NOT STARTED
+model gateway: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+### Findings
+
+- 新增 `DecisionRunDetailView`、`DecisionTraceTimelineView`、`DecisionTraceStepView`、`DecisionEvidenceView` 与 `RedactionStatus`，只承载 redacted summary / ref，不包含 raw credential、raw provider response、raw prompt 或 executable trading instruction。
+- 新增 `DecisionRunReadQuery`、`DecisionTraceReadQuery`、`DecisionEvidenceReadQuery` 与 `DecisionReadModelQueryPort` 的 tenant-bound contract；port 只定义 usecase contract，不依赖 Spring Web、JDBC/JPA、infra、provider SDK 或 Agent runtime。
+- `ReadModelValidation` 对 tenantId / decisionRunId / optional traceId-requestId 做 fail-closed 校验，拒绝 blank、非法 executable action summary、raw/unredacted/secret-like summary 或 ref。
+- `DecisionTraceTimelineView` 允许 empty steps，并保留 repository/API 后续实现提供的顺序；DTO 本身不触发 replay execution、不排序补偿、不外部调用。
+- Architecture guard 新增 qdr readmodel 规则，禁止依赖 dh-api、dh-infra、Spring Web、JDBC/JPA、provider SDK、LangGraph、AutoGen、CrewAI。
+
+### Validation
+
+```text
+git branch --show-current: dev
+git log --oneline -5: HEAD includes 94a07bf docs(qdr): define stage-qdr-2 audit and approval work order
+mvn -ntp -pl dh-usecase -am test: FINAL BUILD SUCCESS / reactor 9/9 / dh-usecase 200 tests / 0 failures / 0 errors
+targeted B1 tests: BUILD SUCCESS / 18 tests / 0 failures / 0 errors
+mvn -ntp -pl dh-app -am test: BUILD SUCCESS / reactor 15/15 / ArchitectureTest 15 tests / 0 failures / 0 errors
+Docker/Testcontainers: SKIPPED / NOT PASS / no valid Docker environment
+forbidden scan original command: WINDOWS_GLOB_ERROR / dh-* literal path error 123
+forbidden scan PowerShell-expanded: PASS / CLASSIFIED / no production risk
+mvn -ntp -Pquality validate: BUILD SUCCESS / reactor 19/19 / Checkstyle 0 violations / Spotless passed
+.\mvnw.cmd -v: UNUSABLE / '\' is not recognized + maven-wrapper.jar no main manifest attribute
+```
+
+### Boundary confirmation
+
+未修改 NQ；未新增 migration；未修改 V5 / V6 migration；未新增 API 实现；未新增 Controller；未新增 approval 表；未新增 approval API；未新增 replay API；未新增 JDBC read repository；未新增真实 HTTP；未新增真实 provider；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`。新增类型只是 read model / query contract。
+
+### Next
+
+```text
+DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API
+```
+
 ## 2026-07-06 DH-STAGE-QDR-2-AUDIT-TRACE-READMODEL-AND-HUMAN-APPROVAL-WO
 
 执行 `DH-STAGE-QDR-2-AUDIT-TRACE-READMODEL-AND-HUMAN-APPROVAL-WO`。本轮为 `WORK_ORDER_ONLY + STAGE_QDR_2_PLANNING + AUDIT_TRACE_READMODEL_DESIGN + HUMAN_APPROVAL_DESIGN + SECURITY_BOUNDARY_DESIGN + NO_CODE_CHANGE`，只编制 stage-qdr-2 Work Order，不实现功能。

@@ -4,8 +4,8 @@
 Task: DH-STAGE-QDR-2-AUDIT-TRACE-READMODEL-AND-HUMAN-APPROVAL-WO
 Stage: stage-qdr-2 = Audit Trace Read Model + Human Approval Packet
 Task type: WORK_ORDER_ONLY + STAGE_QDR_2_PLANNING + AUDIT_TRACE_READMODEL_DESIGN + HUMAN_APPROVAL_DESIGN + SECURITY_BOUNDARY_DESIGN + NO_CODE_CHANGE
-Status: WORK_ORDER_READY / NOT_IMPLEMENTED
-Implementation status: NOT STARTED
+Status: B1_DONE / WORK_ORDER_PARTIALLY_CONSUMED
+Implementation status: PARTIAL / B1_READMODEL_CONTRACT_DONE
 Fact source: docs/current
 ```
 
@@ -13,7 +13,7 @@ Fact source: docs/current
 
 stage-qdr-2 的目标是在 stage-qdr-1 已完成的 `decision_request`、`decision_run`、`quant_signal`、`quant_decision` 基础上，补齐只读审计查询与人工审批包，使一条 dry-run / quant review 结果可被查看、解释、审批、拒绝和追踪。
 
-本 Work Order 只编制后续 implementation 的可执行工单，不实现功能，不新增 Java 生产代码、测试代码、migration、Controller、Service、Repository、API 实现或 runtime wiring。
+本 Work Order 原始版本只编制后续 implementation 的可执行工单。2026-07-06 已由 B1 消费第一批范围：新增 read model DTO / projection、tenant-bound query contract、unit tests 与 architecture guard；仍未新增 migration、Controller、API 实现、JDBC read repository、approval write 或 runtime wiring。
 
 ## 2. 前置状态
 
@@ -26,7 +26,10 @@ V6 quant_signal: EXISTS
 V6 quant_decision: EXISTS
 POST /api/ai/decision-dry-runs success path: writes QDR four tables
 V5 dh_decision_* audit chain: retained
-stage-qdr-2 implementation: NOT STARTED
+stage-qdr-2 implementation: PARTIAL / B1_READMODEL_CONTRACT_DONE
+B1 read model DTO/query contract: DONE / IMPLEMENTED_BY_VALIDATION
+B2 read repository/API: NOT STARTED
+B3/B4 human approval: NOT STARTED
 human_approval_packet: NOT STARTED
 approval API: NOT STARTED
 replay read API: NOT STARTED
@@ -156,7 +159,7 @@ redactionStatus
 evidenceRefsJson
 ```
 
-`redactionStatus` 必须表达 `REDACTED`、`SAFE_SUMMARY` 或 `UNAVAILABLE`，不得因为证据不可读而返回 raw payload。
+`redactionStatus` 必须表达 `REDACTED`、`SUMMARY_ONLY`、`NO_SENSITIVE_DATA` 或 `NOT_APPLICABLE`，不得因为证据不可读而返回 raw payload。
 
 ## 6. Human Approval Packet 设计草案
 
@@ -377,6 +380,7 @@ stage-qdr-2 implementation 必须拆成小批次，不得一次大提交。
 
 ```text
 DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO
+Status: DONE / IMPLEMENTED_BY_VALIDATION
 ```
 
 目标：
@@ -389,10 +393,38 @@ DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO
 只读
 ```
 
+已交付：
+
+```text
+DecisionRunDetailView
+DecisionTraceTimelineView
+DecisionTraceStepView
+DecisionEvidenceView
+RedactionStatus
+DecisionRunReadQuery
+DecisionTraceReadQuery
+DecisionEvidenceReadQuery
+DecisionReadModelQueryPort
+unit tests
+ArchitectureTest readmodel dependency guard
+```
+
+仍未交付：
+
+```text
+read repository
+API / Controller / OpenAPI path
+JDBC implementation
+approval write
+human_approval_packet migration
+replay read API
+```
+
 ### Batch 2
 
 ```text
 DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API
+Status: NOT STARTED
 ```
 
 目标：
@@ -409,6 +441,7 @@ DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API
 
 ```text
 DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN
+Status: NOT STARTED
 ```
 
 目标：
@@ -424,6 +457,7 @@ DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN
 
 ```text
 DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT
+Status: NOT STARTED
 ```
 
 目标：
@@ -440,6 +474,7 @@ DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT
 
 ```text
 DH-STAGE-QDR-2-B5-STAGE-QDR-2-CLOSE-REVIEW
+Status: NOT STARTED
 ```
 
 目标：
@@ -557,8 +592,13 @@ mvn -ntp -Pquality validate
 
 ```text
 STAGE_QDR_2_WO: DONE
-ALLOW_STAGE_QDR_2_B1_IMPLEMENTATION: YES
+STAGE_QDR_2_B1: DONE / IMPLEMENTED_BY_VALIDATION
+STAGE_QDR_2_IMPLEMENTATION_OVERALL: PARTIAL
+ALLOW_STAGE_QDR_2_B2_WO_OR_IMPLEMENTATION: YES
 ALLOW_STAGE_QDR_2_FULL_IMPLEMENTATION_NOW: NO
+ALLOW_API_IMPLEMENTATION: NO
+ALLOW_DB_MIGRATION: NO
+ALLOW_APPROVAL_WRITE: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_AGENT_PHASE: NO
@@ -569,5 +609,5 @@ ALLOW_LIVE: NO
 下一步 implementation 批次名称：
 
 ```text
-DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO
+DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API
 ```
