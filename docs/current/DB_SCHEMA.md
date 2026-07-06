@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: stage-qdr-1 / Quant Decision Review Core Baseline / IN_PROGRESS
-Next stage:    stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / NOT STARTED
+Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / WORK_ORDER_READY / NOT_IMPLEMENTED
+Next stage:    DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / NOT STARTED
 ```
 
 Flyway 迁移：
@@ -16,6 +16,7 @@ V3__stage2_poc_tools.sql       Stage2-PoC-B5：4 张新表 + 2 张 ALTER
 V4__nq_feedback_replay_nonce.sql P1-4 replay nonce persistence
 V5__decision_pipeline_audit.sql  Decision audit / snapshot / trace / provider call / output
 V6__qdr_decision_core_baseline.sql stage-qdr-1 Decision Core baseline
+human_approval_packet            PLANNED / NOT MIGRATED / stage-qdr-2 draft only
 ```
 
 ## 1.1 stage-qdr-1 Decision Core baseline
@@ -144,6 +145,45 @@ REJECTED
 ```
 
 `LONG_BIAS / SHORT_BIAS` 只表示方向性审查意见，不代表 `BUY / SELL`。`human_approval_status` 当前默认 `NOT_REQUIRED`；`human_approval_packet` 与 approval API 留到 `stage-qdr-2`，本轮不实现。
+
+## 1.2 stage-qdr-2 human_approval_packet 草案（PLANNED / NOT IMPLEMENTED）
+
+本节只是 Work Order 级 DB migration 草案，不是已迁移 schema。当前没有新增 migration，没有新增 `human_approval_packet` 表。
+
+```text
+human_approval_packet
+  id uuid primary key
+  decision_run_id uuid not null references decision_run(id)
+  tenant_id varchar not null
+  trace_id varchar not null
+  request_id varchar not null
+  approval_key varchar not null
+  approval_type varchar not null
+  approval_status varchar not null
+  risk_level varchar not null
+  decision_action varchar not null
+  confidence_score numeric(5,4) null
+  summary text null
+  checklist_json jsonb not null
+  evidence_refs_json jsonb null
+  reviewer_id varchar null
+  reviewer_note text null
+  decided_at timestamptz null
+  created_at timestamptz not null
+  updated_at timestamptz not null
+```
+
+建议约束：
+
+```text
+unique(tenant_id, approval_key)
+approval_status in (PENDING, APPROVED, REJECTED, NEEDS_REVIEW, EXPIRED)
+approval_type in (QUANT_DECISION_REVIEW, RISK_REVIEW, STRATEGY_RELEASE_REVIEW, ANOMALY_REVIEW)
+decision_action in (OBSERVE, NO_TRADE, LONG_BIAS, SHORT_BIAS, NEEDS_REVIEW, REJECTED)
+decision_action not in (BUY, SELL, PLACE_ORDER, CANCEL_ORDER, MARKET_ORDER, LIMIT_ORDER)
+```
+
+审批包只记录 human review evidence，不是交易授权。审批状态只允许改变 DH 内部 approval 状态，不触发 NQ mutation、真实 HTTP、provider、order、cancel、risk mutation、ledger mutation、paper 或 live。
 
 ## 2. Stage2-PoC-B5 新增 4 张表
 

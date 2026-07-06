@@ -1,5 +1,61 @@
 # Decision Hub Testing
 
+## 2026-07-06 DH-STAGE-QDR-2-AUDIT-TRACE-READMODEL-AND-HUMAN-APPROVAL-WO validation
+
+```text
+Scope:
+  - 本轮只编制 stage-qdr-2 Work Order。
+  - 只允许修改 docs/current 文档。
+  - 不修改 Java 生产代码、测试代码、migration、API 实现、repository、service、controller。
+  - 不新增 human_approval_packet 表、approval API、replay read API、model_call、prompt version、tool registry。
+  - 不真实 HTTP、不接 real provider、不接 Agent / LangGraph、不启用 LIVE。
+
+Result:
+  STAGE_QDR_2_WO: DONE
+  ALLOW_STAGE_QDR_2_B1_IMPLEMENTATION: YES
+  ALLOW_STAGE_QDR_2_FULL_IMPLEMENTATION_NOW: NO
+  ALLOW_REAL_HTTP: NO
+  ALLOW_REAL_PROVIDER: NO
+  ALLOW_AGENT_PHASE: NO
+  ALLOW_LANGGRAPH_RUNTIME: NO
+  ALLOW_LIVE: NO
+```
+
+本轮计划验证命令：
+
+```powershell
+git status --short
+git branch --show-current
+git diff --check
+git diff --stat
+git diff --name-only
+rg -n "GateK|GateL|GateM|stage-qdr|stage" docs/current
+rg -n "BUY|SELL|PLACE_ORDER|CANCEL_ORDER|MARKET_ORDER|LIMIT_ORDER|placeOrder|cancelOrder|submitOrder|executeOrder|bypassRisk|forceExecute|mutateLedger|mutateRisk|paperRunStart|liveRunStart|apiKey|apiSecret|passphrase|credential|token|cookie|LangGraph|AutoGen|CrewAI|OpenAI|Anthropic|Gemini|Ollama|HttpClient|WebClient|RestTemplate|OkHttp" dh-* docs/current contracts golden_cases
+mvn -ntp -pl dh-app -am test
+mvn -ntp -Pquality validate
+.\mvnw.cmd -v
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS / DOCS_CURRENT_ONLY | 仅允许的 `docs/current` 变更；新增 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`。 |
+| `git branch --show-current` | PASS | 当前分支 `dev`。 |
+| `git diff --check` | PASS WITH LF/CRLF WARNINGS | 仅 Windows LF -> CRLF warning；无 whitespace error。 |
+| `git diff --stat` | REVIEWED | tracked diff 限于 `docs/current/API.md`、`DB_SCHEMA.md`、`README.md`、`ROADMAP.md`、`STATUS.md`、`TESTING.md`、`WORKLOG.md`、`WORK_ORDER.md`；新增 WO 文件由 `git status` 标识为 untracked。 |
+| `git diff --name-only` | REVIEWED | tracked diff 只列出上述 8 个 `docs/current` 文件；untracked WO 文件不在该命令输出内。 |
+| stage naming scan | PASS / CLASSIFIED | `rg -n "GateK|GateL|GateM|stage-qdr|stage" docs/current` 命中较多；分类为历史文档、命名治理说明、旧冻结记录、本轮 stage-qdr-2 文档和 allowed stage* 状态；未发现新建 DH GateK/GateL/GateM 当前阶段。 |
+| forbidden scan original command | COMMAND SHAPE FAILED ON WINDOWS | 用户给定 `dh-*` 在 PowerShell 下按字面路径传给 `rg`，返回 `rg: dh-* ... os error 123`。这是命令形态问题，不是边界失败。 |
+| forbidden scan with PowerShell-expanded `dh-*` directories | PASS / CLASSIFIED | 命中为既有防护代码、负向测试、golden cases、历史文档禁令、planned/forbidden 文案、token usage metadata 字段和 no-real 注释；未发现本轮新增真实 HTTP/provider、LIVE 或交易实现。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS | Reactor 15/15 SUCCESS；Finished at 2026-07-06T13:01:28+08:00；Total time 56:53 min。`dh-app` 39 tests / 0 failures / 0 errors / 1 skipped。 |
+| Docker/Testcontainers | SKIPPED / NOT PASS | `PostgresContainerSmokeTest` 因 Testcontainers 未找到有效 Docker environment skip 1；该结果不能写成 Docker/Testcontainers PASS。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed；Finished at 2026-07-06T13:01:40+08:00；Total time 4.254 s。 |
+| Maven settings warning | NON-BLOCKING WARNING | 系统 Maven 每次输出 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml` line 227 `Unrecognised tag: profiles` warning；本轮未修改 Maven 配置。 |
+| `.\mvnw.cmd -v` | UNUSABLE DESPITE EXIT 0 | 输出 `\ is not recognized as an internal or external command` 与 `.mvn\wrapper\maven-wrapper.jar 没有主清单属性`；`cmd /c` 复核 `EXIT:0`，但 wrapper 实际不可用，不能写成 PASS。 |
+
+Boundary:
+
+未修改 Java 生产代码；未修改 Java 测试代码；未新增 migration；未新增 API 实现；未修改 NQ；未新增真实 HTTP；未新增真实 provider；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`。新增 API 与 `human_approval_packet` 均只处于 `PLANNED / NOT IMPLEMENTED`。
+
 ## 2026-07-05 NQ-DH-I1-MOCK-RUNTIME-PR-PREP validation
 
 ```text

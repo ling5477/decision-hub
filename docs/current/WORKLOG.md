@@ -1,5 +1,81 @@
 # Decision Hub Worklog
 
+## 2026-07-06 DH-STAGE-QDR-2-AUDIT-TRACE-READMODEL-AND-HUMAN-APPROVAL-WO
+
+执行 `DH-STAGE-QDR-2-AUDIT-TRACE-READMODEL-AND-HUMAN-APPROVAL-WO`。本轮为 `WORK_ORDER_ONLY + STAGE_QDR_2_PLANNING + AUDIT_TRACE_READMODEL_DESIGN + HUMAN_APPROVAL_DESIGN + SECURITY_BOUNDARY_DESIGN + NO_CODE_CHANGE`，只编制 stage-qdr-2 Work Order，不实现功能。
+
+### 新增文件
+
+```text
+docs/current/DH_STAGE_QDR_2_WORK_ORDER.md
+```
+
+### 修改文件
+
+```text
+docs/current/API.md
+docs/current/DB_SCHEMA.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### Result
+
+```text
+stage-qdr-1 implementation: DONE
+stage-qdr-1 freeze: CLOSED / ACCEPTED
+stage-qdr-2 WO: DONE / WORK_ORDER_READY
+stage-qdr-2 implementation: NOT STARTED
+Audit Trace Read Model: PLANNED / NOT IMPLEMENTED
+human_approval_packet: PLANNED / NOT MIGRATED
+approval API: PLANNED / NOT IMPLEMENTED
+replay read API: PLANNED / NOT IMPLEMENTED
+model_call / prompt version / tool registry: NOT STARTED
+real HTTP: NO
+real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+### Findings
+
+- Work Order 已定义 Audit Trace Read Model 最小闭环：`DecisionRunDetailView`、`DecisionTraceTimelineView`、`DecisionEvidenceView`。
+- Work Order 已定义 Human Approval Packet 最小闭环：planned `human_approval_packet` 表、approval 状态机、审批写入 fail-closed、终态保护和 tenant-bound 规则。
+- API 合同仅为 `PLANNED / NOT IMPLEMENTED`：`GET /api/ai/decision-runs/{decisionRunId}`、`GET /api/ai/decision-runs/{decisionRunId}/trace`、`GET /api/ai/approval-packets/{approvalPacketId}`、`POST /api/ai/decision-runs/{decisionRunId}/approval-packets`、`POST /api/ai/approval-packets/{approvalPacketId}/decision`。
+- DB schema 仅为 `PLANNED / NOT MIGRATED`：未新增 `human_approval_packet` migration。
+- implementation 拆为 B1-B5；下一步只允许 B1 readmodel DTO / projection，不允许全量实现。
+
+### Validation
+
+```text
+git status --short: PASS / docs/current only; new docs/current/DH_STAGE_QDR_2_WORK_ORDER.md untracked
+git branch --show-current: dev
+git diff --check: PASS / LF->CRLF warnings only / no whitespace error
+git diff --stat: REVIEWED / tracked diff limited to docs/current
+git diff --name-only: REVIEWED / tracked docs/current files only
+stage naming scan: PASS / CLASSIFIED / historical + naming-governance + current stage-qdr docs
+forbidden scan original command: WINDOWS_GLOB_ERROR / dh-* literal path error 123
+forbidden scan PowerShell-expanded: PASS / CLASSIFIED / docs guards, tests, golden cases, no-real code comments, no new violation
+mvn -ntp -pl dh-app -am test: BUILD SUCCESS / reactor 15/15 SUCCESS / total 56:53 min / finished 2026-07-06T13:01:28+08:00
+Docker/Testcontainers: SKIPPED / NOT PASS / PostgresContainerSmokeTest skipped 1 because no valid Docker environment
+mvn -ntp -Pquality validate: BUILD SUCCESS / reactor 19/19 SUCCESS / Checkstyle 0 violations / Spotless passed / finished 2026-07-06T13:01:40+08:00
+.\mvnw.cmd -v: UNUSABLE / output says '\' is not recognized and maven-wrapper.jar has no main manifest attribute / cmd errorlevel still EXIT:0
+```
+
+### Boundary confirmation
+
+未修改 Java 生产代码；未修改 Java 测试代码；未新增 migration；未新增 API 实现；未修改 NQ；未新增真实 HTTP；未新增真实 provider；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`。
+
+### Next
+
+```text
+DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO
+```
+
 ## 2026-07-06 stage-qdr-1 Quant Decision Review Core Baseline
 
 执行 `DH-STAGE-QDR-1-FACTSOURCE-AND-DECISION-CORE-BASELINE`。本轮将当前事实源从历史 PR-only / no-runtime 滞后描述 rebase 到代码现实：DH 已有 limited Integration-1 dry-run endpoint、NQ feedback endpoint、V4 nonce replay 表与 V5 decision audit 表；当前主线切换为 Quant Decision Review Core Baseline。

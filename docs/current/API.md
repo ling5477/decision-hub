@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: stage-qdr-1 / Quant Decision Review Core Baseline / IN_PROGRESS / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-下一阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / NOT STARTED / NO_AGENT / NO_LIVE
+当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / WORK_ORDER_READY / NOT_IMPLEMENTED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+下一阶段: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_ONLY
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -24,14 +24,15 @@ Limited runtime plan: CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTI
 Runtime API contract review: CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME
 DH runtime API WO: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
 DH limited runtime endpoint: IMPLEMENTED / DH_ONLY / DEFAULT_DISABLED / DEV_TEST_ENABLE_ONLY / CLOSE_REVIEW_ACCEPTED / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
-Decision Core baseline: IN_PROGRESS / decision_request + decision_run + quant_signal + quant_decision
+Decision Core baseline: CLOSED / ACCEPTED / decision_request + decision_run + quant_signal + quant_decision
+stage-qdr-2 API drafts: PLANNED / NOT IMPLEMENTED
 Integration-1:        NOT STARTED
 Runtime integration:  NOT STARTED
 AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为正式契约单源；本轮未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 不改变该 endpoint 的外部合同，只补内部 Decision Core 主线落库：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
+OpenAPI 仍为正式契约单源；本轮未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 仅规划只读查询 API 与审批 API 草案，全部标记为 `PLANNED / NOT IMPLEMENTED`；`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
 
 ## 2. 已实现端点
 
@@ -88,6 +89,29 @@ quant_decision:
 ```
 
 安全边界不变：HMAC、timestamp、nonce replay、tenant-source binding、payload cap、memory cap、rate limit、kill switch、forbidden material gate、audit fail-closed 均继续生效。`LONG_BIAS / SHORT_BIAS` 只表示只读方向性审查意见，不是交易指令。
+
+## 2.2 stage-qdr-2 planned API draft（PLANNED / NOT IMPLEMENTED）
+
+以下 API 只属于 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md` 的合同草案。当前未新增 Controller、OpenAPI path、Service、Repository 或测试代码。
+
+```text
+GET  /api/ai/decision-runs/{decisionRunId}                  PLANNED / NOT IMPLEMENTED
+GET  /api/ai/decision-runs/{decisionRunId}/trace            PLANNED / NOT IMPLEMENTED
+GET  /api/ai/approval-packets/{approvalPacketId}            PLANNED / NOT IMPLEMENTED
+POST /api/ai/decision-runs/{decisionRunId}/approval-packets PLANNED / NOT IMPLEMENTED
+POST /api/ai/approval-packets/{approvalPacketId}/decision   PLANNED / NOT IMPLEMENTED
+```
+
+合同要求：
+
+```text
+所有 read API 必须 tenant-bound 且 redacted
+所有 approval write API 必须鉴权
+read API 不触发 replay execution 或 external call
+approval 只改变 DH 内部审批状态，不触发 NQ mutation
+response 不返回 credential、raw provider response、raw prompt 或 executable trading instruction
+APPROVED 不是 BUY；REJECTED 不是 SELL；LONG_BIAS / SHORT_BIAS 不是交易指令
+```
 
 ## 3. Historical / deferred API 方向（当前 API 未实现）
 

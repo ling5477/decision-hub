@@ -1,39 +1,51 @@
 # Decision Hub 当前工单
 
-> 当前阶段: stage-qdr-1 / Quant Decision Review Core Baseline / IN_PROGRESS / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+> 当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / WORK_ORDER_READY / NOT_IMPLEMENTED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation; I1-IMP1 DH dry-run test-support entry; I1 runtime API contract review; I1 DH runtime API work order; I1 DH limited runtime endpoint implementation; I1 DH limited runtime endpoint close review; I1 NQ runtime client work order
-> 下一阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / NOT STARTED / NO_AGENT / NO_LIVE
+> 下一阶段: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_ONLY
 
 ## 1. 当前目标
 
-`stage-qdr-1 = Quant Decision Review Core Baseline` 是当前工单。事实源已按当前代码修正：limited Integration-1 dry-run endpoint `POST /api/ai/decision-dry-runs` 已存在；NQ feedback endpoint `POST /api/ai/feedback/nq` 已存在；V5 `dh_decision_context_snapshot`、`dh_decision_trace_step`、`dh_decision_provider_call_log`、`dh_decision_output` 已存在。当前短板不是缺 endpoint，而是缺统一 Decision Core 主线表、human approval 闭环、replay read API、model_call、prompt version、tool registry。
+`stage-qdr-2 = Audit Trace Read Model + Human Approval Packet` 当前只完成 Work Order。完整工单入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`。stage-qdr-2 implementation 仍为 `NOT STARTED`；本轮未新增 Java 生产代码、测试代码、migration、API 实现、repository、service 或 controller。
 
-本轮只实现 Quant Decision Review Core Baseline：
+stage-qdr-1 已按当前前置状态关闭：
 
 ```text
-新增 decision_request / decision_run / quant_signal / quant_decision
-dry-run 请求进入后落 decision_request / decision_run / quant_signal / quant_decision
-保留现有 V5 decision audit 链路
-响应继续 read-only
-action 只允许 OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS / NEEDS_REVIEW / REJECTED
-LONG_BIAS / SHORT_BIAS 仅为方向性审查意见，不代表 BUY / SELL
+stage-qdr-1 implementation: DONE
+stage-qdr-1 freeze: CLOSED / ACCEPTED
+V6 decision_request / decision_run / quant_signal / quant_decision: EXISTS
+POST /api/ai/decision-dry-runs success path: writes QDR four tables
+V5 dh_decision_* audit chain: retained
 ```
 
-本轮不实现：
+stage-qdr-2 Work Order 后续拆分为：
 
 ```text
-human_approval_packet
-approval API
-replay read API
-model_call
-prompt_template / prompt_version
-tool registry
-真实 provider
-真实 HTTP client
-LangGraph / AutoGen / CrewAI / Semantic Kernel
-OpenAI / Anthropic / Gemini / Ollama SDK
-NQ mutation
-交易 / 订单 / 撤单 / 账户 / ledger / risk / paper / live mutation
+Batch 1: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO
+Batch 2: DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API
+Batch 3: DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN
+Batch 4: DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT
+Batch 5: DH-STAGE-QDR-2-B5-STAGE-QDR-2-CLOSE-REVIEW
+```
+
+stage-qdr-2 Work Order 不授权一次性全量实现，不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI、Agent runtime、NQ mutation 或 LIVE。
+
+### 当前禁止项
+
+```text
+禁止修改 Java 生产代码
+禁止修改 Java 测试代码
+禁止新增 migration
+禁止修改 V6 migration
+禁止新增 human_approval_packet 表
+禁止新增 approval API 实现
+禁止新增 replay read API 实现
+禁止新增 model_call / prompt_template / prompt_version / tool registry
+禁止接真实 HTTP / real provider / OpenAI / Anthropic / Gemini / Ollama SDK
+禁止接 LangGraph / AutoGen / CrewAI
+禁止修改 NQ 仓库
+禁止触碰交易、订单、撤单、账户、ledger、risk、paper、live mutation
+禁止把 LONG_BIAS / SHORT_BIAS 映射为 BUY / SELL
 ```
 
 ### 验收命令
@@ -43,11 +55,12 @@ git status --short
 git branch --show-current
 git diff --check
 git diff --stat
-rg -n "GateK|GateL|GateM" docs/current
-rg -n "BUY|SELL|PLACE_ORDER|CANCEL_ORDER|placeOrder|cancelOrder|submitOrder|executeOrder|bypassRisk|forceExecute" dh-* docs/current contracts golden_cases
-rg -n "LangGraph|AutoGen|CrewAI|OpenAI|Anthropic|Gemini|Ollama|apiKey|apiSecret|passphrase|credential|token|cookie" dh-* docs/current contracts golden_cases
+git diff --name-only
+rg -n "GateK|GateL|GateM|stage-qdr|stage" docs/current
+rg -n "BUY|SELL|PLACE_ORDER|CANCEL_ORDER|MARKET_ORDER|LIMIT_ORDER|placeOrder|cancelOrder|submitOrder|executeOrder|bypassRisk|forceExecute|mutateLedger|mutateRisk|paperRunStart|liveRunStart|apiKey|apiSecret|passphrase|credential|token|cookie|LangGraph|AutoGen|CrewAI|OpenAI|Anthropic|Gemini|Ollama|HttpClient|WebClient|RestTemplate|OkHttp" dh-* docs/current contracts golden_cases
 mvn -ntp -pl dh-app -am test
 mvn -ntp -Pquality validate
+.\mvnw.cmd -v
 ```
 
 若本机 `mvnw` wrapper 不可用，允许使用已安装 Maven `mvn` 执行同等命令，并在验证记录中说明降级原因。

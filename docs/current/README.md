@@ -1,12 +1,12 @@
 # Decision Hub Current Docs
 
-> 当前阶段: stage-qdr-1 / Quant Decision Review Core Baseline / IN_PROGRESS / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-> 下一阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / NOT STARTED / NO_AGENT / NO_LIVE
+> 当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / WORK_ORDER_READY / NOT_IMPLEMENTED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+> 下一阶段: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_ONLY
 > 事实源: docs/current
 >
-> NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 runtime implementation NOT STARTED。DH limited endpoint、NQ limited client、joint runtime dry-run test WO、joint runtime dry-run test implementation blocker fix、joint close review 与 mock runtime milestone close review 均已按 no-real / fake-transport / MockMvc / review-only 边界收口。当前唯一主线切换为 Quant Decision Review Core Baseline：limited Integration-1 dry-run endpoint 已存在，NQ feedback endpoint 已存在，V5 decision audit tables 已存在；本轮补 decision_request / decision_run / quant_signal / quant_decision 主线。no RealClient；no real provider；no real HTTP；no trading ability；LIVE DISABLED。
+> NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 runtime implementation NOT STARTED。DH limited endpoint、NQ limited client、joint runtime dry-run test WO、joint runtime dry-run test implementation blocker fix、joint close review 与 mock runtime milestone close review 均已按 no-real / fake-transport / MockMvc / review-only 边界收口。stage-qdr-1 Quant Decision Review Core Baseline 已 `CLOSED / ACCEPTED`：limited Integration-1 dry-run endpoint 已存在，NQ feedback endpoint 已存在，V5 decision audit tables 已保留，V6 已新增 decision_request / decision_run / quant_signal / quant_decision，dry-run 成功路径已写入 QDR 四表。当前 stage-qdr-2 只完成 Work Order，implementation 仍 `NOT STARTED`。no RealClient；no real provider；no real HTTP；no trading ability；LIVE DISABLED。
 > Security baseline: FULL；fail-closed state: FULL；P1-4 residual CLOSED；header alignment CLOSED；timestamp alignment CLOSED；code reality audit blockers fixed。
-> Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1-K8 已 `CLOSED / ACCEPTED`。旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与旧冻结目录名 `docs/gates/dh-gatek-decision-pipeline-mvp/` 已 `SUPERSEDED / NAMING_REPLACED`；旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`。后续 DH 当前阶段必须使用 stage* 命名，本轮为 `stage-qdr-1 = Quant Decision Review Core Baseline`，不得新建 GateK / GateL / GateM 文档或状态。当前仍不允许把 Runtime integration 写成 started，不允许 Agent / LangGraph runtime、真实 provider、真实 HTTP 或 LIVE。
+> Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1-K8 已 `CLOSED / ACCEPTED`。stage-qdr-2 Work Order 入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`。旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与旧冻结目录名 `docs/gates/dh-gatek-decision-pipeline-mvp/` 已 `SUPERSEDED / NAMING_REPLACED`；旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`。后续 DH 当前阶段必须使用 stage* 命名，不得新建 GateK / GateL / GateM 文档或状态。当前仍不允许把 Runtime integration 写成 started，不允许 Agent / LangGraph runtime、真实 provider、真实 HTTP 或 LIVE。
 
 > 阶段命名治理：NQ 自身阶段使用 Gate 体系，例如 `GateN`；DH 自身阶段使用 Stage 体系，例如 `DH-STAGE4-DECISION-PIPELINE-MVP`。当前 canonical 名称为 `DH-STAGE4-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-stage4-decision-pipeline-mvp/`；旧 `DH-GATEK-DECISION-PIPELINE-MVP`、`DH GateK Decision Pipeline MVP` 与 `docs/gates/dh-gatek-decision-pipeline-mvp/` 仅可作为历史错误命名或 `NAMING_REPLACED` 说明出现。后续 Integration-1 前置条件固定为 `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED`。
 
@@ -65,6 +65,7 @@ docs/current/DH_NQ_INTEGRATION1_RUNTIME_API_CONTRACT_REVIEW.md
 docs/current/DH_NQ_INTEGRATION1_DH_RUNTIME_API_WO.md
 docs/current/DH_NQ_INTEGRATION1_DH_ENDPOINT_CLOSE_REVIEW.md
 docs/current/DH_NQ_INTEGRATION1_JOINT_RUNTIME_DRYRUN_TEST_CLOSE_REVIEW.md
+docs/current/DH_STAGE_QDR_2_WORK_ORDER.md
 docs/current/STATUS.md
 docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md
 docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md

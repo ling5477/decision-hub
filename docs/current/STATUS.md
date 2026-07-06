@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: stage-qdr-1 / Quant Decision Review Core Baseline / IN_PROGRESS / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-> Next stage:    stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / NOT STARTED / NO_AGENT / NO_LIVE
+> Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / WORK_ORDER_READY / NOT_IMPLEMENTED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+> Next stage:    DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_ONLY
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,7 +34,11 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: stage-qdr-1 / Quant Decision Review Core Baseline / IN_PROGRESS / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
+Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / WORK_ORDER_READY / NOT_IMPLEMENTED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
+stage-qdr-1 implementation: DONE.
+stage-qdr-1 freeze: CLOSED / ACCEPTED.
+stage-qdr-2 Work Order: DONE / WORK_ORDER_READY.
+stage-qdr-2 implementation: NOT STARTED.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
 NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
@@ -46,7 +50,7 @@ Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MIS
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime PR prep: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: stage-qdr-1 / Quant Decision Review Core Baseline / IMPLEMENT + VERIFY / NO_AGENT / NO_LIVE.
+Next concrete action: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / NOT STARTED / READMODEL_ONLY / NO_APPROVAL_WRITE.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -57,6 +61,33 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.29 stage-qdr-2 Audit Trace Read Model + Human Approval Packet WO（2026-07-06，WORK_ORDER_READY）
+
+```text
+Task: DH-STAGE-QDR-2-AUDIT-TRACE-READMODEL-AND-HUMAN-APPROVAL-WO
+Task type: WORK_ORDER_ONLY + STAGE_QDR_2_PLANNING + AUDIT_TRACE_READMODEL_DESIGN + HUMAN_APPROVAL_DESIGN + SECURITY_BOUNDARY_DESIGN + NO_CODE_CHANGE
+Artifact: docs/current/DH_STAGE_QDR_2_WORK_ORDER.md
+stage-qdr-1 implementation: DONE
+stage-qdr-1 freeze: CLOSED / ACCEPTED
+stage-qdr-2 WO: DONE / WORK_ORDER_READY
+stage-qdr-2 implementation: NOT STARTED
+Audit Trace Read Model: PLANNED / NOT IMPLEMENTED
+human_approval_packet: PLANNED / NOT MIGRATED
+approval API: PLANNED / NOT IMPLEMENTED
+replay read API: PLANNED / NOT IMPLEMENTED
+model_call: NOT STARTED
+prompt version: NOT STARTED
+tool registry: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+本轮只编制 stage-qdr-2 Work Order，不实现功能。允许后续进入第一个小批次 `DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO`；不允许一次性全量实现 stage-qdr-2，不允许新增 `human_approval_packet` 表、approval API、replay read API、model_call、prompt version、tool registry、真实 HTTP、real provider、LangGraph / AutoGen / CrewAI 或 LIVE。
+
+stage-qdr-2 的设计范围是只读 Audit Trace Read Model 与 Human Approval Packet：查询必须 tenant-bound，approval 只能改变 DH 内部审批状态，不能触发 NQ mutation、order、cancel、risk mutation、ledger mutation、paper 或 live。`LONG_BIAS / SHORT_BIAS` 仍是只读方向性意见，不映射 `BUY / SELL`；`APPROVED` 不是交易授权。
 
 ## 1.0.28 stage-qdr-1 Quant Decision Review Core Baseline（2026-07-06，IN_PROGRESS）
 
