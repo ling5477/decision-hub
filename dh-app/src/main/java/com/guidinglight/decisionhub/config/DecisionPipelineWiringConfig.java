@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionAuditRepository;
 import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionReplayQueryRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcDecisionCoreRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcDecisionReadModelQueryAdapter;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditRepository;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOrchestrator;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOutputAssembler;
@@ -24,6 +25,8 @@ import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionReplayQueryS
 import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionRiskReviewer;
 import com.guidinglight.decisionhub.usecase.decision.MockDecisionSignalProvider;
 import com.guidinglight.decisionhub.usecase.qdr.DecisionRequestRepository;
+import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelQueryPort;
+import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelService;
 
 import java.time.Clock;
 
@@ -35,8 +38,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /**
  * DH Stage4 K3/K4 decision pipeline 装配。
  *
- * <p>本配置只接 DH 自身 JDBC 审计表、mock-only orchestrator 与 K4 replay read model；不新增 Controller、不暴露
- * API、不接真实 provider、不接 NQ runtime、不启用 LangGraph 或 LIVE。
+ * <p>本配置只接 DH 自身 JDBC 审计表、mock-only orchestrator、K4 replay read model 与 QDR B2
+ * 只读 read model；不接真实 provider、不接 NQ runtime、不启用 LangGraph 或 LIVE。
  */
 @Configuration
 public class DecisionPipelineWiringConfig {
@@ -89,6 +92,31 @@ public class DecisionPipelineWiringConfig {
     public DecisionReplayQueryService decisionReplayQueryService(
             final DecisionReplayQueryRepository decisionReplayQueryRepository) {
         return new DefaultDecisionReplayQueryService(decisionReplayQueryRepository);
+    }
+
+    /**
+     * 装配 stage-qdr-2 B2 read model tenant-bound JDBC query adapter。
+     *
+     * @param jdbcTemplate DH 应用 datasource 的 JdbcTemplate。
+     * @return 只读 read model query port。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public DecisionReadModelQueryPort decisionReadModelQueryPort(final JdbcTemplate jdbcTemplate) {
+        return new JdbcDecisionReadModelQueryAdapter(jdbcTemplate);
+    }
+
+    /**
+     * 装配 stage-qdr-2 B2 read model 查询服务。
+     *
+     * @param decisionReadModelQueryPort tenant-bound 只读查询 port。
+     * @return read model query service。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public DecisionReadModelService decisionReadModelService(
+            final DecisionReadModelQueryPort decisionReadModelQueryPort) {
+        return new DecisionReadModelService(decisionReadModelQueryPort);
     }
 
     /**

@@ -1,5 +1,77 @@
 # Decision Hub Worklog
 
+## 2026-07-06 DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API
+
+执行 `DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API`。本轮为 `CODE_CHANGE + TEST + DOCUMENTATION + READMODEL_REPOSITORY + READONLY_API + TENANT_BOUND_QUERY + SECURITY_BOUNDARY_PRESERVATION + NO_DB_MIGRATION + NO_APPROVAL_WRITE + NO_REAL_HTTP + NO_PROVIDER + NO_AGENT`，只实现 stage-qdr-2 B2 read repository 与 read-only API。
+
+### 新增文件
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionReadModelService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionReadModelUnavailableException.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcDecisionReadModelQueryAdapter.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/DecisionRunReadController.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/DecisionReadModelServiceTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcDecisionReadModelQueryAdapterTest.java
+dh-api/src/test/java/com/guidinglight/decisionhub/api/decision/DecisionRunReadControllerWebMvcTest.java
+```
+
+### 修改文件
+
+```text
+dh-api/src/main/java/com/guidinglight/decisionhub/api/security/DhApiAuthenticationFilter.java
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java
+docs/current/API.md
+docs/current/DB_SCHEMA.md
+docs/current/DH_STAGE_QDR_2_WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### Result
+
+```text
+stage-qdr-2 B1: DONE / IMPLEMENTED_BY_VALIDATION
+stage-qdr-2 B2: DONE / IMPLEMENTED
+stage-qdr-2 implementation overall: PARTIAL
+Read repository: IMPLEMENTED / JDBC_READONLY / EXISTING_V5_V6_TABLES_ONLY
+Read API: IMPLEMENTED / GET_DETAIL_AND_TRACE / AUTHENTICATED / TENANT_BOUND
+human_approval_packet: NOT STARTED
+approval API: NOT STARTED
+replay read API: NOT STARTED
+model gateway: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+### Findings
+
+- 新增 `DecisionReadModelService`，在 usecase 层校验 `decisionRunId` UUID 并保证 trace 查询先确认当前 tenant 下 run 存在；非法输入不会进入 repository。
+- 新增 `JdbcDecisionReadModelQueryAdapter`，只读 V6 `decision_request` / `decision_run` / `quant_signal` / `quant_decision` 与 V5 `dh_decision_context_snapshot` / `dh_decision_trace_step` / `dh_decision_provider_call_log` / `dh_decision_output`；V5 trace/evidence 使用 V6 run 反查出的 `request_id` 作为 V5 `decision_id`。
+- 新增 `DecisionRunReadController`，提供 `GET /api/ai/decision-runs/{decisionRunId}` 与 `GET /api/ai/decision-runs/{decisionRunId}/trace`；认证 filter 已覆盖 `/api/ai/decision-runs`。
+- API response 不返回 tenantId，不返回 raw provider response、raw prompt、credential、secret-like material 或 executable trading instruction；trace endpoint 只读取已物化 audit step，不触发 replay execution。
+- Architecture guard 新增 B2 规则，约束 qdr JDBC read adapter 不依赖 API/Web/HTTP/provider/Agent runtime，API read controller 不依赖 infra/JDBC/provider/Agent runtime。
+
+### Targeted validation before final gate
+
+```text
+mvn -ntp -pl dh-usecase -am -Dtest=DecisionReadModelServiceTest "-Dsurefire.failIfNoSpecifiedTests=false" test: BUILD SUCCESS / 4 tests
+mvn -ntp -pl dh-infra -am -Dtest=JdbcDecisionReadModelQueryAdapterTest "-Dsurefire.failIfNoSpecifiedTests=false" test: BUILD SUCCESS / 6 tests
+mvn -ntp -pl dh-api -am -Dtest=DecisionRunReadControllerWebMvcTest "-Dsurefire.failIfNoSpecifiedTests=false" test: BUILD SUCCESS / 7 tests
+mvn -ntp -pl dh-app -am "-Dtest=DecisionPipelineWiringConfigTest,ArchitectureTest" "-Dsurefire.failIfNoSpecifiedTests=false" test: BUILD SUCCESS / 18 tests
+```
+
+### Boundary
+
+未修改 NQ；未新增 migration；未修改 V5 / V6 migration；未新增 `human_approval_packet`；未新增 approval API；未新增 approval write；未新增 replay execution API；未新增 model_call / prompt_template / prompt_version / tool registry；未接真实 HTTP；未接 real provider；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`。B3/B4 仍 `NOT STARTED`。
+
 ## 2026-07-06 DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO
 
 执行 `DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO`。本轮为 `CODE_CHANGE + TEST + DOCUMENTATION + READMODEL_DTO + QUERY_CONTRACT + SECURITY_BOUNDARY_PRESERVATION + NO_API_IMPLEMENTATION + NO_DB_MIGRATION + NO_APPROVAL_WRITE`，只实现 stage-qdr-2 B1 read model DTO / projection / query contract。

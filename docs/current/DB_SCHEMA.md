@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B1_READMODEL_CONTRACT_DONE / PARTIAL_IMPLEMENTATION
-Next stage:    DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API / NOT STARTED
+Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B2_READMODEL_REPOSITORY_API_IMPLEMENTED / PARTIAL_IMPLEMENTATION
+Next stage:    DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN / NOT STARTED
 ```
 
 Flyway 迁移：
@@ -17,17 +17,18 @@ V4__nq_feedback_replay_nonce.sql P1-4 replay nonce persistence
 V5__decision_pipeline_audit.sql  Decision audit / snapshot / trace / provider call / output
 V6__qdr_decision_core_baseline.sql stage-qdr-1 Decision Core baseline
 stage-qdr-2 B1 readmodel DTO   DONE / NO DB SCHEMA CHANGE / NO MIGRATION
+stage-qdr-2 B2 read repository/API DONE / NO DB SCHEMA CHANGE / NO MIGRATION
 human_approval_packet            PLANNED / NOT MIGRATED / stage-qdr-2 draft only
 ```
 
-## 1.0 stage-qdr-2 B1 read model schema impact
+## 1.0 stage-qdr-2 B1/B2 read model schema impact
 
-B1 只新增 `dh-usecase` read model DTO / projection 与 tenant-bound query contract，不新增 DB schema，不新增 Flyway migration，不修改 V5 / V6 migration，不新增 `human_approval_packet` 表。
+B1 只新增 `dh-usecase` read model DTO / projection 与 tenant-bound query contract；B2 新增只读 JDBC adapter 与 authenticated read-only API。B1/B2 均不新增 DB schema，不新增 Flyway migration，不修改 V5 / V6 migration，不新增 `human_approval_packet` 表。
 
 ```text
 Read model DTO/query contract: DONE / USECASE_ONLY
-Read repository: NOT STARTED
-API implementation: NOT STARTED
+Read repository: DONE / JDBC_READONLY / EXISTING_V5_V6_TABLES_ONLY
+API implementation: DONE / READ_ONLY / NO_OPENAPI_FORMALIZATION
 human_approval_packet: PLANNED / NOT MIGRATED
 Approval API: NOT STARTED
 Replay read API: NOT STARTED

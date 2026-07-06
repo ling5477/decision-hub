@@ -398,4 +398,65 @@ public class ArchitectureTest {
                         "crewai..")
                 .check(importMainClasses());
     }
+
+    /**
+     * stage-qdr-2 B2：QDR JDBC read adapter 只能是 DH-owned DB 只读 adapter。
+     *
+     * <p>infra.jdbc.qdr 允许依赖 Spring JDBC，但不得反向依赖 API/Spring Web、HTTP client、真实
+     * provider SDK 或 Agent runtime。
+     */
+    @Test
+    void stageQdr2B2_rule16_qdrJdbcReadAdapterDoesNotDependOnApiWebHttpProviderOrAgentRuntime() {
+        noClasses()
+                .that()
+                .resideInAPackage("..infra.jdbc.qdr..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage(
+                        "..api..",
+                        "org.springframework.web..",
+                        "org.springframework.web.reactive..",
+                        "okhttp3..",
+                        "com.openai..",
+                        "com.anthropic..",
+                        "com.google.genai..",
+                        "dev.langchain4j..",
+                        "org.springframework.ai..",
+                        "langgraph..",
+                        "autogen..",
+                        "crewai..")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("java.net.http.HttpClient")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("java.net.HttpURLConnection")
+                .check(importMainClasses());
+    }
+
+    /**
+     * stage-qdr-2 B2：API read controller 只能依赖 usecase contract，不得直连 repository/JDBC。
+     */
+    @Test
+    void stageQdr2B2_rule17_qdrReadApiDoesNotDependOnInfraJdbcProviderOrAgentRuntime() {
+        noClasses()
+                .that()
+                .resideInAPackage("..api.decision..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage(
+                        "..infra..",
+                        "org.springframework.jdbc..",
+                        "java.sql..",
+                        "javax.sql..",
+                        "com.openai..",
+                        "com.anthropic..",
+                        "com.google.genai..",
+                        "dev.langchain4j..",
+                        "org.springframework.ai..",
+                        "langgraph..",
+                        "autogen..",
+                        "crewai..")
+                .check(importMainClasses());
+    }
 }

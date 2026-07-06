@@ -6,8 +6,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Objects;
+
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -16,69 +18,75 @@ import org.springframework.web.filter.OncePerRequestFilter;
 /**
  * DH AI API 最小认证 filter。
  *
- * <p>保护范围覆盖当前所有 DH API 多租户入口：ResearchRun API、NQ feedback API、limited dry-run API 与
- * deprecated legacy run API。认证结果写入 request attribute，controller 只能从该可信上下文解析 tenant。
+ * <p>保护范围覆盖当前所有 DH API 多租户入口：ResearchRun API、NQ feedback API、limited dry-run
+ * API、QDR decision run read API 与 deprecated legacy run API。认证结果写入 request attribute，
+ * controller 只能从该可信上下文解析 tenant。
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 20)
 public final class DhApiAuthenticationFilter extends OncePerRequestFilter {
 
-  private static final String AUTHORIZATION = "Authorization";
-  private static final String BEARER_PREFIX = "Bearer ";
-  private static final String RESEARCH_PATH = "/api/ai/research-runs";
-  private static final String NQ_FEEDBACK_PATH = "/api/ai/feedback/nq";
-  private static final String DECISION_DRY_RUN_PATH = "/api/ai/decision-dry-runs";
-  private static final String LEGACY_RUN_PATH = "/legacy/runs";
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String RESEARCH_PATH = "/api/ai/research-runs";
+    private static final String NQ_FEEDBACK_PATH = "/api/ai/feedback/nq";
+    private static final String DECISION_DRY_RUN_PATH = "/api/ai/decision-dry-runs";
+    private static final String DECISION_RUN_READ_PATH = "/api/ai/decision-runs";
+    private static final String LEGACY_RUN_PATH = "/legacy/runs";
 
-  private final TokenVerifier tokenVerifier;
+    private final TokenVerifier tokenVerifier;
 
-  /** 构造认证 filter。 */
-  public DhApiAuthenticationFilter(final TokenVerifier tokenVerifier) {
-    this.tokenVerifier = Objects.requireNonNull(tokenVerifier, "tokenVerifier");
-  }
-
-  @Override
-  protected boolean shouldNotFilter(final HttpServletRequest request) {
-    final String path = request.getRequestURI();
-    return !(path.equals(RESEARCH_PATH)
-        || path.startsWith(RESEARCH_PATH + "/")
-        || path.equals(NQ_FEEDBACK_PATH)
-        || path.equals(DECISION_DRY_RUN_PATH)
-        || path.equals(LEGACY_RUN_PATH)
-        || path.startsWith(LEGACY_RUN_PATH + "/"));
-  }
-
-  @Override
-  protected void doFilterInternal(
-      final HttpServletRequest request,
-      final HttpServletResponse response,
-      final FilterChain filterChain)
-      throws ServletException, IOException {
-    final String token = extractBearerToken(request);
-    final AuthContext authContext = tokenVerifier.verify(token);
-    if (authContext == null || isBlank(authContext.tenantId())) {
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-      return;
+    /**
+     * 构造认证 filter。
+     */
+    public DhApiAuthenticationFilter(final TokenVerifier tokenVerifier) {
+        this.tokenVerifier = Objects.requireNonNull(tokenVerifier, "tokenVerifier");
     }
-    final String requestedTenant = request.getHeader(AuthenticatedRequest.TENANT_HEADER);
-    if (!isBlank(requestedTenant) && !authContext.tenantId().equals(requestedTenant)) {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN);
-      return;
-    }
-    request.setAttribute(AuthenticatedRequest.AUTH_CONTEXT_ATTR, authContext);
-    request.setAttribute(AuthenticatedRequest.TENANT_ID_ATTR, authContext.tenantId());
-    filterChain.doFilter(request, response);
-  }
 
-  private static String extractBearerToken(final HttpServletRequest request) {
-    final String header = request.getHeader(AUTHORIZATION);
-    if (header == null || !header.startsWith(BEARER_PREFIX)) {
-      return null;
+    @Override
+    protected boolean shouldNotFilter(final HttpServletRequest request) {
+        final String path = request.getRequestURI();
+        return !(path.equals(RESEARCH_PATH)
+                || path.startsWith(RESEARCH_PATH + "/")
+                || path.equals(NQ_FEEDBACK_PATH)
+                || path.equals(DECISION_DRY_RUN_PATH)
+                || path.equals(DECISION_RUN_READ_PATH)
+                || path.startsWith(DECISION_RUN_READ_PATH + "/")
+                || path.equals(LEGACY_RUN_PATH)
+                || path.startsWith(LEGACY_RUN_PATH + "/"));
     }
-    return header.substring(BEARER_PREFIX.length()).trim();
-  }
 
-  private static boolean isBlank(final String value) {
-    return value == null || value.isBlank();
-  }
+    @Override
+    protected void doFilterInternal(
+            final HttpServletRequest request,
+            final HttpServletResponse response,
+            final FilterChain filterChain)
+            throws ServletException, IOException {
+        final String token = extractBearerToken(request);
+        final AuthContext authContext = tokenVerifier.verify(token);
+        if (authContext == null || isBlank(authContext.tenantId())) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+        final String requestedTenant = request.getHeader(AuthenticatedRequest.TENANT_HEADER);
+        if (!isBlank(requestedTenant) && !authContext.tenantId().equals(requestedTenant)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+        request.setAttribute(AuthenticatedRequest.AUTH_CONTEXT_ATTR, authContext);
+        request.setAttribute(AuthenticatedRequest.TENANT_ID_ATTR, authContext.tenantId());
+        filterChain.doFilter(request, response);
+    }
+
+    private static String extractBearerToken(final HttpServletRequest request) {
+        final String header = request.getHeader(AUTHORIZATION);
+        if (header == null || !header.startsWith(BEARER_PREFIX)) {
+            return null;
+        }
+        return header.substring(BEARER_PREFIX.length()).trim();
+    }
+
+    private static boolean isBlank(final String value) {
+        return value == null || value.isBlank();
+    }
 }

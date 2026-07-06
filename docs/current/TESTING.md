@@ -1,5 +1,54 @@
 # Decision Hub Testing
 
+## 2026-07-06 DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API validation
+
+```text
+Scope:
+  - 本轮只实现 stage-qdr-2 B2 read model repository adapter 与受租户约束的 read API。
+  - 新增 usecase read service、infra JDBC query adapter、api controller、wiring、unit tests、WebMvc tests、ArchitectureTest 边界。
+  - 复用现有 V5/V6 表结构；不新增 migration，不新增 approval 表，不新增 approval write。
+  - 不新增 replay execution API，不新增 model_call / prompt_template / prompt_version / tool_definition / tool_invocation。
+  - 不修改 NQ，不真实 HTTP，不接 real provider，不接 Agent / LangGraph，不启用 LIVE。
+
+Result:
+  STAGE_QDR_2_B1: DONE
+  STAGE_QDR_2_B2: DONE
+  STAGE_QDR_2_IMPLEMENTATION_OVERALL: PARTIAL
+  ALLOW_STAGE_QDR_2_B3_WO_OR_IMPLEMENTATION: YES
+  ALLOW_STAGE_QDR_2_FULL_IMPLEMENTATION_NOW: NO
+  ALLOW_APPROVAL_WRITE: NO
+  ALLOW_REAL_HTTP: NO
+  ALLOW_REAL_PROVIDER: NO
+  ALLOW_AGENT_PHASE: NO
+  ALLOW_LANGGRAPH_RUNTIME: NO
+  ALLOW_LIVE: NO
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| preflight `Get-Location` | PASS | 当前目录 `F:\project\decision-hub`。 |
+| preflight `git status --short` | PASS / CLEAN BEFORE WRITE | B2 开工前工作区无输出；B1 已提交。 |
+| preflight `git branch --show-current` | PASS | 当前分支 `dev`。 |
+| preflight `git log --oneline -5` | PASS / B1 COMMITTED | HEAD 包含 `5e56e7b feat(qdr): add stage-qdr-2 read model contracts`。 |
+| targeted `mvn -ntp -pl dh-usecase -am -Dtest=DecisionReadModelServiceTest "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | 新增 usecase service tests 4 tests / 0 failures / 0 errors；targeted tests 只作为补充，不替代 full module tests。 |
+| targeted `mvn -ntp -pl dh-infra -am -Dtest=JdbcDecisionReadModelQueryAdapterTest "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | 新增 JDBC read adapter tests 6 tests / 0 failures / 0 errors；覆盖 tenant-bound SQL、requestId scoped trace、evidence refs only、illegal `BUY` fail-closed、DB unavailable mapping。 |
+| targeted `mvn -ntp -pl dh-api -am -Dtest=DecisionRunReadControllerWebMvcTest "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | 新增 WebMvc tests 7 tests / 0 failures / 0 errors；覆盖 auth required、tenant mismatch 403、tenantId 不出响应、invalid UUID 400、not found 404、unavailable 500。 |
+| targeted `mvn -ntp -pl dh-app -am "-Dtest=DecisionPipelineWiringConfigTest,ArchitectureTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | ArchitectureTest 17 rules / 0 failures；wiring test 1 / 0 failures。 |
+| `mvn -ntp -pl dh-usecase -am test` | BUILD SUCCESS | reactor 9/9 SUCCESS；`dh-usecase` 204 tests / 0 failures / 0 errors / 0 skipped；Finished at 2026-07-06T15:45:47+08:00。 |
+| `mvn -ntp -pl dh-infra -am test` | BUILD SUCCESS WITH TESTCONTAINERS SKIP | reactor 11/11 SUCCESS；`dh-infra` 43 tests / 0 failures / 0 errors / 3 skipped；`JdbcDecisionReadModelQueryAdapterTest` included 6 tests。 |
+| `mvn -ntp -pl dh-api -am test` | BUILD SUCCESS | reactor 11/11 SUCCESS；`dh-api` 64 tests / 0 failures / 0 errors / 0 skipped；Finished at 2026-07-06T15:48:42+08:00。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS WITH TESTCONTAINERS SKIP | reactor 15/15 SUCCESS；`ArchitectureTest` 17 tests / 0 failures / 0 errors；`dh-app` 42 tests / 0 failures / 0 errors / 1 skipped；Finished at 2026-07-06T15:49:39+08:00。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed；Finished at 2026-07-06T15:49:54+08:00。 |
+| skip flags | PASS / NOT USED FOR FULL TESTS | full module tests 与 quality gate 未使用 `-DskipTests`、未使用 `-DskipITs`。targeted tests 仅使用 `-Dsurefire.failIfNoSpecifiedTests=false` 处理 upstream modules 无指定测试，不跳过目标测试。 |
+| Docker/Testcontainers | SKIPPED / NOT PASS | `JdbcNonceReplayGuardPersistenceTest` skip 3；`PostgresContainerSmokeTest` skip 1；日志显示 no valid Docker environment。skip 不等于 PASS。 |
+| forbidden scan with PowerShell-expanded `dh-*` directories | PASS / CLASSIFIED | 命中分类为 test guard、docs prohibition、enum constraint、redaction/security code、unrelated historical text；未发现 B2 production risk。 |
+| Maven settings warning | NON-BLOCKING WARNING | 系统 Maven 仍输出 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml` line 227 `Unrecognised tag: profiles`；本轮未修改 Maven 配置。 |
+| `.\mvnw.cmd -v` | UNUSABLE DESPITE EXIT 0 | 输出 `\ is not recognized as an internal or external command` 与 `.mvn\wrapper\maven-wrapper.jar 没有主清单属性`；wrapper 仍不可用，不能写成 PASS。 |
+
+Boundary:
+
+未修改 NQ；未新增 migration；未新增 approval 表；未新增 approval API；未新增 approval write；未新增 replay execution API；未新增 model_call / prompt_template / prompt_version / tool_definition / tool_invocation；未新增真实 HTTP；未新增真实 provider；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`；B2 新增类型与 endpoint 仅用于 read model 查询。
+
 ## 2026-07-06 DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO validation
 
 ```text

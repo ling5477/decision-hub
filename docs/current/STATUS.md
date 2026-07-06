@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B1_READMODEL_CONTRACT_DONE / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-> Next stage:    DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_REPOSITORY_AND_API
+> Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B2_READMODEL_REPOSITORY_API_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+> Next stage:    DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ONLY / NO_APPROVAL_API_WRITE_YET
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,11 +34,12 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B1_READMODEL_CONTRACT_DONE / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
+Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B2_READMODEL_REPOSITORY_API_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
 stage-qdr-1 implementation: DONE.
 stage-qdr-1 freeze: CLOSED / ACCEPTED.
 stage-qdr-2 Work Order: DONE / WORK_ORDER_READY.
 stage-qdr-2 B1: DONE / IMPLEMENTED_BY_VALIDATION / READMODEL_DTO_QUERY_CONTRACT_ONLY.
+stage-qdr-2 B2: DONE / IMPLEMENTED / TENANT_BOUND_READ_REPOSITORY_AND_READONLY_API.
 stage-qdr-2 implementation overall: PARTIAL.
 human_approval_packet: NOT STARTED.
 approval API: NOT STARTED.
@@ -55,7 +56,7 @@ Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MIS
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime PR prep: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API / NOT STARTED / NO_APPROVAL_WRITE / NO_DB_MIGRATION.
+Next concrete action: DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN / NOT STARTED / NO_APPROVAL_API_WRITE / NO_REAL_HTTP / NO_PROVIDER.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -66,6 +67,35 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.31 DH-STAGE-QDR-2-B2 Read Model Repository / API（2026-07-06，DONE / IMPLEMENTED）
+
+```text
+Task: DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API
+Task type: CODE_CHANGE + TEST + DOCUMENTATION + READMODEL_REPOSITORY + READONLY_API + TENANT_BOUND_QUERY + SECURITY_BOUNDARY_PRESERVATION + NO_DB_MIGRATION + NO_APPROVAL_WRITE
+stage-qdr-2 WO: DONE / WORK_ORDER_PARTIALLY_CONSUMED
+stage-qdr-2 B1: DONE / IMPLEMENTED_BY_VALIDATION
+stage-qdr-2 B2: DONE / IMPLEMENTED
+stage-qdr-2 implementation overall: PARTIAL
+Read repository: IMPLEMENTED / JDBC_READONLY / EXISTING_V5_V6_TABLES_ONLY
+Read API: IMPLEMENTED / GET_DETAIL_AND_TRACE / TENANT_BOUND / AUTHENTICATED
+OpenAPI formal contract: NOT UPDATED
+human_approval_packet: NOT STARTED
+approval API: NOT STARTED
+replay read API: NOT STARTED
+model gateway: NOT STARTED
+model_call: NOT STARTED
+prompt version: NOT STARTED
+tool registry: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+B2 新增 `DecisionReadModelService`、`JdbcDecisionReadModelQueryAdapter` 与 `DecisionRunReadController`，实现当前 tenant 下 `GET /api/ai/decision-runs/{decisionRunId}` 与 `GET /api/ai/decision-runs/{decisionRunId}/trace`。查询只读访问 V6 `decision_request` / `decision_run` / `quant_signal` / `quant_decision` 与 V5 `dh_decision_context_snapshot` / `dh_decision_trace_step` / `dh_decision_provider_call_log` / `dh_decision_output`，不新增表、不修改 migration、不新增 approval write。
+
+B2 API 必须通过现有 `DhApiAuthenticationFilter` 认证，tenant 只从认证上下文读取；response 不返回 tenantId，不返回 raw provider response、raw prompt、credential、secret-like material 或 executable trading instruction。trace 查询只读取已物化 audit step，不触发 replay execution、外部 HTTP、provider、Agent runtime、LangGraph / AutoGen / CrewAI、NQ mutation 或 LIVE。
 
 ## 1.0.30 DH-STAGE-QDR-2-B1 Read Model DTO / Query Contract（2026-07-06，DONE / IMPLEMENTED_BY_VALIDATION）
 

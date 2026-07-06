@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B1_READMODEL_CONTRACT_DONE / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-下一阶段: DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ALLOWED / READMODEL_REPOSITORY_AND_API
+当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B2_READMODEL_REPOSITORY_API_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+下一阶段: DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ONLY / NO_APPROVAL_API_WRITE_YET
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -26,14 +26,15 @@ DH runtime API WO: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATI
 DH limited runtime endpoint: IMPLEMENTED / DH_ONLY / DEFAULT_DISABLED / DEV_TEST_ENABLE_ONLY / CLOSE_REVIEW_ACCEPTED / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
 Decision Core baseline: CLOSED / ACCEPTED / decision_request + decision_run + quant_signal + quant_decision
 stage-qdr-2 read model DTO/query contract: IMPLEMENTED / USECASE_ONLY / NO_ENDPOINT
-stage-qdr-2 API drafts: PLANNED / NOT IMPLEMENTED
+stage-qdr-2 read model API: IMPLEMENTED / READ_ONLY / TENANT_BOUND / NO_OPENAPI_FORMALIZATION
+stage-qdr-2 approval API drafts: PLANNED / NOT IMPLEMENTED
 Integration-1:        NOT STARTED
 Runtime integration:  NOT STARTED
 AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为正式契约单源；B1 未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 B1 仅落地 usecase-level read model DTO / query contract；只读查询 API 与审批 API 草案仍全部标记为 `PLANNED / NOT IMPLEMENTED`；`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
+OpenAPI 仍为正式契约单源；B2 未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 B1 已落地 usecase-level read model DTO / query contract；B2 已新增 tenant-bound read repository 与只读 detail/trace API；approval API 草案仍标记为 `PLANNED / NOT IMPLEMENTED`；`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
 
 ## 2. 已实现端点
 
@@ -59,6 +60,12 @@ POST /api/ai/decision-dry-runs                       DH limited dry-run inbound 
                                                       - response 仅 read-only snapshot；不返回 BUY / SELL / 可执行订单字段
                                                       - stage-qdr-1 起内部写入 decision_request / decision_run / quant_signal / quant_decision
                                                       - 主线落库或 V5 audit 落库失败必须 fail-closed
+GET  /api/ai/decision-runs/{decisionRunId}           stage-qdr-2 B2 read-only detail API
+                                                      - 必须认证；tenant 只从认证上下文读取
+                                                      - 只读 V6/V5 现有表；不返回 tenantId 或 raw provider/prompt/material
+GET  /api/ai/decision-runs/{decisionRunId}/trace     stage-qdr-2 B2 read-only trace API
+                                                      - 只读取已物化 audit trace step；不触发 replay execution
+                                                      - response 仅 summary/ref；不触发 HTTP、provider、approval write 或 LIVE
 POST /legacy/runs                                    旧链路（@Deprecated，必须认证，不允许匿名）
 GET  /legacy/runs/{runId}                            旧链路（@Deprecated，必须认证且 tenant 匹配）
 ```
@@ -91,19 +98,19 @@ quant_decision:
 
 安全边界不变：HMAC、timestamp、nonce replay、tenant-source binding、payload cap、memory cap、rate limit、kill switch、forbidden material gate、audit fail-closed 均继续生效。`LONG_BIAS / SHORT_BIAS` 只表示只读方向性审查意见，不是交易指令。
 
-## 2.2 stage-qdr-2 planned API draft（PLANNED / NOT IMPLEMENTED）
+## 2.2 stage-qdr-2 read model API（B2 IMPLEMENTED / READ_ONLY）
 
-以下 API 只属于 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md` 的合同草案。B1 已新增 usecase-level DTO / query port 与 unit tests；当前仍未新增 Controller、OpenAPI path、API Service implementation、Repository、JDBC implementation 或 WebMvc API 测试。
+以下 read API 已由 B2 实现为 authenticated / tenant-bound / read-only endpoint。它们没有写入 OpenAPI 正式契约，不是 approval API，不触发 replay execution、外部 HTTP、provider、NQ mutation、Agent runtime 或 LIVE。
 
 ```text
-GET  /api/ai/decision-runs/{decisionRunId}                  PLANNED / NOT IMPLEMENTED
-GET  /api/ai/decision-runs/{decisionRunId}/trace            PLANNED / NOT IMPLEMENTED
+GET  /api/ai/decision-runs/{decisionRunId}                  IMPLEMENTED / READ_ONLY / TENANT_BOUND
+GET  /api/ai/decision-runs/{decisionRunId}/trace            IMPLEMENTED / READ_ONLY / TENANT_BOUND / NO_REPLAY_EXECUTION
 GET  /api/ai/approval-packets/{approvalPacketId}            PLANNED / NOT IMPLEMENTED
 POST /api/ai/decision-runs/{decisionRunId}/approval-packets PLANNED / NOT IMPLEMENTED
 POST /api/ai/approval-packets/{approvalPacketId}/decision   PLANNED / NOT IMPLEMENTED
 ```
 
-B1 已实现的 planned response / query model 名称如下，当前仅作为 usecase read model contract，不是对外 API contract：
+B1/B2 已实现的 read model / query / service / adapter 名称如下。DTO 仍是 usecase read model contract；API response 由 `DecisionRunReadController` 做安全映射，不把 usecase DTO 当作正式 external API contract：
 
 ```text
 DecisionRunDetailView
@@ -115,6 +122,9 @@ DecisionRunReadQuery
 DecisionTraceReadQuery
 DecisionEvidenceReadQuery
 DecisionReadModelQueryPort
+DecisionReadModelService
+JdbcDecisionReadModelQueryAdapter
+DecisionRunReadController
 ```
 
 合同要求：
