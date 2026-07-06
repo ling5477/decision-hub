@@ -1,5 +1,88 @@
 # Decision Hub Worklog
 
+## 2026-07-06 stage-qdr-1 Quant Decision Review Core Baseline
+
+执行 `DH-STAGE-QDR-1-FACTSOURCE-AND-DECISION-CORE-BASELINE`。本轮将当前事实源从历史 PR-only / no-runtime 滞后描述 rebase 到代码现实：DH 已有 limited Integration-1 dry-run endpoint、NQ feedback endpoint、V4 nonce replay 表与 V5 decision audit 表；当前主线切换为 Quant Decision Review Core Baseline。
+
+### 新增文件
+
+```text
+dh-app/src/main/resources/db/migration/V6__qdr_decision_core_baseline.sql
+dh-app/src/test/java/com/guidinglight/decisionhub/V6QuantDecisionCoreBaselineMigrationPresenceTest.java
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/*
+dh-domain/src/test/java/com/guidinglight/decisionhub/domain/qdr/QuantDecisionActionTest.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcDecisionCoreRepository.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcDecisionCoreRepositoryTest.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/*
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/InMemoryDecisionCoreRepositoryTest.java
+```
+
+### 修改文件
+
+```text
+dh-api/src/test/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunControllerWebMvcTest.java
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionDryRunRuntimeWiringConfig.java
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DefaultDecisionDryRunService.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DefaultDecisionDryRunServiceTest.java
+docs/current/API.md
+docs/current/DB_SCHEMA.md
+docs/current/README.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### Result
+
+```text
+stage-qdr-1: IN_PROGRESS / Quant Decision Review Core Baseline
+Decision Core tables: decision_request / decision_run / quant_signal / quant_decision
+Dry-run persistence: request + run + signal + quant_decision mainline records
+Audit chain: V5 dh_decision_* retained
+Response boundary: read-only
+Agent / LangGraph runtime: NOT STARTED
+Real provider: NO
+Real HTTP: NO
+LIVE: DISABLED
+NQ mutation: NO
+```
+
+### Findings
+
+- `POST /api/ai/decision-dry-runs` 已存在，不再写成未实现 endpoint；本轮只补内部 Decision Core 主线落库，不改外部 response contract。
+- `POST /api/ai/feedback/nq` 已存在；NQ feedback raw payload 保存能力不变。
+- V6 新增 `decision_request`、`decision_run`、`quant_signal`、`quant_decision`，其中 `quant_decision.action` 明确禁止 `BUY / SELL / PLACE_ORDER / CANCEL_ORDER`。
+- V6 已为 4 张表的全部字段补齐 `COMMENT ON COLUMN`；字段注释只描述审计、追踪、只读决策语义，不包含凭证、账户密钥、真实 provider 或交易授权。
+- `DefaultDecisionDryRunService` 在既有 HMAC / timestamp / nonce / tenant-source / payload / rate / memory / audit fail-closed gate 之后写入 Decision Core 主线；新主线或 V5 audit 写入失败均返回 fail-closed，不吞异常后返回成功。
+- `LONG_BIAS / SHORT_BIAS` 仍为 readonly bias-only 审查意见，不映射到 `BUY / SELL`。
+
+### Validation
+
+```text
+git diff --check: PASS / only LF->CRLF warnings / no whitespace error
+rg GateK/GateL/GateM docs/current: PASS / CLASSIFIED / 51 hits, historical or naming-governance or this work order guard text
+rg no-live-order terms: PASS / CLASSIFIED / guard tests, fixtures, forbidden docs, V6 check constraint, production denylist only
+rg no-agent/provider/credential terms: PASS / CLASSIFIED / docs guard text, tests, redaction/security code, no new real provider SDK
+mvn -ntp -pl dh-app -am test: BUILD SUCCESS
+mvn -ntp -Pquality validate: BUILD SUCCESS / Checkstyle 0 violations / Spotless check passed
+V6QuantDecisionCoreBaselineMigrationPresenceTest: covers table presence, constraints, readonly action guard, no-trading table guard, and full field comment coverage
+```
+
+仓库 Maven wrapper 当前不可用：`.\mvnw.cmd -v` 返回 `\ is not recognized` 与 `maven-wrapper.jar 没有主清单属性`，因此本轮使用系统 Maven `mvn` 执行等价验证。本机 Docker 不可用，既有 Testcontainers 用例按既有测试逻辑跳过：`JdbcNonceReplayGuardPersistenceTest` skipped 3，`PostgresContainerSmokeTest` skipped 1。该结果不是 Docker/Testcontainers 通过。
+
+### Boundary confirmation
+
+未修改 NQ 仓库；未新增真实 HTTP client；未接 OpenAI / Anthropic / Gemini / Ollama / LangChain / LangGraph；未引入 AutoGen / CrewAI / Semantic Kernel；未新增交易、订单、撤单、账户、ledger、risk、paper/live mutation；未读取或输出 credential、token、cookie、apiKey、apiSecret 或 passphrase；未开启 LIVE。
+
+### Next
+
+```text
+stage-qdr-1 VERIFY -> stage-qdr-2 Audit Trace Read Model + Human Approval Packet / NOT STARTED
+```
+
 ## 2026-07-05 NQ-DH-I1-MOCK-RUNTIME-PR-PREP
 
 完成 `NQ-DH-I1-MOCK-RUNTIME-PR-PREP` 的 DH companion status sync。本轮主交付在 NQ worktree `E:/Project/nexus-quant-i1-dryrun`，DH 只同步 current docs 的 PR companion 状态。

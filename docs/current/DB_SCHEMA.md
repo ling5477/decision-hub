@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: Stage2-PoC-B5 IMPLEMENT completed
-Next stage:    Stage2-PoC VERIFY
+Current stage: stage-qdr-1 / Quant Decision Review Core Baseline / IN_PROGRESS
+Next stage:    stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / NOT STARTED
 ```
 
 Flyway 迁移：
@@ -13,7 +13,137 @@ Flyway 迁移：
 V1__init.sql                   Stage1 基线
 V2__dh_agent_runtime.sql       Stage1 Agent Runtime + dh_nq_feedback_events
 V3__stage2_poc_tools.sql       Stage2-PoC-B5：4 张新表 + 2 张 ALTER
+V4__nq_feedback_replay_nonce.sql P1-4 replay nonce persistence
+V5__decision_pipeline_audit.sql  Decision audit / snapshot / trace / provider call / output
+V6__qdr_decision_core_baseline.sql stage-qdr-1 Decision Core baseline
 ```
+
+## 1.1 stage-qdr-1 Decision Core baseline
+
+V6 新增 4 张 Quant Decision Review 主线表。该主线只服务只读审查与审计，不是交易事实源，不承载订单、撤单、账户、账本、风控 mutation 或 LIVE 状态。所有表与字段均在 migration 中补齐 `COMMENT ON TABLE` / `COMMENT ON COLUMN`，字段注释不得写入凭证、账户密钥或真实 provider 信息。
+
+### decision_request
+
+```text
+id uuid primary key
+request_key varchar not null
+request_type varchar not null
+source_system varchar not null
+source_ref_id varchar null
+tenant_id varchar not null
+trace_id varchar not null
+request_id varchar not null
+input_payload_json jsonb not null
+context_payload_json jsonb null
+status varchar not null
+created_at timestamptz not null
+updated_at timestamptz not null
+
+unique(tenant_id, request_key)
+index(tenant_id, created_at)
+index(trace_id)
+index(request_id)
+```
+
+用途：一条外部或内部审查请求的主线入口。`tenant_id`、`trace_id`、`request_id` 必须写入，便于审计和幂等查询。
+
+### decision_run
+
+```text
+id uuid primary key
+decision_request_id uuid not null references decision_request(id)
+run_no integer not null
+status varchar not null
+orchestrator_key varchar null
+model_provider varchar null
+model_name varchar null
+started_at timestamptz not null
+finished_at timestamptz null
+latency_ms bigint null
+error_code varchar null
+error_message text null
+created_at timestamptz not null
+
+unique(decision_request_id, run_no)
+index(status)
+index(started_at)
+```
+
+用途：记录一次审查运行。`model_provider` / `model_name` 允许为空，本轮不接真实 provider，不写 provider SDK 事实。
+
+### quant_signal
+
+```text
+id uuid primary key
+decision_request_id uuid not null references decision_request(id)
+source_system varchar not null
+symbol varchar null
+exchange varchar null
+timeframe varchar null
+signal_type varchar not null
+signal_payload_json jsonb not null
+strategy_id varchar null
+strategy_version varchar null
+dataset_version varchar null
+received_at timestamptz not null
+created_at timestamptz not null
+
+index(source_system, received_at)
+index(symbol, timeframe)
+```
+
+用途：保存 Quant Decision Review 的输入信号快照。无法识别输入类型时使用 `UNKNOWN_REVIEW_INPUT`，不得把输入解释成可执行订单。
+
+### quant_decision
+
+```text
+id uuid primary key
+quant_signal_id uuid null references quant_signal(id)
+decision_run_id uuid not null references decision_run(id)
+action varchar not null
+confidence_score numeric(5,4) null
+risk_level varchar not null
+rationale text null
+constraints_json jsonb null
+human_approval_status varchar not null default 'NOT_REQUIRED'
+created_at timestamptz not null
+
+index(decision_run_id)
+index(quant_signal_id)
+index(created_at)
+```
+
+允许的 `action`：
+
+```text
+OBSERVE
+NO_TRADE
+LONG_BIAS
+SHORT_BIAS
+NEEDS_REVIEW
+REJECTED
+```
+
+禁止的 `action`：
+
+```text
+BUY
+SELL
+PLACE_ORDER
+CANCEL_ORDER
+```
+
+允许的 `human_approval_status`：
+
+```text
+NOT_REQUIRED
+REQUIRED
+PENDING
+APPROVED
+REJECTED
+```
+
+`LONG_BIAS / SHORT_BIAS` 只表示方向性审查意见，不代表 `BUY / SELL`。`human_approval_status` 当前默认 `NOT_REQUIRED`；`human_approval_packet` 与 approval API 留到 `stage-qdr-2`，本轮不实现。
 
 ## 2. Stage2-PoC-B5 新增 4 张表
 

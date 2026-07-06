@@ -95,12 +95,53 @@ NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW:
               Integration-1 mock runtime close review               [pass / closed / accepted / review-only / mock runtime milestone closed / no real dh call / no real http / no provider / no live]
 NQ-DH-I1-MOCK-RUNTIME-PR-PREP:
               Mock runtime milestone PR preparation                 [ready / pr-prep-only / nq pr create allowed / no merge / no real dh call / no real http / no provider / no live]
-NQ-DH-I1-MOCK-RUNTIME-PR-CREATE:
-              Mock runtime milestone PR creation                    [not started / pr-create-only / no merge / no real dh call / no real http / no provider / no live]
+stage-qdr-1:
+              Quant Decision Review Core Baseline                   [in progress / decision core tables + dry-run收口 / no agent / no live]
+stage-qdr-2:
+              Audit Trace Read Model + Human Approval Packet        [not started / approval闭环规划 / no agent / no live]
+stage-qdr-3:
+              Model Gateway Mock + Prompt/Model Version Baseline    [not started / mock provider only / no real provider]
+stage-qdr-4:
+              NQ Quant Decision Review Read-only Integration Hardening [not started / read-only hardening / no live]
+stage-agent-preview:
+              Agent Runtime 前置条件评估                             [not started / evaluate only / LangGraph not started]
 Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
 Stage3:       NQ Console AI 页面接入                      [later / gated]
 DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
 ```
+
+## 1.0 Quant Decision Review stage 路线
+
+当前唯一主线为 Quant Decision Review。QDR 路线采用 stage* 命名，不继续使用 GateK / GateL / GateM 作为 DH 当前阶段名。
+
+```text
+stage-qdr-1:
+  目标：Quant Decision Review Core Baseline。
+  范围：事实源冻结、decision_request、decision_run、quant_signal、quant_decision、dry-run 到 Decision Core 最小收口。
+  退出条件：一条 dry-run 请求能落 request/run/quant_decision，且响应仍 read-only。
+
+stage-qdr-2:
+  目标：Audit Trace Read Model + Human Approval Packet。
+  范围：GET decision run、GET trace、approval packet、approval API。
+  退出条件：人工能查看 trace 并记录审批状态。
+
+stage-qdr-3:
+  目标：Model Gateway Mock + Prompt/Model Version Baseline。
+  范围：model_call、mock provider abstraction、prompt_template、prompt_version、structured output validation。
+  退出条件：任何 AI/mock 输出可追溯 model/prompt/version/cost/latency。
+
+stage-qdr-4:
+  目标：NQ Quant Decision Review Read-only Integration Hardening。
+  范围：合同 fixture、read-only integration test、no-live-order guarantee、NQ worktree/PR 流程。
+  退出条件：NQ 与 DH 形成“输入事实 -> 审查决策 -> 回放审计”的只读闭环。
+
+stage-agent-preview:
+  目标：Agent Runtime 前置条件评估。
+  范围：只评估，不实现 LangGraph / multi-agent runtime。
+  退出条件：只有 stage-qdr-1 到 stage-qdr-4 全部完成后才允许评估。
+```
+
+`stage-qdr-1` 的当前事实基线：limited Integration-1 dry-run endpoint 已存在；NQ feedback endpoint 已存在；V5 `dh_decision_*` audit tables 已存在；当前缺口从“缺 endpoint”修正为“缺统一 decision_request / decision_run 主线、人审闭环、replay read API、model_call、prompt version、tool registry”。本路线不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI / Semantic Kernel、OpenAI / Anthropic / Gemini / Ollama SDK、NQ mutation 或 LIVE。
 
 ## 1.1 当前受限 runtime planning 结论
 

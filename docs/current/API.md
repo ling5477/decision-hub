@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW / CLOSED / ACCEPTED / REVIEW_ONLY / DH_ONLY / NO_NQ_CHANGE / NO_LIVE
-下一阶段: NQ-DH-I1-NQ-RUNTIME-CLIENT-WO / NOT STARTED / WORK_ORDER_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+当前阶段: stage-qdr-1 / Quant Decision Review Core Baseline / IN_PROGRESS / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+下一阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / NOT STARTED / NO_AGENT / NO_LIVE
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -24,13 +24,14 @@ Limited runtime plan: CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTI
 Runtime API contract review: CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME
 DH runtime API WO: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
 DH limited runtime endpoint: IMPLEMENTED / DH_ONLY / DEFAULT_DISABLED / DEV_TEST_ENABLE_ONLY / CLOSE_REVIEW_ACCEPTED / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+Decision Core baseline: IN_PROGRESS / decision_request + decision_run + quant_signal + quant_decision
 Integration-1:        NOT STARTED
 Runtime integration:  NOT STARTED
 AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为正式契约单源；本轮未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY`，确认该 endpoint 可关闭，并允许下一步进入 NQ runtime client WO。`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
+OpenAPI 仍为正式契约单源；本轮未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 不改变该 endpoint 的外部合同，只补内部 Decision Core 主线落库：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
 
 ## 2. 已实现端点
 
@@ -54,9 +55,39 @@ POST /api/ai/decision-dry-runs                       DH limited dry-run inbound 
                                                       - 仅 signed / timestamped / nonce / tenant-bound request
                                                       - dev/test 可显式启用；production disabled / kill switch fail-closed
                                                       - response 仅 read-only snapshot；不返回 BUY / SELL / 可执行订单字段
+                                                      - stage-qdr-1 起内部写入 decision_request / decision_run / quant_signal / quant_decision
+                                                      - 主线落库或 V5 audit 落库失败必须 fail-closed
 POST /legacy/runs                                    旧链路（@Deprecated，必须认证，不允许匿名）
 GET  /legacy/runs/{runId}                            旧链路（@Deprecated，必须认证且 tenant 匹配）
 ```
+
+### 2.1 `POST /api/ai/decision-dry-runs` 内部持久化行为
+
+`stage-qdr-1` 只更新现有 dry-run endpoint 的内部落库行为，不新增 path，不修改 OpenAPI，不改变 response envelope。
+
+```text
+decision_request:
+  tenant_id / trace_id / request_id 必须写入
+  request_key 使用 requestId
+  request_type = QUANT_DECISION_REVIEW
+
+decision_run:
+  decision_request_id 关联 decision_request
+  run_no = 1
+  orchestrator_key = DEFAULT_DECISION_ORCHESTRATOR
+  provider 字段保留为 null，不代表真实 provider
+
+quant_signal:
+  若输入可识别 signal / backtest / report / risk，则记录对应 signal_type
+  否则 signal_type = UNKNOWN_REVIEW_INPUT
+
+quant_decision:
+  action 仅允许 OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS / NEEDS_REVIEW / REJECTED
+  禁止 BUY / SELL / PLACE_ORDER / CANCEL_ORDER
+  human_approval_status 默认 NOT_REQUIRED，本轮不实现 human_approval_packet
+```
+
+安全边界不变：HMAC、timestamp、nonce replay、tenant-source binding、payload cap、memory cap、rate limit、kill switch、forbidden material gate、audit fail-closed 均继续生效。`LONG_BIAS / SHORT_BIAS` 只表示只读方向性审查意见，不是交易指令。
 
 ## 3. Historical / deferred API 方向（当前 API 未实现）
 

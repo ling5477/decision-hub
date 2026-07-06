@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: NQ-DH-I1-MOCK-RUNTIME-PR-PREP / READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
-> Next stage:    NQ-DH-I1-MOCK-RUNTIME-PR-CREATE / NOT STARTED / PR_CREATE_ONLY / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> Current stage: stage-qdr-1 / Quant Decision Review Core Baseline / IN_PROGRESS / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+> Next stage:    stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / NOT STARTED / NO_AGENT / NO_LIVE
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,7 +34,7 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: NQ-DH-I1-MOCK-RUNTIME-PR-PREP / READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Current main line: stage-qdr-1 / Quant Decision Review Core Baseline / IN_PROGRESS / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
 NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
@@ -46,7 +46,7 @@ Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MIS
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime PR prep: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: NQ-DH-I1-MOCK-RUNTIME-PR-CREATE / NOT STARTED / PR_CREATE_ONLY / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
+Next concrete action: stage-qdr-1 / Quant Decision Review Core Baseline / IMPLEMENT + VERIFY / NO_AGENT / NO_LIVE.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -57,6 +57,33 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.28 stage-qdr-1 Quant Decision Review Core Baseline（2026-07-06，IN_PROGRESS）
+
+```text
+Task: DH-STAGE-QDR-1-FACTSOURCE-AND-DECISION-CORE-BASELINE
+Stage: stage-qdr-1 = Quant Decision Review Core Baseline
+Stage naming rule: DH current docs must use stage* naming; GateK / GateL / GateM must not be used for new DH current stages.
+Task type: STAGE_IMPLEMENTATION_PREP + FACTSOURCE_REBASE + DECISION_CORE_BASELINE + MIGRATION_PLANNING + SECURITY_BOUNDARY_PRESERVATION + NO_AGENT + NO_LIVE
+Current main line: Quant Decision Review
+Limited Integration-1 dry-run endpoint: EXISTS / POST /api/ai/decision-dry-runs / DEFAULT_DISABLED / DEV_TEST_ONLY
+NQ feedback endpoint: EXISTS / POST /api/ai/feedback/nq
+V5 decision audit tables: EXISTS / dh_decision_context_snapshot + dh_decision_trace_step + dh_decision_provider_call_log + dh_decision_output
+Decision Core baseline: IMPLEMENTING / decision_request + decision_run + quant_signal + quant_decision
+Human approval packet: NOT IMPLEMENTED / RESERVED_FOR_stage-qdr-2
+Replay read API: NOT IMPLEMENTED
+model_call / prompt version / tool registry: NOT IMPLEMENTED
+Agent / LangGraph runtime: NOT STARTED
+Real provider: FORBIDDEN
+Real HTTP: FORBIDDEN
+LIVE: DISABLED
+```
+
+本轮事实源冻结以当前代码为准：DH 已存在 NQ feedback endpoint，已存在 limited Integration-1 dry-run endpoint，已存在 HMAC / timestamp / nonce replay / tenant-source binding / payload cap / memory cap / rate limit / kill switch 等 fail-closed 安全能力，已存在 V4 `dh_nq_replay_nonce` 与 V5 `dh_decision_*` 审计链路。历史文档中把 dry-run endpoint 写成未实现的描述属于滞后事实，不再作为当前状态。
+
+当前缺口收口为 Quant Decision Review 主线：`decision_request`、`decision_run`、`quant_signal`、`quant_decision` 为本阶段最小 Decision Core；`human_approval_packet`、approval API、replay read API、model_call、prompt version、tool registry、真实 provider、LangGraph / multi-agent runtime 均不在本轮实现范围。`LONG_BIAS / SHORT_BIAS` 仅表示方向性审查意见，不得映射为 `BUY / SELL` 或任何 order / execution / risk / ledger / paper / live mutation。
+
+GateK naming deprecated for DH project docs；后续 DH current stage 必须使用 stage* 命名。本轮选用 `stage-qdr-1`，因为当前 QDR 主线采用 stage slug 命名，不新建 GateK / GateL / GateM 文档或状态。
 
 ## 1.0.27 NQ-DH I1 Mock Runtime PR Prep（2026-07-05，READY / PR_PREP_ONLY）
 

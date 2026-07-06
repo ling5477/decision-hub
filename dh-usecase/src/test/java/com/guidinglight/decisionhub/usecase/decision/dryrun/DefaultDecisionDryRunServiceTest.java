@@ -18,6 +18,7 @@ import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionPolicyChecke
 import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionRiskReviewer;
 import com.guidinglight.decisionhub.usecase.decision.MockDecisionSignalProvider;
 import com.guidinglight.decisionhub.usecase.decision.support.RecordingDecisionAuditReplayRepository;
+import com.guidinglight.decisionhub.usecase.qdr.InMemoryDecisionCoreRepository;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -40,8 +41,11 @@ class DefaultDecisionDryRunServiceTest {
   void validDryRunReturnsReadonlySnapshotAndWritesAuditTraceReplayRefs() {
     final RecordingDecisionAuditReplayRepository repository =
         new RecordingDecisionAuditReplayRepository();
+    final InMemoryDecisionCoreRepository decisionCoreRepository =
+        new InMemoryDecisionCoreRepository();
     final DecisionDryRunResult result =
-        service(repository, enabled(), defaultOrchestrator(repository)).execute(command());
+        service(repository, decisionCoreRepository, enabled(), defaultOrchestrator(repository))
+            .execute(command());
 
     assertTrue(result.success());
     assertEquals(200, result.status());
@@ -52,6 +56,14 @@ class DefaultDecisionDryRunServiceTest {
     assertFalse(result.snapshot().action().equals("SELL"));
     assertTrue(repository.auditEventCount() >= 1);
     assertTrue(repository.outputCount() >= 1);
+    final var decisionRequest =
+        decisionCoreRepository
+            .findByTenantIdAndRequestKey("tenant-a", "req-dryrun-1")
+            .orElseThrow();
+    final var decisionRun =
+        decisionCoreRepository.findByDecisionRequestId(decisionRequest.id()).getFirst();
+    assertEquals("trace-dryrun-1", decisionRequest.traceId());
+    assertEquals(1, decisionCoreRepository.findByDecisionRunId(decisionRun.id()).size());
   }
 
   @Test
@@ -148,6 +160,22 @@ class DefaultDecisionDryRunServiceTest {
       final DecisionDryRunRuntimeProperties properties,
       final DecisionOrchestrator orchestrator) {
     return new DefaultDecisionDryRunService(orchestrator, repository, properties, CLOCK);
+  }
+
+  private static DefaultDecisionDryRunService service(
+      final DecisionAuditRepository repository,
+      final InMemoryDecisionCoreRepository decisionCoreRepository,
+      final DecisionDryRunRuntimeProperties properties,
+      final DecisionOrchestrator orchestrator) {
+    return new DefaultDecisionDryRunService(
+        orchestrator,
+        repository,
+        decisionCoreRepository,
+        decisionCoreRepository,
+        decisionCoreRepository,
+        decisionCoreRepository,
+        properties,
+        CLOCK);
   }
 
   private static DecisionOrchestrator defaultOrchestrator(final DecisionAuditRepository repository) {

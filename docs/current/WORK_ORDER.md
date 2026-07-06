@@ -1,12 +1,56 @@
 # Decision Hub 当前工单
 
-> 当前阶段: NQ-DH-I1-MOCK-RUNTIME-PR-PREP / READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> 当前阶段: stage-qdr-1 / Quant Decision Review Core Baseline / IN_PROGRESS / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation; I1-IMP1 DH dry-run test-support entry; I1 runtime API contract review; I1 DH runtime API work order; I1 DH limited runtime endpoint implementation; I1 DH limited runtime endpoint close review; I1 NQ runtime client work order
-> 下一阶段: NQ-DH-I1-MOCK-RUNTIME-PR-CREATE / NOT STARTED / PR_CREATE_ONLY / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
+> 下一阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / NOT STARTED / NO_AGENT / NO_LIVE
 
 ## 1. 当前目标
 
-`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成计划与 work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线，mock close review 已 `CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME`。`NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 已关闭为 `CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME`；mock/test-support baseline PR 已合并到 NQ dev；`NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 已完成 review-only 收口；`NQ-DH-I1-DH-RUNTIME-API-WO` 已完成 work-order-only 收口；`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已完成 DH-only limited inbound endpoint；`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY`。`NQ-DH-I1-NQ-RUNTIME-CLIENT-WO` 已在 NQ integration worktree 关闭为 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`，并由 NQ limited runtime client implementation / close review 消费；NQ limited client 当前为 `IMPLEMENTED / TARGETED_TEST_PASS / DEFAULT_DISABLED / FAKE_TRANSPORT_ONLY`，close review 为 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO` 已关闭为 work-order-only；`NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION` 与 `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX` 已由 close review 审查为 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY`。`NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW` 已关闭为 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED`。`NQ-DH-I1-MOCK-RUNTIME-PR-PREP` 已完成为 `READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE`，只准备 NQ PR 材料，不授权 merge。当前仍不允许 runtime integration、真实 DH call、真实 HTTP、real provider、AI / LangGraph、LIVE、schema/contracts/golden_cases/OpenAPI/fixture JSON/migration 修改。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only baseline，计划文档为 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`。
+`stage-qdr-1 = Quant Decision Review Core Baseline` 是当前工单。事实源已按当前代码修正：limited Integration-1 dry-run endpoint `POST /api/ai/decision-dry-runs` 已存在；NQ feedback endpoint `POST /api/ai/feedback/nq` 已存在；V5 `dh_decision_context_snapshot`、`dh_decision_trace_step`、`dh_decision_provider_call_log`、`dh_decision_output` 已存在。当前短板不是缺 endpoint，而是缺统一 Decision Core 主线表、human approval 闭环、replay read API、model_call、prompt version、tool registry。
+
+本轮只实现 Quant Decision Review Core Baseline：
+
+```text
+新增 decision_request / decision_run / quant_signal / quant_decision
+dry-run 请求进入后落 decision_request / decision_run / quant_signal / quant_decision
+保留现有 V5 decision audit 链路
+响应继续 read-only
+action 只允许 OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS / NEEDS_REVIEW / REJECTED
+LONG_BIAS / SHORT_BIAS 仅为方向性审查意见，不代表 BUY / SELL
+```
+
+本轮不实现：
+
+```text
+human_approval_packet
+approval API
+replay read API
+model_call
+prompt_template / prompt_version
+tool registry
+真实 provider
+真实 HTTP client
+LangGraph / AutoGen / CrewAI / Semantic Kernel
+OpenAI / Anthropic / Gemini / Ollama SDK
+NQ mutation
+交易 / 订单 / 撤单 / 账户 / ledger / risk / paper / live mutation
+```
+
+### 验收命令
+
+```powershell
+git status --short
+git branch --show-current
+git diff --check
+git diff --stat
+rg -n "GateK|GateL|GateM" docs/current
+rg -n "BUY|SELL|PLACE_ORDER|CANCEL_ORDER|placeOrder|cancelOrder|submitOrder|executeOrder|bypassRisk|forceExecute" dh-* docs/current contracts golden_cases
+rg -n "LangGraph|AutoGen|CrewAI|OpenAI|Anthropic|Gemini|Ollama|apiKey|apiSecret|passphrase|credential|token|cookie" dh-* docs/current contracts golden_cases
+mvn -ntp -pl dh-app -am test
+mvn -ntp -Pquality validate
+```
+
+若本机 `mvnw` wrapper 不可用，允许使用已安装 Maven `mvn` 执行同等命令，并在验证记录中说明降级原因。
 
 ## 0.0Q NQ-DH-I1-MOCK-RUNTIME-PR-PREP（READY / PR_PREP_ONLY）
 
