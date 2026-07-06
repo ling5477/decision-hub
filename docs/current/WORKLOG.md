@@ -6199,3 +6199,39 @@ DecisionAction no BUY / SELL / PLACE_ORDER / CANCEL_ORDER
 ### 推荐下一步
 
 `NQ-DH-I1-MOCK-RUNTIME-PR-PREP`
+
+---
+
+## DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN
+
+日期：2026-07-06
+
+### 本轮目标
+
+只实现 stage-qdr-2 B3：Human Approval Packet 的 DB migration、domain model、status machine、repository port / service、JDBC repository adapter、unit tests、repository tests、migration presence test、architecture guard 与 docs/current 最小同步。本轮不实现 approval API，不新增 Controller，不新增 WebMvc approval tests，不实现 approval write endpoint，不实现 replay execution API，不接真实 HTTP，不接真实 provider，不接 LangGraph / AutoGen / CrewAI，不修改 NQ，不开启 LIVE。
+
+### 实现记录
+
+- 新增 `V7__human_approval_packet.sql`，只新增 `human_approval_packet` 表；包含 tenant-bound unique key、`decision_run_id` FK、status/type/action/risk/confidence checks、必需索引与 comments。未修改 V1-V6 历史 migration。
+- 新增 approval domain package，覆盖 `HumanApprovalPacket`、ID/key/value object、approval type/status/reviewer/checklist/evidence refs 与 fail-closed content guard。
+- 新增 `ApprovalStatusTransitionPolicy`，只允许 `PENDING` / `NEEDS_REVIEW` 到合法状态；`APPROVED`、`REJECTED`、`EXPIRED` 为终态；无自动审批、无 fallback APPROVED。
+- 新增 usecase repository port / service / command / result / persistence exceptions；所有 lookup/update 以 tenant 为边界，不提供 UUID-only 查询或更新。
+- 新增 `JdbcHumanApprovalPacketRepository`，只写 `human_approval_packet`，duplicate key 与 SQL failure 转换为明确 persistence exception；status update 带 `tenant_id + id + previous_status` 条件。
+- 更新 `ArchitectureTest`，新增 approval domain/usecase/infra 边界规则、禁止交易动词扫描与 NQ client dependency guard。
+
+### 验证摘要
+
+- `mvn -ntp -pl dh-domain -am test`：BUILD SUCCESS。
+- `mvn -ntp -pl dh-usecase -am test`：BUILD SUCCESS。
+- `mvn -ntp -pl dh-infra -am test`：BUILD SUCCESS；新增 repository tests 通过；既有 Testcontainers 依赖测试因 Docker 不可用 skipped 3。
+- `mvn -ntp -pl dh-app -am test`：BUILD SUCCESS；ArchitectureTest 22 tests 通过；V7 migration presence 5 tests 通过；既有 Postgres container smoke 因 Docker 不可用 skipped 1。
+- `mvn -ntp -Pquality validate`：BUILD SUCCESS；0 Checkstyle violations；Spotless passed。
+- `.\mvnw.cmd -v`：wrapper 仍不可用，输出 wrapper jar 缺少主清单属性；本轮使用系统 Maven。
+
+### 边界
+
+未修改 NQ；未新增 approval API / Controller / WebMvc approval tests / approval write endpoint；未新增 replay execution API；未接真实 HTTP outbound；未接真实 provider；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰 order / execution / risk / ledger / account / paper / live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`；未把 `APPROVED` 映射为 `BUY`；未把 `REJECTED` 映射为 `SELL`。
+
+### 推荐下一步
+
+`DH-STAGE-QDR-2-B3-REVIEW-FREEZE`

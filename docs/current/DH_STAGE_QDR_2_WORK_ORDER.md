@@ -4,8 +4,8 @@
 Task: DH-STAGE-QDR-2-AUDIT-TRACE-READMODEL-AND-HUMAN-APPROVAL-WO
 Stage: stage-qdr-2 = Audit Trace Read Model + Human Approval Packet
 Task type: WORK_ORDER_ONLY + STAGE_QDR_2_PLANNING + AUDIT_TRACE_READMODEL_DESIGN + HUMAN_APPROVAL_DESIGN + SECURITY_BOUNDARY_DESIGN + NO_CODE_CHANGE
-Status: B2_DONE / WORK_ORDER_PARTIALLY_CONSUMED
-Implementation status: PARTIAL / B2_READMODEL_REPOSITORY_API_IMPLEMENTED
+Status: B3_DONE / WORK_ORDER_PARTIALLY_CONSUMED
+Implementation status: PARTIAL / B3_HUMAN_APPROVAL_MIGRATION_DOMAIN_IMPLEMENTED
 Fact source: docs/current
 ```
 
@@ -13,7 +13,7 @@ Fact source: docs/current
 
 stage-qdr-2 的目标是在 stage-qdr-1 已完成的 `decision_request`、`decision_run`、`quant_signal`、`quant_decision` 基础上，补齐只读审计查询与人工审批包，使一条 dry-run / quant review 结果可被查看、解释、审批、拒绝和追踪。
 
-本 Work Order 原始版本只编制后续 implementation 的可执行工单。2026-07-06 已由 B1 消费第一批范围：新增 read model DTO / projection、tenant-bound query contract、unit tests 与 architecture guard；同日 B2 消费第二批范围：新增只读 JDBC read adapter、usecase query service、authenticated detail/trace GET API 与回归测试。当前仍未新增 migration、human_approval_packet、approval write、approval API、replay execution API、model/provider/runtime 或 LIVE。
+本 Work Order 原始版本只编制后续 implementation 的可执行工单。2026-07-06 已由 B1 消费第一批范围：新增 read model DTO / projection、tenant-bound query contract、unit tests 与 architecture guard；同日 B2 消费第二批范围：新增只读 JDBC read adapter、usecase query service、authenticated detail/trace GET API 与回归测试；同日 B3 消费第三批范围：新增 `human_approval_packet` migration、approval domain / status machine、repository port / service、JDBC adapter 与回归测试。当前仍未新增 approval write endpoint、approval API、Controller、WebMvc approval tests、replay execution API、model/provider/runtime 或 LIVE。
 
 ## 2. 前置状态
 
@@ -26,13 +26,15 @@ V6 quant_signal: EXISTS
 V6 quant_decision: EXISTS
 POST /api/ai/decision-dry-runs success path: writes QDR four tables
 V5 dh_decision_* audit chain: retained
-stage-qdr-2 implementation: PARTIAL / B2_READMODEL_REPOSITORY_API_IMPLEMENTED
+stage-qdr-2 implementation: PARTIAL / B3_HUMAN_APPROVAL_MIGRATION_DOMAIN_IMPLEMENTED
 B1 read model DTO/query contract: DONE / IMPLEMENTED_BY_VALIDATION
-B2 read repository/API: DONE / IMPLEMENTED / READ_ONLY
-B3/B4 human approval: NOT STARTED
-human_approval_packet: NOT STARTED
+B2 read repository/API: CLOSED / ACCEPTED / READ_ONLY
+B3 human approval migration/domain/repository: DONE / IMPLEMENTED / NO_API
+B4 human approval API: NOT STARTED
+human_approval_packet: MIGRATION_ADDED
 approval API: NOT STARTED
-replay read API: NOT STARTED
+approval write endpoint: NOT STARTED
+replay execution API: NOT STARTED
 model_call: NOT STARTED
 prompt version: NOT STARTED
 tool registry: NOT STARTED
@@ -163,7 +165,7 @@ evidenceRefsJson
 
 ## 6. Human Approval Packet 设计草案
 
-`human_approval_packet` 是 planned table，不在本 Work Order 中新增 migration。
+`human_approval_packet` 已由 B3 新增为 `V7__human_approval_packet.sql`。该表只记录 DH 内部人工审查证据，不是交易授权表，不触发 NQ mutation、真实 HTTP、provider、order、cancel、risk、ledger、paper 或 LIVE。
 
 ### 6.1 表结构草案
 
@@ -201,13 +203,14 @@ decision_action not in (BUY, SELL, PLACE_ORDER, CANCEL_ORDER, MARKET_ORDER, LIMI
 confidence_score is null or confidence_score between 0 and 1
 ```
 
-建议索引：
+索引：
 
 ```text
-idx_human_approval_packet_tenant_created(tenant_id, created_at)
-idx_human_approval_packet_status(tenant_id, approval_status, updated_at)
-idx_human_approval_packet_decision_run(decision_run_id)
-idx_human_approval_packet_trace(trace_id)
+idx_human_approval_packet_tenant_created_at(tenant_id, created_at)
+idx_human_approval_packet_decision_run_id(decision_run_id)
+idx_human_approval_packet_status(approval_status)
+idx_human_approval_packet_trace_id(trace_id)
+idx_human_approval_packet_request_id(request_id)
 ```
 
 ### 6.2 审批语义
@@ -224,6 +227,7 @@ PENDING -> REJECTED
 PENDING -> NEEDS_REVIEW
 NEEDS_REVIEW -> APPROVED
 NEEDS_REVIEW -> REJECTED
+NEEDS_REVIEW -> EXPIRED
 PENDING -> EXPIRED
 APPROVED / REJECTED / EXPIRED 为终态
 禁止 APPROVED -> PENDING
@@ -441,16 +445,17 @@ Status: DONE / IMPLEMENTED / READ_ONLY
 
 ```text
 DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN
-Status: NOT STARTED
+Status: DONE / IMPLEMENTED / NO_API
 ```
 
 目标：
 
 ```text
-新增 human_approval_packet migration
-新增 approval domain/status machine
-新增 repository
-不新增 API write
+新增 human_approval_packet migration：DONE
+新增 approval domain/status machine：DONE
+新增 repository port/service：DONE
+新增 JDBC repository adapter：DONE
+不新增 API write：DONE / NOT IMPLEMENTED
 ```
 
 ### Batch 4

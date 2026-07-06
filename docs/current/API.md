@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B2_READMODEL_REPOSITORY_API_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-下一阶段: DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ONLY / NO_APPROVAL_API_WRITE_YET
+当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B3_HUMAN_APPROVAL_MIGRATION_DOMAIN_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+下一阶段: DH-STAGE-QDR-2-B3-REVIEW-FREEZE / READY / REVIEW_ONLY / NO_APPROVAL_API_WRITE_YET
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -27,6 +27,7 @@ DH limited runtime endpoint: IMPLEMENTED / DH_ONLY / DEFAULT_DISABLED / DEV_TEST
 Decision Core baseline: CLOSED / ACCEPTED / decision_request + decision_run + quant_signal + quant_decision
 stage-qdr-2 read model DTO/query contract: IMPLEMENTED / USECASE_ONLY / NO_ENDPOINT
 stage-qdr-2 read model API: IMPLEMENTED / READ_ONLY / TENANT_BOUND / NO_OPENAPI_FORMALIZATION
+stage-qdr-2 human approval domain/repository: IMPLEMENTED / INTERNAL_ONLY / NO_ENDPOINT
 stage-qdr-2 approval API drafts: PLANNED / NOT IMPLEMENTED
 Integration-1:        NOT STARTED
 Runtime integration:  NOT STARTED
@@ -34,7 +35,7 @@ AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为正式契约单源；B2 未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 B1 已落地 usecase-level read model DTO / query contract；B2 已新增 tenant-bound read repository 与只读 detail/trace API；approval API 草案仍标记为 `PLANNED / NOT IMPLEMENTED`；`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
+OpenAPI 仍为正式契约单源；B3 未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 B1 已落地 usecase-level read model DTO / query contract；B2 已新增 tenant-bound read repository 与只读 detail/trace API；B3 已新增 approval domain / repository / JDBC adapter 与 `human_approval_packet` migration，但这不是 API；approval API 草案仍标记为 `PLANNED / NOT IMPLEMENTED`；`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
 
 ## 2. 已实现端点
 
@@ -93,7 +94,7 @@ quant_signal:
 quant_decision:
   action 仅允许 OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS / NEEDS_REVIEW / REJECTED
   禁止 BUY / SELL / PLACE_ORDER / CANCEL_ORDER
-  human_approval_status 默认 NOT_REQUIRED，本轮不实现 human_approval_packet
+  human_approval_status 默认 NOT_REQUIRED；B3 已新增独立 human_approval_packet migration/domain/repository，但 dry-run endpoint 不自动创建 approval packet
 ```
 
 安全边界不变：HMAC、timestamp、nonce replay、tenant-source binding、payload cap、memory cap、rate limit、kill switch、forbidden material gate、audit fail-closed 均继续生效。`LONG_BIAS / SHORT_BIAS` 只表示只读方向性审查意见，不是交易指令。
@@ -137,6 +138,22 @@ approval 只改变 DH 内部审批状态，不触发 NQ mutation
 response 不返回 credential、raw provider response、raw prompt 或 executable trading instruction
 APPROVED 不是 BUY；REJECTED 不是 SELL；LONG_BIAS / SHORT_BIAS 不是交易指令
 ```
+
+## 2.3 stage-qdr-2 approval internal domain/repository（B3 IMPLEMENTED / NO API）
+
+B3 已实现 DH 内部 `HumanApprovalPacket` domain model、approval status machine、repository port / service 与 JDBC adapter，并新增 `V7__human_approval_packet.sql`。这些实现只为 B4 后续 approval API 提供内部模型和持久化基础，不注册 endpoint，不新增 Controller，不修改 OpenAPI，不新增 WebMvc approval tests。
+
+```text
+HumanApprovalPacket: IMPLEMENTED / DOMAIN_ONLY
+ApprovalStatusTransitionPolicy: IMPLEMENTED / FAIL_CLOSED
+HumanApprovalPacketRepository: IMPLEMENTED / USECASE_PORT
+JdbcHumanApprovalPacketRepository: IMPLEMENTED / TENANT_BOUND
+Approval API: PLANNED / NOT IMPLEMENTED
+Approval write endpoint: NOT STARTED
+Replay execution API: NOT STARTED
+```
+
+`APPROVED` 只表示 DH 内部人工审查状态，不是 `BUY`；`REJECTED` 不是 `SELL`；approval status 不触发 NQ mutation、真实 HTTP、provider、order、cancel、risk、ledger、paper 或 LIVE。
 
 ## 3. Historical / deferred API 方向（当前 API 未实现）
 

@@ -3692,3 +3692,45 @@ ALLOW_LIVE: NO
 ```
 
 边界确认：未修改 DH Java production code；未修改 NQ Java production code；本 review 未修改测试代码；未修改 NQ dev；未改 contracts / OpenAPI / JSON Schema / golden_cases / migration；未真实调用 DH；未真实 HTTP；未访问 localhost 真实服务或外网；未接 real provider；未读取或输出 credential、token、cookie、apiKey、apiSecret、passphrase；未接 Agent / LangGraph；未开启 LIVE；未触碰 NQ order / execution / risk / ledger / account / paper / live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`。
+
+## 2026-07-06 DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN 验证记录
+
+结论：**PASS / B3_IMPLEMENTED / HUMAN_APPROVAL_MIGRATION_DOMAIN_REPOSITORY / NO_APPROVAL_API / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE**。
+
+本轮只实现 stage-qdr-2 B3：`human_approval_packet` migration、approval domain model、approval status machine、repository port / service、JDBC repository adapter、migration presence test、domain/status transition tests、repository tests、ArchitectureTest guard 与 docs/current 最小同步。未新增 approval API、Controller、WebMvc approval tests、approval decision endpoint、replay execution API、真实 HTTP outbound、real provider、OpenAI / Anthropic / Gemini / Ollama SDK、LangGraph / AutoGen / CrewAI、NQ mutation、交易链路或 LIVE。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（写入前） | **PASS / CLEAN** | 分支 `dev`；HEAD 包含 `71ddd5a feat(qdr): add stage-qdr-2 read model repository and API`。 |
+| `git diff --check`（写入前） | **PASS** | 写入前无 diff。 |
+| `mvn -ntp -pl dh-domain -am test` | **BUILD SUCCESS** | dh-domain reactor 3/3 SUCCESS；dh-domain 136 tests，新增 `HumanApprovalPacketTest` 与 `ApprovalStatusTransitionPolicyTest` 覆盖 approval validation / status machine。 |
+| `mvn -ntp -pl dh-usecase -am test` | **BUILD SUCCESS** | dh-usecase reactor 9/9 SUCCESS；dh-usecase 208 tests，新增 `HumanApprovalPacketServiceTest` 覆盖 pending 创建、tenant-bound status update、终态非法转移 fail-closed。 |
+| `mvn -ntp -pl dh-infra -am test` | **BUILD SUCCESS** | dh-infra reactor 11/11 SUCCESS；dh-infra 53 tests，其中新增 `JdbcHumanApprovalPacketRepositoryTest` 10 tests；既有 `JdbcNonceReplayGuardPersistenceTest` 因 Docker/Testcontainers 不可用 skipped 3。 |
+| `mvn -ntp -pl dh-app -am test` | **BUILD SUCCESS** | dh-app reactor 15/15 SUCCESS；`ArchitectureTest` 22 tests 通过；`V7HumanApprovalPacketMigrationPresenceTest` 5 tests 通过；既有 `PostgresContainerSmokeTest` 因 Docker/Testcontainers 不可用 skipped 1。 |
+| `mvn -ntp -Pquality validate` | **BUILD SUCCESS** | 19/19 reactor SUCCESS；0 Checkstyle violations；Spotless check passed。 |
+| `.\mvnw.cmd -v` | **WRAPPER_UNUSABLE / NOT_VALID_MAVEN_WRAPPER** | 命令输出包含 `'\'' is not recognized` 与 `maven-wrapper.jar` 缺少主清单属性；本轮仍使用系统 Maven `mvn`。 |
+
+Noted:
+
+- Maven 均使用 `mvn -ntp`，未使用 `-DskipTests` 或 `-DskipITs`。
+- Docker/Testcontainers 本机不可用，相关容器测试 skip 不等于 PASS。
+- `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml` 仍有 `Unrecognised tag: 'profiles'` warning；未在本轮修改 Maven 全局配置。
+- B3 新 migration 文件为 `dh-app/src/main/resources/db/migration/V7__human_approval_packet.sql`；未修改 V1-V6 历史 migration。
+
+边界确认：未修改 NQ；未新增 approval API；未新增 Controller；未新增 replay execution API；未新增真实 HTTP outbound；未新增真实 provider；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰 order / execution / risk / ledger / account / paper / live；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`；未把 `APPROVED` 映射为 `BUY`；未把 `REJECTED` 映射为 `SELL`；`human_approval_packet` 只是 DH 内部人工审查证据，不是交易授权。
+
+Readiness：
+
+```text
+STAGE_QDR_2_B3: DONE
+ALLOW_STAGE_QDR_2_B3_REVIEW_FREEZE: YES
+ALLOW_STAGE_QDR_2_B4_WO_OR_IMPLEMENTATION: NO
+ALLOW_STAGE_QDR_2_FULL_IMPLEMENTATION_NOW: NO
+ALLOW_APPROVAL_API_IMPLEMENTATION_NOW: NO
+ALLOW_REPLAY_EXECUTION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```

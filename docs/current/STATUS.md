@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B2_READMODEL_REPOSITORY_API_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-> Next stage:    DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN / NOT STARTED / CONTROLLED_IMPLEMENTATION_BATCH_ONLY / NO_APPROVAL_API_WRITE_YET
+> Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B3_HUMAN_APPROVAL_MIGRATION_DOMAIN_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+> Next stage:    DH-STAGE-QDR-2-B3-REVIEW-FREEZE / READY / REVIEW_ONLY / NO_APPROVAL_API_WRITE_YET
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,16 +34,18 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B2_READMODEL_REPOSITORY_API_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
+Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B3_HUMAN_APPROVAL_MIGRATION_DOMAIN_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
 stage-qdr-1 implementation: DONE.
 stage-qdr-1 freeze: CLOSED / ACCEPTED.
 stage-qdr-2 Work Order: DONE / WORK_ORDER_READY.
 stage-qdr-2 B1: DONE / IMPLEMENTED_BY_VALIDATION / READMODEL_DTO_QUERY_CONTRACT_ONLY.
-stage-qdr-2 B2: DONE / IMPLEMENTED / TENANT_BOUND_READ_REPOSITORY_AND_READONLY_API.
+stage-qdr-2 B2: CLOSED / ACCEPTED / TENANT_BOUND_READ_REPOSITORY_AND_READONLY_API.
+stage-qdr-2 B3: DONE / IMPLEMENTED / HUMAN_APPROVAL_MIGRATION_DOMAIN_REPOSITORY / NO_API.
 stage-qdr-2 implementation overall: PARTIAL.
-human_approval_packet: NOT STARTED.
+human_approval_packet: MIGRATION_ADDED.
 approval API: NOT STARTED.
-replay read API: NOT STARTED.
+approval write endpoint: NOT STARTED.
+replay execution API: NOT STARTED.
 model gateway: NOT STARTED.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
@@ -56,7 +58,7 @@ Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MIS
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime PR prep: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN / NOT STARTED / NO_APPROVAL_API_WRITE / NO_REAL_HTTP / NO_PROVIDER.
+Next concrete action: DH-STAGE-QDR-2-B3-REVIEW-FREEZE / REVIEW_ONLY / NO_APPROVAL_API_WRITE / NO_REAL_HTTP / NO_PROVIDER.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -67,6 +69,34 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.32 DH-STAGE-QDR-2-B3 Human Approval Migration / Domain / Repository（2026-07-06，DONE / IMPLEMENTED）
+
+```text
+Task: DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN
+Task type: CODE_CHANGE + TEST + DOCUMENTATION + DB_MIGRATION + HUMAN_APPROVAL_DOMAIN + HUMAN_APPROVAL_REPOSITORY + STATE_MACHINE + SECURITY_BOUNDARY_PRESERVATION + NO_API_IMPLEMENTATION + NO_APPROVAL_API + NO_REAL_HTTP + NO_PROVIDER + NO_AGENT
+stage-qdr-2 WO: DONE / WORK_ORDER_PARTIALLY_CONSUMED
+stage-qdr-2 B1: DONE / IMPLEMENTED_BY_VALIDATION
+stage-qdr-2 B2: CLOSED / ACCEPTED
+stage-qdr-2 B3: DONE / IMPLEMENTED
+stage-qdr-2 implementation overall: PARTIAL
+human_approval_packet: MIGRATION_ADDED / V7__human_approval_packet.sql
+Approval domain/status machine: IMPLEMENTED
+Approval repository port/service: IMPLEMENTED / INTERNAL_ONLY
+JDBC repository adapter: IMPLEMENTED / TENANT_BOUND
+Approval API: NOT STARTED
+Approval write endpoint: NOT STARTED
+Replay execution API: NOT STARTED
+Model gateway: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+B3 新增 `human_approval_packet` Flyway migration、approval domain model、状态机、repository port / service、JDBC repository adapter、migration presence test、domain/status transition tests、repository tests 与 architecture guard。`human_approval_packet` 只记录 DH 内部人工审查证据，不是交易授权；`APPROVED` 不等于 `BUY`，`REJECTED` 不等于 `SELL`，`LONG_BIAS / SHORT_BIAS` 不映射为 `BUY / SELL`。
+
+B3 未新增 Controller、approval API、approval decision endpoint、WebMvc approval tests、replay execution API、真实 HTTP outbound、real provider、OpenAI / Anthropic / Gemini / Ollama SDK、LangGraph / AutoGen / CrewAI、NQ mutation、交易链路或 LIVE。B4 才允许在单独授权下实现 approval API / write endpoint；B5 仍 `NOT STARTED`。
 
 ## 1.0.31 DH-STAGE-QDR-2-B2 Read Model Repository / API（2026-07-06，DONE / IMPLEMENTED）
 

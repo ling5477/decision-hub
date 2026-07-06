@@ -37,6 +37,11 @@ public class ArchitectureTest {
                     "placeOrder", "cancelOrder", "submitOrder", "executeOrder", "bypassRisk",
                     "forceExecute");
 
+    private static final List<String> FORBIDDEN_APPROVAL_MUTATION_TOKENS =
+            List.of(
+                    "placeOrder", "cancelOrder", "submitOrder", "executeOrder", "bypassRisk",
+                    "forceExecute");
+
     private static final Pattern FORBIDDEN_API_PATH =
             Pattern.compile("\"\\s*/?(orders|trades|live)(/|\")", Pattern.CASE_INSENSITIVE);
 
@@ -458,5 +463,216 @@ public class ArchitectureTest {
                         "autogen..",
                         "crewai..")
                 .check(importMainClasses());
+    }
+
+    /**
+     * stage-qdr-2 B3：approval domain 只允许依赖 domain / JDK，不允许依赖 API、infra、security、
+     * Spring、JDBC/JPA、provider SDK 或 Agent runtime。
+     */
+    @Test
+    void stageQdr2B3_rule18_approvalDomainDoesNotDependOnApiInfraSecuritySpringJdbcProviderOrAgentRuntime() {
+        noClasses()
+                .that()
+                .resideInAPackage("..domain.qdr.approval..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage(
+                        "..api..",
+                        "..infra..",
+                        "..security..",
+                        "..usecase..",
+                        "org.springframework..",
+                        "org.springframework.jdbc..",
+                        "java.sql..",
+                        "javax.sql..",
+                        "jakarta.persistence..",
+                        "javax.persistence..",
+                        "org.hibernate..",
+                        "com.openai..",
+                        "com.anthropic..",
+                        "com.google.genai..",
+                        "dev.langchain4j..",
+                        "org.springframework.ai..",
+                        "langgraph..",
+                        "autogen..",
+                        "crewai..")
+                .check(importMainClasses());
+    }
+
+    /**
+     * stage-qdr-2 B3：approval usecase 只能依赖 domain contract，不允许依赖 API、infra、Spring
+     * Web、JDBC/JPA、provider SDK 或 Agent runtime。
+     */
+    @Test
+    void stageQdr2B3_rule19_approvalUsecaseDoesNotDependOnApiInfraWebJdbcProviderOrAgentRuntime() {
+        noClasses()
+                .that()
+                .resideInAPackage("..usecase.qdr.approval..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage(
+                        "..api..",
+                        "..infra..",
+                        "org.springframework.web..",
+                        "org.springframework.web.reactive..",
+                        "org.springframework.jdbc..",
+                        "java.sql..",
+                        "javax.sql..",
+                        "jakarta.persistence..",
+                        "javax.persistence..",
+                        "org.hibernate..",
+                        "com.openai..",
+                        "com.anthropic..",
+                        "com.google.genai..",
+                        "dev.langchain4j..",
+                        "org.springframework.ai..",
+                        "langgraph..",
+                        "autogen..",
+                        "crewai..")
+                .check(importMainClasses());
+    }
+
+    /**
+     * stage-qdr-2 B3：approval infra 只能作为 DH-owned JDBC adapter，不允许依赖 API/Web、
+     * HTTP client、provider SDK 或 Agent runtime。
+     */
+    @Test
+    void stageQdr2B3_rule20_approvalInfraDoesNotDependOnApiWebHttpProviderOrAgentRuntime() {
+        noClasses()
+                .that()
+                .resideInAPackage("..infra.jdbc.qdr..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage(
+                        "..api..",
+                        "org.springframework.web..",
+                        "org.springframework.web.reactive..",
+                        "okhttp3..",
+                        "com.openai..",
+                        "com.anthropic..",
+                        "com.google.genai..",
+                        "dev.langchain4j..",
+                        "org.springframework.ai..",
+                        "langgraph..",
+                        "autogen..",
+                        "crewai..")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("java.net.http.HttpClient")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("java.net.HttpURLConnection")
+                .check(importMainClasses());
+    }
+
+    /**
+     * stage-qdr-2 B3：approval 相关代码不允许出现订单执行、风控旁路或强制执行 token。
+     */
+    @Test
+    void stageQdr2B3_rule21_approvalSourcesForbidOrderAndBypassTokens() {
+        final List<Path> approvalPaths =
+                List.of(
+                        Path.of(
+                                        "..",
+                                        "dh-domain",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "domain",
+                                        "qdr",
+                                        "approval")
+                                .toAbsolutePath()
+                                .normalize(),
+                        Path.of(
+                                        "..",
+                                        "dh-usecase",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "usecase",
+                                        "qdr",
+                                        "approval")
+                                .toAbsolutePath()
+                                .normalize(),
+                        Path.of(
+                                        "..",
+                                        "dh-infra",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "infra",
+                                        "jdbc",
+                                        "qdr",
+                                        "JdbcHumanApprovalPacketRepository.java")
+                                .toAbsolutePath()
+                                .normalize());
+        final List<String> violations = new ArrayList<>();
+        for (Path approvalPath : approvalPaths) {
+            collectForbiddenTokenViolations(
+                    approvalPath, FORBIDDEN_APPROVAL_MUTATION_TOKENS, violations);
+        }
+        if (!violations.isEmpty()) {
+            fail(
+                    "stage-qdr-2 B3 approval source files must not contain order/risk mutation tokens:\n"
+                            + String.join("\n", violations));
+        }
+    }
+
+    /**
+     * stage-qdr-2 B3：approval 相关代码不允许依赖 NQ client 或 connector.nq。
+     */
+    @Test
+    void stageQdr2B3_rule22_approvalDoesNotDependOnNqClient() {
+        noClasses()
+                .that()
+                .resideInAnyPackage(
+                        "..domain.qdr.approval..", "..usecase.qdr.approval..", "..infra.jdbc.qdr..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage("..connector.nq..")
+                .orShould()
+                .dependOnClassesThat()
+                .haveSimpleName("NqBacktestClient")
+                .orShould()
+                .dependOnClassesThat()
+                .haveSimpleName("RealNqBacktestClient")
+                .check(importMainClasses());
+    }
+
+    private static void collectForbiddenTokenViolations(
+            final Path rootOrFile, final List<String> tokens, final List<String> violations) {
+        if (!Files.exists(rootOrFile)) {
+            violations.add("missing approval source path: " + rootOrFile);
+            return;
+        }
+        try (Stream<Path> walker =
+                Files.isDirectory(rootOrFile) ? Files.walk(rootOrFile) : Stream.of(rootOrFile)) {
+            walker
+                    .filter(p -> p.toString().endsWith(".java"))
+                    .forEach(
+                            p -> {
+                                try {
+                                    final String body = Files.readString(p, StandardCharsets.UTF_8);
+                                    for (String token : tokens) {
+                                        if (body.contains(token)) {
+                                            violations.add(p + " contains forbidden token: " + token);
+                                        }
+                                    }
+                                } catch (IOException io) {
+                                    violations.add("failed to read " + p + ": " + io.getMessage());
+                                }
+                            });
+        } catch (IOException io) {
+            violations.add("failed to walk " + rootOrFile + ": " + io.getMessage());
+        }
     }
 }
