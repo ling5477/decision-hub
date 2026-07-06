@@ -22,5 +22,20 @@ public enum DecisionAuditEventType {
   PERSISTENCE_FAILED,
 
   /** 编排内部异常触发 fail-closed。 */
-  DECISION_FAILED
+  DECISION_FAILED,
+
+  /** Human Approval Packet 已创建；只表示 DH 内部审查证据生成，不表示交易授权。 */
+  HUMAN_APPROVAL_PACKET_CREATED,
+
+  /** Human Approval Packet 审批决定已提交；APPROVED 不等于 BUY。 */
+  HUMAN_APPROVAL_DECISION_SUBMITTED,
+
+  /** Human Approval Packet 被人工拒绝；REJECTED 不等于 SELL。 */
+  HUMAN_APPROVAL_DECISION_REJECTED,
+
+  /** Human Approval Packet 需要继续人工审查；不得触发 replay 或 provider。 */
+  HUMAN_APPROVAL_DECISION_NEEDS_REVIEW,
+
+  /** Human Approval Packet 状态转移被状态机拒绝。 */
+  HUMAN_APPROVAL_TRANSITION_DENIED
 }

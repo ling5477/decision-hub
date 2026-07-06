@@ -88,6 +88,7 @@ public class GlobalExceptionHandler {
   private static String safeMsg(String msg) {
     if (msg == null) return "error";
     String trimmed = msg.trim();
+    if (trimmed.contains("No enum constant")) return "Invalid request.";
     if (trimmed.length() > 500) return trimmed.substring(0, 500);
     return trimmed;
   }

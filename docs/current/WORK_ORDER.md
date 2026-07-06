@@ -1,12 +1,12 @@
 # Decision Hub 当前工单
 
-> 当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B3_HUMAN_APPROVAL_MIGRATION_DOMAIN_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+> 当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B4_HUMAN_APPROVAL_API_AUDIT_IMPLEMENTED_BY_VALIDATION / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation; I1-IMP1 DH dry-run test-support entry; I1 runtime API contract review; I1 DH runtime API work order; I1 DH limited runtime endpoint implementation; I1 DH limited runtime endpoint close review; I1 NQ runtime client work order
-> 下一阶段: DH-STAGE-QDR-2-B3-REVIEW-FREEZE / READY / REVIEW_ONLY / NO_APPROVAL_API_WRITE_YET
+> 下一阶段: DH-STAGE-QDR-2-B4-REVIEW-FREEZE / READY / REVIEW_ONLY / NO_B5_CLOSE_REVIEW_YET
 
 ## 1. 当前目标
 
-`stage-qdr-2 = Audit Trace Read Model + Human Approval Packet` 当前已完成 Work Order、B1 read model DTO / query contract、B2 tenant-bound read repository / read-only API，以及 B3 human approval migration / domain / repository。完整工单入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`。stage-qdr-2 implementation overall 仍为 `PARTIAL`；B3 只新增 `V7__human_approval_packet.sql`、DH 内部 approval domain / status machine / repository port / JDBC adapter 与回归测试，未新增 approval API、approval write endpoint、Controller、WebMvc approval tests、replay execution API、model/provider/runtime 或 LIVE。
+`stage-qdr-2 = Audit Trace Read Model + Human Approval Packet` 当前已完成 Work Order、B1 read model DTO / query contract、B2 tenant-bound read repository / read-only API、B3 human approval migration / domain / repository，以及 B4 human approval API / audit。完整工单入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`。stage-qdr-2 implementation overall 仍为 `PARTIAL`；B4 只新增 tenant-bound approval create / get / decision API、approval command service、audit event 写入、WebMvc/service tests、wiring 与 architecture guard，未新增 migration，未修改 V7，未新增 replay execution API、model/provider/runtime 或 LIVE。
 
 stage-qdr-1 已按当前前置状态关闭：
 
@@ -24,7 +24,7 @@ stage-qdr-2 Work Order 后续拆分为：
 Batch 1: DH-STAGE-QDR-2-B1-READMODEL-QUERY-DESIGN-AND-DTO / DONE / IMPLEMENTED_BY_VALIDATION
 Batch 2: DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API / DONE / IMPLEMENTED / READ_ONLY
 Batch 3: DH-STAGE-QDR-2-B3-HUMAN-APPROVAL-MIGRATION-AND-DOMAIN / DONE / IMPLEMENTED / NO_API
-Batch 4: DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT / NOT STARTED
+Batch 4: DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT / DONE / IMPLEMENTED_BY_VALIDATION
 Batch 5: DH-STAGE-QDR-2-B5-STAGE-QDR-2-CLOSE-REVIEW / NOT STARTED
 ```
 
@@ -34,8 +34,9 @@ stage-qdr-2 Work Order 不授权一次性全量实现，不授权真实 provider
 
 ```text
 禁止修改 V1-V6 历史 migration
-禁止继续新增 B4 approval API / approval write endpoint
-禁止新增 approval API 实现
+禁止修改 V7 human_approval_packet migration
+禁止扩大 B4 approval API / approval write endpoint 到 replay、provider、NQ 或交易语义
+禁止新增 B5 close review 实现
 禁止新增 replay execution API 实现
 禁止新增 model_call / prompt_template / prompt_version / tool registry
 禁止接真实 HTTP / real provider / OpenAI / Anthropic / Gemini / Ollama SDK
@@ -45,7 +46,7 @@ stage-qdr-2 Work Order 不授权一次性全量实现，不授权真实 provider
 禁止把 LONG_BIAS / SHORT_BIAS 映射为 BUY / SELL
 禁止把 APPROVED 映射为 BUY
 禁止把 REJECTED 映射为 SELL
-禁止把 B4/B5 写成已实现
+禁止把 B5 写成已实现
 ```
 
 ### 验收命令
@@ -64,6 +65,45 @@ mvn -ntp -Pquality validate
 ```
 
 若本机 `mvnw` wrapper 不可用，允许使用已安装 Maven `mvn` 执行同等命令，并在验证记录中说明降级原因。
+
+## 0.0T DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT（DONE / IMPLEMENTED_BY_VALIDATION）
+
+本轮实现 stage-qdr-2 第四个批次 B4：Human Approval Packet 的 API 层、tenant-bound create approval packet、tenant-bound get approval packet、tenant-bound submit approval decision、审计事件写入、WebMvc tests、service tests、wiring 与 architecture guard。
+
+实现边界：
+
+```text
+HumanApprovalPacketCommandService: IMPLEMENTED / USECASE_ONLY / TENANT_BOUND / AUDIT_FAIL_CLOSED
+ApprovalWriteBoundary: IMPLEMENTED / USECASE_PORT / APP_TRANSACTION_BACKED_WHEN_AVAILABLE
+HumanApprovalPacketController: IMPLEMENTED / AUTHENTICATED / TENANT_CONTEXT_ONLY
+POST /api/ai/decision-runs/{decisionRunId}/approval-packets: IMPLEMENTED / CREATE_PENDING_ONLY
+GET /api/ai/approval-packets/{approvalPacketId}: IMPLEMENTED / READ_ONLY / TENANT_BOUND
+POST /api/ai/approval-packets/{approvalPacketId}/decision: IMPLEMENTED / STATE_MACHINE_ENFORCED
+Audit events: IMPLEMENTED / dh_decision_audit_event
+OpenAPI formalization: NOT UPDATED
+New migration: NO
+V7 migration modified: NO
+Replay execution API: NOT STARTED
+B5 close review: NOT STARTED
+```
+
+结论：
+
+```text
+STAGE_QDR_2_B4: DONE
+STAGE_QDR_2_IMPLEMENTATION_OVERALL: PARTIAL
+ALLOW_STAGE_QDR_2_B4_REVIEW_FREEZE: YES
+ALLOW_STAGE_QDR_2_B5_CLOSE_REVIEW: NO
+ALLOW_STAGE_QDR_2_FULL_IMPLEMENTATION_NOW: NO
+ALLOW_REPLAY_EXECUTION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+B4 未新增 migration、未修改 `V7__human_approval_packet.sql` 或 V1-V6 历史 migration；未新增 replay execution API；未新增 model_call、prompt_template / prompt_version、tool_definition / tool_invocation；未接真实 HTTP、real provider、OpenAI / Anthropic / Gemini / Ollama SDK、LangGraph / AutoGen / CrewAI；未修改 NQ；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation。`APPROVED` 只表示人工审查状态，不是 `BUY`；`REJECTED` 不是 `SELL`；approval API 只改变 DH 内部 approval 状态并写审计事件。
 
 ## 0.0S DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API（DONE / IMPLEMENTED）
 

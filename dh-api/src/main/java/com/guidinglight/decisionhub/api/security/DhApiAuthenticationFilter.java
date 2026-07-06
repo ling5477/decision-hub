@@ -19,8 +19,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * DH AI API 最小认证 filter。
  *
  * <p>保护范围覆盖当前所有 DH API 多租户入口：ResearchRun API、NQ feedback API、limited dry-run
- * API、QDR decision run read API 与 deprecated legacy run API。认证结果写入 request attribute，
- * controller 只能从该可信上下文解析 tenant。
+ * API、QDR decision run read API、Human Approval Packet API 与 deprecated legacy run API。认证结果写入
+ * request attribute，controller 只能从该可信上下文解析 tenant。
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 20)
@@ -32,6 +32,7 @@ public final class DhApiAuthenticationFilter extends OncePerRequestFilter {
     private static final String NQ_FEEDBACK_PATH = "/api/ai/feedback/nq";
     private static final String DECISION_DRY_RUN_PATH = "/api/ai/decision-dry-runs";
     private static final String DECISION_RUN_READ_PATH = "/api/ai/decision-runs";
+    private static final String APPROVAL_PACKET_PATH = "/api/ai/approval-packets";
     private static final String LEGACY_RUN_PATH = "/legacy/runs";
 
     private final TokenVerifier tokenVerifier;
@@ -52,6 +53,8 @@ public final class DhApiAuthenticationFilter extends OncePerRequestFilter {
                 || path.equals(DECISION_DRY_RUN_PATH)
                 || path.equals(DECISION_RUN_READ_PATH)
                 || path.startsWith(DECISION_RUN_READ_PATH + "/")
+                || path.equals(APPROVAL_PACKET_PATH)
+                || path.startsWith(APPROVAL_PACKET_PATH + "/")
                 || path.equals(LEGACY_RUN_PATH)
                 || path.startsWith(LEGACY_RUN_PATH + "/"));
     }

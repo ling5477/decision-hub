@@ -11,6 +11,10 @@ import com.guidinglight.decisionhub.usecase.decision.DecisionProviderHealthEvalu
 import com.guidinglight.decisionhub.usecase.decision.DecisionProviderLatencyRecorder;
 import com.guidinglight.decisionhub.usecase.decision.DecisionReplayQueryRepository;
 import com.guidinglight.decisionhub.usecase.decision.DecisionReplayQueryService;
+import com.guidinglight.decisionhub.usecase.qdr.approval.ApprovalWriteBoundary;
+import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketCommandService;
+import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketRepository;
+import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketService;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelQueryPort;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelService;
 import org.junit.jupiter.api.Test;
@@ -43,6 +47,10 @@ final class DecisionPipelineWiringConfigTest {
                     assertThat(ctx).hasSingleBean(DecisionReplayQueryService.class);
                     assertThat(ctx).hasSingleBean(DecisionReadModelQueryPort.class);
                     assertThat(ctx).hasSingleBean(DecisionReadModelService.class);
+                    assertThat(ctx).hasSingleBean(HumanApprovalPacketRepository.class);
+                    assertThat(ctx).hasSingleBean(HumanApprovalPacketService.class);
+                    assertThat(ctx).hasSingleBean(ApprovalWriteBoundary.class);
+                    assertThat(ctx).hasSingleBean(HumanApprovalPacketCommandService.class);
                     assertThat(ctx).hasSingleBean(DecisionProviderHealthEvaluator.class);
                     assertThat(ctx).hasSingleBean(DecisionProviderBudgetGuard.class);
                     assertThat(ctx).hasSingleBean(DecisionProviderLatencyRecorder.class);

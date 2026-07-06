@@ -5,6 +5,8 @@ import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionAuditReposit
 import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionReplayQueryRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcDecisionCoreRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcDecisionReadModelQueryAdapter;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcHumanApprovalPacketRepository;
+import com.guidinglight.decisionhub.domain.qdr.approval.ApprovalStatusTransitionPolicy;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditRepository;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOrchestrator;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOutputAssembler;
@@ -25,21 +27,29 @@ import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionReplayQueryS
 import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionRiskReviewer;
 import com.guidinglight.decisionhub.usecase.decision.MockDecisionSignalProvider;
 import com.guidinglight.decisionhub.usecase.qdr.DecisionRequestRepository;
+import com.guidinglight.decisionhub.usecase.qdr.approval.ApprovalWriteBoundary;
+import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketCommandService;
+import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketRepository;
+import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketService;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelQueryPort;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelService;
 
 import java.time.Clock;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * DH Stage4 K3/K4 decision pipeline 装配。
  *
  * <p>本配置只接 DH 自身 JDBC 审计表、mock-only orchestrator、K4 replay read model 与 QDR B2
- * 只读 read model；不接真实 provider、不接 NQ runtime、不启用 LangGraph 或 LIVE。
+ * 只读 read model、B4 Human Approval Packet 内部 API command service；不接真实 provider、不接 NQ
+ * runtime、不启用 LangGraph 或 LIVE。
  */
 @Configuration
 public class DecisionPipelineWiringConfig {
@@ -117,6 +127,90 @@ public class DecisionPipelineWiringConfig {
     public DecisionReadModelService decisionReadModelService(
             final DecisionReadModelQueryPort decisionReadModelQueryPort) {
         return new DecisionReadModelService(decisionReadModelQueryPort);
+    }
+
+    /**
+     * 装配 stage-qdr-2 B3/B4 human approval packet repository。
+     *
+     * @param jdbcTemplate DH 应用 datasource 的 JdbcTemplate。
+     * @return tenant-bound approval repository。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public HumanApprovalPacketRepository humanApprovalPacketRepository(
+            final JdbcTemplate jdbcTemplate) {
+        return new JdbcHumanApprovalPacketRepository(
+                jdbcTemplate, decisionPersistenceObjectMapper());
+    }
+
+    /**
+     * 装配 B3 approval packet domain service。
+     *
+     * @param humanApprovalPacketRepository tenant-bound approval repository。
+     * @return approval packet service；内部强制状态机。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public HumanApprovalPacketService humanApprovalPacketService(
+            final HumanApprovalPacketRepository humanApprovalPacketRepository) {
+        return new HumanApprovalPacketService(
+                humanApprovalPacketRepository,
+                new ApprovalStatusTransitionPolicy(),
+                Clock.systemUTC());
+    }
+
+    /**
+     * 装配 B4 approval 写入边界。
+     *
+     * <p>生产应用存在 Spring transaction manager 时，create / submit decision 的 approval write 与
+     * audit write 会处在同一个事务内；audit 写失败抛出 RuntimeException 后回滚 approval 状态。若窄口
+     * wiring 测试没有事务管理器，则回退为直通边界，避免测试误建数据库连接。
+     *
+     * @param transactionManagers Spring transaction manager provider。
+     * @return approval 写入边界。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ApprovalWriteBoundary approvalWriteBoundary(
+            final ObjectProvider<PlatformTransactionManager> transactionManagers) {
+        final PlatformTransactionManager transactionManager = transactionManagers.getIfAvailable();
+        if (transactionManager == null) {
+            return ApprovalWriteBoundary.direct();
+        }
+        final TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        return new ApprovalWriteBoundary() {
+            @Override
+            public <T> T execute(final ApprovalWriteBoundary.ApprovalWriteAction<T> action) {
+                return transactionTemplate.execute(status -> action.get());
+            }
+        };
+    }
+
+    /**
+     * 装配 B4 approval command service。
+     *
+     * @param humanApprovalPacketRepository tenant-bound approval repository。
+     * @param humanApprovalPacketService    B3 状态机 service。
+     * @param decisionReadModelService      B2 read model service，用于校验 decision_run 归属。
+     * @param decisionAuditRepository       V5 audit event port；失败必须 fail-closed。
+     * @param approvalWriteBoundary         approval write + audit write 事务边界。
+     * @return approval command service。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public HumanApprovalPacketCommandService humanApprovalPacketCommandService(
+            final HumanApprovalPacketRepository humanApprovalPacketRepository,
+            final HumanApprovalPacketService humanApprovalPacketService,
+            final DecisionReadModelService decisionReadModelService,
+            final DecisionAuditRepository decisionAuditRepository,
+            final ApprovalWriteBoundary approvalWriteBoundary) {
+        return new HumanApprovalPacketCommandService(
+                humanApprovalPacketRepository,
+                humanApprovalPacketService,
+                decisionReadModelService,
+                decisionAuditRepository,
+                Clock.systemUTC(),
+                approvalWriteBoundary);
     }
 
     /**

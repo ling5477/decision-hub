@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B3_HUMAN_APPROVAL_MIGRATION_DOMAIN_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-> Next stage:    DH-STAGE-QDR-2-B3-REVIEW-FREEZE / READY / REVIEW_ONLY / NO_APPROVAL_API_WRITE_YET
+> Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B4_BLOCKER_FIX_DONE / FREEZE_PENDING_RETRY / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+> Next stage:    DH-STAGE-QDR-2-B4-REVIEW-FREEZE / PENDING_RETRY / REVIEW_ONLY / NO_B5_CLOSE_REVIEW_YET
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,17 +34,20 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B3_HUMAN_APPROVAL_MIGRATION_DOMAIN_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
+Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B4_HUMAN_APPROVAL_API_AUDIT_IMPLEMENTED_BY_VALIDATION / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
 stage-qdr-1 implementation: DONE.
 stage-qdr-1 freeze: CLOSED / ACCEPTED.
 stage-qdr-2 Work Order: DONE / WORK_ORDER_READY.
 stage-qdr-2 B1: DONE / IMPLEMENTED_BY_VALIDATION / READMODEL_DTO_QUERY_CONTRACT_ONLY.
 stage-qdr-2 B2: CLOSED / ACCEPTED / TENANT_BOUND_READ_REPOSITORY_AND_READONLY_API.
-stage-qdr-2 B3: DONE / IMPLEMENTED / HUMAN_APPROVAL_MIGRATION_DOMAIN_REPOSITORY / NO_API.
+stage-qdr-2 B3: CLOSED / ACCEPTED / HUMAN_APPROVAL_MIGRATION_DOMAIN_REPOSITORY / NO_API.
+stage-qdr-2 B4: DONE / IMPLEMENTED_BY_VALIDATION / HUMAN_APPROVAL_API_AUDIT / TENANT_BOUND / NO_REPLAY_EXECUTION.
+stage-qdr-2 B4 blocker fix: DONE / INVALID_APPROVAL_DECISION_REDACTION / APPROVAL_DECISION_INVALID / FREEZE_PENDING_RETRY.
+stage-qdr-2 B4 freeze: PENDING / RETRY_ALLOWED_AFTER_BLOCKER_FIX.
 stage-qdr-2 implementation overall: PARTIAL.
 human_approval_packet: MIGRATION_ADDED.
-approval API: NOT STARTED.
-approval write endpoint: NOT STARTED.
+approval API: IMPLEMENTED_BY_VALIDATION.
+approval write endpoint: IMPLEMENTED_BY_VALIDATION.
 replay execution API: NOT STARTED.
 model gateway: NOT STARTED.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
@@ -58,7 +61,7 @@ Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MIS
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime PR prep: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: DH-STAGE-QDR-2-B3-REVIEW-FREEZE / REVIEW_ONLY / NO_APPROVAL_API_WRITE / NO_REAL_HTTP / NO_PROVIDER.
+Next concrete action: DH-STAGE-QDR-2-B4-REVIEW-FREEZE / REVIEW_ONLY / PENDING_RETRY / NO_B5_CLOSE_REVIEW / NO_REAL_HTTP / NO_PROVIDER.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -69,6 +72,56 @@ K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
+
+## 1.0.34 DH-STAGE-QDR-2-B4 Blocker Fix（2026-07-06，DONE / FREEZE_PENDING_RETRY）
+
+```text
+Task: DH-STAGE-QDR-2-B4-BLOCKER-FIX
+Task type: CODE_CHANGE + TEST + SECURITY_FIX + ERROR_REDACTION_FIX + HUMAN_APPROVAL_API_HARDENING + STAGE_QDR_2_B4_BLOCKER_FIX + NO_NEW_FEATURE + NO_DB_MIGRATION + NO_REPLAY_EXECUTION + NO_REAL_HTTP + NO_PROVIDER + NO_AGENT
+stage-qdr-2 B4 implementation: DONE
+stage-qdr-2 B4 freeze: PENDING / RETRY_ALLOWED_AFTER_BLOCKER_FIX
+P1 blocker: invalid approval decision enum error response may echo raw enum cause
+Fix status: DONE / APPROVAL_DECISION_INVALID / FIXED_SAFE_MESSAGE
+B5 close review: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+B4 blocker fix 将 approval decision request parsing 从 raw enum parsing 收口到安全 parser：`APPROVED`、`REJECTED`、`NEEDS_REVIEW` 通过，`BUY`、`SELL`、`PLACE_ORDER`、`CANCEL_ORDER`、null、blank、unknown 均 fail-closed。非法 decision API response 固定为 `code=APPROVAL_DECISION_INVALID` 与 `message=Invalid approval decision.`，不回显 raw request value、`No enum constant`、enum class 名或交易动作词。
+
+本轮仅为 B4 blocker fix，不新增 API endpoint，不新增 Controller，不新增 migration，不修改 V7 或 V1-V6 migration，不新增 replay execution、真实 HTTP outbound、real provider、LangGraph / AutoGen / CrewAI、NQ mutation、交易链路或 LIVE。B4 freeze 仍为 `PENDING`，下一步只允许重新进入 `DH-STAGE-QDR-2-B4-REVIEW-FREEZE`；B5 仍 `NOT STARTED`。
+
+## 1.0.33 DH-STAGE-QDR-2-B4 Human Approval API / Audit（2026-07-06，DONE / IMPLEMENTED_BY_VALIDATION）
+
+```text
+Task: DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT
+Task type: CODE_CHANGE + TEST + DOCUMENTATION + HUMAN_APPROVAL_API + HUMAN_APPROVAL_AUDIT + TENANT_BOUND_WRITE + STATE_MACHINE_ENFORCEMENT + SECURITY_BOUNDARY_PRESERVATION + NO_DB_MIGRATION + NO_REPLAY_EXECUTION + NO_REAL_HTTP + NO_PROVIDER + NO_AGENT
+stage-qdr-2 WO: DONE / WORK_ORDER_PARTIALLY_CONSUMED
+stage-qdr-2 B1: DONE / IMPLEMENTED_BY_VALIDATION
+stage-qdr-2 B2: CLOSED / ACCEPTED
+stage-qdr-2 B3: CLOSED / ACCEPTED
+stage-qdr-2 B4: DONE / IMPLEMENTED_BY_VALIDATION
+stage-qdr-2 implementation overall: PARTIAL
+human_approval_packet: MIGRATION_ADDED / V7__human_approval_packet.sql / UNCHANGED_IN_B4
+Approval API: IMPLEMENTED_BY_VALIDATION
+Approval write endpoint: IMPLEMENTED_BY_VALIDATION
+Approval audit events: IMPLEMENTED_BY_VALIDATION / dh_decision_audit_event
+Replay execution API: NOT STARTED
+Model gateway: NOT STARTED
+B5 close review: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+B4 新增 `HumanApprovalPacketCommandService`、`ApprovalWriteBoundary`、tenant-bound create / get / submit decision API、审计事件类型、Spring wiring、WebMvc tests、service tests 与 architecture guard。API endpoint 为 `POST /api/ai/decision-runs/{decisionRunId}/approval-packets`、`GET /api/ai/approval-packets/{approvalPacketId}`、`POST /api/ai/approval-packets/{approvalPacketId}/decision`；全部通过 `DhApiAuthenticationFilter`，tenant 只来自认证上下文，不信任 body / query param。
+
+approval write 只改变 DH 内部 `human_approval_packet.approval_status`，提交路径必须走 B3 状态机；repository write 和 audit write 处于同一个 fail-closed 写入边界，audit 失败不得返回 success。审计事件复用既有 `dh_decision_audit_event`，记录 tenantId、traceId、requestId、decisionRunId、approvalPacketId、approvalKey、oldStatus、newStatus、reviewerId、occurredAt 和脱敏 reason。
+
+B4 未新增 migration，未修改 V7 或 V1-V6 历史 migration；未新增 replay execution API；未接真实 HTTP outbound、real provider、OpenAI / Anthropic / Gemini / Ollama SDK、LangGraph / AutoGen / CrewAI、NQ mutation、交易链路或 LIVE。`APPROVED` 不等于 `BUY`，`REJECTED` 不等于 `SELL`，`approval_status` 不得作为 execution signal。下一步只能进入 `DH-STAGE-QDR-2-B4-REVIEW-FREEZE`；B5 仍 `NOT STARTED`。
 
 ## 1.0.32 DH-STAGE-QDR-2-B3 Human Approval Migration / Domain / Repository（2026-07-06，DONE / IMPLEMENTED）
 

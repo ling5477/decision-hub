@@ -1,5 +1,167 @@
 # Decision Hub Worklog
 
+## 2026-07-06 DH-STAGE-QDR-2-B4-BLOCKER-FIX
+
+执行 `DH-STAGE-QDR-2-B4-BLOCKER-FIX`。本轮为 `CODE_CHANGE + TEST + SECURITY_FIX + ERROR_REDACTION_FIX + HUMAN_APPROVAL_API_HARDENING + STAGE_QDR_2_B4_BLOCKER_FIX + NO_NEW_FEATURE + NO_DB_MIGRATION + NO_REPLAY_EXECUTION + NO_REAL_HTTP + NO_PROVIDER + NO_AGENT`，只修复 B4 freeze review 发现的 P1 blocker：invalid approval decision enum error response 可能回显 raw enum cause 或交易动作词。
+
+### 修改文件
+
+```text
+dh-api/src/main/java/com/guidinglight/decisionhub/api/GlobalExceptionHandler.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/HumanApprovalPacketController.java
+dh-api/src/test/java/com/guidinglight/decisionhub/api/decision/HumanApprovalPacketControllerWebMvcTest.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/ApprovalDecisionParser.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/InvalidApprovalDecisionException.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/approval/ApprovalDecisionParserTest.java
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+```
+
+### Result
+
+```text
+STAGE_QDR_2_B4_BLOCKER_FIX: DONE
+B4 implementation: DONE
+B4 freeze: PENDING / RETRY_ALLOWED_AFTER_BLOCKER_FIX
+B5 close review: NOT STARTED
+Replay execution API: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+### Findings
+
+- `HumanApprovalPacketController` 不再对 approval decision 使用 raw enum parsing；提交 decision 前通过 `ApprovalDecisionParser.parseSafe(...)` 显式白名单解析。
+- `ApprovalDecisionParser` 只允许 `APPROVED`、`REJECTED`、`NEEDS_REVIEW`；`BUY`、`SELL`、`PLACE_ORDER`、`CANCEL_ORDER`、null、blank、unknown 均抛出固定安全 `InvalidApprovalDecisionException`。
+- invalid decision API response 固定为 `code=APPROVAL_DECISION_INVALID` 与 `message=Invalid approval decision.`，不包含 raw request value、`No enum constant`、enum class 名或 allowed enum list。
+- `GlobalExceptionHandler.safeMsg(...)` 增加 `No enum constant` 兜底脱敏，避免其他 enum parsing 异常把 Java 原始 enum cause 直接写入 API body。
+- WebMvc 回归覆盖 invalid `BUY` / `SELL` / `PLACE_ORDER` / `CANCEL_ORDER`，断言 error body 不含这些原始值，不触发 repository update、audit write、trace/evidence query、provider write、NQ / HTTP / replay。
+
+### Validation
+
+```text
+git branch --show-current: dev
+git log --oneline -5: HEAD includes 8d92a30 feat(qdr): add stage-qdr-2 human approval domain
+git diff --check: PASS / LF->CRLF warnings only / no whitespace error
+forbidden scan broad: REVIEWED / BROAD_MATCH_COUNT=1603 / no B4 blocker-fix production risk
+changed-file forbidden scan: REVIEWED / CHANGED_FILE_COUNT=28 / CHANGED_MATCH_COUNT=623 / invalid decision tokens limited to negative tests, denylist/security guard, docs prohibition
+mvn -ntp -pl dh-domain -am test: BUILD SUCCESS / 136 tests
+mvn -ntp -pl dh-usecase -am test: BUILD SUCCESS / 226 tests
+mvn -ntp -pl dh-api -am test: BUILD SUCCESS / 77 tests
+mvn -ntp -pl dh-app -am test: BUILD SUCCESS / 54 tests / 1 skipped PostgresContainerSmokeTest due Docker pipe access denied
+mvn -ntp -Pquality validate: BUILD SUCCESS / reactor 19/19 / Checkstyle 0 violations / Spotless passed
+.\mvnw.cmd -v: WRAPPER_UNUSABLE / command exits 0 but outputs '\' is not recognized and maven-wrapper.jar has no main manifest attribute
+skip flags: NOT USED / no -DskipTests / no -DskipITs
+```
+
+### Boundary confirmation
+
+未修改 NQ；未新增 migration；未修改 `V7__human_approval_packet.sql`；未修改 V1-V6 历史 migration；未新增 API endpoint；未新增 Controller；未新增 replay execution API；未新增真实 HTTP outbound；未新增真实 provider；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`；未把 `APPROVED` 映射为 `BUY`；未把 `REJECTED` 映射为 `SELL`；invalid decision error 不回显 `BUY` / `SELL` / `PLACE_ORDER` / `CANCEL_ORDER`；invalid decision 不触发 repository update 或 audit write。
+
+### Next
+
+```text
+DH-STAGE-QDR-2-B4-REVIEW-FREEZE
+```
+
+## 2026-07-06 DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT
+
+执行 `DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT`。本轮为 `CODE_CHANGE + TEST + DOCUMENTATION + HUMAN_APPROVAL_API + HUMAN_APPROVAL_AUDIT + TENANT_BOUND_WRITE + STATE_MACHINE_ENFORCEMENT + SECURITY_BOUNDARY_PRESERVATION + NO_DB_MIGRATION + NO_REPLAY_EXECUTION + NO_REAL_HTTP + NO_PROVIDER + NO_AGENT`，只实现 stage-qdr-2 B4 approval API + audit。
+
+### 新增文件
+
+```text
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/HumanApprovalPacketController.java
+dh-api/src/test/java/com/guidinglight/decisionhub/api/decision/HumanApprovalPacketControllerWebMvcTest.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/ApprovalCommandValidation.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/ApprovalPacketView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/ApprovalWriteBoundary.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/CreateApprovalPacketCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/HumanApprovalPacketAuditException.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/HumanApprovalPacketCommandService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/HumanApprovalPacketNotFoundException.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/SubmitApprovalDecisionCommand.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/approval/HumanApprovalPacketCommandServiceTest.java
+```
+
+### 修改文件
+
+```text
+dh-api/src/main/java/com/guidinglight/decisionhub/api/security/DhApiAuthenticationFilter.java
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DecisionAuditEventType.java
+docs/current/API.md
+docs/current/DB_SCHEMA.md
+docs/current/DH_STAGE_QDR_2_WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/WORK_ORDER.md
+```
+
+### Result
+
+```text
+stage-qdr-2 B3: CLOSED / ACCEPTED
+stage-qdr-2 B4: DONE / IMPLEMENTED_BY_VALIDATION
+stage-qdr-2 implementation overall: PARTIAL
+Approval API: IMPLEMENTED_BY_VALIDATION / AUTHENTICATED / TENANT_BOUND
+Approval write endpoint: IMPLEMENTED_BY_VALIDATION / STATE_MACHINE_ENFORCED
+Approval audit events: IMPLEMENTED_BY_VALIDATION / AUDIT_FAIL_CLOSED
+Replay execution API: NOT STARTED
+Model gateway: NOT STARTED
+B5 close review: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph runtime: NOT STARTED
+LIVE: DISABLED
+```
+
+### Findings
+
+- 新增 `HumanApprovalPacketController`，提供 `POST /api/ai/decision-runs/{decisionRunId}/approval-packets`、`GET /api/ai/approval-packets/{approvalPacketId}`、`POST /api/ai/approval-packets/{approvalPacketId}/decision`。所有 endpoint 必须通过 `DhApiAuthenticationFilter`，tenantId 只从 `AuthenticatedRequest` 读取，不信任 body / query param。
+- 新增 `HumanApprovalPacketCommandService`，在 create 时通过 `DecisionReadModelService` 校验 decision_run 属于当前 tenant；duplicate approval_key fail-closed；submit decision 通过 B3 `HumanApprovalPacketService` 与 `ApprovalStatusTransitionPolicy` 强制状态机。
+- 新增 `ApprovalWriteBoundary` 并在 `DecisionPipelineWiringConfig` 接入 Spring transaction；approval repository write 与 audit write 位于同一写入边界，audit failure 或 repository failure 不返回 success。
+- 审计复用既有 `DecisionAuditRepository` / `dh_decision_audit_event`，新增 `HUMAN_APPROVAL_PACKET_CREATED`、`HUMAN_APPROVAL_DECISION_SUBMITTED`、`HUMAN_APPROVAL_DECISION_REJECTED`、`HUMAN_APPROVAL_DECISION_NEEDS_REVIEW`、`HUMAN_APPROVAL_TRANSITION_DENIED` 事件类型；payload 记录 tenantId、traceId、requestId、decisionRunId、approvalPacketId、approvalKey、oldStatus、newStatus、reviewerId、occurredAt 与脱敏 reason。
+- API response 使用 `ApprovalPacketResponse` / `ApprovalDecisionResponse`，不直接暴露 persistence entity，不返回 tenantId、raw provider response、raw prompt、credential、token、apiKey、apiSecret、passphrase、quantity、leverage 或 executable order instruction。
+- 错误映射覆盖 missing auth、tenant mismatch、invalid decision、not found、duplicate key、terminal transition denied、repository failure 与 audit failure；`BUY` / `SELL` 作为 decision 输入会被拒绝为 validation error。
+- `DhApiAuthenticationFilter` 已覆盖 B4 approval endpoint；approval API 不在 anonymous allowlist。
+- `ArchitectureTest` 增加 B4 guard，约束 approval API/usecase 不依赖 provider SDK、LangGraph / AutoGen / CrewAI、NQ client、HTTP client 或交易动词。
+
+### Validation
+
+```text
+git branch --show-current: dev
+git log --oneline -5: HEAD includes 8d92a30 feat(qdr): add stage-qdr-2 human approval domain
+git diff --check: PASS / LF->CRLF warnings only / no whitespace error
+forbidden scan broad: PASS / CLASSIFIED / no B4 production risk
+forbidden scan changed files: PASS / CLASSIFIED / no B4 production risk
+mvn -ntp -pl dh-domain -am test: BUILD SUCCESS / 136 tests
+mvn -ntp -pl dh-usecase -am test: BUILD SUCCESS / 223 tests / HumanApprovalPacketCommandServiceTest 15 tests
+mvn -ntp -pl dh-infra -am test: BUILD SUCCESS / 53 tests / Docker Testcontainers postgres:17 ran
+mvn -ntp -pl dh-api -am test: BUILD SUCCESS / 77 tests / HumanApprovalPacketControllerWebMvcTest 13 tests
+mvn -ntp -pl dh-app -am test: BUILD SUCCESS / 54 tests / ArchitectureTest 24 tests
+mvn -ntp -Pquality validate: BUILD SUCCESS / reactor 19/19 / Checkstyle 0 violations / Spotless passed
+.\mvnw.cmd -v: WRAPPER_UNUSABLE / '\' is not recognized + maven-wrapper.jar no main manifest attribute
+skip flags: NOT USED / no -DskipTests / no -DskipITs
+```
+
+### Boundary confirmation
+
+未修改 NQ；未新增 migration；未修改 `V7__human_approval_packet.sql`；未修改 V1-V6 历史 migration；未新增 replay execution API；未新增 model_call / prompt_template / prompt_version / tool_definition / tool_invocation；未新增真实 HTTP outbound；未新增真实 provider；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`；未把 `APPROVED` 映射为 `BUY`；未把 `REJECTED` 映射为 `SELL`；approval API 只改变 DH 内部 approval 状态并写审计事件，不触发 NQ / 交易 / provider / HTTP / replay execution。
+
+### Next
+
+```text
+DH-STAGE-QDR-2-B4-REVIEW-FREEZE
+```
+
 ## 2026-07-06 DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API
 
 执行 `DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API`。本轮为 `CODE_CHANGE + TEST + DOCUMENTATION + READMODEL_REPOSITORY + READONLY_API + TENANT_BOUND_QUERY + SECURITY_BOUNDARY_PRESERVATION + NO_DB_MIGRATION + NO_APPROVAL_WRITE + NO_REAL_HTTP + NO_PROVIDER + NO_AGENT`，只实现 stage-qdr-2 B2 read repository 与 read-only API。

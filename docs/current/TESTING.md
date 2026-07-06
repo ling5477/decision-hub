@@ -1,5 +1,106 @@
 # Decision Hub Testing
 
+## 2026-07-06 DH-STAGE-QDR-2-B4-BLOCKER-FIX validation
+
+```text
+Scope:
+  - 本轮只修复 stage-qdr-2 B4 invalid approval decision error redaction blocker。
+  - invalid decision 必须返回固定安全错误码与固定安全 message。
+  - error body 不得包含 BUY / SELL / PLACE_ORDER / CANCEL_ORDER / MARKET_ORDER / LIMIT_ORDER / No enum constant / enum class 名 / raw request value。
+  - invalid decision 不得触发 repository update、audit write、NQ / HTTP / provider / replay。
+  - 不新增 API，不新增 migration，不修改 V7 migration，不进入 B5。
+
+Result:
+  STAGE_QDR_2_B4_BLOCKER_FIX: DONE
+  STAGE_QDR_2_B4_FREEZE: PENDING / RETRY_ALLOWED_AFTER_BLOCKER_FIX
+  ALLOW_STAGE_QDR_2_B4_REVIEW_FREEZE_RETRY: YES
+  ALLOW_STAGE_QDR_2_B4_COMMIT: NO
+  ALLOW_STAGE_QDR_2_B5_CLOSE_REVIEW: NO
+  ALLOW_REPLAY_EXECUTION_NOW: NO
+  ALLOW_REAL_HTTP: NO
+  ALLOW_REAL_PROVIDER: NO
+  ALLOW_AGENT_PHASE: NO
+  ALLOW_LANGGRAPH_RUNTIME: NO
+  ALLOW_LIVE: NO
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| workspace guard | PASS | `E:\Project\decision-hub` exists；`F:\project\decision-hub` does not exist；未触发 `WORKSPACE_NOT_FOUND` 或 `WORKSPACE_AMBIGUOUS_BLOCKED`。 |
+| `git status --short` | PASS / ALLOWED DIRTY | Dirty 为既有 B4 approval API / usecase / audit enum / wiring / tests / docs 加本轮 blocker fix；未 staged。 |
+| `git branch --show-current` | PASS | 当前分支 `dev`。 |
+| `git log --oneline -5` | PASS / B3 COMMITTED | HEAD 包含 `8d92a30 feat(qdr): add stage-qdr-2 human approval domain`。 |
+| `git diff --check` | PASS WITH LF/CRLF WARNINGS | 仅 Windows LF -> CRLF warning；无 whitespace error。 |
+| `git diff --stat` | REVIEWED | tracked diff 仍为 B4 approval API / wiring / tests / docs；untracked B4 Java/test 文件由 `git status` 单独显示。 |
+| `git diff --name-only` | REVIEWED | tracked diff 未包含 migration；untracked 新增文件不在该命令输出内。 |
+| `git ls-files --others --exclude-standard` | REVIEWED | untracked 为 B4 approval API/usecase/tests 文件；未包含 migration。 |
+| `git diff --cached --name-only` | PASS / EMPTY | 未 staged。 |
+| migration boundary | PASS | `git diff --name-only -- dh-app/src/main/resources/db/migration` 与 untracked migration scan 均为空；未新增 migration，未修改 V7。 |
+| blocker source scan | PASS | `ApprovalDecision.valueOf(...)` 不再出现在 approval decision request path；`ApprovalDecisionParser.parseSafe(...)` 接管外部 decision。 |
+| targeted usecase tests | BUILD SUCCESS | `mvn -ntp -pl dh-usecase -am "-Dtest=ApprovalDecisionParserTest,HumanApprovalPacketCommandServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`：18 tests / 0 failures / 0 errors / 0 skipped。 |
+| targeted WebMvc tests | BUILD SUCCESS | `mvn -ntp -pl dh-api -am "-Dtest=HumanApprovalPacketControllerWebMvcTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`：13 tests / 0 failures / 0 errors / 0 skipped。 |
+| broad forbidden scan | REVIEWED / CLASSIFIED | `BROAD_MATCH_COUNT=1603`；命中分类为 production redaction/security code、test guard、docs prohibition、enum/check constraint、unrelated historical text；未发现 B4 blocker-fix production risk。 |
+| changed-file forbidden scan | REVIEWED / CLASSIFIED | `CHANGED_FILE_COUNT=28`，`CHANGED_MATCH_COUNT=623`；changed-file 中 `BUY` / `SELL` / `PLACE_ORDER` / `CANCEL_ORDER` 仅出现在 negative tests、denylist/security guard 或 docs prohibition，不在 success response、error message literal 或 API success contract 中。 |
+| `mvn -ntp -pl dh-domain -am test` | BUILD SUCCESS | 136 tests / 0 failures / 0 errors / 0 skipped。 |
+| `mvn -ntp -pl dh-usecase -am test` | BUILD SUCCESS | 226 tests / 0 failures / 0 errors / 0 skipped；包含 `ApprovalDecisionParserTest` 3 tests 与 `HumanApprovalPacketCommandServiceTest` 15 tests。 |
+| `mvn -ntp -pl dh-api -am test` | BUILD SUCCESS | 77 tests / 0 failures / 0 errors / 0 skipped；包含 `HumanApprovalPacketControllerWebMvcTest` 13 tests。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS WITH TESTCONTAINERS SKIP | 54 tests / 0 failures / 0 errors / 1 skipped；`PostgresContainerSmokeTest` 因 Docker named pipe `\\.\pipe\docker_engine` access denied / no valid Docker environment skipped，skip 不等于 PASS。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed。 |
+| `.\mvnw.cmd -v` | WRAPPER_UNUSABLE / NOT_VALID_MAVEN_WRAPPER | exit code 0 但输出 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+| skip flags | PASS / NOT USED | full Maven tests 与 quality validation 未使用 `-DskipTests` 或 `-DskipITs`；targeted tests 仅使用 `-Dsurefire.failIfNoSpecifiedTests=false` 处理 upstream modules 无指定测试。 |
+
+Boundary:
+
+未修改 NQ；未新增 migration；未修改 `V7__human_approval_packet.sql`；未修改 V1-V6 历史 migration；未新增 replay execution API；未新增真实 HTTP outbound；未新增真实 provider；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`；未把 `APPROVED` 映射为 `BUY`；未把 `REJECTED` 映射为 `SELL`；invalid decision error 不回显 `BUY` / `SELL` / `PLACE_ORDER` / `CANCEL_ORDER`；invalid decision 不触发 repository update 或 audit write。
+
+## 2026-07-06 DH-STAGE-QDR-2-B4-HUMAN-APPROVAL-API-AND-AUDIT validation
+
+```text
+Scope:
+  - 本轮只实现 stage-qdr-2 B4 Human Approval API + Audit。
+  - 新增 tenant-bound create / get / submit decision API、approval command service、审计事件写入、WebMvc/service tests、wiring 与 architecture guard。
+  - B4 不新增 migration，不修改 V7 migration，不新增 replay execution API，不接真实 HTTP / provider / LangGraph / AutoGen / CrewAI，不修改 NQ，不开启 LIVE。
+
+Result:
+  STAGE_QDR_2_B3: CLOSED / ACCEPTED
+  STAGE_QDR_2_B4: DONE / IMPLEMENTED_BY_VALIDATION
+  STAGE_QDR_2_IMPLEMENTATION_OVERALL: PARTIAL
+  APPROVAL_API: IMPLEMENTED_BY_VALIDATION / TENANT_BOUND / AUTHENTICATED
+  APPROVAL_AUDIT: IMPLEMENTED_BY_VALIDATION / AUDIT_FAIL_CLOSED
+  REPLAY_EXECUTION_API: NOT STARTED
+  MODEL_GATEWAY: NOT STARTED
+  B5_CLOSE_REVIEW: NOT STARTED
+  REAL_HTTP: NO
+  REAL_PROVIDER: NO
+  AGENT_LANGGRAPH_RUNTIME: NOT STARTED
+  LIVE: DISABLED
+```
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git branch --show-current` | PASS | 当前分支 `dev`。 |
+| `git log --oneline -5` | PASS / B3 COMMITTED | HEAD 包含 `8d92a30 feat(qdr): add stage-qdr-2 human approval domain`。 |
+| `git status --short` | PASS / B4_ALLOWED_DIFF | 最终 dirty 仅为本轮 B4 code/tests/docs diff；未发现 NQ diff。 |
+| `git diff --check` | PASS WITH LF/CRLF WARNINGS | 仅 Windows LF -> CRLF warning；无 whitespace error。 |
+| `git diff --stat` | REVIEWED | diff 限于 B4 允许的 `dh-usecase` approval command service、`dh-api` approval controller/tests、`dh-app` wiring/architecture tests 与 `docs/current`。 |
+| `git diff --name-only` | REVIEWED | tracked diff 未包含 migration；untracked 为 B4 新增 Java/test 文件。 |
+| broad forbidden scan | PASS / CLASSIFIED | `BROAD_SCAN_MATCH_COUNT=1582`；分类为 migration enum/check constraints、redaction/security code、docs prohibition、test guard、unrelated historical text；未发现 B4 production risk。 |
+| changed-file forbidden scan | PASS / CLASSIFIED | `CHANGED_FILE_COUNT=24`，`CHANGED_SCAN_MATCH_COUNT=602`，`PRODUCTION_CANDIDATE_COUNT=19`；生产候选分类为 enum constraint、redaction/security code、boundary comments；未发现 B4 production risk。 |
+| `mvn -ntp -pl dh-domain -am test` | BUILD SUCCESS | 136 tests；domain approval 状态机基线保持通过。 |
+| `mvn -ntp -pl dh-usecase -am test` | BUILD SUCCESS | 223 tests；新增 `HumanApprovalPacketCommandServiceTest` 15 tests，覆盖 create/decision/audit/repository/tenant/state-machine fail-closed。 |
+| `mvn -ntp -pl dh-infra -am test` | BUILD SUCCESS | 53 tests；Docker/Testcontainers 本轮可用，`postgres:17` 容器测试已运行，未把 skip 写成 PASS。 |
+| `mvn -ntp -pl dh-api -am test` | BUILD SUCCESS | 77 tests；新增 `HumanApprovalPacketControllerWebMvcTest` 13 tests，覆盖 auth、tenant mismatch、invalid decision、audit/repository failure、no executable response。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS | 54 tests；`ArchitectureTest` 24 tests；`PostgresContainerSmokeTest` 使用 `postgres:17` 运行。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed。 |
+| `.\mvnw.cmd -v` | WRAPPER_UNUSABLE / NOT_VALID_MAVEN_WRAPPER | exit code 为 0 但输出包含 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；wrapper 仍不可用，不能写成 Maven wrapper PASS。 |
+| skip flags | PASS / NOT USED | 本轮 Maven 验证未使用 `-DskipTests` 或 `-DskipITs`。 |
+| migration boundary | PASS | 未新增 migration；未修改 `dh-app/src/main/resources/db/migration/V7__human_approval_packet.sql`；未修改 V1-V6 历史 migration。 |
+| NQ boundary | PASS | 未修改 NQ 仓库；未触发 NQ runtime、交易、provider、真实 HTTP 或 LIVE。 |
+
+Boundary:
+
+未修改 NQ；未新增 migration；未修改 V7 migration；未新增 replay execution API；未新增真实 HTTP outbound；未新增真实 provider；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`；未把 `APPROVED` 映射为 `BUY`；未把 `REJECTED` 映射为 `SELL`；approval API 只改变 DH 内部 approval 状态并写 `dh_decision_audit_event` 审计事件。
+
 ## 2026-07-06 DH-STAGE-QDR-2-B2-READMODEL-REPOSITORY-AND-API validation
 
 ```text

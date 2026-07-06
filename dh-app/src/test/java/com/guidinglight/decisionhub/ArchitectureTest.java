@@ -614,6 +614,20 @@ public class ArchitectureTest {
                                         "qdr",
                                         "JdbcHumanApprovalPacketRepository.java")
                                 .toAbsolutePath()
+                                .normalize(),
+                        Path.of(
+                                        "..",
+                                        "dh-api",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "api",
+                                        "decision",
+                                        "HumanApprovalPacketController.java")
+                                .toAbsolutePath()
                                 .normalize());
         final List<String> violations = new ArrayList<>();
         for (Path approvalPath : approvalPaths) {
@@ -636,6 +650,65 @@ public class ArchitectureTest {
                 .that()
                 .resideInAnyPackage(
                         "..domain.qdr.approval..", "..usecase.qdr.approval..", "..infra.jdbc.qdr..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage("..connector.nq..")
+                .orShould()
+                .dependOnClassesThat()
+                .haveSimpleName("NqBacktestClient")
+                .orShould()
+                .dependOnClassesThat()
+                .haveSimpleName("RealNqBacktestClient")
+                .check(importMainClasses());
+    }
+
+    /**
+     * stage-qdr-2 B4：approval API 路径必须受 DhApiAuthenticationFilter 保护。
+     *
+     * <p>该静态守卫防止新增 decision-runs approval 子路径或 approval-packets 子路径后遗漏认证
+     * filter，导致匿名 approval create/query/decision
+     * endpoint。运行态 401/403 仍由 WebMvc tests 覆盖。
+     */
+    @Test
+    void stageQdr2B4_rule23_approvalApiIsInsideAuthenticationFilter() {
+        final Path filterPath =
+                Path.of(
+                                "..",
+                                "dh-api",
+                                "src",
+                                "main",
+                                "java",
+                                "com",
+                                "guidinglight",
+                                "decisionhub",
+                                "api",
+                                "security",
+                                "DhApiAuthenticationFilter.java")
+                        .toAbsolutePath()
+                        .normalize();
+        try {
+            final String body = Files.readString(filterPath, StandardCharsets.UTF_8);
+            if (!body.contains("APPROVAL_PACKET_PATH")
+                    || !body.contains("DECISION_RUN_READ_PATH")
+                    || !body.contains("\"/api/ai/approval-packets\"")
+                    || !body.contains("\"/api/ai/decision-runs\"")
+                    || !body.contains("path.startsWith(DECISION_RUN_READ_PATH + \"/\")")
+                    || !body.contains("path.startsWith(APPROVAL_PACKET_PATH + \"/\")")) {
+                fail("approval packet API path must be protected by DhApiAuthenticationFilter");
+            }
+        } catch (IOException io) {
+            fail("failed to read DhApiAuthenticationFilter.java: " + io.getMessage());
+        }
+    }
+
+    /**
+     * stage-qdr-2 B4：approval API / usecase 不允许依赖 NQ client。
+     */
+    @Test
+    void stageQdr2B4_rule24_approvalApiAndUsecaseDoNotDependOnNqClient() {
+        noClasses()
+                .that()
+                .resideInAnyPackage("..api.decision..", "..usecase.qdr.approval..")
                 .should()
                 .dependOnClassesThat()
                 .resideInAnyPackage("..connector.nq..")

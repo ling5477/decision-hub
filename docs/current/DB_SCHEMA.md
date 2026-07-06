@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B3_HUMAN_APPROVAL_MIGRATION_DOMAIN_IMPLEMENTED / PARTIAL_IMPLEMENTATION
-Next stage:    DH-STAGE-QDR-2-B3-REVIEW-FREEZE / READY
+Current stage: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B4_HUMAN_APPROVAL_API_AUDIT_IMPLEMENTED_BY_VALIDATION / PARTIAL_IMPLEMENTATION
+Next stage:    DH-STAGE-QDR-2-B4-REVIEW-FREEZE / READY
 ```
 
 Flyway 迁移：
@@ -19,20 +19,21 @@ V6__qdr_decision_core_baseline.sql stage-qdr-1 Decision Core baseline
 V7__human_approval_packet.sql      stage-qdr-2 B3 Human Approval Packet
 stage-qdr-2 B1 readmodel DTO   DONE / NO DB SCHEMA CHANGE / NO MIGRATION
 stage-qdr-2 B2 read repository/API DONE / NO DB SCHEMA CHANGE / NO MIGRATION
+stage-qdr-2 B4 approval API/audit DONE / NO DB SCHEMA CHANGE / NO MIGRATION
 human_approval_packet            MIGRATION_ADDED / B3 / NOT_TRADING_AUTHORIZATION
 ```
 
-## 1.0 stage-qdr-2 B1/B2/B3 schema impact
+## 1.0 stage-qdr-2 B1/B2/B3/B4 schema impact
 
-B1 只新增 `dh-usecase` read model DTO / projection 与 tenant-bound query contract；B2 新增只读 JDBC adapter 与 authenticated read-only API。B1/B2 均不新增 DB schema，不新增 Flyway migration，不修改 V5 / V6 migration。B3 新增 `V7__human_approval_packet.sql`，只新增 `human_approval_packet` 表，不修改 V1-V6 历史 migration，不 ALTER 旧表，不 DROP 表。
+B1 只新增 `dh-usecase` read model DTO / projection 与 tenant-bound query contract；B2 新增只读 JDBC adapter 与 authenticated read-only API。B1/B2 均不新增 DB schema，不新增 Flyway migration，不修改 V5 / V6 migration。B3 新增 `V7__human_approval_packet.sql`，只新增 `human_approval_packet` 表，不修改 V1-V6 历史 migration，不 ALTER 旧表，不 DROP 表。B4 只新增 API / command service / audit integration / tests / wiring，不新增 migration，不修改 V7，不修改 V1-V6。
 
 ```text
 Read model DTO/query contract: DONE / USECASE_ONLY
 Read repository: DONE / JDBC_READONLY / EXISTING_V5_V6_TABLES_ONLY
 API implementation: DONE / READ_ONLY / NO_OPENAPI_FORMALIZATION
 human_approval_packet: MIGRATION_ADDED / V7
-Approval API: NOT STARTED
-Approval write endpoint: NOT STARTED
+Approval API: IMPLEMENTED_BY_VALIDATION / NO_SCHEMA_CHANGE
+Approval write endpoint: IMPLEMENTED_BY_VALIDATION / NO_SCHEMA_CHANGE
 Replay execution API: NOT STARTED
 ```
 
@@ -161,7 +162,7 @@ APPROVED
 REJECTED
 ```
 
-`LONG_BIAS / SHORT_BIAS` 只表示方向性审查意见，不代表 `BUY / SELL`。`human_approval_status` 当前默认 `NOT_REQUIRED`；B3 已新增独立 `human_approval_packet` 表，但 approval API / write endpoint 仍未实现。
+`LONG_BIAS / SHORT_BIAS` 只表示方向性审查意见，不代表 `BUY / SELL`。`human_approval_status` 当前默认 `NOT_REQUIRED`；B3 已新增独立 `human_approval_packet` 表，B4 approval API 只写该表的内部 approval 状态，不修改 `quant_decision.action`，也不把 `approval_status` 当作 execution signal。
 
 ## 1.2 stage-qdr-2 human_approval_packet（B3 MIGRATION_ADDED / NOT TRADING AUTHORIZATION）
 
@@ -213,6 +214,19 @@ idx_human_approval_packet_request_id(request_id)
 ```
 
 `checklist_json` / `evidence_refs_json` 不得存储 credential、apiKey、apiSecret、passphrase、token、cookie、raw provider response 或 raw prompt secret。审批包只记录 human review evidence，不是交易授权。审批状态只允许改变 DH 内部 approval 状态；`APPROVED` 不等于 `BUY`，`REJECTED` 不等于 `SELL`，`LONG_BIAS / SHORT_BIAS` 不映射为 `BUY / SELL`。
+
+## 1.3 stage-qdr-2 B4 schema conclusion
+
+```text
+B4 new migration: NO
+B4 modified V7 migration: NO
+B4 modified V1-V6 migrations: NO
+B4 new table: NO
+B4 schema impact: NONE
+B4 audit target: existing dh_decision_audit_event
+```
+
+B4 approval create / decision submit 通过既有 `human_approval_packet` 表与既有 `dh_decision_audit_event` 审计表完成，不新增独立 audit subsystem。audit write 失败必须 fail-closed；repository write 失败必须 fail-closed；任何 approval API 都不得写 NQ DB、不得写交易事实、不得写 order / risk / ledger / paper / live mutation。
 
 ## 2. Stage2-PoC-B5 新增 4 张表
 

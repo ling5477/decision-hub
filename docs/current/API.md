@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B3_HUMAN_APPROVAL_MIGRATION_DOMAIN_IMPLEMENTED / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
-下一阶段: DH-STAGE-QDR-2-B3-REVIEW-FREEZE / READY / REVIEW_ONLY / NO_APPROVAL_API_WRITE_YET
+当前阶段: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / B4_HUMAN_APPROVAL_API_AUDIT_IMPLEMENTED_BY_VALIDATION / PARTIAL_IMPLEMENTATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER
+下一阶段: DH-STAGE-QDR-2-B4-REVIEW-FREEZE / READY / REVIEW_ONLY / NO_B5_CLOSE_REVIEW_YET
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -27,15 +27,16 @@ DH limited runtime endpoint: IMPLEMENTED / DH_ONLY / DEFAULT_DISABLED / DEV_TEST
 Decision Core baseline: CLOSED / ACCEPTED / decision_request + decision_run + quant_signal + quant_decision
 stage-qdr-2 read model DTO/query contract: IMPLEMENTED / USECASE_ONLY / NO_ENDPOINT
 stage-qdr-2 read model API: IMPLEMENTED / READ_ONLY / TENANT_BOUND / NO_OPENAPI_FORMALIZATION
-stage-qdr-2 human approval domain/repository: IMPLEMENTED / INTERNAL_ONLY / NO_ENDPOINT
-stage-qdr-2 approval API drafts: PLANNED / NOT IMPLEMENTED
+stage-qdr-2 human approval domain/repository: IMPLEMENTED / INTERNAL_ONLY
+stage-qdr-2 approval API: IMPLEMENTED_BY_VALIDATION / TENANT_BOUND / AUDIT_FAIL_CLOSED / NO_OPENAPI_FORMALIZATION
+replay execution API: NOT IMPLEMENTED
 Integration-1:        NOT STARTED
 Runtime integration:  NOT STARTED
 AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为正式契约单源；B3 未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 B1 已落地 usecase-level read model DTO / query contract；B2 已新增 tenant-bound read repository 与只读 detail/trace API；B3 已新增 approval domain / repository / JDBC adapter 与 `human_approval_packet` migration，但这不是 API；approval API 草案仍标记为 `PLANNED / NOT IMPLEMENTED`；`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
+OpenAPI 仍为正式契约单源；B4 未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay execution API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 B1 已落地 usecase-level read model DTO / query contract；B2 已新增 tenant-bound read repository 与只读 detail/trace API；B3 已新增 approval domain / repository / JDBC adapter 与 `human_approval_packet` migration；B4 已新增 tenant-bound approval create / get / decision API 与审计事件写入。`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
 
 ## 2. 已实现端点
 
@@ -67,6 +68,19 @@ GET  /api/ai/decision-runs/{decisionRunId}           stage-qdr-2 B2 read-only de
 GET  /api/ai/decision-runs/{decisionRunId}/trace     stage-qdr-2 B2 read-only trace API
                                                       - 只读取已物化 audit trace step；不触发 replay execution
                                                       - response 仅 summary/ref；不触发 HTTP、provider、approval write 或 LIVE
+POST /api/ai/decision-runs/{decisionRunId}/approval-packets
+                                                     stage-qdr-2 B4 approval packet create API
+                                                      - 必须认证；tenant 只从认证上下文读取
+                                                      - 基于当前 tenant 下已存在 decision_run 创建 PENDING approval packet
+                                                      - 写入 approval packet 与 audit event；audit/repository 失败 fail-closed
+GET  /api/ai/approval-packets/{approvalPacketId}     stage-qdr-2 B4 approval packet read API
+                                                      - 必须认证；tenant-bound；只返回 redacted API response DTO
+POST /api/ai/approval-packets/{approvalPacketId}/decision
+                                                     stage-qdr-2 B4 approval decision API
+                                                      - 只允许 APPROVED / REJECTED / NEEDS_REVIEW
+                                                      - 必须走 approval 状态机；终态重复提交返回冲突
+                                                      - 只改变 DH 内部 approval 状态并写 audit event
+                                                      - 不修改 quant_decision.action；不触发 NQ、交易、provider、HTTP 或 replay execution
 POST /legacy/runs                                    旧链路（@Deprecated，必须认证，不允许匿名）
 GET  /legacy/runs/{runId}                            旧链路（@Deprecated，必须认证且 tenant 匹配）
 ```
@@ -99,16 +113,16 @@ quant_decision:
 
 安全边界不变：HMAC、timestamp、nonce replay、tenant-source binding、payload cap、memory cap、rate limit、kill switch、forbidden material gate、audit fail-closed 均继续生效。`LONG_BIAS / SHORT_BIAS` 只表示只读方向性审查意见，不是交易指令。
 
-## 2.2 stage-qdr-2 read model API（B2 IMPLEMENTED / READ_ONLY）
+## 2.2 stage-qdr-2 read model 与 approval API（B2/B4 IMPLEMENTED）
 
-以下 read API 已由 B2 实现为 authenticated / tenant-bound / read-only endpoint。它们没有写入 OpenAPI 正式契约，不是 approval API，不触发 replay execution、外部 HTTP、provider、NQ mutation、Agent runtime 或 LIVE。
+以下 read API 已由 B2 实现为 authenticated / tenant-bound / read-only endpoint；approval API 已由 B4 实现为 authenticated / tenant-bound / audit-fail-closed endpoint。它们没有写入 OpenAPI 正式契约，不触发 replay execution、外部 HTTP、provider、NQ mutation、Agent runtime 或 LIVE。
 
 ```text
 GET  /api/ai/decision-runs/{decisionRunId}                  IMPLEMENTED / READ_ONLY / TENANT_BOUND
 GET  /api/ai/decision-runs/{decisionRunId}/trace            IMPLEMENTED / READ_ONLY / TENANT_BOUND / NO_REPLAY_EXECUTION
-GET  /api/ai/approval-packets/{approvalPacketId}            PLANNED / NOT IMPLEMENTED
-POST /api/ai/decision-runs/{decisionRunId}/approval-packets PLANNED / NOT IMPLEMENTED
-POST /api/ai/approval-packets/{approvalPacketId}/decision   PLANNED / NOT IMPLEMENTED
+GET  /api/ai/approval-packets/{approvalPacketId}            IMPLEMENTED / READ_ONLY / TENANT_BOUND
+POST /api/ai/decision-runs/{decisionRunId}/approval-packets IMPLEMENTED / CREATE_PENDING_ONLY / TENANT_BOUND
+POST /api/ai/approval-packets/{approvalPacketId}/decision   IMPLEMENTED / STATE_MACHINE_ENFORCED / AUDIT_FAIL_CLOSED
 ```
 
 B1/B2 已实现的 read model / query / service / adapter 名称如下。DTO 仍是 usecase read model contract；API response 由 `DecisionRunReadController` 做安全映射，不把 usecase DTO 当作正式 external API contract：
@@ -139,21 +153,54 @@ response 不返回 credential、raw provider response、raw prompt 或 executabl
 APPROVED 不是 BUY；REJECTED 不是 SELL；LONG_BIAS / SHORT_BIAS 不是交易指令
 ```
 
-## 2.3 stage-qdr-2 approval internal domain/repository（B3 IMPLEMENTED / NO API）
+## 2.3 stage-qdr-2 approval internal domain/repository（B3 IMPLEMENTED）
 
-B3 已实现 DH 内部 `HumanApprovalPacket` domain model、approval status machine、repository port / service 与 JDBC adapter，并新增 `V7__human_approval_packet.sql`。这些实现只为 B4 后续 approval API 提供内部模型和持久化基础，不注册 endpoint，不新增 Controller，不修改 OpenAPI，不新增 WebMvc approval tests。
+B3 已实现 DH 内部 `HumanApprovalPacket` domain model、approval status machine、repository port / service 与 JDBC adapter，并新增 `V7__human_approval_packet.sql`。B4 在此基础上新增 API command service / controller / audit integration，但未修改 OpenAPI 或 migration。
 
 ```text
 HumanApprovalPacket: IMPLEMENTED / DOMAIN_ONLY
 ApprovalStatusTransitionPolicy: IMPLEMENTED / FAIL_CLOSED
 HumanApprovalPacketRepository: IMPLEMENTED / USECASE_PORT
 JdbcHumanApprovalPacketRepository: IMPLEMENTED / TENANT_BOUND
-Approval API: PLANNED / NOT IMPLEMENTED
-Approval write endpoint: NOT STARTED
+Approval API: IMPLEMENTED_BY_VALIDATION / B4
+Approval write endpoint: IMPLEMENTED_BY_VALIDATION / B4
 Replay execution API: NOT STARTED
 ```
 
 `APPROVED` 只表示 DH 内部人工审查状态，不是 `BUY`；`REJECTED` 不是 `SELL`；approval status 不触发 NQ mutation、真实 HTTP、provider、order、cancel、risk、ledger、paper 或 LIVE。
+
+## 2.4 stage-qdr-2 approval API 行为（B4 IMPLEMENTED_BY_VALIDATION）
+
+`HumanApprovalPacketController` 暴露三个 B4 endpoint，但不直接暴露 persistence entity。tenantId 只来自 `AuthenticatedRequest` / `DhApiAuthenticationFilter` 写入的认证上下文；body 中不接受 tenantId、approvalStatus、decisionAction、traceId 或 final execution action。
+
+```text
+Create request:
+  approvalType
+  summary
+  checklistJson
+  evidenceRefsJson
+  reviewerId / reviewerNote 为可选输入；reviewerId 优先使用认证上下文 userId
+
+Decision request:
+  decision = APPROVED / REJECTED / NEEDS_REVIEW
+  reviewerNote
+  reviewerId 可选，优先使用认证上下文 userId
+```
+
+错误映射：
+
+```text
+missing auth: 401
+tenant header mismatch: 403
+validation error / invalid decision such as BUY or SELL: 400
+not found or tenant mismatch lookup: 404
+duplicate approval_key: 409
+terminal transition denied: 409 / APPROVAL_TRANSITION_DENIED
+repository write/read failure: 500 / QDR_APPROVAL_WRITE_FAILED
+audit failure: 500 / QDR_APPROVAL_AUDIT_FAILED
+```
+
+response 允许字段只包含 approval packet / decision run / approval status / risk / readonly decision action / confidence / redacted checklist/evidence/reviewer summary / timestamps。response 不返回 tenantId，不返回 raw provider response、raw prompt、credential、token、cookie、apiKey、apiSecret、passphrase、quantity、leverage 或 executable order instruction。
 
 ## 3. Historical / deferred API 方向（当前 API 未实现）
 
