@@ -1,10 +1,10 @@
 # Decision Hub Current Docs
 
-> 当前阶段: DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD / IMPLEMENTED_BY_VALIDATION / MOCK_ONLY / REVIEW_FREEZE_REQUIRED
-> 下一阶段: DH-STAGE-QDR-3-B2-REVIEW-FREEZE / READY / NO_DIRECT_B3
+> 当前阶段: DH-STAGE-QDR-3-B5-CLOSE-REVIEW / RETRY_REQUIRED / READY
+> 下一阶段: DH-STAGE-QDR-3-B5-CLOSE-REVIEW / REVIEW_ONLY / RETRY
 > 事实源: docs/current
 >
-> 当前 DH 实际执行路径为 `F:/project/decision-hub`；此前 `E:/Project/decision-hub` 属于另一环境路径，不得混用。NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 runtime implementation NOT STARTED。stage-qdr-1 Quant Decision Review Core Baseline 已 `CLOSED / ACCEPTED`。stage-qdr-2 B1/B2/B3/B4 已 `CLOSED / ACCEPTED / COMMITTED`，B4 commit 为 `1e3acf4 feat(qdr): add stage-qdr-2 human approval API`。stage-qdr-2 implementation `DONE`；B5 close review `YES / ACCEPTED`；stage-qdr-2 final close `CLOSED`；stage-qdr-3 planning `DONE / PLAN_ONLY`；stage-qdr-3 implementation work order `DONE / WORK_ORDER_ONLY`；B1 Prompt / Model Version Domain + Mock Registry 已 `COMMITTED`；B2 Model Gateway Mock Runtime + Policy Guard 已 `IMPLEMENTED_BY_VALIDATION`，下一步必须 B2 review/freeze，不得直接 B3。no RealClient；no real provider；no real HTTP；no Agent / LangGraph runtime；no trading ability；LIVE DISABLED。
+> 当前 DH 实际执行路径为 `E:/Project/decision-hub`；不得自动切换到旧环境路径 `F:/project/decision-hub`。NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 runtime implementation NOT STARTED。stage-qdr-1 Quant Decision Review Core Baseline 已 `CLOSED / ACCEPTED`。stage-qdr-2 B1/B2/B3/B4/B5 已完成并验收，stage-qdr-2 final close 已 `CLOSED / ACCEPTED`。stage-qdr-3 planning `DONE / PLAN_ONLY`；implementation work order `DONE / WORK_ORDER_ONLY`；B1 `DONE / COMMITTED`；B2 `DONE / FREEZE ACCEPTED / COMMITTED`；B3 `DONE / FREEZE ACCEPTED / COMMITTED`；B4 `DONE / FREEZE ACCEPTED / COMMITTED`。B5 close review 首次执行为 `NOT_ACCEPTED`，唯一 P1 blocker 是 root README 与 docs/current factsources 漂移；修复后下一步只允许重新执行 `DH-STAGE-QDR-3-B5-CLOSE-REVIEW`。stage-qdr-3 acceptance `NOT YET ACCEPTED`；stage-qdr-3 final close `NOT CLOSED`；stage-qdr-4 `NOT STARTED`。no RealClient；no real provider；no real HTTP；no Agent / LangGraph runtime；no trading ability；LIVE DISABLED。
 > Security baseline: FULL；fail-closed state: FULL；P1-4 residual CLOSED；header alignment CLOSED；timestamp alignment CLOSED；code reality audit blockers fixed。
 > Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1-K8 已 `CLOSED / ACCEPTED`。stage-qdr-2 Work Order 入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`；本轮 discipline closeout 入口为 `docs/current/DH_STAGE_QDR_2_DISCIPLINE_CLOSEOUT.md`。旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与旧冻结目录名 `docs/gates/dh-gatek-decision-pipeline-mvp/` 已 `SUPERSEDED / NAMING_REPLACED`；旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`。后续 DH 当前阶段必须使用 stage* 命名，不得新建 GateK / GateL / GateM 文档或状态。当前仍不允许把 Runtime integration 写成 started，不允许 Agent / LangGraph runtime、真实 provider、真实 HTTP 或 LIVE。
 
@@ -221,17 +221,19 @@ Stage3-B3 DH Backtest Request Adapter IMPL（2026-05-26，DH 端可插拔骨架�
 当前下一步只允许进入：
 
 ```text
-DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY / PLANNED / CONTROLLED_IMPLEMENTATION / MOCK_ONLY。
+DH-STAGE-QDR-3-B5-CLOSE-REVIEW / READY / REVIEW_ONLY / RETRY。
 
 执行口径：
   - stage-qdr-2 B1/B2/B3/B4 已 CLOSED / ACCEPTED / COMMITTED。
   - stage-qdr-2 B5 close review 已 ACCEPTED。
   - stage-qdr-2 implementation DONE；final close CLOSED。
-  - stage-qdr-3 planning DONE / PLAN_ONLY；implementation work order DONE / WORK_ORDER_ONLY；implementation NOT STARTED。
-  - 下一步只允许 B1 Prompt / Model Version Domain + Mock Registry，不得直接进入 B2/B3/B4。
+  - stage-qdr-3 planning DONE / PLAN_ONLY；implementation work order DONE / WORK_ORDER_ONLY；implementation DONE。
+  - stage-qdr-3 B1 DONE / COMMITTED；B2 DONE / FREEZE ACCEPTED / COMMITTED；B3 DONE / FREEZE ACCEPTED / COMMITTED；B4 DONE / FREEZE ACCEPTED / COMMITTED。
+  - B5 close review 首次执行为 NOT_ACCEPTED，P1 blocker 是 docs factsources drift；当前下一步只允许 B5 close review retry。
+  - stage-qdr-3 acceptance NOT YET ACCEPTED；stage-qdr-3 final close NOT CLOSED；stage-qdr-4 NOT STARTED。
   - replay execution API / model gateway implementation / tool registry 均 NOT STARTED。
   - Agent / LangGraph runtime NOT STARTED；real HTTP / real provider 均 NO；LIVE DISABLED。
-  - 当前 DH 实际执行路径为 F:/project/decision-hub；E:/Project/decision-hub 属于另一环境路径，不得混用。
+  - 当前 DH 实际执行路径为 E:/Project/decision-hub；F:/project/decision-hub 仅作为旧环境路径记录，不得作为当前路径。
   - mvnw.cmd 当前 UNUSABLE / P2 TOOLING RISK；系统 Maven mvn 是当前替代验证工具。
   - Docker CLI daemon 可用，但 Testcontainers 本机访问 \\.\pipe\docker_engine 被拒绝；skip 不得写成 PASS。
 

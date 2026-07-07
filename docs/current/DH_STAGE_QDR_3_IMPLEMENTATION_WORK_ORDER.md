@@ -3,7 +3,7 @@
 ```text
 Task: DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER
 Task type: WORK_ORDER_ONLY + STAGE_QDR_3_IMPLEMENTATION_PLANNING + MODEL_GATEWAY_WORK_ORDER + PROMPT_VERSION_WORK_ORDER + PROVIDER_TRUST_SECURITY_BOUNDARY + AUDIT_REDACTION_TEST_MATRIX + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
-Status: DONE / WORK_ORDER_ONLY / B4_IMPLEMENTED_BY_VALIDATION
+Status: DONE / WORK_ORDER_ONLY / B4_FREEZE_ACCEPTED / B5_RETRY_READY
 Fact source: docs/current
 Date: 2026-07-07
 ```
@@ -32,19 +32,19 @@ stage-qdr-1: CLOSED / ACCEPTED
 stage-qdr-2 final close: CLOSED / ACCEPTED
 stage-qdr-3 model gateway prompt version plan: DONE
 stage-qdr-3 implementation work order: DONE / WORK_ORDER_ONLY
-stage-qdr-3 implementation: B4_IMPLEMENTED_BY_VALIDATION
-B1: COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
-B2: CLOSED / ACCEPTED / COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
-B3: CLOSED / ACCEPTED / COMMITTED / V8_MIGRATION_JDBC_BASELINE / NO_API
-B4: IMPLEMENTED_BY_VALIDATION / QDR_PIPELINE_MOCK_GATEWAY_INTEGRATION / NO_API / NO_MIGRATION / REVIEW_FREEZE_REQUIRED
-B5: NOT STARTED / CLOSE_REVIEW_ONLY
+stage-qdr-3 implementation: DONE
+B1: DONE / COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
+B2: DONE / FREEZE ACCEPTED / COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
+B3: DONE / FREEZE ACCEPTED / COMMITTED / V8_MIGRATION_JDBC_BASELINE / NO_API
+B4: DONE / FREEZE ACCEPTED / COMMITTED / QDR_PIPELINE_MOCK_GATEWAY_INTEGRATION / NO_API / NO_MIGRATION
+B5: READY_FOR_RETRY / CLOSE_REVIEW_ONLY / NOT_ACCEPTED_YET
 real HTTP: NO
 real provider: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 ```
 
-本工单已将 stage-qdr-3 implementation 拆成后续可执行批次。B1 已按 domain/usecase/mock registry 范围完成提交；B2 已按 mock gateway runtime / ProviderTrustPolicy / budget / redaction guard 范围完成提交；B3 已按 V8 migration / persistence ports / JDBC repositories / migration tests / JDBC tests / ArchitectureTest guard 范围完成提交；B4 已按 QDR decision / dry-run pipeline mock gateway integration 范围完成实现与验证。B5 仍未启动。本线不新增 API，不接真实 provider，不接真实 HTTP，不启动 Agent / LangGraph / LIVE。
+本工单已将 stage-qdr-3 implementation 拆成后续可执行批次。B1 已按 domain/usecase/mock registry 范围完成提交；B2 已按 mock gateway runtime / ProviderTrustPolicy / budget / redaction guard 范围完成提交并 freeze accepted；B3 已按 V8 migration / persistence ports / JDBC repositories / migration tests / JDBC tests / ArchitectureTest guard 范围完成提交并 freeze accepted；B4 已按 QDR decision / dry-run pipeline mock gateway integration 范围完成实现、验证、freeze accepted 与提交。B5 close review 首次执行为 `NOT_ACCEPTED`，P1 blocker 为 docs factsources drift；当前允许 retry。本线不新增 API，不接真实 provider，不接真实 HTTP，不启动 Agent / LangGraph / LIVE。
 
 ## 2. Stage-qdr-3 批次冻结
 
@@ -136,7 +136,7 @@ fallback to allow
 
 Review 规则：B2 必须 review/freeze，因为涉及 `ProviderTrustPolicy`、gateway fail-closed、安全边界与 mock provider no-outbound 证明。
 
-B2 当前结果：`CLOSED / ACCEPTED / COMMITTED`。B2 review/freeze 已关闭；B3 也已 `CLOSED / ACCEPTED / COMMITTED`。当前下一步只允许 `DH-STAGE-QDR-3-B4-REVIEW-FREEZE`，不得直接进入 B5 close review。
+B2 当前结果：`DONE / FREEZE ACCEPTED / COMMITTED`。B2 review/freeze 已关闭；B3/B4 也已 `DONE / FREEZE ACCEPTED / COMMITTED`。当前下一步只允许 `DH-STAGE-QDR-3-B5-CLOSE-REVIEW` retry。
 
 ### B3: Persistence Baseline
 
@@ -220,7 +220,7 @@ BUY / SELL / PLACE_ORDER / CANCEL_ORDER as output action
 
 Review 规则：B4 必须 review/freeze，因为涉及 decision pipeline integration、audit trace mapping、QDR output boundary 和 fail-closed 行为。
 
-B4 当前结果：`IMPLEMENTED_BY_VALIDATION / REVIEW_FREEZE_REQUIRED`。B4 已将 existing dry-run / QDR decision pipeline 接入 mock ModelGateway、gateway call persistence 与 redacted V5 audit/trace refs；下一步只允许 `DH-STAGE-QDR-3-B4-REVIEW-FREEZE`，不得直接进入 B5 close review。
+B4 当前结果：`DONE / FREEZE ACCEPTED / COMMITTED`。B4 已将 existing dry-run / QDR decision pipeline 接入 mock ModelGateway、gateway call persistence 与 redacted V5 audit/trace refs；当前下一步只允许 `DH-STAGE-QDR-3-B5-CLOSE-REVIEW` retry。B5 retry 不得写成 accepted，不得启动 stage-qdr-4。
 
 ### B5: Stage-qdr-3 Close Review
 
@@ -433,9 +433,9 @@ no trading action tests
 
 ```text
 STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER: DONE
-ALLOW_STAGE_QDR_3_B4_REVIEW_FREEZE: YES
+ALLOW_STAGE_QDR_3_B4_REVIEW_FREEZE: NO / ALREADY_ACCEPTED
 ALLOW_STAGE_QDR_3_B4_COMMIT: NO
-ALLOW_STAGE_QDR_3_B5_AFTER_B4_COMMIT: NO
+ALLOW_STAGE_QDR_3_B5_CLOSE_REVIEW_RETRY: YES
 ALLOW_STAGE_QDR_3_B5_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
@@ -447,5 +447,5 @@ ALLOW_LIVE: NO
 下一步唯一允许动作：
 
 ```text
-DH-STAGE-QDR-3-B4-REVIEW-FREEZE
+DH-STAGE-QDR-3-B5-CLOSE-REVIEW
 ```

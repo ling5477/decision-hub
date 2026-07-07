@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: DH-STAGE-QDR-3-B4-QDR-PIPELINE-MOCK-GATEWAY-INTEGRATION / IMPLEMENTED_BY_VALIDATION / NO_SCHEMA_CHANGE
-Next stage:    DH-STAGE-QDR-3-B4-REVIEW-FREEZE / READY / NO_DIRECT_B5
+Current stage: DH-STAGE-QDR-3-B5-CLOSE-REVIEW / RETRY_REQUIRED / READY / NO_SCHEMA_CHANGE
+Next stage:    DH-STAGE-QDR-3-B5-CLOSE-REVIEW / REVIEW_ONLY / RETRY
 ```
 
 Flyway 迁移：
@@ -28,7 +28,8 @@ stage-qdr-3 implementation WO    DONE / B1-B5_ORDERED / NO MIGRATION
 B1 Prompt/Model Version Domain   COMMITTED / DOMAIN_USECASE_ONLY / NO MIGRATION
 B2 Model Gateway Mock Runtime    IMPLEMENTED_BY_VALIDATION / USECASE_ONLY / NO MIGRATION
 B3 Persistence Baseline          CLOSED / ACCEPTED / COMMITTED / V8 ADDED
-B4 QDR Pipeline Integration      IMPLEMENTED_BY_VALIDATION / NO MIGRATION / NO V9 / REVIEW_FREEZE_REQUIRED
+B4 QDR Pipeline Integration      DONE / FREEZE ACCEPTED / COMMITTED / NO MIGRATION / NO V9
+B5 close review retry            READY_FOR_RETRY / NOT_ACCEPTED_YET / NO DB SCHEMA CHANGE
 V9                              NOT STARTED
 ```
 
@@ -125,7 +126,7 @@ status / provider_kind / profile_status / version_status / trust_decision / fail
 
 V8 migration comments explicitly state raw prompt, raw provider response and credential material are forbidden. Prompt/model version immutability is not enforced by DB trigger in B3; it is enforced by append-only schema shape, migration comments, repository contract, checksum duplicate behavior and tests. Duplicate same checksum is idempotent by contract; duplicate different checksum and checksum mismatch must fail closed.
 
-B3 已完成并关闭；B4 当前只复用 V5/V6/V8 既有表，不新增 V9，不实现 API、真实 provider、Provider SDK 或 real HTTP。B4 完成后必须先进入 `DH-STAGE-QDR-3-B4-REVIEW-FREEZE`，不得直接进入 B5。
+B3 已完成并关闭；B4 只复用 V5/V6/V8 既有表，不新增 V9，不实现 API、真实 provider、Provider SDK 或 real HTTP，并已 `DONE / FREEZE ACCEPTED / COMMITTED`。当前允许重新执行 `DH-STAGE-QDR-3-B5-CLOSE-REVIEW`，但 B5 retry 不得新增 schema，不得把 stage-qdr-3 final close 写成 closed。
 
 ## 1.1 stage-qdr-2 B1/B2/B3/B4 schema impact
 

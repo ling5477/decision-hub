@@ -3,7 +3,7 @@
 ```text
 Task: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN
 Task type: PLANNING_ONLY + MODEL_GATEWAY_DESIGN + PROMPT_VERSION_DESIGN + PROVIDER_TRUST_BOUNDARY_DESIGN + AUDIT_REDACTION_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION
-Status: DONE / PLAN_ONLY / WORK_ORDER_DONE / B4_IMPLEMENTED_BY_VALIDATION
+Status: DONE / PLAN_ONLY / WORK_ORDER_DONE / B4_FREEZE_ACCEPTED / B5_RETRY_READY
 Fact source: docs/current
 Date: 2026-07-07
 ```
@@ -28,18 +28,19 @@ stage-qdr-2 acceptance: ACCEPTED
 stage-qdr-2 final close: CLOSED
 stage-qdr-2 final docs sync commit: docs(qdr): record stage-qdr-2 acceptance
 stage-qdr-3 planning: DONE / PLAN_ONLY
-stage-qdr-3 implementation: B4_IMPLEMENTED_BY_VALIDATION
-B1 Prompt/Model Version Domain + Mock Registry: COMMITTED
-B2 Model Gateway Mock Runtime + Policy Guard: CLOSED / ACCEPTED / COMMITTED
-B3 Persistence Baseline: CLOSED / ACCEPTED / COMMITTED
-B4 QDR Decision Pipeline Integration: IMPLEMENTED_BY_VALIDATION / REVIEW_FREEZE_REQUIRED
+stage-qdr-3 implementation: DONE
+B1 Prompt/Model Version Domain + Mock Registry: DONE / COMMITTED
+B2 Model Gateway Mock Runtime + Policy Guard: DONE / FREEZE ACCEPTED / COMMITTED
+B3 Persistence Baseline: DONE / FREEZE ACCEPTED / COMMITTED
+B4 QDR Decision Pipeline Integration: DONE / FREEZE ACCEPTED / COMMITTED
+B5 Close Review: READY_FOR_RETRY / NOT_ACCEPTED_YET
 real HTTP: NO
 real provider: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 ```
 
-本计划已进入 B4 controlled implementation 结果同步：B1 已提交 domain/usecase/mock registry baseline；B2 已关闭并提交 mock gateway runtime / ProviderTrustPolicy / budget / redaction guard；B3 已关闭并提交 V8 migration、persistence ports、JDBC repositories、migration/JDBC tests 与 ArchitectureTest guard；B4 已把 QDR decision / dry-run pipeline 接入 mock ModelGateway、gateway call persistence 与 redacted audit/trace refs。B4 未新增 API、Controller、migration、真实 provider、真实 HTTP、Agent / LangGraph、contracts、golden_cases 或 NQ 仓库。
+本计划已进入 B5 close review retry 前状态同步：B1 已提交 domain/usecase/mock registry baseline；B2 已关闭并提交 mock gateway runtime / ProviderTrustPolicy / budget / redaction guard；B3 已关闭并提交 V8 migration、persistence ports、JDBC repositories、migration/JDBC tests 与 ArchitectureTest guard；B4 已把 QDR decision / dry-run pipeline 接入 mock ModelGateway、gateway call persistence 与 redacted audit/trace refs，并已 freeze accepted / committed。B5 close review 首次执行为 `NOT_ACCEPTED`，P1 blocker 是 docs factsources drift；修复后只允许重新执行 B5 close review。B4 未新增 API、Controller、migration、真实 provider、真实 HTTP、Agent / LangGraph、contracts、golden_cases 或 NQ 仓库。
 
 ## 3. Model Gateway 设计边界
 
@@ -524,10 +525,10 @@ DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER
 ```text
 DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER: DONE / WORK_ORDER_ONLY
 Artifact: docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md
-stage-qdr-3 implementation: B4_IMPLEMENTED_BY_VALIDATION
-Next concrete action: DH-STAGE-QDR-3-B4-REVIEW-FREEZE
-Current execution workspace: E:/project/decision-hub
+stage-qdr-3 implementation: DONE
+Next concrete action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW / RETRY
+Current execution workspace: E:/Project/decision-hub
 Former alternate environment path: F:/project/decision-hub / do not use in this run
 ```
 
-该 work order 已完成 B1、B2、B3 与 B4 controlled implementation 同步。B2 已 `CLOSED / ACCEPTED / COMMITTED`；B3 已 `CLOSED / ACCEPTED / COMMITTED`；B4 已实现 QDR pipeline mock gateway integration 并要求 standalone review/freeze。下一步只允许 `DH-STAGE-QDR-3-B4-REVIEW-FREEZE`；B5 仍不得立即启动。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime、NQ mutation、trading mutation 与 LIVE 仍全部禁止。
+该 work order 已完成 B1、B2、B3 与 B4 controlled implementation 同步。B1 已 `DONE / COMMITTED`；B2/B3/B4 已 `DONE / FREEZE ACCEPTED / COMMITTED`；B4 已实现 QDR pipeline mock gateway integration 并完成 standalone review/freeze acceptance。下一步只允许重新执行 `DH-STAGE-QDR-3-B5-CLOSE-REVIEW`；B5 retry 仍不得写成 accepted，不得启动 stage-qdr-4。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime、NQ mutation、trading mutation 与 LIVE 仍全部禁止。

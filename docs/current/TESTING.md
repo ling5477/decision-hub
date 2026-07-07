@@ -1,5 +1,50 @@
 # Decision Hub Testing
 
+## 2026-07-07 DH-STAGE-QDR-3-CLOSE-BLOCKER-FIX validation
+
+```text
+Scope:
+  - 本轮只修复 stage-qdr-3 B5 close review 首次执行发现的 docs factsources drift P1 blocker。
+  - 修复范围限定 root README 与 docs/current 状态入口；不修改 Java 生产代码、Java 测试代码、migration、API、Controller、Repository、Service、contracts、golden_cases 或 NQ。
+  - 不把 stage-qdr-3 写成 ACCEPTED，不把 stage-qdr-3 final close 写成 CLOSED，不启动 stage-qdr-4。
+
+Result:
+  STAGE_QDR_3_CLOSE_BLOCKER_FIX: DONE
+  ALLOW_STAGE_QDR_3_B5_CLOSE_REVIEW_RETRY: YES
+  ALLOW_STAGE_QDR_3_FINAL_CLOSE: NO
+  ALLOW_STAGE_QDR_4_PLAN: NO
+  ALLOW_STAGE_QDR_4_IMPLEMENTATION: NO
+  ALLOW_REAL_HTTP: NO
+  ALLOW_REAL_PROVIDER: NO
+  ALLOW_AGENT_PHASE: NO
+  ALLOW_LANGGRAPH_RUNTIME: NO
+  ALLOW_LIVE: NO
+```
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| workspace guard | PASS | `E:\Project\decision-hub` exists；`F:\project\decision-hub` does not exist；本轮只在 `E:\Project\decision-hub` 执行。 |
+| `git branch --show-current` | PASS | 当前分支 `dev`。 |
+| `git log --oneline -12` | PASS / B4 COMMITTED | HEAD 包含 `a5d9bf2 feat(qdr): integrate mock model gateway into pipeline`，且包含 B1/B2/B3/planning/work-order commits。 |
+| `git status --short` | DOCS_ONLY_DIRTY | dirty 限于本轮允许的 `README.md` 与 `docs/current` 文档；无 Java、test、migration、API、contracts、golden_cases 或 NQ diff。 |
+| `git diff --cached --name-only` | PASS / EMPTY | 本轮未 staged。 |
+| `git ls-files --others --exclude-standard` | PASS / EMPTY | 本轮未新增 untracked 文件。 |
+| `git diff --check` | PASS_WITH_EOL_WARNINGS | 无 whitespace error；仅 Windows LF -> CRLF warning。 |
+| `git diff --stat` / `git diff --name-only` | DOCS_ONLY | diff 限于 root README 与允许的 `docs/current` 文档；`TESTING.md` 与 `WORKLOG.md` 仅追加本轮验证和工作记录。 |
+| stale facts scan | PASS | 旧 B4 review/freeze required、旧 B4 review/freeze next、旧 B5 not-started 当前态、旧 F 路径当前口径均已清理；历史记录仅以 historical 方式保留。 |
+| unsafe state scan | PASS | 未引入 real provider / real HTTP / Provider SDK / Agent runtime / LangGraph runtime / LIVE 开启 / stage-qdr-4 启动 / gateway result 被写成交易信号等错误表述。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed；未使用 `-DskipTests` 或 `-DskipITs`。 |
+| `.\mvnw.cmd -v` | WRAPPER_UNUSABLE / NOT_VALID_MAVEN_WRAPPER | 命令返回码为 0，但输出仍包含 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+| Docker/Testcontainers | INHERITED_TOOLING_ENV_RISK / NOT PASS | 本轮 docs-only blocker fix 未重跑 Docker/Testcontainers；既有 Docker/Testcontainers 环境型 skip 风险继承，skip 不得写成 PASS。 |
+
+B5 close review 首次结果：代码实现面与 Maven validation 已具备 close review 基础，但 root README 与 `docs/current` 仍停在旧 B2/B3/B4 状态，形成 P1 docs alignment blocker，因此 `STAGE_QDR_3_ACCEPTANCE=NOT_ACCEPTED`。
+
+本轮修复结果：root README、`docs/current/README.md`、`STATUS.md`、`WORK_ORDER.md`、`ROADMAP.md`、`API.md`、`DB_SCHEMA.md` 与 stage-qdr-3 plan/work-order 文档已同步到 B4 freeze accepted / committed、B5 close review retry ready、stage-qdr-3 not accepted yet、stage-qdr-4 not started。`TESTING.md` 与 `WORKLOG.md` 记录本轮 blocker fix 与验证证据。
+
+Boundary:
+
+未修改业务代码；未修改测试代码；未新增 migration；未修改 V1-V8 migration；未新增 V9 migration；未新增 API；未新增 Controller；未新增 Repository；未新增 Service；未新增真实 HTTP outbound；未新增真实 provider；未接 Provider SDK；未修改 NQ；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未保存 raw provider response；未持久化 raw prompt；stage-qdr-4 未启动。
+
 ## 2026-07-07 DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER validation
 
 ```text

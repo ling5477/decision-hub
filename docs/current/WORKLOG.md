@@ -1,5 +1,76 @@
 # Decision Hub Worklog
 
+## 2026-07-07 DH-STAGE-QDR-3-CLOSE-BLOCKER-FIX
+
+执行 `DH-STAGE-QDR-3-CLOSE-BLOCKER-FIX`。本轮为 `DOCUMENTATION_ONLY + CLOSE_REVIEW_BLOCKER_FIX + STAGE_QDR_3_FACTSOURCE_ALIGNMENT + ROOT_README_SYNC + DOCS_CURRENT_SYNC + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE`，只修复 B5 close review 首次执行发现的 docs factsources drift P1 blocker。
+
+### 修改文件
+
+```text
+README.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/ROADMAP.md
+docs/current/WORK_ORDER.md
+docs/current/WORKLOG.md
+docs/current/TESTING.md
+docs/current/API.md
+docs/current/DB_SCHEMA.md
+docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md
+docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md
+```
+
+### 修复结果
+
+```text
+stage-qdr-3 implementation: DONE
+stage-qdr-3 B1: DONE / COMMITTED
+stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED
+stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED
+stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
+stage-qdr-3 B5 close review first result: NOT_ACCEPTED / DOCS_FACTSOURCE_DRIFT
+stage-qdr-3 B5 close review retry: READY
+stage-qdr-3 acceptance: NOT_ACCEPTED_YET
+stage-qdr-3 final close: NOT_CLOSED
+stage-qdr-4 planning: NOT_STARTED
+stage-qdr-4 implementation: NOT_STARTED
+real HTTP: NO
+real provider: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+B5 close review 首次未通过的原因是 root README 与 `docs/current` 当前事实源仍停留在旧状态：root README 停在 B3 blocker，`docs/current/README.md` 停在 B2，`STATUS.md` / `WORK_ORDER.md` 仍含 B4 review/freeze required、next B4 review/freeze、B5 not started 等当前态残留。本轮已将这些入口同步到 B4 freeze accepted / committed 与 B5 close review retry ready。
+
+### Validation
+
+```text
+workspace guard: PASS / E:\Project\decision-hub exists / F:\project\decision-hub does not exist
+git branch --show-current: dev
+git log --oneline -12: HEAD includes a5d9bf2 feat(qdr): integrate mock model gateway into pipeline
+git status --short: DOCS_ONLY_DIRTY / README.md + docs/current only
+git diff --check: PASS / LF->CRLF warnings only / no whitespace error
+git diff --stat: DOCS_ONLY
+git diff --cached --name-only: EMPTY
+git ls-files --others --exclude-standard: EMPTY
+stale facts scan: PASS / no current B4 review-freeze or old F path wording
+unsafe state scan: PASS / no real provider, real HTTP, Agent, LangGraph, LIVE or stage-qdr-4 started wording
+mvn -ntp -Pquality validate: BUILD SUCCESS / reactor 19/19 / Checkstyle 0 violations / Spotless passed
+.\mvnw.cmd -v: WRAPPER_UNUSABLE / exits 0 but wrapper output invalid
+skip flags: NOT USED / no -DskipTests / no -DskipITs
+Docker/Testcontainers: INHERITED_ENV_RISK / skip is not PASS
+```
+
+### Boundary confirmation
+
+未修改 Java 生产代码；未修改 Java 测试代码；未新增 migration；未修改 V1-V8 migration；未新增 V9 migration；未新增 API；未新增 Controller；未新增 Repository；未新增 Service；未新增真实 HTTP outbound；未新增真实 provider；未接 Provider SDK；未修改 NQ；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未保存 raw provider response；未持久化 raw prompt；stage-qdr-4 未启动。
+
+### Next
+
+```text
+DH-STAGE-QDR-3-B5-CLOSE-REVIEW
+```
+
 ## 2026-07-07 DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER
 
 执行 `DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER`。本轮为 `WORK_ORDER_ONLY + STAGE_QDR_3_IMPLEMENTATION_DISCIPLINE + MODEL_GATEWAY_MOCK_BASELINE_WO + PROMPT_VERSION_IMPLEMENTATION_WO + PROVIDER_TRUST_BOUNDARY_WO + AUDIT_REDACTION_WO + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE`，只把 stage-qdr-3 从 planning 细化为后续 implementation batches 的工作令。
@@ -6821,7 +6892,7 @@ ALLOW_LIVE: NO
 ### 推荐下一步
 
 ```text
-DH-STAGE-QDR-3-B4-REVIEW-FREEZE
+DH-STAGE-QDR-3-B5-CLOSE-REVIEW
 ```
 
 ---
