@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT / DONE / DOCS_AND_TOOLING_DISCIPLINE / NO_BUSINESS_CODE_CHANGE
-> Next stage:    DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY
+> Current stage: DH-STAGE-QDR-2 / ACCEPTED / FINAL_CLOSE_SYNCED / NO_RUNTIME
+> Next stage:    DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / READY / PLANNING_ONLY / IMPLEMENTATION_NOT_STARTED
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -34,9 +34,8 @@ DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
-Current workspace: E:/Project/decision-hub.
-Historical path only: F:/project/decision-hub.
-Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / IMPLEMENTED_PENDING_CLOSE_REVIEW / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
+Current workspace: F:/Project/decision-hub.
+Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / ACCEPTED / FINAL_CLOSE_SYNCED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
 stage-qdr-1 implementation: DONE.
 stage-qdr-1 freeze: CLOSED / ACCEPTED.
 stage-qdr-2 Work Order: DONE / WORK_ORDER_READY.
@@ -46,15 +45,18 @@ stage-qdr-2 B3: CLOSED / ACCEPTED / HUMAN_APPROVAL_MIGRATION_DOMAIN_REPOSITORY /
 stage-qdr-2 B4: CLOSED / ACCEPTED / COMMITTED / HUMAN_APPROVAL_API_AUDIT / TENANT_BOUND / NO_REPLAY_EXECUTION.
 stage-qdr-2 B4 blocker fix: DONE / INVALID_APPROVAL_DECISION_REDACTION / APPROVAL_DECISION_INVALID.
 stage-qdr-2 B4 freeze: CLOSED / ACCEPTED / COMMITTED.
-stage-qdr-2 B5: READY / NOT STARTED / REVIEW_ONLY.
-stage-qdr-2 implementation overall: IMPLEMENTED_PENDING_CLOSE_REVIEW.
+stage-qdr-2 B5 close review: YES / ACCEPTED / REVIEW_ONLY.
+stage-qdr-2 implementation: DONE.
+stage-qdr-2 acceptance: ACCEPTED.
+stage-qdr-2 final close: CLOSED.
 human_approval_packet: MIGRATION_ADDED.
 approval API: IMPLEMENTED_BY_VALIDATION.
 approval write endpoint: IMPLEMENTED_BY_VALIDATION.
 replay execution API: NOT STARTED.
 model gateway: NOT STARTED.
 tool registry: NOT STARTED.
-stage-qdr-3: NOT STARTED.
+stage-qdr-3 planning: READY.
+stage-qdr-3 implementation: NOT STARTED.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
 NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
@@ -66,7 +68,7 @@ Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MIS
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime PR prep: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY / NO_NEW_FEATURE / NO_REAL_HTTP / NO_PROVIDER.
+Next concrete action: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / READY / PLANNING_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -76,6 +78,40 @@ K7 Golden Cases / Eval: CLOSED.
 K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
+```
+
+## 1.0.36 DH-STAGE-QDR-2 Final Close Docs Sync（2026-07-07，CLOSED / ACCEPTED）
+
+```text
+Task: DH-STAGE-QDR-2-FINAL-CLOSE-DOCS-SYNC
+Task type: DOCUMENTATION_ONLY + STAGE_FINAL_CLOSE_RECORD + ACCEPTANCE_RESULT_SYNC + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_RUNTIME + NO_PROVIDER + NO_AGENT + NO_LIVE
+stage-qdr-2 implementation: DONE
+stage-qdr-2 close review: YES
+stage-qdr-2 acceptance: ACCEPTED
+stage-qdr-2 final close: CLOSED
+stage-qdr-3 planning: READY
+stage-qdr-3 implementation: NOT STARTED
+real HTTP: NO
+real provider: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+本轮只把 `DH-STAGE-QDR-2-B5-CLOSE-REVIEW` 的 `ACCEPTED` 结论写回 `docs/current` 与 root README。stage-qdr-2 已完成并验收；下一步只允许进入 `DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN`，且该下一步仅为 planning，不允许直接进入 stage-qdr-3 implementation。
+
+stage-qdr-3 不授权真实 provider、真实 HTTP、Agent runtime、LangGraph runtime、多 Agent runtime、NQ mutation、replay execution 或 LIVE。`mvnw.cmd` 仍保持 `UNUSABLE / P2 TOOLING RISK`；Docker/Testcontainers 本机仍保留 named pipe 权限风险，skip 不等于 PASS。
+
+Readiness:
+
+```text
+STAGE_QDR_2_FINAL_CLOSE_DOCS_SYNC: DONE
+ALLOW_STAGE_QDR_3_PLAN: YES
+ALLOW_STAGE_QDR_3_IMPLEMENTATION: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
 ```
 
 ## 1.0.35 DH-STAGE-QDR-2 Discipline Closeout（2026-07-06，DONE / B5 READY）

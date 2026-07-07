@@ -171,3 +171,28 @@ ALLOW_LIVE: NO
 ```text
 DH-STAGE-QDR-2-B5-CLOSE-REVIEW
 ```
+
+## 9. Final close docs sync follow-up
+
+2026-07-07 已完成 `DH-STAGE-QDR-2-FINAL-CLOSE-DOCS-SYNC`。本条为后续状态写回说明，不改变本文件 §1-§8 对 2026-07-06 discipline closeout 当时状态的历史记录。
+
+```text
+stage-qdr-2 implementation: DONE
+stage-qdr-2 close review: YES
+stage-qdr-2 acceptance: ACCEPTED
+stage-qdr-2 final close: CLOSED
+stage-qdr-3 planning: READY
+stage-qdr-3 implementation: NOT STARTED
+Real HTTP: NO
+Real provider: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+下一步唯一允许动作：
+
+```text
+DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN
+```
+
+该下一步只允许 planning，不允许 stage-qdr-3 implementation，不允许接真实 provider、真实 HTTP、Agent runtime、LangGraph runtime、多 Agent runtime 或 LIVE。`mvnw.cmd` 仍为 `UNUSABLE / P2 TOOLING RISK`；Docker/Testcontainers named pipe 权限风险仍保留，skip 不等于 PASS。

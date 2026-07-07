@@ -1,5 +1,39 @@
 # Decision Hub Testing
 
+## 2026-07-07 DH-STAGE-QDR-2-FINAL-CLOSE-DOCS-SYNC validation
+
+```text
+Scope:
+  - 本轮只把 DH-STAGE-QDR-2-B5-CLOSE-REVIEW 的 ACCEPTED 结论写回 docs/current 与 root README。
+  - 不修改 Java 生产代码、Java 测试代码、migration、contracts、golden_cases、API contract、repository、service、controller 或 runtime wiring。
+  - 不启动 stage-qdr-3 implementation；stage-qdr-3 只允许进入 Model Gateway + Prompt Version planning。
+
+Result:
+  STAGE_QDR_2_IMPLEMENTATION: DONE
+  STAGE_QDR_2_CLOSE_REVIEW: YES
+  STAGE_QDR_2_ACCEPTANCE: ACCEPTED
+  STAGE_QDR_2_FINAL_CLOSE: CLOSED
+  ALLOW_STAGE_QDR_3_PLAN: YES
+  ALLOW_STAGE_QDR_3_IMPLEMENTATION: NO
+  ALLOW_REAL_HTTP: NO
+  ALLOW_REAL_PROVIDER: NO
+  ALLOW_AGENT_PHASE: NO
+  ALLOW_LANGGRAPH_RUNTIME: NO
+  ALLOW_LIVE: NO
+```
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| B5 close review accepted evidence | ACCEPTED | B5 close review 已完成；本轮仅做 accepted 结论 docs/current / README 写回。 |
+| B5 scoped Maven tests | BUILD SUCCESS / ACCEPTED EVIDENCE | B5 review 结论已接受 scoped Maven tests 全部通过；本轮 docs-only final close sync 不重跑 scoped tests。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | 本轮执行；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | 本轮执行；exit code 0 但输出包含 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven Wrapper PASS。 |
+| Docker/Testcontainers | P2 TOOLING_ENV_RISK / NOT PASS | 沿用 B5 accepted evidence：本机 Java/Testcontainers 访问 `\\.\pipe\docker_engine` 存在 named pipe 权限风险；Docker-gated tests skip 不等于 PASS。本轮未重跑 Docker/Testcontainers。 |
+
+Boundary:
+
+未修改业务代码；未修改测试代码；未新增 migration；未修改历史 migration；未新增 API；未新增 Controller；未新增 repository；未新增 service；未新增 replay execution；未新增真实 HTTP outbound；未新增真实 provider；未修改 NQ；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未开启 LIVE；未触碰交易链路；未把 stage-qdr-3 写成 started；未把 stage-qdr-3 implementation 写成 allowed。
+
 ## 2026-07-06 DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT validation
 
 ```text

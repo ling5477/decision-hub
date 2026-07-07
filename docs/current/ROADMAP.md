@@ -98,9 +98,9 @@ NQ-DH-I1-MOCK-RUNTIME-PR-PREP:
 stage-qdr-1:
               Quant Decision Review Core Baseline                   [closed / accepted / decision core tables + dry-run收口 / no agent / no live]
 stage-qdr-2:
-              Audit Trace Read Model + Human Approval Packet        [implemented pending close review / b1-b4 closed accepted committed / b5 ready not started / no agent / no live]
+              Audit Trace Read Model + Human Approval Packet        [accepted / final close closed / no agent / no live]
 stage-qdr-3:
-              Model Gateway Mock + Prompt/Model Version Baseline    [not started / mock provider only / no real provider]
+              Model Gateway + Prompt Version Plan                   [planning ready / implementation not started / no real provider]
 stage-qdr-4:
               NQ Quant Decision Review Read-only Integration Hardening [not started / read-only hardening / no live]
 stage-agent-preview:
@@ -123,13 +123,13 @@ stage-qdr-1:
 stage-qdr-2:
   目标：Audit Trace Read Model + Human Approval Packet。
   范围：B1 已完成 usecase-level read model DTO / query contract；B2 已完成 tenant-bound read repository / read-only API；B3 已完成 human approval migration / domain / repository；B4 已完成 tenant-bound approval API / audit；discipline closeout 已同步路径、工具风险和 review 触发规则。
-  状态：B1 CLOSED / ACCEPTED / COMMITTED；B2 CLOSED / ACCEPTED / COMMITTED；B3 CLOSED / ACCEPTED / COMMITTED；B4 CLOSED / ACCEPTED / COMMITTED；overall IMPLEMENTED_PENDING_CLOSE_REVIEW；B5 READY / NOT STARTED。
+  状态：B1 CLOSED / ACCEPTED / COMMITTED；B2 CLOSED / ACCEPTED / COMMITTED；B3 CLOSED / ACCEPTED / COMMITTED；B4 CLOSED / ACCEPTED / COMMITTED；implementation DONE；B5 close review YES；acceptance ACCEPTED；final close CLOSED。
   退出条件：人工能查看 trace 并记录审批状态；approval 只改变 DH 内部审批状态，不触发 NQ mutation、真实 HTTP、real provider、order、risk、ledger、paper 或 live。
-  下一步：DH-STAGE-QDR-2-B5-CLOSE-REVIEW。B5 只做 close review / acceptance，不新增功能；stage-qdr-3 不得在 B5 前启动。
+  下一步：DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN。该下一步只允许规划 Model Gateway + Prompt Version，不允许 stage-qdr-3 implementation。
 
 stage-qdr-3:
-  目标：Model Gateway Mock + Prompt/Model Version Baseline。
-  范围：model_call、mock provider abstraction、prompt_template、prompt_version、structured output validation。
+  目标：Model Gateway + Prompt Version planning。
+  范围：只规划 model gateway、mock provider boundary、prompt/model version baseline、structured output validation 与后续小批次；不直接实现真实 provider、真实 HTTP、Agent runtime、LangGraph runtime 或 LIVE。
   退出条件：任何 AI/mock 输出可追溯 model/prompt/version/cost/latency。
 
 stage-qdr-4:
@@ -143,7 +143,7 @@ stage-agent-preview:
   退出条件：只有 stage-qdr-1 到 stage-qdr-4 全部完成后才允许评估。
 ```
 
-`stage-qdr-1` 的当前事实基线：limited Integration-1 dry-run endpoint 已存在；NQ feedback endpoint 已存在；V5 `dh_decision_*` audit tables 已存在；V6 `decision_request` / `decision_run` / `quant_signal` / `quant_decision` 已完成并关闭。stage-qdr-2 已推进到 B4：Audit Trace Read Model 的 DTO / projection、tenant-bound query contract、JDBC read adapter、read-only detail/trace API、`human_approval_packet` migration / domain / repository，以及 tenant-bound approval create / get / decision API + audit 已落地；当前缺口变为 B4 review/freeze 与 B5 close review。replay execution API、model_call、prompt version、tool registry 均仍为 `NOT IMPLEMENTED`。本路线不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI / Semantic Kernel、OpenAI / Anthropic / Gemini / Ollama SDK、NQ mutation 或 LIVE。
+`stage-qdr-1` 的当前事实基线：limited Integration-1 dry-run endpoint 已存在；NQ feedback endpoint 已存在；V5 `dh_decision_*` audit tables 已存在；V6 `decision_request` / `decision_run` / `quant_signal` / `quant_decision` 已完成并关闭。stage-qdr-2 已完成并验收：Audit Trace Read Model 的 DTO / projection、tenant-bound query contract、JDBC read adapter、read-only detail/trace API、`human_approval_packet` migration / domain / repository，以及 tenant-bound approval create / get / decision API + audit 已落地；B5 close review 已 `ACCEPTED`，final close 已 `CLOSED`。下一步仅为 `DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN`。replay execution API、model_call、prompt version、tool registry 均仍为 `NOT IMPLEMENTED`。本路线不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI / Semantic Kernel、OpenAI / Anthropic / Gemini / Ollama SDK、NQ mutation 或 LIVE。
 
 ## 1.1 当前受限 runtime planning 结论
 

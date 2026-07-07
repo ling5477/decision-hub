@@ -9,8 +9,8 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-当前阶段: DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT / DONE / DOCS_AND_TOOLING_DISCIPLINE / NO_BUSINESS_CODE_CHANGE
-下一阶段: DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY
+当前阶段: DH-STAGE-QDR-2 / ACCEPTED / FINAL_CLOSE_SYNCED / NO_RUNTIME
+下一阶段: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / READY / PLANNING_ONLY / IMPLEMENTATION_NOT_STARTED
 事实源: docs/current
 ```
 
@@ -83,11 +83,11 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY。
-- 当前 DH 实际工作区固定为 `E:/Project/decision-hub`；`F:/project/decision-hub` 只能作为历史路径出现。
+DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / READY / PLANNING_ONLY / NO_IMPLEMENTATION。
+- 当前 DH 实际工作区为 `F:/Project/decision-hub`。
 - stage-qdr-2 B1/B2/B3/B4 均已完成、freeze/acceptance 通过并提交；B4 HEAD 为 `feat(qdr): add stage-qdr-2 human approval API`。
-- B5 是 stage-qdr-2 close review / acceptance，不是新功能实现，不允许补新 API、migration、provider 或 runtime。
-- stage-qdr-3 仍 `NOT STARTED`。
+- stage-qdr-2 B5 close review 已 `ACCEPTED`；stage-qdr-2 final close 已 `CLOSED`。
+- stage-qdr-3 只允许进入 Model Gateway + Prompt Version planning；implementation 仍 `NOT STARTED` 且 `NOT ALLOWED`。
 - replay execution API / model gateway / tool registry 均 `NOT STARTED`。
 - real HTTP / real provider / Agent runtime / LangGraph runtime 均未启动；LIVE DISABLED。
 - `mvnw.cmd` 当前为 `UNUSABLE / P2 TOOLING RISK`；使用系统 Maven `mvn` 作为当前替代验证工具。

@@ -1,10 +1,10 @@
 # Decision Hub Current Docs
 
-> 当前阶段: DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT / DONE / DOCS_AND_TOOLING_DISCIPLINE / NO_BUSINESS_CODE_CHANGE
-> 下一阶段: DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY
+> 当前阶段: DH-STAGE-QDR-2 / ACCEPTED / FINAL_CLOSE_SYNCED / NO_RUNTIME
+> 下一阶段: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / READY / PLANNING_ONLY / IMPLEMENTATION_NOT_STARTED
 > 事实源: docs/current
 >
-> 当前 DH 实际工作区固定为 `E:/Project/decision-hub`；`F:/project/decision-hub` 只能作为历史路径出现，后续任务不得自动切换。NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 runtime implementation NOT STARTED。stage-qdr-1 Quant Decision Review Core Baseline 已 `CLOSED / ACCEPTED`。stage-qdr-2 B1/B2/B3/B4 已 `CLOSED / ACCEPTED / COMMITTED`，B4 commit 为 `1e3acf4 feat(qdr): add stage-qdr-2 human approval API`。stage-qdr-2 当前为 `IMPLEMENTED_PENDING_CLOSE_REVIEW`；B5 close review `READY / NOT STARTED`；stage-qdr-3 `NOT STARTED`。no RealClient；no real provider；no real HTTP；no Agent / LangGraph runtime；no trading ability；LIVE DISABLED。
+> 当前 DH 实际工作区为 `F:/Project/decision-hub`。NQ / DH 三轮只读审计已完成；Integration-0 safety gate CLOSED / ACCEPTED；DH not integrated；runtime integration NOT STARTED；Integration-1 runtime implementation NOT STARTED。stage-qdr-1 Quant Decision Review Core Baseline 已 `CLOSED / ACCEPTED`。stage-qdr-2 B1/B2/B3/B4 已 `CLOSED / ACCEPTED / COMMITTED`，B4 commit 为 `1e3acf4 feat(qdr): add stage-qdr-2 human approval API`。stage-qdr-2 implementation `DONE`；B5 close review `YES / ACCEPTED`；stage-qdr-2 final close `CLOSED`；stage-qdr-3 planning `READY`；stage-qdr-3 implementation `NOT STARTED`。no RealClient；no real provider；no real HTTP；no Agent / LangGraph runtime；no trading ability；LIVE DISABLED。
 > Security baseline: FULL；fail-closed state: FULL；P1-4 residual CLOSED；header alignment CLOSED；timestamp alignment CLOSED；code reality audit blockers fixed。
 > Current contract artifacts: `contracts/json-schema/dh-decision-request.schema.json` and `contracts/json-schema/dh-decision-output.schema.json`。`DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md` 与 `DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md` 已 `ACCEPTED / CLOSED`；K1-K8 已 `CLOSED / ACCEPTED`。stage-qdr-2 Work Order 入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`；本轮 discipline closeout 入口为 `docs/current/DH_STAGE_QDR_2_DISCIPLINE_CLOSEOUT.md`。旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与旧冻结目录名 `docs/gates/dh-gatek-decision-pipeline-mvp/` 已 `SUPERSEDED / NAMING_REPLACED`；旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 为 `SUPERSEDED / REBASE_REQUIRED`。后续 DH 当前阶段必须使用 stage* 命名，不得新建 GateK / GateL / GateM 文档或状态。当前仍不允许把 Runtime integration 写成 started，不允许 Agent / LangGraph runtime、真实 provider、真实 HTTP 或 LIVE。
 
@@ -219,20 +219,21 @@ Stage3-B3 DH Backtest Request Adapter IMPL（2026-05-26，DH 端可插拔骨架�
 当前下一步只允许进入：
 
 ```text
-DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY。
+DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / READY / PLANNING_ONLY / NO_IMPLEMENTATION。
 
 执行口径：
   - stage-qdr-2 B1/B2/B3/B4 已 CLOSED / ACCEPTED / COMMITTED。
-  - B5 只做 close review / acceptance，不是 implementation batch。
-  - stage-qdr-3 NOT STARTED，不得在 B5 前启动。
+  - stage-qdr-2 B5 close review 已 ACCEPTED。
+  - stage-qdr-2 implementation DONE；final close CLOSED。
+  - stage-qdr-3 planning READY；implementation NOT STARTED / NOT ALLOWED。
   - replay execution API / model gateway / tool registry 均 NOT STARTED。
   - Agent / LangGraph runtime NOT STARTED；real HTTP / real provider 均 NO；LIVE DISABLED。
-  - 当前 DH 实际工作区为 E:/Project/decision-hub；F:/project/decision-hub 只保留为历史路径。
+  - 当前 DH 实际工作区为 F:/Project/decision-hub。
   - mvnw.cmd 当前 UNUSABLE / P2 TOOLING RISK；系统 Maven mvn 是当前替代验证工具。
   - Docker CLI daemon 可用，但 Testcontainers 本机访问 \\.\pipe\docker_engine 被拒绝；skip 不得写成 PASS。
 
 严格禁止：
-  补新功能进入 B5 / 启动 stage-qdr-3 / 修改 NQ 仓库 / 新增 API 或 migration /
+  启动 stage-qdr-3 implementation / 修改 NQ 仓库 / 新增 API 或 migration /
   新增 replay execution / 接真实 provider / 接真实 HTTP / 接 LangGraph runtime /
   开启 LIVE / 触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation。
 ```
