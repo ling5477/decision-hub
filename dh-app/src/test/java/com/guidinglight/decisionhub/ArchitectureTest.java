@@ -42,6 +42,11 @@ public class ArchitectureTest {
                     "placeOrder", "cancelOrder", "submitOrder", "executeOrder", "bypassRisk",
                     "forceExecute");
 
+    private static final List<String> FORBIDDEN_QDR_MODEL_MUTATION_TOKENS =
+            List.of(
+                    "placeOrder", "cancelOrder", "submitOrder", "executeOrder", "bypassRisk",
+                    "forceExecute");
+
     private static final Pattern FORBIDDEN_API_PATH =
             Pattern.compile("\"\\s*/?(orders|trades|live)(/|\")", Pattern.CASE_INSENSITIVE);
 
@@ -334,7 +339,7 @@ public class ArchitectureTest {
     // ============================================================================
 
     /**
-     * stage-qdr-1：QDR domain 不允许依赖 api / infra / security。
+     * stage-qdr-1：QDR domain 不允许依赖 api / infra / DH security module。
      */
     @Test
     void stageQdr1_rule13_qdrDomainIsolatedFromApiInfraSecurity() {
@@ -343,7 +348,8 @@ public class ArchitectureTest {
                 .resideInAPackage("..domain.qdr..")
                 .should()
                 .dependOnClassesThat()
-                .resideInAnyPackage("..api..", "..infra..", "..security..")
+                .resideInAnyPackage(
+                        "..api..", "..infra..", "com.guidinglight.decisionhub.security..")
                 .check(importMainClasses());
     }
 
@@ -721,6 +727,160 @@ public class ArchitectureTest {
                 .check(importMainClasses());
     }
 
+    /**
+     * stage-qdr-3 B1：qdr model domain 只允许依赖 domain/JDK，不允许依赖 API、infra、Spring、
+     * JDBC/JPA、provider SDK、HTTP client 或 Agent runtime。
+     */
+    @Test
+    void stageQdr3B1_rule25_qdrModelDomainDoesNotDependOnApiInfraWebJdbcProviderOrAgentRuntime() {
+        noClasses()
+                .that()
+                .resideInAPackage("..domain.qdr.model..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage(
+                        "..api..",
+                        "..infra..",
+                        "..usecase..",
+                        "org.springframework..",
+                        "org.springframework.web..",
+                        "org.springframework.web.reactive..",
+                        "org.springframework.jdbc..",
+                        "java.sql..",
+                        "javax.sql..",
+                        "jakarta.persistence..",
+                        "javax.persistence..",
+                        "org.hibernate..",
+                        "okhttp3..",
+                        "com.openai..",
+                        "com.anthropic..",
+                        "com.google.genai..",
+                        "dev.langchain4j..",
+                        "org.springframework.ai..",
+                        "langgraph..",
+                        "autogen..",
+                        "crewai..")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("java.net.http.HttpClient")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("java.net.HttpURLConnection")
+                .check(importMainClasses());
+    }
+
+    /**
+     * stage-qdr-3 B1：qdr model usecase 只能依赖 domain/usecase/JDK，不允许依赖 API、infra、
+     * Spring Web、JDBC/JPA、provider SDK、HTTP client 或 Agent runtime。
+     */
+    @Test
+    void stageQdr3B1_rule26_qdrModelUsecaseDoesNotDependOnApiInfraWebJdbcProviderOrAgentRuntime() {
+        noClasses()
+                .that()
+                .resideInAPackage("..usecase.qdr.model..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage(
+                        "..api..",
+                        "..infra..",
+                        "org.springframework.web..",
+                        "org.springframework.web.reactive..",
+                        "org.springframework.jdbc..",
+                        "java.sql..",
+                        "javax.sql..",
+                        "jakarta.persistence..",
+                        "javax.persistence..",
+                        "org.hibernate..",
+                        "okhttp3..",
+                        "com.openai..",
+                        "com.anthropic..",
+                        "com.google.genai..",
+                        "dev.langchain4j..",
+                        "org.springframework.ai..",
+                        "langgraph..",
+                        "autogen..",
+                        "crewai..")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("java.net.http.HttpClient")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("java.net.HttpURLConnection")
+                .check(importMainClasses());
+    }
+
+    /**
+     * stage-qdr-3 B1：qdr model production sources 不允许出现订单执行、风控旁路或强制执行 token。
+     *
+     * <p>PromptInjectionGuard 可以把大写风险词作为 denylist/enum constraint；这里专门拦截会被误用为
+     * Java 方法或执行 hook 的 camelCase mutation token。
+     */
+    @Test
+    void stageQdr3B1_rule27_qdrModelSourcesForbidOrderAndBypassMutationTokens() {
+        final List<Path> qdrModelPaths =
+                List.of(
+                        Path.of(
+                                        "..",
+                                        "dh-domain",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "domain",
+                                        "qdr",
+                                        "model")
+                                .toAbsolutePath()
+                                .normalize(),
+                        Path.of(
+                                        "..",
+                                        "dh-usecase",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "usecase",
+                                        "qdr",
+                                        "model")
+                                .toAbsolutePath()
+                                .normalize());
+        final List<String> violations = new ArrayList<>();
+        for (Path qdrModelPath : qdrModelPaths) {
+            collectForbiddenTokenViolations(
+                    qdrModelPath, FORBIDDEN_QDR_MODEL_MUTATION_TOKENS, violations);
+        }
+        if (!violations.isEmpty()) {
+            fail(
+                    "stage-qdr-3 B1 qdr model source files must not contain mutation tokens:\n"
+                            + String.join("\n", violations));
+        }
+    }
+
+    /**
+     * stage-qdr-3 B1：不得提前新增 Prompt / Model Gateway API endpoint 或 V8 migration artifact。
+     */
+    @Test
+    void stageQdr3B1_rule28_noPromptModelApiEndpointOrMigrationArtifact() {
+        final List<String> violations = new ArrayList<>();
+        collectPatternViolations(
+                Path.of("..", "dh-api", "src", "main", "java").toAbsolutePath().normalize(),
+                Pattern.compile(
+                        "@(RequestMapping|GetMapping|PostMapping|PutMapping|DeleteMapping|PatchMapping)"
+                                + "[\\s\\S]{0,240}(prompt|model-gateway|provider-profile)",
+                        Pattern.CASE_INSENSITIVE),
+                "B1 must not add prompt/model API endpoint",
+                violations);
+        collectV8MigrationFileViolations(
+                Path.of("src", "main", "resources", "db", "migration").toAbsolutePath().normalize(),
+                violations);
+        if (!violations.isEmpty()) {
+            fail("stage-qdr-3 B1 API/migration boundary violations:\n" + String.join("\n", violations));
+        }
+    }
+
     private static void collectForbiddenTokenViolations(
             final Path rootOrFile, final List<String> tokens, final List<String> violations) {
         if (!Files.exists(rootOrFile)) {
@@ -728,7 +888,7 @@ public class ArchitectureTest {
             return;
         }
         try (Stream<Path> walker =
-                Files.isDirectory(rootOrFile) ? Files.walk(rootOrFile) : Stream.of(rootOrFile)) {
+                     Files.isDirectory(rootOrFile) ? Files.walk(rootOrFile) : Stream.of(rootOrFile)) {
             walker
                     .filter(p -> p.toString().endsWith(".java"))
                     .forEach(
@@ -746,6 +906,49 @@ public class ArchitectureTest {
                             });
         } catch (IOException io) {
             violations.add("failed to walk " + rootOrFile + ": " + io.getMessage());
+        }
+    }
+
+    private static void collectPatternViolations(
+            final Path rootOrFile,
+            final Pattern pattern,
+            final String violationMessage,
+            final List<String> violations) {
+        if (!Files.exists(rootOrFile)) {
+            return;
+        }
+        try (Stream<Path> walker =
+                     Files.isDirectory(rootOrFile) ? Files.walk(rootOrFile) : Stream.of(rootOrFile)) {
+            walker
+                    .filter(p -> p.toString().endsWith(".java") || p.toString().endsWith(".sql"))
+                    .forEach(
+                            p -> {
+                                try {
+                                    final String body = Files.readString(p, StandardCharsets.UTF_8);
+                                    final Matcher matcher = pattern.matcher(body);
+                                    if (matcher.find()) {
+                                        violations.add(p + ": " + violationMessage);
+                                    }
+                                } catch (IOException io) {
+                                    violations.add("failed to read " + p + ": " + io.getMessage());
+                                }
+                            });
+        } catch (IOException io) {
+            violations.add("failed to walk " + rootOrFile + ": " + io.getMessage());
+        }
+    }
+
+    private static void collectV8MigrationFileViolations(
+            final Path migrationRoot, final List<String> violations) {
+        if (!Files.exists(migrationRoot)) {
+            return;
+        }
+        try (Stream<Path> walker = Files.walk(migrationRoot)) {
+            walker
+                    .filter(p -> p.getFileName().toString().startsWith("V8__"))
+                    .forEach(p -> violations.add(p + ": B1 must not add V8 migration artifact"));
+        } catch (IOException io) {
+            violations.add("failed to walk " + migrationRoot + ": " + io.getMessage());
         }
     }
 }

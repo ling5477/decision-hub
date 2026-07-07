@@ -6630,3 +6630,48 @@ ALLOW_LIVE: NO
 ### 推荐下一步
 
 `DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER`
+
+---
+
+## DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY
+
+日期：2026-07-07
+
+### 本轮目标
+
+只实现 stage-qdr-3 B1：Prompt / Model Version domain baseline、immutable checksum、tenant-bound in-memory/mock registry、PromptRenderPolicy contract、PromptInjectionGuard contract、domain/usecase tests、ArchitectureTest guard 与 docs/current 最小同步。本轮不新增 migration、API、Controller、Repository/JDBC adapter、真实 provider、HTTP client、Provider SDK、Agent runtime、LangGraph runtime、contracts、golden_cases 或 NQ 修改。
+
+### 实现记录
+
+- 新增 `dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/model/**`，覆盖 `PromptTemplate`、`PromptVersion`、`PromptVersionChecksum`、`ModelProfile`、`ModelVersion`、`ProviderProfile` 与 mock/local-planned provider enum baseline。
+- `PromptVersion` 与 `ModelVersion` 使用 Java record 保持 immutable；checksum 使用 JDK SHA-256 deterministic 计算；checksum mismatch fail-closed，异常消息不回显 raw prompt、secret-like material 或 dangerous input。
+- 新增 `PromptModelSafetyRules`，对 blank template、secret-like material、可执行交易 instruction、`BUY / SELL / PLACE_ORDER / CANCEL_ORDER / MARKET_ORDER / LIMIT_ORDER` 等 fail-closed。
+- 新增 `PromptVersionRegistryPort`、registration/lookup command/query/result 与 `InMemoryPromptVersionRegistry`；registry 按 tenant + template + version 隔离，same checksum duplicate idempotent，different checksum duplicate fail-closed。
+- 新增 `PromptInjectionGuard`、`PromptInjectionDecision`、`PromptInjectionViolation` 与 deterministic denylist guard；覆盖 ignore previous instructions、reveal system prompt、credential extraction、bypass risk/policy、place/execute order、BUY/SELL executable intent、mutate NQ state、disable audit、external provider direct call 与 raw credential extraction。
+- 新增 `PromptRenderPolicy`、`PromptRenderContext`、`PromptRenderResult` 与 deterministic render policy；只做内存渲染和本地 guard，不调用 LLM、HTTP 或 provider，不持久化 raw prompt。
+- 更新 `ArchitectureTest`，新增 B1 qdr model domain/usecase dependency guard、provider SDK / HTTP client / LangGraph / AutoGen / CrewAI / trading mutation token / API endpoint / V8 migration guard。
+
+### 验证摘要
+
+- `mvn -ntp -pl dh-domain -am test`：BUILD SUCCESS；dh-domain 151 tests。
+- `mvn -ntp -pl dh-usecase -am test`：BUILD SUCCESS；dh-usecase 240 tests。
+- `mvn -ntp -pl dh-app -am test`：BUILD SUCCESS；`ArchitectureTest` 28 tests 通过；dh-app 58 tests，其中既有 `PostgresContainerSmokeTest` 因 Docker/Testcontainers 不可用 skipped 1；dh-infra 53 tests，其中既有 `JdbcNonceReplayGuardPersistenceTest` skipped 3。
+- `mvn -ntp -Pquality validate`：BUILD SUCCESS；19/19 reactor SUCCESS；0 Checkstyle violations；Spotless check passed。
+- `.\mvnw.cmd -v`：WRAPPER_UNUSABLE；输出 wrapper 异常文本，进程返回码为 0，但不作为 Maven wrapper 可用证明。
+- forbidden scan：PASS / REVIEWED / ACTUAL_RISK_0；命中分类为 test guard、docs prohibition、enum constraint、redaction/security code、existing historical text；B1 production package 仅命中 denylist / redaction / security contract。
+
+### 边界
+
+未修改 NQ；未新增 migration；未修改历史 migration；未新增 API；未新增 Controller；未新增 Repository/JDBC adapter；未新增 Spring Web 入口；未新增真实 HTTP outbound；未新增真实 provider；未接 Provider SDK；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未启动 Agent runtime；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未保存 raw provider response；未持久化 raw prompt；stage-qdr-3 B2/B3/B4 未启动。
+
+### 推荐下一步
+
+```text
+git commit -m "feat(qdr): add stage-qdr-3 prompt model version baseline"
+```
+
+随后进入：
+
+```text
+DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD
+```

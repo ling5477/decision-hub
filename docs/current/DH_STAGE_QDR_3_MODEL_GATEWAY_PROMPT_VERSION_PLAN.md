@@ -3,7 +3,7 @@
 ```text
 Task: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN
 Task type: PLANNING_ONLY + MODEL_GATEWAY_DESIGN + PROMPT_VERSION_DESIGN + PROVIDER_TRUST_BOUNDARY_DESIGN + AUDIT_REDACTION_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION
-Status: DONE / PLAN_ONLY / WORK_ORDER_REQUIRED / IMPLEMENTATION_NOT_STARTED
+Status: DONE / PLAN_ONLY / WORK_ORDER_DONE / B1_IMPLEMENTED_BY_VALIDATION
 Fact source: docs/current
 Date: 2026-07-07
 ```
@@ -28,14 +28,18 @@ stage-qdr-2 acceptance: ACCEPTED
 stage-qdr-2 final close: CLOSED
 stage-qdr-2 final docs sync commit: docs(qdr): record stage-qdr-2 acceptance
 stage-qdr-3 planning: DONE / PLAN_ONLY
-stage-qdr-3 implementation: NOT STARTED
+stage-qdr-3 implementation: B1_IMPLEMENTED_BY_VALIDATION
+B1 Prompt/Model Version Domain + Mock Registry: IMPLEMENTED_BY_VALIDATION
+B2 Model Gateway Mock Runtime + Policy Guard: NOT STARTED
+B3 Persistence Baseline: NOT STARTED
+B4 QDR Decision Pipeline Integration: NOT STARTED
 real HTTP: NO
 real provider: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 ```
 
-本计划不修改 Java 生产代码、测试代码、migration、API、Controller、Repository、Service、contracts、golden_cases 或 NQ 仓库。
+本计划已进入 B1 controlled implementation 结果同步：B1 只修改 domain/usecase/mock registry、tests、architecture guard 与 docs/current 最小记录；未新增 migration、API、Controller、Repository/JDBC adapter、真实 provider、真实 HTTP、Agent / LangGraph、contracts、golden_cases 或 NQ 仓库。
 
 ## 3. Model Gateway 设计边界
 

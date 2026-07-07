@@ -4032,3 +4032,43 @@ ALLOW_AGENT_PHASE: NO
 ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
+
+## 2026-07-07 DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY 验证记录
+
+结论：**PASS / B1_IMPLEMENTED_BY_VALIDATION / DOMAIN_USECASE_MOCK_REGISTRY / NO_DB_MIGRATION / NO_API_CHANGE / NO_REAL_HTTP / NO_PROVIDER / NO_AGENT / NO_LANGGRAPH / NO_LIVE**。
+
+本轮只实现 stage-qdr-3 B1：Prompt / Model Version domain baseline、immutable checksum、tenant-bound in-memory/mock registry、PromptRenderPolicy contract、PromptInjectionGuard contract、domain/usecase tests、ArchitectureTest guard 与 docs/current 最小同步。未新增 migration、API、Controller、Repository/JDBC adapter、真实 provider、HTTP client、Provider SDK、Agent runtime、LangGraph runtime、contracts、golden_cases 或 NQ 修改。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（写入前） | **PASS / CLEAN** | 分支 `dev`；无 staged、untracked 或 dirty 输出。 |
+| `git log --oneline -10` | **PASS** | HEAD 包含 `1c1e383 docs(qdr): define stage-qdr-3 implementation work order`。 |
+| `mvn -ntp -pl dh-domain -am test` | **BUILD SUCCESS** | dh-domain 151 tests；新增 `PromptVersionTest` 8 tests 与 `ModelProfileVersionTest` 7 tests 通过。 |
+| `mvn -ntp -pl dh-usecase -am test` | **BUILD SUCCESS** | dh-usecase 240 tests；新增 `InMemoryPromptVersionRegistryTest` 6 tests、`PromptInjectionGuardTest` 3 tests、`DeterministicPromptRenderPolicyTest` 5 tests 通过。 |
+| `mvn -ntp -pl dh-app -am test` | **BUILD SUCCESS** | dh-app reactor 15/15 SUCCESS；`ArchitectureTest` 28 tests 通过；dh-app 58 tests，其中既有 `PostgresContainerSmokeTest` 因 Docker/Testcontainers 不可用 skipped 1；dh-infra 53 tests，其中既有 `JdbcNonceReplayGuardPersistenceTest` skipped 3。 |
+| `mvn -ntp -Pquality validate` | **BUILD SUCCESS** | 19/19 reactor SUCCESS；0 Checkstyle violations；Spotless check passed。 |
+| `.\mvnw.cmd -v` | **WRAPPER_UNUSABLE / NOT_VALID_MAVEN_WRAPPER** | 命令输出 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` 缺少主清单属性；进程返回码为 0，但行为仍不可作为 Maven wrapper 可用证明。 |
+| forbidden scan | **PASS / REVIEWED / ACTUAL_RISK_0** | 全量命中为 test guard、docs prohibition、enum constraint、redaction/security code、existing historical text；B1 production package 二次扫描仅命中 deterministic denylist / redaction 注释 / security contract，无真实 provider、HTTP client、LangGraph 或交易执行实现。 |
+
+Noted:
+
+- Maven 均使用 `mvn -ntp`，未使用 `-DskipTests` 或 `-DskipITs`。
+- Maven 仍输出既有 settings warning：`D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml` 中存在 `Unrecognised tag: 'profiles'`。
+- Docker/Testcontainers 本机不可用风险继承；Docker-gated skip 不得写成 PASS。
+- `mvnw.cmd` 仍不可用，本轮继续使用系统 Maven。
+
+Readiness：
+
+```text
+STAGE_QDR_3_B1: DONE
+ALLOW_STAGE_QDR_3_B1_COMMIT: YES
+ALLOW_STAGE_QDR_3_B2_AFTER_B1_COMMIT: YES
+ALLOW_STAGE_QDR_3_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_3_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_3_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```

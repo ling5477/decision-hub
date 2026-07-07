@@ -3,7 +3,7 @@
 ```text
 Task: DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER
 Task type: WORK_ORDER_ONLY + STAGE_QDR_3_IMPLEMENTATION_PLANNING + MODEL_GATEWAY_WORK_ORDER + PROMPT_VERSION_WORK_ORDER + PROVIDER_TRUST_SECURITY_BOUNDARY + AUDIT_REDACTION_TEST_MATRIX + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
-Status: DONE / WORK_ORDER_ONLY / IMPLEMENTATION_NOT_STARTED
+Status: DONE / WORK_ORDER_ONLY / B1_IMPLEMENTED_BY_VALIDATION
 Fact source: docs/current
 Date: 2026-07-07
 ```
@@ -33,20 +33,26 @@ stage-qdr-1: CLOSED / ACCEPTED
 stage-qdr-2 final close: CLOSED / ACCEPTED
 stage-qdr-3 model gateway prompt version plan: DONE
 stage-qdr-3 implementation work order: DONE / WORK_ORDER_ONLY
-stage-qdr-3 implementation: NOT STARTED
+stage-qdr-3 implementation: B1_IMPLEMENTED_BY_VALIDATION
+B1: IMPLEMENTED_BY_VALIDATION / MOCK_ONLY / NO_API / NO_MIGRATION
+B2: NOT STARTED / PROVIDER_TRUST_REVIEW_REQUIRED
+B3: NOT STARTED / MIGRATION_REVIEW_REQUIRED
+B4: NOT STARTED / DECISION_PIPELINE_REVIEW_REQUIRED
 real HTTP: NO
 real provider: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 ```
 
-本工单只把 stage-qdr-3 implementation 拆成后续可执行批次，不实现任何代码，不新增测试，不新增 migration，不新增 API，不接真实 provider，不接真实 HTTP，不启动 Agent / LangGraph / LIVE。
+本工单已将 stage-qdr-3 implementation 拆成后续可执行批次。B1 已按 domain/usecase/mock registry 范围完成实现与验证；B2/B3/B4/B5 仍未启动。本线不新增 migration，不新增 API，不接真实 provider，不接真实 HTTP，不启动 Agent / LangGraph / LIVE。
 
 ## 2. Stage-qdr-3 批次冻结
 
 stage-qdr-3 implementation 必须按以下 B1-B5 顺序推进，不得跳过 B1 直接进入 B2/B3/B4，也不得一次性全量实现。
 
 ### B1: Prompt / Model Version Domain + Mock Registry
+
+状态：`IMPLEMENTED_BY_VALIDATION / MOCK_ONLY / NO_API / NO_MIGRATION / NO_REAL_PROVIDER / NO_REAL_HTTP`。
 
 目标：
 
@@ -437,4 +443,3 @@ ALLOW_LIVE: NO
 ```text
 DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY
 ```
-

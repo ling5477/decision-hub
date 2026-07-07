@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / DONE / WORK_ORDER_ONLY / IMPLEMENTATION_NOT_STARTED
-> Next stage:    DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY / PLANNED / CONTROLLED_IMPLEMENTATION / MOCK_ONLY
+> Current stage: DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY / IMPLEMENTED_BY_VALIDATION / MOCK_ONLY
+> Next stage:    DH-STAGE-QDR-3-B1-COMMIT / READY / THEN_B2_PLAN_OR_IMPLEMENTATION_GATE
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -36,7 +36,7 @@ K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
 Current workspace: F:/project/decision-hub.
 Path discipline: E:/Project/decision-hub belongs to another environment path and must not be mixed with F:/project/decision-hub.
-Current main line: stage-qdr-3 / Model Gateway + Prompt/Model Version Baseline / WORK_ORDER_DONE / IMPLEMENTATION_NOT_STARTED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
+Current main line: stage-qdr-3 / Model Gateway + Prompt/Model Version Baseline / B1_IMPLEMENTED_BY_VALIDATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
 stage-qdr-1 implementation: DONE.
 stage-qdr-1 freeze: CLOSED / ACCEPTED.
 stage-qdr-2 Work Order: DONE / WORK_ORDER_READY.
@@ -58,11 +58,14 @@ model gateway: NOT STARTED.
 tool registry: NOT STARTED.
 stage-qdr-3 planning: DONE / PLAN_ONLY.
 stage-qdr-3 implementation work order: DONE / WORK_ORDER_ONLY.
-stage-qdr-3 implementation: NOT STARTED.
+stage-qdr-3 implementation: B1_IMPLEMENTED_BY_VALIDATION.
 stage-qdr-3 plan artifact: docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md.
 stage-qdr-3 work order artifact: docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md.
-stage-qdr-3 B1: PLANNED / PROMPT_MODEL_VERSION_DOMAIN_MOCK_REGISTRY / NO_REAL_PROVIDER / NO_REAL_HTTP.
-stage-qdr-3 next action: DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY / CONTROLLED_IMPLEMENTATION / MOCK_ONLY.
+stage-qdr-3 B1: IMPLEMENTED_BY_VALIDATION / PROMPT_MODEL_VERSION_DOMAIN_MOCK_REGISTRY / NO_REAL_PROVIDER / NO_REAL_HTTP / NO_API / NO_MIGRATION.
+stage-qdr-3 B2: NOT STARTED / PROVIDER_TRUST_POLICY_GATE_REQUIRED.
+stage-qdr-3 B3: NOT STARTED / MIGRATION_REVIEW_REQUIRED.
+stage-qdr-3 B4: NOT STARTED / DECISION_PIPELINE_REVIEW_REQUIRED.
+stage-qdr-3 next action: git commit -m "feat(qdr): add stage-qdr-3 prompt model version baseline"; then DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
 NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
@@ -74,7 +77,7 @@ Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MIS
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime PR prep: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY / PLANNED / CONTROLLED_IMPLEMENTATION / MOCK_ONLY / NO_REAL_HTTP / NO_PROVIDER.
+Next concrete action: B1 commit, then DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD / NOT STARTED / REVIEW_GATE_REQUIRED / NO_REAL_HTTP / NO_PROVIDER.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -84,6 +87,39 @@ K7 Golden Cases / Eval: CLOSED.
 K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
+```
+
+## 1.0.39 DH-STAGE-QDR-3 B1 Prompt / Model Version Domain + Mock Registry（2026-07-07，IMPLEMENTED_BY_VALIDATION）
+
+```text
+Task: DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY
+Task type: CODE_CHANGE + TEST + MINIMAL_DOCUMENTATION + STAGE_QDR_3_B1 + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+stage-qdr-3 B1: IMPLEMENTED_BY_VALIDATION
+B2: NOT STARTED
+B3: NOT STARTED
+B4: NOT STARTED
+real HTTP: NO
+real provider: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+B1 只新增 QDR prompt/model version domain baseline、tenant-bound in-memory/mock registry、`PromptRenderPolicy` contract、deterministic `PromptInjectionGuard` contract、checksum validation 与 architecture guard。实现不新增 API / Controller / OpenAPI，不新增 migration，不修改历史 migration，不接真实 provider，不接真实 HTTP，不启动 Agent / LangGraph，不触碰 NQ、交易、订单、账户、ledger、risk、paper 或 LIVE。
+
+Readiness:
+
+```text
+STAGE_QDR_3_B1: DONE
+ALLOW_STAGE_QDR_3_B1_COMMIT: YES
+ALLOW_STAGE_QDR_3_B2_AFTER_B1_COMMIT: YES
+ALLOW_STAGE_QDR_3_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_3_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_3_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
 ```
 
 ## 1.0.38 DH-STAGE-QDR-3 Implementation Work Order（2026-07-07，DONE / WORK_ORDER_ONLY）
