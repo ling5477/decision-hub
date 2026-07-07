@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / DONE / PLANNING_ONLY / NO_DB_MIGRATION
-Next stage:    DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / READY / WORK_ORDER_ONLY / NO_DB_MIGRATION_YET
+Current stage: DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / DONE / WORK_ORDER_ONLY / NO_DB_MIGRATION
+Next stage:    DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY / PLANNED / NO_DB_MIGRATION
 ```
 
 Flyway 迁移：
@@ -23,11 +23,13 @@ stage-qdr-2 B4 approval API/audit CLOSED / ACCEPTED / COMMITTED / NO DB SCHEMA C
 stage-qdr-2 B5 close review ACCEPTED / NO DB SCHEMA CHANGE
 human_approval_packet            MIGRATION_ADDED / B3 / NOT_TRADING_AUTHORIZATION
 stage-qdr-3 planning             DONE / PLANNED_TABLES_ONLY / NO MIGRATION
+stage-qdr-3 implementation WO    DONE / B1-B5_ORDERED / NO MIGRATION
+B1 Prompt/Model Version Domain   PLANNED / DOMAIN_USECASE_ONLY / NO MIGRATION
 ```
 
 ## 1.0 stage-qdr-3 planned schema（PLANNED / NOT IMPLEMENTED）
 
-本轮只规划 Model Gateway + Prompt/Model Version Baseline，不新增 migration，不修改 V1-V7 历史 migration。以下候选表必须在后续 `DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER` 与 migration review/freeze 后才能实现：
+stage-qdr-3 planning 与 implementation work order 只规划 Model Gateway + Prompt/Model Version Baseline，不新增 migration，不修改 V1-V7 历史 migration。以下候选表只能在后续 B3 Persistence Baseline 与 migration review/freeze 后实现；B1 不允许新增 migration：
 
 ```text
 prompt_template       PLANNED / B3 candidate / NOT IMPLEMENTED
@@ -64,7 +66,7 @@ model_gateway_call index(prompt_version_id)
 model_gateway_call index(model_version_id)
 ```
 
-任何 stage-qdr-3 migration batch 都必须先 review/freeze；migration batch 之前不得实现 API、真实 provider、Provider SDK 或 real HTTP。
+任何 stage-qdr-3 migration batch 都必须先 review/freeze；B3 之前不得新增 V8 migration，不得实现 API、真实 provider、Provider SDK 或 real HTTP。
 
 ## 1.1 stage-qdr-2 B1/B2/B3/B4 schema impact
 

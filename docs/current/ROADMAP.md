@@ -100,7 +100,7 @@ stage-qdr-1:
 stage-qdr-2:
               Audit Trace Read Model + Human Approval Packet        [accepted / final close closed / no agent / no live]
 stage-qdr-3:
-              Model Gateway + Prompt/Model Version Baseline          [plan done / implementation work order next / no real provider]
+              Model Gateway + Prompt/Model Version Baseline          [implementation work order done / B1 planned / no real provider]
 stage-qdr-4:
               NQ Quant Decision Review Read-only Integration Hardening [not started / read-only hardening / no live]
 stage-agent-preview:
@@ -129,9 +129,9 @@ stage-qdr-2:
 
 stage-qdr-3:
   目标：Model Gateway + Prompt/Model Version Baseline。
-  范围：已完成 planning-only 文档，定义 ModelGatewayPort、ModelProviderPort、PromptVersionRegistry、PromptRenderingPolicy、ProviderTrustPolicy、mock provider、audit/redaction/trace、planned tables 与后续 B1-B5 批次；不直接实现真实 provider、真实 HTTP、Agent runtime、LangGraph runtime 或 LIVE。
-  状态：PLAN DONE / IMPLEMENTATION NOT STARTED。
-  下一步：DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER。该下一步仍是 work-order-only，不允许直接 implementation。
+  范围：已完成 planning-only 文档和 implementation work order，定义 ModelGatewayPort、ModelProviderPort、PromptVersionRegistry、PromptRenderingPolicy、ProviderTrustPolicy、mock provider、audit/redaction/trace、planned tables 与 B1-B5 批次；不直接实现真实 provider、真实 HTTP、Agent runtime、LangGraph runtime 或 LIVE。
+  状态：PLAN DONE / WORK_ORDER DONE / IMPLEMENTATION NOT STARTED。
+  下一步：DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY。该下一步只允许 B1 controlled implementation，不允许直接 B2/B3/B4。
   退出条件：后续 implementation 完成后，任何 mock/model 输出可追溯 model/prompt/version/cost/latency，且 raw prompt / raw provider response 默认不保存。
 
 stage-qdr-4:
@@ -145,7 +145,7 @@ stage-agent-preview:
   退出条件：只有 stage-qdr-1 到 stage-qdr-4 全部完成后才允许评估。
 ```
 
-`stage-qdr-1` 的当前事实基线：limited Integration-1 dry-run endpoint 已存在；NQ feedback endpoint 已存在；V5 `dh_decision_*` audit tables 已存在；V6 `decision_request` / `decision_run` / `quant_signal` / `quant_decision` 已完成并关闭。stage-qdr-2 已完成并验收：Audit Trace Read Model 的 DTO / projection、tenant-bound query contract、JDBC read adapter、read-only detail/trace API、`human_approval_packet` migration / domain / repository，以及 tenant-bound approval create / get / decision API + audit 已落地；B5 close review 已 `ACCEPTED`，final close 已 `CLOSED`。stage-qdr-3 planning 已完成：`docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md`。下一步仅允许 `DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER`，且仍为 work-order-only。replay execution API、model gateway implementation、prompt version implementation、tool registry 均仍为 `NOT IMPLEMENTED`。本路线不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI / Semantic Kernel、OpenAI / Anthropic / Gemini / Ollama SDK、NQ mutation 或 LIVE。
+`stage-qdr-1` 的当前事实基线：limited Integration-1 dry-run endpoint 已存在；NQ feedback endpoint 已存在；V5 `dh_decision_*` audit tables 已存在；V6 `decision_request` / `decision_run` / `quant_signal` / `quant_decision` 已完成并关闭。stage-qdr-2 已完成并验收：Audit Trace Read Model 的 DTO / projection、tenant-bound query contract、JDBC read adapter、read-only detail/trace API、`human_approval_packet` migration / domain / repository，以及 tenant-bound approval create / get / decision API + audit 已落地；B5 close review 已 `ACCEPTED`，final close 已 `CLOSED`。stage-qdr-3 planning 已完成：`docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md`。stage-qdr-3 implementation work order 已完成：`docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md`。下一步仅允许 `DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY`，且只允许 mock registry / prompt-model version domain controlled implementation。replay execution API、model gateway implementation、prompt version implementation、tool registry 均仍为 `NOT IMPLEMENTED`。本路线不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI / Semantic Kernel、OpenAI / Anthropic / Gemini / Ollama SDK、NQ mutation 或 LIVE。
 
 ## 1.1 当前受限 runtime planning 结论
 

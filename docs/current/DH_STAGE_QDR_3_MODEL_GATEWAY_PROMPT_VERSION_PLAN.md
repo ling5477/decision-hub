@@ -515,3 +515,15 @@ ALLOW_LIVE: NO
 DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER
 ```
 
+## 12. Work order follow-up（2026-07-07）
+
+```text
+DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER: DONE / WORK_ORDER_ONLY
+Artifact: docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md
+stage-qdr-3 implementation: NOT STARTED
+Next concrete action: DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY
+Current execution workspace: F:/project/decision-hub
+Former alternate environment path: E:/Project/decision-hub / do not mix
+```
+
+该 work order 只允许后续进入 B1 Prompt / Model Version Domain + Mock Registry 的 controlled implementation；B2/B3/B4 仍不得立即启动。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime、NQ mutation、trading mutation 与 LIVE 仍全部禁止。

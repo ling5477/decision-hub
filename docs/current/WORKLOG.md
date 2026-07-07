@@ -1,5 +1,80 @@
 # Decision Hub Worklog
 
+## 2026-07-07 DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER
+
+执行 `DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER`。本轮为 `WORK_ORDER_ONLY + STAGE_QDR_3_IMPLEMENTATION_DISCIPLINE + MODEL_GATEWAY_MOCK_BASELINE_WO + PROMPT_VERSION_IMPLEMENTATION_WO + PROVIDER_TRUST_BOUNDARY_WO + AUDIT_REDACTION_WO + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE`，只把 stage-qdr-3 从 planning 细化为后续 implementation batches 的工作令。
+
+### 新增文件
+
+```text
+docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md
+```
+
+### 修改文件
+
+```text
+README.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/ROADMAP.md
+docs/current/WORK_ORDER.md
+docs/current/WORKLOG.md
+docs/current/API.md
+docs/current/DB_SCHEMA.md
+docs/current/TESTING.md
+docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md
+```
+
+### Result
+
+```text
+stage-qdr-2: CLOSED / ACCEPTED
+stage-qdr-3 plan: DONE
+stage-qdr-3 implementation work order: DONE
+stage-qdr-3 implementation: NOT STARTED
+next batch: DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY
+real HTTP: NO
+real provider: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### Work order boundaries
+
+- B1：Prompt / Model Version Domain + Mock Registry。允许 domain/usecase contracts、in-memory/mock registry、validation tests 与 architecture guard；不新增 API、migration、HTTP、provider SDK 或 real provider。
+- B2：Model Gateway Mock Runtime + Policy Guard。只接 `MockModelProvider`，强制 `ProviderTrustPolicy`、payload cap、token budget、memory cap、redaction guard 与 fail-closed；完成后必须 close review。
+- B3：Persistence Baseline。规划 `prompt_template`、`prompt_version`、`model_profile`、`model_version`、`model_gateway_call` 或等价最小表；migration 必须 review/freeze 后才实现。
+- B4：QDR Decision Pipeline Integration。只接 mock gateway，保持 structured output 与 audit trace refs；不得触发 approval、NQ、交易或 real provider；完成后必须 review。
+- B5：Stage-qdr-3 Close Review。只做 final acceptance，不实现新功能。
+
+### Review triggers
+
+只有 migration、API / Controller / OpenAPI、auth / tenant / HMAC / nonce / source、provider trust / outbound boundary、audit / redaction / trace fail-closed、P0/P1 blocker fix、stage close review 触发 standalone review/freeze。普通 batch 只做 validation + 最小 docs，不再默认单独长 review。
+
+### Validation
+
+```text
+workspace guard: PASS / F:\project\decision-hub exists / E:\Project\decision-hub does not exist
+git branch --show-current: dev
+git log --oneline -10: HEAD includes c4e6ffe docs(qdr): plan stage-qdr-3 model gateway baseline
+git status --short before write: PASS / CLEAN
+git diff --check: PASS / LF->CRLF warnings only / no whitespace error
+forbidden scan: PASS / total 1699 / docs prohibition 1109 / test guard 415 / existing historical text 175 / actual risk 0 / provider-http risk 0 / mutation risk 0
+mvn -ntp -Pquality validate: BUILD SUCCESS / reactor 19/19 / Checkstyle 0 violations / Spotless passed
+.\mvnw.cmd -v: WRAPPER_UNUSABLE / exits 0 but wrapper output invalid
+skip flags: NOT USED / no -DskipTests / no -DskipITs
+```
+
+### Boundary confirmation
+
+未修改 Java 生产代码；未修改 Java 测试代码；未新增 migration；未修改历史 migration；未新增 API；未新增 Controller；未新增 Repository；未新增 Service；未新增真实 HTTP outbound；未新增真实 provider；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未修改 NQ；未读取或输出 credential、token、cookie、apiKey、apiSecret、passphrase；未新增 replay execution；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`；未把 `APPROVED` 映射为 `BUY`；未把 `REJECTED` 映射为 `SELL`；未开启 LIVE；stage-qdr-3 implementation 未启动。
+
+### Next
+
+```text
+DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY
+```
+
 ## 2026-07-07 DH-STAGE-QDR-2-FINAL-CLOSE-DOCS-SYNC
 
 执行 `DH-STAGE-QDR-2-FINAL-CLOSE-DOCS-SYNC`。本轮为 `DOCUMENTATION_ONLY + STAGE_FINAL_CLOSE_RECORD + ACCEPTANCE_RESULT_SYNC + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_RUNTIME + NO_PROVIDER + NO_AGENT + NO_LIVE`，只把 `DH-STAGE-QDR-2-B5-CLOSE-REVIEW` 的 `ACCEPTED` 结论写回 `docs/current` 与 root README。

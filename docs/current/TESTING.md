@@ -1,5 +1,67 @@
 # Decision Hub Testing
 
+## 2026-07-07 DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER validation
+
+```text
+Scope:
+  - 本轮只做 stage-qdr-3 implementation work order。
+  - 只新增/更新 README 与 docs/current 文档。
+  - 不修改 Java 生产代码、Java 测试代码、migration、API、Controller、Repository、Service、contracts、golden_cases 或 NQ。
+  - 不实现 Model Gateway，不实现 Prompt Version，不接真实 provider，不接真实 HTTP，不启动 Agent / LangGraph / LIVE。
+
+Result:
+  STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER: DONE
+  ALLOW_STAGE_QDR_3_B1_IMPLEMENTATION: YES
+  ALLOW_STAGE_QDR_3_B2_IMPLEMENTATION_NOW: NO
+  ALLOW_STAGE_QDR_3_B3_IMPLEMENTATION_NOW: NO
+  ALLOW_STAGE_QDR_3_B4_IMPLEMENTATION_NOW: NO
+  ALLOW_REAL_HTTP: NO
+  ALLOW_REAL_PROVIDER: NO
+  ALLOW_AGENT_PHASE: NO
+  ALLOW_LANGGRAPH_RUNTIME: NO
+  ALLOW_LIVE: NO
+```
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| workspace guard | PASS | `F:\project\decision-hub` exists；`E:\Project\decision-hub` does not exist；本轮只在 `F:\project\decision-hub` 执行。 |
+| `git status --short`（写入前） | PASS / CLEAN | 分支 `dev`；无 dirty、untracked 或 staged 文件。 |
+| `git log --oneline -10`（写入前） | PASS | HEAD 为 `c4e6ffe docs(qdr): plan stage-qdr-3 model gateway baseline`，且包含 `e7a24b0 docs(qdr): record stage-qdr-2 acceptance`。 |
+| `git diff --check` | PASS | 本轮执行；无 whitespace error；仅 Windows LF -> CRLF warning。 |
+| `git diff --stat` | DOCS_ONLY | diff 限于 `README.md` 与 `docs/current` 文档；无 Java、migration、contracts 或 golden_cases 变更。 |
+| forbidden scan | PASS / REVIEWED | broad scan 总命中 1699；docs prohibition 1109，test guard 415，existing historical text 175，actual risk 0；生产代码二次扫描 `PROVIDER_HTTP_RISK_HITS=0`，`MUTATION_CALL_RISK_HITS=0`。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed；未使用 `-DskipTests` 或 `-DskipITs`。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | 命令 exit code 0 但输出仍包含 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven Wrapper PASS。 |
+| Docker/Testcontainers | P2 TOOLING_ENV_RISK / INHERITED | 本轮未修复 Docker/Testcontainers 环境风险；Docker-gated skip 仍不得写成 PASS。 |
+
+stage-qdr-3 后续测试矩阵：
+
+```text
+B1 Prompt / Model Version Domain + Mock Registry:
+  prompt version immutable / checksum required / in-memory registry / render policy /
+  prompt injection guard / no raw prompt storage / no provider or HTTP dependency
+
+B2 Model Gateway Mock Runtime + Policy Guard:
+  mock provider only / no outbound HTTP / ProviderTrustPolicy enforced / token budget /
+  payload cap / memory cap / redaction guard / audit fail-closed / provider unavailable fail-closed
+
+B3 Persistence Baseline:
+  migration presence / column comments / tenant indexes / unique constraints /
+  raw_prompt and raw_response forbidden columns absent / redacted summary and hash refs only
+
+B4 QDR Decision Pipeline Integration:
+  structured output / promptVersionId and modelVersionId trace refs / provider trust trace ref /
+  no approval mutation / no NQ mutation / no trading signal mapping
+
+B5 Stage-qdr-3 Close Review:
+  docs-current consistency / forbidden scan / quality validate / no real provider / no real HTTP /
+  no Agent / no LangGraph / LIVE disabled
+```
+
+Boundary:
+
+未修改业务代码；未修改测试代码；未新增 migration；未修改历史 migration；未新增 API；未新增 Controller；未新增 Repository；未新增 Service；未新增真实 HTTP outbound；未新增真实 provider；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未修改 NQ；未读取或输出 credential、token、cookie、apiKey、apiSecret、passphrase；未新增 replay execution；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`；未把 `APPROVED` 映射为 `BUY`；未把 `REJECTED` 映射为 `SELL`；未开启 LIVE；stage-qdr-3 implementation 未启动。
+
 ## 2026-07-07 DH-STAGE-QDR-2-FINAL-CLOSE-DOCS-SYNC validation
 
 ```text

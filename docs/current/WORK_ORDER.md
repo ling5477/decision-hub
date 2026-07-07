@@ -1,12 +1,12 @@
 # Decision Hub 当前工单
 
-> 当前阶段: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / DONE / PLANNING_ONLY / IMPLEMENTATION_NOT_STARTED
+> 当前阶段: DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / DONE / WORK_ORDER_ONLY / IMPLEMENTATION_NOT_STARTED
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation; I1-IMP1 DH dry-run test-support entry; I1 runtime API contract review; I1 DH runtime API work order; I1 DH limited runtime endpoint implementation; I1 DH limited runtime endpoint close review; I1 NQ runtime client work order
-> 下一阶段: DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / READY / WORK_ORDER_ONLY / NO_IMPLEMENTATION_YET / NO_REAL_PROVIDER
+> 下一阶段: DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY / PLANNED / CONTROLLED_IMPLEMENTATION / MOCK_ONLY / NO_REAL_PROVIDER
 
 ## 1. 当前目标
 
-`stage-qdr-2 = Audit Trace Read Model + Human Approval Packet` 当前已完成 Work Order、B1 read model DTO / query contract、B2 tenant-bound read repository / read-only API、B3 human approval migration / domain / repository、B4 human approval API / audit，以及 B5 close review / acceptance；B1-B4 均已 `CLOSED / ACCEPTED / COMMITTED`，B5 close review 已 `YES / ACCEPTED`。完整工单入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`，discipline closeout 入口为 `docs/current/DH_STAGE_QDR_2_DISCIPLINE_CLOSEOUT.md`。stage-qdr-2 implementation 为 `DONE`，final close 为 `CLOSED`。stage-qdr-3 planning 已完成，计划入口为 `docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md`；下一步只允许编写 stage-qdr-3 implementation work order，不得直接做 implementation。
+`stage-qdr-2 = Audit Trace Read Model + Human Approval Packet` 当前已完成 Work Order、B1 read model DTO / query contract、B2 tenant-bound read repository / read-only API、B3 human approval migration / domain / repository、B4 human approval API / audit，以及 B5 close review / acceptance；B1-B4 均已 `CLOSED / ACCEPTED / COMMITTED`，B5 close review 已 `YES / ACCEPTED`。完整工单入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`，discipline closeout 入口为 `docs/current/DH_STAGE_QDR_2_DISCIPLINE_CLOSEOUT.md`。stage-qdr-2 implementation 为 `DONE`，final close 为 `CLOSED`。stage-qdr-3 planning 已完成，计划入口为 `docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md`；stage-qdr-3 implementation work order 已完成，工单入口为 `docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md`。下一步只允许 B1 Prompt / Model Version Domain + Mock Registry，不得直接做 B2/B3/B4。
 
 stage-qdr-1 已按当前前置状态关闭：
 
@@ -67,6 +67,43 @@ mvn -ntp -Pquality validate
 ```
 
 若本机 `mvnw` wrapper 不可用，允许使用已安装 Maven `mvn` 执行同等命令，并在验证记录中说明降级原因。
+
+## 0.0X DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER（DONE / B1 NEXT）
+
+本轮只编制 stage-qdr-3 implementation work order；不修改 Java 生产代码、测试代码、migration、API、repository、service、controller，不实现 Model Gateway，不接真实 provider，不接真实 HTTP，不启动 Agent / LangGraph / LIVE。
+
+```text
+Work order artifact: docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md
+stage-qdr-3 implementation work order: DONE / WORK_ORDER_ONLY
+stage-qdr-3 implementation: NOT STARTED
+B1: PLANNED / PROMPT_MODEL_VERSION_DOMAIN_MOCK_REGISTRY
+B2: NOT ALLOWED NOW / PROVIDER_TRUST_REVIEW_REQUIRED
+B3: NOT ALLOWED NOW / MIGRATION_REVIEW_REQUIRED
+B4: NOT ALLOWED NOW / DECISION_PIPELINE_REVIEW_REQUIRED
+B5: NOT STARTED / CLOSE_REVIEW_ONLY
+real HTTP: NO
+real provider: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+批次顺序：
+
+```text
+B1 Prompt / Model Version Domain + Mock Registry
+B2 Model Gateway Mock Runtime + Policy Guard
+B3 Persistence Baseline
+B4 QDR Decision Pipeline Integration
+B5 Stage-qdr-3 Close Review
+```
+
+下一步唯一允许动作：
+
+```text
+DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY / PLANNED / CONTROLLED_IMPLEMENTATION / MOCK_ONLY
+```
+
+B1 不允许新增 API、migration、real provider、real HTTP、Provider SDK、LangGraph / AutoGen / CrewAI、NQ mutation、LIVE、raw prompt/raw provider response storage 或交易 mutation。B2/B3/B4 必须在 B1 后单独授权并按 review trigger 推进。
 
 ## 0.0W DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN（DONE / PLAN_ONLY / WO NEXT）
 
