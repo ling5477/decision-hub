@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD / IMPLEMENTED_BY_VALIDATION / MOCK_ONLY / REVIEW_FREEZE_REQUIRED
-> Next stage:    DH-STAGE-QDR-3-B2-REVIEW-FREEZE / READY / NO_DIRECT_B3
+> Current stage: DH-STAGE-QDR-3-B3-BLOCKER-FIX / DONE / DB_SCHEMA_ALIGNED / VALIDATION_RECOVERED
+> Next stage:    DH-STAGE-QDR-3-B3-REVIEW-FREEZE / READY / NO_DIRECT_B4
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -36,7 +36,7 @@ K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
 Current workspace: F:/project/decision-hub.
 Path discipline: E:/Project/decision-hub belongs to another environment path and must not be mixed with F:/project/decision-hub.
-Current main line: stage-qdr-3 / Model Gateway + Prompt/Model Version Baseline / B2_IMPLEMENTED_BY_VALIDATION / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
+Current main line: stage-qdr-3 / Model Gateway + Prompt/Model Version Baseline / B3_BLOCKER_FIX_DONE / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
 stage-qdr-1 implementation: DONE.
 stage-qdr-1 freeze: CLOSED / ACCEPTED.
 stage-qdr-2 Work Order: DONE / WORK_ORDER_READY.
@@ -54,18 +54,20 @@ human_approval_packet: MIGRATION_ADDED.
 approval API: IMPLEMENTED_BY_VALIDATION.
 approval write endpoint: IMPLEMENTED_BY_VALIDATION.
 replay execution API: NOT STARTED.
-model gateway: IMPLEMENTED_BY_VALIDATION / MOCK_ONLY / USECASE_ONLY / NO_API / NO_MIGRATION.
+model gateway: IMPLEMENTED_BY_VALIDATION / MOCK_ONLY / USECASE_ONLY / NO_API.
+model gateway persistence: IMPLEMENTED_BY_VALIDATION / V8 / JDBC_BASELINE / NO_API.
 tool registry: NOT STARTED.
 stage-qdr-3 planning: DONE / PLAN_ONLY.
 stage-qdr-3 implementation work order: DONE / WORK_ORDER_ONLY.
-stage-qdr-3 implementation: B2_IMPLEMENTED_BY_VALIDATION.
+stage-qdr-3 implementation: B3_IMPLEMENTED_BY_VALIDATION.
 stage-qdr-3 plan artifact: docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md.
 stage-qdr-3 work order artifact: docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md.
 stage-qdr-3 B1: COMMITTED / PROMPT_MODEL_VERSION_DOMAIN_MOCK_REGISTRY / NO_REAL_PROVIDER / NO_REAL_HTTP / NO_API / NO_MIGRATION.
-stage-qdr-3 B2: IMPLEMENTED_BY_VALIDATION / MODEL_GATEWAY_MOCK_RUNTIME_POLICY_GUARD / REVIEW_FREEZE_REQUIRED / NO_REAL_PROVIDER / NO_REAL_HTTP / NO_API / NO_MIGRATION.
-stage-qdr-3 B3: NOT STARTED / MIGRATION_REVIEW_REQUIRED.
+stage-qdr-3 B2: CLOSED / ACCEPTED / COMMITTED / MODEL_GATEWAY_MOCK_RUNTIME_POLICY_GUARD / NO_REAL_PROVIDER / NO_REAL_HTTP / NO_API / NO_MIGRATION.
+stage-qdr-3 B3: IMPLEMENTED_BY_VALIDATION / V8_MIGRATION_JDBC_BASELINE / BLOCKER_FIX_DONE / REVIEW_FREEZE_REQUIRED / NO_REAL_PROVIDER / NO_REAL_HTTP / NO_API.
 stage-qdr-3 B4: NOT STARTED / DECISION_PIPELINE_REVIEW_REQUIRED.
-stage-qdr-3 next action: DH-STAGE-QDR-3-B2-REVIEW-FREEZE.
+stage-qdr-3 B5: NOT STARTED / CLOSE_REVIEW_ONLY.
+stage-qdr-3 next action: DH-STAGE-QDR-3-B3-REVIEW-FREEZE.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
 NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
@@ -77,7 +79,7 @@ Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MIS
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime PR prep: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: DH-STAGE-QDR-3-B2-REVIEW-FREEZE / READY / REVIEW_ONLY / NO_DIRECT_B3 / NO_REAL_HTTP / NO_PROVIDER.
+Next concrete action: DH-STAGE-QDR-3-B3-REVIEW-FREEZE / READY / REVIEW_ONLY / NO_DIRECT_B4 / NO_REAL_HTTP / NO_PROVIDER.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -87,6 +89,73 @@ K7 Golden Cases / Eval: CLOSED.
 K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
+```
+
+## 1.0.42 DH-STAGE-QDR-3 B3 Blocker Fix（2026-07-07，DONE）
+
+```text
+Task: DH-STAGE-QDR-3-B3-BLOCKER-FIX
+Task type: BLOCKER_FIX + DOCUMENTATION_FIX + TOOLING_VALIDATION_RECOVERY + STAGE_QDR_3_B3_FREEZE_BLOCKER_FIX + NO_BUSINESS_CODE_CHANGE + NO_DB_MIGRATION_CHANGE + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+stage-qdr-3 B1: COMMITTED
+stage-qdr-3 B2: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-3 B3: IMPLEMENTED_BY_VALIDATION / BLOCKER_FIX_DONE
+B4: NOT STARTED
+B5: NOT STARTED
+real HTTP: NO
+real provider: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+本轮只修复 B3 review/freeze blocker：`docs/current/DB_SCHEMA.md` 的 V8 schema 记录已按实际 `V8__qdr_model_gateway_persistence_baseline.sql` 对齐，去除 planned / stale 字段名，补齐实际字段、unique/index、check constraint 与 raw storage prohibition 说明。未修改 V1-V8 migration、Java 生产代码、测试代码、API、Controller、JDBC repository 或 NQ 仓库。
+
+Maven validation 已恢复并通过：`mvn -ntp -pl dh-domain -am test`、`mvn -ntp -pl dh-usecase -am test`、`mvn -ntp -pl dh-infra -am test`、`mvn -ntp -pl dh-app -am test`、`mvn -ntp -Pquality validate` 均为 `BUILD SUCCESS`；未使用 `-DskipTests` 或 `-DskipITs`。本轮未执行 Maven local repository cleanup，未使用临时 `maven.repo.local`。
+
+Readiness:
+
+```text
+STAGE_QDR_3_B3_BLOCKER_FIX: DONE
+ALLOW_STAGE_QDR_3_B3_REVIEW_FREEZE_RETRY: YES
+ALLOW_STAGE_QDR_3_B3_COMMIT: NO
+ALLOW_STAGE_QDR_3_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+## 1.0.41 DH-STAGE-QDR-3 B3 Persistence Baseline（2026-07-07，IMPLEMENTED_BY_VALIDATION）
+
+```text
+Task: DH-STAGE-QDR-3-B3-PERSISTENCE-BASELINE
+Task type: CODE_CHANGE + TEST + DB_MIGRATION + MINIMAL_DOCUMENTATION + STAGE_QDR_3_B3 + PROMPT_MODEL_VERSION_PERSISTENCE + MODEL_GATEWAY_CALL_PERSISTENCE + JDBC_REPOSITORY + AUDIT_REDACTION_STORAGE_BOUNDARY + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+stage-qdr-3 B1: COMMITTED
+stage-qdr-3 B2: CLOSED / ACCEPTED / COMMITTED
+stage-qdr-3 B3: IMPLEMENTED_BY_VALIDATION
+B4: NOT STARTED
+B5: NOT STARTED
+real HTTP: NO
+real provider: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+B3 新增 `V8__qdr_model_gateway_persistence_baseline.sql`、tenant-bound prompt/model version persistence ports、JDBC repositories、migration presence tests、JDBC fail-closed tests 与 ArchitectureTest guard。V8 只保存 `qdr_prompt_template`、`qdr_prompt_version`、`qdr_model_profile`、`qdr_model_version`、`qdr_model_gateway_call` 的 safe metadata / hash / ref / redacted summary；不保存 raw prompt，不保存 raw provider response，不保存 credential / apiKey / apiSecret / token / passphrase。B3 未新增 API / Controller / OpenAPI，未接真实 provider、真实 HTTP、Provider SDK、Agent / LangGraph、NQ 或 LIVE。
+
+Readiness:
+
+```text
+STAGE_QDR_3_B3: DONE
+ALLOW_STAGE_QDR_3_B3_REVIEW_FREEZE: YES
+ALLOW_STAGE_QDR_3_B3_COMMIT: NO
+ALLOW_STAGE_QDR_3_B4_AFTER_B3_COMMIT: NO
+ALLOW_STAGE_QDR_3_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
 ```
 
 ## 1.0.40 DH-STAGE-QDR-3 B2 Model Gateway Mock Runtime + Policy Guard（2026-07-07，IMPLEMENTED_BY_VALIDATION）

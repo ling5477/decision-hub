@@ -3978,6 +3978,49 @@ ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
 
+## 2026-07-07 DH-STAGE-QDR-3-B3-PERSISTENCE-BASELINE 验证记录
+
+结论：**PASS / B3_IMPLEMENTED_BY_VALIDATION / V8_MIGRATION_JDBC_BASELINE / NO_API_CHANGE / NO_REAL_HTTP / NO_PROVIDER / NO_AGENT / NO_LANGGRAPH / NO_LIVE**。
+
+本轮只实现 stage-qdr-3 B3 persistence baseline：新增 V8 Flyway migration、prompt/model version persistence ports、tenant-bound JDBC repositories、migration/JDBC tests、ArchitectureTest guard 与 docs/current 最小同步。未新增 API、Controller、OpenAPI、真实 provider、HTTP client、Provider SDK、Agent runtime、LangGraph runtime、NQ mutation 或 LIVE。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（写入前） | **PASS / CLEAN** | 分支 `dev`；HEAD 为 `6395f7e feat(qdr): add stage-qdr-3 model gateway mock runtime`；无 staged、untracked 或 dirty 输出。 |
+| `git log --oneline -10` | **PASS** | HEAD 包含 `feat(qdr): add stage-qdr-3 model gateway mock runtime`。 |
+| `git diff --check`（写入前） | **PASS** | 无 whitespace error。 |
+| `mvn -ntp -pl dh-domain -am test` | **BUILD SUCCESS** | dh-domain 151 tests，0 failures，0 errors，0 skipped。 |
+| `mvn -ntp -pl dh-usecase -am test` | **BUILD SUCCESS** | dh-usecase 279 tests，0 failures，0 errors，0 skipped；新增 `QdrPersistenceCommandSafetyTest` 5 tests 通过。 |
+| `mvn -ntp -pl dh-infra -am test` | **BUILD SUCCESS / DOCKER_GATED_SKIP_PRESENT** | dh-infra 72 tests，0 failures，0 errors，3 skipped；新增 `JdbcQdrModelPersistenceRepositoryTest` 19 tests 通过；`JdbcNonceReplayGuardPersistenceTest` 因本机 Testcontainers/Docker 环境不可用 skipped 3。 |
+| `mvn -ntp -pl dh-app -am test` | **BUILD SUCCESS / DOCKER_GATED_SKIP_PRESENT** | dh-app 73 tests，0 failures，0 errors，1 skipped；`ArchitectureTest` 36 tests 通过；新增 `V8QdrModelGatewayPersistenceBaselineMigrationPresenceTest` 7 tests 通过；`PostgresContainerSmokeTest` 因本机 Testcontainers/Docker 环境不可用 skipped 1。 |
+| `mvn -ntp -Pquality validate` | **BUILD SUCCESS** | reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。 |
+| `.\mvnw.cmd -v` | **WRAPPER_UNUSABLE / NOT_VALID_MAVEN_WRAPPER** | 输出 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` 缺少主清单属性；进程返回码为 0，但行为不能作为 wrapper 可用证明。 |
+| forbidden scan | **PASS / REVIEWED / ACTUAL_RISK_0** | 用户指定 broad scan 命中 1873 行；分类为 migration negative guard 41、test guard 435、docs prohibition / existing historical text 1133、contract/golden-case guard 50、existing historical migration / enum constraint 29、redaction/security code 118、budget/usage token field 67；actual risk 0。 |
+
+Noted:
+
+- Maven 均使用 `mvn -ntp`，未使用 `-DskipTests` 或 `-DskipITs`。
+- Maven 仍输出既有 settings warning：`D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml` 中存在 `Unrecognised tag: 'profiles'`。
+- Docker/Testcontainers 本机不可用风险继承；Docker-gated skip 不得写成 PASS。
+- `mvnw.cmd` 仍不可用，本轮继续使用系统 Maven。
+- V8 migration 新增；V1-V7 历史 migration 未修改。
+- B3 未新增 API；未修改 NQ；未新增真实 provider / HTTP client / Provider SDK；未保存 raw provider response；未持久化 raw prompt。
+
+Readiness：
+
+```text
+STAGE_QDR_3_B3: DONE
+ALLOW_STAGE_QDR_3_B3_REVIEW_FREEZE: YES
+ALLOW_STAGE_QDR_3_B3_COMMIT: NO
+ALLOW_STAGE_QDR_3_B4_AFTER_B3_COMMIT: NO
+ALLOW_STAGE_QDR_3_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
 ## 2026-07-07 DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD 验证记录
 
 结论：**PASS / B2_IMPLEMENTED_BY_VALIDATION / MODEL_GATEWAY_MOCK_RUNTIME_POLICY_GUARD / NO_DB_MIGRATION / NO_API_CHANGE / NO_REAL_HTTP / NO_PROVIDER / NO_AGENT / NO_LANGGRAPH / NO_LIVE**。
@@ -4106,6 +4149,56 @@ ALLOW_STAGE_QDR_3_B1_COMMIT: YES
 ALLOW_STAGE_QDR_3_B2_AFTER_B1_COMMIT: YES
 ALLOW_STAGE_QDR_3_B2_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_3_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_3_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+## 2026-07-07 DH-STAGE-QDR-3-B3-BLOCKER-FIX 验证记录
+
+结论：**PASS / BLOCKER_FIX_DONE / DB_SCHEMA_ALIGNED / TOOLING_VALIDATION_RECOVERED / NO_BUSINESS_CODE_CHANGE / NO_DB_MIGRATION_CHANGE / NO_API_CHANGE / NO_REAL_HTTP / NO_PROVIDER / NO_AGENT / NO_LANGGRAPH / NO_LIVE**。
+
+本轮只修复 B3 review/freeze blocker：`docs/current/DB_SCHEMA.md` 的 V8 schema 记录已与实际 `V8__qdr_model_gateway_persistence_baseline.sql` 对齐，去除 stale/planned 字段名并记录实际字段、tenant-bound unique/index、check constraints、raw storage prohibition 与 repository/test contract。未修改 Java 生产代码、测试代码、V1-V8 migration、API、Controller、Repository、Service、NQ 仓库、contracts 或 golden_cases。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short` | **DIRTY / EXPECTED_B3_WORKTREE** | 分支 `dev`；dirty 范围为既有 B3 implementation 文件和本轮允许的 docs/README 文档；无 staged。 |
+| `git branch --show-current` | **PASS** | `dev`。 |
+| `git log --oneline -12` | **PASS** | HEAD `6395f7e feat(qdr): add stage-qdr-3 model gateway mock runtime`，包含 B2 commit。 |
+| `git diff --check` | **PASS_WITH_EOL_WARNINGS** | 无 whitespace error；仅 Windows LF -> CRLF warning。 |
+| `git diff --stat` / `git diff --name-only` | **PASS / REVIEWED** | tracked diff 仍限 B3 ArchitectureTest 与 docs/current；本轮新增 tracked diff 为允许的 `README.md` / `docs/current/DB_SCHEMA.md` / `STATUS.md` / `WORK_ORDER.md` / `ROADMAP.md` / `TESTING.md` / `WORKLOG.md`。 |
+| `git diff --cached --name-only` | **PASS** | 无 staged。 |
+| `git diff --name-only -- dh-app/src/main/resources/db/migration` | **PASS** | 无 tracked diff；V8 为 untracked B3 migration，V1-V7 无 diff。 |
+| `git diff --name-only -- dh-api/src/main` | **PASS** | 无 API production diff。 |
+| `git diff --name-only -- contracts golden_cases` | **PASS** | 无 contracts / golden_cases diff。 |
+| DB_SCHEMA stale field scan | **PASS** | `current_prompt_version_id`、`version_label`、`render_policy_ref`、`redaction_policy_ref`、`provider_profile_ref`、`trust_tier`、`feature_flag_ref` 等 stale 字段不再命中。 |
+| forbidden scan | **PASS / REVIEWED / ACTUAL_RISK_0** | 用户指定 broad scan 已执行；命中分类为 migration negative guard、test guard、docs prohibition、enum constraint、redaction/security code、existing historical text、budget/usage token field。production 窄扫确认无真实 provider、真实 HTTP client、Provider SDK、LangGraph、AutoGen、CrewAI、raw_prompt/raw_provider_response 存储或交易执行路径。 |
+| `mvn -ntp -pl dh-domain -am test` | **BUILD SUCCESS** | dh-domain 151 tests，0 failures / errors / skips。 |
+| `mvn -ntp -pl dh-usecase -am test` | **BUILD SUCCESS** | dh-usecase 279 tests，0 failures / errors / skips；`QdrPersistenceCommandSafetyTest` 5 tests 通过。 |
+| `mvn -ntp -pl dh-infra -am test` | **BUILD SUCCESS / DOCKER_GATED_SKIP_PRESENT** | dh-infra 72 tests，0 failures，0 errors，3 skipped；`JdbcQdrModelPersistenceRepositoryTest` 19 tests 通过；3 skipped 为既有 Testcontainers/Docker 环境不可用路径，不记录为 PASS。 |
+| `mvn -ntp -pl dh-app -am test` | **BUILD SUCCESS / DOCKER_GATED_SKIP_PRESENT** | dh-app 73 tests，0 failures，0 errors，1 skipped；`ArchitectureTest` 36 tests 通过，V8 migration presence tests 7 tests 通过；1 skipped 为既有 `PostgresContainerSmokeTest` Docker/Testcontainers 环境不可用路径，不记录为 PASS。 |
+| `mvn -ntp -Pquality validate` | **BUILD SUCCESS** | reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。 |
+| `.\mvnw.cmd -v` | **WRAPPER_UNUSABLE / NOT_VALID_MAVEN_WRAPPER** | 输出包含 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` 缺少主清单属性；进程返回码为 0，但行为不能作为 wrapper 可用证明。 |
+| `docker version` | **DOCKER_DAEMON_UNAVAILABLE** | Docker client `29.2.1` 存在；连接 `npipe:////./pipe/dockerDesktopLinuxEngine` 失败，daemon pipe 不存在或未运行。 |
+| `docker info` | **DOCKER_DAEMON_UNAVAILABLE** | Docker client 存在；Server 不可访问。 |
+
+Noted:
+
+- 本轮 Maven 均使用系统 `mvn -ntp`，未使用 `-DskipTests`，未使用 `-DskipITs`。
+- 本轮未触发 Maven local repository `FileAlreadyExistsException`，因此未删除 `D:\Tool\Maven\maven-repository\org\springframework\boot\spring-boot-starter-parent\3.5.10`，也未使用临时 `-Dmaven.repo.local`。
+- Maven 仍输出既有 settings warning：`D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml` 中存在 `Unrecognised tag: 'profiles'`。
+- Docker/Testcontainers 当前为环境型不可用；相关 skipped 只能记录为 skip，不得写成 PASS。
+- `mvnw.cmd` 仍不可用，本轮继续使用系统 Maven。
+
+Readiness：
+
+```text
+STAGE_QDR_3_B3_BLOCKER_FIX: DONE
+ALLOW_STAGE_QDR_3_B3_REVIEW_FREEZE_RETRY: YES
+ALLOW_STAGE_QDR_3_B3_COMMIT: NO
 ALLOW_STAGE_QDR_3_B4_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO

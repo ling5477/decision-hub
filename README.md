@@ -9,8 +9,8 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-当前阶段: DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / DONE / WORK_ORDER_ONLY / IMPLEMENTATION_NOT_STARTED
-下一阶段: DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY / PLANNED / CONTROLLED_IMPLEMENTATION / MOCK_ONLY
+当前阶段: DH-STAGE-QDR-3-B3-BLOCKER-FIX / DONE / DB_SCHEMA_ALIGNED / VALIDATION_RECOVERED
+下一阶段: DH-STAGE-QDR-3-B3-REVIEW-FREEZE / READY / NO_DIRECT_B4
 事实源: docs/current
 ```
 
@@ -83,16 +83,16 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY / PLANNED / CONTROLLED_IMPLEMENTATION / MOCK_ONLY。
+DH-STAGE-QDR-3-B3-REVIEW-FREEZE / READY / REVIEW_ONLY / NO_DIRECT_B4。
 - 当前 DH 实际执行路径为 `F:/project/decision-hub`；此前 `E:/Project/decision-hub` 属于另一环境路径，不得混用。
-- stage-qdr-2 B1/B2/B3/B4 均已完成、freeze/acceptance 通过并提交；B4 HEAD 为 `feat(qdr): add stage-qdr-2 human approval API`。
-- stage-qdr-2 B5 close review 已 `ACCEPTED`；stage-qdr-2 final close 已 `CLOSED`。
-- stage-qdr-3 Model Gateway + Prompt Version plan 已 `DONE / PLAN_ONLY`；implementation work order 已 `DONE / WORK_ORDER_ONLY`。
-- stage-qdr-3 implementation 仍 `NOT STARTED`；下一步只允许 B1 Prompt / Model Version Domain + Mock Registry，不允许直接 B2/B3/B4。
-- replay execution API / model gateway implementation / tool registry 均 `NOT STARTED`。
+- stage-qdr-2 B1/B2/B3/B4/B5 均已完成；stage-qdr-2 final close 已 `CLOSED / ACCEPTED`。
+- stage-qdr-3 Model Gateway + Prompt Version plan 已 `DONE / PLAN_ONLY`；implementation work order 已 `DONE / WORK_ORDER_ONLY`；B1 已提交，B2 已 `CLOSED / ACCEPTED / COMMITTED`。
+- stage-qdr-3 B3 Persistence Baseline 已 `IMPLEMENTED_BY_VALIDATION`；本轮 blocker fix 已将 `docs/current/DB_SCHEMA.md` 对齐实际 V8 schema，并恢复 Maven validation。
+- 下一步只允许 `DH-STAGE-QDR-3-B3-REVIEW-FREEZE`；不得直接进入 B4/B5。
+- replay execution API / model gateway API / provider API / prompt version API / tool registry 均 `NOT STARTED`。
 - real HTTP / real provider / Agent runtime / LangGraph runtime 均未启动；LIVE DISABLED。
 - `mvnw.cmd` 当前为 `UNUSABLE / P2 TOOLING RISK`；使用系统 Maven `mvn` 作为当前替代验证工具。
-- Docker daemon CLI 可用，但本机 Java/Testcontainers 访问 `\\.\pipe\docker_engine` 被拒绝；Docker-gated tests skip 只能记录为环境型 skip，不得写成 PASS。
+- Docker CLI client 存在，但当前 daemon pipe `npipe:////./pipe/dockerDesktopLinuxEngine` 不可达；Docker-gated tests skip 只能记录为环境型 skip，不得写成 PASS。
 - 严格禁止：修改 NQ 仓库 / 接实盘 / 自动下单 / 绕风控 / 重写回测核心 / 接真实 provider / 接 LangGraph runtime / 开启 LIVE。
 ```
 

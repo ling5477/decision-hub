@@ -100,7 +100,7 @@ stage-qdr-1:
 stage-qdr-2:
               Audit Trace Read Model + Human Approval Packet        [accepted / final close closed / no agent / no live]
 stage-qdr-3:
-              Model Gateway + Prompt/Model Version Baseline          [B2 implemented by validation / review-freeze next / no real provider / no real http]
+              Model Gateway + Prompt/Model Version Baseline          [B3 blocker fix done / review-freeze retry next / no real provider / no real http]
 stage-qdr-4:
               NQ Quant Decision Review Read-only Integration Hardening [not started / read-only hardening / no live]
 stage-agent-preview:
@@ -129,9 +129,9 @@ stage-qdr-2:
 
 stage-qdr-3:
   目标：Model Gateway + Prompt/Model Version Baseline。
-  范围：已完成 planning-only 文档和 implementation work order；B1 已提交 Prompt / Model Version domain baseline；B2 已实现 usecase-level mock Model Gateway、MockModelProvider、ProviderTrustPolicy enforcement、budget / payload / memory / redaction guard、prompt/model registry lookup、fail-closed error model、gateway tests 与 architecture guard；不直接实现真实 provider、真实 HTTP、Agent runtime、LangGraph runtime 或 LIVE。
-  状态：PLAN DONE / WORK_ORDER DONE / B1 COMMITTED；B2 IMPLEMENTED_BY_VALIDATION；B3/B4/B5 NOT STARTED。
-  下一步：进入 `DH-STAGE-QDR-3-B2-REVIEW-FREEZE`。B2 涉及 ProviderTrustPolicy / gateway fail-closed，需要单独 review/freeze；不得直接进入 B3/B4。
+  范围：已完成 planning-only 文档和 implementation work order；B1 已提交 Prompt / Model Version domain baseline；B2 已完成并提交 usecase-level mock Model Gateway、MockModelProvider、ProviderTrustPolicy enforcement、budget / payload / memory / redaction guard、prompt/model registry lookup、fail-closed error model、gateway tests 与 architecture guard；B3 已实现 V8 persistence baseline、tenant-bound JDBC repositories、migration tests 与 ArchitectureTest guard；B3 blocker fix 已完成 DB_SCHEMA 与实际 V8 schema 对齐并恢复 Maven validation；不直接实现真实 provider、真实 HTTP、Agent runtime、LangGraph runtime 或 LIVE。
+  状态：PLAN DONE / WORK_ORDER DONE / B1 COMMITTED；B2 CLOSED / ACCEPTED / COMMITTED；B3 IMPLEMENTED_BY_VALIDATION / BLOCKER_FIX_DONE；B4/B5 NOT STARTED。
+  下一步：进入 `DH-STAGE-QDR-3-B3-REVIEW-FREEZE` retry。B3 涉及 V8 migration、JDBC persistence、tenant-bound query 与 raw storage ban，需要单独 review/freeze；不得直接进入 B4/B5。
   退出条件：任何 mock/model 输出可追溯 model/prompt/version/budget/usage，且 raw prompt / raw provider response 默认不保存。
 
 stage-qdr-4:
@@ -145,7 +145,7 @@ stage-agent-preview:
   退出条件：只有 stage-qdr-1 到 stage-qdr-4 全部完成后才允许评估。
 ```
 
-`stage-qdr-1` 的当前事实基线：limited Integration-1 dry-run endpoint 已存在；NQ feedback endpoint 已存在；V5 `dh_decision_*` audit tables 已存在；V6 `decision_request` / `decision_run` / `quant_signal` / `quant_decision` 已完成并关闭。stage-qdr-2 已完成并验收：Audit Trace Read Model 的 DTO / projection、tenant-bound query contract、JDBC read adapter、read-only detail/trace API、`human_approval_packet` migration / domain / repository，以及 tenant-bound approval create / get / decision API + audit 已落地；B5 close review 已 `ACCEPTED`，final close 已 `CLOSED`。stage-qdr-3 planning 已完成：`docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md`。stage-qdr-3 implementation work order 已完成：`docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md`。B1 `DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY` 已 `COMMITTED`。B2 `DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD` 已 `IMPLEMENTED_BY_VALIDATION`，只包含 mock gateway runtime / policy guard / budget guard / redaction guard / architecture guard controlled implementation。B3/B4/B5 仍为 `NOT STARTED`。replay execution API、model gateway API、tool registry 均仍为 `NOT IMPLEMENTED`。本路线不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI / Semantic Kernel、OpenAI / Anthropic / Gemini / Ollama SDK、NQ mutation 或 LIVE。
+`stage-qdr-1` 的当前事实基线：limited Integration-1 dry-run endpoint 已存在；NQ feedback endpoint 已存在；V5 `dh_decision_*` audit tables 已存在；V6 `decision_request` / `decision_run` / `quant_signal` / `quant_decision` 已完成并关闭。stage-qdr-2 已完成并验收：Audit Trace Read Model 的 DTO / projection、tenant-bound query contract、JDBC read adapter、read-only detail/trace API、`human_approval_packet` migration / domain / repository，以及 tenant-bound approval create / get / decision API + audit 已落地；B5 close review 已 `ACCEPTED`，final close 已 `CLOSED`。stage-qdr-3 planning 已完成：`docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md`。stage-qdr-3 implementation work order 已完成：`docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md`。B1 `DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY` 已 `COMMITTED`。B2 `DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD` 已 `CLOSED / ACCEPTED / COMMITTED`。B3 `DH-STAGE-QDR-3-B3-PERSISTENCE-BASELINE` 已 `IMPLEMENTED_BY_VALIDATION`，只包含 V8 migration、persistence ports、JDBC repositories、migration/JDBC tests、ArchitectureTest guard 与 docs/current 最小同步；B3 blocker fix 已完成 `DB_SCHEMA.md` 对齐与 Maven validation recovery。B4/B5 仍为 `NOT STARTED`。replay execution API、model gateway API、provider API、prompt version API、tool registry 均仍为 `NOT IMPLEMENTED`。本路线不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI / Semantic Kernel、OpenAI / Anthropic / Gemini / Ollama SDK、NQ mutation 或 LIVE。
 
 ## 1.1 当前受限 runtime planning 结论
 

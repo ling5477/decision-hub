@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD / IMPLEMENTED_BY_VALIDATION / NO_API_CHANGE
-下一阶段: DH-STAGE-QDR-3-B2-REVIEW-FREEZE / READY / NO_DIRECT_B3 / NO_API_IMPLEMENTATION
+当前阶段: DH-STAGE-QDR-3-B3-PERSISTENCE-BASELINE / IMPLEMENTED_BY_VALIDATION / NO_API_CHANGE
+下一阶段: DH-STAGE-QDR-3-B3-REVIEW-FREEZE / READY / NO_DIRECT_B4 / NO_API_IMPLEMENTATION
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -33,10 +33,10 @@ replay execution API: NOT IMPLEMENTED
 stage-qdr-2 B5 close review: YES / ACCEPTED / REVIEW_ONLY / NO_NEW_FEATURE
 stage-qdr-3 planning: DONE / PLAN_ONLY
 stage-qdr-3 implementation work order: DONE / WORK_ORDER_ONLY
-stage-qdr-3 implementation: B2_IMPLEMENTED_BY_VALIDATION
+stage-qdr-3 implementation: B3_IMPLEMENTED_BY_VALIDATION
 B1 Prompt/Model Version Domain: IMPLEMENTED_BY_VALIDATION / DOMAIN_USECASE_ONLY / NO_ENDPOINT
-B2 Model Gateway Mock Runtime: IMPLEMENTED_BY_VALIDATION / USECASE_ONLY / NO_ENDPOINT
-B3 Persistence Baseline: NOT STARTED
+B2 Model Gateway Mock Runtime: CLOSED / ACCEPTED / COMMITTED / USECASE_ONLY / NO_ENDPOINT
+B3 Persistence Baseline: IMPLEMENTED_BY_VALIDATION / V8_JDBC_BASELINE / NO_ENDPOINT
 B4 QDR Pipeline Integration: NOT STARTED
 Model Gateway API: NOT STARTED
 Provider API: NOT STARTED
@@ -47,7 +47,22 @@ AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为正式契约单源；B4 未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay execution API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 B1/B2/B3/B4 已 `CLOSED / ACCEPTED / COMMITTED`；B4 已新增 tenant-bound approval create / get / decision API 与审计事件写入。approval API 只改变 DH 内部 approval 状态并写审计，不触发 NQ、交易、provider、HTTP 或 replay execution。stage-qdr-3 planning 与 implementation work order 已完成；B1 已提交 domain/usecase/mock registry baseline；B2 已实现 usecase-level mock Model Gateway runtime 与 ProviderTrustPolicy / budget / redaction fail-closed guard，但不新增 API，不新增 Controller，不修改 OpenAPI，不新增 Provider API 或 Model Gateway API。B3/B4/B5 仍为 `NOT STARTED`；任何 future Model Gateway / Provider / Prompt Version API 必须另起 API / contract / security review。`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
+OpenAPI 仍为正式契约单源；B4 未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay execution API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 B1/B2/B3/B4 已 `CLOSED / ACCEPTED / COMMITTED`；B4 已新增 tenant-bound approval create / get / decision API 与审计事件写入。approval API 只改变 DH 内部 approval 状态并写审计，不触发 NQ、交易、provider、HTTP 或 replay execution。stage-qdr-3 planning 与 implementation work order 已完成；B1 已提交 domain/usecase/mock registry baseline；B2 已 `CLOSED / ACCEPTED / COMMITTED`；B3 只新增 V8 migration、persistence ports、JDBC repositories 与 tests，不新增 API，不新增 Controller，不修改 OpenAPI，不新增 Provider API、Model Gateway API 或 Prompt Version API。B4/B5 仍为 `NOT STARTED`；任何 future Model Gateway / Provider / Prompt Version API 必须另起 API / contract / security review。`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
+
+### 1.1 stage-qdr-3 B3 API 结论
+
+```text
+B3 new endpoint: NO
+B3 new Controller: NO
+B3 OpenAPI change: NO
+B3 Model Gateway API: NOT STARTED
+B3 Provider API: NOT STARTED
+B3 Prompt Version API: NOT STARTED
+B3 replay execution API: NOT STARTED
+B4/B5: NOT STARTED
+```
+
+B3 persistence baseline 只服务内部 repository 与后续 review/freeze，不改变任何 wire contract。B3 不授权真实 provider、真实 HTTP、Provider SDK、LangGraph / AutoGen / CrewAI、Agent runtime、NQ mutation 或 LIVE。
 
 ## 2. 已实现端点
 

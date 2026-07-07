@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD / IMPLEMENTED_BY_VALIDATION / NO_DB_MIGRATION
-Next stage:    DH-STAGE-QDR-3-B2-REVIEW-FREEZE / READY / NO_DIRECT_B3 / NO_DB_MIGRATION
+Current stage: DH-STAGE-QDR-3-B3-BLOCKER-FIX / DONE / DB_SCHEMA_ALIGNED / VALIDATION_RECOVERED
+Next stage:    DH-STAGE-QDR-3-B3-REVIEW-FREEZE / READY / NO_DIRECT_B4
 ```
 
 Flyway 迁移：
@@ -17,6 +17,7 @@ V4__nq_feedback_replay_nonce.sql P1-4 replay nonce persistence
 V5__decision_pipeline_audit.sql  Decision audit / snapshot / trace / provider call / output
 V6__qdr_decision_core_baseline.sql stage-qdr-1 Decision Core baseline
 V7__human_approval_packet.sql      stage-qdr-2 B3 Human Approval Packet
+V8__qdr_model_gateway_persistence_baseline.sql stage-qdr-3 B3 Prompt / Model Version / Model Gateway Call persistence baseline
 stage-qdr-2 B1 readmodel DTO   DONE / NO DB SCHEMA CHANGE / NO MIGRATION
 stage-qdr-2 B2 read repository/API DONE / NO DB SCHEMA CHANGE / NO MIGRATION
 stage-qdr-2 B4 approval API/audit CLOSED / ACCEPTED / COMMITTED / NO DB SCHEMA CHANGE / NO MIGRATION
@@ -26,50 +27,88 @@ stage-qdr-3 planning             DONE / PLANNED_TABLES_ONLY / NO MIGRATION
 stage-qdr-3 implementation WO    DONE / B1-B5_ORDERED / NO MIGRATION
 B1 Prompt/Model Version Domain   COMMITTED / DOMAIN_USECASE_ONLY / NO MIGRATION
 B2 Model Gateway Mock Runtime    IMPLEMENTED_BY_VALIDATION / USECASE_ONLY / NO MIGRATION
-B3 Persistence Baseline          NOT STARTED / V8 PLANNED ONLY / NOT IMPLEMENTED
+B3 Persistence Baseline          IMPLEMENTED_BY_VALIDATION / V8 ADDED / BLOCKER_FIX_DONE / REVIEW_FREEZE_REQUIRED
 B4 QDR Pipeline Integration      NOT STARTED / NO MIGRATION
+V9                              NOT STARTED
 ```
 
-## 1.0 stage-qdr-3 planned schema（PLANNED / NOT IMPLEMENTED）
+## 1.0 stage-qdr-3 B3 V8 persistence schema（IMPLEMENTED_BY_VALIDATION / DOC_ALIGNED）
 
-stage-qdr-3 planning 与 implementation work order 只规划 Model Gateway + Prompt/Model Version Baseline。B1 已提交 domain/usecase/mock registry baseline；B2 已实现 usecase-level mock gateway runtime / ProviderTrustPolicy / budget / redaction guard，但不新增 migration，不修改 V1-V7 历史 migration。以下候选表只能在后续 B3 Persistence Baseline 与 migration review/freeze 后实现；B2 不允许新增 migration，V8 仍为 planned only / NOT IMPLEMENTED：
+stage-qdr-3 B3 新增 `V8__qdr_model_gateway_persistence_baseline.sql`。V8 只建立 Prompt / Model Version / Model Gateway Call persistence baseline，不新增 API、Controller、Provider SDK、真实 HTTP 或真实 provider，不修改 V1-V7 历史 migration。V8 新增表：
 
 ```text
-prompt_template       PLANNED / B3 candidate / NOT IMPLEMENTED
-prompt_version        PLANNED / B3 candidate / NOT IMPLEMENTED
-model_profile         PLANNED / B3 candidate / NOT IMPLEMENTED
-model_version         PLANNED / B3 candidate / NOT IMPLEMENTED
-model_gateway_call    PLANNED / B3 candidate / NOT IMPLEMENTED
-model_gateway_audit_ref OPTIONAL / DEFERABLE / NOT IMPLEMENTED
+qdr_prompt_template       IMPLEMENTED / tenant-bound / UUID primary key
+qdr_prompt_version        IMPLEMENTED / tenant-bound / immutable version row / FK qdr_prompt_template
+qdr_model_profile         IMPLEMENTED / tenant-bound / UUID primary key
+qdr_model_version         IMPLEMENTED / tenant-bound / immutable version row / FK qdr_model_profile
+qdr_model_gateway_call    IMPLEMENTED / tenant-bound / redacted call metadata / FK prompt_version + model_version
 ```
 
-设计约束：
+V8 字段与存储边界：
 
 ```text
-tenant_id: 必须
-trace_id / request_id / decision_run_id: model_gateway_call 必须
-immutable prompt/model version: 必须
-checksum / hash: 必须
-raw_prompt: 禁止
-raw_response: 禁止
-credential / token / cookie / apiKey / apiSecret / passphrase: 禁止
-redacted_summary / prompt_hash / response_hash / request_ref / response_ref: 允许
+qdr_prompt_template:
+  id uuid primary key
+  tenant_id / template_key / display_name / current_version_id / status / created_at / updated_at
+
+qdr_prompt_version:
+  id uuid primary key
+  tenant_id / prompt_template_id / version / render_policy_key / template_ref / template_hash / redacted_summary / status / checksum / created_at / created_by
+  immutable by repository contract and migration comment; no updated_at column
+
+qdr_model_profile:
+  id uuid primary key
+  tenant_id / provider_profile_id / provider_kind / provider_key / model_key / display_name / capability_summary
+  context_window_tokens / max_output_tokens / profile_status / trust_policy_ref / created_at / updated_at
+
+qdr_model_version:
+  id uuid primary key
+  tenant_id / model_profile_id / model_name / model_version / capability_summary / version_status / checksum / created_at
+  immutable by repository contract and migration comment; no updated_at column
+
+qdr_model_gateway_call:
+  id uuid primary key
+  tenant_id / trace_id / request_id / decision_run_id / prompt_version_id / model_version_id / provider_profile_id
+  provider_kind / provider_identity_ref / status / failure_code / trust_decision / provider_trust_decision_ref / model_call_ref
+  budget_summary / input_characters / rendered_prompt_characters / output_characters / estimated_tokens / memory_entries
+  redacted_input_summary / redacted_output_summary / input_hash / output_hash / audit_ref / trace_ref / created_at
 ```
 
-建议约束与索引：
+禁止存储：
 
 ```text
-prompt_version unique(tenant_id, template_key, version)
-prompt_version checksum not null
-model_version unique(tenant_id, provider_profile_id, model_name, model_version)
-model_gateway_call index(tenant_id, decision_run_id, created_at)
-model_gateway_call index(trace_id)
-model_gateway_call index(request_id)
-model_gateway_call index(prompt_version_id)
-model_gateway_call index(model_version_id)
+raw prompt: FORBIDDEN
+raw provider response: FORBIDDEN
+credential / apiKey / apiSecret / token / cookie / passphrase: FORBIDDEN
+provider_profile_id / provider_kind / provider_key / provider_identity_ref: identity metadata only, no secret material
 ```
 
-任何 stage-qdr-3 migration batch 都必须先 review/freeze；B3 之前不得新增 V8 migration，不得实现 API、真实 provider、Provider SDK 或 real HTTP。
+V8 约束与索引：
+
+```text
+qdr_prompt_template unique(tenant_id, template_key)
+qdr_prompt_template index(tenant_id, created_at)
+qdr_prompt_version unique(tenant_id, prompt_template_id, version)
+qdr_prompt_version index(tenant_id, prompt_template_id, version)
+qdr_prompt_version index(tenant_id, checksum)
+qdr_model_profile unique(tenant_id, model_key)
+qdr_model_profile index(tenant_id, provider_profile_id, provider_kind)
+qdr_model_version unique(tenant_id, model_profile_id, model_name, model_version)
+qdr_model_version index(tenant_id, model_profile_id, model_name, model_version)
+qdr_model_version index(tenant_id, checksum)
+qdr_model_gateway_call unique(tenant_id, model_call_ref)
+qdr_model_gateway_call index(tenant_id, decision_run_id, created_at)
+qdr_model_gateway_call index(trace_id)
+qdr_model_gateway_call index(request_id)
+qdr_model_gateway_call index(tenant_id, prompt_version_id)
+qdr_model_gateway_call index(tenant_id, model_version_id)
+qdr_model_gateway_call index(tenant_id, status, created_at)
+status / provider_kind / profile_status / version_status / trust_decision / failure_code / hash / budget check constraints
+```
+
+V8 migration comments explicitly state raw prompt, raw provider response and credential material are forbidden. Prompt/model version immutability is not enforced by DB trigger in B3; it is enforced by append-only schema shape, migration comments, repository contract, checksum duplicate behavior and tests. Duplicate same checksum is idempotent by contract; duplicate different checksum and checksum mismatch must fail closed.
+
+B3 完成后必须先进入 `DH-STAGE-QDR-3-B3-REVIEW-FREEZE`；不得直接进入 B4，不得新增 V9，不得实现 API、真实 provider、Provider SDK 或 real HTTP。
 
 ## 1.1 stage-qdr-2 B1/B2/B3/B4 schema impact
 

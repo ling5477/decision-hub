@@ -6713,3 +6713,109 @@ DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD
 ```text
 DH-STAGE-QDR-3-B2-REVIEW-FREEZE
 ```
+
+---
+
+## DH-STAGE-QDR-3-B3-PERSISTENCE-BASELINE
+
+日期：2026-07-07
+
+### 本轮目标
+
+只实现 stage-qdr-3 B3：Prompt / Model Version / Model Gateway Call persistence baseline。范围限定为 V8 Flyway migration、usecase persistence ports、infra JDBC repositories、migration tests、JDBC tests、ArchitectureTest guard 与 docs/current 最小同步。本轮不新增 API、Controller、真实 provider、HTTP client、Provider SDK、LangGraph、Agent runtime、LIVE 或 NQ 修改；不得保存 raw prompt、raw provider response、credential、apiKey、apiSecret、token 或 passphrase。
+
+### 实现记录
+
+- 新增 `V8__qdr_model_gateway_persistence_baseline.sql`，建立 `qdr_prompt_template`、`qdr_prompt_version`、`qdr_model_profile`、`qdr_model_version`、`qdr_model_gateway_call` 五张 tenant-bound 表。
+- `qdr_prompt_version` 与 `qdr_model_version` 使用 UUID 主键、tenant-bound unique key、checksum / hash 字段与 immutable repository contract；不保存 raw prompt 或 raw provider response。
+- `qdr_model_gateway_call` 只保存 redacted input/output summary、input/output hash、audit ref、trace ref、budget / usage summary、status、failure code 与 trust decision；不保存 credential、apiKey、apiSecret、token 或 passphrase。
+- 新增 `PromptVersionPersistencePort`、`ModelVersionPersistencePort`、`ModelGatewayCallPersistencePort` 及对应 command/record/exception；port 不提供 UUID-only query/update，checksum conflict 与 persistence failure 均 fail-closed，异常消息走 redaction boundary。
+- 新增 `JdbcPromptVersionRepository`、`JdbcModelVersionRepository`、`JdbcModelGatewayCallRepository`；所有 SELECT 均带 `tenant_id`，duplicate same checksum 对 prompt/model version 幂等返回，duplicate different checksum fail-closed，gateway call duplicate fail-closed。
+- 更新 `ArchitectureTest`，覆盖 B3 JDBC repository 不依赖 dh-api、provider SDK、HTTP client、LangGraph / AutoGen / CrewAI、NQ client；B3 不新增 API endpoint、Controller、真实 provider、HTTP client、交易执行 token；V8 存在且 V9 不存在。
+
+### 验证摘要
+
+- `mvn -ntp -pl dh-domain -am test`：BUILD SUCCESS；dh-domain 151 tests，0 failures / errors / skips。
+- `mvn -ntp -pl dh-usecase -am test`：BUILD SUCCESS；dh-usecase 279 tests，0 failures / errors / skips；新增 persistence command safety tests 5 tests 通过。
+- `mvn -ntp -pl dh-infra -am test`：BUILD SUCCESS；dh-infra 72 tests，0 failures / errors，3 skipped；新增 JDBC QDR model persistence tests 19 tests 通过；skipped 为既有 Testcontainers / Docker 不可用路径，不记录为 PASS。
+- `mvn -ntp -pl dh-app -am test`：BUILD SUCCESS；dh-app 73 tests，0 failures / errors，1 skipped；`ArchitectureTest` 36 tests 通过，V8 migration presence / forbidden field / comment / check constraint tests 7 tests 通过；skipped 为既有 `PostgresContainerSmokeTest` Docker/Testcontainers 不可用路径，不记录为 PASS。
+- `mvn -ntp -Pquality validate`：BUILD SUCCESS；19/19 reactor SUCCESS；0 Checkstyle violations；Spotless check passed；未使用 `-DskipTests` 或 `-DskipITs`。
+- `.\mvnw.cmd -v`：WRAPPER_UNUSABLE；进程返回码为 0，但输出 wrapper 异常文本，不作为 Maven wrapper 可用证明。
+- forbidden scan：PASS / REVIEWED / ACTUAL_RISK_0；总命中 1873 行，分类为 migration negative guard、test guard、docs prohibition、enum constraint、redaction/security code、existing historical text、budget / usage token field、contract / golden-case guard；未发现 actual risk。
+
+### 边界
+
+未修改 NQ；未修改 V1-V7 migration；未新增 API；未新增 Controller；未新增 REST endpoint；未新增真实 HTTP outbound；未新增真实 provider；未接 Provider SDK；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未启动 Agent runtime；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未保存 raw provider response；未持久化 raw prompt；stage-qdr-3 B4 未启动。
+
+### Readiness
+
+```text
+STAGE_QDR_3_B3: DONE
+ALLOW_STAGE_QDR_3_B3_REVIEW_FREEZE: YES
+ALLOW_STAGE_QDR_3_B3_COMMIT: NO
+ALLOW_STAGE_QDR_3_B4_AFTER_B3_COMMIT: NO
+ALLOW_STAGE_QDR_3_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### 推荐下一步
+
+```text
+DH-STAGE-QDR-3-B3-REVIEW-FREEZE
+```
+
+---
+
+## DH-STAGE-QDR-3-B3-BLOCKER-FIX
+
+日期：2026-07-07
+
+### 本轮目标
+
+只修复 B3 review/freeze blocker：对齐 `docs/current/DB_SCHEMA.md` 的 V8 schema 记录，并恢复/复核 B3 validation。不得修改 Java 生产代码、测试代码、V1-V8 migration、API、Controller、Repository、Service、NQ 仓库、contracts、golden_cases；不得进入 B4/B5。
+
+### 修复记录
+
+- 将 `docs/current/DB_SCHEMA.md` 的 V8 段从 planned/stale 字段记录修正为实际 `V8__qdr_model_gateway_persistence_baseline.sql` 内容。
+- 对齐 `qdr_prompt_template`、`qdr_prompt_version`、`qdr_model_profile`、`qdr_model_version`、`qdr_model_gateway_call` 的实际字段、unique/index、check constraints 与 raw storage prohibition。
+- 明确 prompt/model version immutability 在 B3 中由 append-only schema shape、migration comments、repository contract、checksum duplicate behavior 和 tests 兜底，不由 DB trigger 强制。
+- 同步 `README.md`、`docs/current/STATUS.md`、`docs/current/WORK_ORDER.md`、`docs/current/ROADMAP.md` 与 `docs/current/TESTING.md` 的 blocker fix / validation recovery 状态。
+
+### 验证摘要
+
+- `mvn -ntp -pl dh-domain -am test`：BUILD SUCCESS；151 tests，0 failures / errors / skips。
+- `mvn -ntp -pl dh-usecase -am test`：BUILD SUCCESS；279 tests，0 failures / errors / skips。
+- `mvn -ntp -pl dh-infra -am test`：BUILD SUCCESS；72 tests，0 failures / errors，3 skipped；skipped 为既有 Testcontainers/Docker 环境项。
+- `mvn -ntp -pl dh-app -am test`：BUILD SUCCESS；73 tests，0 failures / errors，1 skipped；`ArchitectureTest` 36 tests 与 V8 migration presence 7 tests 通过；skipped 为既有 Testcontainers/Docker 环境项。
+- `mvn -ntp -Pquality validate`：BUILD SUCCESS；19/19 reactor SUCCESS；0 Checkstyle violations；Spotless check passed。
+- `.\mvnw.cmd -v`：WRAPPER_UNUSABLE；输出 wrapper 异常文本，不能作为 Maven wrapper 可用证明。
+- `docker version` / `docker info`：Docker client 存在，但 daemon pipe `npipe:////./pipe/dockerDesktopLinuxEngine` 不可达。
+- forbidden scan：PASS / REVIEWED / ACTUAL_RISK_0；命中分类为 migration negative guard、test guard、docs prohibition、enum constraint、redaction/security code、existing historical text、budget/usage token field。
+
+### 边界
+
+未修改 NQ；未修改 V1-V8 migration；未新增 V9；未新增 API；未新增 Controller；未新增 REST endpoint；未新增真实 HTTP outbound；未新增真实 provider；未接 Provider SDK；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未启动 Agent runtime；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未保存 raw provider response；未持久化 raw prompt；stage-qdr-3 B4 未启动。
+
+### Readiness
+
+```text
+STAGE_QDR_3_B3_BLOCKER_FIX: DONE
+ALLOW_STAGE_QDR_3_B3_REVIEW_FREEZE_RETRY: YES
+ALLOW_STAGE_QDR_3_B3_COMMIT: NO
+ALLOW_STAGE_QDR_3_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### 推荐下一步
+
+```text
+DH-STAGE-QDR-3-B3-REVIEW-FREEZE
+```

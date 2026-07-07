@@ -865,7 +865,9 @@ public class ArchitectureTest {
     }
 
     /**
-     * stage-qdr-3 B1：不得提前新增 Prompt / Model Gateway API endpoint 或 V8 migration artifact。
+     * stage-qdr-3 B1：不得新增 Prompt / Model Gateway API endpoint。
+     *
+     * <p>V8 migration 已由 B3 独立守卫接管；B1 guard 继续阻断 API 提前扩散。
      */
     @Test
     void stageQdr3B1_rule28_noPromptModelApiEndpointOrMigrationArtifact() {
@@ -877,9 +879,6 @@ public class ArchitectureTest {
                                 + "[\\s\\S]{0,240}(prompt|model-gateway|provider-profile)",
                         Pattern.CASE_INSENSITIVE),
                 "B1 must not add prompt/model API endpoint",
-                violations);
-        collectV8MigrationFileViolations(
-                Path.of("src", "main", "resources", "db", "migration").toAbsolutePath().normalize(),
                 violations);
         if (!violations.isEmpty()) {
             fail("stage-qdr-3 B1 API/migration boundary violations:\n" + String.join("\n", violations));
@@ -974,7 +973,9 @@ public class ArchitectureTest {
     }
 
     /**
-     * stage-qdr-3 B2：不得新增 Prompt / Model Gateway API endpoint 或 V8 migration artifact。
+     * stage-qdr-3 B2：不得新增 Prompt / Model Gateway API endpoint。
+     *
+     * <p>V8 migration 已由 B3 独立守卫接管；B2 guard 继续阻断 API 提前扩散。
      */
     @Test
     void stageQdr3B2_rule31_noGatewayApiEndpointOrMigrationArtifact() {
@@ -986,11 +987,6 @@ public class ArchitectureTest {
                                 + "[\\s\\S]{0,240}(prompt|model-gateway|provider-profile|model-version)",
                         Pattern.CASE_INSENSITIVE),
                 "B2 must not add prompt/model gateway API endpoint",
-                violations);
-        collectV8MigrationFileViolations(
-                Path.of("..", "dh-app", "src", "main", "resources", "db", "migration")
-                        .toAbsolutePath()
-                        .normalize(),
                 violations);
         if (!violations.isEmpty()) {
             fail("stage-qdr-3 B2 API/migration boundary violations:\n" + String.join("\n", violations));
@@ -1023,6 +1019,191 @@ public class ArchitectureTest {
             fail(
                     "stage-qdr-3 B2 qdr business code must call through ModelGatewayPort:\n"
                             + String.join("\n", violations));
+        }
+    }
+
+    /**
+     * stage-qdr-3 B3：QDR model JDBC repository 不允许依赖 dh-api、provider SDK、HTTP client、Agent
+     * framework 或 NQ client。
+     */
+    @Test
+    void stageQdr3B3_rule33_qdrModelJdbcRepositoryDoesNotDependOnApiProviderHttpAgentOrNqClient() {
+        noClasses()
+                .that()
+                .resideInAPackage("..infra.jdbc.qdr.model..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage(
+                        "..api..",
+                        "..connector.nq..",
+                        "org.springframework.web..",
+                        "org.springframework.web.reactive..",
+                        "okhttp3..",
+                        "com.openai..",
+                        "com.anthropic..",
+                        "com.google.genai..",
+                        "dev.langchain4j..",
+                        "org.springframework.ai..",
+                        "langgraph..",
+                        "autogen..",
+                        "crewai..")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("java.net.http.HttpClient")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("java.net.HttpURLConnection")
+                .orShould()
+                .dependOnClassesThat()
+                .haveSimpleName("NqBacktestClient")
+                .orShould()
+                .dependOnClassesThat()
+                .haveSimpleName("RealNqBacktestClient")
+                .check(importMainClasses());
+    }
+
+    /**
+     * stage-qdr-3 B3：QDR model persistence production source 不得出现 provider SDK、HTTP outbound、
+     * Agent framework、raw storage 字段或交易 mutation token。
+     */
+    @Test
+    void stageQdr3B3_rule34_qdrModelPersistenceSourcesForbidProviderHttpAgentRawStorageAndMutation() {
+        final List<Path> roots =
+                List.of(
+                        Path.of(
+                                        "..",
+                                        "dh-usecase",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "usecase",
+                                        "qdr",
+                                        "model")
+                                .toAbsolutePath()
+                                .normalize(),
+                        Path.of(
+                                        "..",
+                                        "dh-usecase",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "usecase",
+                                        "qdr",
+                                        "gateway")
+                                .toAbsolutePath()
+                                .normalize(),
+                        Path.of(
+                                        "..",
+                                        "dh-infra",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "infra",
+                                        "jdbc",
+                                        "qdr",
+                                        "model")
+                                .toAbsolutePath()
+                                .normalize(),
+                        Path.of("src", "main", "resources", "db", "migration")
+                                .toAbsolutePath()
+                                .normalize());
+        final List<String> violations = new ArrayList<>();
+        for (Path root : roots) {
+            collectForbiddenTokenViolations(root, FORBIDDEN_QDR_GATEWAY_MUTATION_TOKENS, violations);
+            collectPatternViolations(
+                    root,
+                    Pattern.compile(
+                            "\\b(raw_prompt|raw_provider_response)\\b",
+                            Pattern.CASE_INSENSITIVE),
+                    "B3 persistence must not declare raw prompt/provider response storage fields",
+                    violations);
+            collectPatternViolations(
+                    root,
+                    Pattern.compile(
+                            "import\\s+.*(openai|anthropic|genai|ollama|langgraph|autogen|crewai|"
+                                    + "WebClient|RestTemplate|OkHttp|HttpClient|connector\\.nq)",
+                            Pattern.CASE_INSENSITIVE),
+                    "B3 persistence must not import provider SDK, HTTP client, Agent framework, or NQ client",
+                    violations);
+            collectPatternViolations(
+                    root,
+                    Pattern.compile(
+                            "(WebClient\\.builder|new\\s+RestTemplate|OkHttpClient|"
+                                    + "HttpClient\\.new|URI\\.create\\(|URL\\()",
+                            Pattern.CASE_INSENSITIVE),
+                    "B3 persistence must not create outbound HTTP setup",
+                    violations);
+        }
+        if (!violations.isEmpty()) {
+            fail(
+                    "stage-qdr-3 B3 persistence source boundary violations:\n"
+                            + String.join("\n", violations));
+        }
+    }
+
+    /**
+     * stage-qdr-3 B3：不得新增 Prompt / Model Gateway API endpoint 或 Controller。
+     */
+    @Test
+    void stageQdr3B3_rule35_noPromptModelGatewayApiEndpointOrController() {
+        final List<String> violations = new ArrayList<>();
+        collectPatternViolations(
+                Path.of("..", "dh-api", "src", "main", "java").toAbsolutePath().normalize(),
+                Pattern.compile(
+                        "@(RequestMapping|GetMapping|PostMapping|PutMapping|DeleteMapping|PatchMapping)"
+                                + "[\\s\\S]{0,240}(prompt|model-gateway|provider-profile|model-version)",
+                        Pattern.CASE_INSENSITIVE),
+                "B3 must not add prompt/model gateway API endpoint",
+                violations);
+        collectPatternViolations(
+                Path.of("..", "dh-api", "src", "main", "java").toAbsolutePath().normalize(),
+                Pattern.compile(
+                        "class\\s+\\w*(Prompt|ModelGateway|ProviderProfile|ModelVersion)\\w*Controller",
+                        Pattern.CASE_INSENSITIVE),
+                "B3 must not add prompt/model gateway Controller",
+                violations);
+        if (!violations.isEmpty()) {
+            fail("stage-qdr-3 B3 API boundary violations:\n" + String.join("\n", violations));
+        }
+    }
+
+    /**
+     * stage-qdr-3 B3：必须存在唯一 V8 migration，且不得创建 V9。
+     */
+    @Test
+    void stageQdr3B3_rule36_v8MigrationExistsAndV9DoesNotExist() {
+        final Path migrationRoot =
+                Path.of("src", "main", "resources", "db", "migration").toAbsolutePath().normalize();
+        final Path v8 = migrationRoot.resolve("V8__qdr_model_gateway_persistence_baseline.sql");
+        final List<String> violations = new ArrayList<>();
+        if (!Files.exists(v8)) {
+            violations.add("missing V8 migration: " + v8);
+        }
+        try (Stream<Path> walker = Files.walk(migrationRoot)) {
+            final long v8Count =
+                    walker.filter(p -> p.getFileName().toString().startsWith("V8__")).count();
+            if (v8Count != 1) {
+                violations.add("expected exactly one V8 migration, found " + v8Count);
+            }
+        } catch (IOException io) {
+            violations.add("failed to walk " + migrationRoot + ": " + io.getMessage());
+        }
+        collectPatternViolations(
+                migrationRoot,
+                Pattern.compile("V9__", Pattern.CASE_INSENSITIVE),
+                "B3 must not create V9 migration",
+                violations);
+        if (!violations.isEmpty()) {
+            fail("stage-qdr-3 B3 migration version boundary violations:\n" + String.join("\n", violations));
         }
     }
 
