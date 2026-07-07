@@ -6770,6 +6770,62 @@ DH-STAGE-QDR-3-B3-REVIEW-FREEZE
 
 ---
 
+## DH-STAGE-QDR-3-B4-QDR-PIPELINE-MOCK-GATEWAY-INTEGRATION
+
+日期：2026-07-07
+
+### 本轮目标
+
+只实现 stage-qdr-3 B4：把既有 QDR decision / dry-run pipeline 接入 stage-qdr-3 B1/B2/B3 的 mock Model Gateway、prompt/model/provider registry、gateway call persistence 与 redacted audit/trace metadata。本轮不得新增 API、Controller、migration、真实 provider、真实 HTTP outbound、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ 调用、交易链路、approval 自动状态变更或 replay execution。
+
+### 实施记录
+
+- 新增 `QdrModelGatewayIntegrationPort` 与 `DefaultQdrModelGatewayIntegrationService`，在 gateway 调用前强制 baseline lookup、tenant-bound prompt/model/provider registry lookup、checksum 校验、ProviderTrustPolicy、budget、redaction 与 PromptInjectionGuard；任何 registry / policy / budget / redaction / injection / provider / malformed result / persistence / trace / audit failure 均 fail-closed。
+- 新增 deterministic B4 mock baseline：`DefaultQdrMockModelGatewayBaseline`、`QdrModelGatewayBaselinePort`、`QdrModelGatewayBaseline` 与 provider registry；只允许 mock provider profile，不读取 credential、环境变量或外部文件，不接真实 provider、HTTP client 或 SDK。
+- 更新既有 `DefaultDecisionDryRunService` 成功路径：orchestrator success 后通过 `QdrModelGatewayIntegrationPort` 调用 mock gateway；gateway result 只写入 reasoning / evidence summary / redacted trace refs 与 `quant_decision.constraints_json`，不改变 approval status，不触发 NQ、交易或 replay execution。
+- 更新 `DecisionTraceStepName`，新增 `MODEL_GATEWAY_MOCK_CALL` trace step；trace/audit payload 只包含 `promptVersionId`、`modelVersionId`、`providerProfileId`、`gatewayCallRef`、`trustDecision`、`redactionStatus`、`budgetSummary` 等 refs，不包含 raw prompt、raw provider response 或 credential。
+- 更新 app wiring：`DecisionPipelineWiringConfig` 只装配 in-memory mock registries、mock provider、B3 JDBC persistence ports、`ModelGatewayService` 与 B4 integration service；`DecisionDryRunRuntimeWiringConfig` 将 gateway integration port 注入 dry-run pipeline。
+- 更新 usecase / WebMvc / Architecture tests：覆盖 success path、metadata persistence、trace/audit refs、response redaction、failure safe error、14 类 fail-closed case、无 API/migration/HTTP/provider SDK/LangGraph/NQ/trading/raw storage guard。
+
+### 验证摘要
+
+- `mvn -ntp -pl dh-domain -am test`：BUILD SUCCESS；151 tests，0 failures / errors / skips。
+- `mvn -ntp -pl dh-usecase -am test`：BUILD SUCCESS；295 tests，0 failures / errors / skips。
+- `mvn -ntp -pl dh-infra -am test`：BUILD SUCCESS；72 tests，0 failures / errors，3 skipped；skipped 为既有 Testcontainers / Docker named pipe access denied 环境项，不记录为 PASS。
+- `mvn -ntp -pl dh-api -am test`：BUILD SUCCESS；78 tests，0 failures / errors / skips。
+- `mvn -ntp -pl dh-app -am test`：BUILD SUCCESS；76 tests，0 failures / errors，1 skipped；`ArchitectureTest` 39 rules 通过；skipped 为既有 Docker/Testcontainers 环境项，不记录为 PASS。
+- `mvn -ntp -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。
+- `.\mvnw.cmd -v`：WRAPPER_UNUSABLE；输出 wrapper 异常文本，不能作为 Maven wrapper 可用证明。
+- `docker version`：Docker client `29.6.1` 存在，但 named pipe permission denied；`docker info` 返回 Docker Desktop `29.6.1` server 信息，环境仍需按 Testcontainers named pipe 风险处理。
+- 本轮 Maven 均使用系统 `mvn -ntp`，未使用 `-DskipTests` 或 `-DskipITs`。
+
+### 边界
+
+未修改 NQ；未新增 migration；未修改 V1-V8 migration；未新增 V9；未新增 API；未新增 Controller；未新增 REST endpoint；未新增真实 HTTP outbound；未新增真实 provider；未接 Provider SDK；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未启动 Agent runtime；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未保存 raw provider response；未持久化 raw prompt；未把 gateway result 映射为 `BUY` / `SELL` / `PLACE_ORDER` / `CANCEL_ORDER`；stage-qdr-3 B5 未启动。
+
+### Readiness
+
+```text
+STAGE_QDR_3_B4: DONE
+ALLOW_STAGE_QDR_3_B4_REVIEW_FREEZE: YES
+ALLOW_STAGE_QDR_3_B4_COMMIT: NO
+ALLOW_STAGE_QDR_3_B5_AFTER_B4_COMMIT: NO
+ALLOW_STAGE_QDR_3_B5_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### 推荐下一步
+
+```text
+DH-STAGE-QDR-3-B4-REVIEW-FREEZE
+```
+
+---
+
 ## DH-STAGE-QDR-3-B3-BLOCKER-FIX
 
 日期：2026-07-07

@@ -19,6 +19,11 @@ import com.guidinglight.decisionhub.usecase.decision.DefaultDecisionRiskReviewer
 import com.guidinglight.decisionhub.usecase.decision.MockDecisionSignalProvider;
 import com.guidinglight.decisionhub.usecase.decision.support.RecordingDecisionAuditReplayRepository;
 import com.guidinglight.decisionhub.usecase.qdr.InMemoryDecisionCoreRepository;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayFailureCode;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationCommand;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationException;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationPort;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationResult;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -43,17 +48,35 @@ class DefaultDecisionDryRunServiceTest {
         new RecordingDecisionAuditReplayRepository();
     final InMemoryDecisionCoreRepository decisionCoreRepository =
         new InMemoryDecisionCoreRepository();
+    final RecordingGatewayIntegration gatewayIntegration = new RecordingGatewayIntegration();
     final DecisionDryRunResult result =
-        service(repository, decisionCoreRepository, enabled(), defaultOrchestrator(repository))
+        service(
+                repository,
+                decisionCoreRepository,
+                enabled(),
+                defaultOrchestrator(repository),
+                gatewayIntegration)
             .execute(command());
 
     assertTrue(result.success());
     assertEquals(200, result.status());
     assertNotNull(result.snapshot().auditRef());
     assertNotNull(result.snapshot().replayRef());
+    assertEquals(1, gatewayIntegration.invocations);
+    assertTrue(result.snapshot().traceSummary().contains("modelGateway:MODEL_GATEWAY_MOCK_CALL"));
+    assertTrue(result.snapshot().traceSummary().contains("promptVersion:prompt-version-test"));
+    assertTrue(result.snapshot().traceSummary().contains("modelVersion:model-version-test"));
+    assertTrue(result.snapshot().traceSummary().contains("providerProfile:provider-profile-test"));
+    assertTrue(result.snapshot().traceSummary().contains("gatewayCall:model-call:test"));
+    assertTrue(result.snapshot().traceSummary().contains("trust:ALLOWED"));
+    assertTrue(result.snapshot().traceSummary().contains("redaction:PASSED"));
+    assertTrue(result.snapshot().traceSummary().contains("budget:input=10,rendered=20,output=5,estimated=9,memory=1"));
     assertTrue(Set.of("OBSERVE", "NO_TRADE", "LONG_BIAS", "SHORT_BIAS").contains(result.snapshot().action()));
     assertFalse(result.snapshot().action().equals("BUY"));
     assertFalse(result.snapshot().action().equals("SELL"));
+    assertFalse(result.snapshot().traceSummary().toString().contains("raw prompt"));
+    assertFalse(result.snapshot().traceSummary().toString().contains("raw provider response"));
+    assertFalse(result.snapshot().traceSummary().toString().contains("credential"));
     assertTrue(repository.auditEventCount() >= 1);
     assertTrue(repository.outputCount() >= 1);
     final var decisionRequest =
@@ -64,6 +87,25 @@ class DefaultDecisionDryRunServiceTest {
         decisionCoreRepository.findByDecisionRequestId(decisionRequest.id()).getFirst();
     assertEquals("trace-dryrun-1", decisionRequest.traceId());
     assertEquals(1, decisionCoreRepository.findByDecisionRunId(decisionRun.id()).size());
+  }
+
+  @Test
+  void gatewayFailureFailsClosedAndDoesNotReturnSuccessSnapshot() {
+    final RecordingGatewayIntegration gatewayIntegration =
+        new RecordingGatewayIntegration(ModelGatewayFailureCode.POLICY_DENIED);
+    final DecisionDryRunResult result =
+        service(
+                new RecordingDecisionAuditReplayRepository(),
+                enabled(),
+                new DefaultDecisionOrchestrator(),
+                gatewayIntegration)
+            .execute(command());
+
+    assertRejected(result, 403, DecisionDryRunErrorCode.POLICY_DENIED);
+    assertEquals(1, gatewayIntegration.invocations);
+    assertFalse(String.valueOf(result.message()).contains("raw prompt"));
+    assertFalse(String.valueOf(result.message()).contains("raw provider response"));
+    assertFalse(String.valueOf(result.message()).contains("credential"));
   }
 
   @Test
@@ -159,7 +201,16 @@ class DefaultDecisionDryRunServiceTest {
       final DecisionAuditRepository repository,
       final DecisionDryRunRuntimeProperties properties,
       final DecisionOrchestrator orchestrator) {
-    return new DefaultDecisionDryRunService(orchestrator, repository, properties, CLOCK);
+    return service(repository, properties, orchestrator, new RecordingGatewayIntegration());
+  }
+
+  private static DefaultDecisionDryRunService service(
+      final DecisionAuditRepository repository,
+      final DecisionDryRunRuntimeProperties properties,
+      final DecisionOrchestrator orchestrator,
+      final QdrModelGatewayIntegrationPort gatewayIntegration) {
+    return new DefaultDecisionDryRunService(
+        orchestrator, repository, gatewayIntegration, properties, CLOCK);
   }
 
   private static DefaultDecisionDryRunService service(
@@ -167,9 +218,24 @@ class DefaultDecisionDryRunServiceTest {
       final InMemoryDecisionCoreRepository decisionCoreRepository,
       final DecisionDryRunRuntimeProperties properties,
       final DecisionOrchestrator orchestrator) {
+    return service(
+        repository,
+        decisionCoreRepository,
+        properties,
+        orchestrator,
+        new RecordingGatewayIntegration());
+  }
+
+  private static DefaultDecisionDryRunService service(
+      final DecisionAuditRepository repository,
+      final InMemoryDecisionCoreRepository decisionCoreRepository,
+      final DecisionDryRunRuntimeProperties properties,
+      final DecisionOrchestrator orchestrator,
+      final QdrModelGatewayIntegrationPort gatewayIntegration) {
     return new DefaultDecisionDryRunService(
         orchestrator,
         repository,
+        gatewayIntegration,
         decisionCoreRepository,
         decisionCoreRepository,
         decisionCoreRepository,
@@ -273,6 +339,40 @@ class DefaultDecisionDryRunServiceTest {
 
     private static RuntimeException failure() {
       return new IllegalStateException("audit write failure");
+    }
+  }
+
+  private static final class RecordingGatewayIntegration implements QdrModelGatewayIntegrationPort {
+
+    private final ModelGatewayFailureCode failureCode;
+    private int invocations;
+
+    private RecordingGatewayIntegration() {
+      this(null);
+    }
+
+    private RecordingGatewayIntegration(final ModelGatewayFailureCode failureCode) {
+      this.failureCode = failureCode;
+    }
+
+    @Override
+    public QdrModelGatewayIntegrationResult invoke(
+        final QdrModelGatewayIntegrationCommand command) {
+      invocations++;
+      if (failureCode != null) {
+        throw new QdrModelGatewayIntegrationException(failureCode, "gateway failed closed");
+      }
+      return new QdrModelGatewayIntegrationResult(
+          "prompt-version-test",
+          "model-version-test",
+          "provider-profile-test",
+          "model-call:test",
+          "ALLOWED",
+          "PASSED",
+          "input=10,rendered=20,output=5,estimated=9,memory=1",
+          "mock-qdr-review:test",
+          "trace:model-call:test",
+          "audit:model-call:test");
     }
   }
 }

@@ -12,6 +12,7 @@ import com.guidinglight.decisionhub.usecase.qdr.DecisionRequestRepository;
 import com.guidinglight.decisionhub.usecase.qdr.DecisionRunRepository;
 import com.guidinglight.decisionhub.usecase.qdr.QuantDecisionRepository;
 import com.guidinglight.decisionhub.usecase.qdr.QuantSignalRepository;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationPort;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -105,6 +106,7 @@ public class DecisionDryRunRuntimeWiringConfig {
      * @param decisionRunRepository     stage-qdr-1 run 主线 repository。
      * @param quantSignalRepository     stage-qdr-1 signal 主线 repository。
      * @param quantDecisionRepository   stage-qdr-1 decision 主线 repository。
+     * @param qdrModelGatewayIntegration stage-qdr-3 B4 mock gateway integration。
      * @param properties                dry-run runtime 配置。
      * @return dry-run usecase service。
      */
@@ -117,10 +119,12 @@ public class DecisionDryRunRuntimeWiringConfig {
             final DecisionRunRepository decisionRunRepository,
             final QuantSignalRepository quantSignalRepository,
             final QuantDecisionRepository quantDecisionRepository,
+            final QdrModelGatewayIntegrationPort qdrModelGatewayIntegration,
             final DecisionDryRunRuntimeProperties properties) {
         return new DefaultDecisionDryRunService(
                 orchestrator,
                 auditRepository,
+                qdrModelGatewayIntegration,
                 decisionRequestRepository,
                 decisionRunRepository,
                 quantSignalRepository,

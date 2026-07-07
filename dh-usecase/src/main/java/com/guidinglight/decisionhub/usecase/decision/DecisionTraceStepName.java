@@ -15,6 +15,9 @@ public enum DecisionTraceStepName {
   /** Deterministic mock provider signal 生成。 */
   MOCK_PROVIDER_SIGNAL,
 
+  /** stage-qdr-3 B4 mock ModelGateway 调用；不代表真实 provider 或 HTTP 已接入。 */
+  MODEL_GATEWAY_MOCK_CALL,
+
   /** 输出前风险审查。 */
   RISK_REVIEW,
 

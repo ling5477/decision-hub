@@ -36,6 +36,11 @@ import com.guidinglight.decisionhub.usecase.decision.DecisionOrchestrator;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunRuntimeProperties;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DefaultDecisionDryRunService;
 import com.guidinglight.decisionhub.usecase.qdr.InMemoryDecisionCoreRepository;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayFailureCode;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationCommand;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationException;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationPort;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationResult;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -115,6 +120,14 @@ class DecisionDryRunControllerWebMvcTest {
                         .andReturn();
 
         final String response = result.getResponse().getContentAsString();
+        assertTrue(response.contains("MODEL_GATEWAY_MOCK_CALL"));
+        assertTrue(response.contains("prompt-version-webmvc"));
+        assertTrue(response.contains("model-version-webmvc"));
+        assertTrue(response.contains("provider-profile-webmvc"));
+        assertTrue(response.contains("model-call:webmvc"));
+        assertFalse(response.contains("raw prompt"));
+        assertFalse(response.contains("raw provider response"));
+        assertFalse(response.contains("credential"));
         assertFalse(response.contains("BUY"));
         assertFalse(response.contains("SELL"));
         assertFalse(response.contains("PLACE_ORDER"));
@@ -329,6 +342,44 @@ class DecisionDryRunControllerWebMvcTest {
                 .andExpect(jsonPath("$.errorCode").value("UNKNOWN_ERROR"));
     }
 
+    @Test
+    void gatewayFailureReturnsSafeRedactedError() throws Exception {
+        final InMemoryDecisionAuditRepository auditRepository = new InMemoryDecisionAuditRepository();
+        mockMvc =
+                newMockMvc(
+                        true,
+                        auditRepository,
+                        2048,
+                        1000,
+                        new DecisionDryRunRuntimeProperties(
+                                true,
+                                false,
+                                false,
+                                true,
+                                Set.of("NQ_DRYRUN"),
+                                Set.of("tenant-a:NQ_DRYRUN"),
+                                32768),
+                        defaultOrchestrator(auditRepository),
+                        new InMemoryDecisionCoreRepository(),
+                        new RecordingGatewayIntegration(ModelGatewayFailureCode.POLICY_DENIED));
+        final Map<String, Object> envelope = legalEnvelope("req-gateway-fail");
+        final String body = objectMapper.writeValueAsString(envelope);
+
+        final MvcResult result =
+                mockMvc
+                        .perform(signedPost(envelope, body))
+                        .andExpect(status().isForbidden())
+                        .andExpect(jsonPath("$.errorCode").value("POLICY_DENIED"))
+                        .andReturn();
+
+        final String response = result.getResponse().getContentAsString();
+        assertFalse(response.contains("raw prompt"));
+        assertFalse(response.contains("raw provider response"));
+        assertFalse(response.contains("credential"));
+        assertFalse(response.contains("PLACE_ORDER"));
+        assertFalse(response.contains("CANCEL_ORDER"));
+    }
+
     private MockMvc newMockMvc(
             final boolean enabled,
             final DecisionAuditRepository repository,
@@ -424,6 +475,26 @@ class DecisionDryRunControllerWebMvcTest {
             final DecisionDryRunRuntimeProperties properties,
             final DecisionOrchestrator orchestrator,
             final InMemoryDecisionCoreRepository decisionCoreRepository) {
+        return newMockMvc(
+                enabled,
+                repository,
+                maxPayloadBytes,
+                maxRequests,
+                properties,
+                orchestrator,
+                decisionCoreRepository,
+                new RecordingGatewayIntegration());
+    }
+
+    private MockMvc newMockMvc(
+            final boolean enabled,
+            final DecisionAuditRepository repository,
+            final long maxPayloadBytes,
+            final int maxRequests,
+            final DecisionDryRunRuntimeProperties properties,
+            final DecisionOrchestrator orchestrator,
+            final InMemoryDecisionCoreRepository decisionCoreRepository,
+            final QdrModelGatewayIntegrationPort gatewayIntegration) {
         // enabled 参数保留在签名中，便于测试调用点直接表达 feature gate 场景；实际 gate 值已在 properties 中冻结。
         assert enabled == properties.enabled();
         final DecisionDryRunController controller =
@@ -431,6 +502,7 @@ class DecisionDryRunControllerWebMvcTest {
                         new DefaultDecisionDryRunService(
                                 orchestrator,
                                 repository,
+                                gatewayIntegration,
                                 decisionCoreRepository,
                                 decisionCoreRepository,
                                 decisionCoreRepository,
@@ -636,6 +708,38 @@ class DecisionDryRunControllerWebMvcTest {
 
         private static RuntimeException failure() {
             return new IllegalStateException("audit write failure");
+        }
+    }
+
+    private static final class RecordingGatewayIntegration implements QdrModelGatewayIntegrationPort {
+
+        private final ModelGatewayFailureCode failureCode;
+
+        private RecordingGatewayIntegration() {
+            this(null);
+        }
+
+        private RecordingGatewayIntegration(final ModelGatewayFailureCode failureCode) {
+            this.failureCode = failureCode;
+        }
+
+        @Override
+        public QdrModelGatewayIntegrationResult invoke(
+                final QdrModelGatewayIntegrationCommand command) {
+            if (failureCode != null) {
+                throw new QdrModelGatewayIntegrationException(failureCode, "gateway failed closed");
+            }
+            return new QdrModelGatewayIntegrationResult(
+                    "prompt-version-webmvc",
+                    "model-version-webmvc",
+                    "provider-profile-webmvc",
+                    "model-call:webmvc",
+                    "ALLOWED",
+                    "PASSED",
+                    "input=10,rendered=20,output=5,estimated=9,memory=1",
+                    "mock-qdr-review:webmvc",
+                    "trace:model-call:webmvc",
+                    "audit:model-call:webmvc");
         }
     }
 }

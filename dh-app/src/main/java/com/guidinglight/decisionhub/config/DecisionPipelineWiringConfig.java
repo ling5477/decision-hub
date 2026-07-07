@@ -6,6 +6,9 @@ import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionReplayQueryR
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcDecisionCoreRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcDecisionReadModelQueryAdapter;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcHumanApprovalPacketRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcModelGatewayCallRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcModelVersionRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcPromptVersionRepository;
 import com.guidinglight.decisionhub.domain.qdr.approval.ApprovalStatusTransitionPolicy;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditRepository;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOrchestrator;
@@ -31,6 +34,29 @@ import com.guidinglight.decisionhub.usecase.qdr.approval.ApprovalWriteBoundary;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketCommandService;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketRepository;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketService;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.DefaultQdrMockModelGatewayBaseline;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.DefaultQdrModelGatewayIntegrationService;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.DeterministicProviderTrustPolicy;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.InMemoryProviderProfileRegistry;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.MockModelProvider;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayCallPersistencePort;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayPort;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayService;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelProviderPort;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ProviderProfileRegistryPort;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ProviderTrustPolicy;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayBaselinePort;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationPort;
+import com.guidinglight.decisionhub.usecase.qdr.model.DeterministicPromptInjectionGuard;
+import com.guidinglight.decisionhub.usecase.qdr.model.DeterministicPromptRenderPolicy;
+import com.guidinglight.decisionhub.usecase.qdr.model.InMemoryModelVersionRegistry;
+import com.guidinglight.decisionhub.usecase.qdr.model.InMemoryPromptVersionRegistry;
+import com.guidinglight.decisionhub.usecase.qdr.model.ModelVersionPersistencePort;
+import com.guidinglight.decisionhub.usecase.qdr.model.ModelVersionRegistryPort;
+import com.guidinglight.decisionhub.usecase.qdr.model.PromptInjectionGuard;
+import com.guidinglight.decisionhub.usecase.qdr.model.PromptRenderPolicy;
+import com.guidinglight.decisionhub.usecase.qdr.model.PromptVersionPersistencePort;
+import com.guidinglight.decisionhub.usecase.qdr.model.PromptVersionRegistryPort;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelQueryPort;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelService;
 
@@ -48,8 +74,8 @@ import org.springframework.transaction.support.TransactionTemplate;
  * DH Stage4 K3/K4 decision pipeline 装配。
  *
  * <p>本配置只接 DH 自身 JDBC 审计表、mock-only orchestrator、K4 replay read model 与 QDR B2
- * 只读 read model、B4 Human Approval Packet 内部 API command service；不接真实 provider、不接 NQ
- * runtime、不启用 LangGraph 或 LIVE。
+ * 只读 read model、B4 Human Approval Packet 内部 API command service，以及 stage-qdr-3 B4 mock
+ * ModelGateway integration；不接真实 provider、不接 NQ runtime、不启用 LangGraph 或 LIVE。
  */
 @Configuration
 public class DecisionPipelineWiringConfig {
@@ -211,6 +237,205 @@ public class DecisionPipelineWiringConfig {
                 decisionAuditRepository,
                 Clock.systemUTC(),
                 approvalWriteBoundary);
+    }
+
+    /**
+     * 装配 stage-qdr-3 B1 prompt registry。
+     *
+     * <p>registry 仅驻留内存，由 B4 deterministic mock bootstrap 按 tenant 注册 prompt version；不访问
+     * HTTP、不读取 secret、不代表 provider runtime。
+     *
+     * @return prompt version registry。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public PromptVersionRegistryPort promptVersionRegistryPort() {
+        return new InMemoryPromptVersionRegistry();
+    }
+
+    /**
+     * 装配 stage-qdr-3 B2 model registry。
+     *
+     * @return model version registry。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ModelVersionRegistryPort modelVersionRegistryPort() {
+        return new InMemoryModelVersionRegistry();
+    }
+
+    /**
+     * 装配 B4 mock provider profile registry。
+     *
+     * @return provider profile registry；只保存 mock identity metadata。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ProviderProfileRegistryPort providerProfileRegistryPort() {
+        return new InMemoryProviderProfileRegistry();
+    }
+
+    /**
+     * 装配 B3 prompt version JDBC persistence port。
+     *
+     * @param jdbcTemplate DH datasource。
+     * @return prompt version persistence port。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public PromptVersionPersistencePort promptVersionPersistencePort(final JdbcTemplate jdbcTemplate) {
+        return new JdbcPromptVersionRepository(jdbcTemplate);
+    }
+
+    /**
+     * 装配 B3 model version JDBC persistence port。
+     *
+     * @param jdbcTemplate DH datasource。
+     * @return model version persistence port。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ModelVersionPersistencePort modelVersionPersistencePort(final JdbcTemplate jdbcTemplate) {
+        return new JdbcModelVersionRepository(jdbcTemplate);
+    }
+
+    /**
+     * 装配 B3 model gateway call JDBC persistence port。
+     *
+     * @param jdbcTemplate DH datasource。
+     * @return gateway call persistence port。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ModelGatewayCallPersistencePort modelGatewayCallPersistencePort(final JdbcTemplate jdbcTemplate) {
+        return new JdbcModelGatewayCallRepository(jdbcTemplate);
+    }
+
+    /**
+     * 装配 deterministic prompt injection guard。
+     *
+     * @return prompt injection guard。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public PromptInjectionGuard promptInjectionGuard() {
+        return new DeterministicPromptInjectionGuard();
+    }
+
+    /**
+     * 装配 deterministic prompt render policy。
+     *
+     * @param promptInjectionGuard prompt injection guard。
+     * @return prompt render policy。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public PromptRenderPolicy promptRenderPolicy(final PromptInjectionGuard promptInjectionGuard) {
+        return new DeterministicPromptRenderPolicy(promptInjectionGuard);
+    }
+
+    /**
+     * 装配 B4 mock-only ProviderTrustPolicy。
+     *
+     * @param providerProfileRegistry provider profile registry。
+     * @return provider trust policy。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ProviderTrustPolicy qdrProviderTrustPolicy(
+            final ProviderProfileRegistryPort providerProfileRegistry) {
+        return new DeterministicProviderTrustPolicy(providerProfileRegistry);
+    }
+
+    /**
+     * 装配 deterministic mock model provider。
+     *
+     * @return mock provider；不发 HTTP、不读 credential、不访问 NQ。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ModelProviderPort modelProviderPort() {
+        return new MockModelProvider();
+    }
+
+    /**
+     * 装配 B2 ModelGatewayPort。
+     *
+     * @param promptVersionRegistry prompt registry。
+     * @param modelVersionRegistry model registry。
+     * @param promptRenderPolicy prompt render policy。
+     * @param promptInjectionGuard prompt injection guard。
+     * @param providerTrustPolicy mock-only provider trust policy。
+     * @param modelProvider mock provider。
+     * @return model gateway service。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ModelGatewayPort modelGatewayPort(
+            final PromptVersionRegistryPort promptVersionRegistry,
+            final ModelVersionRegistryPort modelVersionRegistry,
+            final PromptRenderPolicy promptRenderPolicy,
+            final PromptInjectionGuard promptInjectionGuard,
+            final ProviderTrustPolicy providerTrustPolicy,
+            final ModelProviderPort modelProvider) {
+        return new ModelGatewayService(
+                promptVersionRegistry,
+                modelVersionRegistry,
+                promptRenderPolicy,
+                promptInjectionGuard,
+                providerTrustPolicy,
+                modelProvider);
+    }
+
+    /**
+     * 装配 B4 deterministic mock baseline bootstrap。
+     *
+     * @param promptVersionRegistry prompt registry。
+     * @param modelVersionRegistry model registry。
+     * @param providerProfileRegistry provider profile registry。
+     * @param promptVersionPersistence prompt persistence。
+     * @param modelVersionPersistence model persistence。
+     * @return mock baseline bootstrap port。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public QdrModelGatewayBaselinePort qdrModelGatewayBaselinePort(
+            final PromptVersionRegistryPort promptVersionRegistry,
+            final ModelVersionRegistryPort modelVersionRegistry,
+            final ProviderProfileRegistryPort providerProfileRegistry,
+            final PromptVersionPersistencePort promptVersionPersistence,
+            final ModelVersionPersistencePort modelVersionPersistence) {
+        return new DefaultQdrMockModelGatewayBaseline(
+                promptVersionRegistry,
+                modelVersionRegistry,
+                providerProfileRegistry,
+                promptVersionPersistence,
+                modelVersionPersistence,
+                Clock.systemUTC());
+    }
+
+    /**
+     * 装配 B4 QDR mock gateway integration。
+     *
+     * @param baselinePort mock baseline bootstrap。
+     * @param modelGatewayPort model gateway port。
+     * @param modelGatewayCallPersistencePort gateway call persistence。
+     * @param decisionAuditRepository audit / trace repository。
+     * @return QDR gateway integration port。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public QdrModelGatewayIntegrationPort qdrModelGatewayIntegrationPort(
+            final QdrModelGatewayBaselinePort baselinePort,
+            final ModelGatewayPort modelGatewayPort,
+            final ModelGatewayCallPersistencePort modelGatewayCallPersistencePort,
+            final DecisionAuditRepository decisionAuditRepository) {
+        return new DefaultQdrModelGatewayIntegrationService(
+                baselinePort,
+                modelGatewayPort,
+                modelGatewayCallPersistencePort,
+                decisionAuditRepository,
+                Clock.systemUTC());
     }
 
     /**

@@ -590,6 +590,54 @@ ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
 
+---
+
+## 2026-07-07 DH-STAGE-QDR-3-B4-QDR-PIPELINE-MOCK-GATEWAY-INTEGRATION 验证记录
+
+结论：**PASS / B4_IMPLEMENTED_BY_VALIDATION / QDR_PIPELINE_MOCK_GATEWAY_INTEGRATED / FAIL_CLOSED_DECISION_PIPELINE / NO_DB_MIGRATION / NO_API_CHANGE / NO_REAL_HTTP / NO_PROVIDER / NO_AGENT / NO_LANGGRAPH / NO_LIVE**。
+
+本轮只实现 stage-qdr-3 B4：将既有 `POST /api/ai/decision-dry-runs` 内部 dry-run / QDR decision pipeline 接入 mock `ModelGatewayPort` / `ModelGatewayService`，强制 ProviderTrustPolicy、prompt/model/provider registry lookup、budget、redaction、prompt injection guard、gateway call persistence 与 redacted audit/trace refs。未新增 API、Controller、migration、真实 provider、真实 HTTP outbound、Provider SDK、Agent runtime、LangGraph runtime、replay execution、approval 自动状态变更、NQ 调用或交易链路。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（写入前） | **PASS / CLEAN** | 分支 `dev`；HEAD 包含 `a3797d8 feat(qdr): add stage-qdr-3 model gateway persistence`；无 staged、untracked 或 dirty 输出。 |
+| `git branch --show-current` | **PASS** | `dev`。 |
+| `git log --oneline -12` | **PASS** | HEAD 包含 `feat(qdr): add stage-qdr-3 model gateway persistence`，满足 B3 committed 前置。 |
+| `git diff --check`（实现后） | **PASS_WITH_EOL_WARNINGS** | 无 whitespace error；仅 Windows LF -> CRLF warning。 |
+| `git diff --stat` / `git diff --name-only` | **PASS / REVIEWED** | diff 限 B4 usecase gateway integration、dry-run pipeline、app wiring、tests、ArchitectureTest 与 `docs/current` 最小同步；未出现 migration、contracts、golden_cases 或 NQ diff。 |
+| `mvn -ntp -pl dh-domain -am test` | **BUILD SUCCESS** | dh-domain 151 tests，0 failures / errors / skips。 |
+| `mvn -ntp -pl dh-usecase -am test` | **BUILD SUCCESS** | dh-usecase 295 tests，0 failures / errors / skips；覆盖 B4 gateway integration success、metadata persistence、trace/audit refs 与 fail-closed cases。 |
+| `mvn -ntp -pl dh-infra -am test` | **BUILD SUCCESS / DOCKER_GATED_SKIP_PRESENT** | dh-infra 72 tests，0 failures / errors，3 skipped；skipped 为既有 Testcontainers / Docker named pipe access denied 环境项，不记录为 PASS。 |
+| `mvn -ntp -pl dh-api -am test` | **BUILD SUCCESS** | dh-api 78 tests，0 failures / errors / skips；existing dry-run WebMvc tests 覆盖 redacted gateway metadata 与 gateway failure safe error。 |
+| `mvn -ntp -pl dh-app -am test` | **BUILD SUCCESS / DOCKER_GATED_SKIP_PRESENT** | dh-app 76 tests，0 failures / errors，1 skipped；`ArchitectureTest` 39 rules 通过；skipped 为既有 `PostgresContainerSmokeTest` Docker/Testcontainers 环境项，不记录为 PASS。 |
+| `mvn -ntp -Pquality validate` | **BUILD SUCCESS** | reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。 |
+| `.\mvnw.cmd -v` | **WRAPPER_UNUSABLE / NOT_VALID_MAVEN_WRAPPER** | 输出包含 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` 缺少主清单属性；进程返回码为 0，但行为不能作为 wrapper 可用证明。 |
+| `docker version` | **INCONSISTENT / CLIENT_PRESENT_PIPE_DENIED** | Docker client `29.6.1` 存在；连接 `npipe:////./pipe/dockerDesktopLinuxEngine` permission denied，退出码 1。 |
+| `docker info` | **SERVER_INFO_REACHABLE_WITH_ENV_RISK** | 命令返回 0，并显示 Docker Desktop `29.6.1` server 信息；但 Java/Testcontainers 仍因 named pipe access denied skip。 |
+
+Noted:
+
+- Maven 均使用系统 `mvn -ntp`；未使用 `-DskipTests`，未使用 `-DskipITs`。
+- `mvnw.cmd` 仍不可用，本轮继续使用系统 Maven。
+- Docker/Testcontainers 为继承环境风险：CLI `docker info` 可返回 server 信息，但 `docker version` 与 Java/Testcontainers named pipe 访问仍存在权限问题；相关 skipped 只能记录为 skip，不得写成 PASS。
+- B4 gateway result 只进入 reasoning / evidence summary / redacted trace refs；不映射 `BUY` / `SELL` / `PLACE_ORDER` / `CANCEL_ORDER`，不改变 approval status，不触发 NQ、交易或 replay execution。
+- audit / trace / persistence / policy / budget / redaction / registry / prompt injection / mock provider failure 均按 fail-closed 处理，failure response 不暴露 raw prompt、raw provider response、credential、dangerous input 或内部 provider material。
+
+Readiness：
+
+```text
+STAGE_QDR_3_B4: DONE
+ALLOW_STAGE_QDR_3_B4_REVIEW_FREEZE: YES
+ALLOW_STAGE_QDR_3_B4_COMMIT: NO
+ALLOW_STAGE_QDR_3_B5_AFTER_B4_COMMIT: NO
+ALLOW_STAGE_QDR_3_B5_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
 Boundary:
 
 未改 NQ dev；未改 NQ dry-run worktree；未改 contracts、golden_cases、fixture JSON 或 migration；未新增 NQ runtime client、RealClient、真实 HTTP outbound client、real provider、Agent / LangGraph runtime 或 LIVE；未读取 credential、token、cookie、API secret、passphrase；未写 order / execution / ledger / account / trading 状态；未输出 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 或 executable order instruction。

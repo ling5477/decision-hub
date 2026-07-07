@@ -1207,6 +1207,167 @@ public class ArchitectureTest {
         }
     }
 
+    /**
+     * stage-qdr-3 B4：pipeline mock gateway integration 不得新增 API、Controller 或 V9 migration。
+     *
+     * <p>B4 只接入既有 dry-run / QDR pipeline；provider/model gateway API、Controller 与 DB migration 均保持
+     * NOT STARTED，V8 仍是当前最新 migration。
+     */
+    @Test
+    void stageQdr3B4_rule37_noApiControllerOrMigrationExpansion() {
+        final List<String> violations = new ArrayList<>();
+        final Path apiRoot = Path.of("..", "dh-api", "src", "main", "java").toAbsolutePath().normalize();
+        collectPatternViolations(
+                apiRoot,
+                Pattern.compile(
+                        "@(RequestMapping|GetMapping|PostMapping|PutMapping|DeleteMapping|PatchMapping)"
+                                + "[\\s\\S]{0,240}(prompt|model-gateway|provider-profile|model-version)",
+                        Pattern.CASE_INSENSITIVE),
+                "B4 must not add prompt/model gateway API endpoint",
+                violations);
+        collectPatternViolations(
+                apiRoot,
+                Pattern.compile(
+                        "class\\s+\\w*(Prompt|ModelGateway|ProviderProfile|ModelVersion)\\w*Controller",
+                        Pattern.CASE_INSENSITIVE),
+                "B4 must not add prompt/model gateway Controller",
+                violations);
+        final Path migrationRoot =
+                Path.of("src", "main", "resources", "db", "migration").toAbsolutePath().normalize();
+        collectPatternViolations(
+                migrationRoot,
+                Pattern.compile("V9__", Pattern.CASE_INSENSITIVE),
+                "B4 must not create V9 migration",
+                violations);
+        if (!violations.isEmpty()) {
+            fail("stage-qdr-3 B4 API/migration boundary violations:\n" + String.join("\n", violations));
+        }
+    }
+
+    /**
+     * stage-qdr-3 B4：dry-run pipeline 不允许绕过 gateway integration port。
+     *
+     * <p>QDR dry-run pipeline 只能依赖 QdrModelGatewayIntegrationPort；ProviderTrustPolicy 与 provider 调用必须留在
+     * qdr.gateway 包内部，不能被 dry-run service 直接触达。
+     */
+    @Test
+    void stageQdr3B4_rule38_pipelineUsesGatewayIntegrationPortOnly() {
+        final Path dryRunService =
+                Path.of(
+                                "..",
+                                "dh-usecase",
+                                "src",
+                                "main",
+                                "java",
+                                "com",
+                                "guidinglight",
+                                "decisionhub",
+                                "usecase",
+                                "decision",
+                                "dryrun",
+                                "DefaultDecisionDryRunService.java")
+                        .toAbsolutePath()
+                        .normalize();
+        final List<String> violations = new ArrayList<>();
+        try {
+            final String body = Files.readString(dryRunService, StandardCharsets.UTF_8);
+            if (!body.contains("QdrModelGatewayIntegrationPort")) {
+                violations.add(dryRunService + ": dry-run pipeline must depend on QdrModelGatewayIntegrationPort");
+            }
+            if (body.contains("ModelProviderPort")
+                    || body.contains("MockModelProvider")
+                    || body.contains("ProviderTrustPolicy")) {
+                violations.add(dryRunService + ": dry-run pipeline must not bypass gateway/trust boundary");
+            }
+        } catch (IOException io) {
+            violations.add("failed to read " + dryRunService + ": " + io.getMessage());
+        }
+        if (!violations.isEmpty()) {
+            fail("stage-qdr-3 B4 gateway-only pipeline boundary violations:\n" + String.join("\n", violations));
+        }
+    }
+
+    /**
+     * stage-qdr-3 B4：pipeline / gateway / app mock wiring 不允许出现真实 provider、HTTP、Agent、NQ、交易
+     * mutation 或 raw storage 字段。
+     */
+    @Test
+    void stageQdr3B4_rule39_sourcesForbidRealProviderHttpAgentNqTradingAndRawStorage() {
+        final List<Path> roots =
+                List.of(
+                        Path.of(
+                                        "..",
+                                        "dh-usecase",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "usecase",
+                                        "decision",
+                                        "dryrun")
+                                .toAbsolutePath()
+                                .normalize(),
+                        Path.of(
+                                        "..",
+                                        "dh-usecase",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "usecase",
+                                        "qdr",
+                                        "gateway")
+                                .toAbsolutePath()
+                                .normalize(),
+                        Path.of(
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "config",
+                                        "DecisionPipelineWiringConfig.java")
+                                .toAbsolutePath()
+                                .normalize());
+        final List<String> violations = new ArrayList<>();
+        for (Path root : roots) {
+            collectForbiddenTokenViolations(root, FORBIDDEN_QDR_GATEWAY_MUTATION_TOKENS, violations);
+            collectPatternViolations(
+                    root,
+                    Pattern.compile(
+                            "\\b(raw_prompt|raw_provider_response)\\b",
+                            Pattern.CASE_INSENSITIVE),
+                    "B4 must not declare raw prompt/provider response storage fields",
+                    violations);
+            collectPatternViolations(
+                    root,
+                    Pattern.compile(
+                            "import\\s+.*(openai|anthropic|genai|ollama|langgraph|autogen|crewai|"
+                                    + "WebClient|RestTemplate|OkHttp|HttpClient|connector\\.nq)",
+                            Pattern.CASE_INSENSITIVE),
+                    "B4 must not import provider SDK, HTTP client, Agent framework, or NQ client",
+                    violations);
+            collectPatternViolations(
+                    root,
+                    Pattern.compile(
+                            "(WebClient\\.builder|new\\s+RestTemplate|OkHttpClient|"
+                                    + "HttpClient\\.new|URI\\.create\\(|URL\\()",
+                            Pattern.CASE_INSENSITIVE),
+                    "B4 must not create outbound HTTP setup",
+                    violations);
+        }
+        if (!violations.isEmpty()) {
+            fail(
+                    "stage-qdr-3 B4 source boundary violations:\n"
+                            + String.join("\n", violations));
+        }
+    }
+
     private static void collectForbiddenTokenViolations(
             final Path rootOrFile, final List<String> tokens, final List<String> violations) {
         if (!Files.exists(rootOrFile)) {

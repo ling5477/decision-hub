@@ -1,12 +1,12 @@
 # Decision Hub 当前工单
 
-> 当前阶段: DH-STAGE-QDR-3-B3-BLOCKER-FIX / DONE / DB_SCHEMA_ALIGNED / VALIDATION_RECOVERED
+> 当前阶段: DH-STAGE-QDR-3-B4-QDR-PIPELINE-MOCK-GATEWAY-INTEGRATION / IMPLEMENTED_BY_VALIDATION / REVIEW_FREEZE_REQUIRED
 > 已关闭: DH-CODEX-WORKFLOW conflict cleanup; Integration-0 safety gate; P1-4 residual; header alignment; timestamp alignment; Stage4 Decision Pipeline MVP; Integration-1 dry-run plan baseline; I1-P0 factsource rebase; I1-P1 contract dry-run plan; I1-P2 contract fixtures plan; I1-P3 dry-run implementation readiness plan; I1-P4 implementation gate review fix; I1 dry-run mock implementation work order; I1-M0 contract gap close work order; I1-M1 DH dry-run contract entry mock work order; I1-M2 NQ dry-run stub recorder work order; I1-M3 joint mock fixtures and contract tests work order; I1-IMP0 contract gap test-support implementation; I1-IMP1 DH dry-run test-support entry; I1 runtime API contract review; I1 DH runtime API work order; I1 DH limited runtime endpoint implementation; I1 DH limited runtime endpoint close review; I1 NQ runtime client work order
-> 下一阶段: DH-STAGE-QDR-3-B3-REVIEW-FREEZE / READY / NO_DIRECT_B4
+> 下一阶段: DH-STAGE-QDR-3-B4-REVIEW-FREEZE / READY / NO_DIRECT_B5
 
 ## 1. 当前目标
 
-`stage-qdr-2 = Audit Trace Read Model + Human Approval Packet` 当前已完成 Work Order、B1 read model DTO / query contract、B2 tenant-bound read repository / read-only API、B3 human approval migration / domain / repository、B4 human approval API / audit，以及 B5 close review / acceptance；B1-B4 均已 `CLOSED / ACCEPTED / COMMITTED`，B5 close review 已 `YES / ACCEPTED`。完整工单入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`，discipline closeout 入口为 `docs/current/DH_STAGE_QDR_2_DISCIPLINE_CLOSEOUT.md`。stage-qdr-2 implementation 为 `DONE`，final close 为 `CLOSED`。stage-qdr-3 planning 已完成，计划入口为 `docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md`；stage-qdr-3 implementation work order 已完成，工单入口为 `docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md`。B1 Prompt / Model Version Domain + Mock Registry 已提交；B2 Model Gateway Mock Runtime + Policy Guard 已 `CLOSED / ACCEPTED / COMMITTED`；B3 Persistence Baseline 已实现并完成验证，B3 blocker fix 已完成 DB_SCHEMA 对齐与 Maven validation recovery。下一步只允许 B3 review/freeze，不得直接进入 B4/B5。
+`stage-qdr-2 = Audit Trace Read Model + Human Approval Packet` 当前已完成 Work Order、B1 read model DTO / query contract、B2 tenant-bound read repository / read-only API、B3 human approval migration / domain / repository、B4 human approval API / audit，以及 B5 close review / acceptance；B1-B4 均已 `CLOSED / ACCEPTED / COMMITTED`，B5 close review 已 `YES / ACCEPTED`。完整工单入口为 `docs/current/DH_STAGE_QDR_2_WORK_ORDER.md`，discipline closeout 入口为 `docs/current/DH_STAGE_QDR_2_DISCIPLINE_CLOSEOUT.md`。stage-qdr-2 implementation 为 `DONE`，final close 为 `CLOSED`。stage-qdr-3 planning 已完成，计划入口为 `docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md`；stage-qdr-3 implementation work order 已完成，工单入口为 `docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md`。B1 Prompt / Model Version Domain + Mock Registry 已提交；B2 Model Gateway Mock Runtime + Policy Guard 已 `CLOSED / ACCEPTED / COMMITTED`；B3 Persistence Baseline 已 `CLOSED / ACCEPTED / COMMITTED`；B4 QDR Pipeline Mock Gateway Integration 已 `IMPLEMENTED_BY_VALIDATION / REVIEW_FREEZE_REQUIRED`。下一步只允许 B4 review/freeze，不得直接进入 B5。
 
 stage-qdr-1 已按当前前置状态关闭：
 
@@ -41,8 +41,8 @@ stage-qdr-2 Work Order 不授权一次性全量实现，不授权真实 provider
 禁止新增 tool registry
 禁止接真实 HTTP / real provider / OpenAI / Anthropic / Gemini / Ollama SDK
 禁止接 LangGraph / AutoGen / CrewAI
-禁止在 B3 review/freeze 前启动 B4/B5
-禁止跳过 B3 migration / persistence / raw storage boundary review/freeze
+禁止在 B4 review/freeze 前启动 B5
+禁止跳过 B4 decision pipeline / audit trace / gateway fail-closed boundary review/freeze
 禁止修改 NQ 仓库
 禁止触碰交易、订单、撤单、账户、ledger、risk、paper、live mutation
 禁止把 LONG_BIAS / SHORT_BIAS 映射为 BUY / SELL
@@ -68,7 +68,7 @@ mvn -ntp -Pquality validate
 
 若本机 `mvnw` wrapper 不可用，允许使用已安装 Maven `mvn` 执行同等命令，并在验证记录中说明降级原因。
 
-## 0.0X DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER（DONE / B1 NEXT）
+## 0.0X DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER（DONE / B4 REVIEW_FREEZE NEXT）
 
 本轮只编制 stage-qdr-3 implementation work order；不修改 Java 生产代码、测试代码、migration、API、repository、service、controller，不实现 Model Gateway，不接真实 provider，不接真实 HTTP，不启动 Agent / LangGraph / LIVE。
 
@@ -97,23 +97,23 @@ B4 QDR Decision Pipeline Integration
 B5 Stage-qdr-3 Close Review
 ```
 
-下一步唯一允许动作：
+该历史下一步已由 B1/B2/B3/B4 实施批次消费；当前唯一允许动作：
 
 ```text
-DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY / PLANNED / CONTROLLED_IMPLEMENTATION / MOCK_ONLY
+DH-STAGE-QDR-3-B4-REVIEW-FREEZE / READY / REVIEW_ONLY / NO_DIRECT_B5
 ```
 
 B1 不允许新增 API、migration、real provider、real HTTP、Provider SDK、LangGraph / AutoGen / CrewAI、NQ mutation、LIVE、raw prompt/raw provider response storage 或交易 mutation。B2/B3/B4 必须在 B1 后单独授权并按 review trigger 推进。
 
-## 0.0Y DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY（IMPLEMENTED_BY_VALIDATION / COMMIT NEXT）
+## 0.0Y DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY（COMMITTED / HISTORICAL_RECORD）
 
 本轮只实现 B1 domain/usecase/mock registry 基线：Prompt / Model Version domain、immutable checksum、tenant-bound in-memory registry、PromptRenderPolicy contract、PromptInjectionGuard contract、domain/usecase tests 与 architecture guard。未新增 API、Controller、migration、Repository/JDBC adapter、真实 provider、HTTP client、Provider SDK、Agent runtime、LangGraph runtime、NQ mutation 或 LIVE。
 
 ```text
-B1: IMPLEMENTED_BY_VALIDATION / MOCK_ONLY / NO_API / NO_MIGRATION
-B2: NOT STARTED / ProviderTrustPolicy / gateway fail-closed review required
-B3: NOT STARTED / migration review required
-B4: NOT STARTED / decision pipeline integration review required
+B1: COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
+B2: CLOSED / ACCEPTED / COMMITTED
+B3: CLOSED / ACCEPTED / COMMITTED
+B4: IMPLEMENTED_BY_VALIDATION / REVIEW_FREEZE_REQUIRED
 B5: NOT STARTED / close review only
 real HTTP: NO
 real provider: NO
@@ -121,17 +121,13 @@ Agent / LangGraph: NO
 LIVE: DISABLED
 ```
 
-下一步唯一允许动作：
+该历史下一步已完成；当前唯一允许动作：
 
 ```text
-git commit -m "feat(qdr): add stage-qdr-3 prompt model version baseline"
+DH-STAGE-QDR-3-B4-REVIEW-FREEZE
 ```
 
-B1 commit 后才允许进入：
-
-```text
-DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD / NOT STARTED / REVIEW_GATE_REQUIRED
-```
+B1 commit 已完成；B2/B3 已关闭，B4 已实现并等待 review/freeze。
 
 ## 0.0Z DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD（CLOSED / ACCEPTED / COMMITTED）
 
@@ -140,8 +136,8 @@ DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD / NOT STARTED / REVIEW
 ```text
 B1: COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
 B2: CLOSED / ACCEPTED / COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
-B3: IMPLEMENTED_BY_VALIDATION / V8_MIGRATION_JDBC_BASELINE / REVIEW_FREEZE_REQUIRED
-B4: NOT STARTED / decision pipeline integration review required
+B3: CLOSED / ACCEPTED / COMMITTED / V8_MIGRATION_JDBC_BASELINE
+B4: IMPLEMENTED_BY_VALIDATION / decision pipeline integration review required
 B5: NOT STARTED / close review only
 real HTTP: NO
 real provider: NO
@@ -155,17 +151,17 @@ LIVE: DISABLED
 DH-STAGE-QDR-3-B2-REVIEW-FREEZE / CLOSED / ACCEPTED / COMMITTED
 ```
 
-B2 已由 review/freeze 关闭；当前下一步只允许 B3 review/freeze。B4/B5 不得在 B3 review/freeze 前启动，且仍不得新增 API / Controller / OpenAPI、不得接真实 provider / real HTTP / Provider SDK、不得启动 Agent / LangGraph，不得触碰 NQ、交易、订单、撤单、账户、ledger、risk、paper 或 live mutation。
+B2 已由 review/freeze 关闭；B3 也已 `CLOSED / ACCEPTED / COMMITTED`。当前下一步只允许 B4 review/freeze，且仍不得新增 API / Controller / OpenAPI、不得接真实 provider / real HTTP / Provider SDK、不得启动 Agent / LangGraph，不得触碰 NQ、交易、订单、撤单、账户、ledger、risk、paper 或 live mutation。
 
-## 0.0AA DH-STAGE-QDR-3-B3-PERSISTENCE-BASELINE（IMPLEMENTED_BY_VALIDATION / REVIEW_FREEZE NEXT）
+## 0.0AA DH-STAGE-QDR-3-B3-PERSISTENCE-BASELINE（CLOSED / ACCEPTED / COMMITTED）
 
 本轮只实现 B3 persistence baseline：新增 V8 Flyway migration、prompt/model version persistence ports、tenant-bound JDBC repositories、migration/JDBC tests、ArchitectureTest guard 与 docs/current 最小同步。未新增 API、Controller、OpenAPI、真实 provider、HTTP client、Provider SDK、Agent runtime、LangGraph runtime、NQ mutation 或 LIVE。
 
 ```text
 B1: COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
 B2: CLOSED / ACCEPTED / COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
-B3: IMPLEMENTED_BY_VALIDATION / V8_MIGRATION_JDBC_BASELINE / NO_API / REVIEW_FREEZE_REQUIRED
-B4: NOT STARTED / decision pipeline integration review required
+B3: CLOSED / ACCEPTED / COMMITTED / V8_MIGRATION_JDBC_BASELINE / NO_API
+B4: IMPLEMENTED_BY_VALIDATION / decision pipeline integration review required
 B5: NOT STARTED / close review only
 real HTTP: NO
 real provider: NO
@@ -175,23 +171,23 @@ LIVE: DISABLED
 
 B3 只保存 safe metadata / hash / ref / redacted summary；不保存 raw prompt，不保存 raw provider response，不保存 credential / apiKey / apiSecret / token / passphrase。所有业务表与 repository 查询必须 tenant-bound；checksum mismatch、duplicate different checksum、repository write failure 与 model gateway call persistence failure 必须 fail-closed。
 
-下一步唯一允许动作：
+该历史下一步已完成；当前唯一允许动作：
 
 ```text
-DH-STAGE-QDR-3-B3-REVIEW-FREEZE
+DH-STAGE-QDR-3-B4-REVIEW-FREEZE
 ```
 
-B3 review/freeze 前不得启动 B4 decision pipeline integration、不得新增 Model Gateway API / Provider API / Prompt Version API、不得接真实 provider / real HTTP / Provider SDK、不得启动 Agent / LangGraph，不得触碰 NQ、交易、订单、撤单、账户、ledger、risk、paper 或 live mutation。
+B3 review/freeze 已关闭；B4 已实现并等待 review/freeze。仍不得新增 Model Gateway API / Provider API / Prompt Version API、不得接真实 provider / real HTTP / Provider SDK、不得启动 Agent / LangGraph，不得触碰 NQ、交易、订单、撤单、账户、ledger、risk、paper 或 live mutation。
 
-## 0.0AB DH-STAGE-QDR-3-B3-BLOCKER-FIX（DONE / REVIEW_FREEZE RETRY）
+## 0.0AB DH-STAGE-QDR-3-B3-BLOCKER-FIX（DONE / CLOSED_BY_B3_REVIEW_FREEZE）
 
 本轮只修复 B3 review/freeze blocker：`docs/current/DB_SCHEMA.md` 的 V8 schema 记录已与实际 `V8__qdr_model_gateway_persistence_baseline.sql` 对齐；Maven validation 已恢复并通过。不修改 Java 生产代码、测试代码、V1-V8 migration、API、Controller、Repository、Service、NQ 仓库、contracts 或 golden_cases。
 
 ```text
 B1: COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
 B2: CLOSED / ACCEPTED / COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
-B3: IMPLEMENTED_BY_VALIDATION / V8_MIGRATION_JDBC_BASELINE / BLOCKER_FIX_DONE / REVIEW_FREEZE_REQUIRED
-B4: NOT STARTED / decision pipeline integration review required
+B3: CLOSED / ACCEPTED / COMMITTED / V8_MIGRATION_JDBC_BASELINE / BLOCKER_FIX_DONE
+B4: IMPLEMENTED_BY_VALIDATION / decision pipeline integration review required
 B5: NOT STARTED / close review only
 real HTTP: NO
 real provider: NO
@@ -201,13 +197,41 @@ LIVE: DISABLED
 
 本轮验证命令：`mvn -ntp -pl dh-domain -am test`、`mvn -ntp -pl dh-usecase -am test`、`mvn -ntp -pl dh-infra -am test`、`mvn -ntp -pl dh-app -am test`、`mvn -ntp -Pquality validate` 均为 `BUILD SUCCESS`。`.\mvnw.cmd -v` 仍为 `WRAPPER_UNUSABLE`；Docker CLI client 存在但 daemon pipe 不可达，Testcontainers skip 仍按环境型 skip 记录，不得写成 PASS。
 
+该历史下一步已完成；当前唯一允许动作：
+
+```text
+DH-STAGE-QDR-3-B4-REVIEW-FREEZE
+```
+
+B3 review/freeze retry 已关闭；B4 已实现并等待 review/freeze。B5 仍不得启动，不得新增 Model Gateway API / Provider API / Prompt Version API，不得接真实 provider、real HTTP、Provider SDK、Agent runtime、LangGraph runtime、AutoGen、CrewAI、NQ mutation、交易链路或 LIVE。
+
+## 0.0AC DH-STAGE-QDR-3-B4-QDR-PIPELINE-MOCK-GATEWAY-INTEGRATION（IMPLEMENTED_BY_VALIDATION / REVIEW_FREEZE NEXT）
+
+本轮只实现 B4 QDR decision / dry-run pipeline mock gateway integration：把 existing dry-run 成功路径接入 `QdrModelGatewayIntegrationPort`，通过 B1/B2/B3 的 mock gateway、registry、ProviderTrustPolicy、budget / redaction / prompt injection guard、gateway call persistence 与 V5 audit/trace 写入形成闭环。B4 未新增 API、Controller、OpenAPI、migration、真实 provider、真实 HTTP、Provider SDK、Agent runtime、LangGraph runtime、NQ mutation 或 LIVE。
+
+```text
+B1: COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
+B2: CLOSED / ACCEPTED / COMMITTED / MOCK_ONLY / NO_API / NO_MIGRATION
+B3: CLOSED / ACCEPTED / COMMITTED / V8_MIGRATION_JDBC_BASELINE / NO_API
+B4: IMPLEMENTED_BY_VALIDATION / QDR_PIPELINE_MOCK_GATEWAY_INTEGRATION / NO_API / NO_MIGRATION / REVIEW_FREEZE_REQUIRED
+B5: NOT STARTED / close review only
+real HTTP: NO
+real provider: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+B4 成功路径只把 gateway redacted summary 追加为 reasoning / evidence summary，并将 `promptVersionId`、`modelVersionId`、`providerProfileId`、`gatewayCallRef`、`trustDecision`、`redactionStatus`、`budgetSummary` 写入 trace summary、audit payload 与 `quant_decision.constraints_json` safe refs。gateway result 不改变 approval status，不触发 replay execution、NQ、交易、订单、撤单、账户、ledger、risk、paper 或 live mutation。
+
+B4 fail-closed 覆盖 prompt version missing、model version missing、provider missing、tenant mismatch、checksum mismatch、ProviderTrustPolicy denied、prompt injection denied、budget exceeded、redaction failure、mock provider unavailable、malformed mock provider result、gateway call persistence failure、audit failure、trace failure 与 unknown exception。failure response 只返回安全错误，不暴露 raw prompt、raw provider response、secret-like material 或 dangerous input。
+
 下一步唯一允许动作：
 
 ```text
-DH-STAGE-QDR-3-B3-REVIEW-FREEZE
+DH-STAGE-QDR-3-B4-REVIEW-FREEZE
 ```
 
-B3 review/freeze retry 前仍不得启动 B4/B5，不得新增 Model Gateway API / Provider API / Prompt Version API，不得接真实 provider、real HTTP、Provider SDK、Agent runtime、LangGraph runtime、AutoGen、CrewAI、NQ mutation、交易链路或 LIVE。
+B4 review/freeze 前不得启动 B5，不得提交 B4，仍不得新增 Model Gateway API / Provider API / Prompt Version API，不得接真实 provider、real HTTP、Provider SDK、Agent runtime、LangGraph runtime、AutoGen、CrewAI、NQ mutation、交易链路或 LIVE。
 
 ## 0.0W DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN（DONE / PLAN_ONLY / WO NEXT）
 

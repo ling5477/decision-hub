@@ -26,6 +26,11 @@ import com.guidinglight.decisionhub.usecase.qdr.DecisionRunRepository;
 import com.guidinglight.decisionhub.usecase.qdr.InMemoryDecisionCoreRepository;
 import com.guidinglight.decisionhub.usecase.qdr.QuantDecisionRepository;
 import com.guidinglight.decisionhub.usecase.qdr.QuantSignalRepository;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayFailureCode;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationCommand;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationException;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationPort;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationResult;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -60,6 +65,7 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
     private final DecisionRunRepository decisionRunRepository;
     private final QuantSignalRepository quantSignalRepository;
     private final QuantDecisionRepository quantDecisionRepository;
+    private final QdrModelGatewayIntegrationPort qdrModelGatewayIntegration;
     private final DecisionDryRunRuntimeProperties properties;
     private final Clock clock;
 
@@ -68,26 +74,36 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
      *
      * @param orchestrator    既有 mock-only DecisionOrchestrator。
      * @param auditRepository 既有 audit / trace / replay persistence port。
+     * @param qdrModelGatewayIntegration stage-qdr-3 B4 mock gateway integration。
      * @param properties      runtime feature gate 配置。
      * @param clock           时间源。
      */
     public DefaultDecisionDryRunService(
             final DecisionOrchestrator orchestrator,
             final DecisionAuditRepository auditRepository,
+            final QdrModelGatewayIntegrationPort qdrModelGatewayIntegration,
             final DecisionDryRunRuntimeProperties properties,
             final Clock clock) {
-        this(orchestrator, auditRepository, new InMemoryDecisionCoreRepository(), properties, clock);
+        this(
+                orchestrator,
+                auditRepository,
+                qdrModelGatewayIntegration,
+                new InMemoryDecisionCoreRepository(),
+                properties,
+                clock);
     }
 
     private DefaultDecisionDryRunService(
             final DecisionOrchestrator orchestrator,
             final DecisionAuditRepository auditRepository,
+            final QdrModelGatewayIntegrationPort qdrModelGatewayIntegration,
             final InMemoryDecisionCoreRepository decisionCoreRepository,
             final DecisionDryRunRuntimeProperties properties,
             final Clock clock) {
         this(
                 orchestrator,
                 auditRepository,
+                qdrModelGatewayIntegration,
                 decisionCoreRepository,
                 decisionCoreRepository,
                 decisionCoreRepository,
@@ -101,6 +117,7 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
      *
      * @param orchestrator              既有 mock-only DecisionOrchestrator。
      * @param auditRepository           既有 audit / trace / replay persistence port。
+     * @param qdrModelGatewayIntegration stage-qdr-3 B4 mock gateway integration。
      * @param decisionRequestRepository request 主线 repository。
      * @param decisionRunRepository     run 主线 repository。
      * @param quantSignalRepository     signal 主线 repository。
@@ -111,6 +128,7 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
     public DefaultDecisionDryRunService(
             final DecisionOrchestrator orchestrator,
             final DecisionAuditRepository auditRepository,
+            final QdrModelGatewayIntegrationPort qdrModelGatewayIntegration,
             final DecisionRequestRepository decisionRequestRepository,
             final DecisionRunRepository decisionRunRepository,
             final QuantSignalRepository quantSignalRepository,
@@ -119,6 +137,8 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
             final Clock clock) {
         this.orchestrator = Objects.requireNonNull(orchestrator, "orchestrator");
         this.auditRepository = Objects.requireNonNull(auditRepository, "auditRepository");
+        this.qdrModelGatewayIntegration =
+                Objects.requireNonNull(qdrModelGatewayIntegration, "qdrModelGatewayIntegration");
         this.decisionRequestRepository =
                 Objects.requireNonNull(decisionRequestRepository, "decisionRequestRepository");
         this.decisionRunRepository =
@@ -155,13 +175,24 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
                             "DRY_RUN_RECEIVED");
             final DecisionRequest request = toDecisionRequest(command);
             final DecisionOutput output = orchestrator.decide(request);
-            recordQuantDecision(decisionCoreSession, command, output);
             final DecisionDryRunResult providerFailure = mapProviderFailure(command, output);
             if (providerFailure != null) {
+                recordQuantDecision(decisionCoreSession, command, output, null);
                 return providerFailure;
             }
-            final DecisionDryRunSnapshot snapshot = toSnapshot(output, receivedAuditRef);
+            final QdrModelGatewayIntegrationResult gatewayResult =
+                    qdrModelGatewayIntegration.invoke(toGatewayCommand(command, decisionCoreSession, output));
+            recordQuantDecision(decisionCoreSession, command, output, gatewayResult);
+            final DecisionDryRunSnapshot snapshot = toSnapshot(output, receivedAuditRef, gatewayResult);
             return DecisionDryRunResult.success(snapshot);
+        } catch (final QdrModelGatewayIntegrationException error) {
+            failDecisionRun(decisionCoreSession, error);
+            return rejectWithoutThrowing(
+                    command,
+                    statusForGatewayFailure(error.failureCode()),
+                    errorCodeForGatewayFailure(error.failureCode()),
+                    "model gateway failed closed",
+                    eventTypeForGatewayFailure(error.failureCode()));
         } catch (final RuntimeException error) {
             failDecisionRun(decisionCoreSession, error);
             return rejectWithoutThrowing(
@@ -357,7 +388,8 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
     private void recordQuantDecision(
             final DecisionCoreSession session,
             final DecisionDryRunCommand command,
-            final DecisionOutput output) {
+            final DecisionOutput output,
+            final QdrModelGatewayIntegrationResult gatewayResult) {
         final Instant finishedAt = clock.instant();
         final QuantDecisionAction action = quantAction(output);
         final RiskLevel riskLevel = RiskLevel.fromDecisionRiskLevel(output.getRiskLevel());
@@ -372,8 +404,8 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
                         action,
                         confidenceFor(action),
                         riskLevel,
-                        rationale(output),
-                        constraints(command, output),
+                        rationale(output, gatewayResult),
+                        constraints(command, output, gatewayResult),
                         HumanApprovalStatus.NOT_REQUIRED,
                         finishedAt));
         decisionRunRepository.complete(
@@ -403,6 +435,22 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
         }
     }
 
+    private QdrModelGatewayIntegrationCommand toGatewayCommand(
+            final DecisionDryRunCommand command,
+            final DecisionCoreSession decisionCoreSession,
+            final DecisionOutput output) {
+        return new QdrModelGatewayIntegrationCommand(
+                command.tenantId(),
+                command.traceId(),
+                command.requestId(),
+                decisionCoreSession.runId(),
+                command.context().symbol(),
+                command.context().market(),
+                command.context().timeframe(),
+                output.getRiskLevel().name(),
+                command.context().evidenceRefs());
+    }
+
     private DecisionRequest toDecisionRequest(final DecisionDryRunCommand command) {
         final DecisionDryRunContext context = command.context();
         return DecisionRequest.readOnlyRecommendation(
@@ -425,8 +473,11 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
     }
 
     private DecisionDryRunSnapshot toSnapshot(
-            final DecisionOutput output, final String receivedAuditRef) {
+            final DecisionOutput output,
+            final String receivedAuditRef,
+            final QdrModelGatewayIntegrationResult gatewayResult) {
         final List<String> reasons = new ArrayList<>(output.getReasonCodes());
+        reasons.add("MODEL_GATEWAY_MOCK_CALL");
         final DecisionAction externalAction;
         if (output.getAction() == DecisionAction.ABSTAIN) {
             externalAction = DecisionAction.NO_TRADE;
@@ -445,7 +496,15 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
                         "request:" + output.getRequestId(),
                         "trace:" + output.getTraceId(),
                         "policy:" + output.getPolicyStatus().name(),
-                        "provider:" + output.getProviderStatus().name()),
+                        "provider:" + output.getProviderStatus().name(),
+                        gatewayResult.traceSummaryEntries().get(0),
+                        gatewayResult.traceSummaryEntries().get(1),
+                        gatewayResult.traceSummaryEntries().get(2),
+                        gatewayResult.traceSummaryEntries().get(3),
+                        gatewayResult.traceSummaryEntries().get(4),
+                        gatewayResult.traceSummaryEntries().get(5),
+                        gatewayResult.traceSummaryEntries().get(6),
+                        gatewayResult.traceSummaryEntries().get(7)),
                 "replay:" + output.getRequestId(),
                 receivedAuditRef,
                 output.getSchemaVersion());
@@ -580,15 +639,24 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
         return null;
     }
 
-    private static String rationale(final DecisionOutput output) {
+    private static String rationale(
+            final DecisionOutput output, final QdrModelGatewayIntegrationResult gatewayResult) {
         if (output.getReasonCodes().isEmpty()) {
-            return "QDR_READONLY_DECISION";
+            return gatewayResult == null
+                    ? "QDR_READONLY_DECISION"
+                    : "QDR_READONLY_DECISION," + gatewayResult.redactedSummary();
         }
-        return String.join(",", output.getReasonCodes());
+        final List<String> reasons = new ArrayList<>(output.getReasonCodes());
+        if (gatewayResult != null) {
+            reasons.add(gatewayResult.redactedSummary());
+        }
+        return String.join(",", reasons);
     }
 
     private static Map<String, Object> constraints(
-            final DecisionDryRunCommand command, final DecisionOutput output) {
+            final DecisionDryRunCommand command,
+            final DecisionOutput output,
+            final QdrModelGatewayIntegrationResult gatewayResult) {
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("readOnly", true);
         payload.put("dryRun", command.dryRun());
@@ -597,6 +665,9 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
         payload.put("source", command.source());
         payload.put("policyStatus", output.getPolicyStatus().name());
         payload.put("providerStatus", output.getProviderStatus().name());
+        if (gatewayResult != null) {
+            payload.put("modelGateway", gatewayResult.toConstraintRefs());
+        }
         return payload;
     }
 
@@ -683,6 +754,51 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
             return DecisionAuditEventType.POLICY_DENIED;
         }
         return DecisionAuditEventType.DECISION_FAILED;
+    }
+
+    private static DecisionAuditEventType eventTypeForGatewayFailure(
+            final ModelGatewayFailureCode failureCode) {
+        if (failureCode == ModelGatewayFailureCode.BUDGET_EXCEEDED
+                || failureCode == ModelGatewayFailureCode.PROVIDER_TIMEOUT
+                || failureCode == ModelGatewayFailureCode.PROVIDER_UNAVAILABLE
+                || failureCode == ModelGatewayFailureCode.PROVIDER_DISABLED
+                || failureCode == ModelGatewayFailureCode.PROVIDER_OUTPUT_INVALID) {
+            return DecisionAuditEventType.PROVIDER_FAILED;
+        }
+        if (failureCode == ModelGatewayFailureCode.POLICY_DENIED
+                || failureCode == ModelGatewayFailureCode.PROMPT_DENIED
+                || failureCode == ModelGatewayFailureCode.REDACTION_FAILED
+                || failureCode == ModelGatewayFailureCode.REAL_PROVIDER_FORBIDDEN
+                || failureCode == ModelGatewayFailureCode.UNKNOWN_PROVIDER
+                || failureCode == ModelGatewayFailureCode.REGISTRY_MISMATCH
+                || failureCode == ModelGatewayFailureCode.PROMPT_VERSION_NOT_FOUND
+                || failureCode == ModelGatewayFailureCode.MODEL_VERSION_NOT_FOUND
+                || failureCode == ModelGatewayFailureCode.MISSING_REQUIRED_FIELD) {
+            return DecisionAuditEventType.POLICY_DENIED;
+        }
+        return DecisionAuditEventType.DECISION_FAILED;
+    }
+
+    private static int statusForGatewayFailure(final ModelGatewayFailureCode failureCode) {
+        return switch (failureCode) {
+            case BUDGET_EXCEEDED -> 429;
+            case PROVIDER_TIMEOUT -> 504;
+            case PROVIDER_UNAVAILABLE, PROVIDER_DISABLED, UNKNOWN_PROVIDER, REAL_PROVIDER_FORBIDDEN -> 503;
+            case PROVIDER_OUTPUT_INVALID, UNKNOWN_ERROR -> 500;
+            default -> 403;
+        };
+    }
+
+    private static DecisionDryRunErrorCode errorCodeForGatewayFailure(
+            final ModelGatewayFailureCode failureCode) {
+        return switch (failureCode) {
+            case BUDGET_EXCEEDED -> DecisionDryRunErrorCode.BUDGET_EXCEEDED;
+            case PROVIDER_TIMEOUT -> DecisionDryRunErrorCode.PROVIDER_TIMEOUT;
+            case PROVIDER_UNAVAILABLE, PROVIDER_DISABLED, UNKNOWN_PROVIDER, REAL_PROVIDER_FORBIDDEN ->
+                    DecisionDryRunErrorCode.PROVIDER_DISABLED;
+            case PROVIDER_OUTPUT_INVALID, UNKNOWN_ERROR -> DecisionDryRunErrorCode.UNKNOWN_ERROR;
+            default -> DecisionDryRunErrorCode.POLICY_DENIED;
+        };
     }
 
     private static String requestId(final DecisionDryRunCommand command) {

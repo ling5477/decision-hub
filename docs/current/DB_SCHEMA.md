@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: DH-STAGE-QDR-3-B3-BLOCKER-FIX / DONE / DB_SCHEMA_ALIGNED / VALIDATION_RECOVERED
-Next stage:    DH-STAGE-QDR-3-B3-REVIEW-FREEZE / READY / NO_DIRECT_B4
+Current stage: DH-STAGE-QDR-3-B4-QDR-PIPELINE-MOCK-GATEWAY-INTEGRATION / IMPLEMENTED_BY_VALIDATION / NO_SCHEMA_CHANGE
+Next stage:    DH-STAGE-QDR-3-B4-REVIEW-FREEZE / READY / NO_DIRECT_B5
 ```
 
 Flyway 迁移：
@@ -27,10 +27,27 @@ stage-qdr-3 planning             DONE / PLANNED_TABLES_ONLY / NO MIGRATION
 stage-qdr-3 implementation WO    DONE / B1-B5_ORDERED / NO MIGRATION
 B1 Prompt/Model Version Domain   COMMITTED / DOMAIN_USECASE_ONLY / NO MIGRATION
 B2 Model Gateway Mock Runtime    IMPLEMENTED_BY_VALIDATION / USECASE_ONLY / NO MIGRATION
-B3 Persistence Baseline          IMPLEMENTED_BY_VALIDATION / V8 ADDED / BLOCKER_FIX_DONE / REVIEW_FREEZE_REQUIRED
-B4 QDR Pipeline Integration      NOT STARTED / NO MIGRATION
+B3 Persistence Baseline          CLOSED / ACCEPTED / COMMITTED / V8 ADDED
+B4 QDR Pipeline Integration      IMPLEMENTED_BY_VALIDATION / NO MIGRATION / NO V9 / REVIEW_FREEZE_REQUIRED
 V9                              NOT STARTED
 ```
+
+## 1.0a stage-qdr-3 B4 schema impact（NO_SCHEMA_CHANGE）
+
+stage-qdr-3 B4 未新增 Flyway migration，未新增 V9，未修改 V1-V8 历史 migration，未新增表、索引、constraint 或 column。B4 只复用既有 V5 audit/trace 表、V6 decision core 表与 V8 `qdr_model_gateway_call` / prompt/model version persistence baseline。
+
+```text
+B4 new migration: NO
+B4 modified V1-V8 migration: NO
+B4 V9 migration: NOT STARTED
+B4 new table: NO
+B4 schema impact: NONE
+B4 gateway call target: existing qdr_model_gateway_call
+B4 audit target: existing dh_decision_audit_event / dh_decision_trace_step
+B4 decision refs target: existing quant_decision.constraints_json
+```
+
+B4 persistence 仍只保存 safe metadata / hash / ref / redacted summary：`promptVersionId`、`modelVersionId`、`providerProfileId`、`gatewayCallRef`、`trustDecision`、`redactionStatus`、`budgetSummary`、input/output hash、audit ref 与 trace ref。不保存 raw prompt，不保存 raw provider response，不保存 credential / apiKey / apiSecret / token / cookie / passphrase。gateway call persistence failure、audit failure 与 trace failure 均必须 fail-closed。
 
 ## 1.0 stage-qdr-3 B3 V8 persistence schema（IMPLEMENTED_BY_VALIDATION / DOC_ALIGNED）
 
@@ -108,7 +125,7 @@ status / provider_kind / profile_status / version_status / trust_decision / fail
 
 V8 migration comments explicitly state raw prompt, raw provider response and credential material are forbidden. Prompt/model version immutability is not enforced by DB trigger in B3; it is enforced by append-only schema shape, migration comments, repository contract, checksum duplicate behavior and tests. Duplicate same checksum is idempotent by contract; duplicate different checksum and checksum mismatch must fail closed.
 
-B3 完成后必须先进入 `DH-STAGE-QDR-3-B3-REVIEW-FREEZE`；不得直接进入 B4，不得新增 V9，不得实现 API、真实 provider、Provider SDK 或 real HTTP。
+B3 已完成并关闭；B4 当前只复用 V5/V6/V8 既有表，不新增 V9，不实现 API、真实 provider、Provider SDK 或 real HTTP。B4 完成后必须先进入 `DH-STAGE-QDR-3-B4-REVIEW-FREEZE`，不得直接进入 B5。
 
 ## 1.1 stage-qdr-2 B1/B2/B3/B4 schema impact
 

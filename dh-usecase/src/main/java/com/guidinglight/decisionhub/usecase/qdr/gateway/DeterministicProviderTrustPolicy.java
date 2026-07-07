@@ -6,10 +6,7 @@ import com.guidinglight.decisionhub.domain.qdr.model.ProviderProfile;
 import com.guidinglight.decisionhub.domain.qdr.model.ProviderProfileStatus;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * B2 deterministic ProviderTrustPolicy。
@@ -19,7 +16,17 @@ import java.util.stream.Collectors;
  */
 public final class DeterministicProviderTrustPolicy implements ProviderTrustPolicy {
 
-    private final Map<String, ProviderProfile> providerProfiles;
+    private final ProviderProfileRegistryPort providerProfileRegistry;
+
+    /**
+     * 创建可动态 mock bootstrap 的 deterministic trust policy。
+     *
+     * @param providerProfileRegistry mock provider profile registry。
+     */
+    public DeterministicProviderTrustPolicy(final ProviderProfileRegistryPort providerProfileRegistry) {
+        this.providerProfileRegistry =
+                Objects.requireNonNull(providerProfileRegistry, "providerProfileRegistry");
+    }
 
     /**
      * 创建 deterministic trust policy。
@@ -27,9 +34,9 @@ public final class DeterministicProviderTrustPolicy implements ProviderTrustPoli
      * @param providerProfiles in-memory provider profiles。
      */
     public DeterministicProviderTrustPolicy(final Collection<ProviderProfile> providerProfiles) {
-        this.providerProfiles =
-                Objects.requireNonNull(providerProfiles, "providerProfiles").stream()
-                        .collect(Collectors.toUnmodifiableMap(p -> p.id().value(), Function.identity()));
+        final InMemoryProviderProfileRegistry registry = new InMemoryProviderProfileRegistry();
+        Objects.requireNonNull(providerProfiles, "providerProfiles").forEach(registry::register);
+        this.providerProfileRegistry = registry;
     }
 
     @Override
@@ -43,7 +50,8 @@ public final class DeterministicProviderTrustPolicy implements ProviderTrustPoli
             return ModelProviderTrustDecision.denied(
                     ModelGatewayFailureCode.UNKNOWN_PROVIDER, "provider-trust-unknown");
         }
-        final ProviderProfile profile = providerProfiles.get(context.providerProfileId().trim());
+        final ProviderProfile profile =
+                providerProfileRegistry.findById(context.providerProfileId()).orElse(null);
         if (profile == null) {
             return ModelProviderTrustDecision.denied(
                     ModelGatewayFailureCode.UNKNOWN_PROVIDER, "provider-trust-unknown");
