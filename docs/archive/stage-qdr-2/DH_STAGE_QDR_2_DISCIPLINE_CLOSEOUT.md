@@ -1,5 +1,10 @@
 # DH stage-qdr-2 Discipline Closeout
 
+> HISTORICAL RECORD
+> NOT CURRENT FACTSOURCE
+> Current state source: docs/current/STATUS.md and docs/current/WORK_ORDER.md
+> Archive reason: stage-qdr-2 discipline closeout was consumed by final close; this file is retained for review history only.
+
 ```text
 Task: DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT
 Task type: DOCUMENTATION + TOOLING_REVIEW + PROCESS_DISCIPLINE_CLOSEOUT + STAGE_STATE_ALIGNMENT + NO_BUSINESS_CODE_CHANGE

@@ -1,11 +1,5 @@
 # Decision Hub API
 
-> supporting document
-> not primary stage gate source
-> old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
->
-> 当前 API 文档只记录已实现 API 与明确的未实现 API 边界。它不是 stage-qdr-3 B5 close review 的默认 blocker source；只有出现 `FACTSOURCE_POLICY.md` 定义的硬错误时才可升级为 blocker。
-
 ## 1. 当前状态
 
 ```text

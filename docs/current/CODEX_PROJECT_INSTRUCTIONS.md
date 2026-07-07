@@ -3,128 +3,35 @@
 > 项目: Decision Hub
 > 必需前置 skill: `nq-dh-workflow-router`
 > 必需文档 skill: `dh-docs-writer`
-> 事实源: `docs/current`
+> 当前事实源: `docs/current`
+> 当前工作区: `E:/Project/decision-hub`
 
-## 1. 前置分类规则
-
-每个 Codex 任务必须先执行 `nq-dh-workflow-router` 前置分类：
-
-```text
-1. 读取用户目标、范围、禁止项和验收标准。
-2. 选择一个 Task classification。
-3. 按分类选择 Plugins selected。
-4. 收口 Scope，明确允许读取和修改的文件。
-5. 检查 DH/NQ 安全边界。
-6. 按标准输出格式执行和收尾。
-```
-
-开工前必须明确：
+## 1. 当前状态锁定
 
 ```text
-repository
-module
-target files
-excluded files
-expected output
+stage-qdr-2: FINAL CLOSE CLOSED / ACCEPTED
+stage-qdr-3 implementation: DONE
+stage-qdr-3 B1: DONE / COMMITTED
+stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED
+stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED
+stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
+stage-qdr-3 B5: READY FOR RETRY
+stage-qdr-3 acceptance: NOT_ACCEPTED_YET
+stage-qdr-3 final close: NOT_CLOSED
+stage-qdr-4: NOT_STARTED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
 ```
 
-当前 DH 实际工作区固定为：
+## 2. 前置分类规则
 
-```text
-E:/Project/decision-hub
-```
+每个 Codex 任务必须先使用 `nq-dh-workflow-router` 分类，再决定 skill、scope、文件范围和验证命令。DH 文档治理、`docs/current`、archive、work order、acceptance、freeze、close review、WORKLOG、TESTING、STATUS、ROADMAP、API 与 DB_SCHEMA 同步必须使用 `dh-docs-writer`。
 
-`F:/project/decision-hub` 只能作为历史路径出现。后续任务如果发现两个路径同时存在，必须先停止并做路径澄清，不得自动切换工作区。
-
-默认不得扫描：
-
-```text
-node_modules
-target
-build
-dist
-.git
-logs
-test-results
-secrets
-credentials
-```
-
-禁止读取、复制、提交或输出：
-
-```text
-token
-cookie
-API key
-API secret
-exchange secret
-production .env
-private key
-mnemonic
-keystore password
-2FA backup code
-```
-
-文档事实源规则：
-
-```text
-不把 archived / historical / superseded 文档当作当前事实源。
-除非用户明确要求历史对照，否则当前状态以 docs/current/STATUS.md、
-docs/current/README.md、docs/current/ROADMAP.md、CODEX_PROJECT_INSTRUCTIONS.md
-和 AGENTS.md 的当前段落为准。
-历史 Stage 文档只能作为背景，不得自动转化为当前 next task。
-DH 文档治理任务必须使用 .agents/skills/dh-docs-writer/SKILL.md。
-```
-
-语言治理规则：
-
-```text
-DH 文档正文、架构说明、阶段计划、Worklog、Testing、Roadmap、Status 默认中文为主。
-DH 代码注释 / Javadoc 默认中文为主。
-Java 包名 / 类名 / 方法名 / 字段名、enum 值、JSON Schema 字段、OpenAPI 字段、HTTP header、状态枚举、命令和外部技术名保留英文原样。
-固定输出字段可保留英文，但字段内容必须中文为主。
-不允许新增英文长段落，除非是协议、代码片段、命令、schema 或外部规范引用。
-从 NQ skill 同步规则时，必须改写为 DH 中文主语言风格。
-```
-
-阶段命名治理规则：
-
-```text
-NQ 自身阶段使用 Gate 体系，例如 GateN。
-DH 自身阶段使用 Stage 体系，例如 DH-STAGE4-DECISION-PIPELINE-MVP。
-NQ-DH 集成任务可以引用 NQ GateN rebase，但不得把 DH 自身阶段写成 GateK/GateL/GateN。
-DH-STAGE4-DECISION-PIPELINE-MVP 是当前 canonical DH 阶段名；旧 DH-GATEK-DECISION-PIPELINE-MVP 属于历史错误命名。
-DH-STAGE4-NAMING-REBASE-FIX 已将 current docs 与冻结目录命名收口；旧 GateK 名称只能作为 SUPERSEDED / NAMING_REPLACED 历史说明保留。
-不得继续创建新的 DH-GATEK-* 当前阶段、任务名或冻结目录。
-```
-
-分类只能从以下集合选择：
-
-```text
-DOCUMENTATION
-CODE_ANALYSIS
-CODE_CHANGE
-SECURITY_AUDIT
-AGENT_API
-NQ_INTEGRATION_PLAN
-PRODUCT_DESIGN
-PRESENTATION
-```
-
-## 2. 插件选择
-
-```text
-DOCUMENTATION        GitHub + Documents + Notion
-CODE_ANALYSIS        GitHub
-CODE_CHANGE          GitHub + CodeRabbit
-SECURITY_AUDIT       GitHub + Codex Security + CodeRabbit
-AGENT_API            GitHub + OpenAI Developers + Codex Security
-NQ_INTEGRATION_PLAN  GitHub + Documents + Codex Security
-PRODUCT_DESIGN       Figma + Product Design，仅在 UI / 流程图任务中使用
-PRESENTATION         Presentations + Documents + Canva
-```
-
-## 3. 标准输出格式
+固定输出字段：
 
 ```text
 Task classification:
@@ -138,65 +45,59 @@ Risks:
 Next concrete action:
 ```
 
-`Summary` 不作为必填字段。发现、结论、变更摘要必须写入 `Findings`。
+`Summary` 不是必填字段。
 
-## 4. DH 项目边界
+## 3. 当前事实源规则
 
-```text
-DH 是多 Agent 决策系统。
-DH 当前只允许研究、分析、候选信号、风险解释、审计记录。
-DH 不允许下单、撤单、修改策略状态、启动 Paper Run、访问交易所密钥、直接读写 NQ DB。
-DH 到 NQ 的任何未来接入都必须从 Integration-0-PLAN 开始。
-Integration-0 只能是只读边界、契约冻结、权限模型、审计模型，不允许真实业务打通。
-```
-
-## 5. 当前状态锁定
+默认可阻断 B5 close review 的文件只包括：
 
 ```text
-DH-AUDIT-FIX completed.
-NQ integration not started.
-Integration-0 safety gate CLOSED / ACCEPTED.
-Integration-1 NOT STARTED.
-Runtime integration NOT STARTED.
-DH integrated NO.
-AI / Agent runtime NOT STARTED.
-RealClient forbidden.
-real provider forbidden.
-LIVE DISABLED.
-NQ mutation forbidden.
-DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
-DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
-DH Stage4 Decision Pipeline MVP K1-K8: CLOSED / ACCEPTED.
-Current main line: stage-qdr-3 / Model Gateway + Prompt/Model Version Baseline / B5_CLOSE_REVIEW_RETRY_REQUIRED.
-stage-qdr-2: FINAL CLOSE CLOSED / ACCEPTED.
-stage-qdr-2 B1/B2/B3/B4/B5: CLOSED / ACCEPTED / COMMITTED.
-stage-qdr-3 planning: DONE / PLAN_ONLY.
-stage-qdr-3 implementation work order: DONE / WORK_ORDER_ONLY.
-stage-qdr-3 implementation: DONE.
-stage-qdr-3 B1: DONE / COMMITTED.
-stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED.
-stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED.
-stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED.
-stage-qdr-3 B5 close review: RETRY_REQUIRED / REVIEW_ONLY.
-stage-qdr-3 acceptance: NOT_ACCEPTED_YET.
-stage-qdr-3 final close: NOT_CLOSED.
-stage-qdr-4: NOT_STARTED.
-Replay execution API: NOT STARTED.
-Model gateway: MOCK_BASELINE_IMPLEMENTED_THROUGH_B1_B4 / PENDING_B5_ACCEPTANCE / NO_REAL_PROVIDER / NO_REAL_HTTP / NO_PROVIDER_SDK.
-Tool registry: NOT STARTED.
-real HTTP: NO.
-real provider: NO.
-Provider SDK: NO.
-Agent / LangGraph: NO.
-LIVE: DISABLED.
-B5 discipline: review-only; B5 pass is required before final close docs sync.
-stage-qdr-4 discipline: planning is allowed only after stage-qdr-3 acceptance; implementation remains forbidden.
-Next concrete action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW / RETRY / REVIEW_ONLY.
-Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
-NQ current planning baseline: GateN.
+README.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/TESTING.md
 ```
 
-## 6. DOCUMENTATION 任务默认验证
+以下文件默认 supporting only，不作为 primary stage gate source：
+
+```text
+docs/current/WORKLOG.md
+docs/current/ROADMAP.md
+docs/current/API.md
+docs/current/DB_SCHEMA.md
+docs/current/DH_STAGE_QDR_*.md
+docs/archive/**
+```
+
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。
+
+## 4. 安全边界
+
+```text
+DH 不直接下单
+DH 不绕过 NQ 风控
+DH 不修改 NQ 订单状态
+DH 不读写 NQ DB
+DH 不访问交易所密钥
+DH 不启动 Paper Run
+DH 不接真实 HTTP
+DH 不接真实 provider
+DH 不引入 Provider SDK
+DH 不启动 Agent / LangGraph runtime
+DH 不启用 LIVE
+```
+
+`LONG_BIAS / SHORT_BIAS` 只是 bias，不得映射成 `BUY / SELL`。`APPROVED` 不是 `BUY`，`REJECTED` 不是 `SELL`。Gateway result 只能作为只读 evidence / reasoning summary，不得触发交易、approval mutation、NQ mutation、risk mutation、ledger mutation、paper 或 live mutation。
+
+## 5. 文档语言与路径规则
+
+正文使用简体中文。类名、字段名、状态枚举、HTTP header、命令、路径和外部技术名保留英文原样。当前路径统一为 `E:/Project/decision-hub`；旧 `F:/project/decision-hub` 只能作为历史路径记录，不得作为当前执行路径。
+
+## 6. 验证纪律
+
+docs-only 治理任务至少运行：
 
 ```powershell
 git status --short
@@ -204,4 +105,14 @@ git diff --check
 git diff --stat
 ```
 
-如果用户明确禁止业务代码变更，验证时还必须确认 diff 只落在允许的文档和规则文件。
+本轮 QDR pre-close governance 还必须运行：
+
+```powershell
+git diff --name-only
+git diff --cached --name-only
+stale facts scan required by DH-DOCS-GOVERNANCE-ARCHIVE-STAGE-QDR-3-PRE-CLOSE
+mvn -ntp -Pquality validate
+.\mvnw.cmd -v
+```
+
+`mvnw.cmd` 当前仍不可写成可用。Docker/Testcontainers skip 只能写成环境型 skip，不得写成 PASS。

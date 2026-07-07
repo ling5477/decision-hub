@@ -1,11 +1,5 @@
 # Decision Hub DB Schema
 
-> supporting document
-> not primary stage gate source
-> old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
->
-> 当前 DB_SCHEMA 只记录已存在 migration 与 schema 边界。它不是 stage-qdr-3 B5 close review 的默认 blocker source；只有出现 `FACTSOURCE_POLICY.md` 定义的硬错误时才可升级为 blocker。
-
 ## 1. 当前状态
 
 ```text

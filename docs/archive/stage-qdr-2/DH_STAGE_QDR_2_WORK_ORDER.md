@@ -1,5 +1,10 @@
 # DH stage-qdr-2 Work Order
 
+> HISTORICAL RECORD
+> NOT CURRENT FACTSOURCE
+> Current state source: docs/current/STATUS.md and docs/current/WORK_ORDER.md
+> Archive reason: stage-qdr-2 final close is CLOSED / ACCEPTED; this work order is retained for review history only.
+
 ```text
 Task: DH-STAGE-QDR-2-AUDIT-TRACE-READMODEL-AND-HUMAN-APPROVAL-WO
 Stage: stage-qdr-2 = Audit Trace Read Model + Human Approval Packet

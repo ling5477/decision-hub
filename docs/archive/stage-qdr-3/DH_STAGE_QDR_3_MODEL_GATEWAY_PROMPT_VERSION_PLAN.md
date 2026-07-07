@@ -1,5 +1,10 @@
 # DH stage-qdr-3 Model Gateway + Prompt/Model Version Plan
 
+> HISTORICAL RECORD
+> NOT CURRENT FACTSOURCE
+> Current state source: docs/current/STATUS.md and docs/current/WORK_ORDER.md
+> Archive reason: stage-qdr-3 plan was consumed by B1-B4 implementation and freeze acceptance; B5 retry is now the only next action.
+
 ```text
 Task: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN
 Task type: PLANNING_ONLY + MODEL_GATEWAY_DESIGN + PROMPT_VERSION_DESIGN + PROVIDER_TRUST_BOUNDARY_DESIGN + AUDIT_REDACTION_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION

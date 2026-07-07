@@ -1,5 +1,10 @@
 # DH stage-qdr-3 Implementation Work Order
 
+> HISTORICAL RECORD
+> NOT CURRENT FACTSOURCE
+> Current state source: docs/current/STATUS.md and docs/current/WORK_ORDER.md
+> Archive reason: stage-qdr-3 implementation work order was consumed by B1-B4; B5 retry is now the only next action.
+
 ```text
 Task: DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER
 Task type: WORK_ORDER_ONLY + STAGE_QDR_3_IMPLEMENTATION_PLANNING + MODEL_GATEWAY_WORK_ORDER + PROMPT_VERSION_WORK_ORDER + PROVIDER_TRUST_SECURITY_BOUNDARY + AUDIT_REDACTION_TEST_MATRIX + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE

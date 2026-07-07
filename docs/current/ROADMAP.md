@@ -1,373 +1,50 @@
 # Decision Hub Roadmap
 
-## 1. 总路线
+> supporting document
+> not primary stage gate source
+> old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
-DH 的目标不是成为交易系统，而是成为 NQ 的 AI Agent 决策能力层。
+## 1. 当前路线
 
-路线：
-
-```text
-DH-REFIT-1:   文档结构与边界统一                          [completed]
-Stage1:       Boundary Freeze + Agent Runtime Skeleton    [completed]
-Stage1-CLOSE: 旧链路 @Deprecated + 文档单源 + ArchUnit    [completed]
-Integration-0: 只读边界、契约冻结、权限模型、审计模型        [closed / accepted]
-DH-STAGE4-DECISION-PIPELINE-MVP-PLAN:
-              只读 Decision Pipeline MVP 规划               [accepted / closed]
-DH-STAGE4-DECISION-PIPELINE-MVP-WO:
-              Decision Pipeline MVP 可执行工单               [accepted / closed]
-DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE:
-              Decision Contract Freeze                     [pass / closed / accepted]
-DH-STAGE4-DECISION-PIPELINE-MVP-K1-CONTRACT-FREEZE-REVIEW:
-              K1 contract review                          [completed / closed]
-DH-STAGE4-DECISION-PIPELINE-MVP-K2-ORCHESTRATOR-SKELETON:
-              DecisionOrchestrator Skeleton                [implemented]
-DH-STAGE4-DECISION-PIPELINE-MVP-K3-AUDIT-SNAPSHOT-TRACE-PERSISTENCE:
-              Audit / Snapshot / Trace Persistence         [closed / accepted after M1]
-DH-STAGE4-DECISION-PIPELINE-MVP-M1-READINESS-REVIEW:
-              K1-K3 milestone readiness review             [closed / accepted]
-DH-STAGE4-DECISION-PIPELINE-MVP-K4-REPLAY-READ-MODEL:
-              Replay Read Model                           [implemented / ready for next]
-DH-STAGE4-DECISION-PIPELINE-MVP-K5-PROVIDER-HEALTH-BUDGET-LATENCY:
-              Provider Health / Budget / Latency           [implemented / ready for next]
-DH-STAGE4-DECISION-PIPELINE-MVP-K6-MOCK-NQ-DRYRUN-CONTRACT-TESTS:
-              Mock NQ Dry-run Contract Tests               [implemented / ready for next]
-DH-STAGE4-DECISION-PIPELINE-MVP-K7-GOLDEN-CASES-EVAL:
-              Golden Cases / Eval                          [closed]
-DH-STAGE4-DECISION-PIPELINE-MVP-K8-ACCEPTANCE-FREEZE:
-              Acceptance / Freeze                          [closed / accepted]
-NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN:
-              Integration-1 dry-run plan rebase on NQ GateN [plan baseline accepted]
-NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE:
-              NQ / DH factsource rebase for Integration-1 dry-run [closed / accepted / docs-only]
-NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN:
-              Integration-1 dry-run contract planning       [completed / plan only / not implemented]
-NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN:
-              双仓 fixture / schema / golden case 对齐规划      [completed / plan only / not implemented]
-NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN:
-              NQ stub + DH entry + joint mock readiness planning [completed / plan only / not implemented]
-NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX:
-              Implementation gate review fix                 [completed / docs-only / gate-fix]
-NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO:
-              Dry-run mock implementation work order          [completed / work-order-only / not implemented]
-NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO:
-              Contract gap close work order                   [completed / work-order-only / contract gap closed / not implemented]
-NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO:
-              DH dry-run contract entry mock work order       [completed / work-order-only / not implemented]
-NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO:
-              NQ dry-run stub recorder work order             [completed / work-order-only / not implemented]
-NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO:
-              Joint mock fixtures and contract tests work order [completed / work-order-only / final WO before implementation]
-NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION:
-              Contract gap test-support implementation         [implemented / test-support-only / mock-only / ready for review]
-NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY:
-              DH dry-run test-support entry                    [implemented / test-support-only / mock-only / ready for validation]
-NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT:
-              NQ stub recorder no-side-effect support          [verify pass / test-support-only / mock-only / ready for IMP3 joint mock contract tests]
-NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS:
-              Joint mock contract tests                        [implemented / test-support-only / mock-only / ready for mock close review]
-NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN:
-              Limited dry-run runtime planning                  [closed / accepted / plan-only / not implemented / no runtime]
-NQ-DH-I1-MOCK-BASELINE-PR-PREP:
-              Mock baseline PR preparation                      [closed / merged / no runtime]
-NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW:
-              Runtime API / contract / security review           [closed / accepted / review-only / no runtime]
-NQ-DH-I1-DH-RUNTIME-API-WO:
-              DH runtime API work order                          [closed / accepted / work-order-only / no runtime implementation]
-NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION:
-              DH limited runtime endpoint implementation          [implemented / pending close review / default disabled / no real http / no provider / no live]
-NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW:
-              DH limited endpoint close review                    [closed / accepted / review-only / dh-only / no NQ change / no live]
-NQ-DH-I1-NQ-RUNTIME-CLIENT-WO:
-              NQ runtime client work order                        [closed / accepted / work-order-only / no client implementation / no real http / no provider / no live]
-NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION:
-              NQ limited runtime client implementation             [implemented / targeted-test-pass / default disabled / fake-transport-only]
-NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-CLOSE-REVIEW:
-              NQ limited runtime client close review                [pass / closed / accepted / review-only / no real http / no provider / no live]
-NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO:
-              Joint runtime dry-run test work order                 [closed / accepted / work-order-only / no test implementation / no real dh call / no real http / no provider / no live]
-NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION:
-              Joint runtime dry-run test implementation             [implemented / full-validation-pass / test-only / fake-transport-only / blocker-fix-applied / ready-for-close-review]
-NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX:
-              Joint runtime dry-run blocker fix                     [implemented / full-validation-pass / closed-by-close-review / no real dh call / no real http / no provider / no live]
-NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW:
-              Joint runtime dry-run close review                    [pass / closed / accepted / review-only / no real dh call / no real http / no provider / no live]
-NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW:
-              Integration-1 mock runtime close review               [pass / closed / accepted / review-only / mock runtime milestone closed / no real dh call / no real http / no provider / no live]
-NQ-DH-I1-MOCK-RUNTIME-PR-PREP:
-              Mock runtime milestone PR preparation                 [ready / pr-prep-only / nq pr create allowed / no merge / no real dh call / no real http / no provider / no live]
-stage-qdr-1:
-              Quant Decision Review Core Baseline                   [closed / accepted / decision core tables + dry-run收口 / no agent / no live]
-stage-qdr-2:
-              Audit Trace Read Model + Human Approval Packet        [accepted / final close closed / no agent / no live]
-stage-qdr-3:
-              Model Gateway + Prompt/Model Version Baseline          [B4 freeze accepted / B5 close review retry ready / no real provider / no real http]
-stage-qdr-4:
-              NQ Quant Decision Review Read-only Integration Hardening [not started / read-only hardening / no live]
-stage-agent-preview:
-              Agent Runtime 前置条件评估                             [not started / evaluate only / LangGraph not started]
-Stage2-PoC:   NQ 真实事件回流 + 工具接口预留              [historical / superseded / deferred]
-Stage3:       NQ Console AI 页面接入                      [later / gated]
-DH-FREEZE:    冻结 DH Agent Decision Layer v1             [later]
-```
-
-## 1.0 Quant Decision Review stage 路线
-
-当前唯一主线为 Quant Decision Review。QDR 路线采用 stage* 命名，不继续使用 GateK / GateL / GateM 作为 DH 当前阶段名。
+DH 的目标不是成为交易系统，而是成为 NQ 的 AI Agent 决策能力层。当前主线为 Quant Decision Review。
 
 ```text
-stage-qdr-1:
-  目标：Quant Decision Review Core Baseline。
-  范围：事实源冻结、decision_request、decision_run、quant_signal、quant_decision、dry-run 到 Decision Core 最小收口。
-  状态：CLOSED / ACCEPTED。V6 已新增 decision_request / decision_run / quant_signal / quant_decision；dry-run 成功路径已写入 QDR 四表，响应仍 read-only。
-
-stage-qdr-2:
-  目标：Audit Trace Read Model + Human Approval Packet。
-  范围：B1 已完成 usecase-level read model DTO / query contract；B2 已完成 tenant-bound read repository / read-only API；B3 已完成 human approval migration / domain / repository；B4 已完成 tenant-bound approval API / audit；discipline closeout 已同步路径、工具风险和 review 触发规则。
-  状态：B1 CLOSED / ACCEPTED / COMMITTED；B2 CLOSED / ACCEPTED / COMMITTED；B3 CLOSED / ACCEPTED / COMMITTED；B4 CLOSED / ACCEPTED / COMMITTED；implementation DONE；B5 close review YES；acceptance ACCEPTED；final close CLOSED。
-  退出条件：人工能查看 trace 并记录审批状态；approval 只改变 DH 内部审批状态，不触发 NQ mutation、真实 HTTP、real provider、order、risk、ledger、paper 或 live。
-  下一步：DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN。该下一步只允许规划 Model Gateway + Prompt Version，不允许 stage-qdr-3 implementation。
-
-stage-qdr-3:
-  目标：Model Gateway + Prompt/Model Version Baseline。
-  范围：已完成 planning-only 文档和 implementation work order；B1 已提交 Prompt / Model Version domain baseline；B2 已完成并提交 usecase-level mock Model Gateway、MockModelProvider、ProviderTrustPolicy enforcement、budget / payload / memory / redaction guard、prompt/model registry lookup、fail-closed error model、gateway tests 与 architecture guard；B3 已完成并提交 V8 persistence baseline、tenant-bound JDBC repositories、migration tests 与 ArchitectureTest guard；B4 已把 QDR decision / dry-run pipeline 接入 mock ModelGateway、gateway call persistence 与 V5 audit/trace refs。stage-qdr-3 仍不直接实现真实 provider、真实 HTTP、Agent runtime、LangGraph runtime 或 LIVE。
-  状态：PLAN DONE / WORK_ORDER DONE；B1 DONE / COMMITTED；B2 DONE / FREEZE ACCEPTED / COMMITTED；B3 DONE / FREEZE ACCEPTED / COMMITTED；B4 DONE / FREEZE ACCEPTED / COMMITTED；B5 READY_FOR_RETRY / NOT_ACCEPTED_YET。
-  下一步：重新执行 `DH-STAGE-QDR-3-B5-CLOSE-REVIEW`。B5 retry 只允许 review-only，不得写成 accepted，不得把 stage-qdr-3 final close 写成 closed，不得启动 stage-qdr-4。
-  退出条件：任何 mock/model 输出可追溯 model/prompt/version/budget/usage，且 raw prompt / raw provider response 默认不保存。
-
-stage-qdr-4:
-  目标：NQ Quant Decision Review Read-only Integration Hardening。
-  范围：合同 fixture、read-only integration test、no-live-order guarantee、NQ worktree/PR 流程。
-  退出条件：NQ 与 DH 形成“输入事实 -> 审查决策 -> 回放审计”的只读闭环。
-
-stage-agent-preview:
-  目标：Agent Runtime 前置条件评估。
-  范围：只评估，不实现 LangGraph / multi-agent runtime。
-  退出条件：只有 stage-qdr-1 到 stage-qdr-4 全部完成后才允许评估。
+stage-qdr-1: CLOSED / ACCEPTED
+stage-qdr-2: FINAL CLOSE CLOSED / ACCEPTED
+stage-qdr-3 implementation: DONE
+stage-qdr-3 B1: DONE / COMMITTED
+stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED
+stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED
+stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
+stage-qdr-3 B5: READY FOR RETRY
+stage-qdr-3 acceptance: NOT_ACCEPTED_YET
+stage-qdr-3 final close: NOT_CLOSED
+stage-qdr-4: NOT_STARTED
 ```
 
-`stage-qdr-1` 的当前事实基线：limited Integration-1 dry-run endpoint 已存在；NQ feedback endpoint 已存在；V5 `dh_decision_*` audit tables 已存在；V6 `decision_request` / `decision_run` / `quant_signal` / `quant_decision` 已完成并关闭。stage-qdr-2 已完成并验收：Audit Trace Read Model 的 DTO / projection、tenant-bound query contract、JDBC read adapter、read-only detail/trace API、`human_approval_packet` migration / domain / repository，以及 tenant-bound approval create / get / decision API + audit 已落地；B5 close review 已 `ACCEPTED`，final close 已 `CLOSED`。stage-qdr-3 planning 已完成：`docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md`。stage-qdr-3 implementation work order 已完成：`docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md`。B1 `DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY` 已 `DONE / COMMITTED`。B2 `DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD` 已 `DONE / FREEZE ACCEPTED / COMMITTED`。B3 `DH-STAGE-QDR-3-B3-PERSISTENCE-BASELINE` 已 `DONE / FREEZE ACCEPTED / COMMITTED`。B4 `DH-STAGE-QDR-3-B4-QDR-PIPELINE-MOCK-GATEWAY-INTEGRATION` 已 `DONE / FREEZE ACCEPTED / COMMITTED`，只把 existing dry-run / QDR decision pipeline 接入 mock ModelGateway、gateway call persistence 与 redacted audit/trace refs；B5 close review 首次执行为 `NOT_ACCEPTED`，当前为 `READY_FOR_RETRY`。stage-qdr-3 acceptance 仍 `NOT_ACCEPTED_YET`，final close 仍 `NOT_CLOSED`，stage-qdr-4 仍 `NOT_STARTED`。replay execution API、model gateway API、provider API、prompt version API、tool registry 均仍为 `NOT IMPLEMENTED`。本路线不授权真实 provider、真实 HTTP、LangGraph / AutoGen / CrewAI / Semantic Kernel、OpenAI / Anthropic / Gemini / Ollama SDK、NQ mutation 或 LIVE。
-
-## 1.1 当前受限 runtime planning 结论
-
-- `NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN` 已完成受限 runtime planning 评估，结论为 **CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME**。
-- mock/test-support baseline PR 已合并到 NQ dev，merge commit 为 `578eb65e`；该 merge 不授权 runtime implementation。
-- `NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW` 已完成 review-only 收口，结论为 **CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME**，推荐 Option D：先冻结 API contract / error taxonomy / envelope，再拆 DH/NQ implementation。
-- `NQ-DH-I1-DH-RUNTIME-API-WO` 已完成 work-order-only 收口，结论为 **CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION**；已冻结 DH future endpoint、security gate、source allowlist、request/response envelope、error taxonomy、audit/trace/replay、feature flag、kill switch、后续拆分和回滚要求。
-- `NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已完成 DH-only limited inbound endpoint 最小闭环，endpoint 为 `POST /api/ai/decision-dry-runs`，默认关闭、dev/test 可显式启用、production disabled，且无真实 outbound HTTP、无 provider、无 NQ runtime client、无 Agent / LangGraph、无 LIVE。
-- `NQ_DRYRUN` 只允许 dev/test profile + tenant/source pair allowlist，不进入 production allowlist；schema/contracts/golden_cases、fixture JSON、migration、NQ runtime client、真实 HTTP、real provider、AI / LangGraph 与 LIVE 仍未实现。
-- `NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY`；结论允许进入下一轮 `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO`，但只允许 work-order-only，不允许 NQ client implementation、真实 HTTP、real provider、schema/contracts/golden_cases 修改、Agent / LangGraph runtime 或 LIVE。
-- `NQ-DH-I1-NQ-RUNTIME-CLIENT-WO` 已 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`；NQ work order 已冻结 default disabled、dev/test only、production disabled、kill switch、fail-closed、request/response、HMAC/header、audit/logging、error taxonomy、测试和回滚要求。当前仍不得把 Runtime integration 写成 started，不得把 DH 写成 integrated，不得开启 LIVE。
-- `NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION` 已在 NQ integration worktree 完成 isolated limited client，实现状态为 `IMPLEMENTED / TARGETED_TEST_PASS / DEFAULT_DISABLED / FAKE_TRANSPORT_ONLY`；close review 已 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。
-- `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-WO` 已 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_TEST_IMPLEMENTATION / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。
-- `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-IMPLEMENTATION` 已 `IMPLEMENTED / FULL_VALIDATION_PASS / TEST_ONLY / FAKE_TRANSPORT_ONLY / BLOCKER_FIX_APPLIED / CLOSED_BY_CLOSE_REVIEW`。
-- `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-BLOCKER-FIX` 已 `IMPLEMENTED / FULL_VALIDATION_PASS / CLOSED_BY_CLOSE_REVIEW`。
-- `NQ-DH-I1-JOINT-RUNTIME-DRYRUN-TEST-CLOSE-REVIEW` 已 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`；当前只允许下一轮单独授权 `NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW / REVIEW_ONLY`，不得真实联调、真实 HTTP、provider、schema/contracts/golden_cases 修改、Agent / LangGraph 或 LIVE。
-- `NQ-DH-I1-INTEGRATION1-MOCK-RUNTIME-CLOSE-REVIEW` 已 `PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`；当前只允许下一步 `NQ-DH-I1-MOCK-RUNTIME-PR-PREP / PR_PREP_ONLY`，不得新增 implementation WO、真实 DH call、真实 HTTP、provider、schema/contracts/golden_cases formalization、Agent / LangGraph 或 LIVE。
-
-## 1.2 阶段命名治理
+## 2. 当前下一步
 
 ```text
-NQ 自身阶段使用 Gate 体系，例如 GateN。
-DH 自身阶段使用 Stage 体系，例如 DH-STAGE4-DECISION-PIPELINE-MVP。
-NQ-DH 集成任务可以引用 NQ GateN rebase，但不得把 DH 自身阶段写成 GateK/GateL/GateN。
+DH-STAGE-QDR-3-B5-CLOSE-REVIEW
 ```
 
-旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-gatek-decision-pipeline-mvp/` 属于历史错误命名，当前已由 `DH-STAGE4-NAMING-REBASE-FIX` 收口为 `DH-STAGE4-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-stage4-decision-pipeline-mvp/`。Decision Pipeline MVP 已 `ACCEPTED / CLOSED` 的事实不变；旧 GateK 名称只能作为 `SUPERSEDED / NAMING_REPLACED` 历史说明保留。后续 Integration-1 前置条件必须写为 `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED`，不得写成 `NQ GateN + DH GateK CLOSED`。
+B5 retry 只允许 review-only。它可以审查 B1-B4 evidence、current factsources、forbidden scope、quality validation 和 archive governance，但不得实现新功能，不得启动 stage-qdr-4。
 
-## 2. Stage1（已完成）
+## 3. 后续阶段边界
 
-目标：建立 Agent Runtime Skeleton。
+stage-qdr-4 仍未开始。后续只有在 stage-qdr-3 B5 close review 通过、acceptance 明确完成、final close 明确关闭后，才允许另起 stage-qdr-4 planning。stage-qdr-4 implementation 仍需要后续单独授权。
 
-交付：
+## 4. 持续禁止项
 
 ```text
-domain.research.ResearchRun (+Status)
-domain.agent.AgentTask / TaskNode / AgentRole / AgentArtifact
-domain.candidate.StrategyCandidate / SignalProposal
-domain.judge.JudgeDecision / RiskReview / DecisionRecommendation
-domain.experience.ExperienceEntry / PheromoneEdge
-domain.feedback.NqFeedbackEvent / FeedbackSource
-usecase.agent.* + impl + InMemory repositories
-memory.agent.* + InMemory stores
-eval.agent.* + rule scorers
-connector.nq.* + fake adapters
-api.research.ResearchRunController（POST/GET /api/ai/research-runs/...）
-api.feedback.NqFeedbackController（POST /api/ai/feedback/nq）
-dh-app/AgentRuntimeWiringConfig + V2__dh_agent_runtime.sql
-ResearchRunStage1ClosedLoopTest（create→start→candidate→judge→feedback→experience）
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+NQ mutation: NO
+NQ DB read/write: NO
+trading execution: NO
 ```
 
-验收：`mvn test -Dtest='!PostgresContainerSmokeTest' -Dsurefire.failIfNoSpecifiedTests=false` BUILD SUCCESS。
-
-## 3. Stage1-CLOSE（已完成）
-
-目标：让 Stage1 成为仓库唯一主链路，文档单源，ArchUnit 兜底新边界。
-
-交付：
-
-```text
-domain.run.* / api.legacy.run.* / usecase.facade / usecase.run / usecase.gate /
-usecase.contract / dh-providers 全部 @Deprecated(since="Stage1-CLOSE", forRemoval=true)
-RunController @RequestMapping 从 /runs 改为 /legacy/runs
-contracts/openapi.yaml 中 /runs 路径标 deprecated 并迁到 /legacy/runs
-docs/current 全套文档同步到 Stage1 完成态
-docs/codex/plans/_active/STATUS.json 切到 2026-05-25_Stage1_agent_runtime_skeleton
-docs/codex/plans/_archive/2026-02-04_M1/ 归档老 M1 mock-provider 计划
-ArchitectureTest 新增 4 条规则（domain 独立 / connector.nq 禁字 / usecase.agent 禁 providers / api 禁 order-trade-live 路径）
-dh-eval/pom.xml parent 修回 dh-bom
-dep-tree.txt 重新生成
-```
-
-## 4. Integration-0 / Decision Pipeline MVP 当前路线
-
-Integration-0 safety gate 已 `CLOSED / ACCEPTED`。当前下一步不再是旧 `Integration-0-PLAN`；`DH-STAGE4-DECISION-PIPELINE-MVP-PLAN` 已产出 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md`，状态为 `ACCEPTED / CLOSED`。`DH-STAGE4-DECISION-PIPELINE-MVP-WO` 已产出 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md`，状态为 `ACCEPTED / CLOSED`。K1 Contract Freeze review 已 `PASS / CLOSED / ACCEPTED`。K2 DecisionOrchestrator Skeleton 已实现 mock-only usecase 编排骨架并关闭。K3 Audit / Snapshot / Trace Persistence 已经 M1 readiness review 关闭。K4 Replay Read Model、K5 Provider Health / Budget / Latency、K6 Mock NQ Dry-run Contract Tests、K7 Golden Cases / Eval 均已关闭。K8 Acceptance / Freeze 已 `CLOSED / ACCEPTED`，验收报告见 `docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_ACCEPTANCE_REPORT.md`，冻结快照见 `docs/gates/dh-stage4-decision-pipeline-mvp/`。`NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN` 已完成 planning-only rebase baseline，计划见 `docs/current/DH_NQ_INTEGRATION1_DRYRUN_PLAN_REBASEN.md`；`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 至 `NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO` 已完成 planning / work-order-only 收口。`NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION`、`NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY`、`NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT` 与 `NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS` 已完成 test-support / mock-only 实现准备线；mock close review、limited dry-run runtime planning、runtime API contract review 与 DH runtime API work order 均已关闭为 no-runtime 文档线。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已完成 DH-only limited inbound endpoint 最小实现，仍默认关闭且 production disabled。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW` 已 `CLOSED / ACCEPTED / REVIEW_ONLY`。`NQ-DH-I1-NQ-RUNTIME-CLIENT-WO` 已 `CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE`。当前下一步推荐 `NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / DEFAULT_DISABLED / DEV_TEST_ONLY / NO_LIVE`，且仍不允许把 Integration-1 runtime 写成 started、真实 NQ runtime 写成 connected、real provider 写成 allowed 或 LIVE 写成 enabled。
-
-语言治理补充：后续 DH roadmap、plan、work order、testing、worklog、status 文档正文必须中文为主；工程对象名、enum、JSON/OpenAPI 字段、HTTP header、状态枚举、命令和外部技术名保留英文原样。固定输出字段可以保留英文，但字段内容必须中文为主。
-
-当前状态：
-
-```text
-NQ integration not started
-Integration-0 safety gate CLOSED / ACCEPTED
-Integration-1 implementation NOT STARTED
-Runtime integration NOT STARTED
-DH integrated NO
-AI / Agent runtime NOT STARTED
-RealClient forbidden
-real provider forbidden
-LIVE DISABLED
-NQ mutation forbidden
-Stage4 plan artifact docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_PLAN.md
-Stage4 plan status ACCEPTED / CLOSED
-Current Stage4 work order artifact docs/current/DH_STAGE4_DECISION_PIPELINE_MVP_WORK_ORDER.md
-Current Stage4 work order status ACCEPTED / CLOSED
-K1 contract freeze status PASS / CLOSED / ACCEPTED
-K2 DecisionOrchestrator Skeleton IMPLEMENTED
-K3 Audit / Snapshot / Trace Persistence CLOSED / ACCEPTED after M1
-M1 Readiness Review CLOSED / ACCEPTED
-K4 Replay Read Model CLOSED
-K5 Provider Health / Budget / Latency CLOSED
-K6 Mock NQ Dry-run Contract Tests CLOSED
-K7 Golden Cases / Eval CLOSED
-K8 Acceptance / Freeze CLOSED / ACCEPTED
-NQ-DH-INTEGRATION1-DRYRUN-PLAN-REBASEN PLAN BASELINE ACCEPTED
-NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE CLOSED / ACCEPTED / DOCS-ONLY
-NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-NQ-DH-I1-P2-CONTRACT-FIXTURES-PLAN COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-NQ-DH-I1-P3-DRYRUN-IMPLEMENTATION-READINESS-PLAN COMPLETED / PLAN ONLY / NOT IMPLEMENTED
-NQ-DH-I1-P4-IMPLEMENTATION-GATE-REVIEW-FIX COMPLETED / DOCS-ONLY / GATE-FIX
-NQ-DH-I1-DRYRUN-MOCK-IMPLEMENTATION-WO COMPLETED / WORK_ORDER_ONLY / NOT IMPLEMENTED
-NQ-DH-I1-M0-CONTRACT-GAP-CLOSE-WO COMPLETED / WORK_ORDER_ONLY / CONTRACT_GAP_CLOSED / NOT IMPLEMENTED
-NQ-DH-I1-M1-DH-DRYRUN-CONTRACT-ENTRY-MOCK-WO COMPLETED / WORK_ORDER_ONLY / DH_DRYRUN_ENTRY_PLANNED / NOT IMPLEMENTED
-NQ-DH-I1-M2-NQ-DRYRUN-STUB-RECORDER-WO COMPLETED / WORK_ORDER_ONLY / NQ_DRYRUN_STUB_RECORDER_PLANNED / NOT IMPLEMENTED
-NQ-DH-I1-M3-JOINT-MOCK-FIXTURES-AND-CONTRACT-TESTS-WO COMPLETED / WORK_ORDER_ONLY / FINAL_WO_BEFORE_IMPLEMENTATION / NOT IMPLEMENTED
-NQ-DH-I1-IMP0-CONTRACT-GAP-TEST-SUPPORT-IMPLEMENTATION IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_REVIEW
-NQ-DH-I1-IMP1-DH-DRYRUN-TEST-SUPPORT-ENTRY IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_VALIDATION
-NQ-DH-I1-IMP2-NQ-STUB-RECORDER-NO-SIDE-EFFECT VERIFY PASS / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_IMP3_JOINT_MOCK_CONTRACT_TESTS
-NQ-DH-I1-IMP3-JOINT-MOCK-CONTRACT-TESTS IMPLEMENTED / TEST_SUPPORT_ONLY / MOCK_ONLY / READY_FOR_MOCK_CLOSE_REVIEW
-NQ-DH-I1-MOCK-CLOSE-REVIEW CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME
-NQ-DH-I1-LIMITED-DRYRUN-RUNTIME-PLAN CLOSED / ACCEPTED / PLAN_ONLY / NOT_IMPLEMENTED / NO_RUNTIME
-NQ-DH-I1-MOCK-BASELINE-PR-PREP CLOSED / MERGED / NO_RUNTIME
-NQ-DH-I1-RUNTIME-API-CONTRACT-REVIEW CLOSED / ACCEPTED / REVIEW_ONLY / NO_RUNTIME
-NQ-DH-I1-DH-RUNTIME-API-WO CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_RUNTIME_IMPLEMENTATION
-NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION IMPLEMENTED / DH_ONLY / FEATURE_FLAG_DISABLED_BY_DEFAULT / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
-NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-CLOSE-REVIEW CLOSED / ACCEPTED / REVIEW_ONLY / DH_ONLY / NO_NQ_CHANGE / NO_LIVE
-NQ-DH-I1-NQ-RUNTIME-CLIENT-WO CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE
-Next concrete action NQ-DH-I1-NQ-LIMITED-RUNTIME-CLIENT-IMPLEMENTATION / NOT STARTED / CONTROLLED_IMPLEMENTATION / DEFAULT_DISABLED / DEV_TEST_ONLY / NO_LIVE
-Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK SUPERSEDED / REBASE_REQUIRED
-NQ current planning baseline GateN
-```
-
-NQ / DH 三轮只读审计（NQ 全仓 / DH 全仓 / NQ-DH 联合边界 + 汇总）已完成。Integration-0 是 contract / mock / documentation 工作线，不是 runtime integration。DH P1-4 residual 已 CLOSED；header alignment CLOSED；timestamp alignment CLOSED；code reality audit blockers fixed。上述 CLOSED 不授权 Integration-1 runtime。
-
-DH-NQ Integration-0 契约冻结已完成（contract / mock / docs，未实现集成），见
-`DH_NQ_INTEGRATION0_CONTRACT_FREEZE.md` / `DH_NQ_INTEGRATION0_SECURITY_POLICY.md` /
-`DH_NQ_INTEGRATION0_CONTRACT_TEST_PLAN.md` / `DH_NQ_INTEGRATION0_ACCEPTANCE_REPORT.md`。当前不允许直接 Integration-1 实现、真实只读通道、真实 HTTP、RealClient、Provider、LIVE、AI 自动交易或 LangGraph runtime。
-
-范围：
-
-```text
-DecisionRequest / DecisionOutput / DecisionOrchestrator 规划
-Snapshot / Trace / Replay / Audit 边界规划
-READ_ONLY_RECOMMENDATION 输出模型
-ABSTAIN 默认策略
-forbiddenActions: PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE / READ_NQ_DB / WRITE_NQ_DB
-policy denied fail-closed
-audit 写失败 fail-closed
-验收清单与风险清单
-```
-
-Decision Pipeline MVP PLAN 与 Integration-1 dry-run plan 必须明确禁止：
-
-```text
-不实现真实 NQ client
-不实现 RealClient
-不接真实 HTTP / event 到 NQ
-不调用 NQ runtime 或 NQ /api/ai/research/backtest-requests
-不启动 Paper Run
-不修改 NQ 交易状态
-不访问交易所密钥
-不触碰 LIVE trading
-不读取 NQ DB
-不写 NQ DB
-不接 LangGraph runtime
-不接 LLM / OpenAI / Claude / Gemini / 本地模型 runtime
-不输出 BUY / SELL / PLACE_ORDER / CANCEL_ORDER
-```
-
-Stage4 WO 验收：
-
-```text
-已输出 DH-STAGE4-DECISION-PIPELINE-MVP-WO 文档
-已拆分 K1-K8 implementation batches
-已明确每批 allowed / forbidden files、生产/测试/API/migration 权限、测试、验收和回滚
-已固化 DecisionOutput READ_ONLY_RECOMMENDATION 与 ABSTAIN / fail-closed 规则
-已固化 forbiddenActions 与批次顺序约束
-git diff --check 通过
-本轮按用户要求尝试 mvn test 与 mvn -Pquality validate，并在 TESTING.md 记录真实结果
-```
-
-## 5. Stage2-PoC（historical / superseded / deferred）
-
-以下内容是历史规划背景，不是当前 next，不允许作为当前实现任务：
-
-```text
-NqFeedbackClient 接通真实 HTTP/事件（deferred / forbidden until Integration-0 approved）
-NqBacktestClient 接通真实 NQ /api/ai/research/backtest-requests（deferred / forbidden until Integration-0 approved）
-RealNqBacktestClient / RealClient（forbidden）
-real provider（forbidden）
-真实 HTTP / event 到 NQ（forbidden）
-DH 主动发起真实 NQ backtest request（forbidden）
-```
-
-后续如需恢复这些方向，必须先通过 Integration-0-PLAN 的安全审查、契约冻结和人工确认。
-
-## 6. Stage3：NQ Console 接入
-
-目标：NQ Console 接入 DH AI 页面。
-
-交付页面（落在 NQ frontend，不在 DH）：
-
-```text
-/ai/tasks
-/ai/tasks/:id
-/ai/candidates
-/ai/experiences
-/ai/reports
-```
-
-验收：NQ Console 统一前端入口，不建设 DH 完整业务前端。
-
-## 7. DH-FREEZE
-
-目标：冻结 DH Agent Decision Layer v1。
-
-验收：
-
-```text
-文档快照进入 docs/gates/dh-agent-v1
-回归测试通过
-边界检查通过
-无 AI 直接交易能力
-无 NQ 核心污染
-```
+历史路线、旧 work order、旧 review / freeze 记录、blocker fix 过程和 pre-close snapshots 已归入 `docs/archive/**` 或由 `ARCHIVE_INDEX.md` 索引。它们保留复盘价值，但不能作为当前 next action 或 B5 blocker，除非触发 `FACTSOURCE_POLICY.md` 定义的硬错误。
