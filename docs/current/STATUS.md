@@ -1,7 +1,7 @@
 # Decision Hub Status
 
-> Current stage: DH-STAGE-QDR-2 / ACCEPTED / FINAL_CLOSE_SYNCED / NO_RUNTIME
-> Next stage:    DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / READY / PLANNING_ONLY / IMPLEMENTATION_NOT_STARTED
+> Current stage: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / DONE / PLANNING_ONLY / IMPLEMENTATION_NOT_STARTED
+> Next stage:    DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / READY / WORK_ORDER_ONLY / NO_IMPLEMENTATION_YET
 > AI trading execution: not allowed
 > NQ core changes:      not allowed in this stage
 
@@ -35,7 +35,7 @@ DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 K1 Contract Freeze Review: PASS / CLOSED / ACCEPTED.
 M1 Readiness Review: CLOSED / ACCEPTED.
 Current workspace: F:/Project/decision-hub.
-Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / ACCEPTED / FINAL_CLOSE_SYNCED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
+Current main line: stage-qdr-3 / Model Gateway + Prompt/Model Version Baseline / PLAN_DONE / IMPLEMENTATION_NOT_STARTED / NO_AGENT / NO_LIVE / NO_REAL_HTTP / NO_PROVIDER.
 stage-qdr-1 implementation: DONE.
 stage-qdr-1 freeze: CLOSED / ACCEPTED.
 stage-qdr-2 Work Order: DONE / WORK_ORDER_READY.
@@ -55,8 +55,10 @@ approval write endpoint: IMPLEMENTED_BY_VALIDATION.
 replay execution API: NOT STARTED.
 model gateway: NOT STARTED.
 tool registry: NOT STARTED.
-stage-qdr-3 planning: READY.
+stage-qdr-3 planning: DONE / PLAN_ONLY.
 stage-qdr-3 implementation: NOT STARTED.
+stage-qdr-3 plan artifact: docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md.
+stage-qdr-3 next action: DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / WORK_ORDER_ONLY / NO_IMPLEMENTATION_YET.
 Mock baseline line: NQ-DH-I1-IMP0..IMP3 + MOCK-CLOSE-REVIEW / CLOSED / ACCEPTED / TEST_SUPPORT_ONLY / MOCK_ONLY / NO_RUNTIME.
 Post-PR baseline: NQ dev contains mock/test-support baseline PR #12 merge commit 578eb65e; final read-only check shows current dev / origin/dev at b856cf07155de26f87fad9c21234c1a8a07b964a, with 578eb65e as ancestor.
 NQ runtime client work order: CLOSED / ACCEPTED / WORK_ORDER_ONLY / NO_CLIENT_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
@@ -68,7 +70,7 @@ Joint runtime dry-run test blockers: SIGNATURE_MATERIAL_SOURCE_NORMALIZATION_MIS
 Joint runtime dry-run test close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime milestone close review: PASS / CLOSED / ACCEPTED / REVIEW_ONLY / MOCK_RUNTIME_MILESTONE_CLOSED / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
 Integration-1 mock runtime PR prep: READY / PR_PREP_ONLY / NQ_PR_CREATE_ALLOWED / NO_MERGE / NO_REAL_DH_CALL / NO_REAL_HTTP / NO_PROVIDER / NO_LIVE.
-Next concrete action: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / READY / PLANNING_ONLY / NO_IMPLEMENTATION / NO_REAL_HTTP / NO_PROVIDER.
+Next concrete action: DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / READY / WORK_ORDER_ONLY / NO_IMPLEMENTATION_YET / NO_REAL_HTTP / NO_PROVIDER.
 K2 DecisionOrchestrator Skeleton: IMPLEMENTED.
 K3 Audit / Snapshot / Trace Persistence: CLOSED / ACCEPTED after M1.
 K4 Replay Read Model: CLOSED.
@@ -78,6 +80,37 @@ K7 Golden Cases / Eval: CLOSED.
 K8 Acceptance / Freeze: CLOSED / ACCEPTED.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
+```
+
+## 1.0.37 DH-STAGE-QDR-3 Model Gateway + Prompt/Model Version Plan（2026-07-07，DONE / PLAN_ONLY）
+
+```text
+Task: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN
+Task type: PLANNING_ONLY + MODEL_GATEWAY_DESIGN + PROMPT_VERSION_DESIGN + PROVIDER_TRUST_BOUNDARY_DESIGN + AUDIT_REDACTION_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+Plan artifact: docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md
+stage-qdr-3 planning: DONE / PLAN_ONLY
+stage-qdr-3 implementation: NOT STARTED
+real HTTP: NO
+real provider: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+本轮只规划 `stage-qdr-3 = Model Gateway + Prompt/Model Version Baseline`。计划明确所有 future model/provider 调用必须经过统一 `ModelGatewayPort` 与 `ProviderTrustPolicy`；业务代码不得直连外部 AI provider。Prompt version 必须 immutable 并带 checksum；model version、provider profile、prompt render、provider trust decision 必须进入 audit trace 与 decision trace。默认不保存 raw prompt，不保存 raw provider response，只允许 hash/ref/redacted summary/redacted excerpt。
+
+stage-qdr-3 后续 implementation 必须先输出 `DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER`；不得从本 plan 直接实现 Model Gateway、prompt registry、migration、API、真实 provider、真实 HTTP、Agent runtime、LangGraph runtime 或 LIVE。
+
+Readiness:
+
+```text
+STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN: DONE
+ALLOW_STAGE_QDR_3_IMPLEMENTATION_WO: YES
+ALLOW_STAGE_QDR_3_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
 ```
 
 ## 1.0.36 DH-STAGE-QDR-2 Final Close Docs Sync（2026-07-07，CLOSED / ACCEPTED）

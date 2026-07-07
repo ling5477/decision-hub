@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-当前阶段: DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT / DONE / DOCS_AND_TOOLING_DISCIPLINE / NO_BUSINESS_CODE_CHANGE
-下一阶段: DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY
+当前阶段: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / DONE / PLANNING_ONLY / NO_API_CHANGE
+下一阶段: DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / READY / WORK_ORDER_ONLY / NO_API_IMPLEMENTATION
 ```
 
 OpenAPI 单源：`contracts/openapi.yaml`。
@@ -30,15 +30,19 @@ stage-qdr-2 read model API: IMPLEMENTED / READ_ONLY / TENANT_BOUND / NO_OPENAPI_
 stage-qdr-2 human approval domain/repository: IMPLEMENTED / INTERNAL_ONLY
 stage-qdr-2 approval API: CLOSED / ACCEPTED / COMMITTED / TENANT_BOUND / AUDIT_FAIL_CLOSED / NO_OPENAPI_FORMALIZATION
 replay execution API: NOT IMPLEMENTED
-stage-qdr-2 B5 close review: READY / NOT STARTED / REVIEW_ONLY / NO_NEW_FEATURE
-stage-qdr-3: NOT STARTED
+stage-qdr-2 B5 close review: YES / ACCEPTED / REVIEW_ONLY / NO_NEW_FEATURE
+stage-qdr-3 planning: DONE / PLAN_ONLY
+stage-qdr-3 implementation: NOT STARTED
+Model Gateway API: NOT STARTED
+Provider API: NOT STARTED
+Prompt Version API: NOT STARTED
 Integration-1:        NOT STARTED
 Runtime integration:  NOT STARTED
 AI / Agent runtime:   NOT STARTED
 LIVE:                 DISABLED
 ```
 
-OpenAPI 仍为正式契约单源；B4 未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay execution API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 B1/B2/B3/B4 已 `CLOSED / ACCEPTED / COMMITTED`；B4 已新增 tenant-bound approval create / get / decision API 与审计事件写入。approval API 只改变 DH 内部 approval 状态并写审计，不触发 NQ、交易、provider、HTTP 或 replay execution。`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
+OpenAPI 仍为正式契约单源；B4 未修改 `contracts/openapi.yaml`、`contracts/json-schema/**`、`golden_cases/**` 或 fixture JSON。DH Stage4 Decision Pipeline MVP K1-K8 已 `CLOSED / ACCEPTED`；`DecisionRequest` / `DecisionOutput` 已作为 K1 domain contract 与 JSON Schema 落地；audit / snapshot / trace persistence 与 internal replay read model 已在 usecase/infra 内闭环，但 replay execution API 仍未实现。`NQ-DH-I1-DH-LIMITED-RUNTIME-ENDPOINT-IMPLEMENTATION` 已在 DH 侧实现受限 inbound endpoint `POST /api/ai/decision-dry-runs`，该 endpoint 默认关闭，仅 dev/test profile 可显式启用，production profile disabled / kill switch fail-closed。`stage-qdr-1` 已关闭：成功 dry-run 会创建 `decision_request`、`decision_run`、`quant_signal` 与 `quant_decision`，并继续保留 V5 `dh_decision_*` audit / trace / output 链路。stage-qdr-2 B1/B2/B3/B4 已 `CLOSED / ACCEPTED / COMMITTED`；B4 已新增 tenant-bound approval create / get / decision API 与审计事件写入。approval API 只改变 DH 内部 approval 状态并写审计，不触发 NQ、交易、provider、HTTP 或 replay execution。stage-qdr-3 当前仅完成 planning，不新增 API，不新增 Controller，不修改 OpenAPI，不新增 Provider API。`NQ_DRYRUN` 只进入 dev/test allowlist，不进入 production allowlist；实现不包含 NQ runtime client implementation、真实 outbound HTTP、real provider、Agent / LangGraph runtime 或 LIVE。
 
 ## 2. 已实现端点
 

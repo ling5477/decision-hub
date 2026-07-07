@@ -6503,3 +6503,55 @@ DecisionAction no BUY / SELL / PLACE_ORDER / CANCEL_ORDER
 ### 推荐下一步
 
 `DH-STAGE-QDR-2-B3-REVIEW-FREEZE`
+
+---
+
+## DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN
+
+日期：2026-07-07
+
+### 本轮目标
+
+只做 stage-qdr-3 planning / work order 前置设计，定义 Model Gateway + Prompt/Model Version Baseline、provider trust boundary、prompt injection guard、audit/redaction/trace、planned data model 与后续 implementation batches。本轮不实现任何代码，不新增测试，不新增 migration，不新增 API，不接真实 provider，不接真实 HTTP，不启动 Agent / LangGraph / LIVE。
+
+### 完成内容
+
+- 新增 `docs/current/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md`。
+- 同步 `README.md`、`docs/current/README.md`、`STATUS.md`、`ROADMAP.md`、`WORK_ORDER.md`、`API.md`、`DB_SCHEMA.md` 与 `TESTING.md`。
+- 明确 `stage-qdr-3 = Model Gateway + Prompt/Model Version Baseline`，且只是 plan-only，不是 Agent phase，不是 LangGraph runtime，不接真实 provider，不接真实 HTTP。
+- 规划 `ModelGatewayPort`、`ModelProviderPort`、`ModelGatewayRequest`、`ModelGatewayResult`、`ModelCallContext`、`ModelCallPolicy`、`ModelCallBudget`、`ModelCallRedactionPolicy`、`ModelCallAuditRef`、`ProviderTrustPolicy integration` 与 `MockModelProvider`。
+- 规划 `PromptTemplate`、`PromptVersion`、`PromptRenderContext`、`PromptRenderResult`、`PromptInputPolicy`、`PromptInjectionGuard`、`PromptVersionRegistry`、`ModelProfile`、`ModelVersion` 与 `ProviderProfile`。
+- 明确 raw prompt / raw provider response 默认禁止保存，只允许 hash/ref/redacted summary/redacted excerpt。
+- 规划 proposed tables：`prompt_template`、`prompt_version`、`model_profile`、`model_version`、`model_gateway_call` 与可后置 `model_gateway_audit_ref`；本轮未新增 migration。
+- 拆分后续 B1-B5：Prompt/Model Version Domain + Mock Registry、Model Gateway Mock Runtime + Policy Guard、Persistence Baseline、QDR Decision Pipeline Integration、Stage-qdr-3 Close Review。
+
+### 验证摘要
+
+- `Set-Location -LiteralPath 'E:\Project\decision-hub'`：PATH_UNAVAILABLE；当前执行环境无 `E:` drive，后续在当前 Codex 工作区 `F:\project\decision-hub` 执行。
+- 写入前 `git status --short`：PASS / CLEAN；分支 `dev`；HEAD 为 `e7a24b0 docs(qdr): record stage-qdr-2 acceptance`。
+- `git diff --check`：PASS；仅 LF -> CRLF warning，无 whitespace error。
+- `git diff --stat`：docs-only；tracked diff 限于 `README.md` 与 `docs/current` 文档。
+- Forbidden scan：PASS / REVIEWED；总命中 1664 行，docs prohibition 355，existing historical text 932，test guard 377，actual risk 0。
+- `mvn -ntp -Pquality validate`：BUILD SUCCESS；reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed；未使用 `-DskipTests` 或 `-DskipITs`。
+- `.\mvnw.cmd -v`：WRAPPER_UNUSABLE / P2 TOOLING RISK；仍输出 `'\` is not recognized` 与 wrapper jar 缺少主清单属性。
+
+### 边界
+
+未修改 Java 生产代码；未修改测试代码；未新增 migration；未修改历史 migration；未新增 API；未新增 Controller；未新增 Repository；未新增 Service；未新增真实 HTTP outbound；未新增真实 provider；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未修改 NQ；未读取或输出 credential、token、cookie、apiKey、apiSecret、passphrase；未新增 replay execution；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未把 `LONG_BIAS / SHORT_BIAS` 映射为 `BUY / SELL`；未把 `APPROVED` 映射为 `BUY`；未把 `REJECTED` 映射为 `SELL`；未开启 LIVE；stage-qdr-3 implementation 未启动。
+
+### Readiness
+
+```text
+STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN: DONE
+ALLOW_STAGE_QDR_3_IMPLEMENTATION_WO: YES
+ALLOW_STAGE_QDR_3_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+### 推荐下一步
+
+`DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER`

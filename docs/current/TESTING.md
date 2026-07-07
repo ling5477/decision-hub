@@ -3915,3 +3915,58 @@ ALLOW_AGENT_PHASE: NO
 ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
+
+## 2026-07-07 DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN 验证记录
+
+结论：**PASS / PLAN_ONLY / DOCS_ONLY / NO_CODE_CHANGE / NO_DB_MIGRATION / NO_REAL_HTTP / NO_PROVIDER / NO_AGENT / NO_LANGGRAPH / NO_LIVE**。
+
+本轮只新增 stage-qdr-3 planning 文档并同步 `README.md` 与 `docs/current` 状态入口；未修改 Java 生产代码、测试代码、migration、API、Controller、Repository、Service、contracts、golden_cases 或 NQ 仓库。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| `Set-Location -LiteralPath 'E:\Project\decision-hub'` | **PATH_UNAVAILABLE** | 当前执行环境不存在 `E:` drive；命令返回 `Cannot find drive. A drive with the name 'E' does not exist.`。后续命令在当前 Codex 工作区 `F:\project\decision-hub` 执行。 |
+| `git status --short`（写入前） | **PASS / CLEAN** | 分支 `dev`；无 staged、untracked 或 dirty 输出。 |
+| `git log --oneline -10` | **PASS** | HEAD 为 `e7a24b0 docs(qdr): record stage-qdr-2 acceptance`，满足 final close docs sync 已提交前置。 |
+| `git diff --check`（写入后） | **PASS** | 无 whitespace error；仅 Windows LF -> CRLF warning。 |
+| `git diff --stat`（写入后） | **DOCS_ONLY** | tracked diff 限于 `README.md` 与 `docs/current` 文档；新增 plan 文件由 `git status --short` 标识为 untracked。 |
+| forbidden scan | **PASS / REVIEWED** | 总命中 1664 行；docs prohibition 355，existing historical text 932，test guard 377，actual risk 0。生产代码二次分类为既有 fail-closed 注释、denylist/redaction、计量字段、migration check constraint 或默认禁用配置说明。 |
+| `mvn -ntp -Pquality validate` | **BUILD SUCCESS** | reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed；未使用 `-DskipTests` 或 `-DskipITs`。 |
+| `.\mvnw.cmd -v` | **WRAPPER_UNUSABLE / P2 TOOLING RISK** | 输出包含 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` 缺少主清单属性；本轮继续使用系统 Maven `mvn`。 |
+
+Noted:
+
+- `mvn -ntp -Pquality validate` 仍输出既有 Maven settings warning：`D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml` 中存在 `Unrecognised tag: 'profiles'`。
+- 本轮未运行 `mvn test`，因为任务类型为 planning-only/docs-only，用户明确要求验证 `quality validate`。
+- Docker/Testcontainers 风险继承：`mvnw.cmd` 与 Testcontainers named pipe 风险仍未在本轮修复；Docker-gated skip 不得写成 PASS。
+- 本轮未新增 code、test、migration、API、provider、HTTP client、Agent runtime、LangGraph runtime 或 LIVE 能力。
+
+stage-qdr-3 后续测试矩阵：
+
+```text
+B1 Prompt / Model Version Domain + Mock Registry:
+  immutable prompt version / checksum / registry lookup / no raw prompt tests
+B2 Model Gateway Mock Runtime + Policy Guard:
+  mock provider no outbound / ProviderTrustPolicy / payload cap / token budget / memory cap /
+  prompt injection guard / redaction failure / provider unavailable fail-closed
+B3 Persistence Baseline:
+  migration presence / COMMENT coverage / tenant indexes / unique constraints /
+  raw_prompt and raw_response forbidden columns absent
+B4 QDR Decision Pipeline Integration:
+  structured output / audit trace refs / no approval mutation / no NQ mutation /
+  LONG_BIAS and SHORT_BIAS not mapped to BUY or SELL
+B5 Close Review:
+  docs-current consistency / forbidden scan / quality validate / no real provider / no real HTTP / no LIVE
+```
+
+Readiness：
+
+```text
+STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN: DONE
+ALLOW_STAGE_QDR_3_IMPLEMENTATION_WO: YES
+ALLOW_STAGE_QDR_3_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```

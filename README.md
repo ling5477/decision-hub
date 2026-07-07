@@ -9,8 +9,8 @@ Decision Hub 是 NexusQuant 的 AI Agent 决策能力层。
 ## 当前阶段
 
 ```text
-当前阶段: DH-STAGE-QDR-2 / ACCEPTED / FINAL_CLOSE_SYNCED / NO_RUNTIME
-下一阶段: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / READY / PLANNING_ONLY / IMPLEMENTATION_NOT_STARTED
+当前阶段: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / DONE / PLANNING_ONLY / IMPLEMENTATION_NOT_STARTED
+下一阶段: DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / READY / WORK_ORDER_ONLY / NO_IMPLEMENTATION_YET
 事实源: docs/current
 ```
 
@@ -83,12 +83,13 @@ PLAN -> WO -> IMPLEMENT -> VERIFY -> FREEZE -> NEXT PLAN
 当前下一步只能进入：
 
 ```text
-DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / READY / PLANNING_ONLY / NO_IMPLEMENTATION。
+DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / READY / WORK_ORDER_ONLY / NO_IMPLEMENTATION_YET。
 - 当前 DH 实际工作区为 `F:/Project/decision-hub`。
 - stage-qdr-2 B1/B2/B3/B4 均已完成、freeze/acceptance 通过并提交；B4 HEAD 为 `feat(qdr): add stage-qdr-2 human approval API`。
 - stage-qdr-2 B5 close review 已 `ACCEPTED`；stage-qdr-2 final close 已 `CLOSED`。
-- stage-qdr-3 只允许进入 Model Gateway + Prompt Version planning；implementation 仍 `NOT STARTED` 且 `NOT ALLOWED`。
-- replay execution API / model gateway / tool registry 均 `NOT STARTED`。
+- stage-qdr-3 Model Gateway + Prompt Version plan 已 `DONE / PLAN_ONLY`；implementation 仍 `NOT STARTED` 且 `NOT ALLOWED`。
+- 下一步必须先写 `DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER`，不得直接实现。
+- replay execution API / model gateway implementation / tool registry 均 `NOT STARTED`。
 - real HTTP / real provider / Agent runtime / LangGraph runtime 均未启动；LIVE DISABLED。
 - `mvnw.cmd` 当前为 `UNUSABLE / P2 TOOLING RISK`；使用系统 Maven `mvn` 作为当前替代验证工具。
 - Docker daemon CLI 可用，但本机 Java/Testcontainers 访问 `\\.\pipe\docker_engine` 被拒绝；Docker-gated tests skip 只能记录为环境型 skip，不得写成 PASS。

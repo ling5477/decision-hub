@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: DH-STAGE-QDR-2-DISCIPLINE-CLOSEOUT / DONE / DOCS_AND_TOOLING_DISCIPLINE / NO_BUSINESS_CODE_CHANGE
-Next stage:    DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY
+Current stage: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN / DONE / PLANNING_ONLY / NO_DB_MIGRATION
+Next stage:    DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER / READY / WORK_ORDER_ONLY / NO_DB_MIGRATION_YET
 ```
 
 Flyway 迁移：
@@ -20,11 +20,53 @@ V7__human_approval_packet.sql      stage-qdr-2 B3 Human Approval Packet
 stage-qdr-2 B1 readmodel DTO   DONE / NO DB SCHEMA CHANGE / NO MIGRATION
 stage-qdr-2 B2 read repository/API DONE / NO DB SCHEMA CHANGE / NO MIGRATION
 stage-qdr-2 B4 approval API/audit CLOSED / ACCEPTED / COMMITTED / NO DB SCHEMA CHANGE / NO MIGRATION
-stage-qdr-2 B5 close review READY / NOT STARTED / NO DB SCHEMA CHANGE
+stage-qdr-2 B5 close review ACCEPTED / NO DB SCHEMA CHANGE
 human_approval_packet            MIGRATION_ADDED / B3 / NOT_TRADING_AUTHORIZATION
+stage-qdr-3 planning             DONE / PLANNED_TABLES_ONLY / NO MIGRATION
 ```
 
-## 1.0 stage-qdr-2 B1/B2/B3/B4 schema impact
+## 1.0 stage-qdr-3 planned schema（PLANNED / NOT IMPLEMENTED）
+
+本轮只规划 Model Gateway + Prompt/Model Version Baseline，不新增 migration，不修改 V1-V7 历史 migration。以下候选表必须在后续 `DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER` 与 migration review/freeze 后才能实现：
+
+```text
+prompt_template       PLANNED / B3 candidate / NOT IMPLEMENTED
+prompt_version        PLANNED / B3 candidate / NOT IMPLEMENTED
+model_profile         PLANNED / B3 candidate / NOT IMPLEMENTED
+model_version         PLANNED / B3 candidate / NOT IMPLEMENTED
+model_gateway_call    PLANNED / B3 candidate / NOT IMPLEMENTED
+model_gateway_audit_ref OPTIONAL / DEFERABLE / NOT IMPLEMENTED
+```
+
+设计约束：
+
+```text
+tenant_id: 必须
+trace_id / request_id / decision_run_id: model_gateway_call 必须
+immutable prompt/model version: 必须
+checksum / hash: 必须
+raw_prompt: 禁止
+raw_response: 禁止
+credential / token / cookie / apiKey / apiSecret / passphrase: 禁止
+redacted_summary / prompt_hash / response_hash / request_ref / response_ref: 允许
+```
+
+建议约束与索引：
+
+```text
+prompt_version unique(tenant_id, template_key, version)
+prompt_version checksum not null
+model_version unique(tenant_id, provider_profile_id, model_name, model_version)
+model_gateway_call index(tenant_id, decision_run_id, created_at)
+model_gateway_call index(trace_id)
+model_gateway_call index(request_id)
+model_gateway_call index(prompt_version_id)
+model_gateway_call index(model_version_id)
+```
+
+任何 stage-qdr-3 migration batch 都必须先 review/freeze；migration batch 之前不得实现 API、真实 provider、Provider SDK 或 real HTTP。
+
+## 1.1 stage-qdr-2 B1/B2/B3/B4 schema impact
 
 B1 只新增 `dh-usecase` read model DTO / projection 与 tenant-bound query contract；B2 新增只读 JDBC adapter 与 authenticated read-only API。B1/B2 均不新增 DB schema，不新增 Flyway migration，不修改 V5 / V6 migration。B3 新增 `V7__human_approval_packet.sql`，只新增 `human_approval_packet` 表，不修改 V1-V6 历史 migration，不 ALTER 旧表，不 DROP 表。B4 只新增 API / command service / audit integration / tests / wiring，不新增 migration，不修改 V7，不修改 V1-V6。B5 只能做 close review / acceptance，不得新增 schema。
 
@@ -38,7 +80,7 @@ Approval write endpoint: CLOSED / ACCEPTED / COMMITTED / NO_SCHEMA_CHANGE
 Replay execution API: NOT STARTED
 ```
 
-## 1.1 stage-qdr-1 Decision Core baseline
+## 1.2 stage-qdr-1 Decision Core baseline
 
 V6 新增 4 张 Quant Decision Review 主线表。该主线只服务只读审查与审计，不是交易事实源，不承载订单、撤单、账户、账本、风控 mutation 或 LIVE 状态。所有表与字段均在 migration 中补齐 `COMMENT ON TABLE` / `COMMENT ON COLUMN`，字段注释不得写入凭证、账户密钥或真实 provider 信息。
 
@@ -165,7 +207,7 @@ REJECTED
 
 `LONG_BIAS / SHORT_BIAS` 只表示方向性审查意见，不代表 `BUY / SELL`。`human_approval_status` 当前默认 `NOT_REQUIRED`；B3 已新增独立 `human_approval_packet` 表，B4 approval API 只写该表的内部 approval 状态，不修改 `quant_decision.action`，也不把 `approval_status` 当作 execution signal。
 
-## 1.2 stage-qdr-2 human_approval_packet（B3 MIGRATION_ADDED / NOT TRADING AUTHORIZATION）
+## 1.3 stage-qdr-2 human_approval_packet（B3 MIGRATION_ADDED / NOT TRADING AUTHORIZATION）
 
 B3 已新增 `V7__human_approval_packet.sql`。该 migration 只新增 `human_approval_packet` 表，用于 DH 内部人工审查证据；它不是交易授权表，不触发 NQ mutation，不触发真实 HTTP / provider，不承载 order、cancel、risk、ledger、paper 或 LIVE 状态。
 
@@ -216,7 +258,7 @@ idx_human_approval_packet_request_id(request_id)
 
 `checklist_json` / `evidence_refs_json` 不得存储 credential、apiKey、apiSecret、passphrase、token、cookie、raw provider response 或 raw prompt secret。审批包只记录 human review evidence，不是交易授权。审批状态只允许改变 DH 内部 approval 状态；`APPROVED` 不等于 `BUY`，`REJECTED` 不等于 `SELL`，`LONG_BIAS / SHORT_BIAS` 不映射为 `BUY / SELL`。
 
-## 1.3 stage-qdr-2 B4 schema conclusion
+## 1.4 stage-qdr-2 B4 schema conclusion
 
 ```text
 B4 new migration: NO
