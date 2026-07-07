@@ -3978,6 +3978,47 @@ ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
 
+## 2026-07-07 DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD 验证记录
+
+结论：**PASS / B2_IMPLEMENTED_BY_VALIDATION / MODEL_GATEWAY_MOCK_RUNTIME_POLICY_GUARD / NO_DB_MIGRATION / NO_API_CHANGE / NO_REAL_HTTP / NO_PROVIDER / NO_AGENT / NO_LANGGRAPH / NO_LIVE**。
+
+本轮只实现 stage-qdr-3 B2：usecase-level `ModelGatewayPort` / `ModelProviderPort`、gateway request/result/context/policy/budget/redaction contract、deterministic `MockModelProvider`、`ProviderTrustPolicy` enforcement、budget / payload / memory / redaction guard、prompt/model registry lookup、fail-closed error model、gateway tests 与 ArchitectureTest guard。未新增 migration、API、Controller、Repository/JDBC adapter、真实 provider、HTTP client、Provider SDK、Agent runtime、LangGraph runtime、contracts、golden_cases 或 NQ 修改。
+
+| 命令 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（写入前） | **PASS / CLEAN** | 分支 `dev`；HEAD 为 `713a695 feat(qdr): add stage-qdr-3 prompt model version baseline`；无 staged、untracked 或 dirty 输出。 |
+| `git log --oneline -10` | **PASS** | HEAD 包含 `feat(qdr): add stage-qdr-3 prompt model version baseline`。 |
+| `mvn -ntp -pl dh-domain -am test` | **BUILD SUCCESS** | dh-domain reactor 3/3 SUCCESS；151 tests，0 failures，0 errors，0 skipped。 |
+| `mvn -ntp -pl dh-usecase -am test` | **BUILD SUCCESS** | dh-usecase reactor 9/9 SUCCESS；274 tests，0 failures，0 errors，0 skipped；新增 B2 `MockModelProviderTest` 5 tests、`ModelGatewayServiceTest` 23 tests、`InMemoryModelVersionRegistryTest` 6 tests 通过。 |
+| `mvn -ntp -pl dh-app -am test` | **BUILD SUCCESS** | dh-app reactor 15/15 SUCCESS；`ArchitectureTest` 32 tests 通过；dh-infra 53 tests 中既有 `JdbcNonceReplayGuardPersistenceTest` 因 Docker/Testcontainers 不可用 skipped 3；dh-app 62 tests 中既有 `PostgresContainerSmokeTest` skipped 1。 |
+| `mvn -ntp -Pquality validate` | **BUILD SUCCESS** | reactor 19/19 SUCCESS；0 Checkstyle violations；Spotless check passed。 |
+| forbidden scan | **PASS / REVIEWED / ACTUAL_RISK_0** | 用户指定 `rg` broad scan 命中 1789 行；分类为 test guard、docs prohibition、enum constraint、redaction/security code、existing historical text；B2 production 二次窄扫仅命中 denylist/redaction/security 注释和 redaction-failure 模拟分支，无真实 provider、HTTP client、LangGraph、AutoGen、CrewAI 或交易执行实现。 |
+| `.\mvnw.cmd -v` | **WRAPPER_UNUSABLE / NOT_VALID_MAVEN_WRAPPER** | 输出 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` 缺少主清单属性；进程返回码为 0，但行为仍不可作为 Maven wrapper 可用证明。 |
+
+Noted:
+
+- Maven 均使用 `mvn -ntp`，未使用 `-DskipTests` 或 `-DskipITs`。
+- Maven 仍输出既有 settings warning：`D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml` 中存在 `Unrecognised tag: 'profiles'`。
+- Docker/Testcontainers 本机不可用风险继承；Docker-gated skip 不得写成 PASS。
+- `mvnw.cmd` 仍不可用，本轮继续使用系统 Maven。
+- B2 未新增 migration；未新增 API；未修改 NQ；未新增真实 provider / HTTP client / Provider SDK；未保存 raw provider response；未持久化 raw prompt。
+
+Readiness：
+
+```text
+STAGE_QDR_3_B2: DONE
+ALLOW_STAGE_QDR_3_B2_REVIEW_FREEZE: YES
+ALLOW_STAGE_QDR_3_B2_COMMIT: NO
+ALLOW_STAGE_QDR_3_B3_AFTER_B2_COMMIT: NO
+ALLOW_STAGE_QDR_3_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_3_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
 ## 2026-07-07 DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN 验证记录
 
 结论：**PASS / PLAN_ONLY / DOCS_ONLY / NO_CODE_CHANGE / NO_DB_MIGRATION / NO_REAL_HTTP / NO_PROVIDER / NO_AGENT / NO_LANGGRAPH / NO_LIVE**。

@@ -47,6 +47,11 @@ public class ArchitectureTest {
                     "placeOrder", "cancelOrder", "submitOrder", "executeOrder", "bypassRisk",
                     "forceExecute");
 
+    private static final List<String> FORBIDDEN_QDR_GATEWAY_MUTATION_TOKENS =
+            List.of(
+                    "placeOrder", "cancelOrder", "submitOrder", "executeOrder", "bypassRisk",
+                    "forceExecute", "mutateLedger", "mutateRisk", "paperRunStart", "liveRunStart");
+
     private static final Pattern FORBIDDEN_API_PATH =
             Pattern.compile("\"\\s*/?(orders|trades|live)(/|\")", Pattern.CASE_INSENSITIVE);
 
@@ -881,6 +886,146 @@ public class ArchitectureTest {
         }
     }
 
+    /**
+     * stage-qdr-3 B2：qdr gateway usecase 只能依赖 domain/usecase/JDK，不允许依赖 API、infra、
+     * Spring Web、JDBC/JPA、provider SDK、HTTP client 或 Agent runtime。
+     */
+    @Test
+    void stageQdr3B2_rule29_qdrGatewayUsecaseDoesNotDependOnApiInfraWebJdbcProviderOrAgentRuntime() {
+        noClasses()
+                .that()
+                .resideInAPackage("..usecase.qdr.gateway..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage(
+                        "..api..",
+                        "..infra..",
+                        "org.springframework.web..",
+                        "org.springframework.web.reactive..",
+                        "org.springframework.jdbc..",
+                        "java.sql..",
+                        "javax.sql..",
+                        "jakarta.persistence..",
+                        "javax.persistence..",
+                        "org.hibernate..",
+                        "okhttp3..",
+                        "com.openai..",
+                        "com.anthropic..",
+                        "com.google.genai..",
+                        "dev.langchain4j..",
+                        "org.springframework.ai..",
+                        "langgraph..",
+                        "autogen..",
+                        "crewai..")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("java.net.http.HttpClient")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("java.net.HttpURLConnection")
+                .check(importMainClasses());
+    }
+
+    /**
+     * stage-qdr-3 B2：gateway production source 不允许出现真实 provider SDK、HTTP outbound setup、
+     * Agent framework 或交易 mutation token。
+     */
+    @Test
+    void stageQdr3B2_rule30_qdrGatewaySourcesForbidProviderSdkHttpAgentAndMutationTokens() {
+        final Path gatewayRoot =
+                Path.of(
+                                "..",
+                                "dh-usecase",
+                                "src",
+                                "main",
+                                "java",
+                                "com",
+                                "guidinglight",
+                                "decisionhub",
+                                "usecase",
+                                "qdr",
+                                "gateway")
+                        .toAbsolutePath()
+                        .normalize();
+        final List<String> violations = new ArrayList<>();
+        collectForbiddenTokenViolations(
+                gatewayRoot, FORBIDDEN_QDR_GATEWAY_MUTATION_TOKENS, violations);
+        collectPatternViolations(
+                gatewayRoot,
+                Pattern.compile(
+                        "import\\s+.*(openai|anthropic|genai|ollama|langgraph|autogen|crewai|"
+                                + "WebClient|RestTemplate|OkHttp|HttpClient)",
+                        Pattern.CASE_INSENSITIVE),
+                "B2 gateway must not import provider SDK, HTTP client, or Agent framework",
+                violations);
+        collectPatternViolations(
+                gatewayRoot,
+                Pattern.compile(
+                        "(WebClient\\.builder|new\\s+RestTemplate|OkHttpClient|"
+                                + "HttpClient\\.new|URI\\.create\\(|URL\\()",
+                        Pattern.CASE_INSENSITIVE),
+                "B2 gateway must not create outbound HTTP setup",
+                violations);
+        if (!violations.isEmpty()) {
+            fail(
+                    "stage-qdr-3 B2 gateway source boundary violations:\n"
+                            + String.join("\n", violations));
+        }
+    }
+
+    /**
+     * stage-qdr-3 B2：不得新增 Prompt / Model Gateway API endpoint 或 V8 migration artifact。
+     */
+    @Test
+    void stageQdr3B2_rule31_noGatewayApiEndpointOrMigrationArtifact() {
+        final List<String> violations = new ArrayList<>();
+        collectPatternViolations(
+                Path.of("..", "dh-api", "src", "main", "java").toAbsolutePath().normalize(),
+                Pattern.compile(
+                        "@(RequestMapping|GetMapping|PostMapping|PutMapping|DeleteMapping|PatchMapping)"
+                                + "[\\s\\S]{0,240}(prompt|model-gateway|provider-profile|model-version)",
+                        Pattern.CASE_INSENSITIVE),
+                "B2 must not add prompt/model gateway API endpoint",
+                violations);
+        collectV8MigrationFileViolations(
+                Path.of("..", "dh-app", "src", "main", "resources", "db", "migration")
+                        .toAbsolutePath()
+                        .normalize(),
+                violations);
+        if (!violations.isEmpty()) {
+            fail("stage-qdr-3 B2 API/migration boundary violations:\n" + String.join("\n", violations));
+        }
+    }
+
+    /**
+     * stage-qdr-3 B2：QDR business code 不得绕过 ModelGatewayPort 直连 provider。
+     */
+    @Test
+    void stageQdr3B2_rule32_qdrBusinessCodeDoesNotBypassModelGatewayPort() {
+        final Path qdrRoot =
+                Path.of(
+                                "..",
+                                "dh-usecase",
+                                "src",
+                                "main",
+                                "java",
+                                "com",
+                                "guidinglight",
+                                "decisionhub",
+                                "usecase",
+                                "qdr")
+                        .toAbsolutePath()
+                        .normalize();
+        final Path gatewayRoot = qdrRoot.resolve("gateway");
+        final List<String> violations = new ArrayList<>();
+        collectGatewayBypassViolations(qdrRoot, gatewayRoot, violations);
+        if (!violations.isEmpty()) {
+            fail(
+                    "stage-qdr-3 B2 qdr business code must call through ModelGatewayPort:\n"
+                            + String.join("\n", violations));
+        }
+    }
+
     private static void collectForbiddenTokenViolations(
             final Path rootOrFile, final List<String> tokens, final List<String> violations) {
         if (!Files.exists(rootOrFile)) {
@@ -949,6 +1094,32 @@ public class ArchitectureTest {
                     .forEach(p -> violations.add(p + ": B1 must not add V8 migration artifact"));
         } catch (IOException io) {
             violations.add("failed to walk " + migrationRoot + ": " + io.getMessage());
+        }
+    }
+
+    private static void collectGatewayBypassViolations(
+            final Path qdrRoot, final Path gatewayRoot, final List<String> violations) {
+        if (!Files.exists(qdrRoot)) {
+            return;
+        }
+        try (Stream<Path> walker = Files.walk(qdrRoot)) {
+            walker
+                    .filter(p -> p.toString().endsWith(".java"))
+                    .filter(p -> !p.normalize().startsWith(gatewayRoot.normalize()))
+                    .forEach(
+                            p -> {
+                                try {
+                                    final String body = Files.readString(p, StandardCharsets.UTF_8);
+                                    if (body.contains("MockModelProvider")
+                                            || body.contains("ModelProviderPort")) {
+                                        violations.add(p + ": direct provider dependency outside gateway");
+                                    }
+                                } catch (IOException io) {
+                                    violations.add("failed to read " + p + ": " + io.getMessage());
+                                }
+                            });
+        } catch (IOException io) {
+            violations.add("failed to walk " + qdrRoot + ": " + io.getMessage());
         }
     }
 }

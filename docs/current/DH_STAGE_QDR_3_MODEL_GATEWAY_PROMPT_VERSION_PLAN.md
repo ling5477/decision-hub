@@ -3,7 +3,7 @@
 ```text
 Task: DH-STAGE-QDR-3-MODEL-GATEWAY-PROMPT-VERSION-PLAN
 Task type: PLANNING_ONLY + MODEL_GATEWAY_DESIGN + PROMPT_VERSION_DESIGN + PROVIDER_TRUST_BOUNDARY_DESIGN + AUDIT_REDACTION_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION
-Status: DONE / PLAN_ONLY / WORK_ORDER_DONE / B1_IMPLEMENTED_BY_VALIDATION
+Status: DONE / PLAN_ONLY / WORK_ORDER_DONE / B2_IMPLEMENTED_BY_VALIDATION
 Fact source: docs/current
 Date: 2026-07-07
 ```
@@ -28,9 +28,9 @@ stage-qdr-2 acceptance: ACCEPTED
 stage-qdr-2 final close: CLOSED
 stage-qdr-2 final docs sync commit: docs(qdr): record stage-qdr-2 acceptance
 stage-qdr-3 planning: DONE / PLAN_ONLY
-stage-qdr-3 implementation: B1_IMPLEMENTED_BY_VALIDATION
-B1 Prompt/Model Version Domain + Mock Registry: IMPLEMENTED_BY_VALIDATION
-B2 Model Gateway Mock Runtime + Policy Guard: NOT STARTED
+stage-qdr-3 implementation: B2_IMPLEMENTED_BY_VALIDATION
+B1 Prompt/Model Version Domain + Mock Registry: COMMITTED
+B2 Model Gateway Mock Runtime + Policy Guard: IMPLEMENTED_BY_VALIDATION / REVIEW_FREEZE_REQUIRED
 B3 Persistence Baseline: NOT STARTED
 B4 QDR Decision Pipeline Integration: NOT STARTED
 real HTTP: NO
@@ -39,7 +39,7 @@ Agent / LangGraph: NO
 LIVE: DISABLED
 ```
 
-本计划已进入 B1 controlled implementation 结果同步：B1 只修改 domain/usecase/mock registry、tests、architecture guard 与 docs/current 最小记录；未新增 migration、API、Controller、Repository/JDBC adapter、真实 provider、真实 HTTP、Agent / LangGraph、contracts、golden_cases 或 NQ 仓库。
+本计划已进入 B2 controlled implementation 结果同步：B1 已提交 domain/usecase/mock registry baseline；B2 只修改 usecase-level gateway/model contracts、MockModelProvider、ProviderTrustPolicy enforcement、budget / payload / memory / redaction guard、tests、architecture guard 与 docs/current 最小记录；未新增 migration、API、Controller、Repository/JDBC adapter、真实 provider、真实 HTTP、Agent / LangGraph、contracts、golden_cases 或 NQ 仓库。
 
 ## 3. Model Gateway 设计边界
 
@@ -524,10 +524,10 @@ DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER
 ```text
 DH-STAGE-QDR-3-IMPLEMENTATION-WORK-ORDER: DONE / WORK_ORDER_ONLY
 Artifact: docs/current/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md
-stage-qdr-3 implementation: NOT STARTED
-Next concrete action: DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY
+stage-qdr-3 implementation: B2_IMPLEMENTED_BY_VALIDATION
+Next concrete action: DH-STAGE-QDR-3-B2-REVIEW-FREEZE
 Current execution workspace: F:/project/decision-hub
 Former alternate environment path: E:/Project/decision-hub / do not mix
 ```
 
-该 work order 只允许后续进入 B1 Prompt / Model Version Domain + Mock Registry 的 controlled implementation；B2/B3/B4 仍不得立即启动。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime、NQ mutation、trading mutation 与 LIVE 仍全部禁止。
+该 work order 已完成 B1 与 B2 controlled implementation 同步。B2 涉及 ProviderTrustPolicy / gateway fail-closed 安全边界，下一步只允许 B2 review/freeze；B3/B4 仍不得立即启动。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime、NQ mutation、trading mutation 与 LIVE 仍全部禁止。

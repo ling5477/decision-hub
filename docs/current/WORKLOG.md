@@ -6675,3 +6675,41 @@ git commit -m "feat(qdr): add stage-qdr-3 prompt model version baseline"
 ```text
 DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD
 ```
+
+---
+
+## DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD
+
+日期：2026-07-07
+
+### 本轮目标
+
+只实现 stage-qdr-3 B2：Model Gateway mock runtime、ModelGatewayPort、ModelProviderPort、deterministic MockModelProvider、ProviderTrustPolicy enforcement、budget / payload / memory / redaction guard、prompt/model registry lookup、fail-closed error model、tests、ArchitectureTest guard 与 docs/current 最小同步。本轮不新增 migration、API、Controller、Repository/JDBC adapter、真实 provider、HTTP client、Provider SDK、Agent runtime、LangGraph runtime、contracts、golden_cases 或 NQ 修改。
+
+### 实现记录
+
+- 新增 `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/**`，覆盖 `ModelGatewayPort`、`ModelProviderPort`、`ModelGatewayRequest`、`ModelGatewayResult`、`ModelCallContext`、`ModelCallPolicy`、`ModelCallBudget`、`ModelCallRedactionPolicy`、`ModelGatewayFailure`、`ModelGatewayDecision`、`MockModelProvider` 与 fail-closed exception model。
+- 新增 `ModelVersionRegistryPort`、registration/lookup command/query/result 与 `InMemoryModelVersionRegistry`，补齐 B2 modelVersionId / checksum lookup。
+- `ModelGatewayService` 强制 gateway call 顺序：required identity -> input budget -> input redaction -> PromptInjectionGuard -> prompt registry lookup -> model registry lookup -> prompt render -> rendered prompt budget/redaction -> ProviderTrustPolicy -> MockModelProvider -> provider output shape/budget/redaction -> structured success result。
+- `DeterministicProviderTrustPolicy` 只接受 in-memory mock `ProviderProfile`，unknown / disabled / planned / tenant mismatch / missing policy / real provider / policy exception 全部 fail-closed，不存在 fallback allow。
+- `MockModelProvider` deterministic 返回结构化 readonly `OBSERVE` result；支持 unavailable、timeout、budget exceeded、policy denied、malformed、redaction failure mode；不调用 HTTP，不调用 SDK，不读取环境变量 credential，不读取外部文件，不访问 NQ，不触发交易。
+- 更新 `ArchitectureTest`，新增 B2 gateway dependency guard、provider SDK / HTTP client / Agent framework / trading mutation token guard、API endpoint / V8 migration guard、QDR business provider bypass guard。
+
+### 验证摘要
+
+- `mvn -ntp -pl dh-domain -am test`：BUILD SUCCESS；151 tests，0 failures / errors / skips。
+- `mvn -ntp -pl dh-usecase -am test`：BUILD SUCCESS；274 tests，0 failures / errors / skips；新增 B2 gateway/mock/model registry tests 34 tests 通过。
+- `mvn -ntp -pl dh-app -am test`：BUILD SUCCESS；`ArchitectureTest` 32 tests 通过；既有 Docker/Testcontainers 环境不可用导致 `JdbcNonceReplayGuardPersistenceTest` skipped 3、`PostgresContainerSmokeTest` skipped 1。
+- `mvn -ntp -Pquality validate`：BUILD SUCCESS；19/19 reactor SUCCESS；0 Checkstyle violations；Spotless check passed。
+- `.\mvnw.cmd -v`：WRAPPER_UNUSABLE；输出 wrapper 异常文本，进程返回码为 0，但不作为 Maven wrapper 可用证明。
+- forbidden scan：PASS / REVIEWED / ACTUAL_RISK_0；用户指定 broad scan 命中 1789 行，分类为 test guard、docs prohibition、enum constraint、redaction/security code、existing historical text；B2 production 二次窄扫无真实 provider、HTTP client、LangGraph、AutoGen、CrewAI 或交易执行实现。
+
+### 边界
+
+未修改 NQ；未新增 migration；未修改历史 migration；未新增 API；未新增 Controller；未新增 Repository/JDBC adapter；未新增 Spring Web 入口；未新增真实 HTTP outbound；未新增真实 provider；未接 Provider SDK；未接 OpenAI / Anthropic / Gemini / Ollama SDK；未接 LangGraph / AutoGen / CrewAI；未启动 Agent runtime；未开启 LIVE；未触碰交易、订单、撤单、账户、ledger、risk、paper 或 live mutation；未保存 raw provider response；未持久化 raw prompt；stage-qdr-3 B3/B4 未启动。
+
+### 推荐下一步
+
+```text
+DH-STAGE-QDR-3-B2-REVIEW-FREEZE
+```

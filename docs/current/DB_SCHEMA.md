@@ -3,8 +3,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: DH-STAGE-QDR-3-B1-PROMPT-MODEL-VERSION-DOMAIN-MOCK-REGISTRY / IMPLEMENTED_BY_VALIDATION / NO_DB_MIGRATION
-Next stage:    DH-STAGE-QDR-3-B1-COMMIT / READY / THEN_B2_GATE / NO_DB_MIGRATION
+Current stage: DH-STAGE-QDR-3-B2-MODEL-GATEWAY-MOCK-RUNTIME-POLICY-GUARD / IMPLEMENTED_BY_VALIDATION / NO_DB_MIGRATION
+Next stage:    DH-STAGE-QDR-3-B2-REVIEW-FREEZE / READY / NO_DIRECT_B3 / NO_DB_MIGRATION
 ```
 
 Flyway 迁移：
@@ -24,15 +24,15 @@ stage-qdr-2 B5 close review ACCEPTED / NO DB SCHEMA CHANGE
 human_approval_packet            MIGRATION_ADDED / B3 / NOT_TRADING_AUTHORIZATION
 stage-qdr-3 planning             DONE / PLANNED_TABLES_ONLY / NO MIGRATION
 stage-qdr-3 implementation WO    DONE / B1-B5_ORDERED / NO MIGRATION
-B1 Prompt/Model Version Domain   IMPLEMENTED_BY_VALIDATION / DOMAIN_USECASE_ONLY / NO MIGRATION
-B2 Model Gateway Mock Runtime    NOT STARTED / NO MIGRATION
+B1 Prompt/Model Version Domain   COMMITTED / DOMAIN_USECASE_ONLY / NO MIGRATION
+B2 Model Gateway Mock Runtime    IMPLEMENTED_BY_VALIDATION / USECASE_ONLY / NO MIGRATION
 B3 Persistence Baseline          NOT STARTED / V8 PLANNED ONLY / NOT IMPLEMENTED
 B4 QDR Pipeline Integration      NOT STARTED / NO MIGRATION
 ```
 
 ## 1.0 stage-qdr-3 planned schema（PLANNED / NOT IMPLEMENTED）
 
-stage-qdr-3 planning 与 implementation work order 只规划 Model Gateway + Prompt/Model Version Baseline。B1 已实现 domain/usecase/mock registry baseline，但不新增 migration，不修改 V1-V7 历史 migration。以下候选表只能在后续 B3 Persistence Baseline 与 migration review/freeze 后实现；B1 不允许新增 migration，V8 仍为 planned only / NOT IMPLEMENTED：
+stage-qdr-3 planning 与 implementation work order 只规划 Model Gateway + Prompt/Model Version Baseline。B1 已提交 domain/usecase/mock registry baseline；B2 已实现 usecase-level mock gateway runtime / ProviderTrustPolicy / budget / redaction guard，但不新增 migration，不修改 V1-V7 历史 migration。以下候选表只能在后续 B3 Persistence Baseline 与 migration review/freeze 后实现；B2 不允许新增 migration，V8 仍为 planned only / NOT IMPLEMENTED：
 
 ```text
 prompt_template       PLANNED / B3 candidate / NOT IMPLEMENTED
