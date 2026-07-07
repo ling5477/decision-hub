@@ -167,14 +167,31 @@ NQ mutation forbidden.
 DH Stage4 Decision Pipeline MVP PLAN: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP WO: ACCEPTED / CLOSED.
 DH Stage4 Decision Pipeline MVP K1-K8: CLOSED / ACCEPTED.
-Current main line: stage-qdr-2 / Audit Trace Read Model + Human Approval Packet / IMPLEMENTED_PENDING_CLOSE_REVIEW.
-stage-qdr-2 B1/B2/B3/B4: CLOSED / ACCEPTED / COMMITTED.
-stage-qdr-2 B5: READY / NOT STARTED / REVIEW_ONLY.
-stage-qdr-3: NOT STARTED.
+Current main line: stage-qdr-3 / Model Gateway + Prompt/Model Version Baseline / B5_CLOSE_REVIEW_RETRY_REQUIRED.
+stage-qdr-2: FINAL CLOSE CLOSED / ACCEPTED.
+stage-qdr-2 B1/B2/B3/B4/B5: CLOSED / ACCEPTED / COMMITTED.
+stage-qdr-3 planning: DONE / PLAN_ONLY.
+stage-qdr-3 implementation work order: DONE / WORK_ORDER_ONLY.
+stage-qdr-3 implementation: DONE.
+stage-qdr-3 B1: DONE / COMMITTED.
+stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED.
+stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED.
+stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED.
+stage-qdr-3 B5 close review: RETRY_REQUIRED / REVIEW_ONLY.
+stage-qdr-3 acceptance: NOT_ACCEPTED_YET.
+stage-qdr-3 final close: NOT_CLOSED.
+stage-qdr-4: NOT_STARTED.
 Replay execution API: NOT STARTED.
-Model gateway: NOT STARTED.
+Model gateway: MOCK_BASELINE_IMPLEMENTED_THROUGH_B1_B4 / PENDING_B5_ACCEPTANCE / NO_REAL_PROVIDER / NO_REAL_HTTP / NO_PROVIDER_SDK.
 Tool registry: NOT STARTED.
-Next concrete action: DH-STAGE-QDR-2-B5-CLOSE-REVIEW / READY / NOT STARTED / REVIEW_ONLY.
+real HTTP: NO.
+real provider: NO.
+Provider SDK: NO.
+Agent / LangGraph: NO.
+LIVE: DISABLED.
+B5 discipline: review-only; B5 pass is required before final close docs sync.
+stage-qdr-4 discipline: planning is allowed only after stage-qdr-3 acceptance; implementation remains forbidden.
+Next concrete action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW / RETRY / REVIEW_ONLY.
 Old NQ-DH-GATEK-INTEGRATION1-PLAN-PACK: SUPERSEDED / REBASE_REQUIRED.
 NQ current planning baseline: GateN.
 ```
