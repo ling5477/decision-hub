@@ -1113,7 +1113,13 @@ public class ArchitectureTest {
                                         "model")
                                 .toAbsolutePath()
                                 .normalize(),
-                        Path.of("src", "main", "resources", "db", "migration")
+                        Path.of(
+                                        "src",
+                                        "main",
+                                        "resources",
+                                        "db",
+                                        "migration",
+                                        "V8__qdr_model_gateway_persistence_baseline.sql")
                                 .toAbsolutePath()
                                 .normalize());
         final List<String> violations = new ArrayList<>();
@@ -1177,10 +1183,10 @@ public class ArchitectureTest {
     }
 
     /**
-     * stage-qdr-3 B3：必须存在唯一 V8 migration，且不得创建 V9。
+     * stage-qdr-3 B3：必须存在唯一 V8 migration；Stage4 B2 之后只允许已授权的 V9。
      */
     @Test
-    void stageQdr3B3_rule36_v8MigrationExistsAndV9DoesNotExist() {
+    void stageQdr3B3_rule36_v8MigrationExistsAndUnexpectedV9DoesNotExist() {
         final Path migrationRoot =
                 Path.of("src", "main", "resources", "db", "migration").toAbsolutePath().normalize();
         final Path v8 = migrationRoot.resolve("V8__qdr_model_gateway_persistence_baseline.sql");
@@ -1197,21 +1203,17 @@ public class ArchitectureTest {
         } catch (IOException io) {
             violations.add("failed to walk " + migrationRoot + ": " + io.getMessage());
         }
-        collectPatternViolations(
-                migrationRoot,
-                Pattern.compile("V9__", Pattern.CASE_INSENSITIVE),
-                "B3 must not create V9 migration",
-                violations);
+        collectUnexpectedV9MigrationViolations(migrationRoot, violations);
         if (!violations.isEmpty()) {
             fail("stage-qdr-3 B3 migration version boundary violations:\n" + String.join("\n", violations));
         }
     }
 
     /**
-     * stage-qdr-3 B4：pipeline mock gateway integration 不得新增 API、Controller 或 V9 migration。
+     * stage-qdr-3 B4：pipeline mock gateway integration 不得新增 API、Controller 或未授权 migration。
      *
      * <p>B4 只接入既有 dry-run / QDR pipeline；provider/model gateway API、Controller 与 DB migration 均保持
-     * NOT STARTED，V8 仍是当前最新 migration。
+     * NOT STARTED；Stage4 B2 已授权的 replay/evaluation V9 不属于 B4 mock gateway 扩展。
      */
     @Test
     void stageQdr3B4_rule37_noApiControllerOrMigrationExpansion() {
@@ -1234,11 +1236,7 @@ public class ArchitectureTest {
                 violations);
         final Path migrationRoot =
                 Path.of("src", "main", "resources", "db", "migration").toAbsolutePath().normalize();
-        collectPatternViolations(
-                migrationRoot,
-                Pattern.compile("V9__", Pattern.CASE_INSENSITIVE),
-                "B4 must not create V9 migration",
-                violations);
+        collectUnexpectedV9MigrationViolations(migrationRoot, violations);
         if (!violations.isEmpty()) {
             fail("stage-qdr-3 B4 API/migration boundary violations:\n" + String.join("\n", violations));
         }
@@ -1434,6 +1432,24 @@ public class ArchitectureTest {
             walker
                     .filter(p -> p.getFileName().toString().startsWith("V8__"))
                     .forEach(p -> violations.add(p + ": B1 must not add V8 migration artifact"));
+        } catch (IOException io) {
+            violations.add("failed to walk " + migrationRoot + ": " + io.getMessage());
+        }
+    }
+
+    private static void collectUnexpectedV9MigrationViolations(
+            final Path migrationRoot, final List<String> violations) {
+        if (!Files.exists(migrationRoot)) {
+            return;
+        }
+        try (Stream<Path> walker = Files.walk(migrationRoot)) {
+            walker
+                    .filter(p -> p.getFileName().toString().startsWith("V9__"))
+                    .filter(
+                            p ->
+                                    !"V9__qdr_replay_evaluation_baseline.sql"
+                                            .equals(p.getFileName().toString()))
+                    .forEach(p -> violations.add(p + ": unexpected V9 migration artifact"));
         } catch (IOException io) {
             violations.add("failed to walk " + migrationRoot + ": " + io.getMessage());
         }

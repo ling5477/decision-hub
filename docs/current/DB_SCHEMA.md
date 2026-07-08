@@ -9,8 +9,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: DH-STAGE-QDR-3-FINAL-CLOSE / CLOSED / ACCEPTED / NO_SCHEMA_CHANGE
-Next stage:    DH-STAGE-QDR-4-PLAN / READY / PLAN_ONLY / NO_SCHEMA_CHANGE
+Current stage: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION / DONE / POSTGRES_FLYWAY_VERIFIED
+Next stage:    DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW / READY
 ```
 
 Flyway 迁移：
@@ -24,6 +24,7 @@ V5__decision_pipeline_audit.sql  Decision audit / snapshot / trace / provider ca
 V6__qdr_decision_core_baseline.sql stage-qdr-1 Decision Core baseline
 V7__human_approval_packet.sql      stage-qdr-2 B3 Human Approval Packet
 V8__qdr_model_gateway_persistence_baseline.sql stage-qdr-3 B3 Prompt / Model Version / Model Gateway Call persistence baseline
+V9__qdr_replay_evaluation_baseline.sql stage-qdr-4 B2 QDR replay / evaluation / regression persistence baseline
 stage-qdr-2 B1 readmodel DTO   DONE / NO DB SCHEMA CHANGE / NO MIGRATION
 stage-qdr-2 B2 read repository/API DONE / NO DB SCHEMA CHANGE / NO MIGRATION
 stage-qdr-2 B4 approval API/audit CLOSED / ACCEPTED / COMMITTED / NO DB SCHEMA CHANGE / NO MIGRATION
@@ -37,10 +38,70 @@ B3 Persistence Baseline          CLOSED / ACCEPTED / COMMITTED / V8 ADDED
 B4 QDR Pipeline Integration      DONE / FREEZE ACCEPTED / COMMITTED / NO MIGRATION / NO V9
 B5 close review                  YES / ACCEPTED / NO DB SCHEMA CHANGE
 stage-qdr-3 final close          CLOSED / ACCEPTED / NO DB SCHEMA CHANGE
-stage-qdr-4 planning             READY / PLAN_ONLY / NO DB SCHEMA CHANGE
-stage-qdr-4 implementation       NOT_STARTED / NO
-V9                              NOT STARTED
+stage-qdr-4 planning             DONE / PLAN_ACCEPTED / NO DB SCHEMA CHANGE
+stage-qdr-4 B1 domain contracts  DONE / DOMAIN_USECASE_ONLY / NO MIGRATION
+stage-qdr-4 B2 persistence       DONE / IMPLEMENTED / V9 ADDED / POSTGRES_LOAD_VERIFIED
+V9                              CREATED / QDR_REPLAY_EVALUATION_BASELINE / POSTGRES_LOAD_VERIFIED
 ```
+
+## 1.0b stage-qdr-4 B2 V9 replay / evaluation persistence schema（IMPLEMENTED / POSTGRES_LOAD_VERIFIED）
+
+stage-qdr-4 B2 新增 `V9__qdr_replay_evaluation_baseline.sql`。V9 只建立 DH 内部 QDR replay / evaluation / regression baseline 持久化能力，不新增 API、Controller、真实 HTTP、真实 provider、Provider SDK、Agent runtime、LangGraph runtime、NQ mutation 或 LIVE 能力。V9 新增表：
+
+```text
+qdr_replay_case                 IMPLEMENTED / tenant-bound replay case identity
+qdr_evaluation_case             IMPLEMENTED / tenant-bound evaluation identity
+qdr_expected_decision_summary   IMPLEMENTED / expected/actual structured summary only
+qdr_regression_verdict          IMPLEMENTED / replay/evaluation verdict only
+qdr_regression_finding          IMPLEMENTED / tenant-bound finding evidence
+qdr_replay_input_ref            IMPLEMENTED / structured input ref only
+qdr_replay_output_ref           IMPLEMENTED / structured output ref only
+```
+
+V9 存储边界：
+
+```text
+tenant_id: NOT NULL；所有 save/find/list/ref consistency 均必须 tenant-bound
+case_id / evaluation_id / verdict_id: 对应主线表 NOT NULL，并有 tenant-bound unique/index 支撑
+verdict: PASS / FAIL / WARN / SKIPPED only
+severity: 沿用 B1 replay/evaluation severity 命名 INFO / WARN / ERROR / BLOCKER
+action_label: 只允许 OBSERVE / NO_TRADE / LONG_BIAS / SHORT_BIAS / NEEDS_REVIEW / REJECTED
+JSONB: 仅保存结构化 summary/ref，不保存 raw payload
+hash/checksum: SHA-256 64 hex；字段存在时必须非空或显式格式约束
+```
+
+禁止存储：
+
+```text
+raw prompt: FORBIDDEN
+raw provider response: FORBIDDEN
+credential / apiKey / apiSecret / token / cookie / passphrase / secret: FORBIDDEN
+BUY / SELL / MARKET_ORDER / PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE as executable or allowed action: FORBIDDEN
+regression verdict as trading signal: FORBIDDEN
+```
+
+V9 FK 与一致性策略：
+
+```text
+B2 内部引用使用 tenant-bound FK，包括 replay case、evaluation case、input/output ref、expected/actual summary、verdict/finding。
+不对 V6/V8 source table 建强 FK，避免 replay baseline 与历史 source 生命周期过度耦合。
+不从 evaluation case 反向强依赖 verdict，避免形成迁移顺序和生命周期循环。
+repository 层必须验证必要 ref 存在，缺失或跨 tenant ref 必须 fail-closed。
+```
+
+V9 查询面：
+
+```text
+tenant_id + case_id
+tenant_id + evaluation_id
+tenant_id + verdict_id
+tenant_id + trace_id
+tenant_id + source_request_id
+tenant_id + source_decision_id
+tenant_id + created_at
+```
+
+V9 migration comments explicitly state tenant-bound, not executable trading signal, no raw prompt, no raw provider response and no credential. B2 repository contract rejects UUID-only access, caps/rejects list page size above 100, treats duplicate same checksum as deterministic idempotent save, and fails closed on duplicate different checksum, missing ref, cross-tenant ref or redaction guard violation. File-level migration presence tests pass, and PostgreSQL/Flyway load verification has passed against a real PostgreSQL 17 Testcontainer: Flyway validated 9 migrations and migrated the schema to version v9 with `V9QdrReplayEvaluationFlywayPostgresTest` not skipped.
 
 ## 1.0a stage-qdr-3 B4 schema impact（NO_SCHEMA_CHANGE）
 
@@ -135,7 +196,7 @@ status / provider_kind / profile_status / version_status / trust_decision / fail
 
 V8 migration comments explicitly state raw prompt, raw provider response and credential material are forbidden. Prompt/model version immutability is not enforced by DB trigger in B3; it is enforced by append-only schema shape, migration comments, repository contract, checksum duplicate behavior and tests. Duplicate same checksum is idempotent by contract; duplicate different checksum and checksum mismatch must fail closed.
 
-B3 已完成并关闭；B4 只复用 V5/V6/V8 既有表，不新增 V9，不实现 API、真实 provider、Provider SDK 或 real HTTP，并已 `DONE / FREEZE ACCEPTED / COMMITTED`。B5 close review 已 `YES / ACCEPTED`，stage-qdr-3 final close 已 `CLOSED / ACCEPTED`。当前下一步只允许 `DH-STAGE-QDR-4-PLAN`，不得新增 schema，不得启动 stage-qdr-4 implementation，不得新增 V9。
+B3 已完成并关闭；B4 只复用 V5/V6/V8 既有表，不新增 V9，不实现 API、真实 provider、Provider SDK 或 real HTTP，并已 `DONE / FREEZE ACCEPTED / COMMITTED`。B5 close review 已 `YES / ACCEPTED`，stage-qdr-3 final close 已 `CLOSED / ACCEPTED`。该段仅记录 stage-qdr-3 历史边界；当前 stage-qdr-4 B2 schema 事实以本文件 `1.0b` V9 段落为准。
 
 ## 1.1 stage-qdr-2 B1/B2/B3/B4 schema impact
 

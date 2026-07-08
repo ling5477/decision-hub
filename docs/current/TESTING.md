@@ -3,6 +3,95 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-BLOCKER-FIX validation
+
+```text
+Task type: BLOCKER_FIX + TESTCONTAINERS_VALIDATION + FLYWAY_POSTGRES_LOAD_VERIFICATION + NO_FEATURE_EXPANSION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+stage-qdr-4 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
+stage-qdr-4 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### Blocker fix validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（开工前） | EXPECTED_DIRTY / B2_ALLOWED_SCOPE | dirty 范围为上一轮 B2 implementation 允许范围和本轮 current docs 同步范围；无 staged 文件。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -15` | PASS | 包含 B1 domain contracts、B2 persistence plan、B2 implementation work order commits。 |
+| `git diff --check` | PASS_WITH_CRLF_WARNINGS | exit code 0；仅 Git LF-to-CRLF warning，不是 whitespace error。 |
+| `git diff --cached --name-only` | PASS / EMPTY | 无 staged 文件。 |
+| `docker ps` | PASS / DOCKER_DAEMON_AVAILABLE | Docker daemon 可连接；初始容器列表为空。 |
+| `mvn -ntp -pl dh-app -am "-Dtest=V9QdrReplayEvaluationFlywayPostgresTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS / POSTGRES_FLYWAY_PASS | Testcontainers 连接 Docker Desktop 29.6.1，启动 PostgreSQL 17.10；Flyway successfully validated 9 migrations，并成功迁移到 version v9；`Tests run: 1, Failures: 0, Errors: 0, Skipped: 0`。 |
+| `mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test` | BUILD SUCCESS / POSTGRES_TESTCONTAINERS_PASS | scoped reactor 全绿；`dh-infra` 88 tests，0 skipped；`dh-app` 84 tests，0 skipped；`PostgresContainerSmokeTest` 与 `V9QdrReplayEvaluationFlywayPostgresTest` 均真实执行 PostgreSQL/Testcontainers。 |
+
+### Blocker result
+
+```text
+V9 PostgreSQL/Flyway load: PASS
+Docker/Testcontainers: VERIFIED
+V9QdrReplayEvaluationFlywayPostgresTest: PASS / NOT_SKIPPED
+STAGE_QDR_4_B2_IMPLEMENTATION: DONE
+ALLOW_STAGE_QDR_4_B2_CLOSE_REVIEW: YES
+B3 implementation: NOT_STARTED
+real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
+```
+
+## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION validation
+
+```text
+Task type: IMPLEMENTATION + MIGRATION + REPOSITORY + TESTS + QDR_REPLAY_EVALUATION_PERSISTENCE + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
+stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
+stage-qdr-4 B2 freeze/review: PASS
+stage-qdr-4 B2 implementation work order: DONE / WORK_ORDER_ONLY
+stage-qdr-4 B2 implementation: BLOCKED / IMPLEMENTED / FLYWAY_POSTGRES_LOAD_UNVERIFIED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### Implementation validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `Get-Location` / `git branch --show-current` / `git status --short`（开工前） | PASS | 当前目录 `F:\project\decision-hub`，分支 `dev`，起始工作区 clean。 |
+| `git log --oneline -15`（开工前） | PASS | 包含 `feat(qdr): add replay evaluation domain contracts`、`docs(qdr): plan replay evaluation persistence baseline`、`docs(qdr): define replay evaluation persistence implementation work order`。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 whitespace error、tracked diff 或 staged diff。 |
+| `mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test` | BUILD SUCCESS / WITH_DOCKER_SKIPS | Reactor 测试通过；可见汇总 792 tests，0 failures，0 errors，5 skipped。V9 PostgreSQL/Flyway Testcontainers load test 因 Docker unavailable 被 skip，不能写成 Flyway PASS。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed。系统 Maven settings 仍有 `profiles` warning，非本轮阻断。 |
+| `.\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+| `docker ps` | DOCKER_UNAVAILABLE / BLOCKS_FLYWAY_POSTGRES_LOAD | 无法连接 `npipe:////./pipe/dockerDesktopLinuxEngine`；本机 Docker daemon 不可用，阻断 V9 PostgreSQL/Flyway load 实证。 |
+| required safety wording scan | REVIEWED / ALLOWED_HITS_ONLY | 用户指定 `rg` 已执行；全量命中主要为 docs prohibition、legacy safety notes、redaction/trading guard、migration CHECK/COMMENT 和测试守卫。窄范围复核确认本轮新增生产代码未新增 API/Controller/provider/HTTP/Agent/LangGraph/LIVE 实现；敏感词只在 guard / migration 禁止 key / 注释 / 测试中出现。 |
+| tenant query guard scan | REVIEWED / NEW_ADAPTERS_PASS | 新增 `JdbcReplayCaseRepository`、`JdbcEvaluationCaseRepository`、`JdbcRegressionVerdictRepository` 查询和 ref consistency SQL 均包含 `tenant_id`；repository ports 未出现 UUID-only `findById(UUID id)` 或不带 tenant 的 case/evaluation/verdict 查询。 |
+
+### B2 implementation coverage result
+
+```text
+V9 migration file: CREATED
+file-level V9 migration presence tests: PASS
+PostgreSQL/Flyway V9 load test: SKIPPED / DOCKER_UNAVAILABLE / NOT_PASS
+repository ports: PASS / TENANT_BOUND
+JDBC adapters: PASS / TENANT_BOUND
+redaction guard: PASS
+trading-term guard: PASS
+cross-tenant read tests: PASS
+duplicate behavior tests: PASS
+repository save failure fail-closed test: PASS
+quality validate: PASS
+readiness: BLOCKED until PostgreSQL/Flyway load is verified
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION-WO validation
 
 ```text

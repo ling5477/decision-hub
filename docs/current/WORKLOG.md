@@ -4,6 +4,143 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-BLOCKER-FIX
+
+完成 B2 implementation 唯一阻断项修复：恢复并使用本机 Docker/Testcontainers，实证 `V9QdrReplayEvaluationFlywayPostgresTest` 在 PostgreSQL 17 Testcontainer 中执行并通过，Flyway validated 9 migrations，并成功迁移到 version v9。本轮未修改 migration 语义、未新增功能、未进入 B3。
+
+### Scope
+
+```text
+BLOCKER_FIX
+TESTCONTAINERS_VALIDATION
+FLYWAY_POSTGRES_LOAD_VERIFICATION
+NO_FEATURE_EXPANSION
+NO_API
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+docs/current/STATUS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Result
+
+```text
+docker status: VERIFIED / Docker Desktop 29.6.1 / PostgreSQL 17 Testcontainers runnable
+V9 Flyway PostgreSQL load: PASS
+Testcontainers result: PASS / NOT_SKIPPED
+migration changes: NONE
+test changes: NONE
+docs sync: DONE
+STAGE_QDR_4_B2_IMPLEMENTATION: DONE / POSTGRES_FLYWAY_VERIFIED
+ALLOW_STAGE_QDR_4_B2_CLOSE_REVIEW: YES
+next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW
+```
+
+### Boundary
+
+```text
+未修改 NQ
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未将 replay / regression output 写成 trading signal
+未进入 B3
+```
+
+## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION
+
+完成 stage-qdr-4 B2 persistence baseline 的代码实现与大部分验证：新增 V9 migration、tenant-bound repository ports、JDBC adapters、redaction guard、trading-term guard、repository / migration / tenant isolation / fail-closed tests，并完成 docs/current 最小同步。本轮未新增 API、Controller、真实 HTTP、真实 provider、Provider SDK、Agent runtime、LangGraph runtime、NQ mutation 或 LIVE 能力。
+
+### Scope
+
+```text
+IMPLEMENTATION
+MIGRATION
+REPOSITORY
+TESTS
+QDR_REPLAY_EVALUATION_PERSISTENCE
+NO_API
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+dh-app/src/main/resources/db/migration/V9__qdr_replay_evaluation_baseline.sql
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/**
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcReplayCaseRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcEvaluationCaseRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcRegressionVerdictRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcReplayPersistenceSupport.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/replay/**
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/**
+dh-app/src/test/java/com/guidinglight/decisionhub/V9QdrReplayEvaluationBaselineMigrationPresenceTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/V9QdrReplayEvaluationFlywayPostgresTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/DB_SCHEMA.md
+```
+
+### Result
+
+```text
+stage-qdr-4 B2 implementation: BLOCKED / IMPLEMENTED / FLYWAY_POSTGRES_LOAD_UNVERIFIED
+V9 migration: CREATED / qdr replay evaluation baseline
+repository ports: DONE / TENANT_BOUND
+JDBC adapters: DONE / TENANT_BOUND
+redaction guard: DONE
+trading-term guard: DONE
+docs sync: DONE
+next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-BLOCKER-FIX
+```
+
+### Boundary
+
+```text
+未修改 NQ
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未将 replay / regression output 写成 trading signal
+未进入 B3 mock gateway regression integration
+```
+
+### Validation
+
+```text
+mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test: BUILD SUCCESS / WITH_DOCKER_SKIPS
+mvn -ntp -Pquality validate: BUILD SUCCESS
+.\mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+docker ps: DOCKER_UNAVAILABLE
+required safety wording scan: REVIEWED / ALLOWED_HITS_ONLY
+V9 PostgreSQL/Flyway Testcontainers load: SKIPPED / DOCKER_UNAVAILABLE / NOT_PASS
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION-WO
 
 完成 stage-qdr-4 B2 persistence baseline implementation work order。本轮只编制后续实现边界，未实现 Java、测试、migration、repository、API、真实 HTTP、真实 provider、Provider SDK、Agent runtime、LangGraph runtime 或 LIVE 能力。

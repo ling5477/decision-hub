@@ -14,18 +14,19 @@ stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
-stage-qdr-4 implementation: B1_ONLY / DONE
+stage-qdr-4 implementation: B2_PERSISTENCE_BASELINE / DONE
 stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
 stage-qdr-4 B2 freeze/review: PASS
 stage-qdr-4 B2 implementation work order: DONE / WORK_ORDER_ONLY
-stage-qdr-4 B2 implementation: NOT_STARTED / NO
+stage-qdr-4 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
+stage-qdr-4 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: F:/project/decision-hub
-next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION
+next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW
 ```
 
 ## 2. 当前事实源集合
@@ -76,16 +77,17 @@ stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
-stage-qdr-4 implementation: B1_ONLY / DONE
+stage-qdr-4 implementation: B2_PERSISTENCE_BASELINE / DONE
 stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
 stage-qdr-4 B2 freeze/review: PASS
 stage-qdr-4 B2 implementation work order: DONE / WORK_ORDER_ONLY
-stage-qdr-4 B2 implementation: NOT_STARTED / NO
+stage-qdr-4 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
+stage-qdr-4 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
 B5 close review retry: CLOSED / ACCEPTED
 stage-qdr-4 recommended direction: QDR Replay / Evaluation / Regression Baseline
 ```
 
-B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；B2 persistence baseline plan 已完成。B2 freeze review 已 `PASS`，B2 implementation work order 已完成且仅形成 implementation 边界，不包含 Java、测试、migration、repository 或 API 实现。下一步只允许进入单独的 B2 implementation，不允许跳到 B3 implementation。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 与 LIVE 仍未启动。
+B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；B2 persistence baseline plan 已完成，B2 freeze review 已 `PASS`，B2 implementation work order 已完成。B2 implementation 本轮新增 V9 migration、tenant-bound repository ports、JDBC adapters、migration / repository / redaction / tenant isolation tests，并保持 no API / Controller、no real HTTP、no real provider、no Provider SDK、no Agent / LangGraph runtime、no LIVE。B2 blocker fix 已通过 Docker/Testcontainers 真实 PostgreSQL 验证：`V9QdrReplayEvaluationFlywayPostgresTest` 在 PostgreSQL 17 Testcontainer 中执行，Flyway validated 9 migrations，并成功迁移到 version v9，结果为 1 test / 0 failures / 0 errors / 0 skipped。`mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test` 与 `mvn -ntp -Pquality validate` 已通过。下一步只允许进入 `DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW`；不允许直接进入 B3 implementation。
 
 ## 4. 禁止项
 
@@ -96,7 +98,8 @@ ALLOW_STAGE_QDR_4_B1_DOMAIN_CONTRACTS: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B2_PERSISTENCE_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B2_FREEZE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B2_IMPLEMENTATION_WO: YES / CONSUMED
-ALLOW_STAGE_QDR_4_B2_IMPLEMENTATION: YES
+ALLOW_STAGE_QDR_4_B2_IMPLEMENTATION: YES / CONSUMED
+ALLOW_STAGE_QDR_4_B2_CLOSE_REVIEW: YES
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO

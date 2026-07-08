@@ -3,19 +3,20 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION-WO / DONE
-next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION
-mode: WORK_ORDER_ONLY + B2_IMPLEMENTATION_BOUNDARY_DESIGN + MIGRATION_IMPLEMENTATION_WO + REPOSITORY_IMPLEMENTATION_WO + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE
+current task: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-BLOCKER-FIX / DONE
+next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW
+mode: IMPLEMENTATION + MIGRATION + REPOSITORY + TESTS + QDR_REPLAY_EVALUATION_PERSISTENCE + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
-stage-qdr-4 implementation: B1_ONLY / DONE
+stage-qdr-4 implementation: B2_PERSISTENCE_BASELINE / DONE
 stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
 stage-qdr-4 B2 freeze/review: PASS
 stage-qdr-4 B2 implementation work order: DONE / WORK_ORDER_ONLY
-stage-qdr-4 B2 implementation: NOT_STARTED / NO
+stage-qdr-4 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
+stage-qdr-4 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
 current workspace: F:/project/decision-hub
 ```
 
@@ -33,11 +34,12 @@ stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
-stage-qdr-4 implementation: B1_ONLY / DONE
+stage-qdr-4 implementation: B2_PERSISTENCE_BASELINE / DONE
 stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
 stage-qdr-4 B2 freeze/review: PASS
 stage-qdr-4 B2 implementation work order: DONE / WORK_ORDER_ONLY
-stage-qdr-4 B2 implementation: NOT_STARTED / NO
+stage-qdr-4 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
+stage-qdr-4 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
@@ -57,15 +59,15 @@ B1 real HTTP / provider / SDK: NO
 B1 Agent / LangGraph / LIVE: NO / DISABLED
 ```
 
-## 4. 下一步允许范围
+## 4. B2 implementation 完成范围与下一步
 
 ```text
-DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION
-只允许 B2 persistence baseline implementation 范围
-允许新增 dh-app/src/main/resources/db/migration/V9__qdr_replay_evaluation_baseline.sql
-允许新增 ReplayCaseRepository / EvaluationCaseRepository / RegressionVerdictRepository 及对应 JDBC adapter
-允许补充 migration / repository / tenant isolation / redaction / fail-closed 测试
-必须遵守 docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
+DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
+已新增 dh-app/src/main/resources/db/migration/V9__qdr_replay_evaluation_baseline.sql
+已新增 ReplayCaseRepository / EvaluationCaseRepository / RegressionVerdictRepository 及对应 JDBC adapter
+已补充 migration / repository / tenant isolation / redaction / fail-closed 测试
+V9 PostgreSQL/Flyway load test 已通过真实 Testcontainers PostgreSQL 验证，不能再按 skip/blocker 处理
+下一步只允许 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW
 不得新增 API / Controller
 不得跳到 B3 mock gateway regression integration
 不得跳到 B4 report/read model
@@ -107,6 +109,7 @@ git diff --stat
 git diff --name-only
 git diff --cached --name-only
 mvn -ntp -Pquality validate
+mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test
 .\mvnw.cmd -v
 ```
 

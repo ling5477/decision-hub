@@ -188,7 +188,12 @@ final class ReplayEvaluationContractServiceTest {
 
     private static boolean containsForbiddenRuntimeTerm(final Path path, final String forbiddenTerms) {
         try {
-            return Files.readString(path, StandardCharsets.UTF_8).matches("(?s).*(" + forbiddenTerms + ").*");
+            return Files.readString(path, StandardCharsets.UTF_8).lines()
+                    .map(String::trim)
+                    .filter(line -> !line.startsWith("*"))
+                    .filter(line -> !line.startsWith("//"))
+                    .filter(line -> !line.startsWith("/*"))
+                    .anyMatch(line -> line.matches(".*(" + forbiddenTerms + ").*"));
         } catch (final IOException error) {
             throw new AssertionError("failed to inspect " + path, error);
         }

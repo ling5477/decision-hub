@@ -20,17 +20,18 @@ stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
-stage-qdr-4 implementation: B1_ONLY / DONE
+stage-qdr-4 implementation: B2_PERSISTENCE_BASELINE / DONE
 stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
 stage-qdr-4 B2 freeze/review: PASS
 stage-qdr-4 B2 implementation work order: DONE / WORK_ORDER_ONLY
-stage-qdr-4 B2 implementation: NOT_STARTED / NO
+stage-qdr-4 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
+stage-qdr-4 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION
+next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW
 ```
 
 ## 2. 前置分类规则
@@ -85,7 +86,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成。下一步只能进入单独的 B2 implementation。不得跳到 B3/B4，不得把 B2 与 B3 合并实施。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成，B2 implementation 已完成并通过真实 PostgreSQL/Testcontainers Flyway load 验证。下一步只能进入单独的 B2 close review。不得跳到 B3/B4，不得把 B2 close review 与 B3 合并实施。
 
 ## 4. 安全边界
 
@@ -124,21 +125,23 @@ git diff --stat
 ```powershell
 git diff --name-only
 git diff --cached --name-only
+mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test
 mvn -ntp -Pquality validate
 .\mvnw.cmd -v
 ```
 
 `mvnw.cmd` 当前仍不可写成可用。Docker/Testcontainers skip 只能写成环境型 skip，不得写成 PASS。
 
-## 7. B2 implementation 当前入口
+## 7. B2 close review 当前入口
 
 ```text
-current task: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION
+current task: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW
 work order source: docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
 B2 freeze/review: PASS
-B2 implementation: NOT_STARTED / NO
-V9 migration: ALLOWED_NEXT_IMPLEMENTATION / NOT_CREATED_YET
-Repository / JDBC implementation: NOT_STARTED / NO
+B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
+B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
+V9 migration: CREATED / V9__qdr_replay_evaluation_baseline.sql / POSTGRES_LOAD_VERIFIED
+Repository / JDBC implementation: DONE / TENANT_BOUND
 API / Controller: NO
 real HTTP: NO
 real provider: NO
