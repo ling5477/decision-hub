@@ -1,17 +1,18 @@
 # Decision Hub Gates
 
-This directory stores stage snapshots for Decision Hub.
+本目录保存 Decision Hub 阶段冻结、阶段归档和 historical records。
 
-Current work uses:
+当前事实源仍使用：
 
 ```text
 docs/current
 ```
 
-Suggested next snapshot directory:
+QDR 阶段归档使用：
 
 ```text
-docs/gates/dh-refit-1-plan
+docs/gates/stage-qdr-2/
+docs/gates/stage-qdr-3/
 ```
 
-Stage snapshots are used for review and history. New work continues from `docs/current`.
+已归档文档只用于 review history、复盘和证据追溯，不覆盖 `docs/current/STATUS.md`、`docs/current/WORK_ORDER.md` 或 `docs/current/FACTSOURCE_POLICY.md` 的当前结论。`docs/archive/**` 不作为 QDR 当前归档标准。

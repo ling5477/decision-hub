@@ -45,18 +45,18 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: E:/Project/decision-hub
+current workspace: F:/Project/decision-hub
 next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
 ```
 
 ### Archive Actions
 
 ```text
-docs/archive/stage-qdr-2/DH_STAGE_QDR_2_WORK_ORDER.md
-docs/archive/stage-qdr-2/DH_STAGE_QDR_2_DISCIPLINE_CLOSEOUT.md
-docs/archive/stage-qdr-3/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md
-docs/archive/stage-qdr-3/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md
-docs/archive/stage-qdr-3/pre-close-current-snapshot-20260707/
+docs/gates/stage-qdr-2/DH_STAGE_QDR_2_WORK_ORDER.md
+docs/gates/stage-qdr-2/DH_STAGE_QDR_2_DISCIPLINE_CLOSEOUT.md
+docs/gates/stage-qdr-3/DH_STAGE_QDR_3_MODEL_GATEWAY_PROMPT_VERSION_PLAN.md
+docs/gates/stage-qdr-3/DH_STAGE_QDR_3_IMPLEMENTATION_WORK_ORDER.md
+docs/gates/stage-qdr-3/pre-close-current-snapshot-20260707/
 ```
 
 上述文件均为 historical record，不是 current factsource。current docs 只保留 `README / STATUS / WORK_ORDER / CODEX_PROJECT_INSTRUCTIONS / TESTING / FACTSOURCE_POLICY / ARCHIVE_INDEX` 作为 B5 retry 前的治理入口。
@@ -76,11 +76,74 @@ docs/current/API.md
 docs/current/DB_SCHEMA.md
 docs/current/FACTSOURCE_POLICY.md
 docs/current/ARCHIVE_INDEX.md
-docs/archive/**
+docs/gates/**
 ```
 
 ### Next
 
 ```text
 DH-STAGE-QDR-3-B5-CLOSE-REVIEW
+```
+
+## 2026-07-08 DH-DOCS-GOVERNANCE-GATES-ARCHIVE-FIX
+
+修正上一轮归档路径口径：项目既有阶段归档目录是 `docs/gates`，本轮不再引入 `docs/archive` 作为第二套 QDR 归档体系。
+
+### Scope
+
+```text
+DOCUMENTATION_ONLY
+DOCS_GOVERNANCE_CORRECTION
+GATES_ARCHIVE_ALIGNMENT
+CURRENT_DOCS_CLEANUP
+FACTSOURCE_CONSOLIDATION
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Archive Actions
+
+```text
+docs/archive/stage-qdr-2/* -> docs/gates/stage-qdr-2/
+docs/archive/stage-qdr-3/* -> docs/gates/stage-qdr-3/
+docs/current historical residuals -> docs/gates/stage-qdr-3/current-docs-historical-20260708/
+docs/archive empty directory cleanup: DONE
+```
+
+### Current Docs Retained
+
+```text
+README.md
+STATUS.md
+WORK_ORDER.md
+CODEX_PROJECT_INSTRUCTIONS.md
+TESTING.md
+FACTSOURCE_POLICY.md
+ARCHIVE_INDEX.md
+WORKLOG.md
+ROADMAP.md
+API.md
+DB_SCHEMA.md
+```
+
+### Current State
+
+```text
+stage-qdr-3 B5: READY FOR RETRY
+stage-qdr-3 acceptance: NOT_ACCEPTED_YET
+stage-qdr-3 final close: NOT_CLOSED
+stage-qdr-4: NOT_STARTED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
 ```

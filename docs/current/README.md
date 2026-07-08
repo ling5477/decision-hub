@@ -20,7 +20,7 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: E:/Project/decision-hub
+current workspace: F:/Project/decision-hub
 next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
 ```
 
@@ -48,8 +48,6 @@ docs/current/WORKLOG.md
 docs/current/ROADMAP.md
 docs/current/API.md
 docs/current/DB_SCHEMA.md
-docs/current/DH_STAGE_QDR_*.md
-docs/archive/**
 ```
 
 ## 当前入口文件
@@ -70,9 +68,10 @@ DB_SCHEMA.md               DB schema 状态摘要，supporting only
 ## Archive Pointers
 
 ```text
-docs/archive/stage-qdr-2/
-docs/archive/stage-qdr-3/
-docs/archive/stage-qdr-3/pre-close-current-snapshot-20260707/
+docs/gates/stage-qdr-2/
+docs/gates/stage-qdr-3/
+docs/gates/stage-qdr-3/pre-close-current-snapshot-20260707/
+docs/gates/stage-qdr-3/current-docs-historical-20260708/
 ```
 
-Archive docs are historical records. They are not current factsources and must not override `STATUS.md` or `WORK_ORDER.md`.
+Archive docs are historical records. They are not current factsources and must not override `STATUS.md` or `WORK_ORDER.md`. `docs/archive/**` is not the current QDR archive standard.

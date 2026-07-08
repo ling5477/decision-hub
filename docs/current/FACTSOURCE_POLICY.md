@@ -28,11 +28,20 @@ docs/current/WORKLOG.md
 docs/current/ROADMAP.md
 docs/current/API.md
 docs/current/DB_SCHEMA.md
-docs/current/DH_STAGE_QDR_*.md
-docs/archive/**
 ```
 
 这些文件可以提供背景、验证证据、变更记录、API / DB 摘要或历史复盘，但不得覆盖 `STATUS.md` 与 `WORK_ORDER.md` 的当前结论。
+
+## 3.1 ARCHIVED_DOCS_NOT_BLOCKERS
+
+以下目录是 historical records，默认不作为 close review blocker：
+
+```text
+docs/gates/**
+docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
+```
+
+`docs/gates/**` 是当前 QDR 阶段归档目录。归档文件保留历史内容和复盘价值，但不得覆盖 `STATUS.md`、`WORK_ORDER.md`、`CODEX_PROJECT_INSTRUCTIONS.md` 或 `TESTING.md` 的当前结论。
 
 ## 4. Supporting Docs 升级为 Blocker 的硬错误
 
@@ -71,10 +80,12 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: E:/Project/decision-hub
+current workspace: F:/Project/decision-hub
 next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
 ```
 
 ## 6. Archive Rule
 
-`docs/archive/**` 是 historical records。归档文件可以说明过去某一轮任务当时的状态，但不能作为当前事实源。若归档文档与 current factsources 冲突，以 `STATUS.md` 与 `WORK_ORDER.md` 为准。
+`docs/gates/**` 是当前 QDR 阶段归档目录。`docs/archive/**` 不再作为本项目 QDR 阶段的新归档标准；若历史遗留目录存在，只能作为 historical reference。
+
+归档文件可以说明过去某一轮任务当时的状态，但不能作为当前事实源。若归档文档与 current factsources 冲突，以 `STATUS.md` 与 `WORK_ORDER.md` 为准。

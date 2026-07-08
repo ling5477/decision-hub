@@ -18,7 +18,7 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: E:/Project/decision-hub
+current workspace: F:/Project/decision-hub
 next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
 ```
 
@@ -42,8 +42,13 @@ docs/current/WORKLOG.md
 docs/current/ROADMAP.md
 docs/current/API.md
 docs/current/DB_SCHEMA.md
-docs/current/DH_STAGE_QDR_*.md
-docs/archive/**
+```
+
+`ARCHIVED_DOCS_NOT_BLOCKERS`：
+
+```text
+docs/gates/**
+docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
 完整 blocker 升级规则见 `docs/current/FACTSOURCE_POLICY.md`。
@@ -52,13 +57,15 @@ docs/archive/**
 
 ```text
 DH-DOCS-GOVERNANCE-ARCHIVE-STAGE-QDR-3-PRE-CLOSE: DONE
+DH-DOCS-GOVERNANCE-GATES-ARCHIVE-FIX: DONE / VALIDATED
 current factsources: CONSOLIDATED
-archive policy: DEFINED
+archive policy: DOCS_GATES
 historical QDR docs: ARCHIVED_OR_INDEXED
+docs/archive: NOT_CURRENT_ARCHIVE_STANDARD
 stage-qdr-3 acceptance: NOT_ACCEPTED_YET
 stage-qdr-3 final close: NOT_CLOSED
 stage-qdr-4: NOT_STARTED
-B5 close review retry: ALLOWED_AFTER_VALIDATION
+B5 close review retry: ALLOWED
 ```
 
 B5 close review 可以重新执行，但本文件不把 B5 写成 accepted，不把 stage-qdr-3 final close 写成 closed，也不启动 stage-qdr-4。
@@ -80,4 +87,4 @@ ALLOW_NQ_MUTATION: NO
 
 ## 5. 历史文档处理
 
-已完成阶段的详细 work order、阶段中间产物、旧 review / freeze 记录、blocker fix 过程文档和 pre-close 快照均按历史记录处理。归档文档不得作为当前状态 blocker，除非出现 `FACTSOURCE_POLICY.md` 定义的硬错误。
+已完成阶段的详细 work order、阶段中间产物、旧 review / freeze 记录、blocker fix 过程文档和 pre-close 快照均按历史记录处理。QDR 阶段归档目录统一为 `docs/gates/**`。归档文档不得作为当前状态 blocker，除非出现 `FACTSOURCE_POLICY.md` 定义的硬错误。

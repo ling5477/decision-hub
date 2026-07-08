@@ -8,7 +8,7 @@ mode: REVIEW_ONLY / RETRY
 stage-qdr-3 acceptance: NOT_ACCEPTED_YET
 stage-qdr-3 final close: NOT_CLOSED
 stage-qdr-4: NOT_STARTED
-current workspace: E:/Project/decision-hub
+current workspace: F:/Project/decision-hub
 ```
 
 ## 2. 当前前置状态
@@ -65,7 +65,7 @@ LIVE: DISABLED
 
 ## 5. 可阻断事实源
 
-B5 close review 只应以 `FACTSOURCE_POLICY.md` 中的 `CURRENT_FACTSOURCE_CAN_BLOCK_CLOSE` 集合作为默认 blocker source。`WORKLOG.md`、`ROADMAP.md`、`API.md`、`DB_SCHEMA.md`、`docs/archive/**` 默认 supporting only。
+B5 close review 只应以 `FACTSOURCE_POLICY.md` 中的 `CURRENT_FACTSOURCE_CAN_BLOCK_CLOSE` 集合作为默认 blocker source。`WORKLOG.md`、`ROADMAP.md`、`API.md`、`DB_SCHEMA.md` 默认 supporting only。`docs/gates/**` 为 historical records，不作为默认 blocker；`docs/archive/**` 不再作为 QDR 当前归档标准。
 
 ## 6. 验收命令
 

@@ -4,7 +4,7 @@
 > 必需前置 skill: `nq-dh-workflow-router`
 > 必需文档 skill: `dh-docs-writer`
 > 当前事实源: `docs/current`
-> 当前工作区: `E:/Project/decision-hub`
+> 当前工作区: `F:/Project/decision-hub`
 
 ## 1. 当前状态锁定
 
@@ -67,8 +67,13 @@ docs/current/WORKLOG.md
 docs/current/ROADMAP.md
 docs/current/API.md
 docs/current/DB_SCHEMA.md
-docs/current/DH_STAGE_QDR_*.md
-docs/archive/**
+```
+
+归档历史默认不作为 blocker：
+
+```text
+docs/gates/**
+docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
 只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。
@@ -93,7 +98,7 @@ DH 不启用 LIVE
 
 ## 5. 文档语言与路径规则
 
-正文使用简体中文。类名、字段名、状态枚举、HTTP header、命令、路径和外部技术名保留英文原样。当前路径统一为 `E:/Project/decision-hub`；旧 `F:/project/decision-hub` 只能作为历史路径记录，不得作为当前执行路径。
+正文使用简体中文。类名、字段名、状态枚举、HTTP header、命令、路径和外部技术名保留英文原样。当前路径统一为 `F:/Project/decision-hub`。若历史文档出现旧路径，只能作为 historical record，不得覆盖当前工作区。
 
 ## 6. 验证纪律
 
