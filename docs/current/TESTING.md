@@ -3,6 +3,74 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN validation
+
+```text
+Task type: PLANNING_ONLY + MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN + QDR_REPLAY_EVALUATION_REGRESSION + PIPELINE_BOUNDARY_REVIEW + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+B3 plan: DONE / PLAN_ONLY
+B3 implementation now: NO
+B4 implementation now: NO
+real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
+```
+
+### Docs-only validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current`（开工前） | PASS | `dev`。 |
+| `git log --oneline -20`（开工前） | PASS | 最近提交包含 `a3839b2 docs(qdr): close replay evaluation persistence baseline`、`3fe1bab feat(qdr): persist replay evaluation baseline`、`4dc2944 docs(qdr): define replay evaluation persistence implementation work order`、`6a43256 docs(qdr): plan replay evaluation persistence baseline`、`73b74d2 feat(qdr): add replay evaluation domain contracts`。 |
+| `git diff --check`（开工前） | PASS | 无 whitespace error。 |
+| `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 tracked diff 或 staged diff。 |
+| code path discovery | REVIEWED / EXISTING_PATHS_USED | 附件列出的 `usecase/modelgateway` 与 `usecase/provider` 目录不存在；实际 mock gateway / provider package 为 `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/**`。 |
+| B3 plan document | DONE | 新增 `docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md`；只记录 plan，不写实现。 |
+| forbidden-scope diff | PASS / EMPTY | `git diff --name-only -- dh-domain/src/main dh-usecase/src/main dh-app/src/main dh-infra/src/main contracts golden_cases "dh-*/src/main/resources/db/migration"` 无输出，确认未修改 Java/main、contracts、golden_cases 或 migration。 |
+| safety scan | REVIEWED / NO_ACTUAL_RISK | 用户指定 `rg` 已执行。命中为禁止项、B3 plan guard、既有 DB/API risk statement 或 `FACTSOURCE_POLICY.md:62` hard-error phrase 清单；未发现 real HTTP/provider/Agent/LangGraph/LIVE started/enabled，也未将 raw prompt/provider response/credential 写成 allowed。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed。系统 Maven settings 仍有 `profiles` warning，非本轮阻断。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+
+### B3 implementation test matrix
+
+| 序号 | 测试项 | 计划验收 |
+| --- | --- | --- |
+| 1 | mock gateway output can create replay case | gateway safe refs 能生成并保存 replay case。 |
+| 2 | replay case can create evaluation case | replay case + actual summary/output ref 能生成 evaluation case。 |
+| 3 | expected summary can create regression verdict | expected/actual summary comparison 能保存 verdict。 |
+| 4 | identical mock output returns PASS | deterministic output 与 baseline 完全一致时 `PASS`。 |
+| 5 | confidence drift beyond tolerance returns WARN or FAIL | soft drift `WARN`，hard drift `FAIL`。 |
+| 6 | risk level drift returns WARN or FAIL | policy tolerance 内 `WARN`，越界 `FAIL`。 |
+| 7 | missing evidence ref returns FAIL | required evidence 缺失 fail-closed。 |
+| 8 | provider summary hash mismatch returns WARN or FAIL | 结构化字段一致为 `WARN`，语义不一致为 `FAIL`。 |
+| 9 | modelGatewayVersionRef mismatch is recorded | drift 必须生成 finding，不静默忽略。 |
+| 10 | promptVersionRef mismatch is recorded | drift 必须生成 finding，不静默忽略。 |
+| 11 | policyVersion mismatch is recorded | strict default 下为 `FAIL` 或 `BLOCKED` finding。 |
+| 12 | BUY / SELL / MARKET_ORDER expected action fails closed | 不允许作为 expected actionLabel。 |
+| 13 | PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE allowed action fails closed | 不允许作为 allowed action。 |
+| 14 | raw prompt is not persisted | raw prompt sample 被 guard 拒绝或仅 hash/ref。 |
+| 15 | raw provider response is not persisted | raw provider response sample 被 guard 拒绝或仅 hash/ref。 |
+| 16 | credential-like JSON key fails closed | sensitive key 命中 fail-closed。 |
+| 17 | cross-tenant regression read returns empty or fail-closed | tenant B 不得读 tenant A case/evaluation/verdict/finding。 |
+| 18 | provider/HTTP/Agent/LangGraph classes are not introduced | architecture/safety scan 证明无新增真实 provider/HTTP/Agent/LangGraph。 |
+| 19 | repository save failure returns FAIL / BLOCKED | persistence failure 不吞异常，不 fallback success。 |
+| 20 | quality validate passes | `mvn -ntp -Pquality validate` 通过。 |
+
+### B3 plan result
+
+```text
+STAGE_QDR_4_B3_PLAN: DONE
+ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION_WO: YES
+ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-WO
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW validation
 
 ```text

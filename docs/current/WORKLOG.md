@@ -4,6 +4,118 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN
+
+完成 stage-qdr-4 B3 mock gateway regression integration planning。B3 plan 只规划 future implementation 如何复用 existing dry-run / mock gateway safe refs / B2 replay-evaluation persistence baseline，串起 replay case、evaluation case、regression comparison、verdict 和 finding list。本轮未修改 Java、测试、migration、API、NQ 或 runtime。
+
+### Scope
+
+```text
+PLANNING_ONLY
+MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN
+QDR_REPLAY_EVALUATION_REGRESSION
+PIPELINE_BOUNDARY_REVIEW
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Inspected
+
+```text
+README.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/FACTSOURCE_POLICY.md
+docs/current/DH_STAGE_QDR_4_PLAN.md
+docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
+docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/**
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/**
+dh-app/src/main/resources/db/migration/V9__qdr_replay_evaluation_baseline.sql
+dh-usecase/src/test/java/**/qdr/**
+dh-infra/src/test/java/**/qdr/**
+dh-app/src/test/java/**
+pom.xml
+```
+
+### Files Changed
+
+```text
+docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Result
+
+```text
+target flow: existing dry-run / mock gateway safe refs -> replay case -> evaluation case -> expected/actual summary -> regression comparison -> verdict -> finding list
+usecase boundaries: MockGatewayRegressionCaseBuilder / QdrRegressionEvaluationService / QdrRegressionComparator / RegressionBaselinePolicy / RegressionEvidenceRef planned only
+comparison rules: decisionType / actionLabel / confidenceBand / riskLevel / evidenceRefs / forbiddenActions / providerSummaryHash / modelGatewayVersionRef / promptVersionRef / policyVersion planned
+persistence reuse: B2 V9 seven tables only; no V10; no V9 change
+redaction rules: no raw prompt/provider response/credential; JSONB safe ref/hash/summary only
+trading-term rules: BUY/SELL/MARKET_ORDER not expected action; PLACE_ORDER/CANCEL_ORDER/MUTATE_NQ_STATE not allowed action; LONG_BIAS/SHORT_BIAS direction label only
+test matrix: 20 B3 implementation tests planned
+review/freeze rules: B3 plan -> B3 WO -> B3 implementation -> B3 close review -> B4 plan
+STAGE_QDR_4_B3_PLAN: DONE
+ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION_WO: YES
+ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-WO
+```
+
+### Validation
+
+```text
+git status --short before writing: PASS / CLEAN
+git branch --show-current: dev
+git log --oneline -20: contains B1/B2 plan/WO/implementation/close review commits
+git diff --check before writing: PASS
+git diff --stat/name-only/cached before writing: PASS / EMPTY
+forbidden-scope diff: PASS / EMPTY
+safety scan: REVIEWED / NO_ACTUAL_RISK
+mvn -ntp -Pquality validate: BUILD SUCCESS
+.\mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+### Boundary
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 Repository / JDBC / Service 实现
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未开启 LIVE
+未修改 NQ
+未保存 raw prompt / raw provider response / credential
+未将 replay / regression output 写成 trading signal
+未进入 B3 implementation
+未进入 B4
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW
 
 完成 stage-qdr-4 B2 persistence baseline close review。审查确认 B2 implementation commit 已存在且工作区 clean；V9 PostgreSQL/Flyway Testcontainers load、scoped tests、quality validate 与 safety scan 均满足 close 条件。B2 正式关闭为 `CLOSED / ACCEPTED`，仅允许进入 B3 planning，不允许直接进入 B3 implementation。

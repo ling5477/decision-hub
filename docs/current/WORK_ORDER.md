@@ -3,9 +3,9 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW / PASS
-next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN
-mode: REVIEW_ONLY + CLOSE_REVIEW + MIGRATION_REVIEW + REPOSITORY_REVIEW + TENANT_ISOLATION_REVIEW + REDACTION_REVIEW + TEST_EVIDENCE_REVIEW + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current task: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN / DONE
+next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-WO
+mode: PLANNING_ONLY + MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN + QDR_REPLAY_EVALUATION_REGRESSION + PIPELINE_BOUNDARY_REVIEW + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
@@ -19,7 +19,10 @@ stage-qdr-4 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
 stage-qdr-4 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
 STAGE_QDR_4_B2_CLOSE_REVIEW: PASS
 STAGE_QDR_4_B2: CLOSED / ACCEPTED
-ALLOW_STAGE_QDR_4_B3_PLAN: YES
+stage-qdr-4 B3 plan: DONE / PLAN_ONLY
+STAGE_QDR_4_B3_PLAN: DONE
+ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION_WO: YES
+ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION_NOW: NO
 current workspace: F:/project/decision-hub
 ```
 
@@ -45,6 +48,7 @@ stage-qdr-4 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
 stage-qdr-4 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
 stage-qdr-4 B2 close review: PASS
 stage-qdr-4 B2: CLOSED / ACCEPTED
+stage-qdr-4 B3 plan: DONE / PLAN_ONLY
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
@@ -75,7 +79,11 @@ STAGE_QDR_4_B2: CLOSED / ACCEPTED
 已补充 migration / repository / tenant isolation / redaction / fail-closed 测试
 V9 PostgreSQL/Flyway load test 已通过真实 Testcontainers PostgreSQL 验证，不能再按 skip/blocker 处理
 close review 已确认 V9 migration、tenant-bound repository、redaction guard、trading-term guard、测试证据和 safety scan 可接受
-下一步只允许 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN
+DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN: DONE / PLAN_ONLY
+已规划 dry-run / mock gateway safe refs -> replay case -> evaluation case -> regression verdict / finding 的 future implementation flow
+已规划 MockGatewayRegressionCaseBuilder / QdrRegressionEvaluationService / QdrRegressionComparator / RegressionBaselinePolicy / RegressionEvidenceRef 边界
+已规划 comparison rules、V9 persistence reuse、redaction/trading guard、B3 implementation test matrix
+下一步只允许 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-WO
 不得新增 API / Controller
 不得直接进入 B3 implementation
 不得跳到 B4 report/read model
@@ -99,6 +107,8 @@ close review 已确认 V9 migration、tenant-bound repository、redaction guard�
 禁止修改 NQ
 禁止直接进入 B3 implementation
 禁止 B2 与 B3 合并实施
+禁止 B3 plan 后跳过 WO 直接 implementation
+禁止 B3 与 B4 合并实施
 禁止启用 LIVE
 禁止 git push
 禁止 git commit，除非用户另行明确授权
