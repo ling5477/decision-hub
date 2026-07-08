@@ -35,17 +35,22 @@ STAGE_QDR_4_B3_IMPLEMENTATION_WO: DONE
 stage-qdr-4 B3 implementation: DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED
 STAGE_QDR_4_B3_CLOSE_REVIEW: PASS
 STAGE_QDR_4_B3: CLOSED / ACCEPTED
-ALLOW_STAGE_QDR_4_B4_PLAN: YES
+ALLOW_STAGE_QDR_4_B4_PLAN: YES / CONSUMED
+stage-qdr-4 B4 plan: DONE / REGRESSION_REPORT_READ_MODEL_PLAN_ONLY
+STAGE_QDR_4_B4_PLAN: DONE
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_WO: YES
+stage-qdr-4 B4 implementation work order: NOT_STARTED
 stage-qdr-4 B4 implementation: NOT_STARTED
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_4_B5_FINAL_CLOSE_NOW: NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN
+next action: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO
 ```
 
 ## 2. 前置分类规则
@@ -84,6 +89,7 @@ docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
 docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
 docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
 docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
+docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
 ```
 
 以下文件默认 supporting only，不作为 primary stage gate source：
@@ -102,7 +108,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成，B2 implementation 已完成并通过真实 PostgreSQL/Testcontainers Flyway load 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。B3 mock gateway regression integration plan 已 `DONE / PLAN_ONLY`，B3 mock gateway regression integration work order 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。下一步只能进入 `DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN`。不得跳过 B4 plan/WO 进入 implementation，不得把 B3 / B4 合并实施。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成，B2 implementation 已完成并通过真实 PostgreSQL/Testcontainers Flyway load 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。B3 mock gateway regression integration plan 已 `DONE / PLAN_ONLY`，B3 mock gateway regression integration work order 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。B4 regression report / read model support plan 已 `DONE / PLAN_ONLY`。下一步只能进入 `DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO`。不得跳过 B4 WO 进入 implementation，不得把 B4 与 B5 合并实施，不得在 B4 打 tag。
 
 ## 4. 安全边界
 
@@ -148,12 +154,13 @@ mvn -ntp -Pquality validate
 
 `mvnw.cmd` 当前仍不可写成可用。Docker/Testcontainers skip 只能写成环境型 skip，不得写成 PASS。
 
-## 7. B4 planning 当前入口
+## 7. B4 implementation work order 当前入口
 
 ```text
-previous task: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW / PASS
-plan source: docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
-work order source: docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
+previous task: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN / DONE
+plan source: docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
+previous B3 plan source: docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
+previous B3 work order source: docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
 B2 freeze/review: PASS
 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
@@ -164,7 +171,9 @@ B3 implementation work order: DONE / WORK_ORDER_ONLY
 B3 implementation: DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED
 B3 close review: PASS
 B3 status: CLOSED / ACCEPTED
-ALLOW_STAGE_QDR_4_B4_PLAN: YES
+ALLOW_STAGE_QDR_4_B4_PLAN: YES / CONSUMED
+B4 plan: DONE / REGRESSION_REPORT_READ_MODEL_PLAN_ONLY
+B4 implementation work order: NOT_STARTED
 B4 implementation: NOT_STARTED
 V9 migration: CREATED / V9__qdr_replay_evaluation_baseline.sql / POSTGRES_LOAD_VERIFIED
 Repository / JDBC implementation: DONE / TENANT_BOUND
@@ -174,5 +183,5 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN
+next action: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO
 ```
