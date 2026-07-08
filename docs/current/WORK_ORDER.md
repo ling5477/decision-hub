@@ -3,16 +3,18 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-4-B1-REPLAY-EVALUATION-DOMAIN-CONTRACTS / DONE
-next action: DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
-mode: IMPLEMENTATION + DOMAIN_CONTRACTS_ONLY + NO_MIGRATION + NO_API
+current task: DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN / DONE
+next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-FREEZE-REVIEW
+mode: PLANNING_ONLY + PERSISTENCE_BASELINE_DESIGN + MIGRATION_REVIEW_PREP + NO_MIGRATION + NO_API
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
 stage-qdr-4 implementation: B1_ONLY / DONE
-stage-qdr-4 B2: NOT_STARTED / PLAN_ONLY_NEXT
+stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
+stage-qdr-4 B2 implementation: NOT_STARTED / NO
+stage-qdr-4 B2 freeze/review: READY
 current workspace: F:/project/decision-hub
 ```
 
@@ -31,7 +33,9 @@ stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
 stage-qdr-4 implementation: B1_ONLY / DONE
-stage-qdr-4 B2: NOT_STARTED / PLAN_ONLY_NEXT
+stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
+stage-qdr-4 B2 implementation: NOT_STARTED / NO
+stage-qdr-4 B2 freeze/review: READY
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
@@ -54,10 +58,12 @@ B1 Agent / LangGraph / LIVE: NO / DISABLED
 ## 4. 下一步允许范围
 
 ```text
-DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
-只允许 planning / review / freeze 范围
-评估 migration / persistence / repository 边界
-如需 migration，必须单独 review/freeze
+DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-FREEZE-REVIEW
+只允许 review / freeze 范围
+审查 DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
+审查 V9 migration 规划、repository 边界、tenant isolation、redaction policy、测试矩阵
+确认是否允许后续单独 B2 implementation work order
+不得直接新增 V9 migration
 不得直接 B2 implementation
 不得跳到 B3 mock gateway regression integration
 不得跳到 B4 report/read model
@@ -69,7 +75,7 @@ DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
 ```text
 禁止未经明确授权继续修改 Java 生产代码
 禁止未经明确授权继续修改 Java 测试代码
-禁止在 B2 plan 前新增 migration
+禁止在 B2 freeze/review 前新增 migration
 禁止修改 V1-V8 migration
 禁止未经 review/freeze 新增 V9 migration
 禁止新增 API / Controller / REST endpoint
@@ -80,6 +86,7 @@ DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
 禁止启动 Agent runtime
 禁止修改 NQ
 禁止直接进入 B2 implementation
+禁止直接进入 B3 implementation
 禁止启用 LIVE
 禁止 git push
 禁止 git commit，除非用户另行明确授权

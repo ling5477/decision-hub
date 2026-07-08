@@ -3,6 +3,79 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN validation
+
+```text
+Task type: PLANNING_ONLY + PERSISTENCE_BASELINE_DESIGN + MIGRATION_REVIEW_PREP + QDR_REPLAY_EVALUATION + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+B1 commit: feat(qdr): add replay evaluation domain contracts
+stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
+stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
+stage-qdr-4 B2 implementation: NOT_STARTED / NO
+stage-qdr-4 B2 freeze/review: READY
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### Docs-only validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `F:\project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current`（开工前） | PASS | `dev`。 |
+| `git log --oneline -12`（开工前） | PASS | 最近 12 条包含 `73b74d2 feat(qdr): add replay evaluation domain contracts`。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 whitespace error、tracked diff 或 staged diff。 |
+| `docs/current/WORKFLOW.md` | NOT_FOUND / NON_BLOCKING | 项目规范列为事实源入口，但当前仓库不存在该文件；本轮已读取存在的 current factsources。 |
+| safety wording scan | REVIEWED / EXISTING_FALSE_POSITIVE_IN_UNMODIFIABLE_FILE | 用户指定 `rg` 已执行；`BUY` / `SELL` / `MARKET_ORDER` / `PLACE_ORDER` / `CANCEL_ORDER` / `MUTATE_NQ_STATE` 命中均为禁止项或风险说明；未发现 real HTTP / provider / LangGraph / Agent / LIVE 被写成启用状态。既有 `docs/current/FACTSOURCE_POLICY.md:62` 命中 credential-storage permissive phrase，上下文是 hard-error phrase 清单，不是允许凭证持久化；该文件不在本轮允许修改清单内，保留为 safety-scan residual。 |
+| `git status --short`（收尾） | DOCS_ONLY_DIRTY / NO_STAGED | dirty 限于允许的 `docs/current` 文件；新建 `docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md`；无 staged。 |
+| `git diff --check`（收尾） | PASS_WITH_EOL_WARNINGS | 无 whitespace error；仅 Git 的 LF -> CRLF warning。 |
+| `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（收尾） | DOCS_ONLY_TRACKED_DIFF / NO_STAGED | tracked diff 限于 `docs/current/CODEX_PROJECT_INSTRUCTIONS.md`、`ROADMAP.md`、`STATUS.md`、`TESTING.md`、`WORKLOG.md`、`WORK_ORDER.md`；untracked plan 文件由 `git status --short` 记录；无 staged。 |
+| forbidden scope diff | PASS / EMPTY | `dh-domain`、`dh-usecase`、`dh-memory`、`dh-eval`、`dh-connector`、`dh-api`、`dh-app`、`dh-infra`、`contracts`、`golden_cases` diff 均为空。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed；未使用 `-DskipTests` 或 `-DskipITs`。 |
+| Maven settings warning | P2 TOOLING RISK / NON_BLOCKING | 系统 Maven 仍输出 `Unrecognised tag: 'profiles'`，来源 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml`；不影响本轮 `BUILD SUCCESS`。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | 命令 exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+
+### B2 implementation test matrix
+
+| 序号 | 测试项 | 计划验收 |
+| --- | --- | --- |
+| 1 | migration loads successfully | `V9__qdr_replay_evaluation_baseline.sql` 可由 Flyway 顺序加载。 |
+| 2 | repository saves replay case with tenant_id | 保存后 `tenant_id`、`case_id`、`trace_id` 可按 tenant-bound query 查询。 |
+| 3 | repository rejects missing tenant_id | 缺失 tenant 直接 fail-closed，不写库。 |
+| 4 | repository query is tenant-bound | 所有查询 SQL 必须包含 `tenant_id = ?`。 |
+| 5 | repository does not persist raw prompt | raw prompt 样本被拒绝，或仅保存 hash/ref。 |
+| 6 | repository does not persist raw provider response | raw provider response 样本被拒绝，或仅保存 hash/ref/summary。 |
+| 7 | repository does not persist credential | credential-like 样本被拒绝。 |
+| 8 | regression verdict can be saved and queried | verdict 可按 tenant + verdict_id / evaluation_id 查询。 |
+| 9 | finding list can be saved and queried | 多 finding 可按 tenant + verdict_id 分页查询。 |
+| 10 | duplicate case_id handling is deterministic | same checksum 幂等；different checksum fail-closed。 |
+| 11 | cross-tenant read returns empty or fail-closed | tenant B 不得读到 tenant A 数据。 |
+| 12 | Flyway migration test passes | migration test 覆盖 V1-V9 顺序加载。 |
+
+Boundary:
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V8 migration
+未新增 V9 migration
+未新增 Repository / JDBC / Service 实现
+未新增 API / Controller
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未修改 NQ
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B1-REPLAY-EVALUATION-DOMAIN-CONTRACTS validation
 
 ```text

@@ -15,14 +15,16 @@ stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
 stage-qdr-4 implementation: B1_ONLY / DONE
-stage-qdr-4 B2: NOT_STARTED / PLAN_ONLY_NEXT
+stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
+stage-qdr-4 B2 implementation: NOT_STARTED / NO
+stage-qdr-4 B2 freeze/review: READY
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: F:/project/decision-hub
-next action: DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
+next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-FREEZE-REVIEW
 ```
 
 ## 2. 当前事实源集合
@@ -37,6 +39,7 @@ docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
 docs/current/DH_STAGE_QDR_4_PLAN.md
+docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
 ```
 
 `SUPPORTING_DOCS_NOT_BLOCKERS_BY_DEFAULT`：
@@ -72,12 +75,14 @@ stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
 stage-qdr-4 implementation: B1_ONLY / DONE
-stage-qdr-4 B2: NOT_STARTED / PLAN_ONLY_NEXT
+stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
+stage-qdr-4 B2 implementation: NOT_STARTED / NO
+stage-qdr-4 B2 freeze/review: READY
 B5 close review retry: CLOSED / ACCEPTED
 stage-qdr-4 recommended direction: QDR Replay / Evaluation / Regression Baseline
 ```
 
-B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；下一步只允许进入 B2 persistence baseline plan，不允许直接进入 B2 implementation。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 与 LIVE 仍未启动。
+B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；B2 persistence baseline plan 已完成，仅形成 V9 / repository / tenant / redaction / review 测试矩阵规划。下一步只允许进入 B2 freeze/review，不允许直接进入 B2 implementation，不允许跳到 B3 implementation。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 与 LIVE 仍未启动。
 
 ## 4. 禁止项
 
@@ -85,8 +90,10 @@ B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsourc
 ALLOW_STAGE_QDR_3_FINAL_CLOSE: YES / CONSUMED
 ALLOW_STAGE_QDR_4_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B1_DOMAIN_CONTRACTS: YES / CONSUMED
-ALLOW_STAGE_QDR_4_B2_PERSISTENCE_PLAN: YES
+ALLOW_STAGE_QDR_4_B2_PERSISTENCE_PLAN: YES / CONSUMED
+ALLOW_STAGE_QDR_4_B2_FREEZE_REVIEW: YES
 ALLOW_STAGE_QDR_4_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_PROVIDER_SDK: NO

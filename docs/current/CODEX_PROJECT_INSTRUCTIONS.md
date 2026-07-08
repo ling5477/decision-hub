@@ -21,13 +21,15 @@ stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
 stage-qdr-4 implementation: B1_ONLY / DONE
-stage-qdr-4 B2: NOT_STARTED / PLAN_ONLY_NEXT
+stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
+stage-qdr-4 B2 implementation: NOT_STARTED / NO
+stage-qdr-4 B2 freeze/review: READY
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
+next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-FREEZE-REVIEW
 ```
 
 ## 2. 前置分类规则
@@ -62,6 +64,7 @@ docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
 docs/current/DH_STAGE_QDR_4_PLAN.md
+docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
 ```
 
 以下文件默认 supporting only，不作为 primary stage gate source：
@@ -80,7 +83,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，下一步只能进入 B2 persistence baseline plan；不得直接 B2 implementation，不得跳到 B3/B4。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成；下一步只能进入 B2 freeze/review。不得直接 B2 implementation，不得跳到 B3/B4。
 
 ## 4. 安全边界
 
@@ -124,3 +127,19 @@ mvn -ntp -Pquality validate
 ```
 
 `mvnw.cmd` 当前仍不可写成可用。Docker/Testcontainers skip 只能写成环境型 skip，不得写成 PASS。
+
+## 7. B2 freeze/review 当前入口
+
+```text
+current task: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-FREEZE-REVIEW
+plan source: docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
+B2 implementation: NOT_STARTED / NO
+V9 migration: PLANNED_ONLY / NOT_CREATED
+Repository / JDBC implementation: NOT_STARTED / NO
+API / Controller: NO
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```

@@ -22,13 +22,15 @@ stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
 stage-qdr-4 implementation: B1_ONLY / DONE
-stage-qdr-4 B2: NOT_STARTED / PLAN_ONLY_NEXT
+stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
+stage-qdr-4 B2 implementation: NOT_STARTED / NO
+stage-qdr-4 B2 freeze/review: READY
 ```
 
 ## 2. 当前下一步
 
 ```text
-DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
+DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-FREEZE-REVIEW
 ```
 
 stage-qdr-4 plan 已选择唯一主线：
@@ -46,11 +48,11 @@ stage-qdr-4 = QDR Replay / Evaluation / Regression Baseline
 4. Agent / LangGraph preparation
 ```
 
-stage-qdr-4 B1 已完成 domain/usecase contracts。当前只允许进入 B2 persistence baseline plan；B2 可能涉及 migration、repository 或 persistence 边界，因此必须先 review/freeze，不得直接 implementation，不得跳到 B3/B4，不得新增 API / Controller，不得启动真实 HTTP、真实 provider、Provider SDK、Agent / LangGraph runtime 或 LIVE。
+stage-qdr-4 B1 已完成 domain/usecase contracts。B2 persistence baseline plan 已完成，规划保留 7 张表并建议后续 implementation 使用 `V9__qdr_replay_evaluation_baseline.sql`。B2 涉及 migration、repository 与 persistence 边界，因此下一步必须先做 freeze/review，不得直接 implementation，不得跳到 B3/B4，不得新增 API / Controller，不得启动真实 HTTP、真实 provider、Provider SDK、Agent / LangGraph runtime 或 LIVE。
 
 ## 3. 后续阶段边界
 
-stage-qdr-4 planning 已 `DONE / PLAN_ACCEPTED`。stage-qdr-4 B1 已 `DONE / DOMAIN_CONTRACTS_ONLY`。B2 仅允许先做 persistence baseline plan；implementation 仍需后续单独授权。Agent / LangGraph 必须后置，不进入 stage-qdr-4。
+stage-qdr-4 planning 已 `DONE / PLAN_ACCEPTED`。stage-qdr-4 B1 已 `DONE / DOMAIN_CONTRACTS_ONLY`。B2 plan 已 `DONE / PERSISTENCE_BASELINE_PLAN_ONLY`，但 B2 implementation 仍为 `NOT_STARTED / NO`。B2 implementation 前必须完成 `DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-FREEZE-REVIEW`，并审查可能新增的 `V9__qdr_replay_evaluation_baseline.sql`、repository fail-closed 边界、tenant isolation、redaction policy 与测试矩阵。Agent / LangGraph 必须后置，不进入 stage-qdr-4。
 
 ## 4. 持续禁止项
 

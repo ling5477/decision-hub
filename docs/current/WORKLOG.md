@@ -4,6 +4,114 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
+
+完成 stage-qdr-4 B2 replay / evaluation persistence baseline plan。本轮只做规划，未实现 Java、测试、migration、repository、API、真实 HTTP、真实 provider、Provider SDK、Agent runtime、LangGraph runtime 或 LIVE 能力。
+
+### Scope
+
+```text
+PLANNING_ONLY
+PERSISTENCE_BASELINE_DESIGN
+MIGRATION_REVIEW_PREP
+QDR_REPLAY_EVALUATION
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Inspected
+
+```text
+README.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/DH_STAGE_QDR_4_PLAN.md
+docs/current/DB_SCHEMA.md
+docs/current/WORKFLOW.md: NOT_FOUND
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/replay/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/ReplayEvaluationContractService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/model/QdrPersistenceSafety.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ModelGatewayCallPersistencePort.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/SaveModelGatewayCallCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/HumanApprovalPacketRepository.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/DecisionRequestRepository.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/replay/ReplayEvaluationContractServiceTest.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcDecisionCoreRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/model/JdbcModelGatewayCallRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcHumanApprovalPacketRepository.java
+dh-app/src/main/resources/db/migration/V6__qdr_decision_core_baseline.sql
+dh-app/src/main/resources/db/migration/V8__qdr_model_gateway_persistence_baseline.sql
+pom.xml
+```
+
+### Files Changed
+
+```text
+docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/ROADMAP.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Plan Result
+
+```text
+tables: qdr_replay_case, qdr_evaluation_case, qdr_expected_decision_summary, qdr_regression_verdict, qdr_regression_finding, qdr_replay_input_ref, qdr_replay_output_ref
+migration plan: V9__qdr_replay_evaluation_baseline.sql planned only / not created
+repository boundaries: ReplayCaseRepository, EvaluationCaseRepository, RegressionVerdictRepository planned only / not implemented
+tenant isolation: tenant_id required on all tables and all future query methods
+redaction policy: raw prompt / raw provider response / credential forbidden; persisted content limited to summary/hash/version/status/failure classification
+review/freeze: B2 implementation 前必须 freeze/review；implementation 后必须 close review
+next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-FREEZE-REVIEW
+```
+
+### Boundary
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V8 migration
+未新增 V9 migration
+未新增 Repository / JDBC / Service 实现
+未新增 API / Controller
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未修改 NQ
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+```
+
+### Validation
+
+```text
+git status --short: DOCS_ONLY_DIRTY / NO_STAGED
+git diff --check: PASS_WITH_EOL_WARNINGS
+git diff --stat: DOCS_ONLY_TRACKED_DIFF
+git diff --name-only: DOCS_ONLY_TRACKED_DIFF
+git diff --cached --name-only: PASS / EMPTY
+forbidden scope diff: PASS / EMPTY
+safety wording scan: REVIEWED / EXISTING_FALSE_POSITIVE_IN_UNMODIFIABLE_FILE
+mvn -ntp -Pquality validate: BUILD SUCCESS
+.\mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B1-REPLAY-EVALUATION-DOMAIN-CONTRACTS
 
 完成 stage-qdr-4 B1 replay / evaluation domain contracts。B1 只实现内存领域合同、usecase fail-closed 校验和单元测试，不新增 migration、API、Controller、Repository、真实 HTTP、真实 provider、Provider SDK、Agent runtime、LangGraph runtime 或 LIVE 能力。
