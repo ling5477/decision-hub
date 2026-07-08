@@ -3,6 +3,57 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-3-FINAL-CLOSE-DOCS-SYNC validation
+
+```text
+Task type: DOCUMENTATION_ONLY + STAGE_FINAL_CLOSE_RECORD + ACCEPTANCE_RESULT_SYNC + STAGE_QDR_3_CLOSE_RECORD + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/Project/decision-hub
+stage-qdr-3 implementation: DONE
+stage-qdr-3 close review: YES / B5 ACCEPTED
+stage-qdr-3 acceptance: ACCEPTED
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: READY
+stage-qdr-4 implementation: NOT_STARTED / NO
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+next action: DH-STAGE-QDR-4-PLAN
+```
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（开工前） | PASS / CLEAN | 当前分支 `dev`，起始无 dirty / staged。 |
+| `git branch --show-current`（开工前） | PASS | `dev`。 |
+| `git log --oneline -20`（开工前） | PASS | HEAD 包含并位于 `b595cc2 docs: align QDR archives under docs gates`。 |
+| B5 close review accepted | ACCEPTED / USER_PROVIDED | 用户已提供 `DH-STAGE-QDR-3-B5-CLOSE-REVIEW` ACCEPTED 结论，本轮只写回 current factsources。 |
+| Maven scoped tests | PASS / ACCEPTED_EVIDENCE_FROM_B5_CLOSE_REVIEW | B5 close review accepted 结论包含 scoped Maven tests 通过；本轮 docs-sync 未重新运行 scoped tests。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed；未使用 `-DskipTests` 或 `-DskipITs`。 |
+| Maven settings warning | P2 TOOLING RISK / NON_BLOCKING | 系统 Maven 输出 `Unrecognised tag: 'profiles'`，来源 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml`，不影响本次 `BUILD SUCCESS`，但继续作为工具配置风险保留。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | 命令 exit code 0，但输出仍包含 `'\\` is not recognized` 与 `.mvn\\wrapper\\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+| Docker/Testcontainers | INHERITED_TOOLING_ENV_RISK / NOT RUN | 本轮 docs-only final close sync 未运行 Docker/Testcontainers；既有 Docker/Testcontainers 环境型 skip 风险继承，skip 仍不得写成 PASS。 |
+
+Boundary:
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V8 migration
+未新增 V9 migration
+未新增 API
+未新增 Controller
+未新增 Repository / Service
+未新增真实 HTTP outbound
+未新增真实 provider
+未接 Provider SDK
+未修改 NQ
+未接 LangGraph / AutoGen / CrewAI
+未开启 LIVE
+stage-qdr-4 implementation 未启动
+```
+
 ## 2026-07-08 DH-DOCS-GOVERNANCE-GATES-ARCHIVE-FIX validation
 
 ```text

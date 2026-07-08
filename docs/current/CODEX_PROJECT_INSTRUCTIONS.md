@@ -15,16 +15,17 @@ stage-qdr-3 B1: DONE / COMMITTED
 stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
-stage-qdr-3 B5: READY FOR RETRY
-stage-qdr-3 acceptance: NOT_ACCEPTED_YET
-stage-qdr-3 final close: NOT_CLOSED
-stage-qdr-4: NOT_STARTED
+stage-qdr-3 close review: YES / B5 ACCEPTED
+stage-qdr-3 acceptance: ACCEPTED
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: READY
+stage-qdr-4 implementation: NOT_STARTED / NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
+next action: DH-STAGE-QDR-4-PLAN
 ```
 
 ## 2. 前置分类规则
@@ -49,7 +50,7 @@ Next concrete action:
 
 ## 3. 当前事实源规则
 
-默认可阻断 B5 close review 的文件只包括：
+stage-qdr-4 planning 的当前事实源文件只包括：
 
 ```text
 README.md
@@ -76,7 +77,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 implementation 仍必须等待后续明确授权。
 
 ## 4. 安全边界
 
@@ -115,7 +116,6 @@ git diff --stat
 ```powershell
 git diff --name-only
 git diff --cached --name-only
-stale facts scan required by DH-DOCS-GOVERNANCE-ARCHIVE-STAGE-QDR-3-PRE-CLOSE
 mvn -ntp -Pquality validate
 .\mvnw.cmd -v
 ```

@@ -16,23 +16,24 @@ stage-qdr-3 B1: DONE / COMMITTED
 stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
-stage-qdr-3 B5: READY FOR RETRY
-stage-qdr-3 acceptance: NOT_ACCEPTED_YET
-stage-qdr-3 final close: NOT_CLOSED
-stage-qdr-4: NOT_STARTED
+stage-qdr-3 close review: YES / B5 ACCEPTED
+stage-qdr-3 acceptance: ACCEPTED
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: READY
+stage-qdr-4 implementation: NOT_STARTED / NO
 ```
 
 ## 2. 当前下一步
 
 ```text
-DH-STAGE-QDR-3-B5-CLOSE-REVIEW
+DH-STAGE-QDR-4-PLAN
 ```
 
-B5 retry 只允许 review-only。它可以审查 B1-B4 evidence、current factsources、forbidden scope、quality validation 和 archive governance，但不得实现新功能，不得启动 stage-qdr-4。
+stage-qdr-4 当前只允许 planning。它可以规划目标、范围、验收、风险和后续 work order，但不得实现新功能，不得新增 API / Controller / migration，不得启动真实 HTTP、真实 provider、Provider SDK、Agent / LangGraph runtime 或 LIVE。
 
 ## 3. 后续阶段边界
 
-stage-qdr-4 仍未开始。后续只有在 stage-qdr-3 B5 close review 通过、acceptance 明确完成、final close 明确关闭后，才允许另起 stage-qdr-4 planning。stage-qdr-4 implementation 仍需要后续单独授权。
+stage-qdr-4 planning 已 READY。stage-qdr-4 implementation 仍需要后续单独授权，当前不得启动。
 
 ## 4. 持续禁止项
 

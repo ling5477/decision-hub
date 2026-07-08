@@ -4,6 +4,86 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-3-FINAL-CLOSE-DOCS-SYNC
+
+将用户提供的 `DH-STAGE-QDR-3-B5-CLOSE-REVIEW` ACCEPTED 结论写回 current factsources，并把 stage-qdr-3 final close 收口为 `CLOSED / ACCEPTED`。
+
+### Scope
+
+```text
+DOCUMENTATION_ONLY
+STAGE_FINAL_CLOSE_RECORD
+ACCEPTANCE_RESULT_SYNC
+STAGE_QDR_3_CLOSE_RECORD
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Current State
+
+```text
+stage-qdr-3 implementation: DONE
+stage-qdr-3 close review: YES / B5 ACCEPTED
+stage-qdr-3 acceptance: ACCEPTED
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: READY
+stage-qdr-4 implementation: NOT_STARTED / NO
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+next action: DH-STAGE-QDR-4-PLAN
+```
+
+### Boundary
+
+```text
+本轮不修改 Java 生产代码
+本轮不修改 Java 测试代码
+本轮不新增 migration
+本轮不修改 V1-V8 migration
+本轮不新增 V9 migration
+本轮不新增 API / Controller / REST endpoint
+本轮不新增真实 HTTP outbound
+本轮不新增真实 provider client
+本轮不新增 Provider SDK
+本轮不启动 Agent / LangGraph runtime
+本轮不修改 NQ
+本轮不启用 LIVE
+stage-qdr-4 implementation 未启动
+```
+
+### Files Changed
+
+```text
+README.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/TESTING.md
+docs/current/FACTSOURCE_POLICY.md
+docs/current/ARCHIVE_INDEX.md
+docs/current/WORKLOG.md
+docs/current/ROADMAP.md
+docs/current/API.md
+docs/current/DB_SCHEMA.md
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-4-PLAN
+```
+
 ## 2026-07-07 DH-DOCS-GOVERNANCE-ARCHIVE-STAGE-QDR-3-PRE-CLOSE
 
 执行 docs-only governance pre-close 收口。本轮目标是把 stage-qdr-3 B5 retry 前的当前事实源、归档索引、supporting docs 和 blocker 规则拆开，避免旧阶段文档继续阻断 close review。

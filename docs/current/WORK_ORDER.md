@@ -3,11 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
-mode: REVIEW_ONLY / RETRY
-stage-qdr-3 acceptance: NOT_ACCEPTED_YET
-stage-qdr-3 final close: NOT_CLOSED
-stage-qdr-4: NOT_STARTED
+next action: DH-STAGE-QDR-4-PLAN
+mode: PLAN_ONLY / DOCUMENTATION_ONLY
+stage-qdr-3 close review: YES / B5 ACCEPTED
+stage-qdr-3 acceptance: ACCEPTED
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: READY
+stage-qdr-4 implementation: NOT_STARTED / NO
 current workspace: F:/Project/decision-hub
 ```
 
@@ -20,7 +22,11 @@ stage-qdr-3 B1: DONE / COMMITTED
 stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
-stage-qdr-3 B5: READY FOR RETRY
+stage-qdr-3 close review: YES / B5 ACCEPTED
+stage-qdr-3 acceptance: ACCEPTED
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: READY
+stage-qdr-4 implementation: NOT_STARTED / NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
@@ -28,19 +34,18 @@ Agent / LangGraph: NO
 LIVE: DISABLED
 ```
 
-## 3. B5 Close Review 允许范围
+## 3. Stage-qdr-4 Plan 允许范围
 
 ```text
 读取当前事实源
-复核 B1-B4 evidence
-复核 docs/current 状态一致性
-复核 no real HTTP / provider / SDK / Agent / LangGraph / LIVE
-复核 no code diff / no migration diff
-复核 quality validate
-输出 close review decision
+规划 stage-qdr-4 的目标、边界、验收和风险
+同步 docs/current planning 文档
+保持 no real HTTP / provider / SDK / Agent / LangGraph / LIVE
+保持 no code diff / no migration diff，除非后续 planning 工单另有明确授权
+输出 plan-only result
 ```
 
-## 4. B5 Close Review 禁止范围
+## 4. Stage-qdr-4 Plan 禁止范围
 
 ```text
 禁止新增或修改 Java 生产代码
@@ -55,9 +60,7 @@ LIVE: DISABLED
 禁止启动 LangGraph / AutoGen / CrewAI
 禁止启动 Agent runtime
 禁止修改 NQ
-禁止把 stage-qdr-3 写成 ACCEPTED
-禁止把 stage-qdr-3 final close 写成 CLOSED
-禁止启动 stage-qdr-4
+禁止启动 stage-qdr-4 implementation
 禁止启用 LIVE
 禁止 git push
 禁止 git commit，除非用户另行明确授权
@@ -65,7 +68,7 @@ LIVE: DISABLED
 
 ## 5. 可阻断事实源
 
-B5 close review 只应以 `FACTSOURCE_POLICY.md` 中的 `CURRENT_FACTSOURCE_CAN_BLOCK_CLOSE` 集合作为默认 blocker source。`WORKLOG.md`、`ROADMAP.md`、`API.md`、`DB_SCHEMA.md` 默认 supporting only。`docs/gates/**` 为 historical records，不作为默认 blocker；`docs/archive/**` 不再作为 QDR 当前归档标准。
+stage-qdr-4 planning 只应以 `FACTSOURCE_POLICY.md` 中的 current factsource 集合作为默认事实源。`WORKLOG.md`、`ROADMAP.md`、`API.md`、`DB_SCHEMA.md` 默认 supporting only。`docs/gates/**` 为 historical records，不作为默认 blocker；`docs/archive/**` 不再作为 QDR 当前归档标准。
 
 ## 6. 验收命令
 
@@ -75,7 +78,6 @@ git diff --check
 git diff --stat
 git diff --name-only
 git diff --cached --name-only
-stale facts scan required by DH-DOCS-GOVERNANCE-ARCHIVE-STAGE-QDR-3-PRE-CLOSE
 mvn -ntp -Pquality validate
 .\mvnw.cmd -v
 ```

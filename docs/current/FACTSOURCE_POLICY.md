@@ -2,7 +2,7 @@
 
 ## 1. 目的
 
-本文件定义 `DH-STAGE-QDR-3-B5-CLOSE-REVIEW` 前的 current factsource 与 blocker 规则。目标是防止旧阶段文档、过期 work order、历史 review 记录和阶段中间产物继续覆盖当前状态。
+本文件定义 `stage-qdr-3 final close` 后的 current factsource 与 `DH-STAGE-QDR-4-PLAN` 前的 blocker 规则。目标是防止旧阶段文档、过期 work order、历史 review 记录和阶段中间产物继续覆盖当前状态。
 
 ## 2. CURRENT_FACTSOURCE_CAN_BLOCK_CLOSE
 
@@ -54,8 +54,8 @@ Provider SDK introduced
 LangGraph started
 Agent runtime started
 LIVE enabled
-stage-qdr-4 started
-stage-qdr-3 accepted/final closed 的错误提前声明
+stage-qdr-4 implementation started
+stage-qdr-3 acceptance/final close 与 current factsources 冲突
 gateway result can trade
 raw prompt/raw provider response allowed
 credential storage allowed
@@ -71,17 +71,18 @@ stage-qdr-3 B1: DONE / COMMITTED
 stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
-stage-qdr-3 B5: READY FOR RETRY
-stage-qdr-3 acceptance: NOT_ACCEPTED_YET
-stage-qdr-3 final close: NOT_CLOSED
-stage-qdr-4: NOT_STARTED
+stage-qdr-3 close review: YES / B5 ACCEPTED
+stage-qdr-3 acceptance: ACCEPTED
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: READY
+stage-qdr-4 implementation: NOT_STARTED / NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: F:/Project/decision-hub
-next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
+next action: DH-STAGE-QDR-4-PLAN
 ```
 
 ## 6. Archive Rule

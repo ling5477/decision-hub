@@ -9,8 +9,8 @@
 ## 1. 当前状态
 
 ```text
-Current stage: DH-STAGE-QDR-3-B5-CLOSE-REVIEW / RETRY_REQUIRED / READY / NO_SCHEMA_CHANGE
-Next stage:    DH-STAGE-QDR-3-B5-CLOSE-REVIEW / REVIEW_ONLY / RETRY
+Current stage: DH-STAGE-QDR-3-FINAL-CLOSE / CLOSED / ACCEPTED / NO_SCHEMA_CHANGE
+Next stage:    DH-STAGE-QDR-4-PLAN / READY / PLAN_ONLY / NO_SCHEMA_CHANGE
 ```
 
 Flyway 迁移：
@@ -35,7 +35,10 @@ B1 Prompt/Model Version Domain   COMMITTED / DOMAIN_USECASE_ONLY / NO MIGRATION
 B2 Model Gateway Mock Runtime    IMPLEMENTED_BY_VALIDATION / USECASE_ONLY / NO MIGRATION
 B3 Persistence Baseline          CLOSED / ACCEPTED / COMMITTED / V8 ADDED
 B4 QDR Pipeline Integration      DONE / FREEZE ACCEPTED / COMMITTED / NO MIGRATION / NO V9
-B5 close review retry            READY_FOR_RETRY / NOT_ACCEPTED_YET / NO DB SCHEMA CHANGE
+B5 close review                  YES / ACCEPTED / NO DB SCHEMA CHANGE
+stage-qdr-3 final close          CLOSED / ACCEPTED / NO DB SCHEMA CHANGE
+stage-qdr-4 planning             READY / PLAN_ONLY / NO DB SCHEMA CHANGE
+stage-qdr-4 implementation       NOT_STARTED / NO
 V9                              NOT STARTED
 ```
 
@@ -132,7 +135,7 @@ status / provider_kind / profile_status / version_status / trust_decision / fail
 
 V8 migration comments explicitly state raw prompt, raw provider response and credential material are forbidden. Prompt/model version immutability is not enforced by DB trigger in B3; it is enforced by append-only schema shape, migration comments, repository contract, checksum duplicate behavior and tests. Duplicate same checksum is idempotent by contract; duplicate different checksum and checksum mismatch must fail closed.
 
-B3 已完成并关闭；B4 只复用 V5/V6/V8 既有表，不新增 V9，不实现 API、真实 provider、Provider SDK 或 real HTTP，并已 `DONE / FREEZE ACCEPTED / COMMITTED`。当前允许重新执行 `DH-STAGE-QDR-3-B5-CLOSE-REVIEW`，但 B5 retry 不得新增 schema，不得把 stage-qdr-3 final close 写成 closed。
+B3 已完成并关闭；B4 只复用 V5/V6/V8 既有表，不新增 V9，不实现 API、真实 provider、Provider SDK 或 real HTTP，并已 `DONE / FREEZE ACCEPTED / COMMITTED`。B5 close review 已 `YES / ACCEPTED`，stage-qdr-3 final close 已 `CLOSED / ACCEPTED`。当前下一步只允许 `DH-STAGE-QDR-4-PLAN`，不得新增 schema，不得启动 stage-qdr-4 implementation，不得新增 V9。
 
 ## 1.1 stage-qdr-2 B1/B2/B3/B4 schema impact
 

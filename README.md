@@ -11,22 +11,23 @@ stage-qdr-3 B1: DONE / COMMITTED
 stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
-stage-qdr-3 B5: READY FOR RETRY
-stage-qdr-3 acceptance: NOT_ACCEPTED_YET
-stage-qdr-3 final close: NOT_CLOSED
-stage-qdr-4: NOT_STARTED
+stage-qdr-3 close review: YES / B5 ACCEPTED
+stage-qdr-3 acceptance: ACCEPTED
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: READY
+stage-qdr-4 implementation: NOT_STARTED / NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: F:/Project/decision-hub
-next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
+next action: DH-STAGE-QDR-4-PLAN
 ```
 
 ## 当前事实源
 
-B5 close review 只应以以下文件作为可阻断的当前事实源：
+stage-qdr-3 final close 与 stage-qdr-4 planning 入口只应以以下文件作为当前事实源：
 
 ```text
 README.md
@@ -47,7 +48,7 @@ docs/current/STATUS.md                  唯一当前状态表
 docs/current/WORK_ORDER.md              唯一下一步入口
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md 当前 Codex / Claude 执行纪律
 docs/current/TESTING.md                 当前验证证据与工具风险
-docs/current/FACTSOURCE_POLICY.md       B5 close review blocker 规则
+docs/current/FACTSOURCE_POLICY.md       当前事实源与 blocker 规则
 docs/current/ARCHIVE_INDEX.md           QDR 历史归档索引
 ```
 
@@ -76,7 +77,8 @@ docs/current/ARCHIVE_INDEX.md           QDR 历史归档索引
 git status --short
 git diff --check
 git diff --stat
-stale facts scan required by DH-DOCS-GOVERNANCE-ARCHIVE-STAGE-QDR-3-PRE-CLOSE
+git diff --name-only
+git diff --cached --name-only
 mvn -ntp -Pquality validate
 .\mvnw.cmd -v
 ```

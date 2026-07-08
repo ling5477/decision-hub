@@ -9,17 +9,18 @@ stage-qdr-3 B1: DONE / COMMITTED
 stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
-stage-qdr-3 B5: READY FOR RETRY
-stage-qdr-3 acceptance: NOT_ACCEPTED_YET
-stage-qdr-3 final close: NOT_CLOSED
-stage-qdr-4: NOT_STARTED
+stage-qdr-3 close review: YES / B5 ACCEPTED
+stage-qdr-3 acceptance: ACCEPTED
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: READY
+stage-qdr-4 implementation: NOT_STARTED / NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: F:/Project/decision-hub
-next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
+next action: DH-STAGE-QDR-4-PLAN
 ```
 
 ## 2. 当前事实源集合
@@ -62,19 +63,21 @@ current factsources: CONSOLIDATED
 archive policy: DOCS_GATES
 historical QDR docs: ARCHIVED_OR_INDEXED
 docs/archive: NOT_CURRENT_ARCHIVE_STANDARD
-stage-qdr-3 acceptance: NOT_ACCEPTED_YET
-stage-qdr-3 final close: NOT_CLOSED
-stage-qdr-4: NOT_STARTED
-B5 close review retry: ALLOWED
+stage-qdr-3 close review: YES / B5 ACCEPTED
+stage-qdr-3 acceptance: ACCEPTED
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: READY
+stage-qdr-4 implementation: NOT_STARTED / NO
+B5 close review retry: CLOSED / ACCEPTED
 ```
 
-B5 close review 可以重新执行，但本文件不把 B5 写成 accepted，不把 stage-qdr-3 final close 写成 closed，也不启动 stage-qdr-4。
+B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。下一步只允许进入 `DH-STAGE-QDR-4-PLAN`；stage-qdr-4 implementation、real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 与 LIVE 仍未启动。
 
 ## 4. 禁止项
 
 ```text
-ALLOW_STAGE_QDR_3_FINAL_CLOSE: NO
-ALLOW_STAGE_QDR_4_PLAN: NO
+ALLOW_STAGE_QDR_3_FINAL_CLOSE: YES / CONSUMED
+ALLOW_STAGE_QDR_4_PLAN: YES
 ALLOW_STAGE_QDR_4_IMPLEMENTATION: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO

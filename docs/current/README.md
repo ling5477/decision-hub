@@ -11,22 +11,23 @@ stage-qdr-3 B1: DONE / COMMITTED
 stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
-stage-qdr-3 B5: READY FOR RETRY
-stage-qdr-3 acceptance: NOT_ACCEPTED_YET
-stage-qdr-3 final close: NOT_CLOSED
-stage-qdr-4: NOT_STARTED
+stage-qdr-3 close review: YES / B5 ACCEPTED
+stage-qdr-3 acceptance: ACCEPTED
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: READY
+stage-qdr-4 implementation: NOT_STARTED / NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: F:/Project/decision-hub
-next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
+next action: DH-STAGE-QDR-4-PLAN
 ```
 
-## Close Review 可阻断事实源
+## Stage-qdr-4 Planning 当前事实源
 
-这些文件可以作为 `DH-STAGE-QDR-3-B5-CLOSE-REVIEW` 的 blocker source：
+这些文件可以作为 `DH-STAGE-QDR-4-PLAN` 的 current factsource：
 
 ```text
 README.md
@@ -37,7 +38,7 @@ docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
 ```
 
-若以上文件与当前状态冲突，B5 close review 可以阻断。
+若以上文件与当前状态冲突，必须先修正 factsources，不得进入 stage-qdr-4 implementation。
 
 ## Supporting Docs
 
