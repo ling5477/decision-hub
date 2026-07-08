@@ -4,6 +4,71 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-4-ARCHIVE-CLOSE
+
+完成 Stage-QDR-4 archive close docs sync。本轮只同步 README、docs/current 与 docs/gates 归档入口，把 Stage-QDR-4 final close review `PASS` 收口为 `CLOSED / ACCEPTED / ARCHIVED`，并保持 tag 状态为 `PENDING`。
+
+### Scope
+
+```text
+DOCUMENTATION_ONLY
+STAGE_ARCHIVE_CLOSE
+QDR_REPLAY_EVALUATION_REGRESSION_ARCHIVE
+TAG_PREP
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Archive Actions
+
+```text
+Stage-QDR-4 archive close docs sync: DONE
+README/current factsources: UPDATED
+docs/current/ARCHIVE_INDEX.md: UPDATED
+docs/gates/stage-qdr-4/README.md: CREATED
+No code change
+No test change
+No migration
+No API
+No tag created
+Next tag pending: dh-stage-qdr-4-close
+```
+
+### Boundary
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 Stage-QDR-5 implementation
+未打 tag
+未 push
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-4-TAG-CLOSE
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW
 
 完成 Stage-QDR-4 final close review。审查范围仅限 B1 replay/evaluation domain contracts、B2 persistence baseline、B3 mock gateway regression integration、B4 regression report/read model support 与 current docs 同步；本轮未修改 Java、测试、migration、API、Controller、Repository、Service、contracts、golden_cases 或 NQ。

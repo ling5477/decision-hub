@@ -69,7 +69,39 @@ stage-qdr-4 implementation 仍为 NOT_STARTED / NO。
 
 这些归档文档均为 historical records。它们不覆盖 current `STATUS.md`、`WORK_ORDER.md`、`CODEX_PROJECT_INSTRUCTIONS.md` 或 `TESTING.md`。
 
-## 4. Current Factsource Pointers
+## 4. stage-qdr-4
+
+归档目录：
+
+```text
+docs/gates/stage-qdr-4/
+```
+
+当前内容：
+
+```text
+docs/gates/stage-qdr-4/README.md
+```
+
+内容摘要：
+
+```text
+Stage-QDR-4 Replay / Evaluation / Regression Baseline
+Status: CLOSED / ACCEPTED / ARCHIVED
+Final close review: PASS
+Archive close: DONE
+Tag: PENDING
+Close docs commit: pending until this task is committed
+Next tag: dh-stage-qdr-4-close
+B1 Replay / Evaluation Domain Contracts: DONE
+B2 Replay / Evaluation Persistence Baseline: CLOSED / ACCEPTED
+B3 Mock Gateway Regression Integration: CLOSED / ACCEPTED
+B4 Regression Report / Read Model Support: DONE
+```
+
+Stage-QDR-4 归档记录只作为 historical record 和 tag close 前置证据，不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。
+
+## 5. Current Factsource Pointers
 
 ```text
 Current status: docs/current/STATUS.md
@@ -78,9 +110,10 @@ Stage-qdr-4 plan: docs/current/DH_STAGE_QDR_4_PLAN.md
 Factsource policy: docs/current/FACTSOURCE_POLICY.md
 Validation evidence: docs/current/TESTING.md
 Current docs index: docs/current/README.md
-Next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
+Stage-QDR-4 archive entry: docs/gates/stage-qdr-4/README.md
+Next action: DH-STAGE-QDR-4-TAG-CLOSE
 ```
 
-## 5. Post-close Rule
+## 6. Post-close Rule
 
-`DH-STAGE-QDR-3-B5-CLOSE-REVIEW` 已由用户提供 ACCEPTED 结论并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，后续 `DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER` 仍只参考 `FACTSOURCE_POLICY.md` 定义的 current factsources。归档目录 `docs/gates/**` 只作为 historical records。除非归档文档暴露 `FACTSOURCE_POLICY.md` 定义的硬错误，否则不得覆盖 current factsources 或授权 stage-qdr-4 implementation。
+`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`，Stage-QDR-4 已归档为 `CLOSED / ACCEPTED / ARCHIVED`。后续只允许先执行 `DH-STAGE-QDR-4-TAG-CLOSE`；Stage-QDR-5 只能在 tag close 后 planning-first。归档目录 `docs/gates/**` 只作为 historical records。除非归档文档暴露 `FACTSOURCE_POLICY.md` 定义的硬错误，否则不得覆盖 current factsources 或授权 Stage-QDR-5 implementation。

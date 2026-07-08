@@ -3,6 +3,64 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-4-ARCHIVE-CLOSE validation
+
+```text
+Task type: DOCUMENTATION_ONLY + STAGE_ARCHIVE_CLOSE + QDR_REPLAY_EVALUATION_REGRESSION_ARCHIVE + TAG_PREP + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:/Project/decision-hub
+branch: dev
+B4 implementation commit: b04408a feat(qdr): add regression report read model support
+STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_4_ARCHIVE: DONE
+STAGE_QDR_4_TAG: PENDING
+ALLOW_STAGE_QDR_4_TAG_CLOSE: YES
+ALLOW_STAGE_QDR_5_PLAN: YES
+ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
+real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
+```
+
+### Archive close validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -30` | PASS | 包含 `b04408a feat(qdr): add regression report read model support` 与 `b771c13 docs(qdr): close stage-qdr-4 replay evaluation baseline`。 |
+| `git tag --list "dh-stage-qdr-4-close"` | PASS / NOT_EXISTS | 本地固定 tag 不存在。 |
+| `git ls-remote --tags origin | rg "dh-stage-qdr-4-close"` | NO_MATCH_AFTER_RETRY | 首次遇到 Windows `SEC_E_NO_CREDENTIALS`，使用本机 Git 凭据重试后无匹配输出；未发现远程固定 tag。 |
+| `git diff --check`（写入后） | PASS_WITH_EOL_WARNINGS | exit code 0；仅 Git LF -> CRLF warning，不是 whitespace error。 |
+| `git diff --stat` / `git diff --name-only`（写入后） | DOCS_ONLY_DIFF | tracked diff 限于 README、docs/current 与 docs/gates 归档文档。 |
+| `git diff --cached --name-only`（写入后） | PASS / EMPTY | 无 staged 文件。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 无 diff。 |
+| required safety scan | REVIEWED / ALLOWED_HITS_ONLY | 命中限定在禁止项、历史 guard/test 说明、`NOT STARTED`、`PENDING`、`No tag created` 和 `next tag`；未把 real HTTP/provider/Agent/LangGraph/LIVE 写成 enabled/started，未把 `dh-stage-qdr-4-close` 写成已创建。 |
+| `mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test` | PASS / PRIOR_FINAL_CLOSE_EVIDENCE | Stage-QDR-4 final close review 已记录 BUILD SUCCESS；`V9QdrReplayEvaluationFlywayPostgresTest` 非 skip，PostgreSQL 17 Testcontainers 启动，Flyway validated 9 migrations 并迁移到 v9。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| `V9 PostgreSQL/Testcontainers/Flyway load` | PASS / NOT_SKIPPED | 来自 final close review evidence；V9 PostgreSQL/Flyway load 不再按 skip/blocker 处理。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `maven-wrapper.jar` no main manifest attribute；不能写成 wrapper PASS。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 Stage-QDR-5 implementation
+未打 tag
+未 push
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW validation
 
 ```text

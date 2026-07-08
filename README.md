@@ -21,9 +21,17 @@ stage-qdr-4 B3: CLOSED / ACCEPTED
 stage-qdr-4 B4: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
 STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
 STAGE_QDR_4: CLOSED / ACCEPTED
+STAGE_QDR_4_ARCHIVE: DONE
 STAGE_QDR_4_TAG: PENDING
-ALLOW_STAGE_QDR_4_TAG_AFTER_COMMIT: YES
+ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
+ALLOW_STAGE_QDR_4_TAG_CLOSE: YES
 ALLOW_STAGE_QDR_5_PLAN: YES
+ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
@@ -33,9 +41,24 @@ current workspace: E:/Project/decision-hub
 next action: DH-STAGE-QDR-4-TAG-CLOSE
 ```
 
+## Stage-QDR-4 归档状态
+
+```text
+Stage-QDR-4 Replay / Evaluation / Regression Baseline: CLOSED / ACCEPTED / ARCHIVED
+B1 Replay / Evaluation Domain Contracts: DONE
+B2 Replay / Evaluation Persistence Baseline: CLOSED / ACCEPTED
+B3 Mock Gateway Regression Integration: CLOSED / ACCEPTED
+B4 Regression Report / Read Model Support: DONE
+STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
+STAGE_QDR_4_TAG: PENDING
+next tag: dh-stage-qdr-4-close
+```
+
+Stage-QDR-4 归档不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。下一步仅允许 `DH-STAGE-QDR-4-TAG-CLOSE`；Stage-QDR-5 只能在 tag close 后 planning-first。
+
 ## 当前事实源
 
-stage-qdr-4 final close 与 tag prep 入口只应以以下文件作为当前事实源：
+stage-qdr-4 archive close 与 tag prep 入口只应以以下文件作为当前事实源：
 
 ```text
 README.md
@@ -61,6 +84,7 @@ docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md B4 r
 docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md B4 implementation WO
 docs/current/FACTSOURCE_POLICY.md       当前事实源与 blocker 规则
 docs/current/ARCHIVE_INDEX.md           QDR 历史归档索引
+docs/gates/stage-qdr-4/README.md        Stage-QDR-4 归档入口
 ```
 
 `docs/current/WORKLOG.md`、`ROADMAP.md`、`API.md`、`DB_SCHEMA.md` 是 supporting documents，不是 primary stage gate source。旧阶段工单、旧 review / freeze 记录、blocker fix 过程和中间产物已经移动或索引到 `docs/gates/**`，不得覆盖 `STATUS.md` 与 `WORK_ORDER.md` 的当前结论。`docs/archive/**` 不再作为本项目 QDR 阶段的新归档口径；若未来重新出现，只能作为历史遗留引用。
