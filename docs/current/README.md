@@ -19,20 +19,23 @@ stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
 stage-qdr-4 B2: CLOSED / ACCEPTED
 stage-qdr-4 B3: CLOSED / ACCEPTED
 stage-qdr-4 B4: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
-stage-qdr-4 final close: NOT_STARTED
-stage-qdr-4 tag: NOT_CREATED
+STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
+STAGE_QDR_4: CLOSED / ACCEPTED
+STAGE_QDR_4_TAG: PENDING
+ALLOW_STAGE_QDR_4_TAG_AFTER_COMMIT: YES
+ALLOW_STAGE_QDR_5_PLAN: YES
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: E:/Project/decision-hub
-next action: DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW
+next action: DH-STAGE-QDR-4-TAG-CLOSE
 ```
 
-## Stage-qdr-4 Planning 当前事实源
+## Stage-qdr-4 当前事实源
 
-这些文件可以作为 `DH-STAGE-QDR-4-PLAN` 与后续 work order 的 current factsource：
+这些文件可以作为 `DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 与后续 tag prep 的 current factsource：
 
 ```text
 README.md
@@ -42,11 +45,15 @@ docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
 docs/current/DH_STAGE_QDR_4_PLAN.md
+docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
+docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
+docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
+docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
 docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
 docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md
 ```
 
-若以上文件与当前状态冲突，必须先修正 factsources，不得进入 stage-qdr-4 implementation。
+若以上文件与当前状态冲突，必须先修正 factsources，不得进入 tag 或 Stage-QDR-5 planning。
 
 ## Supporting Docs
 

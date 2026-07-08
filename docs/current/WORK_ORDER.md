@@ -3,9 +3,9 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION / DONE
-next action: DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW
-mode: IMPLEMENTATION + REGRESSION_REPORT_READ_MODEL + QDR_REPLAY_EVALUATION_REPORTING + INTERNAL_READ_MODEL + TESTS + NO_DB_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current task: DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW / PASS
+next action: DH-STAGE-QDR-4-TAG-CLOSE
+mode: REVIEW_ONLY + STAGE_FINAL_CLOSE + QDR_REPLAY_EVALUATION_REGRESSION_ACCEPTANCE + TAG_PREP + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
@@ -34,11 +34,14 @@ stage-qdr-4 B4 implementation work order: DONE / WORK_ORDER_ONLY
 STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
 stage-qdr-4 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
-stage-qdr-4 final close: NOT_STARTED
-stage-qdr-4 tag: NOT_CREATED
+STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
+STAGE_QDR_4: CLOSED / ACCEPTED
+STAGE_QDR_4_TAG: PENDING
+ALLOW_STAGE_QDR_4_TAG_AFTER_COMMIT: YES
+ALLOW_STAGE_QDR_5_PLAN: YES
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
-ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES
+ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_TAG_NOW: NO
 current workspace: E:/Project/decision-hub
 ```
@@ -76,8 +79,11 @@ stage-qdr-4 B4 implementation work order: DONE / WORK_ORDER_ONLY
 STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
 stage-qdr-4 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
-stage-qdr-4 final close: NOT_STARTED
-stage-qdr-4 tag: NOT_CREATED
+STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
+STAGE_QDR_4: CLOSED / ACCEPTED
+STAGE_QDR_4_TAG: PENDING
+ALLOW_STAGE_QDR_4_TAG_AFTER_COMMIT: YES
+ALLOW_STAGE_QDR_5_PLAN: YES
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
@@ -124,9 +130,10 @@ B4 plan 已冻结 tenant-bound report/read model structure、query boundary、co
 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO 已完成为 DONE / WORK_ORDER_ONLY
 B4 WO 已冻结后续 implementation 的 internal read model / report service 目标、允许结构、tenant-bound query、report content、drift summary、B2/V9 persistence reuse、redaction/trading-term guard、fail-closed、测试矩阵、validation、安全扫描、review/close 和 tag 后置规则
 B4 implementation 已完成 tenant-bound internal regression report / read model support，新增 query/view/drift/service 与 usecase 回归测试，复用 B2/V9 repository ports，不新增 migration、V10、API、Controller 或生产 JDBC 查询
-下一步只允许 DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW
+Stage-QDR-4 final close review 已完成并判定 PASS；B1-B4 整体关闭为 CLOSED / ACCEPTED
+下一步只允许 DH-STAGE-QDR-4-TAG-CLOSE
 不得新增 API / Controller，除非后续 implementation 停止并输出 B4_API_REQUIRED_BLOCKER，再进入单独 API freeze review
-不得直接打 tag；stage tag 只允许在 Stage-QDR-4 final close PASS 后处理
+不得直接打 tag；stage tag 只允许在 final close docs commit 后由 DH-STAGE-QDR-4-TAG-CLOSE 处理
 保持 no real HTTP / provider / SDK / Agent / LangGraph / LIVE
 ```
 
@@ -148,11 +155,12 @@ B4 implementation 已完成 tenant-bound internal regression report / read model
 禁止 B2 与 B3 合并实施
 禁止 B3 plan 后跳过 WO 直接 implementation
 禁止 B3 与 B4 合并实施
-禁止 B4 implementation 未完成 validation 前进入 B5 final close
+禁止回退或重写已关闭的 B1-B4 evidence
 禁止 B4 与 B5 合并
 禁止 B4 implementation 中直接新增 API / Controller；如确需 API，必须先输出 B4_API_REQUIRED_BLOCKER
-禁止 B4 implementation 后直接进入 B5 final close
-禁止 B4 打 tag
+禁止在 final close docs commit 前打 tag
+禁止把 Stage-QDR-4 tag 写成已创建，直到 annotated tag 实际创建并推送
+Stage-QDR-5 只能 planning-first，不得启动 implementation/runtime/provider/HTTP/Agent/LangGraph
 禁止启用 LIVE
 禁止 git push
 禁止 git commit，除非用户另行明确授权

@@ -4,6 +4,88 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW
+
+完成 Stage-QDR-4 final close review。审查范围仅限 B1 replay/evaluation domain contracts、B2 persistence baseline、B3 mock gateway regression integration、B4 regression report/read model support 与 current docs 同步；本轮未修改 Java、测试、migration、API、Controller、Repository、Service、contracts、golden_cases 或 NQ。
+
+### Scope
+
+```text
+REVIEW_ONLY
+STAGE_FINAL_CLOSE
+QDR_REPLAY_EVALUATION_REGRESSION_ACCEPTANCE
+TAG_PREP
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+README.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Result
+
+```text
+B1 evidence: PASS
+B2 evidence: PASS
+B3 evidence: PASS
+B4 evidence: PASS
+cross-stage boundary: PASS
+scoped Maven tests: BUILD SUCCESS
+quality validate: BUILD SUCCESS
+safety scan: REVIEWED / ALLOWED_HITS_ONLY
+mvnw.cmd: WRAPPER_UNUSABLE / P2 TOOLING RISK
+STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
+STAGE_QDR_4: CLOSED / ACCEPTED
+STAGE_QDR_4_TAG: PENDING
+ALLOW_STAGE_QDR_4_TAG_AFTER_COMMIT: YES
+ALLOW_STAGE_QDR_5_PLAN: YES
+```
+
+### Boundary
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 Stage-QDR-5
+未打 tag
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-4-TAG-CLOSE
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION
 
 完成 stage-qdr-4 B4 regression report / read model support implementation。本轮先执行 dirty worktree triage，确认 dirty 范围全部属于 B4 允许文件后继续 resume；只新增 usecase/internal read model 结构与回归测试，复用 B2/V9 repository ports；未新增 migration、未修改 V9、未新增 API / Controller、未新增生产 JDBC 查询、未接 provider / HTTP / Agent / LangGraph / LIVE。

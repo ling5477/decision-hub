@@ -3,6 +3,62 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW validation
+
+```text
+Task type: REVIEW_ONLY + STAGE_FINAL_CLOSE + QDR_REPLAY_EVALUATION_REGRESSION_ACCEPTANCE + TAG_PREP + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:/Project/decision-hub
+branch: dev
+B4 implementation commit: b04408a feat(qdr): add regression report read model support
+STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
+STAGE_QDR_4: CLOSED / ACCEPTED
+STAGE_QDR_4_TAG: PENDING
+ALLOW_STAGE_QDR_4_TAG_AFTER_COMMIT: YES
+ALLOW_STAGE_QDR_5_PLAN: YES
+real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
+```
+
+### Final close validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -30` | PASS | 包含 `b04408a feat(qdr): add regression report read model support`。 |
+| `git tag --list "dh-stage-qdr-4-close"` | PASS / NOT_EXISTS | 本地固定 tag 不存在。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 无 whitespace error、tracked diff 或 staged diff。 |
+| B1 evidence review | PASS | Replay / Evaluation domain contracts 存在，`ReplayEvaluationContractService` fail-closed，BUY / SELL / MARKET_ORDER 与 PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE 均有拒绝测试；无 API / migration / provider / HTTP / Agent / LangGraph / LIVE。 |
+| B2 evidence review | PASS | `V9__qdr_replay_evaluation_baseline.sql` 存在，7 张 B2 表、tenant_id、tenant indexes、CHECK、COMMENT、redaction/trading guard 完整；repository ports 与 JDBC adapters tenant-bound；raw prompt / raw provider response / credential 不入库；B2 close review 已 PASS。 |
+| B3 evidence review | PASS | deterministic mock gateway regression flow 已实现；comparator 覆盖 decisionType/actionLabel/confidenceBand/riskLevel/evidenceRefs/forbiddenActions/providerSummaryHash/modelGatewayVersionRef/promptVersionRef/policyVersion；verdict 仅 PASS / WARN / FAIL / SKIPPED；复用 B2 repository；B3 close review 已 PASS。 |
+| B4 evidence review | PASS | `RegressionReportQuery`、`RegressionReportView`、`RegressionReportFindingView`、`RegressionDriftSummary`、`RegressionReadModelService` 已存在；tenant-bound query、pagination/pageSize guard、redacted report content 与 drift summary 已实现。 |
+| `mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test` | BUILD SUCCESS | Reactor 15/15 SUCCESS；`V9QdrReplayEvaluationFlywayPostgresTest` 非 skip，PostgreSQL 17 Testcontainers 启动，Flyway validated 9 migrations 并迁移到 v9。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `maven-wrapper.jar` no main manifest attribute；不能写成 wrapper PASS。 |
+| required safety scan | REVIEWED / ALLOWED_HITS_ONLY | 命中限定在禁止项、测试守卫、redaction guard、migration CHECK/COMMENT、文档风险说明和 mock/test fixtures；未发现真实 HTTP/provider/Agent/LangGraph/LIVE 实现、raw material 持久化或 trading signal。 |
+| `docs/current/WORKFLOW.md` | NOT_FOUND / NON_BLOCKING | 项目规范仍列为事实源入口，但当前仓库不存在该文件；本轮读取已存在 current factsources。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 Stage-QDR-5
+未打 tag
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION validation
 
 ```text

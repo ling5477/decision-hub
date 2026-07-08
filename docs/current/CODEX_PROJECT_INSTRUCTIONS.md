@@ -43,18 +43,21 @@ stage-qdr-4 B4 implementation work order: DONE / WORK_ORDER_ONLY
 STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
 stage-qdr-4 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
-stage-qdr-4 final close: NOT_STARTED
-stage-qdr-4 tag: NOT_CREATED
+STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
+STAGE_QDR_4: CLOSED / ACCEPTED
+STAGE_QDR_4_TAG: PENDING
+ALLOW_STAGE_QDR_4_TAG_AFTER_COMMIT: YES
+ALLOW_STAGE_QDR_5_PLAN: YES
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
-ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES
+ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_TAG_NOW: NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW
+next action: DH-STAGE-QDR-4-TAG-CLOSE
 ```
 
 ## 2. 前置分类规则
@@ -113,7 +116,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成，B2 implementation 已完成并通过真实 PostgreSQL/Testcontainers Flyway load 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。B3 mock gateway regression integration plan 已 `DONE / PLAN_ONLY`，B3 mock gateway regression integration work order 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。B4 regression report / read model support plan 已 `DONE / PLAN_ONLY`，B4 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED`。下一步只能进入 `DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW`。不得把 B4 与 final close review 合并为 tag，不得在 B4 implementation 中直接新增 API / Controller，不得在 B4 打 tag。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成，B2 implementation 已完成并通过真实 PostgreSQL/Testcontainers Flyway load 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。B3 mock gateway regression integration plan 已 `DONE / PLAN_ONLY`，B3 mock gateway regression integration work order 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。B4 regression report / read model support plan 已 `DONE / PLAN_ONLY`，B4 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED`。`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`，Stage-QDR-4 整体 `CLOSED / ACCEPTED`。下一步只能进入 `DH-STAGE-QDR-4-TAG-CLOSE`；tag 当前 `PENDING`，不得在 final close docs commit 前写成已创建。Stage-QDR-5 只能 planning-first，不得启动 implementation、runtime、provider、HTTP、Agent、LangGraph 或 LIVE。
 
 ## 4. 安全边界
 
@@ -182,8 +185,11 @@ B4 plan: DONE / REGRESSION_REPORT_READ_MODEL_PLAN_ONLY
 B4 implementation work order: DONE / WORK_ORDER_ONLY
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
-Stage-QDR-4 final close: NOT_STARTED
-Stage-QDR-4 tag: NOT_CREATED
+STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
+STAGE_QDR_4: CLOSED / ACCEPTED
+STAGE_QDR_4_TAG: PENDING
+ALLOW_STAGE_QDR_4_TAG_AFTER_COMMIT: YES
+ALLOW_STAGE_QDR_5_PLAN: YES
 V9 migration: CREATED / V9__qdr_replay_evaluation_baseline.sql / POSTGRES_LOAD_VERIFIED
 Repository / JDBC implementation: DONE / TENANT_BOUND
 API / Controller: NO
@@ -192,5 +198,5 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW
+next action: DH-STAGE-QDR-4-TAG-CLOSE
 ```

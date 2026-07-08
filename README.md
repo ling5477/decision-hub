@@ -15,19 +15,27 @@ stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
-stage-qdr-4 implementation: NOT_STARTED / NO
+stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
+stage-qdr-4 B2: CLOSED / ACCEPTED
+stage-qdr-4 B3: CLOSED / ACCEPTED
+stage-qdr-4 B4: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
+STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
+STAGE_QDR_4: CLOSED / ACCEPTED
+STAGE_QDR_4_TAG: PENDING
+ALLOW_STAGE_QDR_4_TAG_AFTER_COMMIT: YES
+ALLOW_STAGE_QDR_5_PLAN: YES
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: F:/project/decision-hub
-next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
+current workspace: E:/Project/decision-hub
+next action: DH-STAGE-QDR-4-TAG-CLOSE
 ```
 
 ## 当前事实源
 
-stage-qdr-3 final close 与 stage-qdr-4 planning 入口只应以以下文件作为当前事实源：
+stage-qdr-4 final close 与 tag prep 入口只应以以下文件作为当前事实源：
 
 ```text
 README.md
@@ -49,6 +57,8 @@ docs/current/WORK_ORDER.md              唯一下一步入口
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md 当前 Codex / Claude 执行纪律
 docs/current/TESTING.md                 当前验证证据与工具风险
 docs/current/DH_STAGE_QDR_4_PLAN.md     stage-qdr-4 planning 结论
+docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md B4 read model plan
+docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md B4 implementation WO
 docs/current/FACTSOURCE_POLICY.md       当前事实源与 blocker 规则
 docs/current/ARCHIVE_INDEX.md           QDR 历史归档索引
 ```
