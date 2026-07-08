@@ -19,13 +19,15 @@ stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
-stage-qdr-4 implementation: NOT_STARTED / NO
+stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
+stage-qdr-4 implementation: B1_ONLY / DONE
+stage-qdr-4 B2: NOT_STARTED / PLAN_ONLY_NEXT
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
+next action: DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
 ```
 
 ## 2. 前置分类规则
@@ -78,7 +80,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 implementation 仍必须等待后续明确授权；下一步只能写 implementation work order，不得直接 implementation。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，下一步只能进入 B2 persistence baseline plan；不得直接 B2 implementation，不得跳到 B3/B4。
 
 ## 4. 安全边界
 
@@ -112,7 +114,7 @@ git diff --check
 git diff --stat
 ```
 
-本轮 QDR pre-close governance 还必须运行：
+本轮 QDR B1 / B2 边界治理还必须运行：
 
 ```powershell
 git diff --name-only

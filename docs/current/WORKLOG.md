@@ -4,6 +4,77 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-4-B1-REPLAY-EVALUATION-DOMAIN-CONTRACTS
+
+完成 stage-qdr-4 B1 replay / evaluation domain contracts。B1 只实现内存领域合同、usecase fail-closed 校验和单元测试，不新增 migration、API、Controller、Repository、真实 HTTP、真实 provider、Provider SDK、Agent runtime、LangGraph runtime 或 LIVE 能力。
+
+### Scope
+
+```text
+IMPLEMENTATION
+DOMAIN_CONTRACTS_ONLY
+QDR_REPLAY_EVALUATION_BASELINE
+NO_MIGRATION
+NO_API
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/replay/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/ReplayEvaluationContractService.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/replay/ReplayEvaluationContractServiceTest.java
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/ROADMAP.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Implementation
+
+```text
+ReplayCase / EvaluationCase: tenant-bound replay/evaluation case contracts
+ExpectedDecisionSummary: structured summary only; LONG_BIAS / SHORT_BIAS remain bias labels
+EvaluationPolicy: structured comparison policy; raw provider response comparison is rejected
+RegressionVerdict: PASS / FAIL / WARN / SKIPPED with failure reason and findings
+ReplayEvaluationContractService: validates required fields, trading-mutation terms, policy safety, and B1 initial SKIPPED verdict
+```
+
+### Validation
+
+```text
+mvn -ntp -pl dh-usecase -am "-Dtest=ReplayEvaluationContractServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test: BUILD SUCCESS / 13 tests
+mvn -ntp -pl dh-domain,dh-usecase -am test: BUILD SUCCESS
+```
+
+### Boundary
+
+```text
+未修改 NQ
+未新增 migration
+未修改 V1-V8 migration
+未新增 API / Controller
+未新增 Repository / JDBC persistence
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-PLAN
 
 完成 stage-qdr-4 planning。推荐唯一主线为 `QDR Replay / Evaluation / Regression Baseline`，并把后续动作限定为 implementation work order，不直接启动 implementation。

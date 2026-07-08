@@ -13,14 +13,16 @@ stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
-stage-qdr-4 implementation: NOT_STARTED / NO
+stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
+stage-qdr-4 implementation: B1_ONLY / DONE
+stage-qdr-4 B2: NOT_STARTED / PLAN_ONLY_NEXT
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: F:/project/decision-hub
-next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
+next action: DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
 ```
 
 ## 2. 当前事实源集合
@@ -68,20 +70,23 @@ stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
-stage-qdr-4 implementation: NOT_STARTED / NO
+stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
+stage-qdr-4 implementation: B1_ONLY / DONE
+stage-qdr-4 B2: NOT_STARTED / PLAN_ONLY_NEXT
 B5 close review retry: CLOSED / ACCEPTED
 stage-qdr-4 recommended direction: QDR Replay / Evaluation / Regression Baseline
 ```
 
-B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，下一步只允许进入 `DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER`；stage-qdr-4 implementation、real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 与 LIVE 仍未启动。
+B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；下一步只允许进入 B2 persistence baseline plan，不允许直接进入 B2 implementation。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 与 LIVE 仍未启动。
 
 ## 4. 禁止项
 
 ```text
 ALLOW_STAGE_QDR_3_FINAL_CLOSE: YES / CONSUMED
 ALLOW_STAGE_QDR_4_PLAN: YES / CONSUMED
-ALLOW_STAGE_QDR_4_IMPLEMENTATION_WORK_ORDER: YES
-ALLOW_STAGE_QDR_4_IMPLEMENTATION: NO
+ALLOW_STAGE_QDR_4_B1_DOMAIN_CONTRACTS: YES / CONSUMED
+ALLOW_STAGE_QDR_4_B2_PERSISTENCE_PLAN: YES
+ALLOW_STAGE_QDR_4_B2_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_PROVIDER_SDK: NO

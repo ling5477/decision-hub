@@ -3,14 +3,16 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-4-PLAN / DONE / PLAN_ACCEPTED
-next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
-mode: WORK_ORDER_ONLY / DOCUMENTATION_ONLY
+current task: DH-STAGE-QDR-4-B1-REPLAY-EVALUATION-DOMAIN-CONTRACTS / DONE
+next action: DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
+mode: IMPLEMENTATION + DOMAIN_CONTRACTS_ONLY + NO_MIGRATION + NO_API
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
-stage-qdr-4 implementation: NOT_STARTED / NO
+stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
+stage-qdr-4 implementation: B1_ONLY / DONE
+stage-qdr-4 B2: NOT_STARTED / PLAN_ONLY_NEXT
 current workspace: F:/project/decision-hub
 ```
 
@@ -27,7 +29,9 @@ stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
-stage-qdr-4 implementation: NOT_STARTED / NO
+stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
+stage-qdr-4 implementation: B1_ONLY / DONE
+stage-qdr-4 B2: NOT_STARTED / PLAN_ONLY_NEXT
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
@@ -35,35 +39,39 @@ Agent / LangGraph: NO
 LIVE: DISABLED
 ```
 
-## 3. Stage-qdr-4 Plan 结果
+## 3. B1 完成范围
 
 ```text
-recommended direction: QDR Replay / Evaluation / Regression Baseline
-stage-qdr-4 name: QDR Replay / Evaluation / Regression Baseline
-deferred direction B: Model gateway observability / provider readiness hardening
-deferred direction C: real provider dry-run readiness plan
-deferred direction D: Agent / LangGraph preparation
+B1 task: DH-STAGE-QDR-4-B1-REPLAY-EVALUATION-DOMAIN-CONTRACTS
+B1 status: DONE
+B1 scope: dh-domain + dh-usecase replay/evaluation contracts and unit tests only
+B1 persistence: NO
+B1 API / Controller: NO
+B1 real HTTP / provider / SDK: NO
+B1 Agent / LangGraph / LIVE: NO / DISABLED
 ```
 
-## 4. 下一步 work order 允许范围
+## 4. 下一步允许范围
 
 ```text
-读取当前事实源
-把 stage-qdr-4 plan 转化为 implementation work order
-明确 B1-B5 文件边界、review 触发规则、验证命令和回滚方式
+DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
+只允许 planning / review / freeze 范围
+评估 migration / persistence / repository 边界
+如需 migration，必须单独 review/freeze
+不得直接 B2 implementation
+不得跳到 B3 mock gateway regression integration
+不得跳到 B4 report/read model
 保持 no real HTTP / provider / SDK / Agent / LangGraph / LIVE
-保持 no code diff / no migration diff，除非用户另行明确授权 implementation work order 之外的变更
-输出 work-order-only result
 ```
 
-## 5. Stage-qdr-4 禁止范围
+## 5. Stage-qdr-4 后续禁止范围
 
 ```text
-禁止新增或修改 Java 生产代码
-禁止新增或修改 Java 测试代码
-禁止新增 migration
+禁止未经明确授权继续修改 Java 生产代码
+禁止未经明确授权继续修改 Java 测试代码
+禁止在 B2 plan 前新增 migration
 禁止修改 V1-V8 migration
-禁止新增 V9 migration
+禁止未经 review/freeze 新增 V9 migration
 禁止新增 API / Controller / REST endpoint
 禁止新增真实 HTTP outbound
 禁止新增真实 provider client
@@ -71,7 +79,7 @@ deferred direction D: Agent / LangGraph preparation
 禁止启动 LangGraph / AutoGen / CrewAI
 禁止启动 Agent runtime
 禁止修改 NQ
-禁止启动 stage-qdr-4 implementation
+禁止直接进入 B2 implementation
 禁止启用 LIVE
 禁止 git push
 禁止 git commit，除非用户另行明确授权

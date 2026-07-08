@@ -3,6 +3,58 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-4-B1-REPLAY-EVALUATION-DOMAIN-CONTRACTS validation
+
+```text
+Task type: IMPLEMENTATION + DOMAIN_CONTRACTS_ONLY + QDR_REPLAY_EVALUATION_BASELINE + NO_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
+stage-qdr-4 implementation: B1_ONLY / DONE
+stage-qdr-4 B2: NOT_STARTED / PLAN_ONLY_NEXT
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current`（开工前） | PASS | `dev`。 |
+| `git log --oneline -12`（开工前） | PASS | `HEAD` 为 `28aac0b docs(qdr): plan stage-qdr-4 replay evaluation baseline`。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 whitespace error、tracked diff 或 staged diff。 |
+| `docs/current/WORKFLOW.md` | NOT_FOUND / NON_BLOCKING | 项目规范列为事实源入口，但当前仓库不存在该文件；本轮已读取存在的 current factsources。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ReplayEvaluationContractServiceTest" test` | EXPECTED_TARGETING_FAILURE | 上游 `dh-common` 无匹配测试，Surefire 报 `No tests matching pattern`；非代码失败。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ReplayEvaluationContractServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`（首次） | TEST_FIX_REQUIRED | 13 tests 运行，1 error；测试扫描路径按 root 假设，Surefire 在 `dh-usecase` 模块目录执行导致 `NoSuchFileException`。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ReplayEvaluationContractServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`（第二次） | TEST_FIX_REQUIRED | 13 tests 运行，1 failure；扫描命中生产 Javadoc 中的 `LangGraph` 边界说明，调整为中性 runtime 表述。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ReplayEvaluationContractServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`（最终） | BUILD SUCCESS | `ReplayEvaluationContractServiceTest` 13 tests，0 failures，0 errors，0 skipped。 |
+| `mvn -ntp -pl dh-domain,dh-usecase -am test` | BUILD SUCCESS | Reactor 9/9 SUCCESS；`dh-domain` 151 tests、`dh-connector` 19 tests、`dh-usecase` 308 tests 均 0 failures / 0 errors。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| Maven settings warning | P2 TOOLING RISK / NON_BLOCKING | 系统 Maven 仍输出 `Unrecognised tag: 'profiles'`，来源 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml`；不影响本轮 `BUILD SUCCESS`。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | 命令 exit code 0，但输出仍包含 `'\\` is not recognized` 与 `.mvn\\wrapper\\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+| required safety wording scan | REVIEWED / FALSE_POSITIVE_ONLY | 用户指定 `rg` 已执行；全量命中大量既有 docs / tests / safety guards。本轮 replay/evaluation 新增包窄范围复核只命中 fail-closed pattern、policy 禁止 raw provider response 说明、ExpectedDecisionSummary 禁止 BUY / SELL 说明，以及禁止测试；未新增真实 HTTP/client/provider runtime、SDK、credential 读取或 raw prompt/raw provider response 持久化。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未新增 migration
+未修改 V1-V8 migration
+未新增 API
+未新增 Controller
+未新增 Repository / JDBC persistence
+未新增真实 HTTP client
+未新增真实 provider
+未新增 Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-PLAN validation
 
 ```text
