@@ -3,6 +3,99 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-IMPLEMENTATION validation
+
+```text
+Task type: IMPLEMENTATION + MOCK_GATEWAY_REGRESSION + QDR_REPLAY_EVALUATION_REGRESSION + PIPELINE_INTEGRATION + TESTS + NO_DB_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:/Project/decision-hub
+branch: dev
+B2 status: CLOSED / ACCEPTED
+B3 plan: DONE / PLAN_ONLY
+B3 implementation work order: DONE / WORK_ORDER_ONLY
+B3 implementation: DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED
+B4 implementation: NOT_STARTED
+real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
+```
+
+### Implementation validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（开工复核） | EXPECTED_DIRTY / B3_ALLOWED_SCOPE | dirty/untracked 范围仅包含 B3 implementation 允许的 qdr replay Java/test 文件与允许同步的 `docs/current` 文件；无 staged 文件。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -20` | PASS | 包含 B1/B2/B3 WO 所需 commits：`feat(qdr): add replay evaluation domain contracts`、B2 plan/WO/implementation/close commits、`docs(qdr): define mock gateway regression integration work order`。 |
+| `git diff --check`（开工复核） | PASS_WITH_EOL_WARNINGS | exit code 0；仅 Git LF -> CRLF warning，不是 whitespace error。 |
+| `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工复核） | REVIEWED / NO_STAGED | tracked diff 为允许的 `docs/current` 文件；untracked B3 Java/test 文件由 `git status --short` 记录；无 staged。 |
+| B3 code review | PASS | `MockGatewayRegressionCaseBuilder`、`QdrRegressionEvaluationService`、`QdrRegressionComparator`、`RegressionBaselinePolicy`、`RegressionEvidenceRef` 已复核；只做本地 deterministic comparison 与 B2 repository port persistence command 编排。 |
+| B2 persistence reuse | PASS | 复用 `ReplayCaseRepository`、`EvaluationCaseRepository`、`RegressionVerdictRepository`；未新增 table/schema，未修改 V9，未绕过 tenant-bound repository port。 |
+| targeted B3 tests | BUILD SUCCESS / PASS | `mvn -ntp -pl dh-usecase -am "-Dtest=QdrRegressionComparatorTest,QdrRegressionEvaluationServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`；19 tests，0 failures，0 errors，0 skipped。 |
+| scoped reactor tests | BUILD SUCCESS / PASS / NOT_SKIPPED | `mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test`；reactor 15/15 SUCCESS；`dh-app` 执行 Testcontainers PostgreSQL 17，Flyway successfully validated 9 migrations，并迁移到 version v9。 |
+| quality validate | BUILD SUCCESS | `mvn -ntp -Pquality validate`；reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed。 |
+| required safety scan | REVIEWED / ALLOWED_HITS_ONLY | 用户指定 `rg` 已执行。命中为禁止项说明、docs 风险声明、redaction/trading guard、测试守卫、migration CHECK/COMMENT 或既有 contract guard；未发现真实 HTTP/provider/Agent/LangGraph/LIVE 实现、raw prompt/raw provider response/credential 持久化或 trading signal 输出。 |
+| B3 narrow runtime scan | PASS | 新增 B3 Java/test 文件只命中 guard、测试守卫或否定边界注释；未新增 `HttpClient`、`WebClient`、`RestTemplate`、`OkHttp`、Controller、Provider SDK、OpenAI/Anthropic/Gemini/Ollama SDK、LangGraph/AutoGen/CrewAI runtime。 |
+| migration/API diff check | PASS / EMPTY | `git diff --name-only -- dh-app/src/main/resources/db/migration dh-api dh-app/src/main/java dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr` 无输出；未新增 migration/API/Controller/JDBC schema drift。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+
+### B3 implementation coverage
+
+| 序号 | 测试项 | 实际覆盖 |
+| --- | --- | --- |
+| 1 | mock gateway output can create replay case | `QdrRegressionEvaluationServiceTest.mockGatewayOutputCreatesReplayEvaluationAndVerdictThroughRepositories`。 |
+| 2 | replay case can create evaluation case | 同一 flow 断言 replay/evaluation record 均保存且 caseId 绑定一致。 |
+| 3 | expected summary can create regression verdict | `expectedSummaryCanCreateRegressionVerdictAndFinding`。 |
+| 4 | identical mock output returns PASS | `QdrRegressionComparatorTest.identicalMockOutputReturnsPass`。 |
+| 5 | confidence drift within tolerance returns PASS or WARN | `confidenceDriftWithinToleranceReturnsWarnWhenPolicyRequestsFinding`。 |
+| 6 | confidence drift beyond tolerance returns WARN or FAIL | `confidenceDriftBeyondToleranceReturnsFailUnderStrictPolicy`。 |
+| 7 | risk level drift returns WARN or FAIL | `riskLevelIncreaseReturnsFailUnderStrictPolicy`。 |
+| 8 | missing evidence ref returns FAIL | `missingEvidenceRefReturnsFail`。 |
+| 9 | missing forbidden action returns FAIL | `missingForbiddenActionReturnsFail`。 |
+| 10 | provider summary hash mismatch returns WARN or FAIL | `providerSummaryHashMismatchReturnsFailUnderStrictPolicy`。 |
+| 11 | modelGatewayVersionRef mismatch is recorded | `modelAndPromptVersionMismatchAreRecordedAsFindings`。 |
+| 12 | promptVersionRef mismatch is recorded | `modelAndPromptVersionMismatchAreRecordedAsFindings`。 |
+| 13 | policyVersion mismatch is recorded or SKIPPED | `policyVersionMismatchCanSkipComparison`。 |
+| 14 | BUY / SELL / MARKET_ORDER expected action fails closed | `executableExpectedActionFailsAtBoundary`。 |
+| 15 | PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE allowed action fails closed | `executableAllowedActionFailsAtBoundary`。 |
+| 16 | raw prompt is not persisted | `rawPromptAndRawProviderResponseAreRejectedBeforePersistence`。 |
+| 17 | raw provider response is not persisted | `rawPromptAndRawProviderResponseAreRejectedBeforePersistence`。 |
+| 18 | credential-like JSON key fails closed | `credentialLikeJsonKeyFailsClosedBeforePersistence`。 |
+| 19 | cross-tenant regression read returns empty or fail-closed | `crossTenantRegressionReadReturnsEmpty`。 |
+| 20 | provider/HTTP/Agent/LangGraph classes are not introduced | `providerHttpAgentAndLangGraphClassesAreNotIntroduced` + narrow `rg` scan。 |
+| 21 | repository save failure returns FAIL / BLOCKED | `repositorySaveFailureReturnsFailBlocked`。 |
+| 22 | quality validate passes | `mvn -ntp -Pquality validate` BUILD SUCCESS。 |
+
+### B3 implementation result
+
+```text
+STAGE_QDR_4_B3_IMPLEMENTATION: DONE
+ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW
+```
+
+Boundary:
+
+```text
+未修改 NQ
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 B4
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-WO validation
 
 ```text

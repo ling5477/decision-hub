@@ -3,9 +3,9 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-WO / DONE
-next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-IMPLEMENTATION
-mode: WORK_ORDER_ONLY + B3_IMPLEMENTATION_BOUNDARY_DESIGN + MOCK_GATEWAY_REGRESSION_WO + QDR_REPLAY_EVALUATION_REGRESSION + PIPELINE_INTEGRATION_WO + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current task: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-IMPLEMENTATION / DONE
+next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW
+mode: IMPLEMENTATION + MOCK_GATEWAY_REGRESSION + QDR_REPLAY_EVALUATION_REGRESSION + PIPELINE_INTEGRATION + TESTS + NO_DB_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
@@ -23,11 +23,12 @@ stage-qdr-4 B3 plan: DONE / PLAN_ONLY
 STAGE_QDR_4_B3_PLAN: DONE
 stage-qdr-4 B3 implementation work order: DONE / WORK_ORDER_ONLY
 STAGE_QDR_4_B3_IMPLEMENTATION_WO: DONE
-stage-qdr-4 B3 implementation: NOT_STARTED
+stage-qdr-4 B3 implementation: DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED
 stage-qdr-4 B4 implementation: NOT_STARTED
-ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES
+ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
+ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
-current workspace: F:/project/decision-hub
+current workspace: E:/Project/decision-hub
 ```
 
 ## 2. 当前前置状态
@@ -54,6 +55,8 @@ stage-qdr-4 B2 close review: PASS
 stage-qdr-4 B2: CLOSED / ACCEPTED
 stage-qdr-4 B3 plan: DONE / PLAN_ONLY
 stage-qdr-4 B3 implementation work order: DONE / WORK_ORDER_ONLY
+stage-qdr-4 B3 implementation: DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED
+stage-qdr-4 B4 implementation: NOT_STARTED
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
@@ -90,9 +93,13 @@ DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN: DONE / PLAN_ONLY
 已规划 comparison rules、V9 persistence reuse、redaction/trading guard、B3 implementation test matrix
 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-WO: DONE / WORK_ORDER_ONLY
 B3 WO 已冻结 implementation target flow、usecase/service boundary、comparison rules、B2 persistence reuse、redaction/trading guard、fail-closed 行为、测试矩阵、validation 与 close review 顺序
-下一步只允许 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-IMPLEMENTATION
+B3 implementation 已实现 deterministic mock gateway regression flow：existing dry-run / QDR decision artifact -> mock model gateway summary -> replay case -> evaluation case -> expected/actual summary -> regression comparison -> regression verdict -> finding list
+已新增 MockGatewayRegressionCaseBuilder / QdrRegressionEvaluationService / QdrRegressionComparator / RegressionBaselinePolicy / RegressionEvidenceRef
+已复用 ReplayCaseRepository / EvaluationCaseRepository / RegressionVerdictRepository B2 ports；未新增 schema、未修改 V9
+已补充 comparator 与 service regression tests，覆盖 PASS/WARN/FAIL/SKIPPED、drift、redaction、trading-term、cross-tenant、repository failure 和 forbidden runtime scan
+下一步只允许 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW
 不得新增 API / Controller
-不得跳过 B3 implementation validation / close review
+不得跳过 B3 close review
 不得跳到 B4 report/read model
 保持 no real HTTP / provider / SDK / Agent / LangGraph / LIVE
 ```

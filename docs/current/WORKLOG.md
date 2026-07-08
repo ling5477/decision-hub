@@ -4,6 +4,117 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-IMPLEMENTATION
+
+完成 stage-qdr-4 B3 mock gateway regression integration implementation。B3 本轮只实现 deterministic mock gateway regression flow，把 existing dry-run / QDR decision artifact、mock model gateway safe summary、B2 replay/evaluation persistence ports、expected/actual decision summary、regression comparator、verdict 和 finding list 串成可测试闭环。本轮未新增 migration，未修改 V1-V9，未新增 API / Controller，未接真实 provider / HTTP / Agent / LangGraph / LIVE，未修改 NQ。
+
+### Scope
+
+```text
+IMPLEMENTATION
+MOCK_GATEWAY_REGRESSION
+QDR_REPLAY_EVALUATION_REGRESSION
+PIPELINE_INTEGRATION
+TESTS
+NO_DB_MIGRATION
+NO_API
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Inspected
+
+```text
+README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/replay/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/**
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/replay/**
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/**
+dh-app/src/main/resources/db/migration/**
+pom.xml
+```
+
+### Files Changed
+
+```text
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/replay/RegressionEvidenceRef.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/MockGatewayRegressionCaseBuilder.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionComparator.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionEvaluationCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionEvaluationResult.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionEvaluationService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionSafety.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/RegressionBaselinePolicy.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionComparatorTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionEvaluationServiceTest.java
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Result
+
+```text
+target flow: existing dry-run / QDR decision artifact -> mock model gateway summary -> replay case -> evaluation case -> expected/actual summary -> regression comparison -> regression verdict -> finding list
+usecase/service: QdrRegressionEvaluationService orchestrates comparator + case builder + ReplayCaseRepository + EvaluationCaseRepository + RegressionVerdictRepository
+case builder: MockGatewayRegressionCaseBuilder creates deterministic tenant-bound IDs, input/output refs, summary hashes, replay/evaluation/verdict/finding commands
+comparator: QdrRegressionComparator compares decisionType, actionLabel, confidenceBand, riskLevel, evidenceRefs, forbiddenActions, providerSummaryHash, modelGatewayVersionRef, promptVersionRef, policyVersion and returns PASS / WARN / FAIL / SKIPPED
+policy: RegressionBaselinePolicy controls confidence tolerance, provider hash mismatch, risk increase and policy mismatch skip behavior
+redaction: RegressionEvidenceRef / QdrRegressionSafety reuse B2 ReplayPersistenceGuard and reject raw prompt/provider response/credential-like fields
+trading-term guard: expected actionLabel rejects BUY / SELL / MARKET_ORDER; executable allowed actions reject PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE; verdict/finding remain regression evidence only
+persistence reuse: B2/V9 repository ports reused; no V10, no V9 modification, no new table
+docs sync: STATUS / WORK_ORDER / ROADMAP / TESTING / WORKLOG / CODEX_PROJECT_INSTRUCTIONS updated for B3 implementation DONE and close review next action
+STAGE_QDR_4_B3_IMPLEMENTATION: DONE
+ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW
+```
+
+### Validation
+
+```text
+dirty worktree audit: all existing dirty/untracked files are within B3 allowed scope
+git branch --show-current: dev
+git log --oneline -20: contains B1/B2/B3 WO commits
+mvn -ntp -pl dh-usecase -am "-Dtest=QdrRegressionComparatorTest,QdrRegressionEvaluationServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test: BUILD SUCCESS / 19 tests
+mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test: BUILD SUCCESS / Testcontainers PostgreSQL 17 / Flyway v9 verified
+mvn -ntp -Pquality validate: BUILD SUCCESS / Checkstyle 0 violations / Spotless passed
+required safety scan: REVIEWED / ALLOWED_HITS_ONLY
+.\mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+### Boundary
+
+```text
+未修改 NQ
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 B4
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-WO
 
 完成 stage-qdr-4 B3 mock gateway regression integration work order。B3 WO 只冻结 future implementation 的 target flow、usecase/service boundary、comparison rules、B2 persistence reuse、redaction/trading guard、fail-closed 行为、测试矩阵、validation 和 close review 顺序。本轮未修改 Java、测试、migration、API、NQ 或 runtime。
