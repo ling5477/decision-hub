@@ -3,6 +3,76 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-WO validation
+
+```text
+Task type: WORK_ORDER_ONLY + B3_IMPLEMENTATION_BOUNDARY_DESIGN + MOCK_GATEWAY_REGRESSION_WO + QDR_REPLAY_EVALUATION_REGRESSION + PIPELINE_INTEGRATION_WO + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+B3 plan: DONE / PLAN_ONLY
+B3 implementation work order: DONE / WORK_ORDER_ONLY
+B3 implementation: NOT_STARTED
+B4 implementation: NOT_STARTED
+real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
+```
+
+### Docs-only validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current`（开工前） | PASS | `dev`。 |
+| `git log --oneline -20`（开工前） | PASS | 最近提交包含 B1 domain contracts、B2 plan、B2 WO、B2 implementation 与 B2 close review commits。 |
+| `git diff --check`（开工前） | PASS | 无 whitespace error。 |
+| `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 tracked diff 或 staged diff。 |
+| B3 plan doc | PASS / EXISTS | `docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md` 存在。 |
+| B3 WO document | DONE / DOCS_ONLY | 新增 `docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md`；只记录 work order，不写实现。 |
+| forbidden-scope diff | PASS / EMPTY | `git diff --name-only -- dh-domain/src/main dh-usecase/src/main dh-app/src/main dh-infra/src/main contracts golden_cases "dh-*/src/main/resources/db/migration"` 无输出，确认未修改 Java/main、contracts、golden_cases 或 migration。 |
+| safety scan | REVIEWED / NO_ACTUAL_RISK | 用户指定 `rg` 已执行。命中为禁止项、trading-term guard、B3 docs boundary、既有 `FACTSOURCE_POLICY.md` hard-error phrase 清单或 `NOT_STARTED` false positive；未发现 real HTTP/provider/Agent/LangGraph/LIVE started/enabled，也未将 sensitive data storage 写成 permissive。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed。系统 Maven settings 仍有 `profiles` warning，非本轮阻断。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+
+### B3 implementation test matrix
+
+| 序号 | 测试项 | 计划验收 |
+| --- | --- | --- |
+| 1 | mock gateway output can create replay case | gateway safe refs 能生成 replay case。 |
+| 2 | replay case can create evaluation case | replay case 能生成 evaluation case。 |
+| 3 | expected summary can create regression verdict | expected/actual summary 能生成 verdict。 |
+| 4 | identical mock output returns PASS | deterministic output 完全一致时 `PASS`。 |
+| 5 | confidence drift beyond tolerance returns WARN or FAIL | soft drift `WARN`，hard drift `FAIL`。 |
+| 6 | risk level drift returns WARN or FAIL | tolerance 内 `WARN`，越界 `FAIL`。 |
+| 7 | missing evidence ref returns FAIL | required evidence 缺失 fail-closed。 |
+| 8 | provider summary hash mismatch returns WARN or FAIL | structured fields 一致为 `WARN`，不一致为 `FAIL`。 |
+| 9 | modelGatewayVersionRef mismatch is recorded | version drift 必须生成 finding。 |
+| 10 | promptVersionRef mismatch is recorded | prompt drift 必须生成 finding。 |
+| 11 | policyVersion mismatch is recorded | strict default 下为 `FAIL` 或 `BLOCKED` finding。 |
+| 12 | BUY / SELL / MARKET_ORDER expected action fails closed | 不允许作为 expected actionLabel。 |
+| 13 | PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE allowed action fails closed | 不允许作为 allowed action。 |
+| 14 | raw prompt is not persisted | raw prompt sample 被 guard 拒绝或仅 hash/ref。 |
+| 15 | raw provider response is not persisted | raw provider response sample 被 guard 拒绝或仅 hash/ref。 |
+| 16 | credential-like JSON key fails closed | sensitive key 命中 fail-closed。 |
+| 17 | cross-tenant regression read returns empty or fail-closed | tenant B 不得读 tenant A output。 |
+| 18 | provider/HTTP/Agent/LangGraph classes are not introduced | architecture/safety scan 证明无新增真实 provider/HTTP/Agent/LangGraph。 |
+| 19 | repository save failure returns FAIL / BLOCKED | persistence failure 不 fallback success。 |
+| 20 | quality validate passes | `mvn -ntp -Pquality validate` 通过。 |
+| 21 | replay/regression output cannot become trading signal | verdict/finding 不生成 NQ command、order、risk、ledger、paper/live mutation。 |
+| 22 | B2 schema is reused without migration drift | no V10、no V9 modification、no new table。 |
+
+### B3 WO result
+
+```text
+STAGE_QDR_4_B3_IMPLEMENTATION_WO: DONE
+ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-IMPLEMENTATION
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN validation
 
 ```text
