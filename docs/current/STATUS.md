@@ -28,9 +28,12 @@ STAGE_QDR_4_B3_PLAN: DONE
 stage-qdr-4 B3 implementation work order: DONE / WORK_ORDER_ONLY
 STAGE_QDR_4_B3_IMPLEMENTATION_WO: DONE
 stage-qdr-4 B3 implementation: DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED
+STAGE_QDR_4_B3_CLOSE_REVIEW: PASS
+STAGE_QDR_4_B3: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B4_PLAN: YES
 stage-qdr-4 B4 implementation: NOT_STARTED
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
-ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES
+ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
 real HTTP: NO
 real provider: NO
@@ -38,7 +41,7 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: E:/Project/decision-hub
-next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW
+next action: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN
 ```
 
 ## 2. 当前事实源集合
@@ -102,11 +105,14 @@ stage-qdr-4 B2: CLOSED / ACCEPTED
 stage-qdr-4 B3 plan: DONE / PLAN_ONLY
 stage-qdr-4 B3 implementation work order: DONE / WORK_ORDER_ONLY
 stage-qdr-4 B3 implementation: DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED
+stage-qdr-4 B3 close review: PASS
+stage-qdr-4 B3: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B4_PLAN: YES
 B5 close review retry: CLOSED / ACCEPTED
 stage-qdr-4 recommended direction: QDR Replay / Evaluation / Regression Baseline
 ```
 
-B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；B2 persistence baseline plan 已完成，B2 freeze review 已 `PASS`，B2 implementation work order 已完成。B2 implementation 本轮新增 V9 migration、tenant-bound repository ports、JDBC adapters、migration / repository / redaction / tenant isolation tests，并保持 no API / Controller、no real HTTP、no real provider、no Provider SDK、no Agent / LangGraph runtime、no LIVE。B2 blocker fix 已通过 Docker/Testcontainers 真实 PostgreSQL 验证：`V9QdrReplayEvaluationFlywayPostgresTest` 在 PostgreSQL 17 Testcontainer 中执行，Flyway validated 9 migrations，并成功迁移到 version v9，结果为 1 test / 0 failures / 0 errors / 0 skipped。`DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW` 已完成并判定 `PASS`：V9 migration、tenant-bound repository ports/JDBC adapters、redaction guard、trading-term guard、scoped tests、quality validate 与 safety scan 均满足 close 条件。B2 当前状态为 `CLOSED / ACCEPTED`。`DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN` 已完成为 `DONE / PLAN_ONLY`，B3 implementation work order 已完成为 `DONE / WORK_ORDER_ONLY`。B3 implementation 本轮实现 deterministic mock gateway regression flow：existing dry-run / QDR decision artifact -> mock model gateway summary -> replay case -> evaluation case -> expected/actual summary -> regression comparison -> regression verdict -> finding list；复用 B2/V9 repository ports，不新增 schema/API/Controller，不接真实 provider/HTTP/Agent/LangGraph，不进入 LIVE 或 B4。下一步只允许进入 `DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW`；B4 read model/report 必须后置，不得与 B3 合并。
+B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；B2 persistence baseline plan 已完成，B2 freeze review 已 `PASS`，B2 implementation work order 已完成。B2 implementation 本轮新增 V9 migration、tenant-bound repository ports、JDBC adapters、migration / repository / redaction / tenant isolation tests，并保持 no API / Controller、no real HTTP、no real provider、no Provider SDK、no Agent / LangGraph runtime、no LIVE。B2 blocker fix 已通过 Docker/Testcontainers 真实 PostgreSQL 验证：`V9QdrReplayEvaluationFlywayPostgresTest` 在 PostgreSQL 17 Testcontainer 中执行，Flyway validated 9 migrations，并成功迁移到 version v9，结果为 1 test / 0 failures / 0 errors / 0 skipped。`DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW` 已完成并判定 `PASS`：V9 migration、tenant-bound repository ports/JDBC adapters、redaction guard、trading-term guard、scoped tests、quality validate 与 safety scan 均满足 close 条件。B2 当前状态为 `CLOSED / ACCEPTED`。`DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN` 已完成为 `DONE / PLAN_ONLY`，B3 implementation work order 已完成为 `DONE / WORK_ORDER_ONLY`。B3 implementation 本轮实现 deterministic mock gateway regression flow：existing dry-run / QDR decision artifact -> mock model gateway summary -> replay case -> evaluation case -> expected/actual summary -> regression comparison -> regression verdict -> finding list；复用 B2/V9 repository ports，不新增 schema/API/Controller，不接真实 provider/HTTP/Agent/LangGraph，不进入 LIVE 或 B4。`DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW` 已完成并判定 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。下一步只允许进入 `DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN`；B4 implementation 仍为 `NOT_STARTED`，不得跳过 B4 plan/WO/review 门禁。
 
 ## 4. 禁止项
 
@@ -122,7 +128,8 @@ ALLOW_STAGE_QDR_4_B2_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION_WO: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
-ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES
+ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
+ALLOW_STAGE_QDR_4_B4_PLAN: YES
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO

@@ -33,16 +33,19 @@ STAGE_QDR_4_B3_PLAN: DONE
 stage-qdr-4 B3 implementation work order: DONE / WORK_ORDER_ONLY
 STAGE_QDR_4_B3_IMPLEMENTATION_WO: DONE
 stage-qdr-4 B3 implementation: DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED
+STAGE_QDR_4_B3_CLOSE_REVIEW: PASS
+STAGE_QDR_4_B3: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B4_PLAN: YES
 stage-qdr-4 B4 implementation: NOT_STARTED
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
-ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES
+ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW
+next action: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN
 ```
 
 ## 2. 前置分类规则
@@ -99,7 +102,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成，B2 implementation 已完成并通过真实 PostgreSQL/Testcontainers Flyway load 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。B3 mock gateway regression integration plan 已 `DONE / PLAN_ONLY`，B3 mock gateway regression integration work order 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`。下一步只能进入 `DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW`。不得跳到 B4，不得把 B3 close review / B4 合并实施。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成，B2 implementation 已完成并通过真实 PostgreSQL/Testcontainers Flyway load 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。B3 mock gateway regression integration plan 已 `DONE / PLAN_ONLY`，B3 mock gateway regression integration work order 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。下一步只能进入 `DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN`。不得跳过 B4 plan/WO 进入 implementation，不得把 B3 / B4 合并实施。
 
 ## 4. 安全边界
 
@@ -145,10 +148,10 @@ mvn -ntp -Pquality validate
 
 `mvnw.cmd` 当前仍不可写成可用。Docker/Testcontainers skip 只能写成环境型 skip，不得写成 PASS。
 
-## 7. B3 close review 当前入口
+## 7. B4 planning 当前入口
 
 ```text
-current task: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-IMPLEMENTATION
+previous task: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW / PASS
 plan source: docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
 work order source: docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
 B2 freeze/review: PASS
@@ -159,6 +162,9 @@ B2 status: CLOSED / ACCEPTED
 B3 plan: DONE / PLAN_ONLY
 B3 implementation work order: DONE / WORK_ORDER_ONLY
 B3 implementation: DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED
+B3 close review: PASS
+B3 status: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B4_PLAN: YES
 B4 implementation: NOT_STARTED
 V9 migration: CREATED / V9__qdr_replay_evaluation_baseline.sql / POSTGRES_LOAD_VERIFIED
 Repository / JDBC implementation: DONE / TENANT_BOUND
@@ -168,5 +174,5 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW
+next action: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN
 ```

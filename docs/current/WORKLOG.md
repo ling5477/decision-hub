@@ -4,6 +4,102 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW
+
+完成 stage-qdr-4 B3 mock gateway regression integration close review。审查确认 B3 implementation commit 已提交，工作区开工前 clean，target flow、usecase/service、comparator、B2 repository 复用、redaction、trading-term guard、test evidence 与 safety scan 均满足 close 条件。B3 正式关闭为 `CLOSED / ACCEPTED`，仅允许进入 B4 planning，不允许直接进入 B4 implementation。
+
+### Scope
+
+```text
+REVIEW_ONLY
+CLOSE_REVIEW
+MOCK_GATEWAY_REGRESSION_REVIEW
+QDR_PIPELINE_REVIEW
+REPOSITORY_REUSE_REVIEW
+REDACTION_REVIEW
+TRADING_TERM_GUARD_REVIEW
+TEST_EVIDENCE_REVIEW
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Result
+
+```text
+B3 implementation commit: 54e5575 feat(qdr): integrate mock gateway regression baseline
+worktree: CLEAN before close docs update
+target flow review: PASS
+usecase/service review: PASS
+comparator review: PASS
+persistence reuse review: PASS
+redaction review: PASS
+trading-term review: PASS
+test evidence review: PASS
+safety scan review: PASS / ALLOWED_HITS_ONLY
+STAGE_QDR_4_B3_CLOSE_REVIEW: PASS
+STAGE_QDR_4_B3: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B4_PLAN: YES
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN
+```
+
+### Validation
+
+```text
+git status --short: PASS / CLEAN before docs update
+git branch --show-current: dev
+git log --oneline -20: HEAD 54e5575 feat(qdr): integrate mock gateway regression baseline
+git diff --check: PASS
+git diff --stat: PASS / EMPTY before docs update
+git diff --name-only: PASS / EMPTY before docs update
+git diff --cached --name-only: PASS / EMPTY
+git diff --name-only 54e5575^ 54e5575 -- dh-app/src/main/resources/db/migration dh-api dh-app/src/main/java contracts golden_cases: PASS / EMPTY
+required safety scan: REVIEWED / ALLOWED_HITS_ONLY
+mvn -ntp -pl dh-usecase -am "-Dtest=QdrRegressionComparatorTest,QdrRegressionEvaluationServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test: BUILD SUCCESS / 19 tests
+mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test: BUILD SUCCESS / reactor 15/15 / Testcontainers PostgreSQL 17 / Flyway v9 verified
+mvn -ntp -Pquality validate: BUILD SUCCESS / reactor 19/19 / Checkstyle 0 violations / Spotless passed
+.\mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+### Boundary
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 B4 implementation
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-IMPLEMENTATION
 
 完成 stage-qdr-4 B3 mock gateway regression integration implementation。B3 本轮只实现 deterministic mock gateway regression flow，把 existing dry-run / QDR decision artifact、mock model gateway safe summary、B2 replay/evaluation persistence ports、expected/actual decision summary、regression comparator、verdict 和 finding list 串成可测试闭环。本轮未新增 migration，未修改 V1-V9，未新增 API / Controller，未接真实 provider / HTTP / Agent / LangGraph / LIVE，未修改 NQ。

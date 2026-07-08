@@ -34,13 +34,16 @@ STAGE_QDR_4_B3_PLAN: DONE
 stage-qdr-4 B3 implementation work order: DONE / WORK_ORDER_ONLY
 STAGE_QDR_4_B3_IMPLEMENTATION_WO: DONE
 stage-qdr-4 B3 implementation: DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED
+STAGE_QDR_4_B3_CLOSE_REVIEW: PASS
+STAGE_QDR_4_B3: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B4_PLAN: YES
 B4 implementation: NOT_STARTED
 ```
 
 ## 2. 当前下一步
 
 ```text
-DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW
+DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN
 ```
 
 stage-qdr-4 plan 已选择唯一主线：
@@ -58,11 +61,11 @@ stage-qdr-4 = QDR Replay / Evaluation / Regression Baseline
 4. Agent / LangGraph preparation
 ```
 
-stage-qdr-4 B1 已完成 domain/usecase contracts。B2 persistence baseline plan 已完成，B2 freeze review 已 `PASS`，B2 implementation work order 已完成，B2 implementation 已新增 V9 migration、tenant-bound repository ports、JDBC adapters 和配套测试。V9 PostgreSQL/Flyway load test 已通过真实 Testcontainers PostgreSQL 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。B3 mock gateway regression integration plan 已 `DONE / PLAN_ONLY`，B3 mock gateway regression integration work order 已 `DONE / WORK_ORDER_ONLY`。B3 implementation 已实现 deterministic mock gateway regression flow：existing dry-run / mock gateway safe refs -> replay case -> evaluation case -> expected/actual summary -> regression comparison -> verdict -> finding list；实现范围为 MockGatewayRegressionCaseBuilder、QdrRegressionEvaluationService、QdrRegressionComparator、RegressionBaselinePolicy、RegressionEvidenceRef 与 B2 repository port 复用，不新增 migration、API、Controller、真实 HTTP、真实 provider、Provider SDK、Agent / LangGraph runtime 或 LIVE。下一步只允许进入 `DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW`，不得跳到 B4。
+stage-qdr-4 B1 已完成 domain/usecase contracts。B2 persistence baseline plan 已完成，B2 freeze review 已 `PASS`，B2 implementation work order 已完成，B2 implementation 已新增 V9 migration、tenant-bound repository ports、JDBC adapters 和配套测试。V9 PostgreSQL/Flyway load test 已通过真实 Testcontainers PostgreSQL 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。B3 mock gateway regression integration plan 已 `DONE / PLAN_ONLY`，B3 mock gateway regression integration work order 已 `DONE / WORK_ORDER_ONLY`。B3 implementation 已实现 deterministic mock gateway regression flow：existing dry-run / mock gateway safe refs -> replay case -> evaluation case -> expected/actual summary -> regression comparison -> verdict -> finding list；实现范围为 MockGatewayRegressionCaseBuilder、QdrRegressionEvaluationService、QdrRegressionComparator、RegressionBaselinePolicy、RegressionEvidenceRef 与 B2 repository port 复用，不新增 migration、API、Controller、真实 HTTP、真实 provider、Provider SDK、Agent / LangGraph runtime 或 LIVE。B3 close review 已 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。下一步只允许进入 `DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN`，不得跳过 B4 planning 直接 implementation。
 
 ## 3. 后续阶段边界
 
-stage-qdr-4 planning 已 `DONE / PLAN_ACCEPTED`。stage-qdr-4 B1 已 `DONE / DOMAIN_CONTRACTS_ONLY`。B2 plan 已 `DONE / PERSISTENCE_BASELINE_PLAN_ONLY`，B2 freeze review 已 `PASS`，B2 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B2 blocker fix 已 `DONE / TESTCONTAINERS_VERIFIED`，B2 implementation 已 `DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED`，B2 close review 已 `PASS`，B2 已 `CLOSED / ACCEPTED`。B3 plan 已 `DONE / PLAN_ONLY`，B3 WO 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`。固定顺序为 B3 close review -> B4 plan；B3 close review 通过前不得进入 B4 implementation，不得新增 API / Controller，不得接 provider / HTTP / Agent / LangGraph。B4 read model / report 后置，Agent / LangGraph 必须后置，不进入 stage-qdr-4。
+stage-qdr-4 planning 已 `DONE / PLAN_ACCEPTED`。stage-qdr-4 B1 已 `DONE / DOMAIN_CONTRACTS_ONLY`。B2 plan 已 `DONE / PERSISTENCE_BASELINE_PLAN_ONLY`，B2 freeze review 已 `PASS`，B2 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B2 blocker fix 已 `DONE / TESTCONTAINERS_VERIFIED`，B2 implementation 已 `DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED`，B2 close review 已 `PASS`，B2 已 `CLOSED / ACCEPTED`。B3 plan 已 `DONE / PLAN_ONLY`，B3 WO 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 已 `CLOSED / ACCEPTED`。固定顺序为 B4 plan -> B4 WO -> B4 implementation -> B4 close review；B4 plan 通过前不得进入 B4 implementation，不得新增 API / Controller，不得接 provider / HTTP / Agent / LangGraph。B4 read model / report 仍必须保持只读，Agent / LangGraph 必须后置，不进入 stage-qdr-4。
 
 ## 4. 持续禁止项
 

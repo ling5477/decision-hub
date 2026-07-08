@@ -3,6 +3,77 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW validation
+
+```text
+Task type: REVIEW_ONLY + CLOSE_REVIEW + MOCK_GATEWAY_REGRESSION_REVIEW + QDR_PIPELINE_REVIEW + REPOSITORY_REUSE_REVIEW + REDACTION_REVIEW + TRADING_TERM_GUARD_REVIEW + TEST_EVIDENCE_REVIEW + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:/Project/decision-hub
+branch: dev
+B3 implementation commit: 54e5575 feat(qdr): integrate mock gateway regression baseline
+STAGE_QDR_4_B3_CLOSE_REVIEW: PASS
+STAGE_QDR_4_B3: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B4_PLAN: YES
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
+real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
+```
+
+### Close review validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -20` | PASS | HEAD 为 `54e5575 feat(qdr): integrate mock gateway regression baseline`。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 无 whitespace error、tracked diff 或 staged diff。 |
+| B3 implementation commit check | PASS | `git show --name-only --format='%h %s' 54e5575` 只包含 B3 qdr replay Java/test 文件与允许的 `docs/current` 同步文件。 |
+| target flow review | PASS | flow 为 dry-run / QDR artifact -> mock gateway safe summary -> replay case -> evaluation case -> expected/actual summary -> comparator -> regression verdict -> findings；未调用真实 provider、HTTP、NQ、replay API、Controller、Agent 或 LangGraph。 |
+| usecase/service review | PASS | `tenantId`、`traceId`、`requestId`、`decisionId`、safe hash/ref 均强制校验；repository failure 返回 FAIL / BLOCKER；redaction guard 与 trading-term guard 生效。 |
+| comparator review | PASS | 覆盖 decisionType、actionLabel、confidenceBand、riskLevel、evidenceRefs、forbiddenActions、providerSummaryHash、modelGatewayVersionRef、promptVersionRef、policyVersion；结果只允许 PASS / WARN / FAIL / SKIPPED。 |
+| persistence reuse review | PASS | 复用 `ReplayCaseRepository`、`EvaluationCaseRepository`、`RegressionVerdictRepository` 与 V9 七张表；无 V10、无 V9 修改、无新表、无 UUID-only query、无 cross-tenant read。 |
+| redaction review | PASS | raw prompt、raw provider response、credential/token/cookie/apiKey/apiSecret/passphrase/secret 仅作为禁止项、guard 或测试样本出现；不入库。 |
+| trading-term review | PASS | BUY / SELL / MARKET_ORDER 不可作为 expected actionLabel；PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE 只允许作为 forbiddenActions 或 guard/test；RegressionVerdict 不是交易建议。 |
+| required safety scan | REVIEWED / ALLOWED_HITS_ONLY | 用户指定 `rg` 已执行；命中为禁止项、guard/test、migration CHECK/COMMENT、docs 风险说明或 fixture forbiddenActions；未发现真实 HTTP/provider/Agent/LangGraph/LIVE 实现或 raw material 持久化。 |
+| targeted B3 tests | BUILD SUCCESS / PASS | `mvn -ntp -pl dh-usecase -am "-Dtest=QdrRegressionComparatorTest,QdrRegressionEvaluationServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`；19 tests，0 failures，0 errors，0 skipped。 |
+| broader relevant tests | BUILD SUCCESS / PASS / NOT_SKIPPED | `mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test`；reactor 15/15 SUCCESS；Testcontainers PostgreSQL 17 启动，Flyway validated/applied 9 migrations 到 v9。 |
+| quality validate | BUILD SUCCESS | `mvn -ntp -Pquality validate`；reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+
+### Close review result
+
+```text
+STAGE_QDR_4_B3_CLOSE_REVIEW: PASS
+STAGE_QDR_4_B3: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B4_PLAN: YES
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+next action: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN
+```
+
+Boundary:
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 B4 implementation
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-IMPLEMENTATION validation
 
 ```text
