@@ -10,8 +10,22 @@ Status: CLOSED / ACCEPTED / ARCHIVED
 Final close review: PASS
 Archive close: DONE
 Tag: PENDING
-Close docs commit: pending until this task is committed
+Archive close docs commit: 3689251 docs(qdr): archive stage-qdr-4 replay evaluation baseline
+Archive content fix: copied Stage-QDR-4 current stage documents into this directory
 Next tag: dh-stage-qdr-4-close
+```
+
+## Archived Files
+
+```text
+README.md
+DH_STAGE_QDR_4_PLAN.md
+DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
+DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
+DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
+DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
+DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
+DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md
 ```
 
 ## Closed Scope

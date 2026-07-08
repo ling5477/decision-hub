@@ -4,6 +4,38 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-4-ARCHIVE-CONTENT-FIX
+
+补齐 Stage-QDR-4 归档目录的实际阶段文档。上一轮 archive close commit 已创建 `docs/gates/stage-qdr-4/README.md` 并同步 current factsources，但目录下缺少 `DH_STAGE_QDR_4*.md` 阶段文档副本；本轮将 7 个 Stage-QDR-4 current stage docs 复制到 `docs/gates/stage-qdr-4/`，并同步 `ARCHIVE_INDEX.md` 与 gates README。
+
+### Files Archived
+
+```text
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_PLAN.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md
+```
+
+### Boundary
+
+```text
+No code change
+No test change
+No migration
+No API
+No real provider
+No real HTTP
+No Agent
+No LangGraph
+No LIVE
+No tag created
+No push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-4-ARCHIVE-CLOSE
 
 完成 Stage-QDR-4 archive close docs sync。本轮只同步 README、docs/current 与 docs/gates 归档入口，把 Stage-QDR-4 final close review `PASS` 收口为 `CLOSED / ACCEPTED / ARCHIVED`，并保持 tag 状态为 `PENDING`。

@@ -81,6 +81,13 @@ docs/gates/stage-qdr-4/
 
 ```text
 docs/gates/stage-qdr-4/README.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_PLAN.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md
 ```
 
 内容摘要：
@@ -91,7 +98,8 @@ Status: CLOSED / ACCEPTED / ARCHIVED
 Final close review: PASS
 Archive close: DONE
 Tag: PENDING
-Close docs commit: pending until this task is committed
+Archive close docs commit: 3689251 docs(qdr): archive stage-qdr-4 replay evaluation baseline
+Archive content fix: Stage-QDR-4 current stage documents copied into docs/gates/stage-qdr-4
 Next tag: dh-stage-qdr-4-close
 B1 Replay / Evaluation Domain Contracts: DONE
 B2 Replay / Evaluation Persistence Baseline: CLOSED / ACCEPTED

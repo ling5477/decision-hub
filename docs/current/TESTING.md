@@ -3,6 +3,60 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-4-ARCHIVE-CONTENT-FIX validation
+
+```text
+Task type: DOCUMENTATION_ONLY + ARCHIVE_CONTENT_FIX + STAGE_QDR_4_DOCS_GATES_ARCHIVE + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:/Project/decision-hub
+branch: dev
+reason: docs/gates/stage-qdr-4 contained only README.md after archive close; actual Stage-QDR-4 stage docs needed to be present in the archive directory.
+```
+
+### Archive content check
+
+```text
+docs/gates/stage-qdr-4/README.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_PLAN.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md
+```
+
+### Validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short` | DOCS_ONLY_DIRTY / NO_STAGED | dirty 限于 `docs/current/ARCHIVE_INDEX.md`、`docs/current/TESTING.md`、`docs/current/WORKLOG.md`、`docs/gates/README.md`、`docs/gates/stage-qdr-4/**`。 |
+| `Get-ChildItem docs/gates/stage-qdr-4` | PASS | 目录包含 `README.md` 与 7 个 `DH_STAGE_QDR_4*.md` 阶段文档副本。 |
+| `git diff --check` | PASS_WITH_EOL_WARNINGS | exit code 0；仅 Git LF -> CRLF warning，不是 whitespace error。 |
+| `git diff --stat` / `git diff --name-only` | DOCS_ONLY_DIFF | tracked diff 限于 docs 索引与归档 README；新增 stage docs 由 `git status --short` 记录。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 无 diff。 |
+| safety scan | REVIEWED / ALLOWED_HITS_ONLY | 命中为 `dh-stage-qdr-4-close` pending tag、`No tag created`、历史 `NOT STARTED`、禁止项或 hard-error phrase 清单；未发现 real HTTP/provider/Agent/LangGraph/LIVE enabled/started。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `maven-wrapper.jar` no main manifest attribute；不能写成 wrapper PASS。 |
+| `git tag --list "dh-stage-qdr-4-close"` | PASS / NOT_EXISTS | 本轮仍未创建 tag。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未打 tag
+未 push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-4-ARCHIVE-CLOSE validation
 
 ```text
