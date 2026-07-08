@@ -16,15 +16,16 @@ stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
 stage-qdr-4 implementation: B1_ONLY / DONE
 stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
+stage-qdr-4 B2 freeze/review: PASS
+stage-qdr-4 B2 implementation work order: DONE / WORK_ORDER_ONLY
 stage-qdr-4 B2 implementation: NOT_STARTED / NO
-stage-qdr-4 B2 freeze/review: READY
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: F:/project/decision-hub
-next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-FREEZE-REVIEW
+next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION
 ```
 
 ## 2. 当前事实源集合
@@ -40,6 +41,7 @@ docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
 docs/current/DH_STAGE_QDR_4_PLAN.md
 docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
+docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
 ```
 
 `SUPPORTING_DOCS_NOT_BLOCKERS_BY_DEFAULT`：
@@ -76,13 +78,14 @@ stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
 stage-qdr-4 implementation: B1_ONLY / DONE
 stage-qdr-4 B2 plan: DONE / PERSISTENCE_BASELINE_PLAN_ONLY
+stage-qdr-4 B2 freeze/review: PASS
+stage-qdr-4 B2 implementation work order: DONE / WORK_ORDER_ONLY
 stage-qdr-4 B2 implementation: NOT_STARTED / NO
-stage-qdr-4 B2 freeze/review: READY
 B5 close review retry: CLOSED / ACCEPTED
 stage-qdr-4 recommended direction: QDR Replay / Evaluation / Regression Baseline
 ```
 
-B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；B2 persistence baseline plan 已完成，仅形成 V9 / repository / tenant / redaction / review 测试矩阵规划。下一步只允许进入 B2 freeze/review，不允许直接进入 B2 implementation，不允许跳到 B3 implementation。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 与 LIVE 仍未启动。
+B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；B2 persistence baseline plan 已完成。B2 freeze review 已 `PASS`，B2 implementation work order 已完成且仅形成 implementation 边界，不包含 Java、测试、migration、repository 或 API 实现。下一步只允许进入单独的 B2 implementation，不允许跳到 B3 implementation。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 与 LIVE 仍未启动。
 
 ## 4. 禁止项
 
@@ -91,8 +94,9 @@ ALLOW_STAGE_QDR_3_FINAL_CLOSE: YES / CONSUMED
 ALLOW_STAGE_QDR_4_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B1_DOMAIN_CONTRACTS: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B2_PERSISTENCE_PLAN: YES / CONSUMED
-ALLOW_STAGE_QDR_4_B2_FREEZE_REVIEW: YES
-ALLOW_STAGE_QDR_4_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_4_B2_FREEZE_REVIEW: YES / CONSUMED
+ALLOW_STAGE_QDR_4_B2_IMPLEMENTATION_WO: YES / CONSUMED
+ALLOW_STAGE_QDR_4_B2_IMPLEMENTATION: YES
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO

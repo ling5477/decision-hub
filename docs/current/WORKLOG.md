@@ -4,6 +4,87 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION-WO
+
+完成 stage-qdr-4 B2 persistence baseline implementation work order。本轮只编制后续实现边界，未实现 Java、测试、migration、repository、API、真实 HTTP、真实 provider、Provider SDK、Agent runtime、LangGraph runtime 或 LIVE 能力。
+
+### Scope
+
+```text
+WORK_ORDER_ONLY
+B2_IMPLEMENTATION_BOUNDARY_DESIGN
+MIGRATION_IMPLEMENTATION_WO
+REPOSITORY_IMPLEMENTATION_WO
+TEST_MATRIX_DESIGN
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Work Order Result
+
+```text
+stage-qdr-4 B2 freeze/review: PASS
+stage-qdr-4 B2 implementation work order: DONE / WORK_ORDER_ONLY
+stage-qdr-4 B2 implementation: NOT_STARTED / NO
+migration boundary: only V9__qdr_replay_evaluation_baseline.sql in next implementation
+repository boundary: ReplayCaseRepository, EvaluationCaseRepository, RegressionVerdictRepository and JDBC adapters only
+tenant isolation: all save/find/list/update methods must be tenant-bound
+redaction boundary: raw prompt / raw provider response / credential forbidden
+test matrix: 20 required implementation checks
+next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION
+```
+
+### Boundary
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V8 migration
+未新增 V9 migration
+未新增 Repository / JDBC / Service 实现
+未新增 API / Controller
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未修改 NQ
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+```
+
+### Validation
+
+```text
+git status --short: DOCS_ONLY_DIRTY / NO_STAGED
+git diff --check: PASS_WITH_EOL_WARNINGS
+git diff --stat: DOCS_ONLY_TRACKED_DIFF
+git diff --name-only: DOCS_ONLY_TRACKED_DIFF
+git diff --cached --name-only: PASS / EMPTY
+forbidden scope diff: PASS / EMPTY
+safety wording scan: REVIEWED / FALSE_POSITIVE_ONLY
+mvn -ntp -Pquality validate: BUILD SUCCESS
+.\mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B2-REPLAY-EVALUATION-PERSISTENCE-BASELINE-PLAN
 
 完成 stage-qdr-4 B2 replay / evaluation persistence baseline plan。本轮只做规划，未实现 Java、测试、migration、repository、API、真实 HTTP、真实 provider、Provider SDK、Agent runtime、LangGraph runtime 或 LIVE 能力。
