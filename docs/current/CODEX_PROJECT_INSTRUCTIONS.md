@@ -26,12 +26,15 @@ stage-qdr-4 B2 freeze/review: PASS
 stage-qdr-4 B2 implementation work order: DONE / WORK_ORDER_ONLY
 stage-qdr-4 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
 stage-qdr-4 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
+STAGE_QDR_4_B2_CLOSE_REVIEW: PASS
+STAGE_QDR_4_B2: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B3_PLAN: YES
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW
+next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN
 ```
 
 ## 2. 前置分类规则
@@ -86,7 +89,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成，B2 implementation 已完成并通过真实 PostgreSQL/Testcontainers Flyway load 验证。下一步只能进入单独的 B2 close review。不得跳到 B3/B4，不得把 B2 close review 与 B3 合并实施。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成，B2 implementation 已完成并通过真实 PostgreSQL/Testcontainers Flyway load 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。下一步只能进入 `DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN`。不得直接进入 B3 implementation，不得跳到 B4，不得把 B3 planning 与 implementation 合并实施。
 
 ## 4. 安全边界
 
@@ -140,6 +143,8 @@ work order source: docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENT
 B2 freeze/review: PASS
 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
+B2 close review: PASS
+B2 status: CLOSED / ACCEPTED
 V9 migration: CREATED / V9__qdr_replay_evaluation_baseline.sql / POSTGRES_LOAD_VERIFIED
 Repository / JDBC implementation: DONE / TENANT_BOUND
 API / Controller: NO
@@ -148,4 +153,5 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
+next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN
 ```

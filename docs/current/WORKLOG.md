@@ -4,6 +4,94 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW
+
+完成 stage-qdr-4 B2 persistence baseline close review。审查确认 B2 implementation commit 已存在且工作区 clean；V9 PostgreSQL/Flyway Testcontainers load、scoped tests、quality validate 与 safety scan 均满足 close 条件。B2 正式关闭为 `CLOSED / ACCEPTED`，仅允许进入 B3 planning，不允许直接进入 B3 implementation。
+
+### Scope
+
+```text
+REVIEW_ONLY
+CLOSE_REVIEW
+MIGRATION_REVIEW
+REPOSITORY_REVIEW
+TENANT_ISOLATION_REVIEW
+REDACTION_REVIEW
+TEST_EVIDENCE_REVIEW
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Result
+
+```text
+B2 implementation commit: 3fe1bab feat(qdr): persist replay evaluation baseline
+worktree: CLEAN before close docs update
+migration review: PASS
+repository review: PASS
+tenant isolation review: PASS
+redaction review: PASS
+trading-term review: PASS
+test evidence review: PASS
+safety scan review: PASS / NO_ACTUAL_RISK
+STAGE_QDR_4_B2_CLOSE_REVIEW: PASS
+STAGE_QDR_4_B2: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B3_PLAN: YES
+next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN
+```
+
+### Validation
+
+```text
+git status --short: PASS / CLEAN before docs update
+git diff --check: PASS
+git diff --stat: PASS / EMPTY before docs update
+git diff --name-only: PASS / EMPTY before docs update
+git diff --cached --name-only: PASS / EMPTY
+mvn -ntp -pl dh-app -am "-Dtest=V9QdrReplayEvaluationFlywayPostgresTest" "-Dsurefire.failIfNoSpecifiedTests=false" test: BUILD SUCCESS / PASS / NOT_SKIPPED
+mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test: BUILD SUCCESS / PASS / NOT_SKIPPED
+mvn -ntp -Pquality validate: BUILD SUCCESS
+.\mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+required safety scan: REVIEWED / NO_ACTUAL_RISK
+```
+
+### Boundary
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 Repository / JDBC / Service
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未将 replay / regression output 写成 trading signal
+未进入 B3 implementation
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-BLOCKER-FIX
 
 完成 B2 implementation 唯一阻断项修复：恢复并使用本机 Docker/Testcontainers，实证 `V9QdrReplayEvaluationFlywayPostgresTest` 在 PostgreSQL 17 Testcontainer 中执行并通过，Flyway validated 9 migrations，并成功迁移到 version v9。本轮未修改 migration 语义、未新增功能、未进入 B3。

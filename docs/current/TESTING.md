@@ -3,6 +3,60 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW validation
+
+```text
+Task type: REVIEW_ONLY + CLOSE_REVIEW + MIGRATION_REVIEW + REPOSITORY_REVIEW + TENANT_ISOLATION_REVIEW + REDACTION_REVIEW + TEST_EVIDENCE_REVIEW + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+B2 implementation commit: 3fe1bab feat(qdr): persist replay evaluation baseline
+STAGE_QDR_4_B2_CLOSE_REVIEW: PASS
+STAGE_QDR_4_B2: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B3_PLAN: YES
+ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION_NOW: NO
+real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
+```
+
+### Close review validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `F:\project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current`（开工前） | PASS | `dev`。 |
+| `git log --oneline -15`（开工前） | PASS | 最近提交包含 `3fe1bab feat(qdr): persist replay evaluation baseline`。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 whitespace error、tracked diff 或 staged diff。 |
+| `git show --name-only --format='%h %s' HEAD` | PASS | HEAD 为 `3fe1bab feat(qdr): persist replay evaluation baseline`；B2 commit 文件清单未包含 `dh-api`、Controller、NQ 仓库、Provider SDK 或真实 HTTP client。 |
+| `git diff --name-only HEAD~1..HEAD -- dh-app/src/main/resources/db/migration` | PASS | 仅新增 `dh-app/src/main/resources/db/migration/V9__qdr_replay_evaluation_baseline.sql`；未修改 V1-V8 migration。 |
+| migration review | PASS | V9 创建 7 张表；所有 B2 表包含 `tenant_id`；主查询路径具备 tenant-bound index；verdict / severity / action_label / hash CHECK 存在；COMMENT 明确 no raw prompt / no raw provider response / no credential / not executable trading signal；JSONB 限定 structured summary/ref。 |
+| repository review | PASS | `ReplayCaseRepository`、`EvaluationCaseRepository`、`RegressionVerdictRepository` 与 JDBC adapters 均为 tenant-bound；未发现 UUID-only 查询；list 使用 `ReplayPageRequest`，`limit` 最大 100；duplicate checksum / verdict mismatch fail-closed。 |
+| redaction review | PASS | DB CHECK 覆盖 top-level sensitive key；repository guard 递归覆盖 JSON key/value；测试覆盖 raw prompt / raw provider response / credential-like key。 |
+| trading-term review | PASS | `BUY` / `SELL` / `MARKET_ORDER` / `PLACE_ORDER` / `CANCEL_ORDER` / `MUTATE_NQ_STATE` 只能出现在 forbiddenActions、CHECK、guard 或测试守卫；`LONG_BIAS` / `SHORT_BIAS` 只作为 direction label；`RegressionVerdict` 只表示 replay/evaluation verdict。 |
+| `mvn -ntp -pl dh-app -am "-Dtest=V9QdrReplayEvaluationFlywayPostgresTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS / PASS / NOT_SKIPPED | Docker Desktop 29.6.1 + PostgreSQL 17.10 Testcontainer；Flyway successfully validated 9 migrations and applied to version v9；`Tests run: 1, Failures: 0, Errors: 0, Skipped: 0`。 |
+| `mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test` | BUILD SUCCESS / PASS / NOT_SKIPPED | scoped reactor 15/15 SUCCESS；`dh-domain` 151 tests、`dh-usecase` 316 tests、`dh-infra` 88 tests、`dh-app` 84 tests 均 0 skipped；`PostgresContainerSmokeTest` 与 `V9QdrReplayEvaluationFlywayPostgresTest` 均真实执行 PostgreSQL/Testcontainers。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed。系统 Maven settings 仍有 `profiles` warning，非本轮阻断。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+| required safety scan | REVIEWED / NO_ACTUAL_RISK | 用户指定 `rg` 已执行。全量命中为 docs 禁止项、历史风险说明、migration CHECK/COMMENT、redaction/trading guard、测试守卫或 fixture；B2 commit 窄范围复核未发现真实 HTTP/provider/Agent/LangGraph/LIVE 实现、raw prompt/raw provider response/credential 持久化或 executable trading signal。 |
+
+### Close review result
+
+```text
+STAGE_QDR_4_B2_BLOCKER_FIX: DONE
+STAGE_QDR_4_B2_IMPLEMENTATION: DONE
+V9 PostgreSQL/Flyway load: PASS
+Testcontainers result: PASS / NOT_SKIPPED
+STAGE_QDR_4_B2_CLOSE_REVIEW: PASS
+STAGE_QDR_4_B2: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B3_PLAN: YES
+ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-BLOCKER-FIX validation
 
 ```text

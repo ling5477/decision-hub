@@ -3,9 +3,9 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-BLOCKER-FIX / DONE
-next action: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW
-mode: IMPLEMENTATION + MIGRATION + REPOSITORY + TESTS + QDR_REPLAY_EVALUATION_PERSISTENCE + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current task: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW / PASS
+next action: DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN
+mode: REVIEW_ONLY + CLOSE_REVIEW + MIGRATION_REVIEW + REPOSITORY_REVIEW + TENANT_ISOLATION_REVIEW + REDACTION_REVIEW + TEST_EVIDENCE_REVIEW + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
@@ -17,6 +17,9 @@ stage-qdr-4 B2 freeze/review: PASS
 stage-qdr-4 B2 implementation work order: DONE / WORK_ORDER_ONLY
 stage-qdr-4 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
 stage-qdr-4 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
+STAGE_QDR_4_B2_CLOSE_REVIEW: PASS
+STAGE_QDR_4_B2: CLOSED / ACCEPTED
+ALLOW_STAGE_QDR_4_B3_PLAN: YES
 current workspace: F:/project/decision-hub
 ```
 
@@ -40,6 +43,8 @@ stage-qdr-4 B2 freeze/review: PASS
 stage-qdr-4 B2 implementation work order: DONE / WORK_ORDER_ONLY
 stage-qdr-4 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
 stage-qdr-4 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
+stage-qdr-4 B2 close review: PASS
+stage-qdr-4 B2: CLOSED / ACCEPTED
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
@@ -63,13 +68,16 @@ B1 Agent / LangGraph / LIVE: NO / DISABLED
 
 ```text
 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED
+DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW: PASS
+STAGE_QDR_4_B2: CLOSED / ACCEPTED
 已新增 dh-app/src/main/resources/db/migration/V9__qdr_replay_evaluation_baseline.sql
 已新增 ReplayCaseRepository / EvaluationCaseRepository / RegressionVerdictRepository 及对应 JDBC adapter
 已补充 migration / repository / tenant isolation / redaction / fail-closed 测试
 V9 PostgreSQL/Flyway load test 已通过真实 Testcontainers PostgreSQL 验证，不能再按 skip/blocker 处理
-下一步只允许 DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW
+close review 已确认 V9 migration、tenant-bound repository、redaction guard、trading-term guard、测试证据和 safety scan 可接受
+下一步只允许 DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN
 不得新增 API / Controller
-不得跳到 B3 mock gateway regression integration
+不得直接进入 B3 implementation
 不得跳到 B4 report/read model
 保持 no real HTTP / provider / SDK / Agent / LangGraph / LIVE
 ```
