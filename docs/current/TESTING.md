@@ -3,6 +3,39 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-4-CURRENT-DOCS-CLEANUP validation
+
+```text
+Task type: DOCUMENTATION_ONLY + CURRENT_DOCS_CLEANUP + STAGE_QDR_4_ARCHIVED_DOC_REMOVAL + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:/Project/decision-hub
+branch: dev
+reason: Stage-QDR-4 detailed docs are now archived under docs/gates/stage-qdr-4 and should not remain as current docs.
+```
+
+Expected current cleanup:
+
+```text
+docs/current/DH_STAGE_QDR_4*.md: removed from current
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4*.md: retained as archive
+tag state: PENDING
+```
+
+Actual validation:
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git branch --show-current` | PASS | `dev` |
+| `Get-ChildItem docs/current -Filter 'DH_STAGE_QDR_4*.md'` | PASS / EMPTY | `docs/current` 不再保留 Stage-QDR-4 详细 plan / work order 文档。 |
+| `Get-ChildItem docs/gates/stage-qdr-4 -Filter 'DH_STAGE_QDR_4*.md'` | PASS / 7 FILES | 7 个 Stage-QDR-4 详细文档保留在归档目录。 |
+| `rg -n "docs/current/DH_STAGE_QDR_4\|DH_STAGE_QDR_4_PLAN.md\|DH_STAGE_QDR_4_B[234]_" README.md docs/current/README.md docs/current/STATUS.md docs/current/CODEX_PROJECT_INSTRUCTIONS.md docs/current/FACTSOURCE_POLICY.md docs/current/ARCHIVE_INDEX.md` | PASS / ARCHIVE_POINTERS_ONLY | 未发现 `docs/current/DH_STAGE_QDR_4*.md` 残留；剩余命中均指向 `docs/gates/stage-qdr-4/`。 |
+| `git diff --check` | PASS | 无 whitespace error；仅有 Windows LF-to-CRLF 提示。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`contracts`、`golden_cases`、migration 路径均无 diff。 |
+| safety scan | REVIEWED / ALLOWED_HITS_ONLY | 命中为 pending tag、`No tag created`、历史 `NOT STARTED`、禁止项、测试守卫或 `FACTSOURCE_POLICY.md` hard-error phrase 清单；未发现 real HTTP/provider/Agent/LangGraph/LIVE enabled/started。 |
+| `mvn -ntp -Pquality validate` | PASS | Reactor 19/19 `SUCCESS`；Checkstyle 0 violations；Spotless check passed。 |
+| `.\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | 仍输出 `'\` is not recognized` 与 `maven-wrapper.jar` 无主清单属性；不得记录为 PASS。 |
+| `git tag --list "dh-stage-qdr-4-close"` | PASS / NOT_EXISTS | 本轮未创建 tag。 |
+| `git ls-remote --tags origin "refs/tags/dh-stage-qdr-4-close"` | PASS / NOT_EXISTS | 远程固定 tag 无匹配输出。 |
+
 ## 2026-07-09 DH-STAGE-QDR-4-ARCHIVE-CONTENT-FIX validation
 
 ```text

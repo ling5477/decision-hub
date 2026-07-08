@@ -90,7 +90,7 @@ Next concrete action:
 
 ## 3. 当前事实源规则
 
-stage-qdr-4 planning 的当前事实源文件只包括：
+Stage-QDR-4 已归档，当前 tag close 前的 current factsource 文件只包括：
 
 ```text
 README.md
@@ -99,14 +99,10 @@ docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
-docs/current/DH_STAGE_QDR_4_PLAN.md
-docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
-docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
-docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
-docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
-docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
-docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md
+docs/current/ARCHIVE_INDEX.md
 ```
+
+Stage-QDR-4 的详细 plan / work order / implementation work order 已移动到 `docs/gates/stage-qdr-4/`，只能作为 historical archive evidence，不再作为 current docs 入口或 current factsource。
 
 以下文件默认 supporting only，不作为 primary stage gate source：
 
@@ -173,11 +169,12 @@ mvn -ntp -Pquality validate
 ## 7. Stage-QDR-4 当前入口
 
 ```text
-previous task: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO / DONE
-plan source: docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
-B4 implementation WO source: docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md
-previous B3 plan source: docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
-previous B3 work order source: docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
+previous task: DH-STAGE-QDR-4-ARCHIVE-CONTENT-FIX / DONE
+archive source: docs/gates/stage-qdr-4/
+B4 plan source: docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
+B4 implementation WO source: docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md
+previous B3 plan source: docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
+previous B3 work order source: docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
 B2 freeze/review: PASS
 B2 blocker fix: DONE / TESTCONTAINERS_VERIFIED
 B2 implementation: DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED

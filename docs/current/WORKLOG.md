@@ -4,6 +4,41 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-4-CURRENT-DOCS-CLEANUP
+
+清理 `docs/current` 下已归档的 Stage-QDR-4 详细阶段文档。`DH_STAGE_QDR_4*.md` 的实际内容已在 `docs/gates/stage-qdr-4/` 存档，本轮从 current 目录移除这些长文档，并把 current factsource 列表改为状态入口、执行纪律、验证记录和归档索引。
+
+### Removed From Current
+
+```text
+docs/current/DH_STAGE_QDR_4_PLAN.md
+docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
+docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
+docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
+docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
+docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
+docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md
+```
+
+### Remaining Source
+
+```text
+docs/gates/stage-qdr-4/
+```
+
+### Validation Result
+
+```text
+docs/current/DH_STAGE_QDR_4*.md: EMPTY
+docs/gates/stage-qdr-4/DH_STAGE_QDR_4*.md: 7 archived files
+git diff --check: PASS
+forbidden-scope diff: PASS / EMPTY
+mvn -ntp -Pquality validate: PASS
+mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+tag created: NO
+push: NO
+```
+
 ## 2026-07-09 DH-STAGE-QDR-4-ARCHIVE-CONTENT-FIX
 
 补齐 Stage-QDR-4 归档目录的实际阶段文档。上一轮 archive close commit 已创建 `docs/gates/stage-qdr-4/README.md` 并同步 current factsources，但目录下缺少 `DH_STAGE_QDR_4*.md` 阶段文档副本；本轮将 7 个 Stage-QDR-4 current stage docs 复制到 `docs/gates/stage-qdr-4/`，并同步 `ARCHIVE_INDEX.md` 与 gates README。

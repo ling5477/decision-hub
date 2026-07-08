@@ -67,16 +67,10 @@ docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
-docs/current/DH_STAGE_QDR_4_PLAN.md
-docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
-docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
-docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md
-docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
-docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
-docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md
+docs/current/ARCHIVE_INDEX.md
 ```
 
-若以上文件与当前状态冲突，必须先修正 factsources，不得进入 tag 或 Stage-QDR-5 planning。
+Stage-QDR-4 的详细 plan / work order / implementation work order 已归档到 `docs/gates/stage-qdr-4/`，不再保留在 `docs/current`。若以上 current 文件与当前状态冲突，必须先修正 factsources，不得进入 tag 或 Stage-QDR-5 planning。
 
 ## Supporting Docs
 
@@ -96,12 +90,8 @@ STATUS.md                  当前状态表
 WORK_ORDER.md              下一步唯一入口
 CODEX_PROJECT_INSTRUCTIONS.md 当前执行纪律
 TESTING.md                 当前验证证据与工具风险
-DH_STAGE_QDR_4_PLAN.md     stage-qdr-4 planning 结论
-DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md B4 read model plan
-DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md B4 implementation WO
 FACTSOURCE_POLICY.md       事实源与 blocker 规则
 ARCHIVE_INDEX.md           已归档文档索引
-docs/gates/stage-qdr-4/README.md Stage-QDR-4 归档入口
 WORKLOG.md                 本轮文档治理记录，supporting only
 ROADMAP.md                 路线摘要，supporting only
 API.md                     API 实现状态摘要，supporting only

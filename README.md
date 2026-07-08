@@ -79,12 +79,9 @@ docs/current/STATUS.md                  唯一当前状态表
 docs/current/WORK_ORDER.md              唯一下一步入口
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md 当前 Codex / Claude 执行纪律
 docs/current/TESTING.md                 当前验证证据与工具风险
-docs/current/DH_STAGE_QDR_4_PLAN.md     stage-qdr-4 planning 结论
-docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md B4 read model plan
-docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md B4 implementation WO
 docs/current/FACTSOURCE_POLICY.md       当前事实源与 blocker 规则
 docs/current/ARCHIVE_INDEX.md           QDR 历史归档索引
-docs/gates/stage-qdr-4/README.md        Stage-QDR-4 归档入口
+docs/gates/stage-qdr-4/                 Stage-QDR-4 归档目录与阶段文档
 ```
 
 `docs/current/WORKLOG.md`、`ROADMAP.md`、`API.md`、`DB_SCHEMA.md` 是 supporting documents，不是 primary stage gate source。旧阶段工单、旧 review / freeze 记录、blocker fix 过程和中间产物已经移动或索引到 `docs/gates/**`，不得覆盖 `STATUS.md` 与 `WORK_ORDER.md` 的当前结论。`docs/archive/**` 不再作为本项目 QDR 阶段的新归档口径；若未来重新出现，只能作为历史遗留引用。

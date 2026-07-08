@@ -2,7 +2,7 @@
 
 ## 1. 目的
 
-本文件定义 `stage-qdr-3 final close` 后的 current factsource、`DH-STAGE-QDR-4-PLAN` 结论与后续 work order 前的 blocker 规则。目标是防止旧阶段文档、过期 work order、历史 review 记录和阶段中间产物继续覆盖当前状态。
+本文件定义 Stage-QDR-4 归档后的 current factsource、tag close 前的 blocker 规则和归档文档边界。目标是防止旧阶段文档、过期 work order、历史 review 记录和阶段中间产物继续覆盖当前状态。
 
 ## 2. CURRENT_FACTSOURCE_CAN_BLOCK_CLOSE
 
@@ -15,10 +15,10 @@ docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
-docs/current/DH_STAGE_QDR_4_PLAN.md
+docs/current/ARCHIVE_INDEX.md
 ```
 
-若这些文件与当前状态冲突，B5 close review 可以阻断。
+若这些文件与当前状态冲突，tag close 可以阻断。
 
 ## 3. SUPPORTING_DOCS_NOT_BLOCKERS_BY_DEFAULT
 
@@ -76,14 +76,15 @@ stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
-stage-qdr-4 implementation: NOT_STARTED / NO
+stage-qdr-4: CLOSED / ACCEPTED / ARCHIVED
+stage-qdr-4 tag: PENDING
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: F:/project/decision-hub
-next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
+current workspace: E:/Project/decision-hub
+next action: DH-STAGE-QDR-4-TAG-CLOSE
 ```
 
 ## 6. Archive Rule

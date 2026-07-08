@@ -114,11 +114,10 @@ Stage-QDR-4 归档记录只作为 historical record 和 tag close 前置证据�
 ```text
 Current status: docs/current/STATUS.md
 Current next action: docs/current/WORK_ORDER.md
-Stage-qdr-4 plan: docs/current/DH_STAGE_QDR_4_PLAN.md
 Factsource policy: docs/current/FACTSOURCE_POLICY.md
 Validation evidence: docs/current/TESTING.md
 Current docs index: docs/current/README.md
-Stage-QDR-4 archive entry: docs/gates/stage-qdr-4/README.md
+Stage-QDR-4 archive directory: docs/gates/stage-qdr-4/
 Next action: DH-STAGE-QDR-4-TAG-CLOSE
 ```
 
