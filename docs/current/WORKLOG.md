@@ -4,6 +4,99 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION
+
+完成 stage-qdr-4 B4 regression report / read model support implementation。本轮先执行 dirty worktree triage，确认 dirty 范围全部属于 B4 允许文件后继续 resume；只新增 usecase/internal read model 结构与回归测试，复用 B2/V9 repository ports；未新增 migration、未修改 V9、未新增 API / Controller、未新增生产 JDBC 查询、未接 provider / HTTP / Agent / LangGraph / LIVE。
+
+### Scope
+
+```text
+IMPLEMENTATION
+REGRESSION_REPORT_READ_MODEL
+QDR_REPLAY_EVALUATION_REPORTING
+INTERNAL_READ_MODEL
+TESTS
+NO_DB_MIGRATION
+NO_API
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/RegressionReportQuery.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/RegressionReportView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/RegressionReportFindingView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/RegressionDriftSummary.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/RegressionReadModelService.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/replay/RegressionReadModelServiceTest.java
+docs/current/STATUS.md
+docs/current/README.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Implementation
+
+```text
+read model target: internal regression report / read model support
+structures: RegressionReportQuery, RegressionReportView, RegressionReportFindingView, RegressionDriftSummary, RegressionReadModelService
+query boundary: tenantId required; caseId/evaluationId/verdictId/trace/sourceRequest/sourceDecision/verdict/severity/created range supported; limit/offset required; max pageSize 100
+report content: safe refs, IDs, decision summary labels, verdict/severity, providerSummaryHash, modelGatewayVersionRef, policyVersion, redactedSummary, driftSummary, findings
+drift summary: decisionType/actionLabel/confidenceBand/riskLevel/evidenceRefs/forbiddenActions/providerSummaryHash/modelGatewayVersionRef/promptVersionRef/policyVersion
+persistence reuse: B2 ReplayCaseRepository, EvaluationCaseRepository, RegressionVerdictRepository only
+redaction: view/finding/safe ref construction reruns redaction guard and rejects raw/sensitive/executable content
+trading-term guard: actionLabel remains read-only direction label; executable trading terms are not exposed as allowed action
+docs sync: current STATUS / WORK_ORDER / ROADMAP / TESTING / WORKLOG / CODEX_PROJECT_INSTRUCTIONS updated
+```
+
+### Validation
+
+```text
+dirty scope triage: DIRTY_SCOPE_ACCEPTED_FOR_B4_RESUME / dirty files only in B4 allowed scope
+mvn -ntp -pl dh-usecase -am "-Dtest=RegressionReadModelServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test: BUILD SUCCESS / 15 tests
+mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test: BUILD SUCCESS / reactor 15/15
+mvn -ntp -Pquality validate: BUILD SUCCESS / reactor 19/19 / Checkstyle 0 / Spotless passed
+.\\mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+V9QdrReplayEvaluationFlywayPostgresTest: PASS / PostgreSQL 17 / Flyway v9
+required safety scan: REVIEWED / ALLOWED_HITS_ONLY
+forbidden-scope dirty check: PASS / EMPTY
+```
+
+### Boundary
+
+```text
+未修改 NQ
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未访问 credential / token / cookie / apiKey / apiSecret / passphrase
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 Stage-QDR-4 final close
+未打 tag
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO
 
 完成 stage-qdr-4 B4 regression report / read model support implementation work order。B4 WO 只冻结后续 implementation 的 usecase/internal read model 边界、tenant-bound query、report content、drift summary、B2/V9 persistence reuse、redaction / trading-term guard、fail-closed、测试矩阵、validation、安全扫描、review / close 和 tag 后置规则。本轮未修改 Java、测试、migration、API、README、NQ 或 runtime。

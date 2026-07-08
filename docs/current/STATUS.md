@@ -36,20 +36,21 @@ STAGE_QDR_4_B4_PLAN: DONE
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_WO: YES / CONSUMED
 stage-qdr-4 B4 implementation work order: DONE / WORK_ORDER_ONLY
 STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
-ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES
-stage-qdr-4 B4 implementation: NOT_STARTED
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
+stage-qdr-4 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
 stage-qdr-4 final close: NOT_STARTED
+stage-qdr-4 tag: NOT_CREATED
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
-ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO / DOCS_ONLY_WO_TURN
-ALLOW_STAGE_QDR_4_B5_FINAL_CLOSE_NOW: NO
+ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES
+ALLOW_STAGE_QDR_4_TAG_NOW: NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: E:/Project/decision-hub
-next action: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION
+next action: DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW
 ```
 
 ## 2. 当前事实源集合
@@ -123,14 +124,17 @@ STAGE_QDR_4_B4_PLAN: DONE
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_WO: YES / CONSUMED
 stage-qdr-4 B4 implementation work order: DONE / WORK_ORDER_ONLY
 STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
-ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES
-stage-qdr-4 B4 implementation: NOT_STARTED
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
+stage-qdr-4 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
 stage-qdr-4 final close: NOT_STARTED
+stage-qdr-4 tag: NOT_CREATED
+ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES
+ALLOW_STAGE_QDR_4_TAG_NOW: NO
 B5 close review retry: CLOSED / ACCEPTED
 stage-qdr-4 recommended direction: QDR Replay / Evaluation / Regression Baseline
 ```
 
-B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；B2 persistence baseline plan 已完成，B2 freeze review 已 `PASS`，B2 implementation work order 已完成。B2 implementation 本轮新增 V9 migration、tenant-bound repository ports、JDBC adapters、migration / repository / redaction / tenant isolation tests，并保持 no API / Controller、no real HTTP、no real provider、no Provider SDK、no Agent / LangGraph runtime、no LIVE。B2 blocker fix 已通过 Docker/Testcontainers 真实 PostgreSQL 验证：`V9QdrReplayEvaluationFlywayPostgresTest` 在 PostgreSQL 17 Testcontainer 中执行，Flyway validated 9 migrations，并成功迁移到 version v9，结果为 1 test / 0 failures / 0 errors / 0 skipped。`DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW` 已完成并判定 `PASS`：V9 migration、tenant-bound repository ports/JDBC adapters、redaction guard、trading-term guard、scoped tests、quality validate 与 safety scan 均满足 close 条件。B2 当前状态为 `CLOSED / ACCEPTED`。`DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN` 已完成为 `DONE / PLAN_ONLY`，B3 implementation work order 已完成为 `DONE / WORK_ORDER_ONLY`。B3 implementation 本轮实现 deterministic mock gateway regression flow：existing dry-run / QDR decision artifact -> mock model gateway summary -> replay case -> evaluation case -> expected/actual summary -> regression comparison -> regression verdict -> finding list；复用 B2/V9 repository ports，不新增 schema/API/Controller，不接真实 provider/HTTP/Agent/LangGraph，不进入 LIVE 或 B4。`DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW` 已完成并判定 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。`DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN` 已完成为 `DONE / PLAN_ONLY`；`DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO` 已完成为 `DONE / WORK_ORDER_ONLY`。B4 WO 冻结 tenant-bound regression report / read model support implementation 边界：默认只做 usecase/internal read model，不新增 API / Controller，不新增 migration，不修改 V9，不接 provider / HTTP / Agent / LangGraph / LIVE，不把 report/verdict/drift 写成 trading signal。下一步只允许进入 `DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION`；B4 implementation 仍为 `NOT_STARTED`，不得直接进入 B5 final close 或 tag。
+B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；B2 persistence baseline plan 已完成，B2 freeze review 已 `PASS`，B2 implementation work order 已完成。B2 implementation 本轮新增 V9 migration、tenant-bound repository ports、JDBC adapters、migration / repository / redaction / tenant isolation tests，并保持 no API / Controller、no real HTTP、no real provider、no Provider SDK、no Agent / LangGraph runtime、no LIVE。B2 blocker fix 已通过 Docker/Testcontainers 真实 PostgreSQL 验证：`V9QdrReplayEvaluationFlywayPostgresTest` 在 PostgreSQL 17 Testcontainer 中执行，Flyway validated 9 migrations，并成功迁移到 version v9，结果为 1 test / 0 failures / 0 errors / 0 skipped。`DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW` 已完成并判定 `PASS`：V9 migration、tenant-bound repository ports/JDBC adapters、redaction guard、trading-term guard、scoped tests、quality validate 与 safety scan 均满足 close 条件。B2 当前状态为 `CLOSED / ACCEPTED`。`DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN` 已完成为 `DONE / PLAN_ONLY`，B3 implementation work order 已完成为 `DONE / WORK_ORDER_ONLY`。B3 implementation 本轮实现 deterministic mock gateway regression flow：existing dry-run / QDR decision artifact -> mock model gateway summary -> replay case -> evaluation case -> expected/actual summary -> regression comparison -> regression verdict -> finding list；复用 B2/V9 repository ports，不新增 schema/API/Controller，不接真实 provider/HTTP/Agent/LangGraph，不进入 LIVE。`DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW` 已完成并判定 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。`DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN` 已完成为 `DONE / PLAN_ONLY`；`DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO` 已完成为 `DONE / WORK_ORDER_ONLY`。B4 implementation 本轮已完成 tenant-bound internal regression report / read model support：新增 `RegressionReportQuery`、`RegressionReportView`、`RegressionReportFindingView`、`RegressionDriftSummary` 与 `RegressionReadModelService`，复用 B2/V9 repository ports，不新增 migration、不修改 V9、不新增 API / Controller、不接 provider / HTTP / Agent / LangGraph / LIVE，不把 report/verdict/drift 写成 trading signal。下一步只允许进入 `DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW`；Stage-QDR-4 final close 仍为 `NOT_STARTED`，stage tag 为 `NOT_CREATED`。
 
 ## 4. 禁止项
 
@@ -149,9 +153,9 @@ ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B4_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_WO: YES / CONSUMED
-ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES
-ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO / DOCS_ONLY_WO_TURN
-ALLOW_STAGE_QDR_4_B5_FINAL_CLOSE_NOW: NO
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
+ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES
+ALLOW_STAGE_QDR_4_TAG_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_PROVIDER_SDK: NO

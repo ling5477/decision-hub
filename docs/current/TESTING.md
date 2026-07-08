@@ -3,6 +3,95 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION validation
+
+```text
+Task type: DIRTY_WORKTREE_TRIAGE + B4_IMPLEMENTATION_RESUME + REGRESSION_REPORT_READ_MODEL + QDR_REPLAY_EVALUATION_REPORTING + INTERNAL_READ_MODEL + TESTS + NO_DB_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:/Project/decision-hub
+branch: dev
+STAGE_QDR_4_B1: DONE
+STAGE_QDR_4_B2: CLOSED / ACCEPTED
+STAGE_QDR_4_B3: CLOSED / ACCEPTED
+STAGE_QDR_4_B4_PLAN: DONE
+STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
+STAGE_QDR_4_B4_DIRTY_SCOPE: ACCEPTED
+STAGE_QDR_4_B4_IMPLEMENTATION: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
+Stage-QDR-4 final close: NOT_STARTED
+Stage-QDR-4 tag: NOT_CREATED
+ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES
+ALLOW_STAGE_QDR_4_TAG_NOW: NO
+real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
+```
+
+### Implementation validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short` / `git ls-files --others --exclude-standard`（dirty triage） | DIRTY_SCOPE_ACCEPTED_FOR_B4_RESUME | dirty 限于 `docs/current/**`、`dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/**`、`dh-usecase/src/test/java/**`；无 staged 文件。 |
+| `git branch --show-current`（dirty triage） | PASS | `dev`。 |
+| `git log --oneline -20`（dirty triage） | PASS | 最近 20 条包含 `b5718e7 docs(qdr): define regression report read model work order`。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（dirty triage） | PASS / ALLOWED_DIRTY_ONLY | 无 whitespace error；tracked diff 限于允许的 `docs/current` 文件；staged diff 为空；untracked B4 Java/test 文件由 `git status --short` 记录。 |
+| `mvn -ntp -pl dh-usecase -am -Dtest=RegressionReadModelServiceTest test`（目标测试初次） | TOOLING_PATTERN_RETRY | reactor 上游模块无匹配测试导致 surefire fail；使用 `-Dsurefire.failIfNoSpecifiedTests=false` 重新运行。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=RegressionReadModelServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`（草稿核验） | BUILD SUCCESS | `RegressionReadModelServiceTest` 14 tests，0 failures，0 errors，0 skipped。 |
+| B4 pagination fix | DONE | `caseId` 查询路径把 `offset` 传给 `EvaluationCaseRepository.listByCaseId`，并新增同 case 多 evaluation 分页断言。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=RegressionReadModelServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`（最终） | BUILD SUCCESS | `RegressionReadModelServiceTest` 15 tests，0 failures，0 errors，0 skipped。 |
+| `mvn -ntp -pl dh-domain,dh-usecase,dh-infra,dh-app -am test` | BUILD SUCCESS | Reactor 15/15 SUCCESS；包含 `RegressionReadModelServiceTest`、ArchUnit、API WebMvc、Testcontainers PostgreSQL 17 和 Flyway V9 load。 |
+| `V9QdrReplayEvaluationFlywayPostgresTest` | PASS / POSTGRES_FLYWAY_VERIFIED | PostgreSQL 17 Testcontainer 中 Flyway validated 9 migrations，并成功迁移到 version v9。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `.mvn\\wrapper\\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+| required safety scan | REVIEWED / ALLOWED_HITS_ONLY | 全量命中限定在禁止项、测试守卫、redaction/trading guard、migration CHECK/COMMENT、文档风险说明和既有 no-runtime 注释；本轮新增文件聚焦扫描只命中 Javadoc 禁止项说明与测试 guard 断言；未发现真实 HTTP/provider/Agent/LangGraph/LIVE 实现。 |
+| forbidden-scope dirty check | PASS / EMPTY | `dh-app/src/main/resources/db/migration`、`dh-api`、`dh-infra/src/main/java`、`dh-app/src/main/java`、`contracts`、`golden_cases` 无 diff / untracked。 |
+
+### B4 implementation coverage result
+
+```text
+RegressionReportQuery: DONE / tenantId required / no UUID-only selector / limit 1..100
+RegressionReportView: DONE / safe refs + redacted summary + hash/version/verdict/finding/drift only
+RegressionReportFindingView: DONE / safe finding code/message/evidence ref only
+RegressionDriftSummary: DONE / decision/action/confidence/risk/evidence/forbidden/hash/model/prompt/policy drift
+RegressionReadModelService: DONE / internal usecase read model / B2 repository port composition
+tenant-bound query by caseId: PASS
+tenant-bound query by evaluationId: PASS
+tenant-bound query by verdictId: PASS
+tenantless query: FAIL-CLOSED
+UUID-only repository path: ABSENT / NOT CALLED
+cross-tenant read: EMPTY / FAIL-CLOSED
+list pagination: PASS
+pageSize > 100: REJECTED
+raw prompt exposure: NOT EXPOSED
+raw provider response exposure: NOT EXPOSED
+credential-like field exposure: NOT EXPOSED
+providerSummaryHash drift: PASS
+modelGatewayVersionRef drift: PASS
+promptVersionRef drift: PASS
+policyVersion drift: PASS
+trading executable action exposure: REJECTED / NOT EXPOSED
+provider/HTTP/Agent/LangGraph class introduction: NOT INTRODUCED
+report generation failure: FAIL-CLOSED
+quality validate: PASS
+```
+
+Boundary:
+
+```text
+未修改 NQ
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未访问 credential / token / cookie / apiKey / apiSecret / passphrase
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 Stage-QDR-4 final close
+未打 tag
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO validation
 
 ```text

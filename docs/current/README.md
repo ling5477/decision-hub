@@ -15,14 +15,19 @@ stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
 stage-qdr-4 planning: DONE / PLAN_ACCEPTED
-stage-qdr-4 implementation: NOT_STARTED / NO
+stage-qdr-4 B1: DONE / DOMAIN_CONTRACTS_ONLY
+stage-qdr-4 B2: CLOSED / ACCEPTED
+stage-qdr-4 B3: CLOSED / ACCEPTED
+stage-qdr-4 B4: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
+stage-qdr-4 final close: NOT_STARTED
+stage-qdr-4 tag: NOT_CREATED
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: F:/project/decision-hub
-next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
+current workspace: E:/Project/decision-hub
+next action: DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW
 ```
 
 ## Stage-qdr-4 Planning 当前事实源
@@ -37,6 +42,8 @@ docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
 docs/current/DH_STAGE_QDR_4_PLAN.md
+docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
+docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md
 ```
 
 若以上文件与当前状态冲突，必须先修正 factsources，不得进入 stage-qdr-4 implementation。
@@ -60,6 +67,8 @@ WORK_ORDER.md              下一步唯一入口
 CODEX_PROJECT_INSTRUCTIONS.md 当前执行纪律
 TESTING.md                 当前验证证据与工具风险
 DH_STAGE_QDR_4_PLAN.md     stage-qdr-4 planning 结论
+DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md B4 read model plan
+DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md B4 implementation WO
 FACTSOURCE_POLICY.md       事实源与 blocker 规则
 ARCHIVE_INDEX.md           已归档文档索引
 WORKLOG.md                 本轮文档治理记录，supporting only
