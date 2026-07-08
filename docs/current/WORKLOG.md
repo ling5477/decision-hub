@@ -4,6 +4,108 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-4-PLAN
+
+完成 stage-qdr-4 planning。推荐唯一主线为 `QDR Replay / Evaluation / Regression Baseline`，并把后续动作限定为 implementation work order，不直接启动 implementation。
+
+### Scope
+
+```text
+PLANNING_ONLY
+STAGE_QDR_4_SCOPE_DESIGN
+POST_MODEL_GATEWAY_HARDENING_PLAN
+REPLAY_EVAL_PROVIDER_READINESS_REVIEW
+SECURITY_BOUNDARY_DESIGN
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Current State
+
+```text
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: DONE / PLAN_ACCEPTED
+stage-qdr-4 implementation: NOT_STARTED / NO
+recommended direction: QDR Replay / Evaluation / Regression Baseline
+next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### Plan Result
+
+```text
+recommended direction: A / QDR replay, evaluation and regression baseline
+deferred B: Model gateway observability / provider readiness hardening
+deferred C: real provider dry-run readiness plan
+deferred D: Agent / LangGraph preparation
+batches: B1 replay/eval contracts; B2 persistence baseline; B3 mock gateway regression integration; B4 report/read model/docs support; B5 close review
+next task: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
+```
+
+### Boundary
+
+```text
+本轮不修改 Java 生产代码
+本轮不修改 Java 测试代码
+本轮不新增 migration
+本轮不修改 V1-V8 migration
+本轮不新增 V9 migration
+本轮不新增 API / Controller / REST endpoint
+本轮不新增真实 HTTP outbound
+本轮不新增真实 provider client
+本轮不新增 Provider SDK
+本轮不启动 Agent / LangGraph runtime
+本轮不修改 NQ
+本轮不启用 LIVE
+stage-qdr-4 implementation 未启动
+```
+
+### Files Changed
+
+```text
+README.md
+docs/current/DH_STAGE_QDR_4_PLAN.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/ROADMAP.md
+docs/current/FACTSOURCE_POLICY.md
+docs/current/ARCHIVE_INDEX.md
+```
+
+### Validation
+
+```text
+git status --short: DOCS_ONLY_DIRTY / NO_STAGED
+git diff --check: PASS_WITH_EOL_WARNINGS
+git diff --stat: DOCS_ONLY_TRACKED_DIFF
+git diff --name-only: DOCS_ONLY_TRACKED_DIFF
+git diff --cached --name-only: PASS / EMPTY
+safety wording scan: REVIEWED / FALSE_POSITIVE_ONLY
+mvn -ntp -Pquality validate: BUILD SUCCESS
+.\\mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
+```
+
 ## 2026-07-08 DH-STAGE-QDR-3-FINAL-CLOSE-DOCS-SYNC
 
 将用户提供的 `DH-STAGE-QDR-3-B5-CLOSE-REVIEW` ACCEPTED 结论写回 current factsources，并把 stage-qdr-3 final close 收口为 `CLOSED / ACCEPTED`。

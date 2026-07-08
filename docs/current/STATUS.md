@@ -12,15 +12,15 @@ stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
-stage-qdr-4 planning: READY
+stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 implementation: NOT_STARTED / NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: F:/Project/decision-hub
-next action: DH-STAGE-QDR-4-PLAN
+current workspace: F:/project/decision-hub
+next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## 2. 当前事实源集合
@@ -34,6 +34,7 @@ docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
+docs/current/DH_STAGE_QDR_4_PLAN.md
 ```
 
 `SUPPORTING_DOCS_NOT_BLOCKERS_BY_DEFAULT`：
@@ -66,18 +67,20 @@ docs/archive: NOT_CURRENT_ARCHIVE_STANDARD
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
-stage-qdr-4 planning: READY
+stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 implementation: NOT_STARTED / NO
 B5 close review retry: CLOSED / ACCEPTED
+stage-qdr-4 recommended direction: QDR Replay / Evaluation / Regression Baseline
 ```
 
-B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。下一步只允许进入 `DH-STAGE-QDR-4-PLAN`；stage-qdr-4 implementation、real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 与 LIVE 仍未启动。
+B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，下一步只允许进入 `DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER`；stage-qdr-4 implementation、real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 与 LIVE 仍未启动。
 
 ## 4. 禁止项
 
 ```text
 ALLOW_STAGE_QDR_3_FINAL_CLOSE: YES / CONSUMED
-ALLOW_STAGE_QDR_4_PLAN: YES
+ALLOW_STAGE_QDR_4_PLAN: YES / CONSUMED
+ALLOW_STAGE_QDR_4_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_4_IMPLEMENTATION: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO

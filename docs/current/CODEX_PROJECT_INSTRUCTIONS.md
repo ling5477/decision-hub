@@ -4,7 +4,7 @@
 > 必需前置 skill: `nq-dh-workflow-router`
 > 必需文档 skill: `dh-docs-writer`
 > 当前事实源: `docs/current`
-> 当前工作区: `F:/Project/decision-hub`
+> 当前工作区: `F:/project/decision-hub`
 
 ## 1. 当前状态锁定
 
@@ -18,14 +18,14 @@ stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
-stage-qdr-4 planning: READY
+stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 implementation: NOT_STARTED / NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-PLAN
+next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## 2. 前置分类规则
@@ -59,6 +59,7 @@ docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
+docs/current/DH_STAGE_QDR_4_PLAN.md
 ```
 
 以下文件默认 supporting only，不作为 primary stage gate source：
@@ -77,7 +78,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 implementation 仍必须等待后续明确授权。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 implementation 仍必须等待后续明确授权；下一步只能写 implementation work order，不得直接 implementation。
 
 ## 4. 安全边界
 
@@ -99,7 +100,7 @@ DH 不启用 LIVE
 
 ## 5. 文档语言与路径规则
 
-正文使用简体中文。类名、字段名、状态枚举、HTTP header、命令、路径和外部技术名保留英文原样。当前路径统一为 `F:/Project/decision-hub`。若历史文档出现旧路径，只能作为 historical record，不得覆盖当前工作区。
+正文使用简体中文。类名、字段名、状态枚举、HTTP header、命令、路径和外部技术名保留英文原样。当前路径统一为 `F:/project/decision-hub`。若历史文档出现旧路径，只能作为 historical record，不得覆盖当前工作区。
 
 ## 6. 验证纪律
 

@@ -14,15 +14,15 @@ stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
-stage-qdr-4 planning: READY
+stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 implementation: NOT_STARTED / NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: F:/Project/decision-hub
-next action: DH-STAGE-QDR-4-PLAN
+current workspace: F:/project/decision-hub
+next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## 当前事实源
@@ -48,6 +48,7 @@ docs/current/STATUS.md                  唯一当前状态表
 docs/current/WORK_ORDER.md              唯一下一步入口
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md 当前 Codex / Claude 执行纪律
 docs/current/TESTING.md                 当前验证证据与工具风险
+docs/current/DH_STAGE_QDR_4_PLAN.md     stage-qdr-4 planning 结论
 docs/current/FACTSOURCE_POLICY.md       当前事实源与 blocker 规则
 docs/current/ARCHIVE_INDEX.md           QDR 历史归档索引
 ```

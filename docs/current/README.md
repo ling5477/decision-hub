@@ -14,20 +14,20 @@ stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
-stage-qdr-4 planning: READY
+stage-qdr-4 planning: DONE / PLAN_ACCEPTED
 stage-qdr-4 implementation: NOT_STARTED / NO
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: F:/Project/decision-hub
-next action: DH-STAGE-QDR-4-PLAN
+current workspace: F:/project/decision-hub
+next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## Stage-qdr-4 Planning 当前事实源
 
-这些文件可以作为 `DH-STAGE-QDR-4-PLAN` 的 current factsource：
+这些文件可以作为 `DH-STAGE-QDR-4-PLAN` 与后续 work order 的 current factsource：
 
 ```text
 README.md
@@ -36,6 +36,7 @@ docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
+docs/current/DH_STAGE_QDR_4_PLAN.md
 ```
 
 若以上文件与当前状态冲突，必须先修正 factsources，不得进入 stage-qdr-4 implementation。
@@ -58,6 +59,7 @@ STATUS.md                  当前状态表
 WORK_ORDER.md              下一步唯一入口
 CODEX_PROJECT_INSTRUCTIONS.md 当前执行纪律
 TESTING.md                 当前验证证据与工具风险
+DH_STAGE_QDR_4_PLAN.md     stage-qdr-4 planning 结论
 FACTSOURCE_POLICY.md       事实源与 blocker 规则
 ARCHIVE_INDEX.md           已归档文档索引
 WORKLOG.md                 本轮文档治理记录，supporting only

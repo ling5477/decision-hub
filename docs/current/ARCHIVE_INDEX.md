@@ -61,7 +61,7 @@ B2/B3/B4 已 DONE / FREEZE ACCEPTED / COMMITTED。
 B5 close review 已 YES / ACCEPTED。
 stage-qdr-3 acceptance 已 ACCEPTED。
 stage-qdr-3 final close 已 CLOSED / ACCEPTED。
-stage-qdr-4 planning 已 READY。
+stage-qdr-4 planning 已 DONE / PLAN_ACCEPTED。
 stage-qdr-4 implementation 仍为 NOT_STARTED / NO。
 ```
 
@@ -74,12 +74,13 @@ stage-qdr-4 implementation 仍为 NOT_STARTED / NO。
 ```text
 Current status: docs/current/STATUS.md
 Current next action: docs/current/WORK_ORDER.md
+Stage-qdr-4 plan: docs/current/DH_STAGE_QDR_4_PLAN.md
 Factsource policy: docs/current/FACTSOURCE_POLICY.md
 Validation evidence: docs/current/TESTING.md
 Current docs index: docs/current/README.md
-Next action: DH-STAGE-QDR-4-PLAN
+Next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## 5. Post-close Rule
 
-`DH-STAGE-QDR-3-B5-CLOSE-REVIEW` 已由用户提供 ACCEPTED 结论并写回 current factsources。后续 `DH-STAGE-QDR-4-PLAN` 仍只参考 `FACTSOURCE_POLICY.md` 定义的 current factsources。归档目录 `docs/gates/**` 只作为 historical records。除非归档文档暴露 `FACTSOURCE_POLICY.md` 定义的硬错误，否则不得覆盖 current factsources 或授权 stage-qdr-4 implementation。
+`DH-STAGE-QDR-3-B5-CLOSE-REVIEW` 已由用户提供 ACCEPTED 结论并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，后续 `DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER` 仍只参考 `FACTSOURCE_POLICY.md` 定义的 current factsources。归档目录 `docs/gates/**` 只作为 historical records。除非归档文档暴露 `FACTSOURCE_POLICY.md` 定义的硬错误，否则不得覆盖 current factsources 或授权 stage-qdr-4 implementation。

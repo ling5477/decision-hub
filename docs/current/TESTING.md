@@ -3,6 +3,62 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-4-PLAN validation
+
+```text
+Task type: PLANNING_ONLY + STAGE_QDR_4_SCOPE_DESIGN + POST_MODEL_GATEWAY_HARDENING_PLAN + REPLAY_EVAL_PROVIDER_READINESS_REVIEW + SECURITY_BOUNDARY_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+stage-qdr-3 final close: CLOSED / ACCEPTED
+stage-qdr-4 planning: DONE / PLAN_ACCEPTED
+stage-qdr-4 implementation: NOT_STARTED / NO
+recommended direction: QDR Replay / Evaluation / Regression Baseline
+next action: DH-STAGE-QDR-4-IMPLEMENTATION-WORK-ORDER
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `F:\project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current`（开工前） | PASS | `dev`。 |
+| `git log --oneline -20`（开工前） | PASS | `HEAD` 为 `b3fa637 docs(qdr): record stage-qdr-3 acceptance`。 |
+| `git diff --check`（开工前） | PASS | 无 whitespace error。 |
+| `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 tracked diff，无 staged。 |
+| `git status --short`（验证时） | DOCS_ONLY_DIRTY / NO_STAGED | dirty 限于 root README 与 `docs/current`；新建 `docs/current/DH_STAGE_QDR_4_PLAN.md`；无 staged。 |
+| `git diff --check` | PASS_WITH_EOL_WARNINGS | 无 whitespace error；仅 Git 的 LF -> CRLF warning。 |
+| `git diff --stat` | DOCS_ONLY_TRACKED_DIFF | tracked diff 只包含 `README.md` 与 `docs/current` 允许文档；新建未跟踪 plan 文件由 `git status --short` 记录。 |
+| `git diff --name-only` | DOCS_ONLY_TRACKED_DIFF | 只列出 root README 与 `docs/current` 已跟踪文档。 |
+| `git diff --cached --name-only` | PASS / EMPTY | 无 staged。 |
+| required safety wording scan | REVIEWED / FALSE_POSITIVE_ONLY | 仅命中既有 supporting docs：`API.md` line 56 的 Agent 否定状态，以及 `DB_SCHEMA.md` line 138 的跨句 regex 假阳性；二者不在本轮允许修改清单内，且不是实际启用或启动状态。本轮新增/修改允许文档未新增肯定风险表述。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check executed and build passed；未使用 `-DskipTests` 或 `-DskipITs`。 |
+| Maven settings warning | P2 TOOLING RISK / NON_BLOCKING | 系统 Maven 仍输出 `Unrecognised tag: 'profiles'`，来源 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml`；不影响本次 `BUILD SUCCESS`。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | 命令 exit code 0，但输出仍包含 `'\\` is not recognized` 与 `.mvn\\wrapper\\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+| Docker/Testcontainers | INHERITED_TOOLING_ENV_RISK / NOT RUN | 本轮 docs-only planning 未运行 Docker/Testcontainers；既有 Docker/Testcontainers 环境型 skip 风险继承，skip 仍不得写成 PASS。 |
+
+Boundary:
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V8 migration
+未新增 V9 migration
+未新增 API
+未新增 Controller
+未新增 Repository / Service
+未新增真实 HTTP outbound
+未新增真实 provider
+未接 Provider SDK
+未修改 NQ
+未接 LangGraph / AutoGen / CrewAI
+未开启 LIVE
+stage-qdr-4 implementation 未启动
+```
+
 ## 2026-07-08 DH-STAGE-QDR-3-FINAL-CLOSE-DOCS-SYNC validation
 
 ```text
@@ -81,7 +137,7 @@ LIVE: DISABLED
 | archive migration | DONE | `docs/archive/stage-qdr-2/*` 已迁移到 `docs/gates/stage-qdr-2/`；`docs/archive/stage-qdr-3/*` 已迁移到 `docs/gates/stage-qdr-3/`；空 `docs/archive` 已清理。 |
 | historical residual archive | DONE | `docs/current` 其他历史阶段文档已迁移到 `docs/gates/stage-qdr-3/current-docs-historical-20260708/`。 |
 | current residual scan | PASS_WITH_HISTORICAL_MENTIONS | current factsources / supporting docs 仅保留当前状态、archive index 和 historical pointers；`docs/gates` 命中旧状态均为 historical records。 |
-| stale facts scan | PASS_WITH_CANONICAL_FALSE_POSITIVES | README 与 `docs/current` 未命中旧 pending-close、旧 QDR3 not-started、旧 model-gateway not-started、旧 QDR2 B5 close-review、旧 B4 review-freeze-required、LIVE enabled、real provider YES 或 real HTTP YES；canonical `stage-qdr-4: NOT_STARTED` 命中符合预期。 |
+| stale facts scan | PASS_WITH_CANONICAL_FALSE_POSITIVES | README 与 `docs/current` 未命中旧 pending-close、旧 QDR3 not-started、旧 model-gateway not-started、旧 QDR2 B5 close-review、旧 B4 review-freeze-required 或任何真实 HTTP / provider / LIVE 肯定状态；canonical `stage-qdr-4: NOT_STARTED` 命中符合预期。 |
 | forbidden scope diff | PASS / EMPTY | `dh-domain`、`dh-usecase`、`dh-memory`、`dh-eval`、`dh-connector`、`dh-api`、`dh-app`、`dh-infra`、`contracts`、`golden_cases`、`**/db/migration/**`、`**/*.java` diff 均为空。 |
 | `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed；未使用 `-DskipTests` 或 `-DskipITs`。 |
 | `.\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | 命令 exit code 0，但输出仍包含 `'\` is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
