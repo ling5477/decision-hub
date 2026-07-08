@@ -3,6 +3,92 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-08 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO validation
+
+```text
+Task type: WORK_ORDER_ONLY + B4_IMPLEMENTATION_BOUNDARY_DESIGN + REGRESSION_REPORT_READ_MODEL_WO + QDR_REPLAY_EVALUATION_REPORTING + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:/Project/decision-hub
+branch: dev
+STAGE_QDR_4_B1: DONE
+STAGE_QDR_4_B2: CLOSED / ACCEPTED
+STAGE_QDR_4_B3: CLOSED / ACCEPTED
+STAGE_QDR_4_B4_PLAN: DONE
+STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
+STAGE_QDR_4_B4_IMPLEMENTATION: NOT_STARTED
+Stage-QDR-4 final close: NOT_STARTED
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES
+ALLOW_STAGE_QDR_4_FINAL_CLOSE_NOW: NO
+ALLOW_STAGE_QDR_4_TAG_NOW: NO
+real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
+```
+
+### Docs-only validation
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current`（开工前） | PASS | `dev`。 |
+| `git log --oneline -20`（开工前） | PASS | 最近 20 条包含 B1/B2/B3/B4 plan required commits；HEAD 为 `3c1db84 docs(qdr): plan regression report read model support`。 |
+| `git diff --check`（开工前） | PASS | 无 whitespace error。 |
+| `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 tracked diff 或 staged diff。 |
+| B4 implementation WO document | DONE / DOCS_ONLY | 新增 `docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md`；只记录 work order，不写实现。 |
+| `git status --short`（写入后） | DOCS_ONLY_DIRTY / NO_STAGED | dirty 限于允许的 `docs/current` 文件；新建 B4 WO 文件未 staged。 |
+| `git diff --check`（写入后） | PASS_WITH_EOL_WARNINGS | exit code 0；仅 Git LF -> CRLF warning，不是 whitespace error。 |
+| `git diff --stat` / `git diff --name-only`（写入后） | DOCS_ONLY_TRACKED_DIFF | tracked diff 限于允许的 `docs/current` 文件；新 WO 文件由 `git status --short` 记录。 |
+| `git diff --cached --name-only`（写入后） | PASS / EMPTY | 无 staged 文件。 |
+| forbidden-scope diff | PASS / EMPTY | `git diff --name-only -- dh-domain/src/main dh-usecase/src/main dh-app/src/main dh-infra/src/main contracts golden_cases "dh-*/src/main/resources/db/migration"` 无输出。 |
+| safety scan | REVIEWED / ALLOWED_HITS_ONLY | 命中为 `B4 implementation: NOT_STARTED` 子串假阳性、BUY / SELL / MARKET_ORDER / PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE 禁止项、既有 docs guard、既有 FACTSOURCE_POLICY hard-error phrase residual；未发现 real HTTP/provider/Agent/LangGraph/LIVE started/enabled，未发现 hard-error 清单之外的 sensitive-data permissive statement。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `.mvn\\wrapper\\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+
+### B4 implementation test matrix
+
+| 序号 | 测试项 | 计划验收 |
+| --- | --- | --- |
+| 1 | report query by tenantId + caseId succeeds | 返回同租户 replay/evaluation/verdict/report summary。 |
+| 2 | report query by tenantId + evaluationId succeeds | 返回同租户 evaluation report。 |
+| 3 | report query by tenantId + verdictId succeeds | 返回同租户 verdict report 与 finding list。 |
+| 4 | tenantless query fails closed | 缺失 tenantId 拒绝，不查库。 |
+| 5 | UUID-only query is absent or rejected | 不提供 UUID-only method；若传入仅 UUID 则拒绝。 |
+| 6 | cross-tenant report read returns empty or fail-closed | tenant B 不能读取 tenant A report。 |
+| 7 | list query is paginated | list by createdAt/verdict/severity/trace/request/decision 都显式分页。 |
+| 8 | pageSize > 100 is rejected or capped | implementation 明确 rejected 或 capped 并测试。 |
+| 9 | report does not expose raw prompt | view / JSON / summary 不包含 raw prompt。 |
+| 10 | report does not expose raw provider response | view / JSON / summary 不包含 raw provider response。 |
+| 11 | report does not expose credential-like fields | credential-like keys 被拒绝或不出现在 view。 |
+| 12 | drift summary includes providerSummaryHash mismatch | providerSummaryHash drift 有结构化分类。 |
+| 13 | drift summary includes modelGatewayVersionRef mismatch | modelGatewayVersionRef drift 有结构化分类。 |
+| 14 | drift summary includes promptVersionRef mismatch | promptVersionRef drift 有结构化分类。 |
+| 15 | drift summary includes policyVersion mismatch | policyVersion drift 有结构化分类。 |
+| 16 | BUY / SELL / MARKET_ORDER are not exposed as executable action | 它们只可作为 forbidden/prohibited evidence。 |
+| 17 | PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE are not exposed as allowed action | 它们不得进入 allowed action。 |
+| 18 | provider/HTTP/Agent/LangGraph classes are not introduced | safety scan 和 architecture test 证明未新增 runtime。 |
+| 19 | report generation failure fails closed | repository/query/drift aggregation failure 不返回 partial unsafe report。 |
+| 20 | quality validate passes | `mvn -ntp -Pquality validate` BUILD SUCCESS。 |
+
+Boundary:
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 Repository / JDBC / Service 实现
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 B4 implementation
+未进入 B5 final close
+未打 tag
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN validation
 
 ```text
@@ -36,7 +122,7 @@ real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
 | `git diff --stat` / `git diff --name-only`（写入后） | DOCS_ONLY_TRACKED_DIFF | tracked diff 限于 `CODEX_PROJECT_INSTRUCTIONS.md`、`ROADMAP.md`、`STATUS.md`、`TESTING.md`、`WORKLOG.md`、`WORK_ORDER.md`；新 plan 文件由 `git status --short` 记录。 |
 | `git diff --cached --name-only`（写入后） | PASS / EMPTY | 无 staged 文件。 |
 | forbidden-scope diff | PASS / EMPTY | `git diff --name-only -- dh-domain/src/main dh-usecase/src/main dh-app/src/main dh-infra/src/main contracts golden_cases "dh-*/src/main/resources/db/migration"` 无输出。 |
-| safety scan | REVIEWED / ALLOWED_HITS_ONLY | 命中为 `B4 implementation: NOT_STARTED` 子串假阳性、BUY / SELL / MARKET_ORDER / PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE 禁止项、既有 docs guard、既有 FACTSOURCE_POLICY hard-error phrase residual；未发现 real HTTP/provider/Agent/LangGraph/LIVE started/enabled，未发现 sensitive-data permissive statement。 |
+| safety scan | REVIEWED / ALLOWED_HITS_ONLY | 命中为 `B4 implementation: NOT_STARTED` 子串假阳性、BUY / SELL / MARKET_ORDER / PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE 禁止项、既有 docs guard、既有 FACTSOURCE_POLICY hard-error phrase residual；未发现 real HTTP/provider/Agent/LangGraph/LIVE started/enabled，未发现 hard-error 清单之外的 sensitive-data permissive statement。 |
 | `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
 | `.\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
 

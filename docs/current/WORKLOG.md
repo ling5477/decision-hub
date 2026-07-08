@@ -4,6 +4,123 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-08 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO
+
+完成 stage-qdr-4 B4 regression report / read model support implementation work order。B4 WO 只冻结后续 implementation 的 usecase/internal read model 边界、tenant-bound query、report content、drift summary、B2/V9 persistence reuse、redaction / trading-term guard、fail-closed、测试矩阵、validation、安全扫描、review / close 和 tag 后置规则。本轮未修改 Java、测试、migration、API、README、NQ 或 runtime。
+
+### Scope
+
+```text
+WORK_ORDER_ONLY
+B4_IMPLEMENTATION_BOUNDARY_DESIGN
+REGRESSION_REPORT_READ_MODEL_WO
+QDR_REPLAY_EVALUATION_REPORTING
+TEST_MATRIX_DESIGN
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Inspected
+
+```text
+README.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/ROADMAP.md
+docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_PLAN.md
+docs/current/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
+docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_WO.md
+dh-app/src/main/resources/db/migration/V9__qdr_replay_evaluation_baseline.sql
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/**
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/**
+```
+
+### Files Changed
+
+```text
+docs/current/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IMPLEMENTATION_WO.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Work Order Result
+
+```text
+report/read model target: replay case summary, evaluation case summary, expected vs actual summary, regression verdict summary, finding list, drift summary, version refs, redaction/trading-term guard evidence, tenant-bound query support
+allowed structures: RegressionReportQuery, RegressionReportView, RegressionReportFindingView, RegressionDriftSummary, RegressionReadModelService
+query boundary: tenantId + caseId/evaluationId/verdictId/createdAt/verdict/severity/traceId/sourceRequestId/sourceDecisionId; no UUID-only, tenantless, cross-tenant, unbounded list, pageSize > 100 without reject/cap
+report content boundary: safe refs/hash/version/redacted summary only; no raw prompt/provider response/credential/trading or mutation payload
+drift summary boundary: decisionType/actionLabel/confidenceBand/riskLevel/evidenceRefs/forbiddenActions/providerSummaryHash/modelGatewayVersionRef/promptVersionRef/policyVersion
+persistence reuse: B2 V9 seven tables and existing B2 repository only; no V10; no V9 modification; no new table; schema gap must output B4_SCHEMA_GAP_BLOCKER
+API/controller decision: default no API / no Controller; if required, output B4_API_REQUIRED_BLOCKER
+test matrix: 20 items recorded in TESTING.md and WO
+validation commands: git diff/status, scoped Maven test, quality validate, mvnw risk check
+safety scan: raw/sensitive/trading/runtime scan required for implementation
+review/close rule: usecase/internal read model can proceed to validation + commit; API/migration/security expansion requires review
+tag rule: stage tag only after Stage-QDR-4 final close PASS; B4 does not tag
+next task: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION
+```
+
+### Boundary
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 Repository / JDBC / Service 实现
+未新增 API / Controller / REST endpoint
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未修改 NQ
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 B4 implementation
+未进入 B5 final close
+未打 tag
+```
+
+### Validation
+
+```text
+git status --short: DOCS_ONLY_DIRTY / NO_STAGED
+git diff --check: PASS_WITH_EOL_WARNINGS
+git diff --stat: DOCS_ONLY_TRACKED_DIFF
+git diff --name-only: DOCS_ONLY_TRACKED_DIFF
+git diff --cached --name-only: PASS / EMPTY
+forbidden-scope diff: PASS / EMPTY
+safety wording scan: REVIEWED / ALLOWED_HITS_ONLY
+mvn -ntp -Pquality validate: BUILD SUCCESS
+.\\mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION
+```
+
 ## 2026-07-08 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN
 
 完成 stage-qdr-4 B4 regression report / read model support planning。B4 plan 只规划 tenant-bound 只读报告与 read model 支撑，用于 B1-B3 replay/evaluation/regression 结果的 report summary、finding list、drift summary、redaction / trading-term guard evidence 和 safe refs 复核。本轮未修改 Java、测试、migration、API、README、NQ 或 runtime。

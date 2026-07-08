@@ -3,9 +3,9 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN / DONE
-next action: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO
-mode: PLANNING_ONLY + REGRESSION_REPORT_READ_MODEL_PLAN + QDR_REPLAY_EVALUATION_REPORTING + READ_MODEL_BOUNDARY_REVIEW + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current task: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO / DONE
+next action: DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION
+mode: WORK_ORDER_ONLY + B4_IMPLEMENTATION_BOUNDARY_DESIGN + REGRESSION_REPORT_READ_MODEL_WO + QDR_REPLAY_EVALUATION_REPORTING + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
@@ -29,12 +29,15 @@ STAGE_QDR_4_B3: CLOSED / ACCEPTED
 ALLOW_STAGE_QDR_4_B4_PLAN: YES / CONSUMED
 stage-qdr-4 B4 plan: DONE / REGRESSION_REPORT_READ_MODEL_PLAN_ONLY
 STAGE_QDR_4_B4_PLAN: DONE
-ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_WO: YES
-stage-qdr-4 B4 implementation work order: NOT_STARTED
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_WO: YES / CONSUMED
+stage-qdr-4 B4 implementation work order: DONE / WORK_ORDER_ONLY
+STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES
 stage-qdr-4 B4 implementation: NOT_STARTED
+stage-qdr-4 final close: NOT_STARTED
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
-ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_NOW: NO / DOCS_ONLY_WO_TURN
 ALLOW_STAGE_QDR_4_B5_FINAL_CLOSE_NOW: NO
 current workspace: E:/Project/decision-hub
 ```
@@ -68,8 +71,11 @@ stage-qdr-4 B3 close review: PASS
 stage-qdr-4 B3: CLOSED / ACCEPTED
 ALLOW_STAGE_QDR_4_B4_PLAN: YES / CONSUMED
 stage-qdr-4 B4 plan: DONE / REGRESSION_REPORT_READ_MODEL_PLAN_ONLY
-stage-qdr-4 B4 implementation work order: NOT_STARTED
+stage-qdr-4 B4 implementation work order: DONE / WORK_ORDER_ONLY
+STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
+ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES
 stage-qdr-4 B4 implementation: NOT_STARTED
+stage-qdr-4 final close: NOT_STARTED
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
@@ -113,9 +119,10 @@ B3 implementation 已实现 deterministic mock gateway regression flow：existin
 B3 close review 已完成并判定 PASS；B3 当前状态为 CLOSED / ACCEPTED
 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN 已完成为 DONE / PLAN_ONLY
 B4 plan 已冻结 tenant-bound report/read model structure、query boundary、content boundary、drift summary、V9 persistence reuse、API/controller decision、test matrix、review/freeze/tag rules
-下一步只允许 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO
-不得新增 API / Controller，除非后续 B4 plan/WO 明确授权并完成对应 review
-不得跳过 B4 WO 直接 implementation
+DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO 已完成为 DONE / WORK_ORDER_ONLY
+B4 WO 已冻结后续 implementation 的 internal read model / report service 目标、允许结构、tenant-bound query、report content、drift summary、B2/V9 persistence reuse、redaction/trading-term guard、fail-closed、测试矩阵、validation、安全扫描、review/close 和 tag 后置规则
+下一步只允许 DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION
+不得新增 API / Controller，除非后续 implementation 停止并输出 B4_API_REQUIRED_BLOCKER，再进入单独 API freeze review
 不得直接进入 B5 final close 或 tag
 保持 no real HTTP / provider / SDK / Agent / LangGraph / LIVE
 ```
@@ -138,10 +145,10 @@ B4 plan 已冻结 tenant-bound report/read model structure、query boundary、co
 禁止 B2 与 B3 合并实施
 禁止 B3 plan 后跳过 WO 直接 implementation
 禁止 B3 与 B4 合并实施
-禁止 B4 WO 前进入 B4 implementation
+禁止 B4 implementation 未完成 validation 前进入 B5 final close
 禁止 B4 与 B5 合并
-禁止 B4 plan 后直接新增 API / Controller
-禁止 B4 plan 后直接进入 B5 final close
+禁止 B4 implementation 中直接新增 API / Controller；如确需 API，必须先输出 B4_API_REQUIRED_BLOCKER
+禁止 B4 implementation 后直接进入 B5 final close
 禁止 B4 打 tag
 禁止启用 LIVE
 禁止 git push
