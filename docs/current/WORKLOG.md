@@ -4,6 +4,80 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-IMPLEMENTATION
+
+完成 Stage-QDR-5 B4 Observability Report / Acceptance Support implementation。本轮新增内部只读 report / acceptance support 结构与 `ObservabilityReportService`，复用 B1 observability summary、B2 provider health read model view 与 B3 readiness evaluation result。实现范围保持在 `dh-usecase` QDR gateway package 与对应单测；未新增 API / Controller、migration、production repository/JDBC、真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph、LIVE 或 NQ 修改。
+
+### Scope
+
+```text
+IMPLEMENTATION
+OBSERVABILITY_REPORT
+PROVIDER_READINESS_ACCEPTANCE_SUPPORT
+INTERNAL_REPORT
+TESTS
+NO_DB_MIGRATION
+NO_API
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ModelGatewayObservabilityReport.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderHealthReportSection.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessReportSection.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessAcceptanceSummary.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderFailureClassificationSummary.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderLatencyBudgetReport.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderTrustDecisionReport.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessEvidenceView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/StageQdr5AcceptanceEvidence.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ObservabilityReportService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ObservabilityReportCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessAcceptanceStatus.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ObservabilityReportSafety.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ObservabilityReportServiceTest.java
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Implementation Result
+
+```text
+report input boundary: tenant/source safe refs + B1/B2/B3 safe evidence only
+report output boundary: safe refs / enum summaries / providerSummaryHash / acceptance status / redacted summary only
+acceptance status: PASS / WARN / FAIL / SKIPPED
+PASS meaning: Stage-QDR-5 internal acceptance evidence passed only
+fail-closed: missing tenant/provider -> FAIL; missing readiness result -> SKIPPED; unsafe/raw/credential/trading/NQ mutation input -> FAIL
+security boundary evidence: internal-readonly-report-only
+next action: DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW
+```
+
+### Boundary
+
+```text
+no migration
+no V10
+no API / Controller / REST endpoint
+no production repository / JDBC / persistence adapter
+no real provider / HTTP / Provider SDK
+no Agent / LangGraph
+no LIVE
+no NQ change
+no raw prompt / raw provider response / credential output
+no trading signal
+no final close / archive / tag
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-WO
 
 完成 Stage-QDR-5 B4 Observability Report / Acceptance Support implementation work order。本轮只编制后续 internal report / acceptance support 的实现边界、report input/output boundary、acceptance status boundary、persistence/repository blocker、review trigger、安全门和测试矩阵。未实现 Java、未修改测试、未新增 migration、未新增 API / Controller、未新增 Repository / JDBC / Service、未接真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph 或 LIVE；未修改 NQ，未进入 B4 implementation，未进入 Stage-QDR-5 final close，未创建 tag，未 push。

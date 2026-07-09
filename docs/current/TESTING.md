@@ -3,6 +3,94 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-IMPLEMENTATION validation
+
+```text
+Task type: IMPLEMENTATION + OBSERVABILITY_REPORT + PROVIDER_READINESS_ACCEPTANCE_SUPPORT + INTERNAL_REPORT + TESTS + NO_DB_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:\Project\decision-hub
+branch: dev
+STAGE_QDR_5_B1: DONE
+STAGE_QDR_5_B2: DONE
+STAGE_QDR_5_B3: CLOSED / ACCEPTED
+STAGE_QDR_5_B4_IMPLEMENTATION_WO: DONE
+STAGE_QDR_5_B4_IMPLEMENTATION: DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED
+STAGE_QDR_5_FINAL_CLOSE: NOT_STARTED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### B4 implementation validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `E:\Project\decision-hub`。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -20` | PASS | 包含 `06493a6 docs(qdr): define observability report acceptance work order`、`e4d299d docs(qdr): close provider readiness guard policy evaluation`、`cfad68a feat(qdr): add provider readiness guard policy evaluation`。 |
+| `git status --short`（implementation 收口前） | ALLOWED_DIRTY_ONLY / NO_STAGED | dirty 限于允许的 `docs/current/**` 与 `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/**`、`dh-usecase/src/test/java/**/qdr/**`；无 staged。 |
+| `git diff --check` | PASS_WITH_EOL_WARNINGS | 无 whitespace error；仅 Git 提示已修改 docs 文件后续可能 LF -> CRLF。 |
+| `git diff --stat` / `git diff --name-only` | ALLOWED_TRACKED_DIFF | tracked diff 限于允许的 `docs/current` 文件；untracked B4 Java/test 文件由 `git status --short` 记录。 |
+| `git diff --cached --name-only` | PASS / EMPTY | staged 为空。 |
+| IDEA inspection | PASS | `ObservabilityReportService.java` 无 errors。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ObservabilityReportServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | `ObservabilityReportServiceTest` 19 tests，0 failures，0 errors，0 skipped；Reactor 9/9 SUCCESS。 |
+| `mvn -ntp -pl dh-domain,dh-usecase -am test` | BUILD SUCCESS | Reactor 9/9 SUCCESS；`dh-domain` 151 tests、`dh-connector` 19 tests、`dh-usecase` 424 tests，均 0 failures / 0 errors / 0 skipped。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+| required safety scan | REVIEWED / GUARD_DOC_AND_TEST_HITS_ONLY | 用户指定 `rg` 已执行；命中为 docs/current 禁止项、历史否定边界、B4 Javadoc、redaction/fail-closed guard、测试守卫和既有 QDR guard 文本。未发现本轮新增真实 HTTP/provider/Provider SDK/Agent/LangGraph/LIVE 实现，未发现 acceptance `PASS` 被写成 provider authorization、LIVE permission、trading permission 或 trading signal。 |
+
+### B4 implementation coverage result
+
+| # | Required coverage | Result |
+| --- | --- | --- |
+| 1 | valid observability report can be generated from B1/B2/B3 safe inputs | PASS |
+| 2 | missing tenantId fails closed | PASS |
+| 3 | missing providerRef fails closed | PASS |
+| 4 | missing readiness decision fails closed or returns SKIPPED | PASS |
+| 5 | report includes failure classification summary | PASS |
+| 6 | report includes latency budget summary | PASS |
+| 7 | report includes trust decision summary | PASS |
+| 8 | report includes readiness finding summary | PASS |
+| 9 | report includes acceptance status | PASS |
+| 10 | report does not expose raw prompt | PASS |
+| 11 | report does not expose raw provider response | PASS |
+| 12 | report does not expose credential-like fields | PASS |
+| 13 | PASS does not imply provider authorization | PASS |
+| 14 | PASS does not imply real HTTP / real provider / LIVE | PASS |
+| 15 | report does not imply trading permission | PASS |
+| 16 | BUY / SELL / MARKET_ORDER input fails closed | PASS |
+| 17 | PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE input fails closed | PASS |
+| 18 | no Provider SDK / HTTP client / Agent / LangGraph classes are introduced | PASS |
+| 19 | report generation failure fails closed | PASS |
+| 20 | quality validate passes | PASS；`mvnw.cmd` 仍记录为 P2 tooling risk。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 production Repository / JDBC / persistence adapter
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未读取 credential / token / cookie / apiKey / apiSecret / passphrase
+未保存 raw prompt
+未保存 raw provider response
+未触碰交易、订单、撤单、账户、ledger mutation、risk mutation、paper/live mutation
+未把 observability / readiness / provider health report 写成 trading signal
+未把 readiness 或 acceptance PASS 写成 provider authorization / LIVE permission / trading permission
+未进入 Stage-QDR-5 final close
+未 archive close
+未创建 tag
+未 push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-WO validation
 
 ```text

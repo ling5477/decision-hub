@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-WO
-current task status: DONE / WORK_ORDER_ONLY
-next action: DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-IMPLEMENTATION
-mode: WORK_ORDER_ONLY + B4_IMPLEMENTATION_BOUNDARY_DESIGN + OBSERVABILITY_REPORT_WO + PROVIDER_READINESS_ACCEPTANCE_SUPPORT + CURRENT_DOCS_ACCEPTANCE_SUPPORT + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current task: DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-IMPLEMENTATION
+current task status: DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED
+next action: DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW
+mode: IMPLEMENTATION + OBSERVABILITY_REPORT + PROVIDER_READINESS_ACCEPTANCE_SUPPORT + INTERNAL_REPORT + TESTS + NO_DB_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
 ```
 
-Stage-QDR-5 B1 已完成，B2 Provider Health / Gateway Call Read Model implementation 与 CI blocker fix 已完成，B3 Provider Readiness Guard / Policy Evaluation implementation 已完成。B3 security boundary / close review 已 `PASS`，B3 为 `CLOSED / ACCEPTED`。B4 Observability Report / Acceptance Support work order 已完成为 `DONE / WORK_ORDER_ONLY`。下一步只允许进入 B4 implementation；B4 implementation 仍为 `NOT_STARTED`，不得 all-in-one implementation，不得直接 final close，不得创建 tag，不得 push。
+Stage-QDR-5 B1 已完成，B2 Provider Health / Gateway Call Read Model implementation 与 CI blocker fix 已完成，B3 Provider Readiness Guard / Policy Evaluation implementation 已完成。B3 security boundary / close review 已 `PASS`，B3 为 `CLOSED / ACCEPTED`。B4 Observability Report / Acceptance Support work order 已完成为 `DONE / WORK_ORDER_ONLY`，B4 implementation 已完成为 `DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED`。下一步只允许进入 Stage-QDR-5 final close review；不得直接 archive，不得创建 tag，不得 push。
 
 ## 2. 前置状态
 
@@ -31,9 +31,9 @@ STAGE_QDR_5_B3_IMPLEMENTATION: DONE / PROVIDER_READINESS_GUARD_POLICY_EVALUATION
 STAGE_QDR_5_B3_CLOSE_REVIEW: PASS
 STAGE_QDR_5_B3: CLOSED / ACCEPTED
 STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO: DONE / WORK_ORDER_ONLY
-STAGE_QDR_5_B4_IMPLEMENTATION: NOT_STARTED
+STAGE_QDR_5_B4_IMPLEMENTATION: DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED
 STAGE_QDR_5_FINAL_CLOSE: NOT_STARTED
-STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_CLOSED_ACCEPTED / B4_WO_DONE / B4_IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_CLOSED_ACCEPTED / B4_DONE / FINAL_CLOSE_NOT_STARTED
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES / CONSUMED
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO / ALL_IN_ONE_FORBIDDEN
 ALLOW_STAGE_QDR_5_B1_IMPLEMENTATION: YES / CONSUMED
@@ -45,9 +45,10 @@ ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION_NOW: NO / CONSUMED
 ALLOW_STAGE_QDR_5_B3_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B4_PLAN_OR_WO: YES / CONSUMED
-ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION: YES / AFTER_B4_WO
-ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: YES / AFTER_B4_WO
-ALLOW_STAGE_QDR_5_FINAL_CLOSE_NOW: NO
+ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION: YES / CONSUMED
+ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO / CONSUMED
+ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / AFTER_B4_IMPLEMENTATION
+ALLOW_STAGE_QDR_5_FINAL_CLOSE_NOW: NO / REVIEW_NOT_RUN
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_PROVIDER_SDK: NO
@@ -113,8 +114,8 @@ close review: PASS / CLOSED / ACCEPTED
 
 ```text
 work order status: DONE / WORK_ORDER_ONLY
-implementation status: NOT_STARTED
-implementation allowed now: YES / AFTER_B4_WO
+implementation status: DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED
+implementation allowed now: NO / CONSUMED
 scope: internal report and current docs acceptance support
 default: no API, no migration, no real provider / HTTP, no Agent / LangGraph, no LIVE
 ```
@@ -122,7 +123,7 @@ default: no API, no migration, no real provider / HTTP, no Agent / LangGraph, no
 ### B5
 
 ```text
-allowed now: NO
+allowed now: YES / FINAL_CLOSE_REVIEW_ONLY
 order: final close review PASS -> archive close docs commit -> worktree clean -> annotated tag -> tag push -> next stage planning
 ```
 
@@ -169,8 +170,8 @@ quality validate passes
 B2 implementation 与 B2 CI blocker fix 已完成。
 B3 implementation 与 close review 已完成，范围限于 provider readiness guard / policy evaluation internal boundary。
 B4 work order 已完成，范围限于 internal report / acceptance support boundary design。
-下一步只允许进入 B4 Observability Report / Acceptance Support implementation。
-禁止跳过 B4 implementation 直接进入 Stage-QDR-5 final close。
+下一步只允许进入 Stage-QDR-5 final close review。
+禁止跳过 final close review 直接进入 archive/tag。
 禁止新增 migration。
 禁止修改 V1-V9 migration。
 禁止新增 V10。
@@ -194,5 +195,5 @@ B4 work order 已完成，范围限于 internal report / acceptance support boun
 ## 8. 下一任务
 
 ```text
-DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-IMPLEMENTATION
+DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW
 ```
