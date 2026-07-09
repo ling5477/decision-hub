@@ -4,6 +4,78 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS
+
+完成 Stage-QDR-5 B1 model gateway observability contracts。本轮只新增 usecase 层内存 contract、fail-closed contract service 与 unit test；未新增 migration、API、Controller、Repository/JDBC/persistence、真实 HTTP client、真实 provider、Provider SDK、Agent runtime、LangGraph runtime 或 LIVE 能力，未修改 NQ，未创建 tag，未 push。
+
+### Scope
+
+```text
+IMPLEMENTATION
+DOMAIN_USECASE_CONTRACTS_ONLY
+MODEL_GATEWAY_OBSERVABILITY
+PROVIDER_READINESS_FOUNDATION
+TESTS
+NO_DB_MIGRATION
+NO_API
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ModelGatewayObservabilitySummary.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderHealthSummary.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderFailureClassification.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderLatencyBudgetSummary.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderTrustDecisionSummary.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessSignal.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessStatus.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessFinding.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessSeverity.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ModelGatewayObservabilityContractService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ModelGatewayObservabilityContractException.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ModelGatewayObservabilityContractServiceTest.java
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Implementation
+
+```text
+contracts: observability summary、provider health summary、failure classification、latency budget、trust decision、readiness status/finding/signal
+contract service: ModelGatewayObservabilityContractService validates required refs, safe hash, enum presence, latency/budget bounds, readiness/trust boundaries and fail-closed behavior
+failure classification: maps existing ModelGatewayFailureCode to TIMEOUT / BUDGET_EXCEEDED / POLICY_DENIED / SOURCE_DENIED / PROVIDER_UNAVAILABLE / UNKNOWN / PAYLOAD_REJECTED
+redaction guard: raw prompt / raw provider response / credential-like text rejected through QdrPersistenceSafety plus B1 raw marker guard
+trading guard: BUY / SELL / MARKET_ORDER / PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE rejected as actionable output
+runtime guard: readiness cannot enable real provider, real HTTP, LIVE, provider authorization or trading signal
+```
+
+### Validation
+
+```text
+targeted B1 test: BUILD SUCCESS / 19 tests
+mvn -ntp -pl dh-domain,dh-usecase -am test: BUILD SUCCESS / reactor 9/9
+mvn -ntp -Pquality validate: BUILD SUCCESS / reactor 19/19 / Checkstyle 0 / Spotless passed
+safety scan: REVIEWED / GUARD_AND_DOC_HITS_ONLY
+.\\mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+staged: EMPTY
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-WO
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
 
 完成 Stage-QDR-5 implementation work order。本轮只编制 B1-B5 批次边界、测试矩阵、review 触发规则、安全门和后续提交纪律；未实现 Java、未修改测试、未新增 migration、未新增 API / Controller、未新增 Repository / JDBC / Service、未接真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph 或 LIVE；未修改 NQ，未创建 tag，未 push。

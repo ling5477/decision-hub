@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
-current task status: DONE / WORK_ORDER_ONLY
-next action: DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS
-mode: WORK_ORDER_ONLY + STAGE_QDR_5_IMPLEMENTATION_PLANNING + MODEL_GATEWAY_OBSERVABILITY_WO + PROVIDER_READINESS_HARDENING_WO + SECURITY_BOUNDARY_DESIGN + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current task: DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS
+current task status: DONE / MODEL_GATEWAY_OBSERVABILITY_CONTRACTS_ONLY
+next action: DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-WO
+mode: IMPLEMENTATION + DOMAIN_USECASE_CONTRACTS_ONLY + MODEL_GATEWAY_OBSERVABILITY + PROVIDER_READINESS_FOUNDATION + TESTS + NO_DB_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
 ```
 
-Stage-QDR-5 implementation work order 已完成。本工单只授权下一任务 B1；不得直接进入 B2/B3，不得 all-in-one implementation，不得创建 tag，不得 push。
+Stage-QDR-5 B1 已完成。本工单只授权下一任务 B2 Provider Health / Gateway Call Read Model work order；不得直接进入 B2 implementation、B3 或 all-in-one implementation，不得创建 tag，不得 push。
 
 ## 2. 前置状态
 
@@ -21,10 +21,12 @@ STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
 STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
 STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
 STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
-STAGE_QDR_5_IMPLEMENTATION: NOT_STARTED
+STAGE_QDR_5_B1: DONE / MODEL_GATEWAY_OBSERVABILITY_CONTRACTS_ONLY
+STAGE_QDR_5_IMPLEMENTATION: B1_DONE / CONTRACTS_ONLY
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES / CONSUMED
-ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
-ALLOW_STAGE_QDR_5_B1_IMPLEMENTATION: YES
+ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO / ALL_IN_ONE_FORBIDDEN
+ALLOW_STAGE_QDR_5_B1_IMPLEMENTATION: YES / CONSUMED
+ALLOW_STAGE_QDR_5_B2_PLAN_OR_WO: YES
 ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
@@ -57,7 +59,8 @@ B5: Stage-QDR-5 Final Close Review / Archive Close / Tag Close
 
 ```text
 next task: DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS
-allowed now: YES
+status: DONE / MODEL_GATEWAY_OBSERVABILITY_CONTRACTS_ONLY
+allowed now: YES / CONSUMED
 scope: domain/usecase contracts
 suggested objects: ModelGatewayObservabilitySummary, ProviderHealthSummary, ProviderFailureClassification, ProviderLatencyBudgetSummary, ProviderTrustDecisionSummary, ProviderReadinessSignal
 review: no standalone review unless migration / API / security expansion / P0-P1 blocker appears
@@ -66,7 +69,8 @@ review: no standalone review unless migration / API / security expansion / P0-P1
 ### B2
 
 ```text
-allowed now: NO
+work order allowed now: YES
+implementation allowed now: NO
 scope: internal tenant-bound read model
 source: existing V8 qdr_model_gateway_call / ModelGatewayCallRecord / safe refs
 default: no API, no migration, no raw provider response, no credential, no real provider, no real HTTP
@@ -137,8 +141,8 @@ quality validate passes
 ## 7. 当前禁止范围
 
 ```text
-禁止修改 Java 生产代码，除非后续 B1 work order 明确授权。
-禁止修改 Java 测试代码，除非后续 B1 work order 明确授权。
+禁止进入 B2 implementation，除非后续 B2 work order 或 plan 明确授权。
+禁止进入 B3。
 禁止新增 migration。
 禁止修改 V1-V9 migration。
 禁止新增 V10。
@@ -162,5 +166,5 @@ quality validate passes
 ## 8. 下一任务
 
 ```text
-DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS
+DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-WO
 ```

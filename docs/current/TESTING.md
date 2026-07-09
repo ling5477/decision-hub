@@ -3,6 +3,89 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS validation
+
+```text
+Task type: IMPLEMENTATION + DOMAIN_USECASE_CONTRACTS_ONLY + MODEL_GATEWAY_OBSERVABILITY + PROVIDER_READINESS_FOUNDATION + TESTS + NO_DB_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
+STAGE_QDR_5_B1: DONE / MODEL_GATEWAY_OBSERVABILITY_CONTRACTS_ONLY
+STAGE_QDR_5_B2: NOT_STARTED
+STAGE_QDR_5_B3: NOT_STARTED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### B1 test coverage
+
+```text
+valid model gateway observability summary can be validated
+valid provider health summary can be validated
+missing tenantId fails closed
+missing providerRef fails closed
+missing modelGatewayVersionRef fails closed
+failure classification supports timeout / budget exceeded / policy denied / source denied / unknown
+latency budget summary rejects negative latency / sample count / invalid budget ratio
+trust decision summary supports allowed / denied / degraded / skipped
+readiness signal cannot enable real provider / real HTTP / LIVE
+readiness signal cannot generate trading signal
+raw provider response is rejected
+raw prompt is rejected
+credential-like key is rejected
+providerSummaryHash / modelGatewayVersionRef are safe refs only
+no Provider SDK / HTTP client / Agent / LangGraph runtime classes introduced
+```
+
+### Validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `F:\project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -20` | PASS | 包含 `37d4e97 docs(qdr): define stage-qdr-5 implementation work order`。 |
+| `git tag --list "dh-stage-qdr-4-close"` | PASS | 本地 tag 存在。 |
+| `git rev-list -n 1 dh-stage-qdr-4-close` | PASS | tag peeled target 为 `62c802064f637ad03d3b0f4a185bd55fa3141af2`。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ModelGatewayObservabilityContractServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`（最终） | BUILD SUCCESS | B1 unit test 19 tests，0 failures，0 errors，0 skipped。首次运行因测试调用 `ProviderReadinessSignal.ready` 签名不匹配失败，已最小修正测试后通过。 |
+| `mvn -ntp -pl dh-domain,dh-usecase -am test` | BUILD SUCCESS | Reactor 9/9 SUCCESS；`dh-domain` 151 tests、`dh-connector` 19 tests、`dh-usecase` 369 tests，均 0 failures / 0 errors。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| Maven settings warning | P2 TOOLING RISK / NON_BLOCKING | 系统 Maven 仍输出 `Unrecognised tag: 'profiles'`，来源 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml`；不影响本轮 `BUILD SUCCESS`。 |
+| safety wording scan | REVIEWED / GUARD_AND_DOC_HITS_ONLY | 用户指定 `rg` 已执行；全量命中来自既有禁止项、测试守卫、redaction/fail-closed guard、历史/supporting docs 风险说明。本轮 B1 窄范围复核只命中边界注释、校验器 denylist 和测试守卫；未新增真实 HTTP/provider/Provider SDK/Agent/LangGraph/LIVE 实现。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+| `git status --short`（收尾前） | B1_DIRTY / NO_STAGED | dirty 包含 B1 usecase contracts、B1 unit test 与 current docs；无 staged。 |
+| `git diff --check` | PASS_WITH_EOL_WARNINGS | exit code 0；仅 Git LF -> CRLF warning，不是 whitespace error。 |
+| `git diff --stat` / `git diff --name-only` | TRACKED_DOCS_DIFF | tracked diff 为 current docs；新增 B1 Java/test 文件由 `git status --short` 记录。 |
+| `git diff --cached --name-only` | PASS / EMPTY | staged 为空。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-app/src/main`、`dh-infra/src/main`、`dh-api/src/main`、`contracts`、`golden_cases`、`dh-app/src/main/resources/db/migration` 均无 diff。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 Repository / JDBC / Service persistence
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 provider health / provider readiness / gateway observability trading signal
+未进入 B2/B3 implementation
+未创建 tag
+未 push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER validation
 
 ```text
