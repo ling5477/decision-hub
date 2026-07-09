@@ -3,6 +3,92 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO validation
+
+```text
+Task type: WORK_ORDER_ONLY + B3_SECURITY_BOUNDARY_DESIGN + PROVIDER_READINESS_GUARD_WO + POLICY_EVALUATION_WO + TRUST_DECISION_REVIEW_PREP + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+STAGE_QDR_5_B1: DONE
+STAGE_QDR_5_B2: DONE
+STAGE_QDR_5_B2_CI_BLOCKER_FIX: DONE
+STAGE_QDR_5_B3_IMPLEMENTATION_WO: DONE / WORK_ORDER_ONLY
+STAGE_QDR_5_B3_IMPLEMENTATION: NOT_STARTED
+STAGE_QDR_5_B4: NOT_STARTED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### B3 implementation test matrix
+
+| # | Test item | Expected result |
+| --- | --- | --- |
+| 1 | valid readiness policy evaluates READY in mock/safe context | 仅在 tenant/source/provider/policy/safe evidence 全部满足时返回 `READY`。 |
+| 2 | missing tenantId returns NOT_READY or fail-closed | 缺 tenantId 不进入允许路径。 |
+| 3 | missing providerRef returns NOT_READY or fail-closed | 缺 provider safe ref 不进入允许路径。 |
+| 4 | missing policyVersion returns SKIPPED or NOT_READY | 按 policy 定义返回 `SKIPPED` 或 `NOT_READY`，不得返回 `READY`。 |
+| 5 | source denied returns NOT_READY | source-bound trust policy 拒绝时 fail-closed。 |
+| 6 | policy denied returns NOT_READY | policy deny 不可升级为 degraded allow。 |
+| 7 | timeout classification returns DEGRADED or NOT_READY | timeout 不可返回 executable allow。 |
+| 8 | budget exceeded returns DEGRADED or NOT_READY | budget exceeded 不可返回 executable allow。 |
+| 9 | unknown classification returns NOT_READY | unknown / unmapped 分类 fail-closed。 |
+| 10 | credential-like input fails closed | credential、token、cookie、apiKey、apiSecret、passphrase、secret 类字段或文本被拒绝。 |
+| 11 | raw prompt input fails closed | raw prompt marker 或字段名被拒绝。 |
+| 12 | raw provider response input fails closed | raw provider response marker 或字段名被拒绝。 |
+| 13 | BUY / SELL / MARKET_ORDER input fails closed | 交易方向或 market order 词不进入 `READY`。 |
+| 14 | PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE input fails closed | 执行动作或 NQ mutation 词不进入 `READY`。 |
+| 15 | READY does not enable real provider | 输出不包含 provider enable flag。 |
+| 16 | READY does not enable real HTTP | 输出不包含 HTTP enable flag。 |
+| 17 | READY does not enable LIVE | 输出不包含 LIVE enable flag。 |
+| 18 | READY does not imply trading permission | 输出不包含 trading permission / execution approval 语义。 |
+| 19 | no Provider SDK / HTTP client / Agent / LangGraph classes are introduced | architecture / source scan 无新增禁用类、依赖或 import。 |
+| 20 | policy evaluation failure fails closed | policy exception、read model exception 或 contract exception 均返回 fail-closed decision 或内部安全异常。 |
+| 21 | quality validate passes | `mvn -ntp -Pquality validate` 通过；`mvnw.cmd` 风险原样记录。 |
+
+### Validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `F:\project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -20` | PASS | 包含 `cfe0e9e feat(qdr): add provider health read model support`。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 whitespace error、tracked diff 或 staged diff。 |
+| `git status --short`（文档修改后） | DOCS_ONLY_DIRTY / NO_STAGED | dirty 限于 root README 当前入口与 `docs/current` 允许文件；无 staged。 |
+| `git diff --check`（文档修改后） | PASS_WITH_EOL_WARNINGS | 无 whitespace error；仅 Git LF -> CRLF warning。 |
+| `git diff --stat` / `git diff --name-only`（文档修改后） | DOCS_ONLY_TRACKED_DIFF | tracked diff 限于 root README 当前入口与 `docs/current` 允许文档；新建 B3 WO 由 `git status --short` 记录。 |
+| `git diff --cached --name-only` | PASS / EMPTY | staged 为空。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 均无 diff。 |
+| safety wording scan | REVIEWED / EXISTING_FALSE_POSITIVES_ONLY | 指定 `rg` 已执行；剩余命中为既有 `NOT STARTED` 否定态、`FACTSOURCE_POLICY.md` hard-error phrase、supporting/historical docs 旧否定说明和既有 Stage-QDR-5 总 WO 否定句。本轮新增 B3 WO 未把 real HTTP/provider/Provider SDK/Agent/LangGraph/LIVE 写成开启，未把 raw material 或 credential material 写成许可。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| Maven settings warning | P2 TOOLING RISK / NON_BLOCKING | 系统 Maven 仍输出 `Unrecognised tag: 'profiles'`，来源 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml`；不影响本轮 `BUILD SUCCESS`。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` manifest error；不能写成 Maven wrapper PASS。 |
+
+Boundary:
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 Repository / JDBC / Service 实现
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未修改 NQ
+未开启 LIVE
+B3 implementation 未启动
+B4 未启动
+未创建 tag
+未 push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B2-CI-BLOCKER-FIX validation
 
 ```text
@@ -108,7 +194,7 @@ LIVE: DISABLED
 | 13 | failure classification appears as safe enum only | `ProviderHealthReadModelServiceTest.failureClassificationAppearsAsSafeEnumOnly`。 |
 | 14 | trust decision does not imply provider authorization | `ProviderHealthReadModelServiceTest.trustDecisionDoesNotImplyProviderAuthorization`。 |
 | 15 | readiness signal does not imply real HTTP / provider / LIVE | `ProviderHealthReadModelServiceTest.readinessSignalDoesNotImplyRealHttpProviderOrLive`。 |
-| 16 | provider health is not exposed as trading signal | `ProviderHealthReadModelServiceTest.providerHealthIsNotExposedAsTradingSignal`。 |
+| 16 | health output is not exposed as executable signal | `ProviderHealthReadModelServiceTest.providerHealthIsNotExposedAsTradingSignal`。 |
 | 17 | provider/HTTP/Provider SDK/Agent/LangGraph classes are not introduced | `ProviderHealthReadModelServiceTest.providerHttpProviderSdkAgentAndLangGraphClassesAreNotIntroduced`。 |
 | 18 | report/read failure fails closed | `ProviderHealthReadModelServiceTest.reportReadFailureFailsClosed`。 |
 | 19 | existing gateway call persistence is reused without repository expansion | `ProviderHealthReadModelServiceTest.fromGatewayCallRecordProjectsExistingPersistenceShape`。 |
@@ -126,7 +212,7 @@ LIVE: DISABLED
 | `mvn -ntp -pl dh-domain,dh-usecase -am test` | BUILD SUCCESS | Reactor 9/9 SUCCESS；`dh-domain` 151 tests、`dh-connector` 19 tests、`dh-usecase` 386 tests，均 0 failures / 0 errors。 |
 | `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
 | Maven settings warning | P2 TOOLING RISK / NON_BLOCKING | 系统 Maven 仍输出 `Unrecognised tag: 'profiles'`，来源 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml`；不影响本轮 `BUILD SUCCESS`。 |
-| safety wording scan | REVIEWED / ALLOWED_HITS_ONLY | 用户指定 `rg` 已执行；全量命中来自既有禁止项、测试守卫、redaction/fail-closed guard、历史/supporting docs 风险说明和本轮 B2 边界说明。未发现真实 HTTP/provider/Provider SDK/Agent/LangGraph/LIVE 实现，未发现 provider readiness 写成 LIVE permission，未发现 provider health 写成 trading signal。 |
+| safety wording scan | REVIEWED / ALLOWED_HITS_ONLY | 用户指定 `rg` 已执行；全量命中来自既有禁止项、测试守卫、redaction/fail-closed guard、历史/supporting docs 风险说明和本轮 B2 边界说明。未发现真实 HTTP/provider/Provider SDK/Agent/LangGraph/LIVE 实现，未发现 readiness 被写成 LIVE permission，未发现 health 被写成交易信号。 |
 | forbidden-scope diff | PASS / EMPTY | `dh-infra/src/main/java`、`dh-app/src/main/resources/db/migration`、`dh-api`、`contracts`、`golden_cases` 均无 diff。 |
 | `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
 
@@ -147,7 +233,7 @@ Boundary:
 未读取 credential / token / cookie / apiKey / apiSecret / passphrase
 未保存 raw prompt / raw provider response / credential
 未触碰交易、订单、撤单、账户、ledger mutation、risk mutation、paper mutation、live mutation
-未把 provider health / readiness / gateway observability 写成 trading signal
+未把 health / readiness / gateway observability 写成交易信号
 未把 readiness 写成 provider authorization / LIVE permission
 未开启 LIVE
 未进入 B3 implementation

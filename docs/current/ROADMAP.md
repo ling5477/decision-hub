@@ -58,16 +58,20 @@ STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
 STAGE_QDR_5_B1: DONE / MODEL_GATEWAY_OBSERVABILITY_CONTRACTS_ONLY
 STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO: DONE / WORK_ORDER_ONLY
 STAGE_QDR_5_B2_IMPLEMENTATION: DONE / INTERNAL_PROVIDER_HEALTH_READ_MODEL_IMPLEMENTED
-STAGE_QDR_5_B3: NOT_STARTED
-STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_NOT_STARTED
+STAGE_QDR_5_B3_IMPLEMENTATION_WO: DONE / WORK_ORDER_ONLY
+STAGE_QDR_5_B3_IMPLEMENTATION: NOT_STARTED
+STAGE_QDR_5_B4: NOT_STARTED
+STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_WO_DONE / B3_IMPLEMENTATION_NOT_STARTED
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO / ALL_IN_ONE_FORBIDDEN
 ALLOW_STAGE_QDR_5_B1_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B2_PLAN_OR_WO: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION_NOW: NO / CONSUMED
-ALLOW_STAGE_QDR_5_B3_PLAN_OR_WO: YES / AFTER_B2_IMPLEMENTATION
-ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_5_B3_PLAN_OR_WO: YES / CONSUMED
+ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION: YES / AFTER_B3_WO
+ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION_NOW: YES / AFTER_B3_WO
+ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_TAG_NOW: NO / ALREADY_TAGGED
 ```
@@ -80,8 +84,10 @@ DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER: DONE
 DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS: DONE
 DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-WO: DONE
 DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-IMPLEMENTATION: DONE
-Then: DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO
-Then: B3/B4 only after prior batch close/commit or explicit blocker resolution
+DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO: DONE
+Then: DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-IMPLEMENTATION
+Then: B3 security boundary / close review
+Then: B4 only after B3 review PASS
 ```
 
 Stage-QDR-5 plan 已选择推荐主线：
@@ -109,7 +115,7 @@ B4: Observability Report / Current Docs / Acceptance Support
 B5: Stage-QDR-5 Final Close Review / Archive Close / Tag Close
 ```
 
-B1 已完成为 contracts-only batch；B2 Provider Health / Gateway Call Read Model work order 与 implementation 已完成，当前唯一下一步是 B3 Provider Readiness Guard / Policy Evaluation work order。B2 implementation 只做 internal read model，未新增 API、migration 或 production repository/JDBC expansion。B3 不得直接启动 implementation，不得 all-in-one implementation。B1-B4 只是 Stage-QDR-5 普通 batch，不打 tag。普通 batch 沿用 implementation + tests + boundary scan + minimal docs + commit；只有 migration、API / Controller、security boundary、stage close 或 P0/P1 blocker 才触发 standalone review。B3 涉及 trust/security boundary，必须 close review 或 security-boundary review。Stage tag 只能在 B5 final close `PASS` 且 archive close commit 存在后，由独立 tag close 任务创建。Real provider dry-run 与 Agent / LangGraph preparation 均后置，不在 Stage-QDR-5 implementation 中启动。
+B1 已完成为 contracts-only batch；B2 Provider Health / Gateway Call Read Model work order、implementation 与 CI blocker fix 已完成；B3 Provider Readiness Guard / Policy Evaluation work order 已完成。当前唯一下一步是 B3 implementation。B2 implementation 只做 internal read model，未新增 API、migration 或 production repository/JDBC expansion。B3 是 trust/security boundary 批次，implementation 完成后必须执行 security boundary / close review，review PASS 后才允许 B4；不得 all-in-one implementation。B1-B4 只是 Stage-QDR-5 普通 batch，不打 tag。Stage tag 只能在 B5 final close `PASS` 且 archive close commit 存在后，由独立 tag close 任务创建。Real provider dry-run 与 Agent / LangGraph preparation 均后置，不在 Stage-QDR-5 implementation 中启动。
 
 B2 implementation boundary:
 
@@ -144,9 +150,35 @@ repository or report failure fails closed
 quality validate passes
 ```
 
+B3 Provider Readiness Guard / Policy Evaluation implementation test matrix 另需覆盖：
+
+```text
+valid readiness policy evaluates READY in mock/safe context
+missing tenantId returns NOT_READY or fail-closed
+missing providerRef returns NOT_READY or fail-closed
+missing policyVersion returns SKIPPED or NOT_READY
+source denied returns NOT_READY
+policy denied returns NOT_READY
+timeout classification returns DEGRADED or NOT_READY
+budget exceeded returns DEGRADED or NOT_READY
+unknown classification returns NOT_READY
+credential-like input fails closed
+raw prompt input fails closed
+raw provider response input fails closed
+BUY / SELL / MARKET_ORDER input fails closed
+PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE input fails closed
+READY does not enable real provider
+READY does not enable real HTTP
+READY does not enable LIVE
+READY does not imply trading permission
+no Provider SDK / HTTP client / Agent / LangGraph classes introduced
+policy evaluation failure fails closed
+quality validate passes
+```
+
 ## 3. 后续阶段边界
 
-stage-qdr-4 planning 已 `DONE / PLAN_ACCEPTED`。stage-qdr-4 B1 已 `DONE / DOMAIN_CONTRACTS_ONLY`。B2 plan 已 `DONE / PERSISTENCE_BASELINE_PLAN_ONLY`，B2 freeze review 已 `PASS`，B2 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B2 blocker fix 已 `DONE / TESTCONTAINERS_VERIFIED`，B2 implementation 已 `DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED`，B2 close review 已 `PASS`，B2 已 `CLOSED / ACCEPTED`。B3 plan 已 `DONE / PLAN_ONLY`，B3 WO 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 已 `CLOSED / ACCEPTED`。B4 plan 已 `DONE / REGRESSION_REPORT_READ_MODEL_PLAN_ONLY`，B4 WO 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED`。Stage-QDR-4 final close review 已 `PASS`，整体 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag close 已 `DONE`。Stage-QDR-5 plan 已 `DONE / PLAN_ONLY`，implementation work order 已 `DONE / WORK_ORDER_ONLY`，B1 已 `DONE / MODEL_GATEWAY_OBSERVABILITY_CONTRACTS_ONLY`，B2 work order 已 `DONE / WORK_ORDER_ONLY`，B2 implementation 已 `DONE / INTERNAL_PROVIDER_HEALTH_READ_MODEL_IMPLEMENTED`；下一步只能进入 B3 `DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO`。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 和 LIVE 仍然后置且禁止。
+stage-qdr-4 planning 已 `DONE / PLAN_ACCEPTED`。stage-qdr-4 B1 已 `DONE / DOMAIN_CONTRACTS_ONLY`。B2 plan 已 `DONE / PERSISTENCE_BASELINE_PLAN_ONLY`，B2 freeze review 已 `PASS`，B2 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B2 blocker fix 已 `DONE / TESTCONTAINERS_VERIFIED`，B2 implementation 已 `DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED`，B2 close review 已 `PASS`，B2 已 `CLOSED / ACCEPTED`。B3 plan 已 `DONE / PLAN_ONLY`，B3 WO 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 已 `CLOSED / ACCEPTED`。B4 plan 已 `DONE / REGRESSION_REPORT_READ_MODEL_PLAN_ONLY`，B4 WO 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED`。Stage-QDR-4 final close review 已 `PASS`，整体 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag close 已 `DONE`。Stage-QDR-5 plan 已 `DONE / PLAN_ONLY`，implementation work order 已 `DONE / WORK_ORDER_ONLY`，B1 已 `DONE / MODEL_GATEWAY_OBSERVABILITY_CONTRACTS_ONLY`，B2 work order 已 `DONE / WORK_ORDER_ONLY`，B2 implementation 已 `DONE / INTERNAL_PROVIDER_HEALTH_READ_MODEL_IMPLEMENTED`，B3 work order 已 `DONE / WORK_ORDER_ONLY`；下一步只能进入 B3 implementation。B3 implementation 后必须 security boundary / close review，review PASS 后才允许 B4。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 和 LIVE 仍然后置且禁止。
 
 ## 4. 持续禁止项
 

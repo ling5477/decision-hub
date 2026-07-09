@@ -4,6 +4,86 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO
+
+完成 Stage-QDR-5 B3 Provider Readiness Guard / Policy Evaluation implementation work order。本轮只编制后续 readiness decision、trust gate、fail-closed classification 的实现边界、policy input boundary、decision boundary、fail-closed 规则、security boundary review 触发规则和测试矩阵。未实现 Java、未修改测试、未新增 migration、未新增 API / Controller、未新增 Repository / JDBC / Service、未接真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph 或 LIVE；未修改 NQ，未创建 tag，未 push。
+
+### Scope
+
+```text
+WORK_ORDER_ONLY
+B3_SECURITY_BOUNDARY_DESIGN
+PROVIDER_READINESS_GUARD_WO
+POLICY_EVALUATION_WO
+TRUST_DECISION_REVIEW_PREP
+TEST_MATRIX_DESIGN
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+README.md
+docs/current/DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Work Order Result
+
+```text
+provider readiness guard target: future-readiness condition evidence only
+allowed structures: ProviderReadinessPolicy / Guard / EvaluationCommand / EvaluationResult / Decision / DecisionReason / Finding / GuardService
+policy input boundary: tenant/source/provider/gateway/read-model safe view/policyVersion/trace refs only
+decision boundary: READY / NOT_READY / DEGRADED / SKIPPED only
+fail-closed boundary: missing tenant/provider/policy/source denial/policy denial/timeout/budget/unknown/raw material/trading term fail-closed
+security boundary: SECURITY_BOUNDARY_REVIEW_REQUIRED: YES
+review triggers: B3 implementation -> security boundary / close review -> B4 only after review PASS
+next action: DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-IMPLEMENTATION
+```
+
+### Validation Snapshot
+
+```text
+preflight: PASS / dev / worktree clean / B2 commit present
+safety wording scan: REVIEWED / EXISTING_FALSE_POSITIVES_ONLY
+forbidden-scope diff: PASS / EMPTY
+quality validate: BUILD SUCCESS / Reactor 19/19 / Checkstyle 0 / Spotless passed
+mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+### Boundary
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 Repository / JDBC / Service 实现
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未修改 NQ
+未开启 LIVE
+未进入 B3 implementation
+未进入 B4
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B2-CI-BLOCKER-FIX
 
 完成 Stage-QDR-5 B2 CI blocker fix。本轮只修复 B1/B2 observability guard 触发既有 `ArchitectureTest` source scan 的问题；未扩展 B2 功能，未修改 CI 配置、migration、API、Controller、production repository/JDBC、NQ、provider、HTTP、Provider SDK、Agent、LangGraph 或 LIVE。

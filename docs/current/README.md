@@ -29,16 +29,22 @@ STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
 STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
 STAGE_QDR_5_B1: DONE / MODEL_GATEWAY_OBSERVABILITY_CONTRACTS_ONLY
 STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO: DONE / WORK_ORDER_ONLY
-STAGE_QDR_5_B2_IMPLEMENTATION: NOT_STARTED
-STAGE_QDR_5_B3: NOT_STARTED
-STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_WO_DONE / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_5_B2_IMPLEMENTATION: DONE / INTERNAL_PROVIDER_HEALTH_READ_MODEL_IMPLEMENTED
+STAGE_QDR_5_B2_CI_BLOCKER_FIX: DONE
+STAGE_QDR_5_B3_IMPLEMENTATION_WO: DONE / WORK_ORDER_ONLY
+STAGE_QDR_5_B3_IMPLEMENTATION: NOT_STARTED
+STAGE_QDR_5_B4: NOT_STARTED
+STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_WO_DONE / B3_IMPLEMENTATION_NOT_STARTED
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_5_B1_IMPLEMENTATION: YES / CONSUMED
-ALLOW_STAGE_QDR_5_B2_PLAN_OR_WO: YES
-ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION: YES
-ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION_NOW: YES / AFTER_B2_WO
-ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_5_B2_PLAN_OR_WO: YES / CONSUMED
+ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION: YES / CONSUMED
+ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION_NOW: NO / CONSUMED
+ALLOW_STAGE_QDR_5_B3_PLAN_OR_WO: YES / CONSUMED
+ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION: YES / AFTER_B3_WO
+ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION_NOW: YES / AFTER_B3_WO
+ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_AGENT_PHASE: NO
@@ -50,8 +56,8 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-WO
-next action: DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-IMPLEMENTATION
+current task: DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO
+next action: DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-IMPLEMENTATION
 ```
 
 ## Stage-QDR-4 归档状态
@@ -68,7 +74,7 @@ STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
 STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
 ```
 
-Stage-QDR-4 归档和 tag close 不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。`DH-STAGE-QDR-5-PLAN` 与 `DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER` 已完成；Stage-QDR-5 implementation 仍未启动，下一步只能进入 B1 `DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS`，不得直接 B2/B3 或 all-in-one implementation。
+Stage-QDR-4 归档和 tag close 不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。`DH-STAGE-QDR-5-PLAN`、`DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`、B1、B2 与 B3 implementation work order 已完成；下一步只能进入 B3 `DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-IMPLEMENTATION`。B3 implementation 后必须进入 security boundary / close review，review PASS 后才允许 B4；不得 all-in-one implementation。
 
 ## Stage-qdr-4 当前事实源
 
@@ -85,9 +91,10 @@ docs/current/ARCHIVE_INDEX.md
 docs/current/DH_STAGE_QDR_5_PLAN.md
 docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
 docs/current/DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
+docs/current/DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
 ```
 
-Stage-QDR-4 的详细 plan / work order / implementation work order 已归档到 `docs/gates/stage-qdr-4/`，不再保留在 `docs/current`。Stage-QDR-5 的 planning 入口是 `docs/current/DH_STAGE_QDR_5_PLAN.md`；implementation work order 入口是 `docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md`；B2 Provider Health / Gateway Call Read Model work order 入口是 `docs/current/DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md`。
+Stage-QDR-4 的详细 plan / work order / implementation work order 已归档到 `docs/gates/stage-qdr-4/`，不再保留在 `docs/current`。Stage-QDR-5 的 planning 入口是 `docs/current/DH_STAGE_QDR_5_PLAN.md`；implementation work order 入口是 `docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md`；B2 Provider Health / Gateway Call Read Model work order 入口是 `docs/current/DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md`；B3 Provider Readiness Guard / Policy Evaluation work order 入口是 `docs/current/DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md`。
 
 ## Supporting Docs
 
@@ -112,6 +119,7 @@ ARCHIVE_INDEX.md           已归档文档索引
 DH_STAGE_QDR_5_PLAN.md     Stage-QDR-5 plan-only 记录
 DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md Stage-QDR-5 implementation batch 边界与测试矩阵
 DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md Stage-QDR-5 B2 internal read model implementation work order
+DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md Stage-QDR-5 B3 provider readiness guard / policy evaluation implementation work order
 WORKLOG.md                 本轮文档治理记录，supporting only
 ROADMAP.md                 路线摘要，supporting only
 API.md                     API 实现状态摘要，supporting only

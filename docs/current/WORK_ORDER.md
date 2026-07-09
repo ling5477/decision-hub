@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-5-B2-CI-BLOCKER-FIX
-current task status: DONE / CI_BLOCKER_FIXED
-next action: DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO
-mode: CI_BLOCKER_FIX + B2_PROVIDER_HEALTH_READ_MODEL_FIX + REGRESSION_VALIDATION + NO_FEATURE_EXPANSION + NO_DB_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current task: DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO
+current task status: DONE / WORK_ORDER_ONLY
+next action: DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-IMPLEMENTATION
+mode: WORK_ORDER_ONLY + B3_SECURITY_BOUNDARY_DESIGN + PROVIDER_READINESS_GUARD_WO + POLICY_EVALUATION_WO + TRUST_DECISION_REVIEW_PREP + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
 ```
 
-Stage-QDR-5 B1 已完成，B2 Provider Health / Gateway Call Read Model implementation 与 CI blocker fix 已完成。下一步只允许进入 B3 Provider Readiness Guard / Policy Evaluation work order；不得直接进入 B3 implementation 或 all-in-one implementation，不得创建 tag，不得 push。
+Stage-QDR-5 B1 已完成，B2 Provider Health / Gateway Call Read Model implementation 与 CI blocker fix 已完成，B3 Provider Readiness Guard / Policy Evaluation work order 已完成。下一步只允许进入 B3 implementation；B3 implementation 后必须进入 security boundary / close review，review PASS 后才允许 B4；不得 all-in-one implementation，不得创建 tag，不得 push。
 
 ## 2. 前置状态
 
@@ -26,16 +26,20 @@ STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO: DONE / WORK_ORDER_ONL
 STAGE_QDR_5_B2_IMPLEMENTATION: DONE / INTERNAL_PROVIDER_HEALTH_READ_MODEL_IMPLEMENTED
 STAGE_QDR_5_B2_CI: FIXED / ARCHITECTURE_SOURCE_SCAN_FIXED
 STAGE_QDR_5_B2_CI_BLOCKER_FIX: DONE
-STAGE_QDR_5_B3: NOT_STARTED
-STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_NOT_STARTED
+STAGE_QDR_5_B3_IMPLEMENTATION_WO: DONE / WORK_ORDER_ONLY
+STAGE_QDR_5_B3_IMPLEMENTATION: NOT_STARTED
+STAGE_QDR_5_B4: NOT_STARTED
+STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_WO_DONE / B3_IMPLEMENTATION_NOT_STARTED
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES / CONSUMED
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO / ALL_IN_ONE_FORBIDDEN
 ALLOW_STAGE_QDR_5_B1_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B2_PLAN_OR_WO: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION_NOW: NO / CONSUMED
-ALLOW_STAGE_QDR_5_B3_PLAN_OR_WO: YES / AFTER_B2_IMPLEMENTATION
-ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_5_B3_PLAN_OR_WO: YES / CONSUMED
+ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION: YES / AFTER_B3_WO
+ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION_NOW: YES / AFTER_B3_WO
+ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_PROVIDER_SDK: NO
@@ -50,7 +54,7 @@ ALLOW_LIVE: NO
 Stage-QDR-5 = Model Gateway Observability / Provider Readiness Hardening
 ```
 
-Stage-QDR-5 目标是把现有 mock model gateway call、provider trust decision、budget / usage summary、failure code、redacted refs 与 replay/regression evidence 汇总为可审计、tenant-bound、fail-closed 的 provider readiness evidence。该 readiness 只表示未来接入条件评估，不是 provider authorization、live enablement、trading permission 或 execution approval。
+Stage-QDR-5 目标是把现有 mock model gateway call、provider trust decision、budget / usage summary、failure code、redacted refs 与 replay/regression evidence 汇总为可审计、tenant-bound、fail-closed 的 readiness evidence。该 readiness 只表示未来接入条件评估，不是 provider authorization、live enablement、trading permission 或 execution approval。
 
 ## 4. 批次边界
 
@@ -88,16 +92,18 @@ blocker: API / migration / repository production expansion / cross-tenant read
 
 ```text
 plan/work order allowed now: YES / AFTER_B2_IMPLEMENTATION
-implementation allowed now: NO
+work order status: DONE / WORK_ORDER_ONLY
+implementation allowed now: YES / AFTER_B3_WO
+implementation status: NOT_STARTED
 scope: provider readiness decision / trust gate / fail-closed classification
 required: readiness is future condition evidence only
-review: close review or security-boundary review required
+review: security-boundary / close review required after implementation; review PASS required before B4
 ```
 
 ### B4
 
 ```text
-allowed now: NO
+allowed now: NO / BEFORE_B3_SECURITY_REVIEW_PASS
 scope: internal report and current docs acceptance support
 default: no API, no migration, no real provider / HTTP, no Agent / LangGraph, no LIVE
 ```
@@ -149,9 +155,10 @@ quality validate passes
 ## 7. 当前禁止范围
 
 ```text
-B2 implementation 已完成，范围仅限 `DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-WO` 定义的 internal read model boundary。
-允许进入 B3 work order / planning。
-禁止进入 B3 implementation。
+B2 implementation 与 B2 CI blocker fix 已完成。
+B3 work order 已完成，范围仅限 `DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md` 定义的 provider readiness guard / policy evaluation boundary。
+允许进入 B3 implementation。
+禁止 B3 implementation 后直接进入 B4。
 禁止新增 migration。
 禁止修改 V1-V9 migration。
 禁止新增 V10。
@@ -175,5 +182,5 @@ B2 implementation 已完成，范围仅限 `DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GA
 ## 8. 下一任务
 
 ```text
-DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO
+DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-IMPLEMENTATION
 ```
