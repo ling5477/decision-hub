@@ -3,6 +3,68 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-CLOSE-REVIEW validation
+
+```text
+Task type: REVIEW_ONLY + SECURITY_BOUNDARY_CLOSE_REVIEW + PROVIDER_READINESS_GUARD_REVIEW + POLICY_EVALUATION_REVIEW + TRUST_DECISION_REVIEW + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: confirmed by Get-Location
+branch: dev
+implementation commit: cfad68a feat(qdr): add provider readiness guard policy evaluation
+STAGE_QDR_5_B1: DONE
+STAGE_QDR_5_B2: DONE
+STAGE_QDR_5_B3_IMPLEMENTATION: DONE
+STAGE_QDR_5_B3_CLOSE_REVIEW: PASS
+STAGE_QDR_5_B3: CLOSED / ACCEPTED
+STAGE_QDR_5_B4: READY_FOR_PLAN_OR_WO
+STAGE_QDR_5_B4_IMPLEMENTATION: NOT_STARTED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### Close review validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `F:\project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -20` | PASS | 包含 `cfad68a feat(qdr): add provider readiness guard policy evaluation`。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 whitespace error、tracked diff 或 staged diff。 |
+| structure review | PASS | `ProviderReadinessPolicy`、`ProviderReadinessGuard`、`ProviderReadinessEvaluationCommand`、`ProviderReadinessEvaluationResult`、`ProviderReadinessDecision`、`ProviderReadinessDecisionReason`、`ProviderReadinessGuardService` 与 `ProviderReadinessGuardServiceTest` 已复核；复用 B1/B2 contracts 与 safe read model view。 |
+| policy input boundary review | PASS | 输入只使用 tenant/source/provider/modelGatewayVersion/providerSummaryHash/failure/latency/trust/readiness/policy/trace/sourceRequest/timestamps 与 B2 safe view；credential/raw/provider payload/trading/NQ mutation 输入 fail-closed。 |
+| decision boundary review | PASS | 输出枚举限于 `READY / NOT_READY / DEGRADED / SKIPPED`；`READY` 固定不启用 real provider、real HTTP、LIVE 或 trading。 |
+| fail-closed review | PASS | missing tenant/provider/policy、source denied、policy denied、timeout、budget exceeded、unknown classification、credential-like、raw prompt、raw provider response、trading term、NQ mutation 与 internal exception 均有 fail-closed 规则和测试证据。 |
+| security boundary review | PASS | 未新增 API、Controller、migration、production repository/JDBC、real HTTP、real provider、Provider SDK、Agent、LangGraph、LIVE、NQ mutation 或 trading mutation。 |
+| safety scan | PASS / GUARD_AND_DOC_HITS_ONLY | 用户指定 `rg` 已执行；命中为 current docs 禁止项说明、B3 guard/test fail-closed 用例、redaction guard 和否定边界。B3 窄范围复核未发现 runtime/provider/HTTP/SDK/Agent/LangGraph/LIVE 实现。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ProviderReadinessGuardServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | `ProviderReadinessGuardServiceTest` 19 tests，0 failures，0 errors，0 skipped；Reactor 9/9 SUCCESS。 |
+| `mvn -ntp -pl dh-domain,dh-usecase -am test` | BUILD SUCCESS | Reactor 9/9 SUCCESS；`dh-domain` 151 tests、`dh-connector` 19 tests、`dh-usecase` 405 tests 均 0 failures / 0 errors / 0 skipped。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| Maven settings warning | P2 TOOLING RISK / NON_BLOCKING | 系统 Maven 仍输出 `Unrecognised tag: 'profiles'`，来源 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml`；不影响本轮 `BUILD SUCCESS`。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` manifest error；不能写成 Maven wrapper PASS。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未新增 API / Controller
+未新增 production Repository / JDBC / persistence adapter
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+B4 implementation 未启动
+未创建 tag
+未 push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-IMPLEMENTATION validation
 
 ```text
@@ -14,7 +76,7 @@ STAGE_QDR_5_B2: DONE
 STAGE_QDR_5_B3_IMPLEMENTATION_WO: DONE
 STAGE_QDR_5_B3_IMPLEMENTATION: DONE / PROVIDER_READINESS_GUARD_POLICY_EVALUATION_IMPLEMENTED
 STAGE_QDR_5_B4: NOT_STARTED
-ALLOW_STAGE_QDR_5_B3_CLOSE_REVIEW: YES / AFTER_B3_IMPLEMENTATION
+B3 close review next at implementation time: YES / HISTORICAL_RECORD
 ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO
 real HTTP: NO
 real provider: NO

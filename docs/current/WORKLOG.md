@@ -4,6 +4,80 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-CLOSE-REVIEW
+
+完成 Stage-QDR-5 B3 Provider Readiness Guard / Policy Evaluation security boundary / close review。本轮只做 review 与 `docs/current` 最小同步；未修改 Java 生产代码、测试代码、migration、API、Controller、Repository/JDBC、contracts、golden_cases 或 NQ。
+
+### Scope
+
+```text
+REVIEW_ONLY
+SECURITY_BOUNDARY_CLOSE_REVIEW
+PROVIDER_READINESS_GUARD_REVIEW
+POLICY_EVALUATION_REVIEW
+TRUST_DECISION_REVIEW
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Close Review Result
+
+```text
+structure review: PASS
+policy input boundary review: PASS
+decision boundary review: PASS
+fail-closed review: PASS
+security boundary review: PASS
+test evidence review: PASS
+safety scan review: PASS / GUARD_AND_DOC_HITS_ONLY
+STAGE_QDR_5_B3_CLOSE_REVIEW: PASS
+STAGE_QDR_5_B3: CLOSED / ACCEPTED
+STAGE_QDR_5_B4: READY_FOR_PLAN_OR_WO
+STAGE_QDR_5_B4_IMPLEMENTATION: NOT_STARTED
+```
+
+### Validation Snapshot
+
+```text
+preflight: PASS / dev / worktree clean / cfad68a implementation commit present
+targeted B3 test: BUILD SUCCESS / ProviderReadinessGuardServiceTest 19 tests
+dh-domain,dh-usecase scoped regression: BUILD SUCCESS / dh-domain 151 / dh-connector 19 / dh-usecase 405
+quality validate: BUILD SUCCESS / Reactor 19/19 / Checkstyle 0 / Spotless passed
+safety scan: PASS / GUARD_AND_DOC_HITS_ONLY
+mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+### Boundary
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未新增 API / Controller
+未新增 production Repository / JDBC / persistence adapter
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+B4 implementation 未启动
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-WO
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-IMPLEMENTATION
 
 完成 Stage-QDR-5 B3 Provider Readiness Guard / Policy Evaluation implementation。本轮只实现内部 readiness policy evaluation、trust gate、redaction guard、fail-closed rules 和 B3 tests；未新增 API、migration、production repository/JDBC、真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph、NQ 或 LIVE。
