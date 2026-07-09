@@ -3,6 +3,94 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER validation
+
+```text
+Task type: WORK_ORDER_ONLY + STAGE_QDR_5_IMPLEMENTATION_PLANNING + MODEL_GATEWAY_OBSERVABILITY_WO + PROVIDER_READINESS_HARDENING_WO + SECURITY_BOUNDARY_DESIGN + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
+Stage-QDR-5 implementation: NOT_STARTED
+ALLOW_STAGE_QDR_5_B1_IMPLEMENTATION: YES
+ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION_NOW: NO
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+Planned Stage-QDR-5 test matrix:
+
+| # | Test item | Expected result |
+| --- | --- | --- |
+| 1 | valid provider health summary can be created | summary 仅含 tenant/provider/call safe refs、状态、hash、延迟/预算安全字段。 |
+| 2 | missing tenantId fails closed | 缺 tenantId 直接拒绝或输出 denied readiness。 |
+| 3 | missing providerRef fails closed | 缺 provider safe ref 直接拒绝或输出 denied readiness。 |
+| 4 | failure classification supports timeout / budget exceeded / policy denied / source denied / unknown | 分类稳定映射，不泄露原始异常。 |
+| 5 | latency budget summary records p50 / p95 / p99 or equivalent safe fields | 只记录安全数值，不代表真实 provider billing。 |
+| 6 | trust decision summary records allowed / denied / degraded / skipped | denied / degraded / skipped 不可执行。 |
+| 7 | readiness signal cannot enable real provider | 不产生 provider enable flag。 |
+| 8 | readiness signal cannot enable real HTTP | 不产生 HTTP enable flag。 |
+| 9 | readiness signal cannot enable LIVE | 不产生 LIVE enable flag。 |
+| 10 | readiness signal cannot generate trading signal | 不包含 BUY / SELL / PLACE_ORDER / CANCEL_ORDER。 |
+| 11 | raw provider response is rejected | raw response 字段或 key 被 redaction boundary 拒绝。 |
+| 12 | credential-like key is rejected | token / key / secret / passphrase 类文本被拒绝。 |
+| 13 | provider health read model is tenant-bound | 查询必须带 tenantId。 |
+| 14 | cross-tenant read returns empty or fail-closed | tenant mismatch 不返回他租户数据。 |
+| 15 | providerSummaryHash / modelGatewayVersionRef are safe refs only | 只保存 hash/ref。 |
+| 16 | no Provider SDK / HTTP client / Agent / LangGraph classes introduced | architecture / rg scan 无新增禁用类或依赖。 |
+| 17 | repository or report failure fails closed | read model/report 失败时输出 denied/skipped 或抛内部可理解异常。 |
+| 18 | quality validate passes | `mvn -ntp -Pquality validate` 通过；`mvnw.cmd` 风险如实记录。 |
+
+Validation record:
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `F:\project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current`（开工前） | PASS | `dev`。 |
+| `git log --oneline -30`（开工前） | PASS | 包含 `61b2c49 docs(qdr): plan stage-qdr-5 provider readiness hardening`。 |
+| `git tag --list "dh-stage-qdr-4-close"` | PASS | 本地 tag 存在。 |
+| `git rev-list -n 1 dh-stage-qdr-4-close` | PASS | tag peeled target 为 `62c802064f637ad03d3b0f4a185bd55fa3141af2`。 |
+| `git ls-remote --tags origin \| rg "dh-stage-qdr-4-close"` | PASS | remote tag 与 peeled target 均存在。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 tracked diff、staged diff 或 whitespace error。 |
+| `git status --short`（文档修改后） | DOCS_ONLY_DIRTY / NO_STAGED | dirty 限于 root README 当前入口、`docs/current` 允许文档和新建 WO；无 staged。 |
+| `git diff --check`（文档修改后） | PASS_WITH_EOL_WARNINGS | 无 whitespace error；Git 仍提示 LF -> CRLF warning。 |
+| `git diff --stat` / `git diff --name-only`（文档修改后） | DOCS_ONLY_TRACKED_DIFF | tracked diff 限于 root README 当前入口与 `docs/current` 允许文档；新建 WO 由 `git status --short` 记录。 |
+| `git diff --cached --name-only` | PASS / EMPTY | staged 为空。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 均无 diff。 |
+| safety wording scan | REVIEWED / EXISTING_FALSE_POSITIVE_ONLY | 命中来自 `AGENTS.md` / `.agents` / supporting docs 的否定语义、hard-error phrase 和历史证据；本轮新增 WO 未把 provider/HTTP/SDK/Agent/LangGraph/LIVE 写成开启，也未把 raw material 或 credential material 写成许可。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed；系统 Maven settings 仍有 `Unrecognised tag: 'profiles'` warning，非本轮阻断。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\` is not recognized` 与 `.mvn\\wrapper\\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+
+Boundary:
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API
+未新增 Controller
+未新增 Repository / JDBC / Service implementation
+未新增真实 HTTP client
+未新增真实 provider
+未接 Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未修改 NQ
+未开启 LIVE
+未进入 Stage-QDR-5 implementation
+未创建 tag
+未 push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-PLAN validation
 
 ```text
@@ -33,7 +121,7 @@ Validation summary:
 | `git diff --name-only` | DOCS_ONLY_TRACKED_DIFF | tracked diff 为 `README.md`、`docs/current/ARCHIVE_INDEX.md`、`CODEX_PROJECT_INSTRUCTIONS.md`、`README.md`、`ROADMAP.md`、`STATUS.md`、`WORK_ORDER.md`。 |
 | `git diff --cached --name-only` | PASS / EMPTY | staged 为空。 |
 | forbidden-scope diff | PASS / EMPTY | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 无 diff。 |
-| safety wording scan | REVIEWED / HISTORICAL_ALLOWED_HITS_ONLY | 命中来自 `AGENTS.md` / `.agents` 的 `NOT STARTED` 否定语义、tag-created 规则说明、`FACTSOURCE_POLICY.md` hard-error phrase、旧 TESTING/WORKLOG evidence 和 supporting API/DB_SCHEMA 历史段落；本轮修改文件未把 real HTTP/provider/SDK/Agent/LangGraph/LIVE 写成 enabled/started，也未把 credential/raw prompt/raw provider response 写成 allowed。 |
+| safety wording scan | REVIEWED / HISTORICAL_FALSE_POSITIVE_ONLY | 命中来自 `AGENTS.md` / `.agents` 的 `NOT STARTED` 否定语义、tag-created 规则说明、`FACTSOURCE_POLICY.md` hard-error phrase、旧 TESTING/WORKLOG evidence 和 supporting API/DB_SCHEMA 历史段落；本轮修改文件未把 real HTTP/provider/SDK/Agent/LangGraph/LIVE 写成 enabled/started，也未把 credential/raw prompt/raw provider response 写成许可。 |
 | `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | Reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed。系统 Maven settings 仍有 `Unrecognised tag: 'profiles'` warning，非本轮阻断。 |
 | `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` manifest 问题；不得写成 wrapper PASS。 |
 
@@ -817,7 +905,7 @@ real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
 | code path discovery | REVIEWED / EXISTING_PATHS_USED | 附件列出的 `usecase/modelgateway` 与 `usecase/provider` 目录不存在；实际 mock gateway / provider package 为 `dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/**`。 |
 | B3 plan document | DONE | 新增 `docs/current/DH_STAGE_QDR_4_B3_MOCK_GATEWAY_REGRESSION_INTEGRATION_PLAN.md`；只记录 plan，不写实现。 |
 | forbidden-scope diff | PASS / EMPTY | `git diff --name-only -- dh-domain/src/main dh-usecase/src/main dh-app/src/main dh-infra/src/main contracts golden_cases "dh-*/src/main/resources/db/migration"` 无输出，确认未修改 Java/main、contracts、golden_cases 或 migration。 |
-| safety scan | REVIEWED / NO_ACTUAL_RISK | 用户指定 `rg` 已执行。命中为禁止项、B3 plan guard、既有 DB/API risk statement 或 `FACTSOURCE_POLICY.md:62` hard-error phrase 清单；未发现 real HTTP/provider/Agent/LangGraph/LIVE started/enabled，也未将 raw prompt/provider response/credential 写成 allowed。 |
+| safety scan | REVIEWED / NO_ACTUAL_RISK | 用户指定 `rg` 已执行。命中为禁止项、B3 plan guard、既有 DB/API risk statement 或 `FACTSOURCE_POLICY.md:62` hard-error phrase 清单；未发现 real HTTP/provider/Agent/LangGraph/LIVE started/enabled，也未将 raw prompt/provider response/credential 写成许可。 |
 | `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed。系统 Maven settings 仍有 `profiles` warning，非本轮阻断。 |
 | `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
 

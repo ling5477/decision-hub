@@ -4,6 +4,80 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
+
+完成 Stage-QDR-5 implementation work order。本轮只编制 B1-B5 批次边界、测试矩阵、review 触发规则、安全门和后续提交纪律；未实现 Java、未修改测试、未新增 migration、未新增 API / Controller、未新增 Repository / JDBC / Service、未接真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph 或 LIVE；未修改 NQ，未创建 tag，未 push。
+
+### Scope
+
+```text
+WORK_ORDER_ONLY
+STAGE_QDR_5_IMPLEMENTATION_PLANNING
+MODEL_GATEWAY_OBSERVABILITY_WO
+PROVIDER_READINESS_HARDENING_WO
+SECURITY_BOUNDARY_DESIGN
+TEST_MATRIX_DESIGN
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Current State
+
+```text
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
+Stage-QDR-5 implementation: NOT_STARTED
+ALLOW_STAGE_QDR_5_B1_IMPLEMENTATION: YES
+ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION_NOW: NO
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+next action: DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS
+```
+
+### Work Order Result
+
+```text
+B1: Model Gateway Observability Contracts
+B2: Provider Health / Gateway Call Read Model
+B3: Provider Readiness Guard / Policy Evaluation
+B4: Observability Report / Acceptance Support
+B5: Stage-QDR-5 Final Close Review / Archive Close / Tag Close
+review triggers: migration / API / security boundary / stage close / P0-P1 blocker only
+stage order: final close review PASS -> archive close docs commit -> worktree clean -> annotated tag -> tag push -> next stage planning
+```
+
+### Files Changed
+
+```text
+README.md
+docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-PLAN
 
 完成 Stage-QDR-5 planning。本轮只做规划与 current docs 同步；未修改 Java、测试、migration、API、contracts、golden_cases 或 NQ；未接真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph 或 LIVE；未创建新 tag，未 push。
