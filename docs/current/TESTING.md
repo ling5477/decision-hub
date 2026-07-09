@@ -3,6 +3,95 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-IMPLEMENTATION validation
+
+```text
+Task type: IMPLEMENTATION + PROVIDER_READINESS_GUARD + POLICY_EVALUATION + TRUST_SECURITY_BOUNDARY + TESTS + NO_DB_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+STAGE_QDR_5_B1: DONE
+STAGE_QDR_5_B2: DONE
+STAGE_QDR_5_B3_IMPLEMENTATION_WO: DONE
+STAGE_QDR_5_B3_IMPLEMENTATION: DONE / PROVIDER_READINESS_GUARD_POLICY_EVALUATION_IMPLEMENTED
+STAGE_QDR_5_B4: NOT_STARTED
+ALLOW_STAGE_QDR_5_B3_CLOSE_REVIEW: YES / AFTER_B3_IMPLEMENTATION
+ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### B3 implementation coverage
+
+| # | Test item | Evidence |
+| --- | --- | --- |
+| 1 | valid readiness policy evaluates READY in mock/safe context | `ProviderReadinessGuardServiceTest.validReadinessPolicyEvaluatesReadyInMockSafeContext`。 |
+| 2 | missing tenantId returns NOT_READY or fail-closed | `missingTenantIdReturnsNotReadyFailClosed`。 |
+| 3 | missing providerRef returns NOT_READY or fail-closed | `missingProviderRefReturnsNotReadyFailClosed`。 |
+| 4 | missing policyVersion returns SKIPPED or NOT_READY | `missingPolicyVersionReturnsSkippedFailClosed`。 |
+| 5 | source denied returns NOT_READY | `sourceDeniedReturnsNotReady`。 |
+| 6 | policy denied returns NOT_READY | `policyDeniedReturnsNotReady`。 |
+| 7 | timeout classification returns DEGRADED or NOT_READY | `timeoutClassificationReturnsDegraded`。 |
+| 8 | budget exceeded returns DEGRADED or NOT_READY | `budgetExceededReturnsDegraded`。 |
+| 9 | unknown classification returns NOT_READY | `unknownClassificationReturnsNotReady`。 |
+| 10 | credential-like input fails closed | `credentialLikeInputFailsClosedWithoutLeakingValue`。 |
+| 11 | raw prompt input fails closed | `rawPromptInputFailsClosed`。 |
+| 12 | raw provider response input fails closed | `rawProviderResponseInputFailsClosed`。 |
+| 13 | BUY / SELL / MARKET_ORDER input fails closed | `buySellMarketOrderInputFailsClosed`。 |
+| 14 | PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE input fails closed | `placeCancelMutateNqStateInputFailsClosed`。 |
+| 15 | READY does not enable real provider | `readyDoesNotEnableRealProviderHttpLiveOrTrading`。 |
+| 16 | READY does not enable real HTTP | `readyDoesNotEnableRealProviderHttpLiveOrTrading`。 |
+| 17 | READY does not enable LIVE | `readyDoesNotEnableRealProviderHttpLiveOrTrading`。 |
+| 18 | READY does not imply trading permission | `readyDoesNotEnableRealProviderHttpLiveOrTrading`。 |
+| 19 | no Provider SDK / HTTP client / Agent / LangGraph classes are introduced | `providerSdkHttpAgentAndLangGraphClassesAreNotIntroduced`。 |
+| 20 | policy evaluation failure fails closed | `policyEvaluationFailureFailsClosed`。 |
+| 21 | unsafe READY policy result fails closed | `policyReturningUnsafeReadyReasonFailsClosed`。 |
+
+### Validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `F:\project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -20` | PASS | 包含 `6652f68 docs(qdr): define provider readiness guard work order`、`cfe0e9e feat(qdr): add provider health read model support`、`7aed5e8 feat(qdr): add model gateway observability contracts`。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 whitespace error、tracked diff 或 staged diff。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ProviderReadinessGuardServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`（首次） | TEST_FIX_REQUIRED | 19 tests 运行，2 errors；fail-closed finding code 派生出 raw marker，被 B1 `READINESS_SIGNAL_CONTRACT_REJECTED` 拒绝。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ProviderReadinessGuardServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`（最终） | BUILD SUCCESS | `ProviderReadinessGuardServiceTest` 19 tests，0 failures，0 errors，0 skipped；Reactor 9/9 SUCCESS。 |
+| `git status --short`（实现后） | DIRTY / EXPECTED / NO_STAGED | dirty 限于允许的 `dh-usecase/.../qdr/gateway/**`、`dh-usecase/src/test/java/**/qdr/**` 与 `docs/current`；无 staged。 |
+| `git diff --check`（实现后） | PASS_WITH_EOL_WARNINGS | 无 whitespace error；仅 current docs LF -> CRLF warning。 |
+| `git diff --stat` / `git diff --name-only`（实现后） | TRACKED_DIFF_ONLY_PLUS_UNTRACKED_JAVA | tracked diff 为 `docs/current`；新增 Java/test 文件为 untracked，由 `git status --short` 记录。 |
+| safety wording scan | REVIEWED / GUARD_AND_EXISTING_DOC_HITS | 用户指定 `rg` 已执行。命中包括既有 docs/supporting/historical 禁止项、本轮 B3 guard/test fail-closed 校验、Javadoc 否定边界；未发现真实 HTTP/provider/Provider SDK/Agent/LangGraph/LIVE 实现，未发现 provider readiness 被写成 authorization/LIVE permission/trading signal。 |
+| `mvn -ntp -pl dh-domain,dh-usecase -am test` | BUILD SUCCESS | Reactor 9/9 SUCCESS；`dh-domain` 151 tests、`dh-connector` 19 tests、`dh-usecase` 405 tests 均 0 failures / 0 errors / 0 skipped。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| Maven settings warning | P2 TOOLING RISK / NON_BLOCKING | 系统 Maven 仍输出 `Unrecognised tag: 'profiles'`，来源 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml`；不影响本轮 `BUILD SUCCESS`。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` manifest error；不能写成 Maven wrapper PASS。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 production Repository / JDBC / persistence adapter
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未开启 LIVE
+未读取 credential / token / cookie / apiKey / apiSecret / passphrase
+未持久化 raw prompt / raw provider response
+未生成 trading signal
+B4 未启动
+未创建 tag
+未 push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO validation
 
 ```text

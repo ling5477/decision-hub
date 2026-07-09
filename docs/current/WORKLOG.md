@@ -4,6 +4,91 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-IMPLEMENTATION
+
+完成 Stage-QDR-5 B3 Provider Readiness Guard / Policy Evaluation implementation。本轮只实现内部 readiness policy evaluation、trust gate、redaction guard、fail-closed rules 和 B3 tests；未新增 API、migration、production repository/JDBC、真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph、NQ 或 LIVE。
+
+### Scope
+
+```text
+IMPLEMENTATION
+PROVIDER_READINESS_GUARD
+POLICY_EVALUATION
+TRUST_SECURITY_BOUNDARY
+TESTS
+NO_DB_MIGRATION
+NO_API
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessPolicy.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessGuard.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessEvaluationCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessEvaluationResult.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessDecision.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessDecisionReason.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessGuardService.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessGuardServiceTest.java
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Implementation Result
+
+```text
+structures: ProviderReadinessPolicy / ProviderReadinessGuard / EvaluationCommand / EvaluationResult / Decision / DecisionReason / GuardService
+policy input boundary: tenantId / sourceRef / providerRef / modelGatewayVersionRef / providerSummaryHash / B1-B2 safe summary-view / policyVersion / trace refs / timestamps only
+decision boundary: READY / NOT_READY / DEGRADED / SKIPPED only
+fail-closed rules: missing tenant/provider/policy/source denied/policy denied/timeout/budget/unknown/sensitive/raw/trading/NQ mutation/internal exception covered
+redaction guard: fixed reason enum retained, safe finding code avoids raw marker echo
+authorization/live/trading-signal guard: READY exposes no provider enable flag, HTTP flag, LIVE flag or trading permission
+docs sync: B3 DONE, B4 NOT_STARTED, next action close review
+```
+
+### Validation Snapshot
+
+```text
+targeted B3 test first run: TEST_FIX_REQUIRED / 19 tests / 2 errors
+targeted B3 test final: BUILD SUCCESS / 19 tests
+dh-domain,dh-usecase scoped regression: BUILD SUCCESS / dh-domain 151 / dh-connector 19 / dh-usecase 405
+quality validate: BUILD SUCCESS / Reactor 19/19 / Checkstyle 0 / Spotless passed
+safety wording scan: REVIEWED / GUARD_AND_EXISTING_DOC_HITS
+mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+### Boundary
+
+```text
+未修改 NQ
+未新增 migration
+未新增 API / Controller
+未新增 production Repository / JDBC / persistence adapter
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未开启 LIVE
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+B4 未启动
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-CLOSE-REVIEW
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO
 
 完成 Stage-QDR-5 B3 Provider Readiness Guard / Policy Evaluation implementation work order。本轮只编制后续 readiness decision、trust gate、fail-closed classification 的实现边界、policy input boundary、decision boundary、fail-closed 规则、security boundary review 触发规则和测试矩阵。未实现 Java、未修改测试、未新增 migration、未新增 API / Controller、未新增 Repository / JDBC / Service、未接真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph 或 LIVE；未修改 NQ，未创建 tag，未 push。
