@@ -3,6 +3,92 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-WO validation
+
+```text
+Task type: WORK_ORDER_ONLY + B4_IMPLEMENTATION_BOUNDARY_DESIGN + OBSERVABILITY_REPORT_WO + PROVIDER_READINESS_ACCEPTANCE_SUPPORT + CURRENT_DOCS_ACCEPTANCE_SUPPORT + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: confirmed by Get-Location
+branch: dev
+STAGE_QDR_5_B1: DONE
+STAGE_QDR_5_B2: DONE
+STAGE_QDR_5_B3: CLOSED / ACCEPTED
+STAGE_QDR_5_B3_CLOSE_REVIEW: PASS
+STAGE_QDR_5_B4_IMPLEMENTATION_WO: DONE
+STAGE_QDR_5_B4_IMPLEMENTATION: NOT_STARTED
+STAGE_QDR_5_FINAL_CLOSE: NOT_STARTED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### B4 implementation test matrix
+
+| # | Test item | Expected result |
+| --- | --- | --- |
+| 1 | valid observability report can be generated from B1/B2/B3 safe inputs | 有效 tenant/provider/source/readiness evidence 可生成 internal report。 |
+| 2 | missing tenantId fails closed | 缺 tenantId 不生成 `PASS`。 |
+| 3 | missing providerRef fails closed | 缺 provider safe ref 不生成 `PASS`。 |
+| 4 | missing readiness decision fails closed or returns SKIPPED | 缺 readiness decision 输出 `SKIPPED` 或 fail-closed，不能输出 `PASS`。 |
+| 5 | report includes failure classification summary | 输出安全 failure classification summary，不包含原始异常。 |
+| 6 | report includes latency budget summary | 输出安全 latency / budget summary，不表示真实 provider billing。 |
+| 7 | report includes trust decision summary | 输出 trust decision summary，denied/degraded/skipped 不可执行。 |
+| 8 | report includes readiness finding summary | 输出 readiness finding summary，不回显原始敏感输入。 |
+| 9 | report includes acceptance status | 输出 `PASS / WARN / FAIL / SKIPPED` 之一。 |
+| 10 | report does not expose raw prompt | 字段名、summary、rendering 均不暴露 raw prompt。 |
+| 11 | report does not expose raw provider response | 字段名、summary、rendering 均不暴露 raw provider response。 |
+| 12 | report does not expose credential-like fields | 不暴露 credential、token、cookie、apiKey、apiSecret、passphrase、secret。 |
+| 13 | PASS does not imply provider authorization | `PASS` 不生成 provider authorization 语义或 flag。 |
+| 14 | PASS does not imply real HTTP / real provider / LIVE | `PASS` 不产生 real HTTP、real provider、LIVE enable flag。 |
+| 15 | report does not imply trading permission | report 不输出 trading permission / execution approval。 |
+| 16 | BUY / SELL / MARKET_ORDER input fails closed | 交易方向或 market order 词不进入 `PASS`。 |
+| 17 | PLACE_ORDER / CANCEL_ORDER / MUTATE_NQ_STATE input fails closed | 执行动作或 NQ mutation 词不进入 `PASS`。 |
+| 18 | no Provider SDK / HTTP client / Agent / LangGraph classes are introduced | architecture / source scan 无新增禁用类、依赖或 import。 |
+| 19 | report generation failure fails closed | report 组装失败转 `FAIL` / `SKIPPED` 或内部安全异常，不返回半成品 `PASS`。 |
+| 20 | quality validate passes | `mvn -ntp -Pquality validate` 通过；`mvnw.cmd` 风险原样记录。 |
+
+### Validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `F:\project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -20` | PASS | 包含 `cfad68a feat(qdr): add provider readiness guard policy evaluation` 与 `e4d299d docs(qdr): close provider readiness guard policy evaluation`。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 whitespace error、tracked diff 或 staged diff。 |
+| `git status --short`（文档修改后） | DOCS_ONLY_DIRTY / NO_STAGED | dirty 限于 root README 当前入口、允许的 `docs/current` 文件和新建 B4 WO；无 staged。 |
+| `git diff --check`（文档修改后） | PASS_WITH_EOL_WARNINGS | 无 whitespace error；仅 Git LF -> CRLF warning。 |
+| `git diff --stat` / `git diff --name-only`（文档修改后） | DOCS_ONLY_TRACKED_DIFF | tracked diff 限于 root README 与 `docs/current` 允许文档；新建 B4 WO 由 `git status --short` 记录。 |
+| `git diff --cached --name-only` | PASS / EMPTY | staged 为空。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 均无 diff。 |
+| safety wording scan | REVIEWED / NEGATIVE_GUARD_AND_EXISTING_DOC_HITS | 指定 `rg` 已执行；命中包括既有 `NOT STARTED` 否定态、`FACTSOURCE_POLICY.md` hard-error phrase、B4 WO 中明确的 `no acceptance-pass-as-*` 禁止项和 report/acceptance 风险说明。未发现 positive / started / enabled / allowed 误表述。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| Maven settings warning | P2 TOOLING RISK / NON_BLOCKING | 系统 Maven 仍输出 `Unrecognised tag: 'profiles'`，来源 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml`；不影响本轮 `BUILD SUCCESS`。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` manifest error；不能写成 Maven wrapper PASS。 |
+
+Boundary:
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 Repository / JDBC / Service 实现
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未修改 NQ
+未开启 LIVE
+B4 implementation 未启动
+Stage-QDR-5 final close 未启动
+未创建 tag
+未 push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-CLOSE-REVIEW validation
 
 ```text
@@ -15,7 +101,7 @@ STAGE_QDR_5_B2: DONE
 STAGE_QDR_5_B3_IMPLEMENTATION: DONE
 STAGE_QDR_5_B3_CLOSE_REVIEW: PASS
 STAGE_QDR_5_B3: CLOSED / ACCEPTED
-STAGE_QDR_5_B4: READY_FOR_PLAN_OR_WO
+B3 close review time B4 state: READY_FOR_PLAN_OR_WO / HISTORICAL_RECORD
 STAGE_QDR_5_B4_IMPLEMENTATION: NOT_STARTED
 real HTTP: NO
 real provider: NO

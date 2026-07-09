@@ -4,6 +4,87 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-WO
+
+完成 Stage-QDR-5 B4 Observability Report / Acceptance Support implementation work order。本轮只编制后续 internal report / acceptance support 的实现边界、report input/output boundary、acceptance status boundary、persistence/repository blocker、review trigger、安全门和测试矩阵。未实现 Java、未修改测试、未新增 migration、未新增 API / Controller、未新增 Repository / JDBC / Service、未接真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph 或 LIVE；未修改 NQ，未进入 B4 implementation，未进入 Stage-QDR-5 final close，未创建 tag，未 push。
+
+### Scope
+
+```text
+WORK_ORDER_ONLY
+B4_IMPLEMENTATION_BOUNDARY_DESIGN
+OBSERVABILITY_REPORT_WO
+PROVIDER_READINESS_ACCEPTANCE_SUPPORT
+CURRENT_DOCS_ACCEPTANCE_SUPPORT
+TEST_MATRIX_DESIGN
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+README.md
+docs/current/DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Work Order Result
+
+```text
+observability report target: internal report / acceptance support only
+allowed structures: ModelGatewayObservabilityReport / ProviderHealthReportSection / ProviderReadinessReportSection / ProviderReadinessAcceptanceSummary / ProviderFailureClassificationSummary / ProviderLatencyBudgetReport / ProviderTrustDecisionReport / ProviderReadinessEvidenceView / StageQdr5AcceptanceEvidence / ObservabilityReportService
+report input boundary: B1 observability summary / B2 provider health read model view / B3 readiness evaluation result and safe refs only
+report output boundary: safe refs / enum summaries / readiness decision / acceptance status / redacted summary only
+acceptance status boundary: PASS / WARN / FAIL / SKIPPED only
+persistence boundary: no migration, no production repository/JDBC by default
+blockers: B4_REPORT_STRUCTURE_BLOCKER / B4_API_REQUIRED_BLOCKER / B4_SCHEMA_EXTENSION_REQUIRED_BLOCKER / B4_REPOSITORY_EXTENSION_REQUIRED_BLOCKER
+test matrix: 20 required implementation checks
+next action: DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-IMPLEMENTATION
+```
+
+### Validation Snapshot
+
+```text
+preflight: PASS / dev / worktree clean / B3 implementation commit present / B3 close review commit present
+forbidden-scope diff: PASS / EMPTY
+safety wording scan: REVIEWED / NEGATIVE_GUARD_AND_EXISTING_DOC_HITS
+quality validate: BUILD SUCCESS / Reactor 19/19 / Checkstyle 0 / Spotless passed
+mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+### Boundary
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 Repository / JDBC / Service 实现
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未修改 NQ
+未开启 LIVE
+B4 implementation 未启动
+Stage-QDR-5 final close 未启动
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-CLOSE-REVIEW
 
 完成 Stage-QDR-5 B3 Provider Readiness Guard / Policy Evaluation security boundary / close review。本轮只做 review 与 `docs/current` 最小同步；未修改 Java 生产代码、测试代码、migration、API、Controller、Repository/JDBC、contracts、golden_cases 或 NQ。
@@ -39,7 +120,7 @@ test evidence review: PASS
 safety scan review: PASS / GUARD_AND_DOC_HITS_ONLY
 STAGE_QDR_5_B3_CLOSE_REVIEW: PASS
 STAGE_QDR_5_B3: CLOSED / ACCEPTED
-STAGE_QDR_5_B4: READY_FOR_PLAN_OR_WO
+B3 close review time B4 state: READY_FOR_PLAN_OR_WO / HISTORICAL_RECORD
 STAGE_QDR_5_B4_IMPLEMENTATION: NOT_STARTED
 ```
 
