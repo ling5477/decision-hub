@@ -3,6 +3,90 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-WO validation
+
+```text
+Task type: WORK_ORDER_ONLY + B2_IMPLEMENTATION_BOUNDARY_DESIGN + PROVIDER_HEALTH_READ_MODEL_WO + MODEL_GATEWAY_OBSERVABILITY_READ_MODEL + SECURITY_BOUNDARY_DESIGN + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+STAGE_QDR_5_B1: DONE
+STAGE_QDR_5_B1_COMMIT: feat(qdr): add model gateway observability contracts
+STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO: DONE / WORK_ORDER_ONLY
+STAGE_QDR_5_B2_IMPLEMENTATION: NOT_STARTED
+STAGE_QDR_5_B3: NOT_STARTED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### B2 implementation test matrix
+
+| # | Test item | Expected result |
+| --- | --- | --- |
+| 1 | provider health query by tenantId + providerRef succeeds | 返回当前 tenant 下 matching provider health view。 |
+| 2 | gateway call observability query by tenantId + modelGatewayVersionRef succeeds | 返回 matching gateway call observability view。 |
+| 3 | trace lookup by tenantId + traceId succeeds | 只返回当前 tenant 的 trace evidence。 |
+| 4 | request lookup by tenantId + sourceRequestId succeeds | 只返回当前 tenant 的 source request evidence。 |
+| 5 | tenantless query fails closed | 构造 query 或 service entry 直接拒绝，repository 不被调用。 |
+| 6 | UUID-only query is absent or rejected | service 不提供 UUID-only selector；如出现 UUID-only 输入必须拒绝。 |
+| 7 | cross-tenant read returns empty or fail-closed | tenant mismatch 不返回他租户数据，也不泄露存在性。 |
+| 8 | list query is paginated | 所有 list path 使用 limit / offset。 |
+| 9 | pageSize > 100 is rejected or capped | 默认 reject；如 cap 必须记录 cap 规则且测试覆盖。 |
+| 10 | report/view does not expose raw prompt | view 字段名和 rendering 均不出现 raw prompt。 |
+| 11 | report/view does not expose raw provider response | view 字段名和 rendering 均不出现 raw provider response。 |
+| 12 | report/view does not expose credential-like fields | 不暴露 credential、token、cookie、apiKey、apiSecret、passphrase、secret。 |
+| 13 | failure classification appears as safe enum only | 只输出 `ProviderFailureClassification` 或安全 view，不输出原始异常。 |
+| 14 | trust decision does not imply provider authorization | `ALLOWED` 不产生 authorization / permission / live wording。 |
+| 15 | readiness signal does not imply real HTTP / provider / LIVE | `READY` 不产生 real provider、HTTP 或 LIVE enable flag。 |
+| 16 | provider-health-as-trading-signal guard is enforced | 不出现 BUY / SELL / PLACE_ORDER / CANCEL_ORDER 或 execution signal。 |
+| 17 | provider/HTTP/Provider SDK/Agent/LangGraph classes are not introduced | architecture / source scan 无新增禁用类、依赖或 import。 |
+| 18 | report/read failure fails closed | read model 组装或 repository 失败转内部 fail-closed exception / empty，不返回半成品。 |
+| 19 | quality validate passes | `mvn -ntp -Pquality validate` 通过；`mvnw.cmd` 风险原样记录。 |
+
+### Validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `F:\project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -20` | PASS | 包含 `7aed5e8 feat(qdr): add model gateway observability contracts`。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 whitespace error、tracked diff 或 staged diff。 |
+| `git status --short`（文档修改后） | DOCS_ONLY_DIRTY / NO_STAGED | dirty 限于 root README 当前入口、`docs/current` 允许文档和新建 B2 WO；无 staged。 |
+| `git diff --check`（文档修改后） | PASS_WITH_EOL_WARNINGS | 无 whitespace error；仅 Git LF -> CRLF warning。 |
+| `git diff --stat` / `git diff --name-only`（文档修改后） | DOCS_ONLY_TRACKED_DIFF | tracked diff 限于 root README 当前入口与 `docs/current` 允许文档；新建 B2 WO 由 `git status --short` 记录。 |
+| `git diff --cached --name-only` | PASS / EMPTY | staged 为空。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 均无 diff。 |
+| safety wording scan | REVIEWED / EXISTING_FALSE_POSITIVE_ONLY | 命中来自 `AGENTS.md`、`.agents`、`API.md` 的 `NOT STARTED` 否定状态、`FACTSOURCE_POLICY.md` hard-error phrase、`DB_SCHEMA.md` 历史/supporting 段落跨句误报、`DH_STAGE_QDR_5_PLAN.md` 后置风险说明；本轮 B2 WO 未把 real HTTP/provider/Provider SDK/Agent/LangGraph/LIVE 写成开启，也未把 raw material 或 credential material 写成许可。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| Maven settings warning | P2 TOOLING RISK / NON_BLOCKING | 系统 Maven 仍输出 `Unrecognised tag: 'profiles'`，来源 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml`；不影响本轮 `BUILD SUCCESS`。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+
+Boundary:
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 Repository / JDBC / Service 实现
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未修改 NQ
+未开启 LIVE
+未进入 B2 implementation
+未进入 B3
+未创建 tag
+未 push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS validation
 
 ```text
@@ -80,7 +164,7 @@ Boundary:
 未启动 Agent runtime
 未开启 LIVE
 未保存 raw prompt / raw provider response / credential
-未生成 provider health / provider readiness / gateway observability trading signal
+未生成 provider-health-as-trading-signal / provider-readiness-as-live-permission / gateway-observability-as-execution-signal
 未进入 B2/B3 implementation
 未创建 tag
 未 push

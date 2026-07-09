@@ -27,11 +27,17 @@ STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
 STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
 STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
 STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
-STAGE_QDR_5_IMPLEMENTATION: NOT_STARTED
+STAGE_QDR_5_B1: DONE / MODEL_GATEWAY_OBSERVABILITY_CONTRACTS_ONLY
+STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO: DONE / WORK_ORDER_ONLY
+STAGE_QDR_5_B2_IMPLEMENTATION: NOT_STARTED
+STAGE_QDR_5_B3: NOT_STARTED
+STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_WO_DONE / IMPLEMENTATION_NOT_STARTED
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
-ALLOW_STAGE_QDR_5_B1_IMPLEMENTATION: YES
-ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_5_B1_IMPLEMENTATION: YES / CONSUMED
+ALLOW_STAGE_QDR_5_B2_PLAN_OR_WO: YES
+ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION: YES
+ALLOW_STAGE_QDR_5_B2_IMPLEMENTATION_NOW: YES / AFTER_B2_WO
 ALLOW_STAGE_QDR_5_B3_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
@@ -44,8 +50,8 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
-next action: DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS
+current task: DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-WO
+next action: DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-IMPLEMENTATION
 ```
 
 ## Stage-QDR-4 归档状态
@@ -78,9 +84,10 @@ docs/current/TESTING.md
 docs/current/ARCHIVE_INDEX.md
 docs/current/DH_STAGE_QDR_5_PLAN.md
 docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
+docs/current/DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
 ```
 
-Stage-QDR-4 的详细 plan / work order / implementation work order 已归档到 `docs/gates/stage-qdr-4/`，不再保留在 `docs/current`。Stage-QDR-5 的 planning 入口是 `docs/current/DH_STAGE_QDR_5_PLAN.md`；implementation work order 入口是 `docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md`。
+Stage-QDR-4 的详细 plan / work order / implementation work order 已归档到 `docs/gates/stage-qdr-4/`，不再保留在 `docs/current`。Stage-QDR-5 的 planning 入口是 `docs/current/DH_STAGE_QDR_5_PLAN.md`；implementation work order 入口是 `docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md`；B2 Provider Health / Gateway Call Read Model work order 入口是 `docs/current/DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md`。
 
 ## Supporting Docs
 
@@ -104,6 +111,7 @@ FACTSOURCE_POLICY.md       事实源与 blocker 规则
 ARCHIVE_INDEX.md           已归档文档索引
 DH_STAGE_QDR_5_PLAN.md     Stage-QDR-5 plan-only 记录
 DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md Stage-QDR-5 implementation batch 边界与测试矩阵
+DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md Stage-QDR-5 B2 internal read model implementation work order
 WORKLOG.md                 本轮文档治理记录，supporting only
 ROADMAP.md                 路线摘要，supporting only
 API.md                     API 实现状态摘要，supporting only

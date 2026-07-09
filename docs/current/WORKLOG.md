@@ -4,6 +4,76 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-WO
+
+完成 Stage-QDR-5 B2 Provider Health / Gateway Call Read Model implementation work order。本轮只编制后续 internal read model 的实现边界、query 边界、view 内容边界、persistence/repository blocker、API blocker、review 触发规则、安全门和测试矩阵；未实现 Java、未修改测试、未新增 migration、未新增 API / Controller、未新增 Repository / JDBC / Service、未接真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph 或 LIVE；未修改 NQ，未创建 tag，未 push。
+
+### Scope
+
+```text
+WORK_ORDER_ONLY
+B2_IMPLEMENTATION_BOUNDARY_DESIGN
+PROVIDER_HEALTH_READ_MODEL_WO
+MODEL_GATEWAY_OBSERVABILITY_READ_MODEL
+SECURITY_BOUNDARY_DESIGN
+TEST_MATRIX_DESIGN
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+README.md
+docs/current/DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Work Order Result
+
+```text
+read model target: Provider Health / Gateway Call Read Model
+allowed structures: ProviderHealthReadModelQuery/View, ModelGatewayCallObservabilityView, ProviderFailureClassificationView, ProviderLatencyBudgetView, ProviderTrustDecisionView, ProviderReadinessSignalView, ProviderHealthReadModelService
+query boundary: tenant-bound only; no UUID-only query, tenantless list, cross-tenant read, unbounded list, or pageSize > 100 without reject/cap
+view boundary: safe refs, hashes, redacted summary and enum summaries only
+persistence boundary: reuse existing model gateway call persistence / QDR gateway result / B1 contracts / QDR safety guards; schema or repository expansion triggers blocker
+API boundary: no API / Controller by default; API need triggers blocker
+review triggers: API / migration / production repository expansion / security boundary / P0-P1 blocker only
+next action: DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-IMPLEMENTATION
+```
+
+### Boundary
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 Repository / JDBC / Service 实现
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 Agent / LangGraph runtime
+未修改 NQ
+未开启 LIVE
+未进入 B2 implementation
+未进入 B3
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B1-MODEL-GATEWAY-OBSERVABILITY-CONTRACTS
 
 完成 Stage-QDR-5 B1 model gateway observability contracts。本轮只新增 usecase 层内存 contract、fail-closed contract service 与 unit test；未新增 migration、API、Controller、Repository/JDBC/persistence、真实 HTTP client、真实 provider、Provider SDK、Agent runtime、LangGraph runtime 或 LIVE 能力，未修改 NQ，未创建 tag，未 push。
