@@ -62,7 +62,8 @@ B5 close review 已 YES / ACCEPTED。
 stage-qdr-3 acceptance 已 ACCEPTED。
 stage-qdr-3 final close 已 CLOSED / ACCEPTED。
 stage-qdr-4 planning 已 DONE / PLAN_ACCEPTED。
-stage-qdr-4 implementation 仍为 NOT_STARTED / NO。
+stage-qdr-4 已 CLOSED / ACCEPTED / ARCHIVED。
+stage-qdr-4 tag 仍为 PENDING。
 ```
 
 `pre-close-current-snapshot-20260707/` 保存上一轮压缩 current docs 前的入口文件快照。`current-docs-historical-20260708/` 保存本轮从 `docs/current` 移出的历史阶段文档、旧 integration planning / review / work order、审计报告、旧 workflow support 文档和其他非 current blocker 文件。

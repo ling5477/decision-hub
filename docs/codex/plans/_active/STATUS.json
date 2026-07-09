@@ -1,4 +1,7 @@
 {
+  "authority": "HISTORICAL_NON_AUTHORITATIVE",
+  "currentFactsource": "docs/current",
+  "authorityNote": "Retained for historical docs/codex JSON sanity only. Do not use as current Decision Hub workflow state.",
   "milestone": "Stage1-CLOSE",
   "activePlanId": "2026-05-25_Stage1_agent_runtime_skeleton",
   "state": "ACTIVE",

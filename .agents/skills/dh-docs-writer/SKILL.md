@@ -136,6 +136,8 @@ Do not use old `Integration-0 not started / plan only` lines as current authorit
 - `README.md` is an entry and concise status summary; do not make it the full fact source.
 - New planning documents must be indexed from `docs/current/README.md`.
 - Every documentation change must synchronize relevant indexes. Do not create orphan documents.
+- Documentation synchronization must be minimal and directly related to the current task. Do not require full current-doc rewrites for every batch.
+- Supporting docs such as `API.md`, `DB_SCHEMA.md`, `TESTING.md`, and `WORKLOG.md` may contain historical noise. Mark it as supporting or historical when needed; do not bulk rewrite history unless explicitly authorized.
 - Do not write a command as passed unless it was actually run and passed.
 - Do not write a validation as complete when it was skipped, blocked, or failed.
 
@@ -159,6 +161,11 @@ DH 文档与注释默认使用中文为主，英文只保留在稳定工程标�
 - Do not edit historical gate snapshots as if they were current docs.
 - If historical facts are stale, write current-doc clarification or errata rather than mutating the frozen snapshot.
 - Archive governance is documentation-only and must not authorize business code, CI, migration, backend, frontend, Python, LIVE, AI runtime, DH runtime, RealClient, real provider, credential, or exchange changes.
+- Archive close and tag close are separate tasks. Archive close records the closed stage and archive commit; tag close may only happen after the archive commit exists and the tag task is explicitly authorized.
+- Never mark a tag as created unless the tag command actually created it. Keep tag state as `PENDING` until then.
+- Standalone review cadence is limited to migration, API / Controller, security boundary, stage close, and P0 / P1 blocker. Ordinary batches use implementation + tests + boundary scan + minimal docs + commit.
+- Stage-QDR-5 must be planning-first and must not start implementation, runtime, provider, HTTP, Agent, LangGraph, or LIVE from a cleanup, archive, tag, or close task.
+- Use the actual repository path from the current environment. Do not hardcode local drive paths as facts. Keep NQ dev and NQ integration worktrees separate.
 
 ## State Vocabulary
 

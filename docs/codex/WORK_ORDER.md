@@ -1,23 +1,38 @@
-# WORK_ORDER（唯一权威）
+# WORK_ORDER（historical / non-authoritative）
 
-本仓库为 **Codex 续跑型工作流**：计划与状态落盘驱动执行。为避免空转，所有规则只在本文件定义，其他文件不得复制口径。
+本文件是早期 Codex 续跑型工作流的历史记录与辅助执行说明，不再作为 Decision Hub 当前事实源、当前状态机或当前 workflow guard。
 
-## 启动必读（强制，最小集合）
+当前事实源只使用：
+
+```text
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/TESTING.md
+docs/current/ARCHIVE_INDEX.md
+docs/current/FACTSOURCE_POLICY.md
+```
+
+`docs/codex/**` 可用于历史追溯和 JSON sanity check，但不得覆盖 `docs/current` 的当前结论，不得驱动 tag、Stage-QDR-5、runtime、provider、HTTP、Agent、LangGraph 或 LIVE。
+
+## 历史启动入口（非当前 authority）
 1) `docs/codex/WORK_ORDER.md`
-2) `docs/codex/plans/_active/STATUS.json`（可选再读：`PLAN.md`）
+2) `docs/codex/plans/_active/STATUS.json`
 
-> 说明：当前激活计划固定映射到 `docs/codex/plans/_active/`。  
-> `PLAN_QUEUE.json` 与 `PLAN_CURRENT_POINTER.json` 仅用于**人类排期/追溯**，不再作为 Codex 决策必读与门禁依赖。
+> 说明：`docs/codex/plans/_active/` 只保留旧 Stage1-CLOSE 状态记录。当前 Decision Hub QDR 阶段不得再依赖它作为 current workflow state。
+> `PLAN_QUEUE.json` 与 `PLAN_CURRENT_POINTER.json` 仅用于**人类排期/追溯**，不作为当前 Codex 决策必读与门禁依赖。
 
-## 状态机与推进规则（强制）
+## 历史状态机与推进规则（只适用于旧 docs/codex 记录）
 - `STATUS.json.activeStepIdx` **必须等于** `steps` 中第一个 `status != DONE` 的 `idx`（即“第一个未完成步骤”）。
 - `IN_PROGRESS` 只允许出现在 `idx == activeStepIdx` 的步骤上（最多 1 个）。
 - `status` 枚举：`TODO | IN_PROGRESS | DONE | BLOCKED | SKIPPED`。
 - 若步骤被阻塞：设置 `status=BLOCKED`，并在 `evidence` 中写明阻塞原因与解除条件（可引用 ISSUE 或依赖项）。
 - 若确需跳过：使用 `SKIPPED`，并在 `evidence` 中写明原因与风险；禁止通过修改 `activeStepIdx` 实现隐式跳步。
 
-## 计划与落盘（强制）
-- 涉及实现/修改时：必须将计划写入 `docs/codex/plans/_active/PLAN.md`（可追加，不要覆盖历史），再开始修改代码/配置。
+## 计划与落盘（历史规则）
+- 旧 docs/codex delivery 任务曾要求将计划写入 `docs/codex/plans/_active/PLAN.md`（可追加，不要覆盖历史），再开始修改代码/配置。
+- 当前 DH QDR 与文档纪律任务必须以 `docs/current/WORK_ORDER.md` 和本轮用户授权为准。
 - 每次推进（至少一个步骤状态变化）后：必须更新 `STATUS.json.updatedAt`，并补充该步骤 `evidence`。
     - `evidence` 至少包含：
         - `files`：本次涉及的文件路径列表（新增/修改/删除）
@@ -55,7 +70,7 @@
     4) 更新 `_active/STATUS.json`（evidence + lastVerify）
     5) 输出 `git diff --stat`
 
-## 任务类型与验证门禁（强制）
+## 任务类型与验证门禁（历史规则）
 - `taskType=delivery`：存在代码/配置/契约变更，必须运行 `scripts/verify.ps1`（本质 `mvn verify`），并回填 `STATUS.json.lastVerify`：
     - `time`：执行时间
     - `result`：`PASS | FAIL`

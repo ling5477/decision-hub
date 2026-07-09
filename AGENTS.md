@@ -41,15 +41,17 @@ docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/README.md
 docs/current/STATUS.md
 docs/current/ROADMAP.md
-docs/current/WORKFLOW.md
 docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/ARCHIVE_INDEX.md
+docs/current/FACTSOURCE_POLICY.md
 ```
 
-涉及 DH/NQ 集成时，还必须读取：
+涉及 DH/NQ 集成时，只能读取当前 factsources 明确索引且实际存在的集成文档；已归档或历史集成文档只能作为 background evidence，不得覆盖 `docs/current` 当前结论。
 
 ```text
-docs/current/DH_NQ_INTEGRATION.md
-docs/current/DH_REFACTOR_STAGE1_WORK_ORDER.md
+docs/current
+docs/gates/**
 ```
 
 `docs/current` 是唯一当前事实源。
@@ -79,14 +81,35 @@ docs/current/TESTING.md
 ## 4. 当前阶段
 
 ```text
-当前阶段: NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE / CLOSED / ACCEPTED
-下一阶段: NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED
+当前任务: DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION / DOCUMENTATION_CLEANUP
+当前阶段: STAGE_QDR_4 / CLOSED / ACCEPTED / ARCHIVED
+当前 tag: STAGE_QDR_4_TAG / PENDING
+当前事实源: docs/current
+下一步: DH-STAGE-QDR-4-TAG-CLOSE（仅在本轮 cleanup 完成、工作区 clean、用户明确进入 tag close 任务后）
+Stage-QDR-5: PLANNING_FIRST_ONLY / NOT STARTED
 事实源: docs/current
 ```
 
-Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架（dh-usecase service + DTO + Repository / dh-connector Fake + Disabled client / dh-app Stage3NqBacktestWiringConfig 三层 gate / ArchUnit 扩到 12 条）；190 tests 全绿；无真实 HTTP；无 RealNqBacktestClient。
+Stage-QDR-4 Replay / Evaluation / Regression Baseline 已 `CLOSED / ACCEPTED / ARCHIVED`；归档 commit 为 `3689251 docs(qdr): archive stage-qdr-4 replay evaluation baseline`，tag `dh-stage-qdr-4-close` 仍为 `PENDING`。当前任务先修复文档纪律、workflow authority、skill policy、archive policy 和 current factsource，不创建 tag，不进入 Stage-QDR-5。
 
-Integration-0 safety gate 已 `CLOSED / ACCEPTED`；P1-4 residual、header alignment、timestamp alignment、code reality audit blockers 均已关闭或修复。`DH-STAGE4-DECISION-PIPELINE-MVP-PLAN` 与 `DH-STAGE4-DECISION-PIPELINE-MVP-WO` 已 `ACCEPTED / CLOSED`；K1-K8 已 `CLOSED / ACCEPTED`，Decision Pipeline MVP 已以 DH Stage4 canonical 命名关闭。旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与 `docs/gates/dh-gatek-decision-pipeline-mvp/` 已标记为 `SUPERSEDED / NAMING_REPLACED`，不得再作为当前阶段、当前任务名或新冻结目录。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 只能作为 historical reference，当前标记为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。`NQ-DH-I1-P0-FACTSOURCE-REBASE-CONTINUE` 已 `CLOSED / ACCEPTED / DOCS-ONLY`；当前下一步只允许 `NQ-DH-I1-P1-CONTRACT-DRYRUN-PLAN / NOT STARTED`，且仍为 plan-only；不允许启动 Integration-1 runtime、真实 NQ runtime、真实 Provider、真实 HTTP、LangGraph runtime、AI / Agent runtime 或 LIVE。Stage3 规划冻结快照位于 docs/gates/dh-stage3-plan/。
+当前必须保持：
+
+```text
+DOCS_DISCIPLINE_CLEANUP_WO: DONE
+ALLOW_DOCS_DISCIPLINE_CLEANUP_IMPLEMENTATION: YES
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_4_TAG: PENDING
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
+ALLOW_STAGE_QDR_5_PLAN_NOW: NO
+ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+```
+
+Integration-0 safety gate 已 `CLOSED / ACCEPTED`；P1-4 residual、header alignment、timestamp alignment、code reality audit blockers 均已关闭或修复。`DH-STAGE4-DECISION-PIPELINE-MVP-PLAN` 与 `DH-STAGE4-DECISION-PIPELINE-MVP-WO` 已 `ACCEPTED / CLOSED`；K1-K8 已 `CLOSED / ACCEPTED`，Decision Pipeline MVP 已以 DH Stage4 canonical 命名关闭。旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与旧 `docs/gates/dh-gatek-decision-pipeline-mvp/` 只能作为 historical naming error；当前 canonical 目录为 `docs/gates/dh-stage4-decision-pipeline-mvp/`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 只能作为 historical reference，当前标记为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。当前不允许启动 Integration-1 runtime、真实 NQ runtime、真实 Provider、真实 HTTP、LangGraph runtime、AI / Agent runtime 或 LIVE。
 
 NQ / DH 三轮只读审计（NQ 全仓 / DH 全仓 / NQ-DH 联合边界 + 汇总）已完成，结论同步在 `docs/current/STATUS.md` §1.1。当前口径固定为：
 
@@ -134,31 +157,30 @@ DH 不成为交易事实源
 
 ## 6. 允许改动范围
 
-DH-REFIT-1-WO 允许改：
+当前 `DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION` 只允许改文档、workflow guard 和本仓库 `.agents` skill policy：
 
 ```text
-dh-domain
-dh-usecase
-dh-memory
-dh-eval
-dh-connector
-dh-api
-dh-app
-dh-infra
+AGENTS.md
+README.md
 docs/current
-contracts
-golden_cases
+docs/README.md
+docs/codex/**
+docs/gates/** 的最小 errata / index
+scripts/verify.ps1
+.agents/**
 ```
 
-当前阶段不允许改：
+当前任务不允许改：
 
 ```text
 NQ 仓库
-实盘执行链路
-订单状态机
-风控核心
-正式回测核心
-NQ Console 正式页面
+Java 生产代码
+Java 测试代码
+Flyway migration
+API / Controller
+contracts
+golden_cases
+实盘执行链路 / 订单状态机 / 风控核心 / 正式回测核心
 ```
 
 ## 7. 构建与验证
@@ -339,11 +361,13 @@ NQ mutation forbidden.
 ### 11.3 当前 Codex workflow 文档入口
 
 ```text
-docs/current/CODEX_WORKFLOW_INDEX.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
-docs/current/DH_CODEX_PLUGIN_WORKFLOW.md
-docs/current/DH_WORKFLOW_ROUTER_SKILL.md
-docs/current/DH_CODEX_TASK_TEMPLATES.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/ARCHIVE_INDEX.md
+docs/current/FACTSOURCE_POLICY.md
 .agents/skills/nq-dh-workflow-router/SKILL.md
 .agents/skills/dh-docs-writer/SKILL.md
 ```

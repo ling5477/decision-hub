@@ -3,6 +3,51 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION validation
+
+```text
+Task type: DOCUMENTATION_CLEANUP_IMPLEMENTATION + WORKFLOW_AUTHORITY_REPAIR + SKILL_POLICY_FIX + ARCHIVE_POLICY_FIX + CURRENT_FACTSOURCE_REPAIR + TOOLING_GUARD_UPDATE + NO_JAVA_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_TAG + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+branch: dev
+current workspace: resolved by Get-Location for this run
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_4_TAG: PENDING
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
+ALLOW_STAGE_QDR_5_PLAN_NOW: NO
+ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
+```
+
+Validation summary:
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前工作区由命令确认；文档不再把本机盘符路径写成唯一事实。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -30` | PASS | 包含 `3689251 docs(qdr): archive stage-qdr-4 replay evaluation baseline`。 |
+| `git diff --check` | PASS_AFTER_FIX | 首次发现 `docs/codex/WORK_ORDER.md` trailing whitespace；已修复后通过。 |
+| `git diff --name-only -- dh-domain/src/main dh-usecase/src/main dh-app/src/main dh-infra/src/main contracts golden_cases "dh-*/src/main/resources/db/migration"` | PASS / EMPTY | 未修改 Java production、migration、contracts 或 golden_cases。 |
+| safety scan | REVIEWED / CLASSIFIED | `current-valid`: current docs / skills 中的 docs/codex 降权、archive-before-tag、pending tag、review cadence；`historical-only`: docs/gates、docs/codex archive、旧路径与旧阶段快照；`false-positive`: `NOT STARTED`、禁止项、不要写 tag created 的否定语义；`needs-fix`: trailing whitespace，已修复；`actual-risk`: 无。 |
+| `mvn -ntp -Pquality validate` | PASS | Reactor 19/19 `BUILD SUCCESS`，0 Checkstyle violations，Spotless check passed；系统 Maven settings 仍有 `Unrecognised tag: 'profiles'` warning，非本轮阻断。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 shell 报告的 slash command not recognized 与 `.mvn\\wrapper\\maven-wrapper.jar` manifest 问题；不得写成 wrapper PASS。 |
+| `git tag --list "dh-stage-qdr-4-close"` | PASS / NOT_EXISTS | 本轮未创建 tag。 |
+| `git ls-remote --tags origin | rg "dh-stage-qdr-4-close"` | PASS / NO_MATCH | 远端未观察到固定 tag。 |
+
+Boundary confirmation:
+
+```text
+Java production changes: NO
+Java test changes: NO
+DB migration changes: NO
+API / Controller changes: NO
+contracts changes: NO
+golden_cases changes: NO
+NQ changes: NO
+tag creation: NO
+push: NO
+Stage-QDR-5: NOT STARTED
+real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
+```
+
 ## 2026-07-09 DH-STAGE-QDR-4-CURRENT-DOCS-CLEANUP validation
 
 ```text

@@ -4,7 +4,7 @@
 > 必需前置 skill: `nq-dh-workflow-router`
 > 必需文档 skill: `dh-docs-writer`
 > 当前事实源: `docs/current`
-> 当前工作区: `E:/Project/decision-hub`
+> 当前工作区: 每轮用 `Get-Location` 确认；不得把本机盘符路径写成唯一事实
 
 ## 1. 当前状态锁定
 
@@ -48,8 +48,10 @@ STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
 STAGE_QDR_4_ARCHIVE: DONE
 STAGE_QDR_4_TAG: PENDING
 ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
-ALLOW_STAGE_QDR_4_TAG_CLOSE: YES
-ALLOW_STAGE_QDR_5_PLAN: YES
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
+ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES
+ALLOW_STAGE_QDR_5_PLAN_NOW: NO
+ALLOW_STAGE_QDR_5_PLAN_AFTER_TAG: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
@@ -65,7 +67,8 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-TAG-CLOSE
+current task: DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION
+next action after cleanup: DH-STAGE-QDR-4-TAG-CLOSE
 ```
 
 ## 2. 前置分类规则
@@ -120,7 +123,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成，B2 implementation 已完成并通过真实 PostgreSQL/Testcontainers Flyway load 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。B3 mock gateway regression integration plan 已 `DONE / PLAN_ONLY`，B3 mock gateway regression integration work order 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。B4 regression report / read model support plan 已 `DONE / PLAN_ONLY`，B4 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED`。`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`，Stage-QDR-4 archived; next action is tag close. Stage-QDR-4 整体 `CLOSED / ACCEPTED / ARCHIVED`。下一步只能进入 `DH-STAGE-QDR-4-TAG-CLOSE`；tag 当前 `PENDING`，不得在 archive close docs commit 与 clean worktree 前写成已创建。Stage-QDR-5 只能 planning-first，不得启动 implementation、runtime、provider、HTTP、Agent、LangGraph 或 LIVE。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成，B2 implementation 已完成并通过真实 PostgreSQL/Testcontainers Flyway load 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。B3 mock gateway regression integration plan 已 `DONE / PLAN_ONLY`，B3 mock gateway regression integration work order 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。B4 regression report / read model support plan 已 `DONE / PLAN_ONLY`，B4 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED`。`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`。Stage-QDR-4 整体 `CLOSED / ACCEPTED / ARCHIVED`，tag 当前 `PENDING`。本轮先执行 `DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION`，不得创建 tag；cleanup 完成并保持 clean 后，下一步才允许进入独立 `DH-STAGE-QDR-4-TAG-CLOSE`。Stage-QDR-5 只能在 tag close 后 planning-first，不得启动 implementation、runtime、provider、HTTP、Agent、LangGraph 或 LIVE。
 
 ## 4. 安全边界
 
@@ -142,7 +145,7 @@ DH 不启用 LIVE
 
 ## 5. 文档语言与路径规则
 
-正文使用简体中文。类名、字段名、状态枚举、HTTP header、命令、路径和外部技术名保留英文原样。当前路径统一为 `E:/Project/decision-hub`。若历史文档出现旧路径，只能作为 historical record，不得覆盖当前工作区。
+正文使用简体中文。类名、字段名、状态枚举、HTTP header、命令、路径和外部技术名保留英文原样。当前路径必须由每轮 `Get-Location` 确认，不得硬编码本机盘符路径。若历史文档出现旧路径，只能作为 historical record，不得覆盖当前工作区。
 
 ## 6. 验证纪律
 
@@ -195,8 +198,10 @@ STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
 STAGE_QDR_4_ARCHIVE: DONE
 STAGE_QDR_4_TAG: PENDING
 ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
-ALLOW_STAGE_QDR_4_TAG_CLOSE: YES
-ALLOW_STAGE_QDR_5_PLAN: YES
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
+ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES
+ALLOW_STAGE_QDR_5_PLAN_NOW: NO
+ALLOW_STAGE_QDR_5_PLAN_AFTER_TAG: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
 V9 migration: CREATED / V9__qdr_replay_evaluation_baseline.sql / POSTGRES_LOAD_VERIFIED
 Repository / JDBC implementation: DONE / TENANT_BOUND

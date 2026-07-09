@@ -99,6 +99,18 @@ Before choosing files or next actions, classify whether the task is DH-owned, NQ
 - The canonical DH Decision Pipeline MVP stage is `DH-STAGE4-DECISION-PIPELINE-MVP`; the legacy `DH-GATEK-DECISION-PIPELINE-MVP` wording is a historical error and must remain marked as `SUPERSEDED / NAMING_REPLACED` after `DH-STAGE4-NAMING-REBASE-FIX`.
 - DH `docs/gates` directories should use DH Stage IDs such as `dh-stage4-decision-pipeline-mvp`; `docs/gates/dh-gatek-*` is not a standard path for new DH freeze work.
 
+## Workflow Discipline Route
+
+Archive, tag, review, and path rules:
+
+- `archive-before-tag` is mandatory. A stage tag may be created only after the stage archive commit exists and a separate tag-close task explicitly authorizes tag creation.
+- Archive close and tag close are separate steps. Do not mark a tag as created unless the tag command actually created it and, if required, pushed it.
+- Stage-QDR-5 must be planning-first. Do not start Stage-QDR-5 implementation, runtime, provider, HTTP, Agent, LangGraph, or LIVE from a tag, cleanup, archive, or close task.
+- Only these conditions trigger standalone review: migration, API / Controller, security boundary, stage close, P0 / P1 blocker.
+- A normal batch should close as implementation + tests + boundary scan + minimal docs + commit. Do not add standalone review/freeze for every ordinary batch.
+- Use the actual repository path from the current environment. Do not hardcode local drive paths as facts.
+- NQ dev and NQ integration worktrees must not be mixed. If a task needs NQ, explicitly identify which worktree is allowed; DH documentation tasks must not modify NQ.
+
 ## DH Safety Boundary
 
 Treat DH as a multi-agent decision system only:

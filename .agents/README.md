@@ -1,11 +1,13 @@
 # Optimized Agent Skills
 
-这是从原 38 个 skills 合并后的精简版。目标是减少触发冲突、降低上下文噪声，并把零散技能合并成“可执行工作流”。
+这是从原 38 个 skills 合并后的精简版。目标是减少触发冲突、降低上下文噪声，并把零散技能合并成“可执行工作流”。当前 active skills 为 10 个，其中 `nq-dh-workflow-router` 与 `dh-docs-writer` 是 DH/NQ workflow governance skills。
 
 ## 当前 active skills
 
 | Skill | 用途 |
 |---|---|
+| `nq-dh-workflow-router` | DH/NQ 任务前置分类、范围收口、插件建议、Stage/Gate 命名与安全边界 |
+| `dh-docs-writer` | DH docs/current、work order、archive、freeze/close、事实源和文档治理 |
 | `frontend-product-ui-design` | 页面产品化、业务 UX、信息架构、状态/空态/风险提示 |
 | `ui-visual-system-polish` | 视觉层级、排版、色彩、响应式、动效、设计系统一致性 |
 | `frontend-antd-page-builder` | React + Ant Design 页面、组件、API 接入落地 |
@@ -17,23 +19,33 @@
 
 ## 使用原则
 
-1. 前端页面从需求到上线，优先使用：
+1. 所有 DH/NQ 任务先使用：
+   - `nq-dh-workflow-router`
+
+2. DH 文档治理、factsources、archive、work order、close/freeze 记录，使用：
+   - `dh-docs-writer`
+
+3. 前端页面从需求到上线，优先使用：
    - `frontend-product-ui-design`
    - `frontend-antd-page-builder`
    - `frontend-quality-regression`
 
-2. 只做视觉提升时，使用：
+4. 只做视觉提升时，使用：
    - `ui-visual-system-polish`
 
-3. Java 后端问题闭环，使用：
+5. Java 后端问题闭环，使用：
    - `java-backend-maintenance`
    - `java-backend-regression-tests`
 
-4. 数据库结构变更，使用：
+6. 数据库结构变更，使用：
    - `db-schema-migration-review`
 
-5. Python 工具和批处理，使用：
+7. Python 工具和批处理，使用：
    - `python-ops-tooling`
+
+8. Stage tag 只能在 archive commit 已存在且 tag close 任务明确授权后处理；archive close 与 tag close 必须分开。
+
+9. 普通 batch 不默认触发 standalone review。只有 migration、API / Controller、安全边界、stage close、P0 / P1 blocker 才触发 review；普通 batch 以 implementation + tests + boundary scan + minimal docs + commit 为闭环。
 
 ## 对 NexusQuant / Decision Hub 的默认约束
 
@@ -42,3 +54,5 @@
 - 服务端数据放 TanStack Query，不把服务端数据塞进 Zustand。
 - 不为了 UI 优化新增后端 API、migration 或业务能力。
 - 涉及交易、风控、恢复、停止、发布、撤单等操作时，必须展示影响范围并做二次确认。
+- 路径以当前机器 `Get-Location` 返回的真实仓库为准，不硬编码盘符路径。
+- NQ dev 与 NQ integration worktree 不得混用。

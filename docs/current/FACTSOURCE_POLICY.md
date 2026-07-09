@@ -83,8 +83,9 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: E:/Project/decision-hub
-next action: DH-STAGE-QDR-4-TAG-CLOSE
+current workspace: use Get-Location per run
+current task: DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION
+next action after cleanup: DH-STAGE-QDR-4-TAG-CLOSE
 ```
 
 ## 6. Archive Rule
@@ -92,3 +93,9 @@ next action: DH-STAGE-QDR-4-TAG-CLOSE
 `docs/gates/**` 是当前 QDR 阶段归档目录。`docs/archive/**` 不再作为本项目 QDR 阶段的新归档标准；若历史遗留目录存在，只能作为 historical reference。
 
 归档文件可以说明过去某一轮任务当时的状态，但不能作为当前事实源。若归档文档与 current factsources 冲突，以 `STATUS.md` 与 `WORK_ORDER.md` 为准。
+
+## 7. Documentation Discipline Cleanup Rule
+
+当前 `DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION` 只修复文档纪律、workflow authority、skill policy、archive policy 和 current factsource。它不创建 tag，不进入 Stage-QDR-5，不修改 Java、测试、migration、API、contracts、golden_cases 或 NQ。
+
+cleanup 完成且工作区 clean 后，才允许另起独立 `DH-STAGE-QDR-4-TAG-CLOSE`。Stage-QDR-5 只能在 tag close 后 planning-first，不得从 cleanup、archive 或 tag 任务直接进入 implementation。

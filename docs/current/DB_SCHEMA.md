@@ -4,13 +4,15 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 >
-> 当前 DB_SCHEMA 只记录已存在 migration 与 schema 边界。它不是 stage-qdr-3 B5 close review 的默认 blocker source；只有出现 `FACTSOURCE_POLICY.md` 定义的硬错误时才可升级为 blocker。
+> 当前 DB_SCHEMA 只记录已存在 migration 与 schema 边界。它不是 Stage-QDR-4 tag close 或 docs discipline cleanup 的默认 blocker source；只有出现 `FACTSOURCE_POLICY.md` 定义的硬错误时才可升级为 blocker。
 
 ## 1. 当前状态
 
 ```text
-Current stage: DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-IMPLEMENTATION / DONE / POSTGRES_FLYWAY_VERIFIED
-Next stage:    DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW / READY
+Current task:  DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION / NO_DB_MIGRATION
+Current stage: STAGE_QDR_4 / CLOSED / ACCEPTED / ARCHIVED
+Current tag:   STAGE_QDR_4_TAG / PENDING
+Next action:   DH-STAGE-QDR-4-TAG-CLOSE / TAG_CLOSE_ONLY / NO_DB_MIGRATION
 ```
 
 Flyway 迁移：

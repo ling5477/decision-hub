@@ -25,23 +25,54 @@ function Assert-JsonParsable([string]$path) {
   try { $null = $txt | ConvertFrom-Json } catch { throw ("Invalid JSON: {0} -> {1}" -f $path, $_.Exception.Message) }
 }
 
+function Assert-TextContains([string]$path, [string]$expected) {
+  if (-not (Test-Path $path)) { throw ("Missing required file: {0}" -f $path) }
+  $txt = Get-Content -Raw -Encoding UTF8 $path
+  if (-not $txt.Contains($expected)) {
+    throw ("Missing required marker in {0}: {1}" -f $path, $expected)
+  }
+}
+
 try {
-  # Fast-fail guards for Codex workflow files
+  # Fast-fail guards for current Decision Hub workflow files.
   Assert-NoBom "AGENTS.md"
-  Assert-NoBom "docs/codex/WORK_ORDER.md"
+  foreach ($p in @(
+      "README.md",
+      "docs/current/README.md",
+      "docs/current/STATUS.md",
+      "docs/current/WORK_ORDER.md",
+      "docs/current/CODEX_PROJECT_INSTRUCTIONS.md",
+      "docs/current/TESTING.md",
+      "docs/current/ARCHIVE_INDEX.md"
+    )) {
+    Assert-NoBom $p
+  }
 
-  # v3: minimal workflow guard (authoritative)
-  $activeStatus = "docs/codex/plans/_active/STATUS.json"
-  Assert-NoBom $activeStatus
-  Assert-JsonParsable $activeStatus
+  # Current authority guard: docs/current is the current factsource.
+  Assert-TextContains "docs/current/STATUS.md" "STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED"
+  Assert-TextContains "docs/current/STATUS.md" "STAGE_QDR_4_TAG: PENDING"
+  Assert-TextContains "docs/current/STATUS.md" "ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO"
+  Assert-TextContains "docs/current/STATUS.md" "ALLOW_STAGE_QDR_5_PLAN_NOW: NO"
+  Assert-TextContains "docs/current/STATUS.md" "ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO"
+  Assert-TextContains "docs/current/STATUS.md" "ALLOW_REAL_HTTP: NO"
+  Assert-TextContains "docs/current/STATUS.md" "ALLOW_REAL_PROVIDER: NO"
+  Assert-TextContains "docs/current/STATUS.md" "ALLOW_AGENT_PHASE: NO"
+  Assert-TextContains "docs/current/STATUS.md" "ALLOW_LANGGRAPH_RUNTIME: NO"
+  Assert-TextContains "docs/current/STATUS.md" "ALLOW_LIVE: NO"
+  Assert-TextContains "docs/current/WORK_ORDER.md" "DH-STAGE-QDR-4-TAG-CLOSE"
+  Assert-TextContains "docs/current/CODEX_PROJECT_INSTRUCTIONS.md" "docs/current"
 
-  # v3: queue/pointer are informational only (non-blocking)
-  foreach ($p in @("docs/codex/PLAN_QUEUE.json", "docs/codex/PLAN_CURRENT_POINTER.json")) {
+  # Historical docs/codex files are JSON sanity checks only, not current workflow authority.
+  foreach ($p in @(
+      "docs/codex/plans/_active/STATUS.json",
+      "docs/codex/PLAN_QUEUE.json",
+      "docs/codex/PLAN_CURRENT_POINTER.json"
+    )) {
     try {
       Assert-NoBom $p
       Assert-JsonParsable $p
     } catch {
-      Write-Warning ("Non-blocking workflow file issue: {0} -> {1}" -f $p, $_.Exception.Message)
+      Write-Warning ("Non-blocking historical docs/codex issue: {0} -> {1}" -f $p, $_.Exception.Message)
     }
   }
 

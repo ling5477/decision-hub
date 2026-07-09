@@ -3,9 +3,9 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-4-ARCHIVE-CLOSE / DONE
-next action: DH-STAGE-QDR-4-TAG-CLOSE
-mode: DOCUMENTATION_ONLY + STAGE_ARCHIVE_CLOSE + QDR_REPLAY_EVALUATION_REGRESSION_ARCHIVE + TAG_PREP + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current task: DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION
+next action after cleanup: DH-STAGE-QDR-4-TAG-CLOSE
+mode: DOCUMENTATION_CLEANUP_IMPLEMENTATION + WORKFLOW_AUTHORITY_REPAIR + SKILL_POLICY_FIX + ARCHIVE_POLICY_FIX + CURRENT_FACTSOURCE_REPAIR + TOOLING_GUARD_UPDATE + NO_JAVA_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_TAG + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
 stage-qdr-3 close review: YES / B5 ACCEPTED
 stage-qdr-3 acceptance: ACCEPTED
 stage-qdr-3 final close: CLOSED / ACCEPTED
@@ -35,12 +35,14 @@ STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
 stage-qdr-4 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
 STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_4: CLOSED / ACCEPTED
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
 STAGE_QDR_4_ARCHIVE: DONE
 STAGE_QDR_4_TAG: PENDING
 ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
-ALLOW_STAGE_QDR_4_TAG_CLOSE: YES
-ALLOW_STAGE_QDR_5_PLAN: YES
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
+ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES
+ALLOW_STAGE_QDR_5_PLAN_NOW: NO
+ALLOW_STAGE_QDR_5_PLAN_AFTER_TAG: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
@@ -51,7 +53,7 @@ ALLOW_REAL_PROVIDER: NO
 ALLOW_AGENT_PHASE: NO
 ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
-current workspace: E:/Project/decision-hub
+current workspace: use Get-Location per run
 ```
 
 ## 2. 当前前置状态
@@ -88,12 +90,14 @@ STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
 stage-qdr-4 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
 STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_4: CLOSED / ACCEPTED
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
 STAGE_QDR_4_ARCHIVE: DONE
 STAGE_QDR_4_TAG: PENDING
 ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
-ALLOW_STAGE_QDR_4_TAG_CLOSE: YES
-ALLOW_STAGE_QDR_5_PLAN: YES
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
+ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES
+ALLOW_STAGE_QDR_5_PLAN_NOW: NO
+ALLOW_STAGE_QDR_5_PLAN_AFTER_TAG: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
 real HTTP: NO
 real provider: NO
@@ -142,7 +146,7 @@ DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO 已完�
 B4 WO 已冻结后续 implementation 的 internal read model / report service 目标、允许结构、tenant-bound query、report content、drift summary、B2/V9 persistence reuse、redaction/trading-term guard、fail-closed、测试矩阵、validation、安全扫描、review/close 和 tag 后置规则
 B4 implementation 已完成 tenant-bound internal regression report / read model support，新增 query/view/drift/service 与 usecase 回归测试，复用 B2/V9 repository ports，不新增 migration、V10、API、Controller 或生产 JDBC 查询
 Stage-QDR-4 final close review 已完成并判定 PASS；B1-B4 整体关闭为 CLOSED / ACCEPTED / ARCHIVED
-下一步只允许 DH-STAGE-QDR-4-TAG-CLOSE
+本轮只允许 DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION；cleanup 完成并保持 clean 后，下一步才允许 DH-STAGE-QDR-4-TAG-CLOSE
 不得新增 API / Controller，除非后续 implementation 停止并输出 B4_API_REQUIRED_BLOCKER，再进入单独 API freeze review
 不得直接打 tag；stage tag 只允许在 archive close docs commit 后由 DH-STAGE-QDR-4-TAG-CLOSE 处理
 保持 no real HTTP / provider / SDK / Agent / LangGraph / LIVE
@@ -169,9 +173,9 @@ Stage-QDR-4 final close review 已完成并判定 PASS；B1-B4 整体关闭为 C
 禁止回退或重写已关闭的 B1-B4 evidence
 禁止 B4 与 B5 合并
 禁止 B4 implementation 中直接新增 API / Controller；如确需 API，必须先输出 B4_API_REQUIRED_BLOCKER
-禁止在 final close docs commit 前打 tag
+禁止在 docs discipline cleanup 完成前打 tag；tag close 必须是独立任务
 禁止把 Stage-QDR-4 tag 写成已创建，直到 annotated tag 实际创建并推送
-Stage-QDR-5 只能 planning-first，不得启动 implementation/runtime/provider/HTTP/Agent/LangGraph
+Stage-QDR-5 只能在 tag close 后 planning-first，不得启动 implementation/runtime/provider/HTTP/Agent/LangGraph
 禁止启用 LIVE
 禁止 git push
 禁止 git commit，除非用户另行明确授权

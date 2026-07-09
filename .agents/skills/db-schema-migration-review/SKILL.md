@@ -43,7 +43,22 @@ argument-hint: "[ddl, migration, schema, or table]"
 - TIMESTAMPTZ 写入优先使用 `Timestamp.from(Instant)`。
 - 交易、风控、恢复、审计类表必须有追踪字段。
 - 关键状态字段必须有 CHECK 约束。
-- Gate freeze 前不夹带无关 schema 改造。
+- Gate / DH Stage freeze 前不夹带无关 schema 改造。
+
+## 触发条件
+
+必须触发 migration / schema review：
+
+- 新增、删除、重命名或修改表、字段、索引、约束、默认值、COMMENT。
+- 新增或修改 Flyway / Liquibase migration。
+- 涉及回填、历史数据兼容、锁表风险或 schema 语义变化。
+- 影响审计、租户、权限、资金、订单、风控、回放、trace、replay、approval 或 QDR 主线表。
+
+不触发 migration freeze：
+
+- 明确 `NO_DB_MIGRATION` 的普通 batch。
+- 仅修改文档、skill policy、workflow guard、测试说明或 current factsources。
+- 仅使用既有 schema 的 Service / read model / DTO 调整，且没有 schema 语义变化。
 
 ## 输出格式
 

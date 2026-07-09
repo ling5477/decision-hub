@@ -20,12 +20,14 @@ stage-qdr-4 B2: CLOSED / ACCEPTED
 stage-qdr-4 B3: CLOSED / ACCEPTED
 stage-qdr-4 B4: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
 STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_4: CLOSED / ACCEPTED
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
 STAGE_QDR_4_ARCHIVE: DONE
 STAGE_QDR_4_TAG: PENDING
 ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
-ALLOW_STAGE_QDR_4_TAG_CLOSE: YES
-ALLOW_STAGE_QDR_5_PLAN: YES
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
+ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES
+ALLOW_STAGE_QDR_5_PLAN_NOW: NO
+ALLOW_STAGE_QDR_5_PLAN_AFTER_TAG: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
@@ -37,8 +39,9 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: E:/Project/decision-hub
-next action: DH-STAGE-QDR-4-TAG-CLOSE
+current workspace: use Get-Location per run
+current task: DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION
+next action after cleanup: DH-STAGE-QDR-4-TAG-CLOSE
 ```
 
 ## Stage-QDR-4 归档状态
@@ -54,7 +57,7 @@ STAGE_QDR_4_TAG: PENDING
 next tag: dh-stage-qdr-4-close
 ```
 
-Stage-QDR-4 归档不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。下一步仅允许 `DH-STAGE-QDR-4-TAG-CLOSE`；Stage-QDR-5 只能在 tag close 后 planning-first。
+Stage-QDR-4 归档不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。本轮先完成 `DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION`，不得创建 tag；cleanup 完成并保持 clean 后，下一步才允许进入独立 `DH-STAGE-QDR-4-TAG-CLOSE`。Stage-QDR-5 只能在 tag close 后 planning-first。
 
 ## 当前事实源
 

@@ -12,6 +12,19 @@
 
 冻结快照原本验收结论仍为 `ACCEPTED / CLOSED`。目录内部分历史文件名、历史命令输出和冻结时刻记录仍可能保留 `DH_GATEK`、`DH-GATEK`、`GateK` 或 `dh-gatek` 字样；这些只代表原始历史记录或旧错误命名，不得作为当前事实源。当前事实源以 `docs/current` 中的 `DH-STAGE4-DECISION-PIPELINE-MVP` 和 `NQ GateN + DH Stage4 Decision Pipeline MVP CLOSED` 为准。
 
+## 0.1 文档纪律勘误索引（2026-07-09）
+
+本目录是冻结快照，不做大规模历史正文重写。`DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION` 仅确认以下索引规则：
+
+```text
+legacy GateK wording: historical-only / naming residual
+current authority: docs/current
+current Stage4 canonical name: DH-STAGE4-DECISION-PIPELINE-MVP
+do not treat archived GateK wording as current task name
+do not use this archive to start Stage-QDR-5 implementation
+do not use this archive to authorize provider / HTTP / Agent / LangGraph / LIVE
+```
+
 ## 1. 冻结范围
 
 本目录是 `docs/current` 在 DH Stage4 Decision Pipeline MVP K8 acceptance / freeze 关闭时的历史快照，包含当前事实源文档、Stage4 plan/work order、acceptance report、测试记录、工作日志、API 事实说明、Integration-0 安全文档和 Stage 历史上下文。

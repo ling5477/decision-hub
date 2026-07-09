@@ -4,6 +4,66 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION
+
+执行 DH 文档纪律修复。本轮只修改文档、workflow guard 和 `.agents` skill policy；未修改 Java、测试、migration、API、contracts、golden_cases 或 NQ；未创建 tag，未 push，未进入 Stage-QDR-5。
+
+### C1 Authority Repair
+
+```text
+AGENTS.md: current factsources 修复为 docs/current 实际存在入口；移除不存在的 WORKFLOW / DH_NQ_INTEGRATION / DH_REFACTOR_STAGE1 current 必读入口。
+scripts/verify.ps1: current gate 改为 docs/current/STATUS.md、WORK_ORDER.md、CODEX_PROJECT_INSTRUCTIONS.md；docs/codex 仅做 historical JSON sanity check。
+docs/codex/WORK_ORDER.md: 降权为 historical / non-authoritative。
+docs/codex/plans/_active/STATUS.json: 增加 HISTORICAL_NON_AUTHORITATIVE 元数据。
+```
+
+### C2 Skill Policy Repair
+
+```text
+.agents/README.md: active skills 同步为 10 个。
+.agents/MERGE_MAP.md: 增加 workflow governance skills 与 8 个 implementation/review skills 的关系。
+nq-dh-workflow-router: 固化 archive-before-tag、stage tag after archive commit、review cadence、Stage-QDR-5 planning-first、路径/worktree 纪律。
+dh-docs-writer: 固化 minimal docs sync、archive/tag 分离、historical docs 不批量重写。
+db-schema-migration-review: Gate freeze 扩展为 Gate / DH Stage；明确 migration review 触发条件与 no migration batch 不强制 freeze。
+```
+
+### C3 Current Docs Repair
+
+```text
+README.md / docs/current/README.md / STATUS.md / WORK_ORDER.md / ROADMAP.md / CODEX_PROJECT_INSTRUCTIONS.md / FACTSOURCE_POLICY.md:
+  STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
+  STAGE_QDR_4_TAG: PENDING
+  ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
+  ALLOW_STAGE_QDR_5_PLAN_NOW: NO
+  ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
+
+docs/README.md: 移除旧 DH-REFIT current stage。
+docs/current/ARCHIVE_INDEX.md: 修复 stage-qdr-3 摘要中 stage-qdr-4 implementation NOT_STARTED / NO 残留。
+```
+
+### C4 Supporting Docs Noise Reduction
+
+```text
+docs/current/API.md: 只更新 supporting current summary，不重写历史 API 记录。
+docs/current/DB_SCHEMA.md: 只更新 supporting current summary，不重写历史 schema 记录。
+docs/gates/dh-stage4-decision-pipeline-mvp/README.md: 增加 legacy GateK wording errata/index；不改冻结历史正文。
+.agents/AGENTS.frontend-skill-routing.md: later decision，未 merge/delete。
+```
+
+### Validation
+
+```text
+git diff --check: PASS_AFTER_FIX
+safety scan: REVIEWED / CLASSIFIED / NO_ACTUAL_RISK
+forbidden-scope diff: PASS / EMPTY
+mvn -ntp -Pquality validate: PASS / BUILD SUCCESS / reactor 19/19
+mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+local tag dh-stage-qdr-4-close: NOT_EXISTS
+remote tag dh-stage-qdr-4-close: NO_MATCH
+```
+
+下一步：如果工作区保持 docs-only 且用户进入 tag close 任务，执行 `DH-STAGE-QDR-4-TAG-CLOSE`。Stage-QDR-5 仍只能在 tag close 后 planning-first。
+
 ## 2026-07-09 DH-STAGE-QDR-4-CURRENT-DOCS-CLEANUP
 
 清理 `docs/current` 下已归档的 Stage-QDR-4 详细阶段文档。`DH_STAGE_QDR_4*.md` 的实际内容已在 `docs/gates/stage-qdr-4/` 存档，本轮从 current 目录移除这些长文档，并把 current factsource 列表改为状态入口、执行纪律、验证记录和归档索引。

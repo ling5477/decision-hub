@@ -32,12 +32,16 @@ docs/gates/<stage-id>/
 docs/current/README.md
 docs/current/STATUS.md
 docs/current/ROADMAP.md
-docs/current/WORKFLOW.md
 docs/current/WORK_ORDER.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/TESTING.md
+docs/current/ARCHIVE_INDEX.md
 ```
 
 ## 4. 当前阶段
 
-当前阶段：DH-REFIT-1-PLAN completed，Next: DH-REFIT-1-WO。
+当前阶段：`STAGE_QDR_4 / CLOSED / ACCEPTED / ARCHIVED`，`STAGE_QDR_4_TAG / PENDING`。
 
-目标：将 DH 文档结构统一到 NQ 工作流，并为 DH Agent Runtime Skeleton 重构提供稳定文档入口。
+当前任务：`DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION`。本轮只修复文档纪律、workflow authority、skill policy、archive policy 和 current factsource；不得创建 tag，不得进入 Stage-QDR-5，不得修改 Java、测试、migration、API、contracts、golden_cases 或 NQ。
+
+下一步：cleanup 完成并保持 clean 后，才能进入独立 `DH-STAGE-QDR-4-TAG-CLOSE`。Stage-QDR-5 只能在 tag close 后 planning-first。
