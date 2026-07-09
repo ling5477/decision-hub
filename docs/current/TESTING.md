@@ -3,6 +3,56 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-5-PLAN validation
+
+```text
+Task type: PLANNING_ONLY + STAGE_QDR_5_SCOPE_DESIGN + POST_QDR_REPLAY_EVALUATION_PLAN + MODEL_GATEWAY_OBSERVABILITY_REVIEW + PROVIDER_READINESS_BOUNDARY_REVIEW + SECURITY_BOUNDARY_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+branch: dev
+current workspace: resolved by Get-Location for this run
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+STAGE_QDR_4_TAG_CLOSE: DONE
+TAG: dh-stage-qdr-4-close
+TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
+STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_5_IMPLEMENTATION: NOT_STARTED
+```
+
+Validation summary:
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前工作区确认为 `F:\project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -30` | PASS | HEAD 为 `62c8020 docs(workflow): repair documentation discipline and skill policy`。 |
+| `git tag --list "dh-stage-qdr-4-close"` | PASS | 本地 tag 存在。 |
+| `git rev-list -n 1 dh-stage-qdr-4-close` | PASS | `62c802064f637ad03d3b0f4a185bd55fa3141af2`。 |
+| `git ls-remote --tags origin | rg "dh-stage-qdr-4-close"` | PASS | 远端 annotated tag 存在，peeled target 为 `62c802064f637ad03d3b0f4a185bd55fa3141af2`。 |
+| `git diff --check` | PASS_WITH_EOL_WARNINGS | exit code 0；仅 Git LF -> CRLF warning，不是 whitespace error。 |
+| `git diff --stat` | DOCS_ONLY_TRACKED_DIFF | tracked diff 限于 `README.md` 与 `docs/current` 已允许文档；新增 plan 文件由 `git status --short` 记录。 |
+| `git diff --name-only` | DOCS_ONLY_TRACKED_DIFF | tracked diff 为 `README.md`、`docs/current/ARCHIVE_INDEX.md`、`CODEX_PROJECT_INSTRUCTIONS.md`、`README.md`、`ROADMAP.md`、`STATUS.md`、`WORK_ORDER.md`。 |
+| `git diff --cached --name-only` | PASS / EMPTY | staged 为空。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 无 diff。 |
+| safety wording scan | REVIEWED / HISTORICAL_ALLOWED_HITS_ONLY | 命中来自 `AGENTS.md` / `.agents` 的 `NOT STARTED` 否定语义、tag-created 规则说明、`FACTSOURCE_POLICY.md` hard-error phrase、旧 TESTING/WORKLOG evidence 和 supporting API/DB_SCHEMA 历史段落；本轮修改文件未把 real HTTP/provider/SDK/Agent/LangGraph/LIVE 写成 enabled/started，也未把 credential/raw prompt/raw provider response 写成 allowed。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | Reactor 19/19 SUCCESS；Checkstyle 0 violations；Spotless check passed。系统 Maven settings 仍有 `Unrecognised tag: 'profiles'` warning，非本轮阻断。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` manifest 问题；不得写成 wrapper PASS。 |
+
+Boundary confirmation:
+
+```text
+Java production changes: NO
+Java test changes: NO
+DB migration changes: NO
+API / Controller changes: NO
+contracts changes: NO
+golden_cases changes: NO
+NQ changes: NO
+tag creation: NO
+push: NO
+real HTTP / provider / Agent / LangGraph / LIVE: NO / DISABLED
+Stage-QDR-5 implementation: NOT_STARTED
+```
+
 ## 2026-07-09 DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION validation
 
 ```text

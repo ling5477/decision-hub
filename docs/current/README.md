@@ -20,14 +20,13 @@ stage-qdr-4 B2: CLOSED / ACCEPTED
 stage-qdr-4 B3: CLOSED / ACCEPTED
 stage-qdr-4 B4: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
 STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_4_ARCHIVE: DONE
-STAGE_QDR_4_TAG: PENDING
-ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
-ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
-ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES
-ALLOW_STAGE_QDR_5_PLAN_NOW: NO
-ALLOW_STAGE_QDR_5_PLAN_AFTER_TAG: YES
+STAGE_QDR_4_TAG_CLOSE: DONE
+STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
+STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
+STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
+ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
@@ -40,8 +39,8 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION
-next action after cleanup: DH-STAGE-QDR-4-TAG-CLOSE
+current task: DH-STAGE-QDR-5-PLAN
+next action: DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## Stage-QDR-4 归档状态
@@ -53,11 +52,12 @@ B2 Replay / Evaluation Persistence Baseline: CLOSED / ACCEPTED
 B3 Mock Gateway Regression Integration: CLOSED / ACCEPTED
 B4 Regression Report / Read Model Support: DONE
 STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_4_TAG: PENDING
-next tag: dh-stage-qdr-4-close
+STAGE_QDR_4_TAG_CLOSE: DONE
+STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
+STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
 ```
 
-Stage-QDR-4 归档不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。本轮先执行 `DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION`，不得创建 tag；cleanup 完成并保持 clean 后，下一步才允许进入独立 `DH-STAGE-QDR-4-TAG-CLOSE`。Stage-QDR-5 只能在 tag close 后 planning-first。
+Stage-QDR-4 归档和 tag close 不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。本轮完成 `DH-STAGE-QDR-5-PLAN`；Stage-QDR-5 implementation 仍未启动，下一步只能进入 `DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`，不得直接 implementation。
 
 ## Stage-qdr-4 当前事实源
 
@@ -71,9 +71,10 @@ docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
 docs/current/ARCHIVE_INDEX.md
+docs/current/DH_STAGE_QDR_5_PLAN.md
 ```
 
-Stage-QDR-4 的详细 plan / work order / implementation work order 已归档到 `docs/gates/stage-qdr-4/`，不再保留在 `docs/current`。若以上 current 文件与当前状态冲突，必须先修正 factsources，不得进入 tag 或 Stage-QDR-5 planning。
+Stage-QDR-4 的详细 plan / work order / implementation work order 已归档到 `docs/gates/stage-qdr-4/`，不再保留在 `docs/current`。Stage-QDR-5 的当前 planning 入口是 `docs/current/DH_STAGE_QDR_5_PLAN.md`；implementation 必须先走独立 work order。
 
 ## Supporting Docs
 

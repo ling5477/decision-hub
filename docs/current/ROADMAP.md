@@ -45,47 +45,59 @@ STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
 STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_4_ARCHIVE: DONE
-STAGE_QDR_4_TAG: PENDING
-ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
-ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
-ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES
-ALLOW_STAGE_QDR_5_PLAN_NOW: NO
-ALLOW_STAGE_QDR_5_PLAN_AFTER_TAG: YES
+STAGE_QDR_4_TAG_CLOSE: DONE
+STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
+STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
+ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES / CONSUMED
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO / ALREADY_DONE
+ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES / CONSUMED
+STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
+ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
-ALLOW_STAGE_QDR_4_TAG_NOW: NO
+ALLOW_STAGE_QDR_4_TAG_NOW: NO / ALREADY_TAGGED
 ```
 
 ## 2. 当前下一步
 
 ```text
-DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION
-Then: DH-STAGE-QDR-4-TAG-CLOSE
-Then: Stage-QDR-5 planning-first
+DH-STAGE-QDR-5-PLAN
+Then: DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
+Then: Stage-QDR-5 implementation only after accepted work order
 ```
 
-stage-qdr-4 plan 已选择唯一主线：
+Stage-QDR-5 plan 已选择推荐主线：
 
 ```text
-stage-qdr-4 = QDR Replay / Evaluation / Regression Baseline
+Stage-QDR-5 = Model Gateway Observability / Provider Readiness Hardening
 ```
 
 推荐顺序：
 
 ```text
-1. QDR replay / evaluation / regression baseline
-2. Model gateway observability / provider readiness hardening
-3. real provider dry-run readiness plan
-4. Agent / LangGraph preparation
+1. Model Gateway Observability / Provider Readiness Hardening
+2. QDR Regression Baseline Hardening
+3. Real Provider Dry-run Readiness Plan
+4. Agent / LangGraph Preparation
 ```
 
-stage-qdr-4 B1 已完成 domain/usecase contracts。B2 persistence baseline plan 已完成，B2 freeze review 已 `PASS`，B2 implementation work order 已完成，B2 implementation 已新增 V9 migration、tenant-bound repository ports、JDBC adapters 和配套测试。V9 PostgreSQL/Flyway load test 已通过真实 Testcontainers PostgreSQL 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。B3 mock gateway regression integration plan 已 `DONE / PLAN_ONLY`，B3 mock gateway regression integration work order 已 `DONE / WORK_ORDER_ONLY`。B3 implementation 已实现 deterministic mock gateway regression flow：existing dry-run / mock gateway safe refs -> replay case -> evaluation case -> expected/actual summary -> regression comparison -> verdict -> finding list；实现范围为 MockGatewayRegressionCaseBuilder、QdrRegressionEvaluationService、QdrRegressionComparator、RegressionBaselinePolicy、RegressionEvidenceRef 与 B2 repository port 复用，不新增 migration、API、Controller、真实 HTTP、真实 provider、Provider SDK、Agent / LangGraph runtime 或 LIVE。B3 close review 已 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。B4 regression report / read model support plan 已 `DONE / PLAN_ONLY`，B4 implementation work order 已 `DONE / WORK_ORDER_ONLY`。B4 implementation 已完成 tenant-bound internal read model / report service implementation，不新增 API / Controller / migration / V9 修改 / provider / HTTP / Agent / LangGraph / LIVE。Stage-QDR-4 final close review 已 `PASS`，Stage-QDR-4 整体 `CLOSED / ACCEPTED / ARCHIVED`。当前先执行 `DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION`，不得打 tag。cleanup 完成并保持 clean 后才允许进入独立 `DH-STAGE-QDR-4-TAG-CLOSE`；tag close 后才允许 Stage-QDR-5 planning-first。
+Stage-QDR-5 批次规划：
+
+```text
+B1: Model Gateway Observability Contracts
+B2: Provider Health / Gateway Call Read Model
+B3: Provider Readiness Guard / Policy Evaluation
+B4: Observability Report / Current Docs / Acceptance Support
+B5: Stage-QDR-5 Final Close Review / Archive Close / Tag Close
+```
+
+B1-B4 只是 Stage-QDR-5 普通 batch，不打 tag。普通 batch 沿用 implementation + tests + boundary scan + minimal docs + commit；只有 migration、API / Controller、security boundary、stage close 或 P0/P1 blocker 才触发 standalone review。Stage tag 只能在 B5 final close `PASS` 且 archive close commit 存在后，由独立 tag close 任务创建。Real provider dry-run 与 Agent / LangGraph preparation 均后置，不在 Stage-QDR-5 implementation 中启动。
 
 ## 3. 后续阶段边界
 
-stage-qdr-4 planning 已 `DONE / PLAN_ACCEPTED`。stage-qdr-4 B1 已 `DONE / DOMAIN_CONTRACTS_ONLY`。B2 plan 已 `DONE / PERSISTENCE_BASELINE_PLAN_ONLY`，B2 freeze review 已 `PASS`，B2 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B2 blocker fix 已 `DONE / TESTCONTAINERS_VERIFIED`，B2 implementation 已 `DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED`，B2 close review 已 `PASS`，B2 已 `CLOSED / ACCEPTED`。B3 plan 已 `DONE / PLAN_ONLY`，B3 WO 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 已 `CLOSED / ACCEPTED`。B4 plan 已 `DONE / REGRESSION_REPORT_READ_MODEL_PLAN_ONLY`，B4 WO 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED`。Stage-QDR-4 final close review 已 `PASS`，整体 `CLOSED / ACCEPTED / ARCHIVED`。stage tag 当前 `PENDING`；本轮 cleanup 不处理 tag。Stage-QDR-5 只能在 tag close 后 planning-first；real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 和 LIVE 仍然后置且禁止。
+stage-qdr-4 planning 已 `DONE / PLAN_ACCEPTED`。stage-qdr-4 B1 已 `DONE / DOMAIN_CONTRACTS_ONLY`。B2 plan 已 `DONE / PERSISTENCE_BASELINE_PLAN_ONLY`，B2 freeze review 已 `PASS`，B2 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B2 blocker fix 已 `DONE / TESTCONTAINERS_VERIFIED`，B2 implementation 已 `DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED`，B2 close review 已 `PASS`，B2 已 `CLOSED / ACCEPTED`。B3 plan 已 `DONE / PLAN_ONLY`，B3 WO 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 已 `CLOSED / ACCEPTED`。B4 plan 已 `DONE / REGRESSION_REPORT_READ_MODEL_PLAN_ONLY`，B4 WO 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED`。Stage-QDR-4 final close review 已 `PASS`，整体 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag close 已 `DONE`。Stage-QDR-5 plan 已 `DONE / PLAN_ONLY`，implementation 仍为 `NOT_STARTED`；real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 和 LIVE 仍然后置且禁止。
 
 ## 4. 持续禁止项
 

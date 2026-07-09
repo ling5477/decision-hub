@@ -44,19 +44,21 @@ STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
 stage-qdr-4 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
 STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_4_ARCHIVE: DONE
-STAGE_QDR_4_TAG: PENDING
-ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
-ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
-ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES
-ALLOW_STAGE_QDR_5_PLAN_NOW: NO
-ALLOW_STAGE_QDR_5_PLAN_AFTER_TAG: YES
+STAGE_QDR_4_TAG_CLOSE: DONE
+STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
+STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
+ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES / CONSUMED
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO / ALREADY_DONE
+ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES / CONSUMED
+STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
+ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
-ALLOW_STAGE_QDR_4_TAG_NOW: NO
+ALLOW_STAGE_QDR_4_TAG_NOW: NO / ALREADY_TAGGED
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_AGENT_PHASE: NO
@@ -67,8 +69,8 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current task: DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION
-next action after cleanup: DH-STAGE-QDR-4-TAG-CLOSE
+current task: DH-STAGE-QDR-5-PLAN
+next action: DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## 2. 前置分类规则
@@ -93,7 +95,7 @@ Next concrete action:
 
 ## 3. 当前事实源规则
 
-Stage-QDR-4 已归档，当前 tag close 前的 current factsource 文件只包括：
+Stage-QDR-4 已归档并完成 tag close。Stage-QDR-5 planning 后的 current factsource 文件包括：
 
 ```text
 README.md
@@ -103,6 +105,7 @@ docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
 docs/current/ARCHIVE_INDEX.md
+docs/current/DH_STAGE_QDR_5_PLAN.md
 ```
 
 Stage-QDR-4 的详细 plan / work order / implementation work order 已移动到 `docs/gates/stage-qdr-4/`，只能作为 historical archive evidence，不再作为 current docs 入口或 current factsource。
@@ -123,7 +126,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1 已按用户授权完成，B2 persistence baseline plan 已完成，B2 freeze review 已 PASS，B2 implementation work order 已完成，B2 implementation 已完成并通过真实 PostgreSQL/Testcontainers Flyway load 验证。B2 close review 已 `PASS`，B2 当前状态为 `CLOSED / ACCEPTED`。B3 mock gateway regression integration plan 已 `DONE / PLAN_ONLY`，B3 mock gateway regression integration work order 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。B4 regression report / read model support plan 已 `DONE / PLAN_ONLY`，B4 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED`。`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`。Stage-QDR-4 整体 `CLOSED / ACCEPTED / ARCHIVED`，tag 当前 `PENDING`。本轮先执行 `DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION`，不得创建 tag；cleanup 完成并保持 clean 后，下一步才允许进入独立 `DH-STAGE-QDR-4-TAG-CLOSE`。Stage-QDR-5 只能在 tag close 后 planning-first，不得启动 implementation、runtime、provider、HTTP、Agent、LangGraph 或 LIVE。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1/B2/B3/B4、final close review、archive close 和 tag close 均已完成；Stage-QDR-4 整体为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag 为 `dh-stage-qdr-4-close`，target 为 `62c8020 docs(workflow): repair documentation discipline and skill policy`。`DH-STAGE-QDR-5-PLAN` 已完成为 `DONE / PLAN_ONLY`，推荐方向为 `Model Gateway Observability / Provider Readiness Hardening`。下一步只能进入 `DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`，不得直接启动 implementation、runtime、provider、HTTP、Agent、LangGraph 或 LIVE。
 
 ## 4. 安全边界
 
@@ -194,14 +197,16 @@ B4 implementation work order: DONE / WORK_ORDER_ONLY
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
 STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_4_ARCHIVE: DONE
-STAGE_QDR_4_TAG: PENDING
-ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
-ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
-ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES
-ALLOW_STAGE_QDR_5_PLAN_NOW: NO
-ALLOW_STAGE_QDR_5_PLAN_AFTER_TAG: YES
+STAGE_QDR_4_TAG_CLOSE: DONE
+STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
+STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
+ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES / CONSUMED
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO / ALREADY_DONE
+ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES / CONSUMED
+STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
+ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
 V9 migration: CREATED / V9__qdr_replay_evaluation_baseline.sql / POSTGRES_LOAD_VERIFIED
 Repository / JDBC implementation: DONE / TENANT_BOUND
@@ -211,5 +216,5 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-4-TAG-CLOSE
+next action: DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
 ```

@@ -95,20 +95,21 @@ docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B4_REGRESSION_REPORT_READ_MODEL_SUPPORT_IM
 
 ```text
 Stage-QDR-4 Replay / Evaluation / Regression Baseline
-Status: CLOSED / ACCEPTED / ARCHIVED
+Status: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 Final close review: PASS
 Archive close: DONE
-Tag: PENDING
+Tag close: DONE
+Tag: DONE / dh-stage-qdr-4-close
+Tag target: 62c8020 docs(workflow): repair documentation discipline and skill policy
 Archive close docs commit: 3689251 docs(qdr): archive stage-qdr-4 replay evaluation baseline
 Archive content fix: Stage-QDR-4 current stage documents copied into docs/gates/stage-qdr-4
-Next tag: dh-stage-qdr-4-close
 B1 Replay / Evaluation Domain Contracts: DONE
 B2 Replay / Evaluation Persistence Baseline: CLOSED / ACCEPTED
 B3 Mock Gateway Regression Integration: CLOSED / ACCEPTED
 B4 Regression Report / Read Model Support: DONE
 ```
 
-Stage-QDR-4 归档记录只作为 historical record 和 tag close 前置证据，不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。
+Stage-QDR-4 归档记录只作为 historical record 和 tag close 证据，不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。
 
 ## 5. Current Factsource Pointers
 
@@ -118,10 +119,11 @@ Current next action: docs/current/WORK_ORDER.md
 Factsource policy: docs/current/FACTSOURCE_POLICY.md
 Validation evidence: docs/current/TESTING.md
 Current docs index: docs/current/README.md
+Stage-QDR-5 plan: docs/current/DH_STAGE_QDR_5_PLAN.md
 Stage-QDR-4 archive directory: docs/gates/stage-qdr-4/
-Next action: DH-STAGE-QDR-4-TAG-CLOSE
+Next action: DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## 6. Post-close Rule
 
-`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`，Stage-QDR-4 已归档为 `CLOSED / ACCEPTED / ARCHIVED`。后续只允许先执行 `DH-STAGE-QDR-4-TAG-CLOSE`；Stage-QDR-5 只能在 tag close 后 planning-first。归档目录 `docs/gates/**` 只作为 historical records。除非归档文档暴露 `FACTSOURCE_POLICY.md` 定义的硬错误，否则不得覆盖 current factsources 或授权 Stage-QDR-5 implementation。
+`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`，Stage-QDR-4 已归档并打 tag，为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。`DH-STAGE-QDR-5-PLAN` 已完成为 `DONE / PLAN_ONLY`；后续只允许先执行 `DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`，不得直接 implementation。归档目录 `docs/gates/**` 只作为 historical records。除非归档文档暴露 `FACTSOURCE_POLICY.md` 定义的硬错误，否则不得覆盖 current factsources 或授权越过 work order 的 Stage-QDR-5 implementation。

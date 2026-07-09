@@ -4,6 +4,131 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-5-PLAN
+
+完成 Stage-QDR-5 planning。本轮只做规划与 current docs 同步；未修改 Java、测试、migration、API、contracts、golden_cases 或 NQ；未接真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph 或 LIVE；未创建新 tag，未 push。
+
+### Scope
+
+```text
+PLANNING_ONLY
+STAGE_QDR_5_SCOPE_DESIGN
+POST_QDR_REPLAY_EVALUATION_PLAN
+MODEL_GATEWAY_OBSERVABILITY_REVIEW
+PROVIDER_READINESS_BOUNDARY_REVIEW
+SECURITY_BOUNDARY_DESIGN
+NO_CODE_CHANGE
+NO_TEST_CHANGE
+NO_DB_MIGRATION
+NO_API_CHANGE
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Inspected
+
+```text
+AGENTS.md
+README.md
+pom.xml
+scripts/verify.ps1
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/ROADMAP.md
+docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/ARCHIVE_INDEX.md
+docs/current/FACTSOURCE_POLICY.md
+.agents/skills/nq-dh-workflow-router/SKILL.md
+.agents/skills/dh-docs-writer/SKILL.md
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/**
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/**
+dh-app/src/main/resources/db/migration/V8__qdr_model_gateway_persistence_baseline.sql
+dh-app/src/main/resources/db/migration/V9__qdr_replay_evaluation_baseline.sql
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/**
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/**
+```
+
+### Files Changed
+
+```text
+README.md
+docs/current/DH_STAGE_QDR_5_PLAN.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/ARCHIVE_INDEX.md
+```
+
+### Plan Result
+
+```text
+recommended direction: Model Gateway Observability / Provider Readiness Hardening
+deferred B: QDR Regression Baseline Hardening
+deferred C: Real Provider Dry-run Readiness Plan
+deferred D: Agent / LangGraph Preparation
+stage-qdr-5 name: Model Gateway Observability / Provider Readiness Hardening
+B1: Model Gateway Observability Contracts
+B2: Provider Health / Gateway Call Read Model
+B3: Provider Readiness Guard / Policy Evaluation
+B4: Observability Report / Current Docs / Acceptance Support
+B5: Stage-QDR-5 Final Close Review / Archive Close / Tag Close
+review trigger: migration / API / Controller / security boundary / stage close / P0-P1 blocker only
+next action: DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
+```
+
+### Validation
+
+```text
+Get-Location: PASS / F:\project\decision-hub
+branch: dev
+git status --short before writing: PASS / CLEAN
+tag dh-stage-qdr-4-close: PASS / local and remote visible
+tag target: PASS / 62c802064f637ad03d3b0f4a185bd55fa3141af2
+git diff --check: PASS_WITH_EOL_WARNINGS
+git diff --cached --name-only: PASS / EMPTY
+forbidden-scope diff: PASS / EMPTY
+safety wording scan: REVIEWED / HISTORICAL_ALLOWED_HITS_ONLY
+mvn -ntp -Pquality validate: PASS / BUILD SUCCESS / reactor 19/19
+.\\mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+### Boundary
+
+```text
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 Repository / JDBC / Service 实现
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未读取 credential / token / cookie / apiKey / apiSecret / passphrase
+未持久化 raw prompt
+未持久化 raw provider response
+未修改 NQ
+未启动 Agent runtime
+未接 LangGraph runtime
+未开启 LIVE
+未进入 Stage-QDR-5 implementation
+未创建新 tag
+未 push
+```
+
 ## 2026-07-09 DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION
 
 执行 DH 文档纪律修复。本轮只修改文档、workflow guard 和 `.agents` skill policy；未修改 Java、测试、migration、API、contracts、golden_cases 或 NQ；未创建 tag，未 push，未进入 Stage-QDR-5。

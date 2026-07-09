@@ -39,19 +39,21 @@ STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
 stage-qdr-4 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
 STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_4_ARCHIVE: DONE
-STAGE_QDR_4_TAG: PENDING
-ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
-ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
-ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES
-ALLOW_STAGE_QDR_5_PLAN_NOW: NO
-ALLOW_STAGE_QDR_5_PLAN_AFTER_TAG: YES
+STAGE_QDR_4_TAG_CLOSE: DONE
+STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
+STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
+ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES / CONSUMED
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO / ALREADY_DONE
+ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES / CONSUMED
+STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
+ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
-ALLOW_STAGE_QDR_4_TAG_NOW: NO
+ALLOW_STAGE_QDR_4_TAG_NOW: NO / ALREADY_TAGGED
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_AGENT_PHASE: NO
@@ -63,8 +65,8 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION
-next action after cleanup: DH-STAGE-QDR-4-TAG-CLOSE
+current task: DH-STAGE-QDR-5-PLAN
+next action: DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## 2. 当前事实源集合
@@ -79,6 +81,7 @@ docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
 docs/current/ARCHIVE_INDEX.md
+docs/current/DH_STAGE_QDR_5_PLAN.md
 ```
 
 `SUPPORTING_DOCS_NOT_BLOCKERS_BY_DEFAULT`：
@@ -135,22 +138,26 @@ STAGE_QDR_4_B4_IMPLEMENTATION_WO: DONE
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
 stage-qdr-4 B4 implementation: DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED
 STAGE_QDR_4_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_4: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_4_ARCHIVE: DONE
-STAGE_QDR_4_TAG: PENDING
-ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
-ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
-ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES
-ALLOW_STAGE_QDR_5_PLAN_NOW: NO
-ALLOW_STAGE_QDR_5_PLAN_AFTER_TAG: YES
+STAGE_QDR_4_TAG_CLOSE: DONE
+STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
+STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
+ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES / CONSUMED
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO / ALREADY_DONE
+ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES / CONSUMED
+STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
+ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
-ALLOW_STAGE_QDR_4_TAG_NOW: NO
+ALLOW_STAGE_QDR_4_TAG_NOW: NO / ALREADY_TAGGED
 B5 close review retry: CLOSED / ACCEPTED
 stage-qdr-4 recommended direction: QDR Replay / Evaluation / Regression Baseline
+stage-qdr-5 recommended direction: Model Gateway Observability / Provider Readiness Hardening
+stage-qdr-5 next action: DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
 ```
 
-B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；B2 persistence baseline plan 已完成，B2 freeze review 已 `PASS`，B2 implementation work order 已完成。B2 implementation 本轮新增 V9 migration、tenant-bound repository ports、JDBC adapters、migration / repository / redaction / tenant isolation tests，并保持 no API / Controller、no real HTTP、no real provider、no Provider SDK、no Agent / LangGraph runtime、no LIVE。B2 blocker fix 已通过 Docker/Testcontainers 真实 PostgreSQL 验证：`V9QdrReplayEvaluationFlywayPostgresTest` 在 PostgreSQL 17 Testcontainer 中执行，Flyway validated 9 migrations，并成功迁移到 version v9，结果为 1 test / 0 failures / 0 errors / 0 skipped。`DH-STAGE-QDR-4-B2-PERSISTENCE-BASELINE-CLOSE-REVIEW` 已完成并判定 `PASS`：V9 migration、tenant-bound repository ports/JDBC adapters、redaction guard、trading-term guard、scoped tests、quality validate 与 safety scan 均满足 close 条件。B2 当前状态为 `CLOSED / ACCEPTED`。`DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-PLAN` 已完成为 `DONE / PLAN_ONLY`，B3 implementation work order 已完成为 `DONE / WORK_ORDER_ONLY`。B3 implementation 本轮实现 deterministic mock gateway regression flow：existing dry-run / QDR decision artifact -> mock model gateway summary -> replay case -> evaluation case -> expected/actual summary -> regression comparison -> regression verdict -> finding list；复用 B2/V9 repository ports，不新增 schema/API/Controller，不接真实 provider/HTTP/Agent/LangGraph，不进入 LIVE。`DH-STAGE-QDR-4-B3-MOCK-GATEWAY-REGRESSION-INTEGRATION-CLOSE-REVIEW` 已完成并判定 `PASS`，B3 当前状态为 `CLOSED / ACCEPTED`。`DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-PLAN` 已完成为 `DONE / PLAN_ONLY`；`DH-STAGE-QDR-4-B4-REGRESSION-REPORT-READ-MODEL-SUPPORT-IMPLEMENTATION-WO` 已完成为 `DONE / WORK_ORDER_ONLY`。B4 implementation 本轮已完成 tenant-bound internal regression report / read model support：新增 `RegressionReportQuery`、`RegressionReportView`、`RegressionReportFindingView`、`RegressionDriftSummary` 与 `RegressionReadModelService`，复用 B2/V9 repository ports，不新增 migration、不修改 V9、不新增 API / Controller、不接 provider / HTTP / Agent / LangGraph / LIVE，不把 report/verdict/drift 写成 trading signal。`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已完成并判定 `PASS`：B1/B2/B3/B4 evidence、scoped tests、quality validate、safety scan 与跨阶段边界均满足 close 条件。Stage-QDR-4 当前状态为 `CLOSED / ACCEPTED / ARCHIVED`，stage tag 为 `PENDING`。当前任务为 `DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION`；本轮不得创建 tag，不得进入 Stage-QDR-5。cleanup 完成并保持 clean 后，下一步才允许进入独立 `DH-STAGE-QDR-4-TAG-CLOSE`。Stage-QDR-5 只能在 tag close 后 planning-first。
+B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；B2 persistence baseline plan 已完成，B2 freeze review 已 `PASS`，B2 implementation work order 已完成。B2 implementation 新增 V9 migration、tenant-bound repository ports、JDBC adapters、migration / repository / redaction / tenant isolation tests，并保持 no API / Controller、no real HTTP、no real provider、no Provider SDK、no Agent / LangGraph runtime、no LIVE。B3 已完成 deterministic mock gateway regression flow。B4 已完成 tenant-bound internal regression report / read model support。`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已完成并判定 `PASS`；Stage-QDR-4 当前状态为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag close 已 `DONE`，tag 为 `dh-stage-qdr-4-close`，target 为 `62c8020 docs(workflow): repair documentation discipline and skill policy`。`DH-STAGE-QDR-5-PLAN` 已完成为 `DONE / PLAN_ONLY`，推荐方向为 `Model Gateway Observability / Provider Readiness Hardening`。下一步只允许进入 `DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`；Stage-QDR-5 implementation 仍未启动，不得直接 implementation，不得接 real HTTP/provider/SDK，不得启动 Agent / LangGraph，不得开启 LIVE。
 
 ## 4. 禁止项
 
@@ -171,13 +178,13 @@ ALLOW_STAGE_QDR_4_B4_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION_WO: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B4_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
-ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES
-ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO
-ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES
-ALLOW_STAGE_QDR_5_PLAN_NOW: NO
-ALLOW_STAGE_QDR_5_PLAN_AFTER_TAG: YES
+ALLOW_STAGE_QDR_4_TAG_AFTER_ARCHIVE_COMMIT: YES / CONSUMED
+ALLOW_STAGE_QDR_4_TAG_CLOSE_NOW: NO / ALREADY_DONE
+ALLOW_STAGE_QDR_4_TAG_CLOSE_AFTER_CLEANUP: YES / CONSUMED
+STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
+ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO
-ALLOW_STAGE_QDR_4_TAG_NOW: NO
+ALLOW_STAGE_QDR_4_TAG_NOW: NO / ALREADY_TAGGED
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_PROVIDER_SDK: NO
