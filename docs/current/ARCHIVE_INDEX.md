@@ -120,10 +120,14 @@ Factsource policy: docs/current/FACTSOURCE_POLICY.md
 Validation evidence: docs/current/TESTING.md
 Current docs index: docs/current/README.md
 Stage-QDR-5 plan: docs/current/DH_STAGE_QDR_5_PLAN.md
+Stage-QDR-5 status: CLOSED / ACCEPTED
+Stage-QDR-5 final close review: PASS
+Stage-QDR-5 archive: PENDING
+Stage-QDR-5 tag: NOT_CREATED
 Stage-QDR-4 archive directory: docs/gates/stage-qdr-4/
-Next action: DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER
+Next action: DH-STAGE-QDR-5-ARCHIVE-CLOSE
 ```
 
 ## 6. Post-close Rule
 
-`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`，Stage-QDR-4 已归档并打 tag，为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。`DH-STAGE-QDR-5-PLAN` 已完成为 `DONE / PLAN_ONLY`；后续只允许先执行 `DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`，不得直接 implementation。归档目录 `docs/gates/**` 只作为 historical records。除非归档文档暴露 `FACTSOURCE_POLICY.md` 定义的硬错误，否则不得覆盖 current factsources 或授权越过 work order 的 Stage-QDR-5 implementation。
+`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`，Stage-QDR-4 已归档并打 tag，为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。`DH-STAGE-QDR-5-PLAN`、implementation work order、B1、B2、B3、B4 与 final close review 均已完成；Stage-QDR-5 当前为 `CLOSED / ACCEPTED`，archive 为 `PENDING`，tag 为 `NOT_CREATED`。后续只允许先执行 `DH-STAGE-QDR-5-ARCHIVE-CLOSE`，不得直接 tag close，不得 push，不得进入 Stage-QDR-6。归档目录 `docs/gates/**` 只作为 historical records。除非归档文档暴露 `FACTSOURCE_POLICY.md` 定义的硬错误，否则不得覆盖 current factsources 或授权越过当前 work order。

@@ -3,6 +3,74 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW validation
+
+```text
+Task type: REVIEW_ONLY + STAGE_FINAL_CLOSE + MODEL_GATEWAY_OBSERVABILITY_ACCEPTANCE + PROVIDER_READINESS_HARDENING_ACCEPTANCE + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:\Project\decision-hub
+branch: dev
+STAGE_QDR_5_B1: DONE
+STAGE_QDR_5_B2: DONE
+STAGE_QDR_5_B3: CLOSED / ACCEPTED
+STAGE_QDR_5_B4_IMPLEMENTATION: DONE
+STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
+STAGE_QDR_5: CLOSED / ACCEPTED
+STAGE_QDR_5_ARCHIVE: PENDING
+STAGE_QDR_5_TAG: NOT_CREATED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### Final close validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `E:\Project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始 worktree clean。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -30` | PASS | 包含 `645cb20 feat(qdr): add observability acceptance report support`、B4 WO、B3 close review、B3 implementation、B2/B1 commits。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 whitespace error、tracked diff 或 staged diff。 |
+| B1 evidence review | PASS | `ModelGatewayObservabilitySummary`、`ProviderHealthSummary`、`ProviderFailureClassification`、`ProviderLatencyBudgetSummary`、`ProviderTrustDecisionSummary`、readiness signal/status/finding/severity 与 contract service 存在；raw/credential/trading guard 有测试。 |
+| B2 evidence review | PASS | `ProviderHealthReadModelQuery/View/Service` 与 `ModelGatewayCallObservabilityView` 存在；tenant-bound query、pageSize guard、安全 view、no provider authorization / no trading signal 语义有测试。 |
+| B3 evidence review | PASS | `ProviderReadinessPolicy/Guard/Command/Result/Decision/Reason/GuardService` 存在；`READY / NOT_READY / DEGRADED / SKIPPED` 语义安全；B3 close review 已 `PASS`。 |
+| B4 evidence review | PASS | `ModelGatewayObservabilityReport`、`ObservabilityReportService` 与 provider health/readiness/failure/latency/trust/acceptance report sections 存在；`PASS` 不授权 provider/HTTP/LIVE/trading/NQ execution。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ModelGatewayObservabilityContractServiceTest,ProviderHealthReadModelServiceTest,ProviderReadinessGuardServiceTest,ObservabilityReportServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | 4 个测试类共 74 tests，0 failures，0 errors，0 skipped；Reactor 9/9 SUCCESS。 |
+| `mvn -ntp -pl dh-domain,dh-usecase -am test` | BUILD SUCCESS | Reactor 9/9 SUCCESS；`dh-domain` 151 tests、`dh-connector` 19 tests、`dh-usecase` 424 tests，均 0 failures / 0 errors / 0 skipped。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+| required safety scan | REVIEWED / GUARD_DOC_AND_TEST_HITS_ONLY | 用户指定 `rg` 已执行；命中为 docs/current/README/AGENTS 禁止项、历史否定边界、Javadoc、redaction/fail-closed guard、测试守卫和既有 QDR guard 文本。未发现本轮新增真实 HTTP/provider/Provider SDK/Agent/LangGraph/LIVE 实现，未发现 readiness/acceptance/provider health 被写成 authorization、LIVE permission、trading permission 或 trading signal。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 production Repository / JDBC / persistence adapter
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未读取 credential / token / cookie / apiKey / apiSecret / passphrase
+未保存 raw prompt
+未保存 raw provider response
+未触碰交易、订单、撤单、账户、ledger mutation、risk mutation、paper/live mutation
+未把 provider health / readiness / acceptance report 写成 trading signal
+未把 readiness 或 acceptance PASS 写成 provider authorization / LIVE permission / trading permission
+未进入 Stage-QDR-6
+未 archive close
+未创建 tag
+未 push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-IMPLEMENTATION validation
 
 ```text

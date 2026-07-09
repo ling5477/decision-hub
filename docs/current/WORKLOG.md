@@ -4,6 +4,48 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW
+
+完成 Stage-QDR-5 final close review。本轮为 review-only / docs-current sync，不修改 Java 生产代码、测试代码、migration、API、Controller、Repository/JDBC、contracts、golden_cases 或 NQ。审查范围覆盖 B1 Model Gateway Observability Contracts、B2 Provider Health / Gateway Call Read Model、B3 Provider Readiness Guard / Policy Evaluation、B4 Observability Report / Acceptance Support，以及 cross-stage no-real-provider / no-real-HTTP / no-SDK / no-Agent / no-LangGraph / no-LIVE 边界。
+
+结论：
+
+```text
+STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
+STAGE_QDR_5: CLOSED / ACCEPTED
+STAGE_QDR_5_ARCHIVE: PENDING
+STAGE_QDR_5_TAG: NOT_CREATED
+ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES
+ALLOW_STAGE_QDR_5_TAG_NOW: NO
+ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+next action: DH-STAGE-QDR-5-ARCHIVE-CLOSE
+```
+
+验证：
+
+```text
+preflight: branch dev, worktree clean, B4 implementation commit 645cb20 present
+targeted tests: 74 tests, 0 failures/errors/skips
+scoped tests: dh-domain 151, dh-connector 19, dh-usecase 424 tests, all pass
+quality validate: BUILD SUCCESS, 19/19 reactor success, Checkstyle 0, Spotless passed
+mvnw.cmd: WRAPPER_UNUSABLE / P2 TOOLING RISK
+safety scan: guard/doc/test hits only, no actual runtime/provider/HTTP/SDK/Agent/LangGraph/LIVE implementation found
+```
+
+边界：
+
+```text
+no NQ change
+no Java production/test change
+no migration/API/Controller/repository/JDBC/contract/golden change
+no real provider / real HTTP / Provider SDK / Agent / LangGraph / LIVE
+no raw prompt / raw provider response / credential persistence
+no trading signal
+no archive close
+no tag
+no push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-IMPLEMENTATION
 
 完成 Stage-QDR-5 B4 Observability Report / Acceptance Support implementation。本轮新增内部只读 report / acceptance support 结构与 `ObservabilityReportService`，复用 B1 observability summary、B2 provider health read model view 与 B3 readiness evaluation result。实现范围保持在 `dh-usecase` QDR gateway package 与对应单测；未新增 API / Controller、migration、production repository/JDBC、真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph、LIVE 或 NQ 修改。
