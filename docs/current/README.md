@@ -38,9 +38,12 @@ STAGE_QDR_5_B3: CLOSED / ACCEPTED
 STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO: DONE / WORK_ORDER_ONLY
 STAGE_QDR_5_B4_IMPLEMENTATION: DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED
 STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_5: CLOSED / ACCEPTED
-STAGE_QDR_5_ARCHIVE: PENDING
-STAGE_QDR_5_TAG: NOT_CREATED
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_5_ARCHIVE: DONE
+STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+STAGE_QDR_6: NOT_STARTED
+ARCHIVE_POLICY: REPAIRED
+ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
 STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_CLOSED_ACCEPTED / B4_DONE / FINAL_CLOSE_PASS
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO / ALL_IN_ONE_FORBIDDEN
@@ -56,7 +59,8 @@ ALLOW_STAGE_QDR_5_B4_PLAN_OR_WO: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO / CONSUMED
 ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / CONSUMED
-ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES
+ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES / CONSUMED
+ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
 ALLOW_STAGE_QDR_5_TAG_NOW: NO
 ALLOW_STAGE_QDR_6_PLAN_NOW: NO
 ALLOW_REAL_HTTP: NO
@@ -70,8 +74,8 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW
-next action: DH-STAGE-QDR-5-ARCHIVE-CLOSE
+current task: DH-DOCS-STAGE-ARCHIVE-POLICY-FIX
+next action: DH-STAGE-QDR-5-TAG-CLOSE
 ```
 
 ## Stage-QDR-4 归档状态
@@ -88,7 +92,7 @@ STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
 STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
 ```
 
-Stage-QDR-4 归档和 tag close 不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。`DH-STAGE-QDR-5-PLAN`、`DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`、B1、B2、B3、B4 与 final close review 已完成；Stage-QDR-5 当前为 `CLOSED / ACCEPTED`。下一步只能进入 `DH-STAGE-QDR-5-ARCHIVE-CLOSE`；不得直接创建 tag、不得 push、不得进入 Stage-QDR-6。
+Stage-QDR-4 归档和 tag close 不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。`DH-STAGE-QDR-5-PLAN`、`DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`、B1、B2、B3、B4、final close review 与 archive close 已完成；本轮已修复 stage archive packet policy，Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED`，tag 为 `PENDING / NOT_CREATED`。下一步只能进入 `DH-STAGE-QDR-5-TAG-CLOSE`；不得 push、不得进入 Stage-QDR-6。
 
 ## Stage-qdr-4 当前事实源
 
@@ -150,6 +154,7 @@ docs/gates/stage-qdr-3/
 docs/gates/stage-qdr-3/pre-close-current-snapshot-20260707/
 docs/gates/stage-qdr-3/current-docs-historical-20260708/
 docs/gates/stage-qdr-4/
+docs/gates/stage-qdr-5/
 ```
 
 Archive docs are historical records. They are not current factsources and must not override `STATUS.md` or `WORK_ORDER.md`. `docs/archive/**` is not the current QDR archive standard.

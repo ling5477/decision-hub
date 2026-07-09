@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW
-current task status: PASS
-next action: DH-STAGE-QDR-5-ARCHIVE-CLOSE
-mode: REVIEW_ONLY + STAGE_FINAL_CLOSE + MODEL_GATEWAY_OBSERVABILITY_ACCEPTANCE + PROVIDER_READINESS_HARDENING_ACCEPTANCE + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current task: DH-DOCS-STAGE-ARCHIVE-POLICY-FIX
+current task status: DONE
+next action: DH-STAGE-QDR-5-TAG-CLOSE
+mode: DOCUMENTATION_POLICY_FIX + STAGE_ARCHIVE_PACKET_REPAIR + SKILL_POLICY_FIX + QDR4_QDR5_ARCHIVE_BACKFILL + TAG_BLOCKED_UNTIL_REPAIR + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
 ```
 
-Stage-QDR-5 B1 已完成，B2 Provider Health / Gateway Call Read Model implementation 与 CI blocker fix 已完成，B3 Provider Readiness Guard / Policy Evaluation implementation 已完成。B3 security boundary / close review 已 `PASS`，B3 为 `CLOSED / ACCEPTED`。B4 Observability Report / Acceptance Support work order 已完成为 `DONE / WORK_ORDER_ONLY`，B4 implementation 已完成为 `DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED`。Stage-QDR-5 final close review 已 `PASS`，Stage-QDR-5 当前为 `CLOSED / ACCEPTED`。下一步只允许进入 Stage-QDR-5 archive close；不得直接创建 tag，不得 push，不得进入 Stage-QDR-6。
+Stage-QDR-5 B1 已完成，B2 Provider Health / Gateway Call Read Model implementation 与 CI blocker fix 已完成，B3 Provider Readiness Guard / Policy Evaluation implementation 已完成。B3 security boundary / close review 已 `PASS`，B3 为 `CLOSED / ACCEPTED`。B4 Observability Report / Acceptance Support work order 已完成为 `DONE / WORK_ORDER_ONLY`，B4 implementation 已完成为 `DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED`。Stage-QDR-5 final close review 已 `PASS`，archive close 已完成，本轮已修复 stage archive packet policy，Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED`。下一步只允许进入 Stage-QDR-5 tag close；不得 push，不得进入 Stage-QDR-6。
 
 ## 2. 前置状态
 
@@ -33,9 +33,12 @@ STAGE_QDR_5_B3: CLOSED / ACCEPTED
 STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO: DONE / WORK_ORDER_ONLY
 STAGE_QDR_5_B4_IMPLEMENTATION: DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED
 STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_5: CLOSED / ACCEPTED
-STAGE_QDR_5_ARCHIVE: PENDING
-STAGE_QDR_5_TAG: NOT_CREATED
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_5_ARCHIVE: DONE
+STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+STAGE_QDR_6: NOT_STARTED
+ARCHIVE_POLICY: REPAIRED
+ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
 STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_CLOSED_ACCEPTED / B4_DONE / FINAL_CLOSE_PASS
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES / CONSUMED
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO / ALL_IN_ONE_FORBIDDEN
@@ -51,7 +54,8 @@ ALLOW_STAGE_QDR_5_B4_PLAN_OR_WO: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO / CONSUMED
 ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / CONSUMED
-ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES
+ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES / CONSUMED
+ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
 ALLOW_STAGE_QDR_5_TAG_NOW: NO
 ALLOW_STAGE_QDR_6_PLAN_NOW: NO
 ALLOW_REAL_HTTP: NO
@@ -175,8 +179,8 @@ quality validate passes
 B2 implementation 与 B2 CI blocker fix 已完成。
 B3 implementation 与 close review 已完成，范围限于 provider readiness guard / policy evaluation internal boundary。
 B4 work order 已完成，范围限于 internal report / acceptance support boundary design。
-下一步只允许进入 Stage-QDR-5 final close review。
-禁止跳过 final close review 直接进入 archive/tag。
+下一步只允许进入 Stage-QDR-5 tag close。
+禁止跳过 archive close commit 直接进入 Stage-QDR-6。
 禁止新增 migration。
 禁止修改 V1-V9 migration。
 禁止新增 V10。
@@ -200,5 +204,5 @@ B4 work order 已完成，范围限于 internal report / acceptance support boun
 ## 8. 下一任务
 
 ```text
-DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW
+DH-STAGE-QDR-5-TAG-CLOSE
 ```

@@ -6,19 +6,29 @@
 
 ```text
 Stage: Stage-QDR-4 Replay / Evaluation / Regression Baseline
-Status: CLOSED / ACCEPTED / ARCHIVED
+Status: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 Final close review: PASS
 Archive close: DONE
-Tag: PENDING
+Tag close: DONE
+Tag: dh-stage-qdr-4-close
+Tag target: 62c8020 docs(workflow): repair documentation discipline and skill policy
 Archive close docs commit: 3689251 docs(qdr): archive stage-qdr-4 replay evaluation baseline
 Archive content fix: copied Stage-QDR-4 current stage documents into this directory
-Next tag: dh-stage-qdr-4-close
+Archive packet policy repair: DONE
 ```
 
 ## Archived Files
 
 ```text
 README.md
+PLAN.md
+IMPLEMENTATION_WORK_ORDER.md
+BATCH_SUMMARY.md
+VALIDATION_EVIDENCE.md
+FINAL_CLOSE_REVIEW.md
+ARCHIVE_CLOSE.md
+DISCIPLINE_REPAIR.md
+STATUS_SNAPSHOT.md
 DH_STAGE_QDR_4_PLAN.md
 DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
 DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
@@ -35,6 +45,10 @@ B1 Replay / Evaluation Domain Contracts: DONE
 B2 Replay / Evaluation Persistence Baseline: CLOSED / ACCEPTED
 B3 Mock Gateway Regression Integration: CLOSED / ACCEPTED
 B4 Regression Report / Read Model Support: DONE
+Final close: PASS
+Archive close: DONE
+Documentation discipline repair: DONE
+Tag close: DONE
 ```
 
 ## Boundary
@@ -48,6 +62,7 @@ LangGraph runtime: NO
 LIVE: DISABLED
 NQ mutation: NO
 trading execution: NO
+raw prompt / raw provider response / credential storage: NO
 ```
 
-下一步只允许 `DH-STAGE-QDR-4-TAG-CLOSE`。Stage-QDR-5 只能在 tag close 后 planning-first，不得从本归档入口直接进入 implementation、runtime、provider、HTTP、Agent、LangGraph 或 LIVE。
+Stage-QDR-4 已完成 tag close。本归档包只作为 historical record 和 Stage-QDR-5 前置证据，不授权 implementation、runtime、provider、HTTP、Agent、LangGraph 或 LIVE。

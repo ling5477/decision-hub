@@ -104,7 +104,10 @@ Before choosing files or next actions, classify whether the task is DH-owned, NQ
 Archive, tag, review, and path rules:
 
 - `archive-before-tag` is mandatory. A stage tag may be created only after the stage archive commit exists and a separate tag-close task explicitly authorizes tag creation.
+- Stage close 后必须先形成 self-contained archive packet，单个 `README.md` 不满足 archive-before-tag 要求。
+- Archive packet 必须至少记录计划、work order、batch 摘要、验证证据、final close、archive close、状态快照、边界确认、风险、下一步和 tag state；packet 不完整时 tag close 必须 BLOCKED。
 - Archive close and tag close are separate steps. Do not mark a tag as created unless the tag command actually created it and, if required, pushed it.
+- Stage-QDR-6 planning 必须等 Stage-QDR-5 archive packet 完整、archive policy repair commit 完成、Stage-QDR-5 tag close 完成后，作为独立 planning-first 任务启动。
 - Stage-QDR-5 must be planning-first. Do not start Stage-QDR-5 implementation, runtime, provider, HTTP, Agent, LangGraph, or LIVE from a tag, cleanup, archive, or close task.
 - Only these conditions trigger standalone review: migration, API / Controller, security boundary, stage close, P0 / P1 blocker.
 - A normal batch should close as implementation + tests + boundary scan + minimal docs + commit. Do not add standalone review/freeze for every ordinary batch.

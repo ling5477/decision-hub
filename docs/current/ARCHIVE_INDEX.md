@@ -82,6 +82,14 @@ docs/gates/stage-qdr-4/
 
 ```text
 docs/gates/stage-qdr-4/README.md
+docs/gates/stage-qdr-4/PLAN.md
+docs/gates/stage-qdr-4/IMPLEMENTATION_WORK_ORDER.md
+docs/gates/stage-qdr-4/BATCH_SUMMARY.md
+docs/gates/stage-qdr-4/VALIDATION_EVIDENCE.md
+docs/gates/stage-qdr-4/FINAL_CLOSE_REVIEW.md
+docs/gates/stage-qdr-4/ARCHIVE_CLOSE.md
+docs/gates/stage-qdr-4/DISCIPLINE_REPAIR.md
+docs/gates/stage-qdr-4/STATUS_SNAPSHOT.md
 docs/gates/stage-qdr-4/DH_STAGE_QDR_4_PLAN.md
 docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_PLAN.md
 docs/gates/stage-qdr-4/DH_STAGE_QDR_4_B2_PERSISTENCE_BASELINE_IMPLEMENTATION_WO.md
@@ -111,7 +119,51 @@ B4 Regression Report / Read Model Support: DONE
 
 Stage-QDR-4 归档记录只作为 historical record 和 tag close 证据，不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。
 
-## 5. Current Factsource Pointers
+## 5. stage-qdr-5
+
+归档目录：
+
+```text
+docs/gates/stage-qdr-5/
+```
+
+当前内容：
+
+```text
+docs/gates/stage-qdr-5/README.md
+docs/gates/stage-qdr-5/PLAN.md
+docs/gates/stage-qdr-5/IMPLEMENTATION_WORK_ORDER.md
+docs/gates/stage-qdr-5/BATCH_SUMMARY.md
+docs/gates/stage-qdr-5/VALIDATION_EVIDENCE.md
+docs/gates/stage-qdr-5/B3_SECURITY_CLOSE_REVIEW.md
+docs/gates/stage-qdr-5/FINAL_CLOSE_REVIEW.md
+docs/gates/stage-qdr-5/ARCHIVE_CLOSE.md
+docs/gates/stage-qdr-5/DISCIPLINE_REPAIR.md
+docs/gates/stage-qdr-5/STATUS_SNAPSHOT.md
+```
+
+内容摘要：
+
+```text
+Stage-QDR-5 Model Gateway Observability / Provider Readiness Hardening
+Status: CLOSED / ACCEPTED / ARCHIVED
+Final close review: PASS
+Archive close: DONE
+Tag state: PENDING / NOT_CREATED
+Expected tag: dh-stage-qdr-5-close
+B1 Model Gateway Observability Contracts: DONE
+B2 Provider Health / Gateway Call Read Model: DONE
+B3 Provider Readiness Guard / Policy Evaluation: CLOSED / ACCEPTED
+B3 close review: PASS
+B4 Observability Report / Acceptance Support: DONE
+Archive policy: REPAIRED
+Archive packet policy: REQUIRED_FOR_ALL_FUTURE_STAGES
+Stage-QDR-6: NOT_STARTED
+```
+
+Stage-QDR-5 归档记录只作为 historical record 和 tag close 前审计证据，不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation、trading signal、raw prompt / raw provider response / credential storage。Stage-QDR-5 tag close 只能在本轮 archive policy fix commit 后作为独立任务执行。
+
+## 6. Current Factsource Pointers
 
 ```text
 Current status: docs/current/STATUS.md
@@ -120,14 +172,18 @@ Factsource policy: docs/current/FACTSOURCE_POLICY.md
 Validation evidence: docs/current/TESTING.md
 Current docs index: docs/current/README.md
 Stage-QDR-5 plan: docs/current/DH_STAGE_QDR_5_PLAN.md
-Stage-QDR-5 status: CLOSED / ACCEPTED
+Stage-QDR-5 status: CLOSED / ACCEPTED / ARCHIVED
 Stage-QDR-5 final close review: PASS
-Stage-QDR-5 archive: PENDING
-Stage-QDR-5 tag: NOT_CREATED
+Stage-QDR-5 archive: DONE
+Stage-QDR-5 tag: PENDING / NOT_CREATED
 Stage-QDR-4 archive directory: docs/gates/stage-qdr-4/
-Next action: DH-STAGE-QDR-5-ARCHIVE-CLOSE
+Stage-QDR-5 archive directory: docs/gates/stage-qdr-5/
+Archive policy: REPAIRED
+Archive packet policy: REQUIRED_FOR_ALL_FUTURE_STAGES
+ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
+Next action: DH-STAGE-QDR-5-TAG-CLOSE
 ```
 
-## 6. Post-close Rule
+## 7. Post-close Rule
 
-`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`，Stage-QDR-4 已归档并打 tag，为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。`DH-STAGE-QDR-5-PLAN`、implementation work order、B1、B2、B3、B4 与 final close review 均已完成；Stage-QDR-5 当前为 `CLOSED / ACCEPTED`，archive 为 `PENDING`，tag 为 `NOT_CREATED`。后续只允许先执行 `DH-STAGE-QDR-5-ARCHIVE-CLOSE`，不得直接 tag close，不得 push，不得进入 Stage-QDR-6。归档目录 `docs/gates/**` 只作为 historical records。除非归档文档暴露 `FACTSOURCE_POLICY.md` 定义的硬错误，否则不得覆盖 current factsources 或授权越过当前 work order。
+`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`，Stage-QDR-4 已归档并打 tag，为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。`DH-STAGE-QDR-5-PLAN`、implementation work order、B1、B2、B3、B4、final close review 与 archive close 均已完成；本轮已修复 stage archive packet policy。Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED`，tag 为 `PENDING / NOT_CREATED`。后续只允许先执行 `DH-STAGE-QDR-5-TAG-CLOSE`，不得 push，不得进入 Stage-QDR-6。归档目录 `docs/gates/**` 只作为 historical records。除非归档文档暴露 `FACTSOURCE_POLICY.md` 定义的硬错误，否则不得覆盖 current factsources 或授权越过当前 work order。

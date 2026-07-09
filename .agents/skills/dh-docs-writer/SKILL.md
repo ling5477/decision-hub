@@ -157,6 +157,13 @@ DH 文档与注释默认使用中文为主，英文只保留在稳定工程标�
 ## Gate And Freeze Rules
 
 - A stage may be copied into `docs/gates/<stage-id>/` only after completion and explicit freeze/archive authorization.
+- Stage archive 不得只创建单个 `README.md`。阶段归档必须形成 self-contained archive packet，至少包含 `README.md`、`PLAN.md`、`IMPLEMENTATION_WORK_ORDER.md`、`BATCH_SUMMARY.md`、`VALIDATION_EVIDENCE.md`、`FINAL_CLOSE_REVIEW.md`、`ARCHIVE_CLOSE.md` 和 `STATUS_SNAPSHOT.md`；如阶段存在 security review 或 tag 前纪律修复，还必须补充对应 `SECURITY_BOUNDARY_REVIEW.md` / `DISCIPLINE_REPAIR.md`。
+- Archive packet 必须能脱离 `docs/current` 独立说明该阶段的 task classification、stage scope、files changed summary、implementation batches、validation evidence、boundary confirmation、readiness decision、risks、next concrete action 和 tag state。
+- `docs/current` 是滚动事实源，不得作为历史阶段唯一归档证据；完成阶段的审计、复盘和 tag 前校验必须回到 `docs/gates/<stage-id>/` 的 archive packet。
+- Stage close 顺序固定为：final close review PASS -> final close docs commit -> archive close packet -> archive close commit -> clean worktree -> annotated tag -> push tag。
+- Stage tag 必须打在包含完整 archive packet 的最终 commit 上；archive packet 缺失或只有单 README 时，tag close 必须 BLOCKED。
+- Batch 完成不打 tag。普通 batch 只能进入 implementation + tests + boundary scan + minimal docs + commit，不能跳过 stage final close / archive close。
+- Stage archive close 后、tag close 前，不得进入下一阶段 planning；下一阶段 planning 必须等当前 stage tag close 完成后另起 planning-first 任务。
 - Freeze tasks must include a freeze statement, file list, status alignment, validation record, known residuals, and post-freeze rules.
 - Do not edit historical gate snapshots as if they were current docs.
 - If historical facts are stale, write current-doc clarification or errata rather than mutating the frozen snapshot.

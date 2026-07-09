@@ -3,6 +3,133 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-DOCS-STAGE-ARCHIVE-POLICY-FIX validation
+
+```text
+Task type: DOCUMENTATION_POLICY_FIX + STAGE_ARCHIVE_PACKET_REPAIR + SKILL_POLICY_FIX + QDR4_QDR5_ARCHIVE_BACKFILL + TAG_BLOCKED_UNTIL_REPAIR + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:\Project\decision-hub
+branch: dev
+ARCHIVE_CLOSE_DIRTY_ACCEPTED_FOR_POLICY_FIX: YES
+STAGE_QDR_4_ARCHIVE_PACKET: REPAIRED
+STAGE_QDR_5_ARCHIVE_PACKET: REPAIRED
+STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+STAGE_QDR_6: NOT_STARTED
+ARCHIVE_POLICY: REPAIRED
+ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
+ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
+ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### Policy fix validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `E:\Project\decision-hub`。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git tag --list "dh-stage-qdr-5-close"` | PASS / ABSENT | 本地 tag 尚不存在。 |
+| `git ls-remote --tags origin \| rg "dh-stage-qdr-5-close"` | REMOTE_TAG_CHECK_UNVERIFIED / P2 GIT_CREDENTIAL_RISK | 命令失败：`schannel: AcquireCredentialsHandle failed: SEC_E_NO_CREDENTIALS`；未能确认远程 tag 状态，tag close 任务必须重新检查。 |
+| `git status --short` | DOCS_AND_SKILL_POLICY_DIRTY / NO_STAGED | dirty 范围限于允许的 README、`docs/current`、`docs/gates`、`.agents` skill policy；Stage-QDR-5 archive close dirty docs 纳入本轮 policy fix。 |
+| `git diff --check` | PASS_WITH_EOL_WARNINGS | 无 whitespace error；仅 Git LF -> CRLF warning。 |
+| `git diff --stat` / `git diff --name-only` | DOCS_AND_SKILL_POLICY_DIFF | diff 限于允许的 docs/current、docs/gates、README 与 `.agents` skill policy；新增 stage archive packet 文件为 untracked。 |
+| `git diff --cached --name-only` | PASS / EMPTY | staged 为空。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`dh-api/src/main`、`contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 均无 diff。 |
+| safety wording scan | REVIEWED / NO_ACTUAL_RISK | 命中为 `NOT_STARTED` 被 `STARTED` regex 误命中、Stage-QDR-4 historical tag done、否定句、existing hard-error list phrase，或明确风险说明；未发现 Stage-QDR-5 tag created，未发现 Stage-QDR-6 started，未发现 real provider/HTTP/SDK/Agent/LangGraph/LIVE enabled/started。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 production Repository / JDBC / persistence adapter
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未读取 credential / token / cookie / apiKey / apiSecret / passphrase
+未保存 raw prompt
+未保存 raw provider response
+未触碰交易、订单、撤单、账户、ledger mutation、risk mutation、paper/live mutation
+未把 provider health / readiness / acceptance report 写成 trading signal
+未进入 Stage-QDR-6 planning
+未创建 tag
+未 push
+```
+
+## 2026-07-09 DH-STAGE-QDR-5-ARCHIVE-CLOSE validation
+
+```text
+Task type: DOCUMENTATION_ONLY + STAGE_ARCHIVE_CLOSE + PROVIDER_READINESS_HARDENING_ARCHIVE + TAG_PREP + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:\Project\decision-hub
+branch: dev
+final close docs commit: c11a0e7 docs(qdr): close stage-qdr-5 provider readiness hardening
+STAGE_QDR_5_ARCHIVE_CLOSE: DONE
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
+ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### Archive close validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `E:\Project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始 worktree clean。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -20` | PASS | 包含 `c11a0e7 docs(qdr): close stage-qdr-5 provider readiness hardening`。 |
+| `git tag --list "dh-stage-qdr-5-close"` | PASS / ABSENT | tag 尚不存在。 |
+| `git diff --check` | PASS_WITH_EOL_WARNINGS | 无 whitespace error；仅 Git LF -> CRLF warning。 |
+| `git diff --stat` / `git diff --name-only` | DOCS_ONLY_DIFF | tracked diff 限于允许的 README、`docs/current` 与 `docs/gates/README.md`；新建 `docs/gates/stage-qdr-5/README.md` 由 `git status --short` 记录。 |
+| `git diff --cached --name-only` | PASS / EMPTY | staged 为空。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`dh-api/src/main`、`contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 均无 diff。 |
+| safety wording scan | REVIEWED / NO_ACTUAL_RISK | 命中为禁止项、历史归档、否定边界、docs guard，或 regex 将 `stage` 中的 `tag` 片段误判为 `tag.*DONE`；未发现 Stage-QDR-5 被写为已打 tag，未发现 Stage-QDR-6 STARTED，未发现 real provider/HTTP/SDK/Agent/LangGraph/LIVE enabled/started。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 production Repository / JDBC / persistence adapter
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未读取 credential / token / cookie / apiKey / apiSecret / passphrase
+未保存 raw prompt
+未保存 raw provider response
+未触碰交易、订单、撤单、账户、ledger mutation、risk mutation、paper/live mutation
+未把 provider health / readiness / acceptance report 写成 trading signal
+未进入 Stage-QDR-6 planning
+未创建 tag
+未 push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW validation
 
 ```text

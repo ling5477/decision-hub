@@ -43,9 +43,11 @@
 7. Python 工具和批处理，使用：
    - `python-ops-tooling`
 
-8. Stage tag 只能在 archive commit 已存在且 tag close 任务明确授权后处理；archive close 与 tag close 必须分开。
+8. Stage archive 必须形成 self-contained archive packet，单个 `README.md` 不满足归档要求；Stage tag 只能在完整 archive packet 所在 commit 已存在且 tag close 任务明确授权后处理。archive close 与 tag close 必须分开，packet 不完整时 tag close BLOCKED。
 
 9. 普通 batch 不默认触发 standalone review。只有 migration、API / Controller、安全边界、stage close、P0 / P1 blocker 才触发 review；普通 batch 以 implementation + tests + boundary scan + minimal docs + commit 为闭环。
+
+10. Stage archive close 后、tag close 前不得进入下一阶段 planning；Stage-QDR-6 只能在 Stage-QDR-5 tag close 完成后另起 planning-first 任务。
 
 ## 对 NexusQuant / Decision Hub 的默认约束
 

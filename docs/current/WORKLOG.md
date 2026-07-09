@@ -4,6 +4,101 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-DOCS-STAGE-ARCHIVE-POLICY-FIX
+
+完成 stage archive policy 修复与 Stage-QDR-4 / Stage-QDR-5 archive packet backfill。本轮为 documentation policy fix / stage archive packet repair / skill policy fix，只修改 README、`docs/current`、`docs/gates` 与 `.agents` skill policy；未修改 Java 生产代码、测试代码、migration、API、Controller、Repository/JDBC、contracts、golden_cases 或 NQ。
+
+结论：
+
+```text
+DOCS_STAGE_ARCHIVE_POLICY_FIX: DONE
+STAGE_QDR_4_ARCHIVE_PACKET: REPAIRED
+STAGE_QDR_5_ARCHIVE_PACKET: REPAIRED
+ARCHIVE_POLICY: REPAIRED
+ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
+STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+STAGE_QDR_6: NOT_STARTED
+ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
+ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+ARCHIVE_CLOSE_DIRTY_ACCEPTED_FOR_POLICY_FIX
+next action: DH-STAGE-QDR-5-TAG-CLOSE
+```
+
+变更摘要：
+
+```text
+dh-docs-writer: 固化 self-contained archive packet、archive-before-tag、tag target commit 与 next-stage planning block。
+nq-dh-workflow-router: 补充 archive packet incomplete -> tag blocked、Stage-QDR-6 after Stage-QDR-5 tag close。
+stage-qdr-4: 补齐 PLAN / IMPLEMENTATION_WORK_ORDER / BATCH_SUMMARY / VALIDATION_EVIDENCE / FINAL_CLOSE_REVIEW / ARCHIVE_CLOSE / DISCIPLINE_REPAIR / STATUS_SNAPSHOT。
+stage-qdr-5: 补齐 PLAN / IMPLEMENTATION_WORK_ORDER / BATCH_SUMMARY / VALIDATION_EVIDENCE / B3_SECURITY_CLOSE_REVIEW / FINAL_CLOSE_REVIEW / ARCHIVE_CLOSE / DISCIPLINE_REPAIR / STATUS_SNAPSHOT。
+indexes/current docs: 同步 archive policy repaired、packet required、Stage-QDR-5 tag pending、Stage-QDR-6 not started。
+```
+
+验证：
+
+```text
+preflight: branch dev, local dh-stage-qdr-5-close tag absent, dirty scope allowed, remote tag check failed with SEC_E_NO_CREDENTIALS
+git diff --check: PASS with LF -> CRLF warnings only
+forbidden-scope diff: PASS / EMPTY
+safety scan: reviewed; hits are forbidden-boundary, historical, negative wording, existing hard-error list phrase, or regex overmatch
+quality validate: BUILD SUCCESS, 19/19 reactor success, Checkstyle 0, Spotless passed
+mvnw.cmd: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+边界：
+
+```text
+no NQ change
+no Java production/test change
+no migration/API/Controller/repository/JDBC/contract/golden change
+no real provider / real HTTP / Provider SDK / Agent / LangGraph / LIVE
+no raw prompt / raw provider response / credential persistence
+no trading signal
+no Stage-QDR-6 planning
+no tag
+no push
+```
+
+## 2026-07-09 DH-STAGE-QDR-5-ARCHIVE-CLOSE
+
+完成 Stage-QDR-5 archive close。本轮为 documentation-only / stage archive close / tag prep，只新增 `docs/gates/stage-qdr-5/README.md` 并同步 README、`docs/current` 与 `docs/gates` 索引；未修改 Java 生产代码、测试代码、migration、API、Controller、Repository/JDBC、contracts、golden_cases 或 NQ。
+
+结论：
+
+```text
+STAGE_QDR_5_ARCHIVE_CLOSE: DONE
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
+ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+next action: DH-STAGE-QDR-5-TAG-CLOSE
+```
+
+验证：
+
+```text
+preflight: branch dev, worktree clean, final close docs commit c11a0e7 present, dh-stage-qdr-5-close tag absent
+git diff --check: PASS with LF -> CRLF warnings only
+forbidden-scope diff: PASS / EMPTY
+safety scan: reviewed; hits are forbidden-boundary, historical, docs guard, negative wording, or regex overmatch on stage/tag text
+quality validate: BUILD SUCCESS, 19/19 reactor success, Checkstyle 0, Spotless passed
+mvnw.cmd: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+边界：
+
+```text
+no NQ change
+no Java production/test change
+no migration/API/Controller/repository/JDBC/contract/golden change
+no real provider / real HTTP / Provider SDK / Agent / LangGraph / LIVE
+no raw prompt / raw provider response / credential persistence
+no trading signal
+no Stage-QDR-6 planning
+no tag
+no push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW
 
 完成 Stage-QDR-5 final close review。本轮为 review-only / docs-current sync，不修改 Java 生产代码、测试代码、migration、API、Controller、Repository/JDBC、contracts、golden_cases 或 NQ。审查范围覆盖 B1 Model Gateway Observability Contracts、B2 Provider Health / Gateway Call Read Model、B3 Provider Readiness Guard / Policy Evaluation、B4 Observability Report / Acceptance Support，以及 cross-stage no-real-provider / no-real-HTTP / no-SDK / no-Agent / no-LangGraph / no-LIVE 边界。
