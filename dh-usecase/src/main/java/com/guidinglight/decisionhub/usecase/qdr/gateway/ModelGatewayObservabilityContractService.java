@@ -168,10 +168,8 @@ public final class ModelGatewayObservabilityContractService {
     private static void rejectRawMaterial(final String field, final String value) {
         final String normalized = normalize(value);
         if (normalized.contains("rawprompt")
-                || normalized.contains("raw_prompt")
                 || normalized.contains("prompttext")
                 || normalized.contains("rawproviderresponse")
-                || normalized.contains("raw_provider_response")
                 || normalized.contains("providerraw")) {
             throw new IllegalArgumentException(field + " rejected by raw material boundary");
         }
@@ -204,6 +202,9 @@ public final class ModelGatewayObservabilityContractService {
     }
 
     private static String normalize(final String value) {
-        return value.toLowerCase(Locale.ROOT).replace(" ", "");
+        return value.toLowerCase(Locale.ROOT)
+                .replace(" ", "")
+                .replace("_", "")
+                .replace("-", "");
     }
 }

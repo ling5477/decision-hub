@@ -3,6 +3,158 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-5-B2-CI-BLOCKER-FIX validation
+
+```text
+Task type: CI_BLOCKER_FIX + B2_PROVIDER_HEALTH_READ_MODEL_FIX + REGRESSION_VALIDATION + NO_FEATURE_EXPANSION + NO_DB_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+STAGE_QDR_5_B1: DONE
+STAGE_QDR_5_B2_IMPLEMENTATION: DONE_LOCAL
+STAGE_QDR_5_B2_CI: FIXED / ARCHITECTURE_SOURCE_SCAN_FIXED
+STAGE_QDR_5_B2_CI_BLOCKER_FIX: DONE
+STAGE_QDR_5_B3: NOT_STARTED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### CI evidence and root cause
+
+| Item | Evidence |
+| --- | --- |
+| CI provider | GitHub Actions |
+| `gh run list --limit 10` | Latest failed run: `28998957967` / `CI` / `dev` / `docs(qdr): define provider health read model work order`; previous B1 run `28998071071` also failed. |
+| `gh run view 28998957967 --log-failed` | BLOCKED: `HTTP 403 API rate limit exceeded`。 |
+| `gh auth status` | `GH_CLI_UNAVAILABLE_OR_UNAUTHENTICATED`: default token invalid. |
+| local equivalent command | `mvn -gs target/codex-maven-settings.xml -B -ntp test` |
+| failed job / step | `build & test (Testcontainers / Docker)` / `Build and test` equivalent local reproduction. |
+| failed command | `mvn -B -ntp test` equivalent local reproduction. |
+| failure excerpt | `ArchitectureTest.stageQdr3B3_rule34` and `stageQdr3B4_rule39` failed because `ModelGatewayObservabilityContractService.java` declared raw prompt/provider response storage marker fields. |
+| root cause | B1 observability contract guard used underscore-form raw marker literal in production source, triggering existing architecture source scan. |
+| B2-related | YES；属于 B1/B2 provider observability/read-model workline introduced guard wording。 |
+
+### Fix validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ModelGatewayObservabilityContractServiceTest,ProviderHealthReadModelServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | 36 tests，0 failures，0 errors，0 skipped。 |
+| `mvn -gs target/codex-maven-settings.xml -B -ntp -pl dh-app -am "-Dtest=ArchitectureTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | `ArchitectureTest` 39 tests，0 failures，0 errors，0 skipped。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ProviderHealthReadModelServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | B2 targeted 17 tests，0 failures，0 errors，0 skipped。 |
+| `mvn -ntp -pl dh-domain,dh-usecase -am test` | BUILD SUCCESS | Reactor 9/9 SUCCESS；`dh-domain` 151 tests、`dh-connector` 19 tests、`dh-usecase` 386 tests，均 0 failures / 0 errors。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| `mvn -gs target/codex-maven-settings.xml -B -ntp test` | BUILD SUCCESS | CI equivalent full test passed；Reactor 19/19 SUCCESS；`JdbcNonceReplayGuardPersistenceTest`、`PostgresContainerSmokeTest`、`V9QdrReplayEvaluationFlywayPostgresTest` all executed with 0 skipped/failures。 |
+| B2 safety scan | REVIEWED / ALLOWED_GUARD_AND_DOC_HITS_ONLY | Mandatory `rg` scan over `dh-usecase docs/current` 命中禁止项说明、测试守卫、redaction/forbidden guard 与 B2 boundary Javadoc；未发现本轮新增真实 provider/HTTP/SDK/Agent/LangGraph/LIVE 实现或 trading signal。 |
+| `rg -n "raw_prompt|raw_provider_response" dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ModelGatewayObservabilityContractService.java` | NO_MATCH | CI blocker source-scan offending underscore marker literal 已移除。 |
+| `.\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | Wrapper still prints `maven-wrapper.jar` manifest error on this Windows host；do not record as PASS。 |
+| default Maven settings | P2 TOOLING RISK / NON_BLOCKING | Plain `mvn -B -ntp test` on this Windows host still fails before project build with global Maven repo `FileAlreadyExistsException`; clean settings command above matches CI runner behavior better. |
+
+Boundary:
+
+```text
+未修改 NQ
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 production Repository / JDBC / persistence adapter
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未读取 credential / token / cookie / apiKey / apiSecret / passphrase
+未保存 raw prompt / raw provider response / credential
+未生成 trading signal
+未进入 B3 implementation
+未创建 tag
+未 push
+```
+
+## 2026-07-09 DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-IMPLEMENTATION validation
+
+```text
+Task type: IMPLEMENTATION + PROVIDER_HEALTH_READ_MODEL + MODEL_GATEWAY_OBSERVABILITY_READ_MODEL + INTERNAL_READ_MODEL + TESTS + NO_DB_MIGRATION + NO_API + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: F:/project/decision-hub
+branch: dev
+STAGE_QDR_5_B1: DONE
+STAGE_QDR_5_B2_IMPLEMENTATION_WO: DONE
+STAGE_QDR_5_B2_IMPLEMENTATION: DONE / INTERNAL_PROVIDER_HEALTH_READ_MODEL_IMPLEMENTED
+STAGE_QDR_5_B3: NOT_STARTED
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### B2 implementation coverage
+
+| # | Coverage item | Evidence |
+| --- | --- | --- |
+| 1 | provider health query by tenantId + providerRef succeeds | `ProviderHealthReadModelServiceTest.providerHealthQueryByTenantAndProviderRefSucceeds`。 |
+| 2 | gateway call observability query by tenantId + modelGatewayVersionRef succeeds | `ProviderHealthReadModelServiceTest.gatewayCallObservabilityQueryByTenantAndModelGatewayVersionRefSucceeds`。 |
+| 3 | trace lookup by tenantId + traceId succeeds | `ProviderHealthReadModelServiceTest.traceLookupByTenantAndTraceIdSucceeds`。 |
+| 4 | request lookup by tenantId + sourceRequestId succeeds | `ProviderHealthReadModelServiceTest.requestLookupByTenantAndSourceRequestIdSucceeds`。 |
+| 5 | tenantless query fails closed | `ProviderHealthReadModelServiceTest.tenantlessQueryFailsClosed`。 |
+| 6 | UUID-only query is absent or rejected | `ProviderHealthReadModelServiceTest.uuidOnlyQueryIsAbsent`。 |
+| 7 | cross-tenant read returns empty or fail-closed | `ProviderHealthReadModelServiceTest.crossTenantReadReturnsEmpty`。 |
+| 8 | list query is paginated | `ProviderHealthReadModelServiceTest.listQueryIsPaginated`。 |
+| 9 | pageSize > 100 is rejected | `ProviderHealthReadModelServiceTest.pageSizeAboveOneHundredIsRejected`。 |
+| 10 | report/view does not expose raw prompt | `ProviderHealthReadModelServiceTest.viewDoesNotExposeRawPromptRawProviderResponseOrCredentials`。 |
+| 11 | report/view does not expose raw provider response | `ProviderHealthReadModelServiceTest.viewDoesNotExposeRawPromptRawProviderResponseOrCredentials`。 |
+| 12 | report/view does not expose credential-like fields | `ProviderHealthReadModelServiceTest.viewDoesNotExposeRawPromptRawProviderResponseOrCredentials`。 |
+| 13 | failure classification appears as safe enum only | `ProviderHealthReadModelServiceTest.failureClassificationAppearsAsSafeEnumOnly`。 |
+| 14 | trust decision does not imply provider authorization | `ProviderHealthReadModelServiceTest.trustDecisionDoesNotImplyProviderAuthorization`。 |
+| 15 | readiness signal does not imply real HTTP / provider / LIVE | `ProviderHealthReadModelServiceTest.readinessSignalDoesNotImplyRealHttpProviderOrLive`。 |
+| 16 | provider health is not exposed as trading signal | `ProviderHealthReadModelServiceTest.providerHealthIsNotExposedAsTradingSignal`。 |
+| 17 | provider/HTTP/Provider SDK/Agent/LangGraph classes are not introduced | `ProviderHealthReadModelServiceTest.providerHttpProviderSdkAgentAndLangGraphClassesAreNotIntroduced`。 |
+| 18 | report/read failure fails closed | `ProviderHealthReadModelServiceTest.reportReadFailureFailsClosed`。 |
+| 19 | existing gateway call persistence is reused without repository expansion | `ProviderHealthReadModelServiceTest.fromGatewayCallRecordProjectsExistingPersistenceShape`。 |
+
+### Validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前目录为 `F:\project\decision-hub`。 |
+| `git status --short`（开工前） | PASS / CLEAN | 起始无 dirty / staged。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log --oneline -20` | PASS | 包含 `d841b5d docs(qdr): define provider health read model work order` 与 `7aed5e8 feat(qdr): add model gateway observability contracts`。 |
+| `git diff --check` / `git diff --stat` / `git diff --name-only` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无 whitespace error、tracked diff 或 staged diff。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=ProviderHealthReadModelServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | `ProviderHealthReadModelServiceTest` 17 tests，0 failures，0 errors，0 skipped；Reactor 9/9 SUCCESS。 |
+| `mvn -ntp -pl dh-domain,dh-usecase -am test` | BUILD SUCCESS | Reactor 9/9 SUCCESS；`dh-domain` 151 tests、`dh-connector` 19 tests、`dh-usecase` 386 tests，均 0 failures / 0 errors。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| Maven settings warning | P2 TOOLING RISK / NON_BLOCKING | 系统 Maven 仍输出 `Unrecognised tag: 'profiles'`，来源 `D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml`；不影响本轮 `BUILD SUCCESS`。 |
+| safety wording scan | REVIEWED / ALLOWED_HITS_ONLY | 用户指定 `rg` 已执行；全量命中来自既有禁止项、测试守卫、redaction/fail-closed guard、历史/supporting docs 风险说明和本轮 B2 边界说明。未发现真实 HTTP/provider/Provider SDK/Agent/LangGraph/LIVE 实现，未发现 provider readiness 写成 LIVE permission，未发现 provider health 写成 trading signal。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-infra/src/main/java`、`dh-app/src/main/resources/db/migration`、`dh-api`、`contracts`、`golden_cases` 均无 diff。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 production Repository / JDBC / persistence adapter
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未读取 credential / token / cookie / apiKey / apiSecret / passphrase
+未保存 raw prompt / raw provider response / credential
+未触碰交易、订单、撤单、账户、ledger mutation、risk mutation、paper mutation、live mutation
+未把 provider health / readiness / gateway observability 写成 trading signal
+未把 readiness 写成 provider authorization / LIVE permission
+未开启 LIVE
+未进入 B3 implementation
+未创建 tag
+未 push
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-WO validation
 
 ```text

@@ -4,6 +4,116 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-5-B2-CI-BLOCKER-FIX
+
+完成 Stage-QDR-5 B2 CI blocker fix。本轮只修复 B1/B2 observability guard 触发既有 `ArchitectureTest` source scan 的问题；未扩展 B2 功能，未修改 CI 配置、migration、API、Controller、production repository/JDBC、NQ、provider、HTTP、Provider SDK、Agent、LangGraph 或 LIVE。
+
+### CI Evidence
+
+```text
+CI provider: GitHub Actions
+failed run: 28998957967 / CI / dev / docs(qdr): define provider health read model work order
+failed log access: GH_CLI_UNAVAILABLE_OR_UNAUTHENTICATED / HTTP 403 API rate limit exceeded / gh auth status token invalid
+local equivalent failed command: mvn -gs target/codex-maven-settings.xml -B -ntp test
+failed job: build & test (Testcontainers / Docker) equivalent local reproduction
+failed step: Build and test equivalent local reproduction
+failed command: mvn -B -ntp test
+failure excerpt: ArchitectureTest stageQdr3B3_rule34 and stageQdr3B4_rule39 reported ModelGatewayObservabilityContractService.java declaring raw prompt/provider response storage fields
+B2-related: YES / B1 guard introduced the forbidden raw-storage marker literal under the B2 read-model workline
+```
+
+### Fix
+
+```text
+root cause: ModelGatewayObservabilityContractService used underscore-form raw marker literals in production source guard; existing ArchitectureTest forbids those storage-field tokens anywhere in qdr.gateway production sources
+minimal fix: normalize removes space, underscore and hyphen, then checks only canonical normalized rawprompt/rawproviderresponse/providerraw/prompttext tokens
+security impact: fail-closed raw material rejection preserved; no assertion skipped; no ArchitectureTest relaxation
+```
+
+### Validation Snapshot
+
+```text
+ModelGatewayObservabilityContractServiceTest + ProviderHealthReadModelServiceTest: BUILD SUCCESS / 36 tests
+ArchitectureTest: BUILD SUCCESS / 39 tests
+ProviderHealthReadModelServiceTest targeted: BUILD SUCCESS / 17 tests
+dh-domain,dh-usecase scoped regression: BUILD SUCCESS / dh-domain 151 / dh-connector 19 / dh-usecase 386
+quality validate: BUILD SUCCESS / Checkstyle 0 / Spotless passed
+CI equivalent full test with clean settings: BUILD SUCCESS / Reactor 19/19 / Testcontainers executed
+B2 safety scan: REVIEWED / ALLOWED_GUARD_AND_DOC_HITS_ONLY
+ModelGatewayObservabilityContractService raw marker grep: NO_MATCH
+mvnw.cmd -v: WRAPPER_UNUSABLE / P2 TOOLING RISK
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO
+```
+
+## 2026-07-09 DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-IMPLEMENTATION
+
+完成 Stage-QDR-5 B2 Provider Health / Gateway Call Read Model implementation。本轮只新增 usecase 内部 read model query/view/service 和单元测试；未新增 API / Controller、migration、production repository/JDBC adapter、真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph 或 LIVE 能力，未修改 NQ，未创建 tag，未 push。
+
+### Scope
+
+```text
+IMPLEMENTATION
+PROVIDER_HEALTH_READ_MODEL
+MODEL_GATEWAY_OBSERVABILITY_READ_MODEL
+INTERNAL_READ_MODEL
+TESTS
+NO_DB_MIGRATION
+NO_API
+NO_REAL_PROVIDER
+NO_REAL_HTTP
+NO_AGENT
+NO_LANGGRAPH
+NO_LIVE
+```
+
+### Files Changed
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderHealthReadModelQuery.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderHealthReadModelView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ModelGatewayCallObservabilityView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderFailureClassificationView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderLatencyBudgetView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderTrustDecisionView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderReadinessSignalView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderHealthReadModelService.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/gateway/ProviderHealthReadModelServiceTest.java
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+```
+
+### Implementation
+
+```text
+read model structures: query、provider health view、gateway call observability view、failure/latency/trust/readiness sub-views、service
+query boundary: tenantId 必填；provider/modelGatewayVersion/trace/sourceRequest/failure/trust/readiness selector 或 created/observed window 必填；limit 1..100；offset 非负；无 UUID-only selector
+source reuse: 复用 B1 ModelGatewayObservabilitySummary / ProviderHealthSummary / safety contracts；支持从既有 ModelGatewayCallRecord 脱敏 metadata 投影，不扩展 production repository/JDBC
+redaction guard: 复用 ModelGatewayObservabilityContractService 与 QdrPersistenceSafety；view 只暴露 safe refs、hash、enum 和 redacted summary
+runtime/trading guard: readiness/trust 只作为内部 evidence，不表示 provider authorization、LIVE permission、real provider、real HTTP 或 trading signal
+```
+
+### Validation Snapshot
+
+```text
+targeted B2 test: mvn -ntp -pl dh-usecase -am "-Dtest=ProviderHealthReadModelServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test / BUILD SUCCESS / 17 tests
+full validation: see docs/current/TESTING.md after final verification
+```
+
+### Next
+
+```text
+DH-STAGE-QDR-5-B3-PROVIDER-READINESS-GUARD-POLICY-EVALUATION-WO
+```
+
 ## 2026-07-09 DH-STAGE-QDR-5-B2-PROVIDER-HEALTH-GATEWAY-CALL-READ-MODEL-WO
 
 完成 Stage-QDR-5 B2 Provider Health / Gateway Call Read Model implementation work order。本轮只编制后续 internal read model 的实现边界、query 边界、view 内容边界、persistence/repository blocker、API blocker、review 触发规则、安全门和测试矩阵；未实现 Java、未修改测试、未新增 migration、未新增 API / Controller、未新增 Repository / JDBC / Service、未接真实 provider、真实 HTTP、Provider SDK、Agent、LangGraph 或 LIVE；未修改 NQ，未创建 tag，未 push。
