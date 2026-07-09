@@ -22,8 +22,8 @@ NO_LIVE
 Stage name: Stage-QDR-5
 Stage title: Model Gateway Observability / Provider Readiness Hardening
 Final state: CLOSED / ACCEPTED / ARCHIVED
-Tag state: PENDING / NOT_CREATED
-Expected tag: dh-stage-qdr-5-close
+Tag state: DONE / dh-stage-qdr-5-close
+Tag: dh-stage-qdr-5-close
 Stage-QDR-6: NOT_STARTED
 ```
 
@@ -32,11 +32,11 @@ Stage-QDR-5 的计划目标是把 model gateway observability、provider health�
 ## Source Evidence
 
 ```text
-Plan: docs/current/DH_STAGE_QDR_5_PLAN.md
-Implementation work order: docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
-B2 work order: docs/current/DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
-B3 work order: docs/current/DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
-B4 work order: docs/current/DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md
+Plan: docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_PLAN.md
+Implementation work order: docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
+B2 work order: docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
+B3 work order: docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
+B4 work order: docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md
 Final close evidence: docs/current/STATUS.md and docs/current/TESTING.md
 ```
 
@@ -71,6 +71,6 @@ no raw prompt / raw provider response / credential storage
 STAGE_QDR_5_PLAN: DONE / PLAN_ONLY
 STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
 STAGE_QDR_5_ARCHIVE_CLOSE: DONE
-STAGE_QDR_5_TAG: PENDING / NOT_CREATED
-Next concrete action: DH-STAGE-QDR-5-TAG-CLOSE
+STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
+Next concrete action: DH-STAGE-QDR-6-PLAN
 ```

@@ -5,11 +5,11 @@
 ```text
 Stage name: Stage-QDR-5
 Stage title: Model Gateway Observability / Provider Readiness Hardening
-Final state: CLOSED / ACCEPTED / ARCHIVED
+Final state: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 Final close review: PASS
 Archive close: DONE
-Tag state: PENDING / NOT_CREATED
-Expected tag: dh-stage-qdr-5-close
+Tag state: DONE / dh-stage-qdr-5-close
+Tag: dh-stage-qdr-5-close
 Stage-QDR-6: NOT_STARTED
 ```
 
@@ -23,7 +23,7 @@ B3 close review: PASS
 B4 Observability Report / Acceptance Support: DONE
 Final close: PASS
 Archive close: DONE
-Tag close: PENDING
+Tag close: DONE / dh-stage-qdr-5-close
 ```
 
 ## Policy Snapshot
@@ -31,8 +31,11 @@ Tag close: PENDING
 ```text
 Archive policy: REPAIRED
 Archive packet policy: REQUIRED_FOR_ALL_FUTURE_STAGES
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_6_IMPLEMENTATION_NOW: NO
+STAGE_QDR_5_SOURCE_DOCS_ARCHIVED: YES
+DOCS_CURRENT_QDR5_RESIDUE: NONE
 ```
 
 ## Boundary Snapshot
@@ -56,13 +59,22 @@ ALLOW_CREDENTIAL_STORAGE: NO
 ## Risks
 
 ```text
-Remote tag absence must be verified again in the tag close task.
 mvnw.cmd remains a P2 tooling risk if wrapper output is still broken.
 Future provider/API/migration/repository work requires separate authorization.
+```
+
+## Source Docs Snapshot
+
+```text
+SOURCE_DH_STAGE_QDR_5_PLAN.md
+SOURCE_DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
+SOURCE_DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
+SOURCE_DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
+SOURCE_DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md
 ```
 
 ## Next Concrete Action
 
 ```text
-DH-STAGE-QDR-5-TAG-CLOSE
+DH-STAGE-QDR-6-PLAN
 ```

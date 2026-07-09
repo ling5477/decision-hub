@@ -19,10 +19,10 @@ NO_LIVE
 ## Work Order Sources
 
 ```text
-Primary implementation work order: docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
-B2 work order: docs/current/DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
-B3 work order: docs/current/DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
-B4 work order: docs/current/DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md
+Primary implementation work order: docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
+B2 work order: docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
+B3 work order: docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
+B4 work order: docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md
 ```
 
 ## Implementation Batches
@@ -62,7 +62,7 @@ B3 security boundary close review: PASS
 Final close review: PASS
 Archive close: DONE
 Quality validation: recorded in docs/current/TESTING.md
-Stage-QDR-5 tag: PENDING / NOT_CREATED
+Stage-QDR-5 tag: DONE / dh-stage-qdr-5-close
 ```
 
 ## Boundary Confirmation
@@ -84,7 +84,7 @@ no raw prompt / raw provider response / credential storage
 
 ```text
 STAGE_QDR_5_ARCHIVE_PACKET: REPAIRED
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
-Next concrete action: DH-STAGE-QDR-5-TAG-CLOSE
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
+Next concrete action: DH-STAGE-QDR-6-PLAN
 ```

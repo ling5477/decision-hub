@@ -108,6 +108,7 @@ Archive, tag, review, and path rules:
 - Archive packet 必须至少记录计划、work order、batch 摘要、验证证据、final close、archive close、状态快照、边界确认、风险、下一步和 tag state；packet 不完整时 tag close 必须 BLOCKED。
 - Archive close and tag close are separate steps. Do not mark a tag as created unless the tag command actually created it and, if required, pushed it.
 - Stage-QDR-6 planning 必须等 Stage-QDR-5 archive packet 完整、archive policy repair commit 完成、Stage-QDR-5 tag close 完成后，作为独立 planning-first 任务启动。
+- Closed stage current residue must be treated as a cleanup blocker: if `docs/current` still contains completed-stage plan / WO / batch source docs, move them to `docs/gates/<stage>/SOURCE_*` and verify no residue before next-stage planning.
 - Stage-QDR-5 must be planning-first. Do not start Stage-QDR-5 implementation, runtime, provider, HTTP, Agent, LangGraph, or LIVE from a tag, cleanup, archive, or close task.
 - Only these conditions trigger standalone review: migration, API / Controller, security boundary, stage close, P0 / P1 blocker.
 - A normal batch should close as implementation + tests + boundary scan + minimal docs + commit. Do not add standalone review/freeze for every ordinary batch.

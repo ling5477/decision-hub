@@ -25,8 +25,8 @@ Stage title: Model Gateway Observability / Provider Readiness Hardening
 Final close review: PASS
 Archive close: DONE
 Archive close dirty docs accepted for policy fix: ARCHIVE_CLOSE_DIRTY_ACCEPTED_FOR_POLICY_FIX
-Tag state: PENDING / NOT_CREATED
-Expected tag: dh-stage-qdr-5-close
+Tag state: DONE / dh-stage-qdr-5-close
+Tag: dh-stage-qdr-5-close
 Stage-QDR-6: NOT_STARTED
 ```
 
@@ -65,8 +65,8 @@ no raw prompt / raw provider response / credential storage
 ```text
 STAGE_QDR_5_ARCHIVE_CLOSE: DONE
 STAGE_QDR_5_ARCHIVE_PACKET: REPAIRED
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
 ```
 
 ## Risks
@@ -79,5 +79,5 @@ No push or tag is created by archive close.
 ## Next Concrete Action
 
 ```text
-DH-STAGE-QDR-5-TAG-CLOSE
+DH-STAGE-QDR-6-PLAN
 ```

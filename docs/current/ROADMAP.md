@@ -65,9 +65,9 @@ STAGE_QDR_5_B3: CLOSED / ACCEPTED
 STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO: DONE / WORK_ORDER_ONLY
 STAGE_QDR_5_B4_IMPLEMENTATION: DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED
 STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_5_ARCHIVE: DONE
-STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
 STAGE_QDR_6: NOT_STARTED
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
@@ -87,9 +87,9 @@ ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO / CONSUMED
 ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES / CONSUMED
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_5_TAG_NOW: NO
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+STAGE_QDR_5_TAG_NOW: NO / ALREADY_TAGGED
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
 ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_TAG_NOW: NO / ALREADY_TAGGED
 ```
@@ -109,7 +109,7 @@ DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-WO: DONE
 DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-IMPLEMENTATION: DONE
 DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW: PASS
 DH-STAGE-QDR-5-ARCHIVE-CLOSE: DONE
-Then: DH-STAGE-QDR-5-TAG-CLOSE
+Then: DH-STAGE-QDR-6-PLAN
 ```
 
 Stage-QDR-5 plan 已选择推荐主线：
@@ -137,7 +137,7 @@ B4: Observability Report / Current Docs / Acceptance Support
 B5: Stage-QDR-5 Final Close Review / Archive Close / Tag Close
 ```
 
-B1 已完成为 contracts-only batch；B2 Provider Health / Gateway Call Read Model work order、implementation 与 CI blocker fix 已完成；B3 Provider Readiness Guard / Policy Evaluation work order、implementation 与 close review 已完成，B3 为 `CLOSED / ACCEPTED`。B4 Observability Report / Acceptance Support work order 与 implementation 已完成。Stage-QDR-5 final close review 已 `PASS`，archive close 已完成，本轮已修复 stage archive packet policy，Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED`。当前唯一下一步是 Stage-QDR-5 tag close。B2 implementation 只做 internal read model，未新增 API、migration 或 production repository/JDBC expansion。B3 是 trust/security boundary 批次，close review 结论为 `PASS`；B4 不新增 API、migration、production repository/JDBC、real provider/HTTP、Provider SDK、Agent、LangGraph 或 LIVE。Stage tag 只能在完整 archive packet 与本轮 policy fix commit 存在后，由独立 tag close 任务创建。Real provider dry-run 与 Agent / LangGraph preparation 均后置，不在 Stage-QDR-5 implementation 中启动。
+B1 已完成为 contracts-only batch；B2 Provider Health / Gateway Call Read Model work order、implementation 与 CI blocker fix 已完成；B3 Provider Readiness Guard / Policy Evaluation work order、implementation 与 close review 已完成，B3 为 `CLOSED / ACCEPTED`。B4 Observability Report / Acceptance Support work order 与 implementation 已完成。Stage-QDR-5 final close review、archive close 与 tag close 均已完成，本轮补齐 post-tag current cleanup，Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。当前唯一下一步是 Stage-QDR-6 planning-first。B2 implementation 只做 internal read model，未新增 API、migration 或 production repository/JDBC expansion。B3 是 trust/security boundary 批次，close review 结论为 `PASS`；B4 不新增 API、migration、production repository/JDBC、real provider/HTTP、Provider SDK、Agent、LangGraph 或 LIVE。Stage-QDR-5 tag 已完成为 `dh-stage-qdr-5-close`；后续不得直接进入 Stage-QDR-6 implementation/runtime。Real provider dry-run 与 Agent / LangGraph preparation 均后置，不在 Stage-QDR-5 implementation 中启动。
 
 B2 implementation boundary:
 
@@ -200,7 +200,7 @@ quality validate passes
 
 ## 3. 后续阶段边界
 
-stage-qdr-4 planning 已 `DONE / PLAN_ACCEPTED`。stage-qdr-4 B1 已 `DONE / DOMAIN_CONTRACTS_ONLY`。B2 plan 已 `DONE / PERSISTENCE_BASELINE_PLAN_ONLY`，B2 freeze review 已 `PASS`，B2 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B2 blocker fix 已 `DONE / TESTCONTAINERS_VERIFIED`，B2 implementation 已 `DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED`，B2 close review 已 `PASS`，B2 已 `CLOSED / ACCEPTED`。B3 plan 已 `DONE / PLAN_ONLY`，B3 WO 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 已 `CLOSED / ACCEPTED`。B4 plan 已 `DONE / REGRESSION_REPORT_READ_MODEL_PLAN_ONLY`，B4 WO 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED`。Stage-QDR-4 final close review 已 `PASS`，整体 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag close 已 `DONE`。Stage-QDR-5 plan 已 `DONE / PLAN_ONLY`，implementation work order 已 `DONE / WORK_ORDER_ONLY`，B1 已 `DONE / MODEL_GATEWAY_OBSERVABILITY_CONTRACTS_ONLY`，B2 work order 已 `DONE / WORK_ORDER_ONLY`，B2 implementation 已 `DONE / INTERNAL_PROVIDER_HEALTH_READ_MODEL_IMPLEMENTED`，B3 work order 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / PROVIDER_READINESS_GUARD_POLICY_EVALUATION_IMPLEMENTED`，B3 close review 已 `PASS`，B3 为 `CLOSED / ACCEPTED`，B4 work order 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED`，final close review 已 `PASS`，archive close 已完成，archive packet policy 已修复，Stage-QDR-5 为 `CLOSED / ACCEPTED / ARCHIVED`。下一步只能进入 Stage-QDR-5 tag close，不进入 Stage-QDR-6。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 和 LIVE 仍然后置且禁止。
+stage-qdr-4 planning 已 `DONE / PLAN_ACCEPTED`。stage-qdr-4 B1 已 `DONE / DOMAIN_CONTRACTS_ONLY`。B2 plan 已 `DONE / PERSISTENCE_BASELINE_PLAN_ONLY`，B2 freeze review 已 `PASS`，B2 implementation work order 已 `DONE / WORK_ORDER_ONLY`，B2 blocker fix 已 `DONE / TESTCONTAINERS_VERIFIED`，B2 implementation 已 `DONE / IMPLEMENTED / POSTGRES_FLYWAY_VERIFIED`，B2 close review 已 `PASS`，B2 已 `CLOSED / ACCEPTED`。B3 plan 已 `DONE / PLAN_ONLY`，B3 WO 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / MOCK_GATEWAY_REGRESSION_INTEGRATED`，B3 close review 已 `PASS`，B3 已 `CLOSED / ACCEPTED`。B4 plan 已 `DONE / REGRESSION_REPORT_READ_MODEL_PLAN_ONLY`，B4 WO 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / INTERNAL_REGRESSION_REPORT_READ_MODEL_IMPLEMENTED`。Stage-QDR-4 final close review 已 `PASS`，整体 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag close 已 `DONE`。Stage-QDR-5 plan 已 `DONE / PLAN_ONLY`，implementation work order 已 `DONE / WORK_ORDER_ONLY`，B1 已 `DONE / MODEL_GATEWAY_OBSERVABILITY_CONTRACTS_ONLY`，B2 work order 已 `DONE / WORK_ORDER_ONLY`，B2 implementation 已 `DONE / INTERNAL_PROVIDER_HEALTH_READ_MODEL_IMPLEMENTED`，B3 work order 已 `DONE / WORK_ORDER_ONLY`，B3 implementation 已 `DONE / PROVIDER_READINESS_GUARD_POLICY_EVALUATION_IMPLEMENTED`，B3 close review 已 `PASS`，B3 为 `CLOSED / ACCEPTED`，B4 work order 已 `DONE / WORK_ORDER_ONLY`，B4 implementation 已 `DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED`，final close review、archive close、tag close 与 current cleanup 均已完成，Stage-QDR-5 为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。下一步只能进入 Stage-QDR-6 planning-first，不进入 Stage-QDR-6 implementation/runtime。real HTTP、real provider、Provider SDK、Agent / LangGraph runtime 和 LIVE 仍然后置且禁止。
 
 ## 4. 持续禁止项
 

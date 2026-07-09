@@ -47,7 +47,7 @@
 
 9. 普通 batch 不默认触发 standalone review。只有 migration、API / Controller、安全边界、stage close、P0 / P1 blocker 才触发 review；普通 batch 以 implementation + tests + boundary scan + minimal docs + commit 为闭环。
 
-10. Stage archive close 后、tag close 前不得进入下一阶段 planning；Stage-QDR-6 只能在 Stage-QDR-5 tag close 完成后另起 planning-first 任务。
+10. Stage archive close 后、tag close 前不得进入下一阶段 planning；Stage-QDR-6 只能在 Stage-QDR-5 tag close 完成且 current cleanup 通过后另起 planning-first 任务。已关闭 stage 的 `DH_STAGE_*` source docs 必须迁入 `docs/gates/<stage>/SOURCE_*`，`docs/current` residue 未清零时下一阶段 planning BLOCKED。
 
 ## 对 NexusQuant / Decision Hub 的默认约束
 

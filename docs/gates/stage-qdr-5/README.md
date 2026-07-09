@@ -5,15 +5,15 @@
 ```text
 Stage name: Stage-QDR-5
 Stage title: Model Gateway Observability / Provider Readiness Hardening
-Final state: CLOSED / ACCEPTED / ARCHIVED
+Final state: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 Final close review: PASS
 Archive close: DONE
-Tag: PENDING / NOT_CREATED
-Expected tag: dh-stage-qdr-5-close
+Tag: DONE / dh-stage-qdr-5-close
+Tag: dh-stage-qdr-5-close
 Archive packet policy repair: DONE
 ```
 
-本归档入口只记录 Stage-QDR-5 的完成证据和后续 tag close 准备状态。它不授权 Stage-QDR-6 planning，不授权 runtime、provider、HTTP、SDK、Agent、LangGraph、LIVE 或 NQ 变更。
+本归档入口记录 Stage-QDR-5 的完成证据、tag close 结果和 historical source docs。它不表示 Stage-QDR-6 已启动，不授权 runtime、provider、HTTP、SDK、Agent、LangGraph、LIVE 或 NQ 变更。
 
 ## Batch Summary
 
@@ -25,7 +25,7 @@ B3 close review: PASS
 B4: Observability Report / Acceptance Support
 Final close: PASS
 Archive close: DONE
-Tag close: PENDING
+Tag close: DONE / dh-stage-qdr-5-close
 ```
 
 Stage-QDR-5 将 model gateway observability、provider health、provider readiness guard、policy evaluation 与 acceptance support 收口为内部只读 evidence。B1-B4 的结果只支持 Stage-QDR-5 final close 与归档复盘，不表示 provider authorization、real provider enablement、real HTTP enablement、LIVE permission、trading permission 或 NQ execution permission。
@@ -49,11 +49,23 @@ no raw prompt / raw provider response / credential storage
 
 ```text
 Final close docs commit: c11a0e7 docs(qdr): close stage-qdr-5 provider readiness hardening
-Archive status: CLOSED / ACCEPTED / ARCHIVED
+Archive status: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 Archive directory: docs/gates/stage-qdr-5/
 Current factsource after archive: docs/current
-Next task: DH-STAGE-QDR-5-TAG-CLOSE
+Next task: DH-STAGE-QDR-6-PLAN
 Stage-QDR-6: NOT_STARTED
 ```
 
-Tag close 必须作为独立任务执行；在 tag close 完成前，Stage-QDR-5 tag state 仍为 `PENDING / NOT_CREATED`。本归档记录不得被解释为 tag 已创建、Stage-QDR-6 已启动、real provider/HTTP 已启用或 trading execution 已允许。
+## Source Docs
+
+```text
+SOURCE_DH_STAGE_QDR_5_PLAN.md
+SOURCE_DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
+SOURCE_DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
+SOURCE_DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
+SOURCE_DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md
+```
+
+These files are historical source documents captured from `docs/current` after tag close. Their internal pre-tag wording is historical only; current stage state is `CLOSED / ACCEPTED / ARCHIVED / TAGGED`.
+
+Tag close 已完成，tag 为 `dh-stage-qdr-5-close`。本归档记录不得被解释为 Stage-QDR-6 已启动、real provider/HTTP 已启用或 trading execution 已允许。

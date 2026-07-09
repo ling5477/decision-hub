@@ -25,7 +25,7 @@ Stage-QDR-5 archive close initially left `docs/gates/stage-qdr-5/` with only `RE
 ```text
 Archive policy: REPAIRED
 Archive packet policy: REQUIRED_FOR_ALL_FUTURE_STAGES
-Stage-QDR-5 tag state: PENDING / NOT_CREATED
+Stage-QDR-5 tag state: DONE / dh-stage-qdr-5-close
 Stage-QDR-6: NOT_STARTED
 ```
 
@@ -59,12 +59,12 @@ no raw prompt / raw provider response / credential storage
 ```text
 DOCS_STAGE_ARCHIVE_POLICY_FIX: DONE
 STAGE_QDR_5_ARCHIVE_PACKET: REPAIRED
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
 ```
 
 ## Next Concrete Action
 
 ```text
-DH-STAGE-QDR-5-TAG-CLOSE
+DH-STAGE-QDR-6-PLAN
 ```

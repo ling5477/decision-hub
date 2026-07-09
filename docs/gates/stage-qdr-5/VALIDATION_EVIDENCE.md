@@ -22,9 +22,9 @@ NO_LIVE
 B3 security boundary close review: PASS
 Final close review: PASS
 Archive close: DONE
-Tag close: PENDING
-Tag state: PENDING / NOT_CREATED
-Expected tag: dh-stage-qdr-5-close
+Tag close: DONE / dh-stage-qdr-5-close
+Tag state: DONE / dh-stage-qdr-5-close
+Tag: dh-stage-qdr-5-close
 Stage-QDR-6: NOT_STARTED
 ```
 
@@ -64,8 +64,8 @@ no raw prompt / raw provider response / credential storage
 STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
 STAGE_QDR_5_ARCHIVE_CLOSE: DONE
 STAGE_QDR_5_ARCHIVE_PACKET: REPAIRED
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
 ```
 
 ## Risks

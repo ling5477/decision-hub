@@ -6,8 +6,8 @@
 Stage name: Stage-QDR-5
 Stage title: Model Gateway Observability / Provider Readiness Hardening
 Final state: CLOSED / ACCEPTED / ARCHIVED
-Tag state: PENDING / NOT_CREATED
-Expected tag: dh-stage-qdr-5-close
+Tag state: DONE / dh-stage-qdr-5-close
+Tag: dh-stage-qdr-5-close
 Stage-QDR-6: NOT_STARTED
 ```
 
@@ -56,7 +56,7 @@ no raw prompt / raw provider response / credential storage
 ## Risks
 
 ```text
-Stage-QDR-5 tag remains NOT_CREATED until a separate tag close task.
+Stage-QDR-5 tag close is DONE; tag is dh-stage-qdr-5-close.
 Stage-QDR-6 planning remains blocked until Stage-QDR-5 tag close is complete.
 Future provider/API/migration/repository work still requires independent authorization.
 ```
@@ -64,5 +64,5 @@ Future provider/API/migration/repository work still requires independent authori
 ## Next Concrete Action
 
 ```text
-DH-STAGE-QDR-5-TAG-CLOSE
+DH-STAGE-QDR-6-PLAN
 ```

@@ -120,7 +120,7 @@
 
 - Stage archive 必须形成 self-contained archive packet，不能只保留单个 `README.md`；packet 不完整时 tag close 必须 BLOCKED。
 - Stage tag 只能在完整 archive packet 所在 commit 已存在且 tag close 任务明确授权后处理；archive close 与 tag close 必须分开。
-- Stage archive close 后、tag close 前不得进入下一阶段 planning；Stage-QDR-6 只能在 Stage-QDR-5 tag close 完成后另起 planning-first 任务。
+- Stage archive close 后、tag close 前不得进入下一阶段 planning；Stage-QDR-6 只能在 Stage-QDR-5 tag close 完成且 current cleanup 通过后另起 planning-first 任务。已关闭 stage 的 `DH_STAGE_*` source docs 必须迁入 `docs/gates/<stage>/SOURCE_*`，`docs/current` residue 未清零时下一阶段 planning BLOCKED。
 - 只有 migration、API / Controller、安全边界、stage close、P0 / P1 blocker 触发 review。
 - 普通 batch 不默认触发 standalone review；闭环形态为 implementation + tests + boundary scan + minimal docs + commit。
 - 不硬编码本机盘符路径，执行时以当前机器真实仓库路径为准。

@@ -63,7 +63,7 @@ stage-qdr-3 acceptance 已 ACCEPTED。
 stage-qdr-3 final close 已 CLOSED / ACCEPTED。
 stage-qdr-4 planning 已 DONE / PLAN_ACCEPTED。
 stage-qdr-4 已 CLOSED / ACCEPTED / ARCHIVED。
-stage-qdr-4 tag 仍为 PENDING。
+stage-qdr-4 tag close 已 DONE。
 ```
 
 `pre-close-current-snapshot-20260707/` 保存上一轮压缩 current docs 前的入口文件快照。`current-docs-historical-20260708/` 保存本轮从 `docs/current` 移出的历史阶段文档、旧 integration planning / review / work order、审计报告、旧 workflow support 文档和其他非 current blocker 文件。
@@ -140,17 +140,22 @@ docs/gates/stage-qdr-5/FINAL_CLOSE_REVIEW.md
 docs/gates/stage-qdr-5/ARCHIVE_CLOSE.md
 docs/gates/stage-qdr-5/DISCIPLINE_REPAIR.md
 docs/gates/stage-qdr-5/STATUS_SNAPSHOT.md
+docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_PLAN.md
+docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
+docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
+docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
+docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md
 ```
 
 内容摘要：
 
 ```text
 Stage-QDR-5 Model Gateway Observability / Provider Readiness Hardening
-Status: CLOSED / ACCEPTED / ARCHIVED
+Status: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 Final close review: PASS
 Archive close: DONE
-Tag state: PENDING / NOT_CREATED
-Expected tag: dh-stage-qdr-5-close
+Tag state: DONE / dh-stage-qdr-5-close
+Tag: dh-stage-qdr-5-close
 B1 Model Gateway Observability Contracts: DONE
 B2 Provider Health / Gateway Call Read Model: DONE
 B3 Provider Readiness Guard / Policy Evaluation: CLOSED / ACCEPTED
@@ -159,9 +164,10 @@ B4 Observability Report / Acceptance Support: DONE
 Archive policy: REPAIRED
 Archive packet policy: REQUIRED_FOR_ALL_FUTURE_STAGES
 Stage-QDR-6: NOT_STARTED
+Source docs: ARCHIVED_UNDER_DOCS_GATES
 ```
 
-Stage-QDR-5 归档记录只作为 historical record 和 tag close 前审计证据，不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation、trading signal、raw prompt / raw provider response / credential storage。Stage-QDR-5 tag close 只能在本轮 archive policy fix commit 后作为独立任务执行。
+Stage-QDR-5 归档记录只作为 historical record 和 tag close 前审计证据，不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation、trading signal、raw prompt / raw provider response / credential storage。Stage-QDR-5 tag close 已完成；后续 Stage-QDR-6 只能作为独立 planning-first 任务启动。
 
 ## 6. Current Factsource Pointers
 
@@ -171,19 +177,19 @@ Current next action: docs/current/WORK_ORDER.md
 Factsource policy: docs/current/FACTSOURCE_POLICY.md
 Validation evidence: docs/current/TESTING.md
 Current docs index: docs/current/README.md
-Stage-QDR-5 plan: docs/current/DH_STAGE_QDR_5_PLAN.md
-Stage-QDR-5 status: CLOSED / ACCEPTED / ARCHIVED
+Stage-QDR-5 source docs: docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_*.md
+Stage-QDR-5 status: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 Stage-QDR-5 final close review: PASS
 Stage-QDR-5 archive: DONE
-Stage-QDR-5 tag: PENDING / NOT_CREATED
+Stage-QDR-5 tag: DONE / dh-stage-qdr-5-close
 Stage-QDR-4 archive directory: docs/gates/stage-qdr-4/
 Stage-QDR-5 archive directory: docs/gates/stage-qdr-5/
 Archive policy: REPAIRED
 Archive packet policy: REQUIRED_FOR_ALL_FUTURE_STAGES
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-Next action: DH-STAGE-QDR-5-TAG-CLOSE
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+Next action: DH-STAGE-QDR-6-PLAN
 ```
 
 ## 7. Post-close Rule
 
-`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`，Stage-QDR-4 已归档并打 tag，为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。`DH-STAGE-QDR-5-PLAN`、implementation work order、B1、B2、B3、B4、final close review 与 archive close 均已完成；本轮已修复 stage archive packet policy。Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED`，tag 为 `PENDING / NOT_CREATED`。后续只允许先执行 `DH-STAGE-QDR-5-TAG-CLOSE`，不得 push，不得进入 Stage-QDR-6。归档目录 `docs/gates/**` 只作为 historical records。除非归档文档暴露 `FACTSOURCE_POLICY.md` 定义的硬错误，否则不得覆盖 current factsources 或授权越过当前 work order。
+`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已 `PASS`，Stage-QDR-4 已归档并打 tag，为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。`DH-STAGE-QDR-5-PLAN`、implementation work order、B1、B2、B3、B4、final close review、archive close 与 tag close 均已完成；本轮补齐 post-tag current cleanup。Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag 为 `dh-stage-qdr-5-close`。后续只允许先执行 `DH-STAGE-QDR-6-PLAN`；不得直接进入 Stage-QDR-6 implementation/runtime。归档目录 `docs/gates/**` 只作为 historical records。除非归档文档暴露 `FACTSOURCE_POLICY.md` 定义的硬错误，否则不得覆盖 current factsources 或授权越过当前 work order。

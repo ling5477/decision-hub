@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-DOCS-STAGE-ARCHIVE-POLICY-FIX
-current task status: DONE
-next action: DH-STAGE-QDR-5-TAG-CLOSE
-mode: DOCUMENTATION_POLICY_FIX + STAGE_ARCHIVE_PACKET_REPAIR + SKILL_POLICY_FIX + QDR4_QDR5_ARCHIVE_BACKFILL + TAG_BLOCKED_UNTIL_REPAIR + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current task: DH-STAGE-QDR-5-CURRENT-CLEANUP
+current task status: DONE / POST_TAG_CURRENT_CLEANUP
+next action: DH-STAGE-QDR-6-PLAN
+mode: DOCUMENTATION_ONLY + POST_TAG_CURRENT_CLEANUP + QDR5_SOURCE_DOC_ARCHIVE_BACKFILL + CURRENT_FACTSOURCE_PRUNING + ARCHIVE_INDEX_SYNC + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
 ```
 
-Stage-QDR-5 B1 已完成，B2 Provider Health / Gateway Call Read Model implementation 与 CI blocker fix 已完成，B3 Provider Readiness Guard / Policy Evaluation implementation 已完成。B3 security boundary / close review 已 `PASS`，B3 为 `CLOSED / ACCEPTED`。B4 Observability Report / Acceptance Support work order 已完成为 `DONE / WORK_ORDER_ONLY`，B4 implementation 已完成为 `DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED`。Stage-QDR-5 final close review 已 `PASS`，archive close 已完成，本轮已修复 stage archive packet policy，Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED`。下一步只允许进入 Stage-QDR-5 tag close；不得 push，不得进入 Stage-QDR-6。
+Stage-QDR-5 B1 已完成，B2 Provider Health / Gateway Call Read Model implementation 与 CI blocker fix 已完成，B3 Provider Readiness Guard / Policy Evaluation implementation 已完成。B3 security boundary / close review 已 `PASS`，B3 为 `CLOSED / ACCEPTED`。B4 Observability Report / Acceptance Support work order 已完成为 `DONE / WORK_ORDER_ONLY`，B4 implementation 已完成为 `DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED`。Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成，Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。下一步只允许进入 Stage-QDR-6 planning-first；不得直接进入 Stage-QDR-6 implementation/runtime。
 
 ## 2. 前置状态
 
@@ -33,9 +33,9 @@ STAGE_QDR_5_B3: CLOSED / ACCEPTED
 STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO: DONE / WORK_ORDER_ONLY
 STAGE_QDR_5_B4_IMPLEMENTATION: DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED
 STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_5_ARCHIVE: DONE
-STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
 STAGE_QDR_6: NOT_STARTED
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
@@ -55,9 +55,9 @@ ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO / CONSUMED
 ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES / CONSUMED
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_5_TAG_NOW: NO
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+STAGE_QDR_5_TAG_NOW: NO / ALREADY_TAGGED
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_PROVIDER_SDK: NO
@@ -132,8 +132,9 @@ default: no API, no migration, no real provider / HTTP, no Agent / LangGraph, no
 ### B5
 
 ```text
-allowed now: YES / FINAL_CLOSE_REVIEW_ONLY
-order: final close review PASS -> archive close docs commit -> worktree clean -> annotated tag -> tag push -> next stage planning
+allowed now: NO / CONSUMED
+status: CONSUMED / TAGGED
+order: final close review PASS -> archive close docs commit -> annotated tag -> tag push -> post-tag current cleanup -> next stage planning
 ```
 
 ## 5. Review 触发规则
@@ -171,7 +172,7 @@ repository or report failure fails closed
 quality validate passes
 ```
 
-完整矩阵见 `docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md`。
+完整矩阵见 `docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md`。
 
 ## 7. 当前禁止范围
 
@@ -179,8 +180,8 @@ quality validate passes
 B2 implementation 与 B2 CI blocker fix 已完成。
 B3 implementation 与 close review 已完成，范围限于 provider readiness guard / policy evaluation internal boundary。
 B4 work order 已完成，范围限于 internal report / acceptance support boundary design。
-下一步只允许进入 Stage-QDR-5 tag close。
-禁止跳过 archive close commit 直接进入 Stage-QDR-6。
+下一步只允许进入 Stage-QDR-6 planning-first。
+禁止跳过 Stage-QDR-6 planning-first 直接进入 implementation/runtime。
 禁止新增 migration。
 禁止修改 V1-V9 migration。
 禁止新增 V10。
@@ -204,5 +205,5 @@ B4 work order 已完成，范围限于 internal report / acceptance support boun
 ## 8. 下一任务
 
 ```text
-DH-STAGE-QDR-5-TAG-CLOSE
+DH-STAGE-QDR-6-PLAN
 ```

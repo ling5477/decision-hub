@@ -1,5 +1,7 @@
 # DH Stage-QDR-5 Implementation Work Order
 
+> Historical archive note: This is a historical source document captured before tag close. Current stage state is TAGGED; see README.md / STATUS_SNAPSHOT.md. Historical status wording in this file is not a current factsource.
+
 ## 1. 任务定位
 
 ```text

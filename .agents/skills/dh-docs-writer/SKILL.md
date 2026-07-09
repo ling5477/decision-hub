@@ -164,6 +164,10 @@ DH 文档与注释默认使用中文为主，英文只保留在稳定工程标�
 - Stage tag 必须打在包含完整 archive packet 的最终 commit 上；archive packet 缺失或只有单 README 时，tag close 必须 BLOCKED。
 - Batch 完成不打 tag。普通 batch 只能进入 implementation + tests + boundary scan + minimal docs + commit，不能跳过 stage final close / archive close。
 - Stage archive close 后、tag close 前，不得进入下一阶段 planning；下一阶段 planning 必须等当前 stage tag close 完成后另起 planning-first 任务。
+- Stage tag close 后必须执行 `docs/current` pruning 检查；已关闭 stage 的 `DH_STAGE_<stage>_*` plan / WO / batch process source docs 不得长期保留在 `docs/current`。
+- 已关闭 stage 的 source docs 必须迁入 `docs/gates/<stage-id>/`，可使用 `SOURCE_` 前缀保留原文；旧状态口径必须标注为 historical，不得作为 current factsource。
+- `docs/current` 只能保留当前阶段事实源、当前工作入口、全局索引、验证记录和 supporting summary；完成阶段的过程源文件应由 `docs/gates/<stage-id>/` 承担归档证据职责。
+- 如果 `docs/current` 中残留已关闭 stage 的过程源文件，下一阶段 planning 必须 BLOCKED，直到 current cleanup、source relocation 和 residue check 完成。
 - Freeze tasks must include a freeze statement, file list, status alignment, validation record, known residuals, and post-freeze rules.
 - Do not edit historical gate snapshots as if they were current docs.
 - If historical facts are stale, write current-doc clarification or errata rather than mutating the frozen snapshot.

@@ -1,5 +1,7 @@
 # DH-STAGE-QDR-5-B4-OBSERVABILITY-REPORT-ACCEPTANCE-SUPPORT-WO
 
+> Historical archive note: This is a historical source document captured before tag close. Current stage state is TAGGED; see README.md / STATUS_SNAPSHOT.md. Historical status wording in this file is not a current factsource.
+
 > status: DONE / WORK_ORDER_ONLY
 > scope: B4 implementation boundary design
 > current factsource: docs/current

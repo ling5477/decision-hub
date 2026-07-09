@@ -38,9 +38,9 @@ STAGE_QDR_5_B3: CLOSED / ACCEPTED
 STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO: DONE / WORK_ORDER_ONLY
 STAGE_QDR_5_B4_IMPLEMENTATION: DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED
 STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_5_ARCHIVE: DONE
-STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
 STAGE_QDR_6: NOT_STARTED
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
@@ -60,9 +60,9 @@ ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO / CONSUMED
 ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES / CONSUMED
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_5_TAG_NOW: NO
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+STAGE_QDR_5_TAG_NOW: NO / ALREADY_TAGGED
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_AGENT_PHASE: NO
@@ -74,8 +74,8 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-DOCS-STAGE-ARCHIVE-POLICY-FIX
-next action: DH-STAGE-QDR-5-TAG-CLOSE
+current task: DH-STAGE-QDR-5-CURRENT-CLEANUP
+next action: DH-STAGE-QDR-6-PLAN
 ```
 
 ## Stage-QDR-4 归档状态
@@ -92,11 +92,11 @@ STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
 STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
 ```
 
-Stage-QDR-4 归档和 tag close 不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。`DH-STAGE-QDR-5-PLAN`、`DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`、B1、B2、B3、B4、final close review 与 archive close 已完成；本轮已修复 stage archive packet policy，Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED`，tag 为 `PENDING / NOT_CREATED`。下一步只能进入 `DH-STAGE-QDR-5-TAG-CLOSE`；不得 push、不得进入 Stage-QDR-6。
+Stage-QDR-4 归档和 tag close 不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。`DH-STAGE-QDR-5-PLAN`、`DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`、B1、B2、B3、B4、final close review 与 archive close 已完成；本轮已修复 stage archive packet policy，Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag 为 `dh-stage-qdr-5-close`。下一步只能进入 `DH-STAGE-QDR-6-PLAN`；不得直接进入 Stage-QDR-6 implementation。
 
-## Stage-qdr-4 当前事实源
+## 当前事实源
 
-这些文件可以作为 `DH-STAGE-QDR-4-ARCHIVE-CLOSE` 与后续 tag prep 的 current factsource：
+Stage-QDR-5 已完成 archive close、tag close 与 current cleanup。当前事实源只保留全局状态、下一步入口、验证证据和归档索引；已关闭阶段的 process source docs 只作为 historical archive evidence。
 
 ```text
 README.md
@@ -106,15 +106,9 @@ docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
 docs/current/ARCHIVE_INDEX.md
-docs/current/DH_STAGE_QDR_5_PLAN.md
-docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
-docs/current/DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
-docs/current/DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
-docs/current/DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md
 ```
 
-Stage-QDR-4 的详细 plan / work order / implementation work order 已归档到 `docs/gates/stage-qdr-4/`，不再保留在 `docs/current`。Stage-QDR-5 的 planning 入口是 `docs/current/DH_STAGE_QDR_5_PLAN.md`；implementation work order 入口是 `docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md`；B2 Provider Health / Gateway Call Read Model work order 入口是 `docs/current/DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md`；B3 Provider Readiness Guard / Policy Evaluation work order 入口是 `docs/current/DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md`；B4 Observability Report / Acceptance Support work order 入口是 `docs/current/DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md`。
-
+Stage-QDR-4 和 Stage-QDR-5 的详细 plan / work order / implementation work order 已归档到 `docs/gates/stage-qdr-4/` 与 `docs/gates/stage-qdr-5/`，不再保留在 `docs/current`。Stage-QDR-5 historical source docs 使用 `SOURCE_` 前缀，旧状态只作为 historical record。
 ## Supporting Docs
 
 以下文件默认不是 primary stage gate source，也不是 close review blocker。只有当它们出现硬错误时，才可升级为 blocker，规则见 `FACTSOURCE_POLICY.md`。
@@ -135,17 +129,11 @@ CODEX_PROJECT_INSTRUCTIONS.md 当前执行纪律
 TESTING.md                 当前验证证据与工具风险
 FACTSOURCE_POLICY.md       事实源与 blocker 规则
 ARCHIVE_INDEX.md           已归档文档索引
-DH_STAGE_QDR_5_PLAN.md     Stage-QDR-5 plan-only 记录
-DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md Stage-QDR-5 implementation batch 边界与测试矩阵
-DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md Stage-QDR-5 B2 internal read model implementation work order
-DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md Stage-QDR-5 B3 provider readiness guard / policy evaluation implementation work order
-DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md Stage-QDR-5 B4 observability report / acceptance support implementation work order
 WORKLOG.md                 本轮文档治理记录，supporting only
 ROADMAP.md                 路线摘要，supporting only
 API.md                     API 实现状态摘要，supporting only
 DB_SCHEMA.md               DB schema 状态摘要，supporting only
 ```
-
 ## Archive Pointers
 
 ```text

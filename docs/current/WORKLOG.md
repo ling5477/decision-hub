@@ -4,6 +4,47 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-09 DH-STAGE-QDR-5-CURRENT-CLEANUP
+
+完成 Stage-QDR-5 tag close 后的 current cleanup。本轮为 documentation-only / post-tag current cleanup，只移动已关闭阶段 source docs、同步 current factsource/index、补充 archive packet source docs 列表，并固化 post-tag current pruning 规则；未修改 Java 生产代码、测试代码、migration、API、Controller、Repository/JDBC、contracts、golden_cases 或 NQ。
+
+结论：
+
+```text
+STAGE_QDR_5_CURRENT_CLEANUP: DONE
+STAGE_QDR_5_SOURCE_DOCS_ARCHIVED: YES
+DOCS_CURRENT_QDR5_RESIDUE: NONE
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_6_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-PLAN
+```
+
+变更摘要：
+
+```text
+docs/current/DH_STAGE_QDR_5*.md: moved to docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5*.md
+docs/current: pruned Stage-QDR-5 process source docs and retained current/global factsource entries only
+docs/gates/stage-qdr-5: added source docs list and historical archive note
+docs/current/ARCHIVE_INDEX.md: synced Stage-QDR-5 TAGGED and source-doc archive pointers
+dh-docs-writer / nq-dh-workflow-router: added post-tag current pruning and closed-stage residue blocker rules
+```
+
+边界：
+
+```text
+no NQ change
+no Java production/test change
+no migration/API/Controller/repository/JDBC/contract/golden change
+no real provider / real HTTP / Provider SDK / Agent / LangGraph / LIVE
+no raw prompt / raw provider response / credential persistence
+no trading signal
+no Stage-QDR-6 planning
+no tag
+no push
+```
+
 ## 2026-07-09 DH-DOCS-STAGE-ARCHIVE-POLICY-FIX
 
 完成 stage archive policy 修复与 Stage-QDR-4 / Stage-QDR-5 archive packet backfill。本轮为 documentation policy fix / stage archive packet repair / skill policy fix，只修改 README、`docs/current`、`docs/gates` 与 `.agents` skill policy；未修改 Java 生产代码、测试代码、migration、API、Controller、Repository/JDBC、contracts、golden_cases 或 NQ。
@@ -16,12 +57,12 @@ STAGE_QDR_4_ARCHIVE_PACKET: REPAIRED
 STAGE_QDR_5_ARCHIVE_PACKET: REPAIRED
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
-STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
 STAGE_QDR_6: NOT_STARTED
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
 ARCHIVE_CLOSE_DIRTY_ACCEPTED_FOR_POLICY_FIX
-next action: DH-STAGE-QDR-5-TAG-CLOSE
+next action: DH-STAGE-QDR-6-PLAN
 ```
 
 变更摘要：
@@ -67,11 +108,11 @@ no push
 
 ```text
 STAGE_QDR_5_ARCHIVE_CLOSE: DONE
-STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED
-STAGE_QDR_5_TAG: PENDING / NOT_CREATED
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
-next action: DH-STAGE-QDR-5-TAG-CLOSE
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
+next action: DH-STAGE-QDR-6-PLAN
 ```
 
 验证：
@@ -109,10 +150,10 @@ no push
 STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
 STAGE_QDR_5: CLOSED / ACCEPTED
 STAGE_QDR_5_ARCHIVE: PENDING
-STAGE_QDR_5_TAG: NOT_CREATED
+STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
 ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES
-ALLOW_STAGE_QDR_5_TAG_NOW: NO
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5_TAG_NOW: NO / ALREADY_TAGGED
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
 next action: DH-STAGE-QDR-5-ARCHIVE-CLOSE
 ```
 
@@ -243,7 +284,7 @@ NO_LIVE
 
 ```text
 README.md
-docs/current/DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md
+docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md
 docs/current/README.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
@@ -483,7 +524,7 @@ NO_LIVE
 
 ```text
 README.md
-docs/current/DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
+docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
 docs/current/README.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
@@ -673,7 +714,7 @@ NO_LIVE
 
 ```text
 README.md
-docs/current/DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
+docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
 docs/current/README.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
@@ -845,7 +886,7 @@ stage order: final close review PASS -> archive close docs commit -> worktree cl
 
 ```text
 README.md
-docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
+docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
 docs/current/README.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
@@ -918,7 +959,7 @@ dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/**
 
 ```text
 README.md
-docs/current/DH_STAGE_QDR_5_PLAN.md
+docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_PLAN.md
 docs/current/README.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md

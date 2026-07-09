@@ -66,9 +66,9 @@ STAGE_QDR_5_B3: CLOSED / ACCEPTED
 STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO: DONE / WORK_ORDER_ONLY
 STAGE_QDR_5_B4_IMPLEMENTATION: DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED
 STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_5_ARCHIVE: DONE
-STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
 STAGE_QDR_6: NOT_STARTED
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
@@ -88,9 +88,9 @@ ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO / CONSUMED
 ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES / CONSUMED
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_5_TAG_NOW: NO
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+STAGE_QDR_5_TAG_NOW: NO / ALREADY_TAGGED
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
@@ -105,8 +105,8 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current task: DH-DOCS-STAGE-ARCHIVE-POLICY-FIX
-next action: DH-STAGE-QDR-5-TAG-CLOSE
+current task: DH-STAGE-QDR-5-CURRENT-CLEANUP
+next action: DH-STAGE-QDR-6-PLAN
 ```
 
 ## 2. 前置分类规则
@@ -131,7 +131,7 @@ Next concrete action:
 
 ## 3. 当前事实源规则
 
-Stage-QDR-4 已归档并完成 tag close。Stage-QDR-5 planning 后的 current factsource 文件包括：
+Stage-QDR-4 与 Stage-QDR-5 均已归档并完成 tag close。当前 factsource 文件包括：
 
 ```text
 README.md
@@ -141,14 +141,9 @@ docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/TESTING.md
 docs/current/ARCHIVE_INDEX.md
-docs/current/DH_STAGE_QDR_5_PLAN.md
-docs/current/DH_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER.md
-docs/current/DH_STAGE_QDR_5_B2_PROVIDER_HEALTH_GATEWAY_CALL_READ_MODEL_WO.md
-docs/current/DH_STAGE_QDR_5_B3_PROVIDER_READINESS_GUARD_POLICY_EVALUATION_WO.md
-docs/current/DH_STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO.md
 ```
 
-Stage-QDR-4 的详细 plan / work order / implementation work order 已移动到 `docs/gates/stage-qdr-4/`，只能作为 historical archive evidence，不再作为 current docs 入口或 current factsource。
+Stage-QDR-4 的详细 plan / work order / implementation work order 已移动到 `docs/gates/stage-qdr-4/`；Stage-QDR-5 source docs 已移动到 `docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_*.md`。这些文件只能作为 historical archive evidence，不再作为 current docs 入口或 current factsource。
 
 以下文件默认 supporting only，不作为 primary stage gate source：
 
@@ -166,7 +161,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1/B2/B3/B4、final close review、archive close 和 tag close 均已完成；Stage-QDR-4 整体为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag 为 `dh-stage-qdr-4-close`，target 为 `62c8020 docs(workflow): repair documentation discipline and skill policy`。`DH-STAGE-QDR-5-PLAN` 已完成为 `DONE / PLAN_ONLY`，推荐方向为 `Model Gateway Observability / Provider Readiness Hardening`。`DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`、B1、B2、B3、B4 均已完成；B3 close review 已 `PASS`，B3 为 `CLOSED / ACCEPTED`；B4 implementation 已完成 internal observability report / acceptance support。`DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW` 已 `PASS`，archive close 已完成，本轮已修复 stage archive packet policy，Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED`，tag 为 `PENDING / NOT_CREATED`。下一步只能进入 `DH-STAGE-QDR-5-TAG-CLOSE`；不得 all-in-one tag/push，不得进入 Stage-QDR-6，不得启动 runtime、provider、HTTP、Agent、LangGraph 或 LIVE。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1/B2/B3/B4、final close review、archive close 和 tag close 均已完成；Stage-QDR-4 整体为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag 为 `dh-stage-qdr-4-close`，target 为 `62c8020 docs(workflow): repair documentation discipline and skill policy`。`DH-STAGE-QDR-5-PLAN` 已完成为 `DONE / PLAN_ONLY`，推荐方向为 `Model Gateway Observability / Provider Readiness Hardening`。`DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`、B1、B2、B3、B4 均已完成；B3 close review 已 `PASS`，B3 为 `CLOSED / ACCEPTED`；B4 implementation 已完成 internal observability report / acceptance support。`DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW` 已 `PASS`，archive close 已完成，本轮已修复 stage archive packet policy，Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag 为 `dh-stage-qdr-5-close`。下一步只能进入 `DH-STAGE-QDR-6-PLAN`；不得直接进入 Stage-QDR-6 implementation，不得启动 runtime、provider、HTTP、Agent、LangGraph 或 LIVE。
 
 ## 4. 安全边界
 
@@ -256,9 +251,9 @@ STAGE_QDR_5_B3: CLOSED / ACCEPTED
 STAGE_QDR_5_B4_OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_WO: DONE / WORK_ORDER_ONLY
 STAGE_QDR_5_B4_IMPLEMENTATION: DONE / OBSERVABILITY_REPORT_ACCEPTANCE_SUPPORT_IMPLEMENTED
 STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
-STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_5_ARCHIVE: DONE
-STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
 STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_CLOSED_ACCEPTED / B4_DONE / FINAL_CLOSE_PASS
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_5_IMPLEMENTATION_NOW: NO / ALL_IN_ONE_FORBIDDEN
@@ -275,9 +270,9 @@ ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_5_B4_IMPLEMENTATION_NOW: NO / CONSUMED
 ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES / CONSUMED
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_5_TAG_NOW: NO
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+STAGE_QDR_5_TAG_NOW: NO / ALREADY_TAGGED
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
 V9 migration: CREATED / V9__qdr_replay_evaluation_baseline.sql / POSTGRES_LOAD_VERIFIED
 Repository / JDBC implementation: DONE / TENANT_BOUND
 API / Controller: NO
@@ -286,5 +281,5 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-5-TAG-CLOSE
+next action: DH-STAGE-QDR-6-PLAN
 ```

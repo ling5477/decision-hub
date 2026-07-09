@@ -3,6 +3,71 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-09 DH-STAGE-QDR-5-CURRENT-CLEANUP validation
+
+```text
+Task type: DOCUMENTATION_ONLY + POST_TAG_CURRENT_CLEANUP + QDR5_SOURCE_DOC_ARCHIVE_BACKFILL + CURRENT_FACTSOURCE_PRUNING + ARCHIVE_INDEX_SYNC + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_LIVE
+current workspace: E:\Project\decision-hub
+branch: dev
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+STAGE_QDR_5_SOURCE_DOCS_ARCHIVED: YES
+DOCS_CURRENT_QDR5_RESIDUE: NONE
+STAGE_QDR_6: NOT_STARTED
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_6_IMPLEMENTATION_NOW: NO
+real HTTP: NO
+real provider: NO
+Provider SDK: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+### Current cleanup validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git tag --list "dh-stage-qdr-5-close"` | PASS | 本地 tag 存在。 |
+| `git rev-list -n 1 dh-stage-qdr-5-close` | PASS | tag target 为 `7d530094a13d38a4ee2013ba56c7697f5176057a`。 |
+| `git ls-remote --tags origin "refs/tags/dh-stage-qdr-5-close*"` | PASS | 远程 annotated tag 与 peeled commit 均可见；peeled commit 为 `7d530094a13d38a4ee2013ba56c7697f5176057a`。 |
+| `Get-ChildItem -LiteralPath docs/current -Filter "DH_STAGE_QDR_5*.md"` | PASS / EMPTY | `docs/current` 已无 Stage-QDR-5 process source docs。 |
+| `Get-ChildItem -LiteralPath docs/gates/stage-qdr-5 -Filter "SOURCE_DH_STAGE_QDR_5*.md"` | PASS / 5 FILES | 5 个 Stage-QDR-5 source docs 已回填到 archive packet。 |
+| `git restore --staged -- ...` | PASS | 仅解除 `git mv` 留下的 staged rename；工作区内容未回退。 |
+| `git diff --cached --name-only` | PASS / EMPTY | 暂存区为空。 |
+| `git diff --check` | PASS_WITH_EOL_WARNINGS | 无 whitespace error；仅 Git LF -> CRLF warning。 |
+| `git diff --name-status` / `git diff --name-only` | DOCS_AND_SKILL_POLICY_DIFF | diff 限于允许的 README、`docs/current`、`docs/gates`、`.agents` skill policy；新增 `SOURCE_*` 由 `git status --short` 记录为 untracked。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-domain/src/main`、`dh-usecase/src/main`、`dh-app/src/main`、`dh-infra/src/main`、`dh-api/src/main`、`contracts`、`golden_cases`、`dh-*/src/main/resources/db/migration` 均无 diff。 |
+| required safety scan | REVIEWED / NO_ACTUAL_RISK | 命中为 `NOT_STARTED` 被 `STARTED` regex 误命中、`FACTSOURCE_POLICY.md` hard-error phrase、否定边界、historical archive docs 或 `SOURCE_*` 历史源文件；未发现 Stage-QDR-5 tag pending/not-created、Stage-QDR-6 started、real provider/HTTP/SDK/Agent/LangGraph/LIVE enabled/started。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| `.\\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | exit code 0，但输出仍包含 `'\' is not recognized` 与 `.mvn\wrapper\maven-wrapper.jar` no main manifest attribute；不能写成 Maven wrapper PASS。 |
+
+Boundary:
+
+```text
+未修改 NQ
+未修改 Java 生产代码
+未修改 Java 测试代码
+未新增 migration
+未修改 V1-V9 migration
+未新增 V10
+未新增 API / Controller / REST endpoint
+未新增 production Repository / JDBC / persistence adapter
+未新增真实 HTTP client
+未新增真实 provider / Provider SDK
+未新增 OpenAI / Anthropic / Gemini / Ollama SDK
+未接 LangGraph / AutoGen / CrewAI
+未启动 Agent runtime
+未读取 credential / token / cookie / apiKey / apiSecret / passphrase
+未保存 raw prompt
+未保存 raw provider response
+未触碰交易、订单、撤单、账户、ledger mutation、risk mutation、paper/live mutation
+未把 provider health / readiness / acceptance report 写成 trading signal
+未进入 Stage-QDR-6 planning
+未创建 tag
+未 push
+```
+
 ## 2026-07-09 DH-DOCS-STAGE-ARCHIVE-POLICY-FIX validation
 
 ```text
@@ -12,12 +77,12 @@ branch: dev
 ARCHIVE_CLOSE_DIRTY_ACCEPTED_FOR_POLICY_FIX: YES
 STAGE_QDR_4_ARCHIVE_PACKET: REPAIRED
 STAGE_QDR_5_ARCHIVE_PACKET: REPAIRED
-STAGE_QDR_5_TAG: PENDING / NOT_CREATED
+STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
 STAGE_QDR_6: NOT_STARTED
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
@@ -76,10 +141,10 @@ current workspace: E:\Project\decision-hub
 branch: dev
 final close docs commit: c11a0e7 docs(qdr): close stage-qdr-5 provider readiness hardening
 STAGE_QDR_5_ARCHIVE_CLOSE: DONE
-STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED
-STAGE_QDR_5_TAG: PENDING / NOT_CREATED
-ALLOW_STAGE_QDR_5_TAG_CLOSE: YES_AFTER_ARCHIVE_POLICY_FIX_COMMIT
-ALLOW_STAGE_QDR_6_PLAN_NOW: NO
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
+STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
+ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
@@ -143,7 +208,7 @@ STAGE_QDR_5_B4_IMPLEMENTATION: DONE
 STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
 STAGE_QDR_5: CLOSED / ACCEPTED
 STAGE_QDR_5_ARCHIVE: PENDING
-STAGE_QDR_5_TAG: NOT_CREATED
+STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
 real HTTP: NO
 real provider: NO
 Provider SDK: NO
