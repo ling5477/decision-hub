@@ -64,12 +64,17 @@ STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
 STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_5_ARCHIVE: DONE
 STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
-STAGE_QDR_6: PLANNING / PLAN_DONE / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_6: PLANNING / WORK_ORDER_DONE / IMPLEMENTATION_NOT_STARTED
 STAGE_QDR_6_PLAN: DONE / PLAN_ONLY
 STAGE_QDR_6_MAINLINE: DECISION_PIPELINE_EVIDENCE_CONSOLIDATION
+STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
 STAGE_QDR_6_IMPLEMENTATION: NOT_STARTED
-ALLOW_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: YES / CONSUMED
 ALLOW_STAGE_QDR_6_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_6_B1_IMPLEMENTATION: YES
+ALLOW_STAGE_QDR_6_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO
 ALLOW_EVIDENCE_CONSOLIDATION_IMPLEMENTATION_NOW: NO
 ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
 ALLOW_API_CHANGE_NOW: NO
@@ -112,9 +117,9 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-6-PLAN
-current task status: DONE / PLAN_ONLY
-next action: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
+current task: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
+current task status: DONE / WORK_ORDER_ONLY
+next action: DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS
 ```
 
 ## 2. 当前事实源集合
@@ -125,6 +130,7 @@ next action: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
 README.md
 docs/current/README.md
 docs/current/DH_STAGE_QDR_6_PLAN.md
+docs/current/DH_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
@@ -237,10 +243,11 @@ B5 close review retry: CLOSED / ACCEPTED
 stage-qdr-4 recommended direction: QDR Replay / Evaluation / Regression Baseline
 stage-qdr-5 recommended direction: Model Gateway Observability / Provider Readiness Hardening
 stage-qdr-5 next action: DH-STAGE-QDR-6-PLAN / CONSUMED
-stage-qdr-6 next action: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
+stage-qdr-6 implementation work order: DONE / WORK_ORDER_ONLY
+stage-qdr-6 next action: DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS
 ```
 
-B5 close review 的 ACCEPTED 结论已写回 current factsources。Stage-QDR-4 与 Stage-QDR-5 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。`DH-STAGE-QDR-6-PLAN` 已 `DONE / PLAN_ONLY`，主线冻结为 `Decision Pipeline Evidence Consolidation / Deterministic Replay Baseline`。下一步只允许 `DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER`；不得直接进入 B1-B4 implementation，不得接 real HTTP/provider/SDK，不得启动 Agent / LangGraph 或 NQ runtime integration，不得开启 LIVE。
+B5 close review 的 ACCEPTED 结论已写回 current factsources。Stage-QDR-4 与 Stage-QDR-5 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-6 plan 与 implementation work order 已完成，stage implementation 仍为 `NOT_STARTED`。下一步只允许 B1 Evidence Correlation / Aggregate Contracts；B2-B4、real HTTP/provider/SDK、Agent/LangGraph、NQ runtime integration 与 LIVE 均未授权。
 
 ## 4. 禁止项
 

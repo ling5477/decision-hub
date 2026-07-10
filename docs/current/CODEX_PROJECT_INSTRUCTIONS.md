@@ -69,11 +69,16 @@ STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
 STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_5_ARCHIVE: DONE
 STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
-STAGE_QDR_6: PLANNING / PLAN_DONE / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_6: PLANNING / WORK_ORDER_DONE / IMPLEMENTATION_NOT_STARTED
 STAGE_QDR_6_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
 STAGE_QDR_6_IMPLEMENTATION: NOT_STARTED
-ALLOW_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: YES / CONSUMED
 ALLOW_STAGE_QDR_6_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_6_B1_IMPLEMENTATION: YES
+ALLOW_STAGE_QDR_6_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO
 ALLOW_NQ_RUNTIME_INTEGRATION: NO
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
@@ -110,9 +115,9 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current task: DH-STAGE-QDR-6-PLAN
-current task status: DONE / PLAN_ONLY
-next action: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
+current task: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
+current task status: DONE / WORK_ORDER_ONLY
+next action: DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS
 ```
 
 ## 2. 前置分类规则
@@ -143,6 +148,7 @@ Stage-QDR-4 与 Stage-QDR-5 均已归档并完成 tag close。当前 factsource 
 README.md
 docs/current/README.md
 docs/current/DH_STAGE_QDR_6_PLAN.md
+docs/current/DH_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
@@ -168,7 +174,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。Stage-QDR-4 与 Stage-QDR-5 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。`DH-STAGE-QDR-6-PLAN` 已 `DONE / PLAN_ONLY`，当前主线为 `Decision Pipeline Evidence Consolidation / Deterministic Replay Baseline`。下一步只能进入 `DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER`；不得直接进入 Stage-QDR-6 implementation，不得启动 runtime、provider、HTTP、Agent、LangGraph、NQ runtime integration 或 LIVE。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。Stage-QDR-4 与 Stage-QDR-5 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-6 plan 与 implementation work order 已完成；当前只允许 B1 Evidence Correlation / Aggregate Contracts。B2-B4、migration、API、Repository expansion、provider、HTTP、Agent、LangGraph、NQ runtime integration 与 LIVE 均未授权。
 
 ## 4. 安全边界
 
@@ -288,5 +294,5 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
+next action: DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS
 ```

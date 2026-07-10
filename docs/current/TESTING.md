@@ -3,6 +3,39 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER validation
+
+```text
+Task type: WORK_ORDER_ONLY + EVIDENCE_CONSOLIDATION + DETERMINISTIC_REPLAY_BASELINE + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REPOSITORY_CHANGE + NO_REAL_HTTP + NO_REAL_PROVIDER + NO_AGENT + NO_LANGGRAPH + NO_NQ_CHANGE + NO_LIVE
+branch: dev
+start worktree: CLEAN
+start HEAD: 5108f24 docs(qdr): plan stage-qdr-6 evidence consolidation baseline
+HEAD contains Stage-QDR-6 plan: YES
+STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
+STAGE_QDR_6_IMPLEMENTATION: NOT_STARTED
+```
+
+### Validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short`（开始前） | PASS / EMPTY | 工作区 clean。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git log -1 --oneline` | PASS | HEAD 为 `5108f24 docs(qdr): plan stage-qdr-6 evidence consolidation baseline`。 |
+| `git cat-file -e HEAD:docs/current/DH_STAGE_QDR_6_PLAN.md` | PASS | HEAD 已包含 Stage-QDR-6 plan。 |
+| 代码现实复核 | REVIEWED | 复核现有 `DecisionEvidence`、`DecisionEvidenceView`、`DecisionReplayView`、V5/V6 read models、V8 gateway metadata、V9 replay repositories 与 Stage-QDR-5 readiness/observability services。 |
+| B2 repository sufficiency | PASS FOR WORK_ORDER | 可优先复用现有 ports/read models；本轮未新增 production Repository/JDBC/SQL。若后续必须扩展，触发 `B2_REPOSITORY_EXPANSION_REVIEW_REQUIRED`。 |
+| B3 snapshot sufficiency | PROVISIONAL PASS FOR WORK_ORDER | V5 persisted context snapshot + V6 correlation + V8/V9 safe refs/version/hash 可作为 baseline；B3 开工前必须基于 B2 aggregate 再验证。 |
+| premature/unsafe state scan | PASS / EMPTY | 使用 `rg --pcre2`；未发现 implementation started、B2-B4 提前授权或 migration/API/provider/Agent/LIVE 被开启。 |
+| `git diff --check` | PASS | 无 whitespace error；Windows 行尾仅有 LF→CRLF 提示。 |
+| forbidden-scope diff | PASS / EMPTY | Java、测试、migration、API、Repository、contracts、golden cases、NQ 与 `docs/gates/**` 均无 diff。 |
+| `mvn -ntp -Pquality validate` | PASS | `BUILD SUCCESS`；19/19 reactor modules 成功；root Checkstyle 0 violations；Spotless check 成功。 |
+| `mvn test` | NOT RUN | 本轮为 docs-only work order；未把未运行测试写成 PASS。 |
+| Docker/Testcontainers | NOT RUN | 本轮未运行。 |
+| staged files | PASS / EMPTY | 未执行 `git add`。 |
+
+首次 premature-state scan 因 `rg` 默认 regex 不支持 look-behind 而命令失败；已改用 `rg --pcre2` 重跑并得到 `PREMATURE_OR_UNSAFE_STATE_HITS=NONE`。该工具命令修正不改变仓库结论。
+
 ## 2026-07-11 DH-STAGE-QDR-6-PLAN validation
 
 ```text

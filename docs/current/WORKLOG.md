@@ -4,6 +4,26 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-11 DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
+
+完成 Stage-QDR-6 implementation work order。开工前确认 `dev`、工作区 clean，HEAD `5108f24` 已包含 Stage-QDR-6 plan。实际复核了既有 decision evidence/replay views、V5/V6 read model、V8 gateway safe metadata、V9 replay/evaluation/regression repositories 与 Stage-QDR-5 provider readiness/observability service。
+
+```text
+STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
+STAGE_QDR_6_IMPLEMENTATION: NOT_STARTED
+B1: AUTHORIZED_NEXT
+B2: NOT_AUTHORIZED_NOW
+B3: NOT_AUTHORIZED_NOW
+B4: NOT_AUTHORIZED_NOW
+B2 repository expansion blocker: NOT_TRIGGERED / RECHECK_AT_B2_START
+B3 snapshot sufficiency blocker: NOT_TRIGGERED / RECHECK_AFTER_B2
+next action: DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS
+```
+
+新增 `docs/current/DH_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER.md`，并最小同步根 `README.md`、current index/status/work order/roadmap/testing/worklog/Codex instructions。未修改生产代码、测试、migration、API、Controller、Repository/JDBC、contracts、golden cases、NQ 或 `docs/gates/**`。
+
+`mvn -ntp -Pquality validate` 为 `BUILD SUCCESS`，19/19 reactor modules 成功，root Checkstyle 0 violations，Spotless check 成功。未运行 `mvn test`、Docker/Testcontainers；未创建 tag、未 push、未暂存文件。
+
 ## 2026-07-11 DH-STAGE-QDR-6-PLAN
 
 完成 Stage-QDR-6 docs-only planning。开工前确认 `dev`、工作区 clean、暂存区为空，QDR-4/QDR-5 tags 本地与远程存在，QDR-5 archive packet 与 current cleanup 完成，QDR-6 implementation 未开始。实际检查了 decision pipeline、dry-run wiring、V5/V6/V8/V9、QDR replay/evaluation/regression、provider health/readiness/observability、安全层和相关测试。

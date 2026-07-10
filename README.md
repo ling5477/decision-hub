@@ -41,11 +41,16 @@ STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
 STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_5_ARCHIVE: DONE
 STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
-STAGE_QDR_6: PLANNING / PLAN_DONE / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_6: PLANNING / WORK_ORDER_DONE / IMPLEMENTATION_NOT_STARTED
 STAGE_QDR_6_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
 STAGE_QDR_6_IMPLEMENTATION: NOT_STARTED
-ALLOW_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: YES / CONSUMED
 ALLOW_STAGE_QDR_6_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_6_B1_IMPLEMENTATION: YES
+ALLOW_STAGE_QDR_6_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
 STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_CLOSED_ACCEPTED / B4_DONE / FINAL_CLOSE_PASS
@@ -77,9 +82,9 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-6-PLAN
-current task status: DONE / PLAN_ONLY
-next action: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
+current task: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
+current task status: DONE / WORK_ORDER_ONLY
+next action: DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS
 ```
 
 ## Stage-QDR-4 归档状态
@@ -96,7 +101,7 @@ STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
 STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
 ```
 
-Stage-QDR-4 归档和 tag close 不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。Stage-QDR-5 已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag 为 `dh-stage-qdr-5-close`。`DH-STAGE-QDR-6-PLAN` 已 `DONE / PLAN_ONLY`，主线冻结为 `Decision Pipeline Evidence Consolidation / Deterministic Replay Baseline`；下一步只允许 `DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER`，不得直接进入 B1 或其他 implementation。
+Stage-QDR-4 归档和 tag close 不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。Stage-QDR-5 已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag 为 `dh-stage-qdr-5-close`。`DH-STAGE-QDR-6-PLAN` 与 implementation work order 已完成；当前只允许进入 B1 Evidence Correlation / Aggregate Contracts，不允许 B2-B4、migration、API、Repository expansion、provider、Agent 或 LIVE。
 
 ## 当前事实源
 
@@ -124,6 +129,7 @@ Stage-QDR-5 historical source docs 已归档到 `docs/gates/stage-qdr-5/SOURCE_D
 ```text
 docs/current/README.md                  当前文档索引
 docs/current/DH_STAGE_QDR_6_PLAN.md     Stage-QDR-6 当前规划与范围冻结
+docs/current/DH_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER.md Stage-QDR-6 实施工单与批次边界
 docs/current/STATUS.md                  唯一当前状态表
 docs/current/WORK_ORDER.md              唯一下一步入口
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md 当前 Codex / Claude 执行纪律
