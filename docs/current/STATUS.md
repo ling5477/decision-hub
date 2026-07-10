@@ -64,7 +64,18 @@ STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
 STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_5_ARCHIVE: DONE
 STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
-STAGE_QDR_6: NOT_STARTED
+STAGE_QDR_6: PLANNING / PLAN_DONE / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_6_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_6_MAINLINE: DECISION_PIPELINE_EVIDENCE_CONSOLIDATION
+STAGE_QDR_6_IMPLEMENTATION: NOT_STARTED
+ALLOW_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_STAGE_QDR_6_IMPLEMENTATION_NOW: NO
+ALLOW_EVIDENCE_CONSOLIDATION_IMPLEMENTATION_NOW: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+ALLOW_API_CHANGE_NOW: NO
+ALLOW_MIGRATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
+ALLOW_NQ_RUNTIME_INTEGRATION: NO
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
 STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_CLOSED_ACCEPTED / B4_DONE / FINAL_CLOSE_PASS
@@ -85,7 +96,7 @@ ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES / CONSUMED
 STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
 STAGE_QDR_5_TAG_NOW: NO / ALREADY_TAGGED
-ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_6_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
@@ -101,8 +112,9 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-5-CURRENT-CLEANUP
-next action: DH-STAGE-QDR-6-PLAN
+current task: DH-STAGE-QDR-6-PLAN
+current task status: DONE / PLAN_ONLY
+next action: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## 2. 当前事实源集合
@@ -112,6 +124,7 @@ next action: DH-STAGE-QDR-6-PLAN
 ```text
 README.md
 docs/current/README.md
+docs/current/DH_STAGE_QDR_6_PLAN.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
@@ -217,16 +230,17 @@ ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES / CONSUMED
 STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
 STAGE_QDR_5_TAG_NOW: NO / ALREADY_TAGGED
-ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_6_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_TAG_NOW: NO / ALREADY_TAGGED
 B5 close review retry: CLOSED / ACCEPTED
 stage-qdr-4 recommended direction: QDR Replay / Evaluation / Regression Baseline
 stage-qdr-5 recommended direction: Model Gateway Observability / Provider Readiness Hardening
-stage-qdr-5 next action: DH-STAGE-QDR-6-PLAN
+stage-qdr-5 next action: DH-STAGE-QDR-6-PLAN / CONSUMED
+stage-qdr-6 next action: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
 ```
 
-B5 close review 的 ACCEPTED 结论已由用户提供并写回 current factsources。`DH-STAGE-QDR-4-PLAN` 已完成，B1 已按用户授权完成 replay / evaluation domain contracts；B2 persistence baseline plan 已完成，B2 freeze review 已 `PASS`，B2 implementation work order 已完成。B2 implementation 新增 V9 migration、tenant-bound repository ports、JDBC adapters、migration / repository / redaction / tenant isolation tests，并保持 no API / Controller、no real HTTP、no real provider、no Provider SDK、no Agent / LangGraph runtime、no LIVE。B3 已完成 deterministic mock gateway regression flow。B4 已完成 tenant-bound internal regression report / read model support。`DH-STAGE-QDR-4-FINAL-CLOSE-REVIEW` 已完成并判定 `PASS`；Stage-QDR-4 当前状态为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag close 已 `DONE`，tag 为 `dh-stage-qdr-4-close`，target 为 `62c8020 docs(workflow): repair documentation discipline and skill policy`。`DH-STAGE-QDR-5-PLAN` 已完成为 `DONE / PLAN_ONLY`，推荐方向为 `Model Gateway Observability / Provider Readiness Hardening`。`DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`、B1、B2、B3、B4 均已完成；B3 close review 已 `PASS`，B3 为 `CLOSED / ACCEPTED`；B4 implementation 已完成 internal observability report / acceptance support。`DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW` 已 `PASS`，archive close 已完成，本轮已修复 stage archive packet policy，Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag 为 `dh-stage-qdr-5-close`。下一步只允许进入 `DH-STAGE-QDR-6-PLAN`；不得直接进入 Stage-QDR-6 implementation，不得接 real HTTP/provider/SDK，不得启动 Agent / LangGraph，不得开启 LIVE。
+B5 close review 的 ACCEPTED 结论已写回 current factsources。Stage-QDR-4 与 Stage-QDR-5 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。`DH-STAGE-QDR-6-PLAN` 已 `DONE / PLAN_ONLY`，主线冻结为 `Decision Pipeline Evidence Consolidation / Deterministic Replay Baseline`。下一步只允许 `DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER`；不得直接进入 B1-B4 implementation，不得接 real HTTP/provider/SDK，不得启动 Agent / LangGraph 或 NQ runtime integration，不得开启 LIVE。
 
 ## 4. 禁止项
 
@@ -283,7 +297,7 @@ ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES / CONSUMED
 STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
 STAGE_QDR_5_TAG_NOW: NO / ALREADY_TAGGED
-ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_6_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_4_TAG_NOW: NO / ALREADY_TAGGED
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO

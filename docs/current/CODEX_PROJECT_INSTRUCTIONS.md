@@ -69,7 +69,12 @@ STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
 STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_5_ARCHIVE: DONE
 STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
-STAGE_QDR_6: NOT_STARTED
+STAGE_QDR_6: PLANNING / PLAN_DONE / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_6_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_6_IMPLEMENTATION: NOT_STARTED
+ALLOW_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_STAGE_QDR_6_IMPLEMENTATION_NOW: NO
+ALLOW_NQ_RUNTIME_INTEGRATION: NO
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
 STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_CLOSED_ACCEPTED / B4_DONE / FINAL_CLOSE_PASS
@@ -90,7 +95,7 @@ ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES / CONSUMED
 STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
 STAGE_QDR_5_TAG_NOW: NO / ALREADY_TAGGED
-ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_6_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_4_B3_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_4_FINAL_CLOSE_REVIEW: YES / CONSUMED
@@ -105,8 +110,9 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current task: DH-STAGE-QDR-5-CURRENT-CLEANUP
-next action: DH-STAGE-QDR-6-PLAN
+current task: DH-STAGE-QDR-6-PLAN
+current task status: DONE / PLAN_ONLY
+next action: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## 2. 前置分类规则
@@ -136,6 +142,7 @@ Stage-QDR-4 与 Stage-QDR-5 均已归档并完成 tag close。当前 factsource 
 ```text
 README.md
 docs/current/README.md
+docs/current/DH_STAGE_QDR_6_PLAN.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
@@ -161,7 +168,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。stage-qdr-4 B1/B2/B3/B4、final close review、archive close 和 tag close 均已完成；Stage-QDR-4 整体为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag 为 `dh-stage-qdr-4-close`，target 为 `62c8020 docs(workflow): repair documentation discipline and skill policy`。`DH-STAGE-QDR-5-PLAN` 已完成为 `DONE / PLAN_ONLY`，推荐方向为 `Model Gateway Observability / Provider Readiness Hardening`。`DH-STAGE-QDR-5-IMPLEMENTATION-WORK-ORDER`、B1、B2、B3、B4 均已完成；B3 close review 已 `PASS`，B3 为 `CLOSED / ACCEPTED`；B4 implementation 已完成 internal observability report / acceptance support。`DH-STAGE-QDR-5-FINAL-CLOSE-REVIEW` 已 `PASS`，archive close 已完成，本轮已修复 stage archive packet policy，Stage-QDR-5 当前为 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag 为 `dh-stage-qdr-5-close`。下一步只能进入 `DH-STAGE-QDR-6-PLAN`；不得直接进入 Stage-QDR-6 implementation，不得启动 runtime、provider、HTTP、Agent、LangGraph 或 LIVE。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。Stage-QDR-4 与 Stage-QDR-5 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。`DH-STAGE-QDR-6-PLAN` 已 `DONE / PLAN_ONLY`，当前主线为 `Decision Pipeline Evidence Consolidation / Deterministic Replay Baseline`。下一步只能进入 `DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER`；不得直接进入 Stage-QDR-6 implementation，不得启动 runtime、provider、HTTP、Agent、LangGraph、NQ runtime integration 或 LIVE。
 
 ## 4. 安全边界
 
@@ -272,7 +279,7 @@ ALLOW_STAGE_QDR_5_FINAL_CLOSE_REVIEW: YES / CONSUMED
 ALLOW_STAGE_QDR_5_ARCHIVE_CLOSE: YES / CONSUMED
 STAGE_QDR_5_TAG_CLOSE: DONE / dh-stage-qdr-5-close
 STAGE_QDR_5_TAG_NOW: NO / ALREADY_TAGGED
-ALLOW_STAGE_QDR_6_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_6_PLAN: YES / CONSUMED
 V9 migration: CREATED / V9__qdr_replay_evaluation_baseline.sql / POSTGRES_LOAD_VERIFIED
 Repository / JDBC implementation: DONE / TENANT_BOUND
 API / Controller: NO
@@ -281,5 +288,5 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-next action: DH-STAGE-QDR-6-PLAN
+next action: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
 ```

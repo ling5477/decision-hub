@@ -3,6 +3,46 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-PLAN validation
+
+```text
+Task type: PLANNING_ONLY + DECISION_PIPELINE_EVIDENCE_CONSOLIDATION_PLAN + DETERMINISTIC_REPLAY_BASELINE_PLAN + SECURITY_BOUNDARY_DESIGN + TEST_MATRIX_DESIGN + STAGE_GATE_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REAL_HTTP + NO_REAL_PROVIDER + NO_AGENT + NO_LANGGRAPH + NO_NQ_CHANGE + NO_LIVE
+repository: decision-hub
+branch: dev
+start HEAD: b73fbec686be5afd626a5bc8ca3fffe8519bbf9f
+start worktree: CLEAN
+start staged: EMPTY
+STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+STAGE_QDR_5_TAG: dh-stage-qdr-5-close / LOCAL_AND_REMOTE_VERIFIED
+STAGE_QDR_5_CURRENT_CLEANUP: DONE
+STAGE_QDR_6_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_6_IMPLEMENTATION: NOT_STARTED
+```
+
+### Validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `Get-Location` | PASS | 当前仓库为 Decision Hub。 |
+| `git branch --show-current` | PASS | `dev`。 |
+| `git status --short`（开始前） | PASS / EMPTY | 工作区开始前 clean，暂存区为空。 |
+| `git rev-parse HEAD` | PASS | `b73fbec686be5afd626a5bc8ca3fffe8519bbf9f`。 |
+| `git tag --list` / `git rev-list` / `git ls-remote --tags origin` | PASS | QDR-4/QDR-5 本地与远程 annotated tags 均存在；peeled targets 分别为 `62c8020...` 与 `7d53009...`。 |
+| `Get-ChildItem docs/current -Filter "DH_STAGE_QDR_5*.md"` | PASS / EMPTY | QDR-5 current process source 无残留。 |
+| `Get-ChildItem docs/current -Filter "DH_STAGE_QDR_6*.md"`（开始前） | PASS / EMPTY | QDR-6 未被提前创建或写成 started。 |
+| 生产代码、测试、wiring、V5/V6/V8/V9、Repository/JDBC 审计 | REVIEWED | 真实检查了 decision、audit/trace/snapshot、QDR replay/evaluation/regression、provider readiness/observability 与安全边界。 |
+| required safety wording scan | REVIEWED / NO_ACTIVE_RISK | 命中均为正确禁止项、历史否定记录、`NOT_STARTED` 正则命中或“acceptance 不等于 authorization/LIVE/trading”的安全说明；未发现 premature implementation。 |
+| `git diff --name-only -- <forbidden scopes>` | PASS / EMPTY | Java main/test、migration、API implementation、contracts、golden_cases 均无 diff。 |
+| `mvn -ntp -Pquality validate` | PASS | `BUILD SUCCESS`；19/19 reactor modules `SUCCESS`；root Checkstyle `0 violations`；Spotless check 成功。 |
+| `.\mvnw.cmd -v` | WRAPPER_UNUSABLE / P2 TOOLING RISK | 进程返回 0，但输出 `\\ is not recognized...` 与 `.mvn\wrapper\maven-wrapper.jar中没有主清单属性`；不能视为可用 wrapper。 |
+| `mvn test` | NOT RUN | 本轮为 docs-only planning，用户指定最终命令为 quality validate；未将测试写成 PASS。 |
+| Docker/Testcontainers | NOT RUN | 本轮未启动 Docker/Testcontainers，不写成 PASS。 |
+| staged files | PASS / EMPTY | 本轮未执行 `git add`。 |
+
+### Tooling interpretation
+
+`mvn -ntp -Pquality validate` 的 reactor、Checkstyle 与 Spotless 实际通过；它不等价于 `mvn test`。Maven wrapper 虽返回进程码 0，但错误输出证明 wrapper 仍不可用，继续保留 `WRAPPER_UNUSABLE / P2 TOOLING RISK`。本轮未运行 Docker/Testcontainers。
+
 ## 2026-07-09 DH-STAGE-QDR-5-CURRENT-CLEANUP validation
 
 ```text

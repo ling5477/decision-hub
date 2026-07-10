@@ -4,6 +4,31 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-11 DH-STAGE-QDR-6-PLAN
+
+完成 Stage-QDR-6 docs-only planning。开工前确认 `dev`、工作区 clean、暂存区为空，QDR-4/QDR-5 tags 本地与远程存在，QDR-5 archive packet 与 current cleanup 完成，QDR-6 implementation 未开始。实际检查了 decision pipeline、dry-run wiring、V5/V6/V8/V9、QDR replay/evaluation/regression、provider health/readiness/observability、安全层和相关测试。
+
+规划结论：
+
+```text
+STAGE_QDR_6_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_6_MAINLINE: DECISION_PIPELINE_EVIDENCE_CONSOLIDATION
+stage name: Decision Pipeline Evidence Consolidation / Deterministic Replay Baseline
+existing unified evidence aggregate: ABSENT
+existing deterministic replay executor: ABSENT
+existing QDR hash/comparator flow: PRESENT / NOT_A_REPLAY_EXECUTOR
+deterministic replay input sufficiency: MUST_BE_PROVEN_IN_IMPLEMENTATION_WO
+ALLOW_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_STAGE_QDR_6_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
+```
+
+文件变更：新增 `docs/current/DH_STAGE_QDR_6_PLAN.md`，同步 `README.md`、`docs/current/README.md`、`STATUS.md`、`WORK_ORDER.md`、`ROADMAP.md`、`TESTING.md`、`WORKLOG.md` 与 `CODEX_PROJECT_INSTRUCTIONS.md`。未修改 API.md、DB_SCHEMA.md、FACTSOURCE_POLICY.md、ARCHIVE_INDEX.md 或 `docs/gates/**`。
+
+验证：`mvn -ntp -Pquality validate` 为 `BUILD SUCCESS`，19/19 reactor modules 成功，Checkstyle 0 violations，Spotless 成功。`.\mvnw.cmd -v` 仍输出无效命令与 wrapper jar 无主清单属性，记录为 `WRAPPER_UNUSABLE / P2 TOOLING RISK`。未运行 `mvn test`、Docker 或 Testcontainers，未将其写成 PASS。forbidden-scope diff 与暂存区均为空。
+
+边界：本轮未修改 Java、测试、migration、API、Controller、Repository/JDBC、contracts、golden_cases 或 NQ；未接真实 HTTP/provider/SDK，未启动 Agent/LangGraph，未读取凭证，未触碰交易执行链，未创建 tag，未 push。
+
 ## 2026-07-09 DH-STAGE-QDR-5-CURRENT-CLEANUP
 
 完成 Stage-QDR-5 tag close 后的 current cleanup。本轮为 documentation-only / post-tag current cleanup，只移动已关闭阶段 source docs、同步 current factsource/index、补充 archive packet source docs 列表，并固化 post-tag current pruning 规则；未修改 Java 生产代码、测试代码、migration、API、Controller、Repository/JDBC、contracts、golden_cases 或 NQ。
