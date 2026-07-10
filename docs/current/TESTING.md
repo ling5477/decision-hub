@@ -2544,3 +2544,34 @@ Boundary:
 未开启 LIVE
 stage-qdr-4 未启动
 ```
+
+## 2026-07-11 DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS validation
+
+```text
+Task type: IMPLEMENTATION + DOMAIN_CONTRACTS_ONLY + UNIT_TESTS + NO_MIGRATION + NO_API + NO_REPOSITORY + NO_PROVIDER + NO_AGENT + NO_LIVE
+branch: dev
+stage-qdr-6 B1: DONE / EVIDENCE_CORRELATION_AGGREGATE_CONTRACTS
+real HTTP: NO
+real provider: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+```
+
+| 命令 / 证据 | 结果 | 说明 |
+| --- | --- | --- |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=DecisionEvidenceAggregateContractTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | B1 目标测试 20 tests passed；纯 unit tests，不使用 PostgreSQL、Docker、Testcontainers 或网络。 |
+| `mvn -ntp -pl dh-usecase -am test` | BUILD SUCCESS | 9 个 reactor 模块成功；`dh-usecase` 444 tests passed。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | 19 个 reactor 模块成功；root Checkstyle 0 violations，Spotless check passed。 |
+| B1 architecture guard | PASS | 合同测试确认新增 contract 的公开签名不依赖 Repository、JDBC、HTTP、Provider、NQ、Agent 或 LangGraph。 |
+
+Boundary:
+
+```text
+仅新增 dh-usecase qdr/evidence contracts 与 unit tests
+未修改 dh-domain
+未新增 migration、API、Controller、Repository、SQL、JDBC 或 aggregate service
+未实现 deterministic replay
+未调用 Provider、HTTP 或 NQ
+未保存 raw prompt、raw provider response 或 credential
+未触碰交易执行链
+```

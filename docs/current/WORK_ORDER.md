@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
-current task status: DONE / WORK_ORDER_ONLY
-next action: DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS
-mode: WORK_ORDER_ONLY + EVIDENCE_CONSOLIDATION + DETERMINISTIC_REPLAY_BASELINE + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_DB_MIGRATION + NO_API_CHANGE + NO_REPOSITORY_CHANGE + NO_REAL_PROVIDER + NO_REAL_HTTP + NO_AGENT + NO_LANGGRAPH + NO_NQ_CHANGE + NO_LIVE
+current task: DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS
+current task status: DONE / COMMITTED
+next action: DH-STAGE-QDR-6-B2-EVIDENCE-AGGREGATION-SERVICE
+mode: IMPLEMENTATION + DOMAIN_CONTRACTS_ONLY + UNIT_TESTS + NO_MIGRATION + NO_API + NO_REPOSITORY + NO_PROVIDER + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 plan 和 implementation work order 已完成。下一步只允许 `DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS`；不得直接进入 B2-B4，不得把现有 mock regression hash builder 写成完整 deterministic replay executor。
+Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 plan、implementation work order 与 B1 Evidence Correlation / Aggregate Contracts 已完成。B2 `DH-STAGE-QDR-6-B2-EVIDENCE-AGGREGATION-SERVICE` 是唯一下一步；不得直接进入 B3-B4，不得把现有 mock regression hash builder 写成完整 deterministic replay executor。
 
 ## 2. 前置状态
 

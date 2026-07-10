@@ -2816,6 +2816,15 @@ current workspace: F:/Project/decision-hub
 next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
 ```
 
+## 2026-07-11 DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS
+
+- 完成 `DecisionEvidenceQuery`、`DecisionEvidenceCorrelation`、`DecisionEvidenceAggregate`、`DecisionEvidenceRef`、`DecisionEvidenceStatus`、`DecisionEvidenceFinding` 与 `DecisionEvidencePolicy` contracts。
+- 复用 `DecisionEvidence`、`DecisionEvidenceView`、`DecisionReplayView`、`QdrPersistenceSafety` 与 `PromptModelSafetyRules`；四键 correlation、跨租户、冲突 ref 和不安全 ref 均 fail-closed。
+- 新增 20 项纯单元测试，覆盖完整度、四键冲突、跨租户、重复不一致引用、敏感材料/交易词拒绝和禁止依赖 guard。
+- 未修改 `dh-domain`，未新增 migration、API、Controller、Repository、SQL、JDBC 或 production aggregation service；未实现 deterministic replay，未调用 Provider、HTTP、NQ、Agent、LangGraph 或 LIVE。
+- 验证：目标 B1 test、`mvn -ntp -pl dh-usecase -am test` 与 `mvn -ntp -Pquality validate` 均为 `BUILD SUCCESS`。
+- 下一步：`DH-STAGE-QDR-6-B2-EVIDENCE-AGGREGATION-SERVICE`。
+
 ### Archive Actions
 
 ```text
