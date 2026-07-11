@@ -3,17 +3,19 @@
 ## Stage-QDR-6 archive readiness（2026-07-11）
 
 ```text
-STAGE_QDR_6_FINAL_CLOSE_REVIEW: BLOCKED / CURRENT_FACTSOURCE_CONFLICT
-STAGE_QDR_6: IMPLEMENTATION_COMPLETE / FINAL_CLOSE_BLOCKED / NOT_ARCHIVED / NOT_TAGGED
-ALLOW_STAGE_QDR_6_ARCHIVE_PACKET: NO
-ALLOW_STAGE_QDR_6_TAG_CLOSE_AFTER_ARCHIVE: NO
-archive packet: NOT_CREATED
+STAGE_QDR_6_FINAL_CLOSE_REVIEW: PREVIOUS_BLOCKED / HISTORICAL_PRESERVED
+STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: PASS
+STAGE_QDR_6: IMPLEMENTATION_COMPLETE / FINAL_CLOSE_PASS / NOT_ARCHIVED / NOT_TAGGED
+ALLOW_STAGE_QDR_6_ARCHIVE_PACKET: YES
+ALLOW_STAGE_QDR_6_CLOSE_DOCS_COMMIT: NO
+ALLOW_STAGE_QDR_6_TAG_CLOSE_AFTER_ARCHIVE: YES
+archive packet: NEXT / NOT_CREATED
 archive commit: NOT_CREATED
 tag: NOT_CREATED
-next action: DH-STAGE-QDR-6-FINAL-CLOSE-BLOCKER-FIX
+next action: DH-STAGE-QDR-6-ARCHIVE-TAG-CLOSE
 ```
 
-Final close review 来源为 `docs/current/DH_STAGE_QDR_6_FINAL_CLOSE_REVIEW.md`。Stage-QDR-6 因 current factsource 冲突尚未通过 final close，不得创建 archive packet、archive commit 或 tag。必须先完成 blocker fix 并让 final close review PASS，之后才可进入 archive-before-tag 顺序。
+Previous blocked review 来源为 `docs/current/DH_STAGE_QDR_6_FINAL_CLOSE_REVIEW.md`，retry PASS 来源为 `docs/current/DH_STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY.md`。本轮未创建 archive packet、archive commit 或 tag；下一任务必须先提交完整 archive packet，再在 clean worktree 上创建 annotated tag。`ALLOW_STAGE_QDR_6_TAG_CLOSE_AFTER_ARCHIVE: YES` 不授权跳过 archive-before-tag。
 
 ## 1. 归档原则
 

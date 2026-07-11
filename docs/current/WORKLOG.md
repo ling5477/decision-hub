@@ -1,5 +1,23 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW-RETRY
+
+- 在 `dev` / `e09d5b4`、clean worktree、empty staged baseline 上重新执行 Stage-QDR-6 final close review。
+- 五个指定 current factsources 已清除上轮未实现/next B1 冲突；previous `DH_STAGE_QDR_6_FINAL_CLOSE_REVIEW.md` 的 `BLOCKED` 历史保持不变。
+- B1/B2 contracts/aggregation、B3 canonical snapshot/persistence/mock deterministic replay、B4 internal report 与 security boundary 均 `PASS`；未发现实现、安全、tenant、hash、migration 或 authorization blocker。
+- 四组 Maven 命令全部通过；全仓 1017 tests、0 failures/errors/skipped；PostgreSQL 17.10/Testcontainers、V1-V11、ArchitectureTest、Checkstyle 与 Spotless 均通过。
+- 只新增 retry review 并同步本任务 allowlist 内 current/supporting 文档；未修改 Java、测试、migration、API、port/JDBC、Repository、wiring 或 NQ，未创建 archive packet、commit、tag 或 push。
+
+```text
+STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: PASS
+CURRENT_FACTSOURCE_CONSISTENCY: PASS
+ALLOW_STAGE_QDR_6_ARCHIVE_PACKET: YES
+ALLOW_STAGE_QDR_6_CLOSE_DOCS_COMMIT: NO
+ALLOW_STAGE_QDR_6_TAG_CLOSE_AFTER_ARCHIVE: YES
+ALLOW_STAGE_QDR_7_PLAN_NOW: NO
+next action: DH-STAGE-QDR-6-ARCHIVE-TAG-CLOSE
+```
+
 ## 2026-07-11 DH-STAGE-QDR-6-FINAL-CLOSE-BLOCKER-FIX
 
 - 仅同步 `README.md`、`docs/current/README.md`、`docs/current/CODEX_PROJECT_INSTRUCTIONS.md` 的 Stage-QDR-6 current facts，并最小更新 `STATUS.md`、`WORK_ORDER.md`、`TESTING.md`、`WORKLOG.md`。

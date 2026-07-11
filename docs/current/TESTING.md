@@ -3,6 +3,33 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW-RETRY validation
+
+```text
+baseline: dev / e09d5b4 / clean / staged empty
+git status --short: PASS
+git diff --check: PASS
+git log --oneline -20: PASS
+stale current wording scan: PASS / historical and cleared-conflict hits classified
+mvn -ntp -pl dh-usecase,dh-infra -am test: PASS / 0 failures / 0 errors / 0 skipped
+mvn -ntp -pl dh-app -am test: PASS / dh-app 106 tests / 0 skipped
+mvn -ntp test: PASS / 1017 tests / 0 failures / 0 errors / 0 skipped
+mvn -ntp -Pquality validate: PASS / reactor 19 of 19
+Checkstyle: PASS / 0 violations
+Spotless: PASS
+ArchitectureTest: PASS / 39 tests / 0 skipped
+PostgreSQL/Testcontainers: PASS / Docker Desktop / postgres:17 / PostgreSQL 17.10
+Flyway: PASS / V1-V11 validated and applied
+V10CanonicalReplaySnapshotFlywayPostgresTest: PASS / 16 tests / 0 skipped
+V1-V9 historical migration diff: empty
+V1-V11 worktree diff: empty
+forbidden-scope diff: empty
+pre-review staged: empty
+commit/push/archive/tag: NOT_RUN / NOT_CREATED
+```
+
+本轮四组用户指定 Maven 命令均真实成功。Surefire XML 共 148 个 suite、1017 tests、0 failures/errors/skipped；B1 20、B2 17、snapshot/canonicalization 27、deterministic replay 15、B4 report 16、ArchitectureTest 39 均执行。PostgreSQL/Testcontainers 未 skip，V10 测试真实使用 PostgreSQL 17.10 并覆盖 clean V1-V11、V1-V9 upgrade、tenant isolation、immutable guard、duplicate/conflict、`REPEATABLE_READ` 与 rollback。Mockito/ByteBuddy dynamic agent future-JDK warning 为 non-blocking tooling risk。
+
 ## 2026-07-11 DH-STAGE-QDR-6-FINAL-CLOSE-BLOCKER-FIX validation
 
 ```text
