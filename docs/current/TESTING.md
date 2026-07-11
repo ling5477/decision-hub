@@ -3,6 +3,33 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-CLOSE-REVIEW validation
+
+```text
+Task type: REVIEW_ONLY + DETERMINISTIC_REPLAY_CLOSE_GATE + SECURITY_BOUNDARY_REVIEW + REPRODUCIBILITY_EVIDENCE_REVIEW
+branch: dev
+HEAD: ae4c94489817bec9223886022b43679d2ae36cbf
+start worktree: CLEAN
+start staged: EMPTY
+B3_DETERMINISTIC_REPLAY_CLOSE_REVIEW: PASS
+POSTGRESQL_REGRESSION_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+```
+
+| Command / check | Result | Notes |
+| --- | --- | --- |
+| `git status --short` / staged check | PASS | 开工时 clean；staged/untracked 为空。 |
+| `git diff --check` | PASS | 开工时无 whitespace error。 |
+| `git show --stat --oneline ae4c944` | PASS | 17 files；deterministic replay usecase/tests 与 4 个 current docs。 |
+| focused replay/snapshot tests | BUILD SUCCESS | executor 11、comparator 4、assembler 7、record 10、canonical JSON 10；合计 42，0 skipped。 |
+| `mvn -ntp -pl dh-usecase -am test` | BUILD SUCCESS | `dh-usecase` 503 tests；0 failures/errors/skipped。 |
+| `mvn -ntp test` | BUILD SUCCESS | reactor 19/19；Surefire XML 汇总 1001 tests，0 failures/errors/skipped。 |
+| PostgreSQL/Testcontainers regression | PASS | `postgres:17` / PostgreSQL 17.10 实际启动；V1→V11 clean migration；V10 snapshot 16/16、V9 1/1。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19；root Checkstyle 0 violations；Spotless PASS。 |
+| architecture/security guard | PASS | executor 无 HTTP/Provider/NQ/Agent/clock/random/environment/write dependency；无 API/runtime wiring。 |
+| worktree V1-V11 diff | PASS | migration worktree/staged diff 为空。 |
+
+Quality 的子模块 `checkstyle outputFile` 提示为既有 non-blocking 输出；root aggregate Checkstyle 与 Spotless 实际通过。Full tests 的 Mockito/Byte Buddy dynamic agent future-JDK warning 不影响本轮通过结论。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE validation
 
 ```text

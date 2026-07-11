@@ -1,5 +1,23 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-CLOSE-REVIEW
+
+- 在 `dev` / `ae4c944`、clean worktree、empty staged 前提下完成 B3-P1/P2/P3、deterministic replay gate 与 baseline 的只读 close review。
+- 确认 persisted `CanonicalReplaySnapshotRecord` 是 executor 唯一输入事实源，可无损重建 `ReplayInputSnapshot` 并重新生成 `QDR6-CJSON-1` canonical bytes/hash；executor 不重读 V5/V6/V8/V9 mutable source。
+- 确认 `QDR6-MOCK-REPLAY-1` 无 clock/random/environment/HTTP/Provider/NQ/Agent/LangGraph/write dependency，无 API/Controller 或 production runtime wiring。
+- 确认 input/output domain separation、lowercase SHA-256、9 类 difference、6 类 status、13 个 failure mapping、stable ordering 与 fail-closed result invariants。
+- 确认 result 固定为 internal reproducibility evidence only；不包含 raw material、credential 或交易动作，不形成 Provider/NQ/交易/Paper/LIVE 授权。
+- focused 42 tests、`dh-usecase` 503 tests、全仓 1001 tests 均 0 failures/errors/skipped；真实 PostgreSQL 17.10/Testcontainers、V1→V11、quality、Checkstyle 与 Spotless 全部通过。
+- 本轮只修改允许的 review/current 文档；未修改 Java、测试、migration、V1-V11、API、port/JDBC、Repository 或 wiring，未持久化 replay result，未创建 tag，未 push。
+
+```text
+B3_DETERMINISTIC_REPLAY_CLOSE_REVIEW: PASS
+STAGE_QDR_6_B3: CLOSED / ACCEPTED
+ALLOW_B4_INTERNAL_REPORT_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_B3_ADDITIONAL_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B4-EVIDENCE-REPLAY-INTERNAL-REPORT
+```
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE
 
 - 新增 `DeterministicReplayCommand`、`DeterministicReplayResult`、`DeterministicReplayExecutor`、冻结 status/difference/failure taxonomy 与 read-only local projection。
