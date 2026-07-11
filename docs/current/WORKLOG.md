@@ -1,5 +1,25 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-P3-CANONICAL-SNAPSHOT-ASSEMBLY-HASH-PERSISTENCE
+
+- 新增完整结构化 `ReplayInputSnapshot`、tenant-bound exact source assembler、`QDR6-CJSON-1` canonicalizer 与 domain-separated SHA-256 hasher；hash domain 固定包含 snapshot schema、canonicalization、executor compatibility 与 hash algorithm version。
+- 新增内部 `ReplayInputSnapshotAssemblyService`，在显式 PostgreSQL `REPEATABLE_READ` 事务内完成 source 读取/验证、snapshot 组装、canonicalize/hash、二次 source revalidation、immutable insert 与 exact read-back；transaction manager 缺失、source drift 或任一步异常均 fail-closed/rollback。
+- `createdAt` 与 snapshot DB ID 不进入 canonical bytes/hash；write command 仅在合法 canonical hash 生成后构造。optional lineage 缺失保持缺失，legacy/incomplete/unsafe source 结构化拒绝，不读取 raw prompt、raw provider response 或凭证。
+- 新增 canonicalizer/assembler 17 个单元测试及 PostgreSQL/wiring 回归；targeted、`dh-app -am`、全仓 Maven 和 quality 均 `BUILD SUCCESS`。全仓 Surefire 986 tests、0 failures/errors/skipped；真实 `postgres:17` / PostgreSQL 17.10，root Checkstyle 0、Spotless PASS。
+- 未修改 V1-V11、production port/JDBC、API/Controller 或外部 runtime；未实现 deterministic replay executor，未调用 HTTP/Provider/NQ/Agent/LangGraph/LIVE，未创建 tag，未 push。
+
+```text
+STAGE_QDR_6_B3_P3: DONE / IMPLEMENTED / POSTGRESQL_VERIFIED
+SNAPSHOT_ASSEMBLER: PASS
+QDR6_CJSON_1: PASS
+DETERMINISTIC_HASH: PASS
+REPEATABLE_READ: PASS
+IMMUTABLE_PERSISTENCE: PASS
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+ALLOW_B3_CLOSE_REVIEW: YES
+next action: DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE
+```
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY
 
 - 在 `dev` / `990c1bb`、clean worktree、empty staged、V1-V10 blocker-fix diff 为空的前提下执行只读复审。

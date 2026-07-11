@@ -5,7 +5,12 @@ import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionAuditReposit
 import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionReplayQueryRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcDecisionCoreRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcDecisionReadModelQueryAdapter;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcEvaluationCaseRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcHumanApprovalPacketRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcCanonicalReplaySnapshotRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcRegressionVerdictRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcReplayCaseRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.ReplayInputSnapshotAssemblyService;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcModelGatewayCallRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcModelVersionRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcPromptVersionRepository;
@@ -34,6 +39,7 @@ import com.guidinglight.decisionhub.usecase.qdr.approval.ApprovalWriteBoundary;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketCommandService;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketRepository;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketService;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceAggregateService;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.DefaultQdrMockModelGatewayBaseline;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.DefaultQdrModelGatewayIntegrationService;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.DeterministicProviderTrustPolicy;
@@ -43,8 +49,10 @@ import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayCallPersiste
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayPort;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayService;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelProviderPort;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ObservabilityReportService;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ProviderProfileRegistryPort;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ProviderTrustPolicy;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ProviderReadinessGuardService;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayBaselinePort;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationPort;
 import com.guidinglight.decisionhub.usecase.qdr.model.DeterministicPromptInjectionGuard;
@@ -59,6 +67,13 @@ import com.guidinglight.decisionhub.usecase.qdr.model.PromptVersionPersistencePo
 import com.guidinglight.decisionhub.usecase.qdr.model.PromptVersionRegistryPort;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelQueryPort;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelService;
+import com.guidinglight.decisionhub.usecase.qdr.replay.EvaluationCaseRepository;
+import com.guidinglight.decisionhub.usecase.qdr.replay.RegressionVerdictRepository;
+import com.guidinglight.decisionhub.usecase.qdr.replay.ReplayCaseRepository;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotAssembler;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotHasher;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotPersistencePort;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.Qdr6CanonicalJson;
 
 import java.time.Clock;
 
@@ -153,6 +168,118 @@ public class DecisionPipelineWiringConfig {
     public DecisionReadModelService decisionReadModelService(
             final DecisionReadModelQueryPort decisionReadModelQueryPort) {
         return new DecisionReadModelService(decisionReadModelQueryPort);
+    }
+
+    /** 装配现有 V9 replay case JDBC port；只增加内部 bean wiring，不改变 port 或 SQL。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public ReplayCaseRepository replayCaseRepository(final JdbcTemplate jdbcTemplate) {
+        return new JdbcReplayCaseRepository(jdbcTemplate, decisionPersistenceObjectMapper());
+    }
+
+    /** 装配现有 V9 evaluation JDBC port；只增加内部 bean wiring。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public EvaluationCaseRepository evaluationCaseRepository(final JdbcTemplate jdbcTemplate) {
+        return new JdbcEvaluationCaseRepository(jdbcTemplate, decisionPersistenceObjectMapper());
+    }
+
+    /** 装配现有 V9 regression verdict JDBC port；不新增查询能力。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public RegressionVerdictRepository regressionVerdictRepository(final JdbcTemplate jdbcTemplate) {
+        return new JdbcRegressionVerdictRepository(jdbcTemplate);
+    }
+
+    /** 装配现有 V10 immutable snapshot persistence port；不扩展 insert/find 合同。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public CanonicalReplaySnapshotPersistencePort canonicalReplaySnapshotPersistencePort(
+            final JdbcTemplate jdbcTemplate) {
+        return new JdbcCanonicalReplaySnapshotRepository(
+                jdbcTemplate, decisionPersistenceObjectMapper());
+    }
+
+    /** 装配 Stage-QDR-6 B2 evidence aggregate，供 P3 在 transaction 内重新读取 safe refs。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public DecisionEvidenceAggregateService decisionEvidenceAggregateService(
+            final DecisionReplayQueryRepository replayQueryRepository,
+            final DecisionReadModelQueryPort decisionReadModelQueryPort,
+            final ReplayCaseRepository replayCaseRepository,
+            final EvaluationCaseRepository evaluationCaseRepository,
+            final RegressionVerdictRepository regressionVerdictRepository,
+            final ModelGatewayCallPersistencePort gatewayCallPersistencePort) {
+        return new DecisionEvidenceAggregateService(
+                replayQueryRepository,
+                decisionReadModelQueryPort,
+                replayCaseRepository,
+                evaluationCaseRepository,
+                regressionVerdictRepository,
+                gatewayCallPersistencePort,
+                new ProviderReadinessGuardService(),
+                new ObservabilityReportService());
+    }
+
+    /** 装配冻结的 QDR6-CJSON-1 encoder；不注册为 HTTP ObjectMapper。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public Qdr6CanonicalJson qdr6CanonicalJson() {
+        return new Qdr6CanonicalJson();
+    }
+
+    /** 装配 canonical snapshot pure assembler。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public CanonicalReplaySnapshotAssembler canonicalReplaySnapshotAssembler(
+            final Qdr6CanonicalJson canonicalJson) {
+        return new CanonicalReplaySnapshotAssembler(canonicalJson);
+    }
+
+    /** 装配 domain-separated SHA-256 calculator。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public CanonicalReplaySnapshotHasher canonicalReplaySnapshotHasher(
+            final Qdr6CanonicalJson canonicalJson) {
+        return new CanonicalReplaySnapshotHasher(canonicalJson);
+    }
+
+    /**
+     * 装配 P3 internal transaction service。
+     *
+     * <p>{@link PlatformTransactionManager} 为强制依赖；缺失会阻断 bean 创建，不允许 direct/default
+     * isolation fallback。该 bean 没有 Controller/API 或外部 runtime 入口。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ReplayInputSnapshotAssemblyService replayInputSnapshotAssemblyService(
+            final DecisionReplayQueryRepository replayQueryRepository,
+            final DecisionReadModelQueryPort decisionReadModelQueryPort,
+            final PromptVersionPersistencePort promptVersionPersistencePort,
+            final ModelVersionPersistencePort modelVersionPersistencePort,
+            final ModelGatewayCallPersistencePort gatewayCallPersistencePort,
+            final ReplayCaseRepository replayCaseRepository,
+            final EvaluationCaseRepository evaluationCaseRepository,
+            final RegressionVerdictRepository regressionVerdictRepository,
+            final DecisionEvidenceAggregateService evidenceAggregateService,
+            final CanonicalReplaySnapshotPersistencePort snapshotPersistencePort,
+            final CanonicalReplaySnapshotAssembler assembler,
+            final CanonicalReplaySnapshotHasher hasher,
+            final PlatformTransactionManager transactionManager) {
+        return new ReplayInputSnapshotAssemblyService(
+                replayQueryRepository,
+                decisionReadModelQueryPort,
+                promptVersionPersistencePort,
+                modelVersionPersistencePort,
+                gatewayCallPersistencePort,
+                replayCaseRepository,
+                evaluationCaseRepository,
+                regressionVerdictRepository,
+                evidenceAggregateService,
+                snapshotPersistencePort,
+                assembler,
+                hasher,
+                transactionManager);
     }
 
     /**

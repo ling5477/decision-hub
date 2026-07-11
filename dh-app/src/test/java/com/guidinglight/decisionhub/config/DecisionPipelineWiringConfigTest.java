@@ -1,6 +1,7 @@
 package com.guidinglight.decisionhub.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditRepository;
@@ -17,10 +18,12 @@ import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketRepo
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketService;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelQueryPort;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelService;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.ReplayInputSnapshotAssemblyService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * K3/K4/QDR B2 decision pipeline 装配回归测试。
@@ -33,6 +36,9 @@ final class DecisionPipelineWiringConfigTest {
     private final ApplicationContextRunner runner =
             new ApplicationContextRunner()
                     .withBean(JdbcTemplate.class, () -> new JdbcTemplate(unusedDataSource()))
+                    .withBean(
+                            PlatformTransactionManager.class,
+                            () -> mock(PlatformTransactionManager.class))
                     .withUserConfiguration(AgentRuntimeWiringConfig.class, DecisionPipelineWiringConfig.class);
 
     @Test
@@ -47,6 +53,7 @@ final class DecisionPipelineWiringConfigTest {
                     assertThat(ctx).hasSingleBean(DecisionReplayQueryService.class);
                     assertThat(ctx).hasSingleBean(DecisionReadModelQueryPort.class);
                     assertThat(ctx).hasSingleBean(DecisionReadModelService.class);
+                    assertThat(ctx).hasSingleBean(ReplayInputSnapshotAssemblyService.class);
                     assertThat(ctx).hasSingleBean(HumanApprovalPacketRepository.class);
                     assertThat(ctx).hasSingleBean(HumanApprovalPacketService.class);
                     assertThat(ctx).hasSingleBean(ApprovalWriteBoundary.class);
@@ -57,6 +64,20 @@ final class DecisionPipelineWiringConfigTest {
                     assertThat(ctx).hasSingleBean(DecisionProviderGuard.class);
                     assertThat(ctx).hasSingleBean(DecisionOrchestrator.class);
                 });
+    }
+
+    @Test
+    void canonicalSnapshotServiceFailsApplicationContextWhenTransactionManagerIsMissing() {
+        new ApplicationContextRunner()
+                .withBean(JdbcTemplate.class, () -> new JdbcTemplate(unusedDataSource()))
+                .withUserConfiguration(
+                        AgentRuntimeWiringConfig.class, DecisionPipelineWiringConfig.class)
+                .run(
+                        context -> {
+                            assertThat(context).hasFailed();
+                            assertThat(context.getStartupFailure())
+                                    .hasMessageContaining("PlatformTransactionManager");
+                        });
     }
 
     private static DriverManagerDataSource unusedDataSource() {

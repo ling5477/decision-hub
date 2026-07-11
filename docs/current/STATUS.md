@@ -1,5 +1,22 @@
 # Decision Hub Status
 
+## 2026-07-11 Stage-QDR-6 B3-P3 canonical snapshot assembly/hash/persistence
+
+```text
+DH_STAGE_QDR_6_B3_P3_CANONICAL_SNAPSHOT_ASSEMBLY_HASH_PERSISTENCE: DONE / IMPLEMENTED / POSTGRESQL_VERIFIED
+SNAPSHOT_ASSEMBLER: PASS
+QDR6_CJSON_1: PASS
+DETERMINISTIC_HASH: PASS
+REPEATABLE_READ: PASS
+IMMUTABLE_PERSISTENCE: PASS
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+ALLOW_B3_CLOSE_REVIEW: YES
+next action: DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE
+```
+
+P3 已按冻结顺序实现 `structured snapshot assembly -> QDR6-CJSON-1 -> domain-separated SHA-256 -> REPEATABLE_READ source revalidation -> immutable persistence`。完整 source 读取、二次 identity/hash 校验、insert 与 exact read-back 位于同一显式 PostgreSQL `REPEATABLE_READ` 事务；canonical hash 完成后才构造 write command，`createdAt` 继续由数据库生成。未修改 schema、V1-V11、production port/JDBC 或 API，未实现或授权 deterministic replay executor。
+
 ## 2026-07-11 Stage-QDR-6 B3 persistence milestone review retry
 
 ```text

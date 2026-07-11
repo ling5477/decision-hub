@@ -2,6 +2,9 @@ package com.guidinglight.decisionhub;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidinglight.decisionhub.domain.decision.DecisionContextSnapshot;
@@ -11,18 +14,42 @@ import com.guidinglight.decisionhub.domain.qdr.RiskLevel;
 import com.guidinglight.decisionhub.domain.qdr.replay.ExpectedDecisionSummary;
 import com.guidinglight.decisionhub.domain.qdr.replay.ReplayInputRef;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcCanonicalReplaySnapshotRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.ReplayInputSnapshotAssemblyService;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcModelGatewayCallRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcPromptVersionRepository;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceCorrelation;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidencePolicy;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceRef;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceAggregate;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceAggregateService;
+import com.guidinglight.decisionhub.usecase.decision.DecisionReplayQueryRepository;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayCallPersistencePort;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayCallRecord;
+import com.guidinglight.decisionhub.usecase.qdr.model.ModelVersionPersistencePort;
+import com.guidinglight.decisionhub.usecase.qdr.model.ModelVersionRecord;
+import com.guidinglight.decisionhub.usecase.qdr.model.PromptVersionPersistencePort;
+import com.guidinglight.decisionhub.usecase.qdr.model.PromptVersionRecord;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.RedactionStatus;
+import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelQueryPort;
+import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionRunDetailView;
+import com.guidinglight.decisionhub.usecase.qdr.replay.EvaluationCaseRepository;
+import com.guidinglight.decisionhub.usecase.qdr.replay.RegressionVerdictRepository;
+import com.guidinglight.decisionhub.usecase.qdr.replay.ReplayCaseRecord;
+import com.guidinglight.decisionhub.usecase.qdr.replay.ReplayCaseRepository;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotAssembler;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotAssemblyException;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotAssemblyRequest;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotHash;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotHasher;
 import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotConflictException;
 import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotIdentity;
 import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotPersistenceException;
 import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotRecord;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotPersistencePort;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotSources;
 import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotVersionVector;
 import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotWriteCommand;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.ReplayInputSnapshot;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -31,7 +58,9 @@ import java.sql.Statement;
 import java.time.Instant;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.FlywayException;
 import org.junit.jupiter.api.Test;
@@ -523,6 +552,217 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                     .isZero();
         }
     }
+
+  @Test
+  void p3ServiceUsesRealRepeatableReadAndPersistsAfterHashWithExactReadBack()
+      throws Exception {
+    resetDatabase();
+    try (Connection connection = connection(); Statement statement = connection.createStatement()) {
+      insertSources(statement);
+    }
+    final DriverManagerDataSource dataSource = dataSource();
+    final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+    final JdbcCanonicalReplaySnapshotRepository delegate =
+        new JdbcCanonicalReplaySnapshotRepository(jdbcTemplate, new ObjectMapper());
+    final AtomicReference<String> isolation = new AtomicReference<>();
+    final CanonicalReplaySnapshotPersistencePort observing =
+        observingPort(
+            delegate,
+            () -> isolation.set(jdbcTemplate.queryForObject("show transaction_isolation", String.class)),
+            false);
+    final CanonicalReplaySnapshotWriteCommand command = snapshotCommand(HASH_B);
+    final ReplayInputSnapshotAssemblyService service =
+        p3Service(observing, new DataSourceTransactionManager(dataSource), command);
+
+    final CanonicalReplaySnapshotRecord persisted =
+        service.assembleHashAndPersist(p3Request(command));
+    final CanonicalReplaySnapshotRecord duplicate =
+        service.assembleHashAndPersist(p3Request(command));
+    final CanonicalReplaySnapshotWriteCommand conflictingCommand = snapshotCommand("c".repeat(64));
+    final ReplayInputSnapshotAssemblyService conflictingService =
+        p3Service(observing, new DataSourceTransactionManager(dataSource), conflictingCommand);
+
+    assertThat(isolation.get()).isEqualTo("repeatable read");
+    assertThat(persisted).isEqualTo(duplicate);
+    assertThatThrownBy(
+            () -> conflictingService.assembleHashAndPersist(p3Request(conflictingCommand)))
+        .isInstanceOf(CanonicalReplaySnapshotConflictException.class);
+    assertThat(persisted.canonicalInputHash()).isEqualTo(HASH_B);
+    assertThat(persisted.createdAt())
+        .isEqualTo(
+            jdbcTemplate
+                .queryForObject(
+                    "select created_at from qdr_canonical_replay_snapshot"
+                        + " where tenant_id=? and snapshot_id=?",
+                    java.sql.Timestamp.class,
+                    "tenant-a",
+                    "snapshot-jdbc")
+                .toInstant());
+    assertThat(delegate.findByTenantAndSnapshotId("tenant-b", "snapshot-jdbc")).isEmpty();
+  }
+
+  @Test
+  void p3FailureAfterInsertRollsBackEntirePostgresTransaction() throws Exception {
+    resetDatabase();
+    try (Connection connection = connection(); Statement statement = connection.createStatement()) {
+      insertSources(statement);
+    }
+    final DriverManagerDataSource dataSource = dataSource();
+    final JdbcCanonicalReplaySnapshotRepository delegate =
+        new JdbcCanonicalReplaySnapshotRepository(new JdbcTemplate(dataSource), new ObjectMapper());
+    final CanonicalReplaySnapshotWriteCommand command = snapshotCommand(HASH_B);
+    final ReplayInputSnapshotAssemblyService service =
+        p3Service(
+            observingPort(delegate, () -> {}, true),
+            new DataSourceTransactionManager(dataSource),
+            command);
+
+    assertThatThrownBy(() -> service.assembleHashAndPersist(p3Request(command)))
+        .isInstanceOf(CanonicalReplaySnapshotAssemblyException.class);
+    assertThat(delegate.findByTenantAndSnapshotId("tenant-a", "snapshot-jdbc")).isEmpty();
+  }
+
+  @Test
+  void p3TransactionManagerMissingFailsFastAndSourceDriftPreventsInsert() {
+    final CanonicalReplaySnapshotPersistencePort persistence =
+        mock(CanonicalReplaySnapshotPersistencePort.class);
+    final CanonicalReplaySnapshotWriteCommand command = snapshotCommand(HASH_B);
+    assertThatThrownBy(() -> p3Service(persistence, null, command))
+        .isInstanceOf(CanonicalReplaySnapshotAssemblyException.class)
+        .extracting(error -> ((CanonicalReplaySnapshotAssemblyException) error).code())
+        .isEqualTo(CanonicalReplaySnapshotAssemblyException.Code.TRANSACTION_MANAGER_REQUIRED);
+
+    final ReplayInputSnapshot first = mock(ReplayInputSnapshot.class);
+    final ReplayInputSnapshot changed = mock(ReplayInputSnapshot.class);
+    final ReplayInputSnapshotAssemblyService service =
+        p3Service(
+            persistence,
+            new DataSourceTransactionManager(dataSource()),
+            command,
+            first,
+            changed);
+    assertThatThrownBy(() -> service.assembleHashAndPersist(p3Request(command)))
+        .isInstanceOf(CanonicalReplaySnapshotAssemblyException.class)
+        .extracting(error -> ((CanonicalReplaySnapshotAssemblyException) error).code())
+        .isEqualTo(CanonicalReplaySnapshotAssemblyException.Code.SOURCE_CHANGED);
+    org.mockito.Mockito.verifyNoInteractions(persistence);
+  }
+
+  private static ReplayInputSnapshotAssemblyService p3Service(
+      final CanonicalReplaySnapshotPersistencePort persistence,
+      final org.springframework.transaction.PlatformTransactionManager transactionManager,
+      final CanonicalReplaySnapshotWriteCommand command,
+      final ReplayInputSnapshot... assemblySnapshots) {
+    final DecisionReplayQueryRepository replayQuery = mock(DecisionReplayQueryRepository.class);
+    final DecisionReadModelQueryPort readModel = mock(DecisionReadModelQueryPort.class);
+    final PromptVersionPersistencePort prompt = mock(PromptVersionPersistencePort.class);
+    final ModelVersionPersistencePort model = mock(ModelVersionPersistencePort.class);
+    final ModelGatewayCallPersistencePort gateway = mock(ModelGatewayCallPersistencePort.class);
+    final ReplayCaseRepository replayCase = mock(ReplayCaseRepository.class);
+    final EvaluationCaseRepository evaluation = mock(EvaluationCaseRepository.class);
+    final RegressionVerdictRepository verdict = mock(RegressionVerdictRepository.class);
+    final DecisionEvidenceAggregateService aggregateService = mock(DecisionEvidenceAggregateService.class);
+    final CanonicalReplaySnapshotAssembler assembler = mock(CanonicalReplaySnapshotAssembler.class);
+    final CanonicalReplaySnapshotHasher hasher = mock(CanonicalReplaySnapshotHasher.class);
+    final ReplayInputSnapshot snapshot =
+        assemblySnapshots.length == 0 ? mock(ReplayInputSnapshot.class) : assemblySnapshots[0];
+
+    when(replayQuery.findReplay(any())).thenReturn(mock(com.guidinglight.decisionhub.domain.decision.DecisionReplayView.class));
+    when(readModel.findDecisionRunDetail(any())).thenReturn(Optional.of(mock(DecisionRunDetailView.class)));
+    when(prompt.findByTenantAndPromptVersionId(any(), any()))
+        .thenReturn(Optional.of(mock(PromptVersionRecord.class)));
+    when(model.findByTenantAndModelVersionId(any(), any()))
+        .thenReturn(Optional.of(mock(ModelVersionRecord.class)));
+    when(gateway.findByTenantAndDecisionRunAndModelCallRef(any(), any(), any()))
+        .thenReturn(Optional.of(mock(ModelGatewayCallRecord.class)));
+    when(replayCase.findById(any(), any())).thenReturn(Optional.of(mock(ReplayCaseRecord.class)));
+    when(aggregateService.aggregate(any(), any())).thenReturn(mock(DecisionEvidenceAggregate.class));
+    if (assemblySnapshots.length > 1) {
+      when(assembler.assemble(any(), any(CanonicalReplaySnapshotSources.class)))
+          .thenReturn(assemblySnapshots[0], assemblySnapshots[1]);
+    } else {
+      when(assembler.assemble(any(), any(CanonicalReplaySnapshotSources.class))).thenReturn(snapshot);
+    }
+    when(hasher.hash(any()))
+        .thenReturn(new CanonicalReplaySnapshotHash("{}".getBytes(java.nio.charset.StandardCharsets.UTF_8), HASH_B));
+    when(assembler.toWriteCommand(any(), any(), any(), any())).thenReturn(command);
+
+    return new ReplayInputSnapshotAssemblyService(
+        replayQuery,
+        readModel,
+        prompt,
+        model,
+        gateway,
+        replayCase,
+        evaluation,
+        verdict,
+        aggregateService,
+        persistence,
+        assembler,
+        hasher,
+        transactionManager);
+  }
+
+  private static CanonicalReplaySnapshotAssemblyRequest p3Request(
+      final CanonicalReplaySnapshotWriteCommand command) {
+    final CanonicalReplaySnapshotIdentity id = command.identity();
+    return new CanonicalReplaySnapshotAssemblyRequest(
+        command.id(),
+        id.snapshotId(),
+        id.tenantId(),
+        id.correlation().traceId(),
+        id.correlation().requestId(),
+        id.correlation().decisionId(),
+        id.decisionRequestId(),
+        id.decisionRunId(),
+        id.modelCallId(),
+        id.modelCallRef(),
+        id.promptVersionId(),
+        id.modelVersionId(),
+        id.replayCaseRowId(),
+        id.replayCaseId(),
+        id.evaluationCaseRowId(),
+        id.evaluationCaseId(),
+        id.regressionVerdictRowId(),
+        id.regressionVerdictId(),
+        null,
+        DecisionEvidencePolicy.CORE_DECISION,
+        command.versionVector());
+  }
+
+  private static CanonicalReplaySnapshotPersistencePort observingPort(
+      final CanonicalReplaySnapshotPersistencePort delegate,
+      final Runnable beforeInsert,
+      final boolean failAfterInsert) {
+    return new CanonicalReplaySnapshotPersistencePort() {
+      @Override
+      public CanonicalReplaySnapshotRecord insert(
+          final String tenantId, final CanonicalReplaySnapshotWriteCommand command) {
+        beforeInsert.run();
+        final CanonicalReplaySnapshotRecord inserted = delegate.insert(tenantId, command);
+        if (failAfterInsert) {
+          throw new CanonicalReplaySnapshotAssemblyException(
+              CanonicalReplaySnapshotAssemblyException.Code.PERSISTENCE_MISMATCH,
+              "synthetic post-insert failure");
+        }
+        return inserted;
+      }
+
+      @Override
+      public Optional<CanonicalReplaySnapshotRecord> findByTenantAndSnapshotId(
+          final String tenantId, final String snapshotId) {
+        return delegate.findByTenantAndSnapshotId(tenantId, snapshotId);
+      }
+
+      @Override
+      public Optional<CanonicalReplaySnapshotRecord> findByTenantAndIdentity(
+          final String tenantId,
+          final CanonicalReplaySnapshotIdentity identity,
+          final String snapshotSchemaVersion) {
+        return delegate.findByTenantAndIdentity(tenantId, identity, snapshotSchemaVersion);
+      }
+    };
+  }
 
   private static CanonicalReplaySnapshotWriteCommand snapshotCommand(
       final String canonicalInputHash) {

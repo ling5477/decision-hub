@@ -3,6 +3,32 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-P3-CANONICAL-SNAPSHOT-ASSEMBLY-HASH-PERSISTENCE validation
+
+```text
+Task type: CODE_CHANGE + SNAPSHOT_ASSEMBLER + QDR6_CJSON_1 + DETERMINISTIC_SHA256_HASH + REPEATABLE_READ_TRANSACTION + IMMUTABLE_PERSISTENCE + POSTGRESQL_TESTS
+branch: dev
+HEAD before implementation: 68fa985846775f4be510447dbd7bdeda30653459
+start worktree: CLEAN
+start staged: EMPTY
+STAGE_QDR_6_B3_P3: DONE / POSTGRESQL_VERIFIED
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+```
+
+| Command / check | Result | Notes |
+| --- | --- | --- |
+| `git diff --check` / scope diff | PASS | 无 whitespace error；migration、production port/JDBC、API/Controller diff 为空。 |
+| canonicalizer/assembler focused tests | BUILD SUCCESS | `Qdr6CanonicalJsonTest` 10/10；`CanonicalReplaySnapshotAssemblerTest` 7/7；0 skipped。 |
+| focused PostgreSQL/wiring tests | BUILD SUCCESS | P3 snapshot PostgreSQL 16/16，加 wiring 2/2；真实 `postgres:17` / PostgreSQL 17.10，0 skipped。 |
+| `mvn -ntp -pl dh-usecase,dh-infra -am test` | BUILD SUCCESS | `dh-usecase` 488 tests、`dh-infra` 88 tests；0 skipped；Testcontainers 实际启动。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS | `dh-app` 106 tests、0 skipped；V1→V11 clean migration 成功。 |
+| `mvn -ntp test` | BUILD SUCCESS | reactor 19/19；Surefire reports 合计 986 tests、0 failures/errors/skipped。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | root Checkstyle 0 violations；Spotless check 通过；子模块 `checkstyle outputFile` 提示为既有 non-blocking 输出。 |
+| `REPEATABLE_READ` / rollback | PASS | 真实隔离级别、transaction manager fail-fast、source drift 拒绝、insert 后异常整体 rollback 均通过。 |
+| hash / persistence | PASS | canonical hash 在 insert 前完成；exact read-back、DB-generated `createdAt`、duplicate-identical/conflict、cross-tenant 与 immutable trigger 均通过。 |
+
+首次 focused read-back 测试发现 persisted record 的非冻结对象相等比较过严；最小修复为 exact 比较数据库冻结字段与 payload bytes 后重跑通过。两次尝试直接调用 Spotless apply goal 因项目未配置该直接调用方式而在执行前失败，未产生文件修改；正式 `-Pquality validate` 的 Spotless binding 已通过。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY validation
 
 ```text
