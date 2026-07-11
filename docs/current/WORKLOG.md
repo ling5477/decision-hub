@@ -4,6 +4,23 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
+
+完成 Stage-QDR-6 B3 persistence gap work order。基于 frozen canonical snapshot contract、Option D persistence review 与实际 V5/V6/V8/V9 schema/ports/JDBC/transaction/test patterns，将后续实现拆成 P1 additive migration + persistence contract、P2 tenant-bound ports/JDBC + identity validation、P3 structured snapshot assembler + local transaction persistence。
+
+```text
+SNAPSHOT_PERSISTENCE_GAP_WORK_ORDER: DONE
+ALLOW_B3_P1_MIGRATION_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_B3_P2_PORT_JDBC_IMPLEMENTATION_NOW: NO
+ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
+ALLOW_MIGRATION_CHANGE_NOW: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-P1-CANONICAL-SNAPSHOT-MIGRATION
+```
+
+工作单固化了 P1 数据库 row count/duplicate/null/FK/lock/Flyway transaction preflight、V10 tenant/composite constraints、UPDATE rejection、256 KiB payload gate、P2 exact identity reads、P3 `REPEATABLE_READ` transaction、三层测试矩阵、P1/P2 milestone review 和 forward-only rollback。本轮未修改 Java、测试、migration、V1-V9、API、Repository/JDBC、production port 或 wiring；未实现 assembler/canonicalizer/hash/replay，未连接数据库或外部系统，未创建 tag，未 push。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
 
 完成 Stage-QDR-6 B3 snapshot persistence gap design review。基于 V5/V6/V8/V9 schema、ports、JDBC、现有 transaction precedent 与 frozen canonical contract，推荐并冻结 Option D：未来 V10 新增独立 append-only canonical snapshot 表，在单一 tenant-bound transaction 内验证 source identities，并物化完整 allowlisted context、version vector、refs 和 canonical hash。

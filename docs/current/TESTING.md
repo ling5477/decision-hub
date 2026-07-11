@@ -3,6 +3,51 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER validation
+
+```text
+Task type: WORK_ORDER_ONLY + ADDITIVE_MIGRATION_PLAN + TENANT_BOUND_PERSISTENCE_PLAN + IMPLEMENTATION_BATCH_DESIGN + TEST_MATRIX_DESIGN + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_MIGRATION_CHANGE + NO_API + NO_REPLAY_IMPLEMENTATION + NO_PROVIDER + NO_AGENT + NO_LIVE
+branch: dev
+start worktree: CLEAN
+start staged: EMPTY
+start HEAD: 8bd6e0786dda620b9dbf9e6ffb30bbe16d0b0d88
+SNAPSHOT_PERSISTENCE_GAP_WORK_ORDER: DONE
+```
+
+### Work-order evidence
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| V5/V6/V8/V9 code reality | REVIEWED | tenant/composite identities、port gaps、JDBC patterns 与 frozen persistence review 一致。 |
+| transaction precedent | PARTIAL / GAP RECORDED | 现有 `TransactionTemplate` 可复用；B3 必须显式 `REPEATABLE_READ` 且 production manager 缺失 fail-fast。 |
+| migration test patterns | PRESENT | 有 V9 presence test 与 PostgreSQL/Testcontainers Flyway test，可扩展到 V10 clean/upgrade/rollback。 |
+| database preflight | NOT RUN / FUTURE P1 | 本轮不连接数据库；row count/duplicate/null/FK/lock/Flyway transaction checks 是 P1 hard gate。 |
+| Maven tests | NOT RUN / NOT REQUIRED | 文档工单未修改 Java、测试或 migration。 |
+| Docker/Testcontainers | NOT RUN / NOT PASS | 本轮不要求且未运行，不写为 PASS。 |
+| quality validate | BUILD SUCCESS | `mvn -ntp -Pquality validate` 19/19 reactor modules success。 |
+
+### Validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS / EXPECTED_DOCS_ONLY | 6 个 tracked allowed docs 修改，1 个预期 work-order doc 新增。 |
+| `git diff --check` | PASS | exit 0；无 whitespace error。 |
+| `git diff --stat` / `git diff --name-only` | PASS / TRACKED_ONLY | tracked diff 仅 6 个 allowed docs；新文件由 status/others scan 确认。 |
+| `git diff --cached --name-only` | PASS / EMPTY | 暂存区为空。 |
+| forbidden-scope diff | PASS / EMPTY | Java、tests、migration、V1-V9、contracts 与 golden_cases 均无 diff。 |
+| migration diff | PASS / EMPTY | `dh-app/src/main/resources/db/migration` 无 diff。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | 19/19 reactor modules success。 |
+| Checkstyle | PASS | root 0 violations；子模块 outputFile 提示不改变 root 结果。 |
+| Spotless | PASS | `spotless:check` 未报告违规。 |
+| Maven tests | NOT RUN / NOT REQUIRED | `validate` lifecycle 不运行 tests；本轮未修改代码或测试。 |
+| Docker/Testcontainers | NOT RUN / NOT PASS | 本轮未运行，不写为 PASS。 |
+
+### Planned implementation test matrix
+
+- Migration/schema：V10 presence/order、clean migration、V1-V9 upgrade、composite FK/unique、UPDATE rejection、duplicate/version/payload rejection、transaction rollback。
+- Port/JDBC：tenant-bound insert/find、cross-tenant invisible、exact prompt/model/call identity、V6/V8 mismatch、no tenantless query、duplicate idempotency/conflict。
+- Assembler/integration：complete snapshot、missing/unsafe/legacy fail-closed、transaction/source failure rollback、PostgreSQL/Testcontainers、无 HTTP/provider/NQ/Agent/trading dependency。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW validation
 
 ```text

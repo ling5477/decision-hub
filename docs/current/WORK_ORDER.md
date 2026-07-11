@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
-current task status: DONE / PERSISTENCE_DESIGN_FROZEN
-next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
-mode: WORK_ORDER_ONLY_NEXT + ADDITIVE_SCHEMA_AND_TENANT_BOUND_PORT_DESIGN + NO_IMPLEMENTATION_NOW + NO_API + NO_HTTP + NO_PROVIDER + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
+current task status: DONE / WORK_ORDER_ONLY
+next action: DH-STAGE-QDR-6-B3-P1-CANONICAL-SNAPSHOT-MIGRATION
+mode: P1_IMPLEMENTATION_NEXT + DATABASE_PREFLIGHT_REQUIRED + ADDITIVE_MIGRATION_ONLY + NO_IMPLEMENTATION_IN_THIS_TASK + NO_API + NO_HTTP + NO_PROVIDER + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 plan、implementation work order、B1 contracts 与 B2 已完成。B3 canonical snapshot input 合同与 persistence gap design 已冻结；推荐 Option D，通过未来 V10 独立 immutable snapshot 表和 tenant-bound source validation 补齐缺口。下一步只编制 persistence gap work order，不得直接实施 migration、port/JDBC、assembler、canonicalizer 或 replay。
+Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 plan、implementation work order、B1 contracts 与 B2 已完成。B3 canonical snapshot input 合同与 persistence gap design 已冻结，persistence gap work order 已将 Option D 拆为 P1/P2/P3。下一步仅允许独立执行 P1 database preflight + additive V10 migration/persistence contract；P2/P3、canonicalizer 与 replay 仍未授权。
 
 ## 2. 前置状态
 
@@ -49,6 +49,10 @@ ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION_NOW: NO
 SNAPSHOT_PERSISTENCE_GAP_REVIEW: DONE
 PERSISTENCE_DESIGN_FROZEN: YES
 ALLOW_SNAPSHOT_PERSISTENCE_GAP_WORK_ORDER: YES
+SNAPSHOT_PERSISTENCE_GAP_WORK_ORDER: DONE
+ALLOW_B3_P1_MIGRATION_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_B3_P2_PORT_JDBC_IMPLEMENTATION_NOW: NO
+ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
 ALLOW_MIGRATION_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO
 ALLOW_EVIDENCE_CONSOLIDATION_IMPLEMENTATION_NOW: NO

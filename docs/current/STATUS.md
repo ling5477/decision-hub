@@ -1,5 +1,25 @@
 # Decision Hub Status
 
+## 2026-07-11 Stage-QDR-6 B3 snapshot persistence gap work order
+
+```text
+DH_STAGE_QDR_6_B3_SNAPSHOT_PERSISTENCE_GAP_WORK_ORDER: DONE / WORK_ORDER_ONLY
+Stage-QDR-6 B1: DONE / COMMITTED
+Stage-QDR-6 B2: DONE / COMMITTED
+canonical snapshot contract: FROZEN
+persistence design: FROZEN
+Stage-QDR-6 B3 implementation: NOT_STARTED
+ALLOW_B3_P1_MIGRATION_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_B3_P2_PORT_JDBC_IMPLEMENTATION_NOW: NO
+ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
+ALLOW_MIGRATION_CHANGE_NOW: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-P1-CANONICAL-SNAPSHOT-MIGRATION
+```
+
+工作单将 frozen Option D 拆为 P1 additive migration/persistence contract、P2 tenant-bound ports/JDBC/identity validation、P3 structured snapshot assembler/persistence integration。P1/P2 独立 commit 后统一做 persistence milestone review；P3 不实现 `QDR6-CJSON-1`、deterministic SHA-256 或 replay executor。本轮未授权任何 migration、Repository/JDBC 或代码变更。
+
 ## 2026-07-11 Stage-QDR-6 B3 snapshot persistence gap review
 
 ```text

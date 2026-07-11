@@ -7,9 +7,9 @@ task: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
 classification: WORK_ORDER_ONLY
 stage: Decision Pipeline Evidence Consolidation / Deterministic Replay Baseline
 work order status: DONE / WORK_ORDER_ONLY
-stage implementation status: B1_DONE / B2_DONE / B3_PERSISTENCE_DESIGN_FROZEN
-current implementation authorization: NONE / WORK_ORDER_ONLY_NEXT
-next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
+stage implementation status: B1_DONE / B2_DONE / B3_WORK_ORDER_DONE
+current implementation authorization: B3_P1_ELIGIBLE_NEXT / NO_CHANGE_IN_THIS_TASK
+next action: DH-STAGE-QDR-6-B3-P1-CANONICAL-SNAPSHOT-MIGRATION
 ```
 
 本工单只冻结 Stage-QDR-6 B1-B5 的实现边界、对象职责、依赖方向、测试矩阵、review 触发条件、回滚规则和 close 条件。本轮未修改生产代码、测试、migration、API、Controller、Repository/JDBC 或 runtime wiring。
@@ -550,7 +550,7 @@ ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION: NO
 
 具体缺口包括完整 immutable context、`contextSchemaVersion`、完整 version vector、prompt/gateway version tenant-bound resolution、V6/V8 stable call identity 与 canonical hash version/domain semantics。不得通过临时新增 migration、Repository/JDBC/SQL、HTTP/provider call、默认值、`latest` 或读取 raw material 绕过 blocker。
 
-2026-07-11 persistence gap review 已冻结 Option D：未来通过 `V10__qdr6_canonical_replay_snapshot.sql` 新增独立 immutable snapshot table，并以 tenant-bound source validation、完整 version vector、strict payload allowlist/size gate 和 local transaction 补齐。该结论只允许进入 `DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER`，不授权立即实现 migration、port/JDBC、assembler、canonicalizer 或 replay。
+2026-07-11 persistence gap review 已冻结 Option D；后续 work order 已进一步拆成 P1 additive migration/persistence contract、P2 tenant-bound ports/JDBC/identity validation、P3 structured snapshot assembler/persistence integration。P1/P2 独立 commit 后统一做 persistence milestone review；P3 不实现 `QDR6-CJSON-1`、deterministic SHA-256 或 replay executor。下一步仅允许独立执行 `DH-STAGE-QDR-6-B3-P1-CANONICAL-SNAPSHOT-MIGRATION`，本轮不授权 migration 或代码变更。
 
 ### 8.10 B3 测试矩阵
 
