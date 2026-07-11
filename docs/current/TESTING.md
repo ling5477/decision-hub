@@ -3,6 +3,49 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B2-EVIDENCE-AGGREGATION-SERVICE validation
+
+```text
+Task type: CODE_CHANGE + EVIDENCE_AGGREGATION + EXISTING_PORTS_ONLY + UNIT_TESTS + NO_REPOSITORY_EXPANSION + NO_MIGRATION + NO_API + NO_HTTP + NO_PROVIDER + NO_AGENT + NO_LIVE
+branch: dev
+start worktree: CLEAN
+start staged: EMPTY
+start HEAD: 92cc23a9e51bc87501fa258921bb11d914f3b531
+STAGE_QDR_6_B1: DONE / COMMITTED
+STAGE_QDR_6_B2: DONE / EVIDENCE_AGGREGATION_EXISTING_PORTS_ONLY
+B2_REPOSITORY_EXPANSION_REVIEW_REQUIRED: NOT_TRIGGERED
+```
+
+### Validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| Git preflight | PASS | 仓库 `decision-hub`、分支 `dev`、HEAD `92cc23a...`；工作区与暂存区均为空。 |
+| code reality / repository sufficiency audit | PASS WITH LIMITATIONS | 复用 V5 `DecisionReplayQueryRepository`、V6 `DecisionReadModelQueryPort`、V8 `ModelGatewayCallPersistencePort`、V9 replay/evaluation/regression ports 与 Stage-QDR-5 read models。V6 需要 `decisionRunId` selector；V8 必须先由 V6 safe provider call ref 定位，缺失时为 `INCOMPLETE`，不做 tenantless scan。 |
+| `mvn -ntp -pl dh-usecase -am "-DskipTests" compile` | BUILD SUCCESS | 9 个 reactor 模块成功。 |
+| `mvn -ntp -pl dh-usecase -am "-Dtest=DecisionEvidenceAggregateServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test` | BUILD SUCCESS | B2 定向测试 17 passed，0 failures/errors/skipped。 |
+| `mvn -ntp -pl dh-usecase -am test` | BUILD SUCCESS | `dh-usecase` 461 tests passed，0 skipped；同轮依赖模块测试也通过。 |
+| `mvn -ntp test` | BUILD SUCCESS / WITH_DOCKER_SKIPS | Surefire reports 合计 937 tests，0 failures，0 errors，5 skipped。 |
+| Docker/Testcontainers | NOT PASS / DOCKER_UNAVAILABLE | `PostgresContainerSmokeTest` 1 skipped、`V9QdrReplayEvaluationFlywayPostgresTest` 1 skipped、`JdbcNonceReplayGuardPersistenceTest` 3 skipped；未将其写为 PASS。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | Reactor 19/19 SUCCESS；root Checkstyle 0 violations；Spotless check passed。 |
+| standalone Spotless apply attempts | NOT AVAILABLE / NON_BLOCKING | plugin prefix 未注册，直接 goal 也因子模块未声明 plugin 而失败；仓库标准 `-Pquality validate` 的 Spotless check 实际通过。 |
+| final Git/scope checks | PASS / ALLOWLIST_ONLY | `git diff --check` exit 0（仅 LF→CRLF warning）；changed set 共 8 个 allowlist 文件，forbidden-scope diff 为空，production evidence package forbidden dependency hits 为 0，暂存区为空。 |
+
+### B2 result and boundary
+
+```text
+aggregate service: IMPLEMENTED
+correlation resolver: IMPLEMENTED
+consistency evaluator: IMPLEMENTED
+stable refs/findings order: IMPLEMENTED
+source exception mapping: INVALID + SOURCE_READ_FAILED
+unsafe ref mapping: INVALID + UNSAFE_EVIDENCE_REJECTED
+new Repository/JDBC/SQL/migration/API/runtime wiring: NONE
+deterministic replay: NOT_IMPLEMENTED
+B3 canonical snapshot sufficiency: INSUFFICIENT / SAFE_REFS_ONLY
+next action: B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED
+```
+
 ## 2026-07-11 DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER validation
 
 ```text

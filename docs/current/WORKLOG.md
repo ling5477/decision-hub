@@ -4,6 +4,28 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-11 DH-STAGE-QDR-6-B2-EVIDENCE-AGGREGATION-SERVICE
+
+完成 Stage-QDR-6 B2 internal evidence aggregation service。实现新增 `DecisionEvidenceAggregateService`、`DecisionEvidenceCorrelationResolver` 与 `DecisionEvidenceConsistencyEvaluator`，复用现有 V5/V6/V8/V9 ports/read models 和 Stage-QDR-5 provider health/readiness/observability safe models；未新增或修改 production port 合同、Repository/JDBC/SQL、migration、API、Controller 或 Spring wiring。
+
+```text
+STAGE_QDR_6_B1: DONE / COMMITTED
+STAGE_QDR_6_B2: DONE / EVIDENCE_AGGREGATION_EXISTING_PORTS_ONLY
+mandatory evidence: missing -> INCOMPLETE
+optional evidence: missing -> no fabricated ref
+cross-tenant/correlation conflict/duplicate contradiction: INVALID
+source read or mapping exception: INVALID + structured finding
+deterministic order: evidence refs + findings sorted
+raw/sensitive/trading material: rejected
+B2_REPOSITORY_EXPANSION_REVIEW_REQUIRED: NOT_TRIGGERED
+ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION: NO
+next action: B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED
+```
+
+新增 17 个纯单元测试，覆盖用户要求的 15 类验收及 policy mismatch、稳定排序。定向测试 17/17 PASS；`dh-usecase` 461 tests、0 skipped；全仓 Surefire reports 为 937 tests、0 failures/errors、5 skipped。5 个 skipped 均为 Docker/Testcontainers 相关测试，当前 Docker unavailable，未写成 PASS。`mvn -ntp -Pquality validate` 19/19 SUCCESS，Checkstyle 0 violations，Spotless check passed。
+
+B2 aggregate 只输出 B1 safe refs/findings，不携带 V5 canonical snapshot 内容或完整 replay version input；因此 B2 本身完成，但不足以直接授权 B3 deterministic replay。未创建 tag，未 push。
+
 ## 2026-07-11 DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
 
 完成 Stage-QDR-6 implementation work order。开工前确认 `dev`、工作区 clean，HEAD `5108f24` 已包含 Stage-QDR-6 plan。实际复核了既有 decision evidence/replay views、V5/V6 read model、V8 gateway safe metadata、V9 replay/evaluation/regression repositories 与 Stage-QDR-5 provider readiness/observability service。
