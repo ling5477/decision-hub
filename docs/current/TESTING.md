@@ -3,6 +3,28 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-ARCHIVE-TAG-CLOSE validation
+
+```text
+close docs commit: PASS / 5961164
+archive path: docs/gates/stage-qdr-6/
+archive packet: COMPLETE
+archive SHA-256: GENERATED / VERIFIED
+git diff --check: PASS
+forbidden-scope diff: EMPTY
+V1-V11 diff: EMPTY
+mvn -ntp -Pquality validate: PASS / reactor 19 of 19
+Checkstyle: PASS / 0 violations
+Spotless: PASS
+full Maven tests: NOT_RERUN / final close retry evidence referenced
+PostgreSQL/Testcontainers: NOT_RERUN / final close retry evidence referenced
+tag: PENDING / NOT_CREATED
+push: NOT_RUN
+Stage-QDR-7: NOT_STARTED / NOT_ALLOWED_YET
+```
+
+本任务只重跑 quality，不重跑 full Maven tests 或 PostgreSQL/Testcontainers。Final close retry 的 1017 tests、0 skipped、PostgreSQL 17.10 与 V1-V11 evidence 已冻结到 archive packet；不得把引用写成本轮重跑。
+
 ## 2026-07-11 DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW-RETRY validation
 
 ```text

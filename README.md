@@ -41,20 +41,21 @@ STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
 STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_5_ARCHIVE: DONE
 STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
-STAGE_QDR_6: IMPLEMENTATION_COMPLETE / FINAL_CLOSE_RETRY_PENDING / NOT_ARCHIVED / NOT_TAGGED
+STAGE_QDR_6: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
 STAGE_QDR_6_PLAN: DONE / PLAN_ONLY
 STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
 STAGE_QDR_6_IMPLEMENTATION: COMPLETE / B1_DONE / B2_DONE / B3_CLOSED_ACCEPTED / B4_DONE_COMMITTED
 ALLOW_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: YES / CONSUMED
 ALLOW_STAGE_QDR_6_IMPLEMENTATION_NOW: NO
-STAGE_QDR_6_FINAL_CLOSE_REVIEW: RETRY_PENDING / PREVIOUS_REVIEW_BLOCKED
+STAGE_QDR_6_FINAL_CLOSE_REVIEW: PREVIOUS_BLOCKED / HISTORICAL_PRESERVED
+STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: PASS / 5961164
 CURRENT_FACTSOURCE_CONFLICT: CLEARED
-STAGE_QDR_6_ARCHIVE: NOT_STARTED
-STAGE_QDR_6_TAG: NOT_STARTED
-STAGE_QDR_7_PLAN: NOT_ALLOWED_YET
-ALLOW_STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: YES / NEXT_TASK_ONLY
-ALLOW_STAGE_QDR_6_ARCHIVE_PACKET_NOW: NO
-ALLOW_STAGE_QDR_6_TAG_CLOSE_NOW: NO
+STAGE_QDR_6_ARCHIVE: DONE / docs/gates/stage-qdr-6/
+STAGE_QDR_6_TAG: PENDING / NOT_CREATED
+STAGE_QDR_7_PLAN: NOT_STARTED / NOT_ALLOWED_YET
+ALLOW_STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: YES / CONSUMED / PASS
+ALLOW_STAGE_QDR_6_ARCHIVE_PACKET_NOW: YES / CONSUMED
+ALLOW_STAGE_QDR_6_TAG_CLOSE_NOW: YES / AFTER_ARCHIVE_COMMIT_AND_CLEAN_WORKTREE
 ALLOW_STAGE_QDR_7_PLAN_NOW: NO
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
@@ -87,9 +88,9 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-6-FINAL-CLOSE-BLOCKER-FIX
-current task status: DONE / CURRENT_FACTSOURCE_ALIGNED
-next action: DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW-RETRY
+current task: DH-STAGE-QDR-6-ARCHIVE-TAG-CLOSE
+current task status: ARCHIVE_PACKET_READY / TAG_PENDING
+next action: annotated tag close for dh-stage-qdr-6-close
 ```
 
 ## Stage-QDR-4 归档状态
@@ -125,6 +126,7 @@ docs/current/FACTSOURCE_POLICY.md
 docs/current/ARCHIVE_INDEX.md
 docs/gates/stage-qdr-4/                 Stage-QDR-4 归档目录与阶段文档
 docs/gates/stage-qdr-5/                 Stage-QDR-5 归档目录与阶段文档
+docs/gates/stage-qdr-6/                 Stage-QDR-6 self-contained archive packet
 ```
 
 Stage-QDR-5 historical source docs 已归档到 `docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_*.md`；这些文件只作为 historical archive evidence，不是 current factsource。
@@ -143,6 +145,7 @@ docs/current/FACTSOURCE_POLICY.md       当前事实源与 blocker 规则
 docs/current/ARCHIVE_INDEX.md           QDR 历史归档索引
 docs/gates/stage-qdr-4/                 Stage-QDR-4 归档目录与阶段文档
 docs/gates/stage-qdr-5/                 Stage-QDR-5 归档目录与阶段文档
+docs/gates/stage-qdr-6/                 Stage-QDR-6 self-contained archive packet
 ```
 
 `docs/current/WORKLOG.md`、`ROADMAP.md`、`API.md`、`DB_SCHEMA.md` 是 supporting documents，不是 primary stage gate source。旧阶段工单、旧 review / freeze 记录、blocker fix 过程和中间产物已经移动或索引到 `docs/gates/**`，不得覆盖 `STATUS.md` 与 `WORK_ORDER.md` 的当前结论。`docs/archive/**` 不再作为本项目 QDR 阶段的新归档口径；若未来重新出现，只能作为历史遗留引用。

@@ -1,5 +1,21 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-6-ARCHIVE-TAG-CLOSE
+
+- Preflight 通过：`dev` / `e09d5b4`、exact 7-file retry diff、staged empty、forbidden/V1-V11 diff empty，本地与远程 tag 均不存在。
+- Final close retry 已提交为 `5961164 docs(qdr): accept stage-qdr-6 final close retry`，只包含 7 个预期 current 文档。
+- 已在 `docs/gates/stage-qdr-6/` 形成 self-contained packet，复制 11 个 Stage-QDR-6 current source 文档且未删除原件。
+- Previous final close `BLOCKED` 与 retry `PASS` 分别保留；archive commit 与 annotated tag 尚未创建。
+- `mvn -ntp -Pquality validate` 已通过，reactor 19/19、Checkstyle 0 violations、Spotless PASS；archive SHA-256 在提交前生成并复核。
+- Stage-QDR-7 仍 `NOT_STARTED / NOT_ALLOWED_YET`；未修改代码、测试、migration、API、Repository/JDBC、wiring 或 NQ。
+
+```text
+STAGE_QDR_6: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
+STAGE_QDR_6_ARCHIVE: DONE / docs/gates/stage-qdr-6/
+STAGE_QDR_6_TAG: PENDING / NOT_CREATED
+next action: archive commit -> clean worktree -> annotated tag close
+```
+
 ## 2026-07-11 DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW-RETRY
 
 - 在 `dev` / `e09d5b4`、clean worktree、empty staged baseline 上重新执行 Stage-QDR-6 final close review。
