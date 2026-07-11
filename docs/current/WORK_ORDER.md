@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-6-B3-P3-CANONICAL-SNAPSHOT-ASSEMBLY-HASH-PERSISTENCE
-current task status: DONE / IMPLEMENTED / POSTGRESQL_VERIFIED
+current task: DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE-GATE
+current task status: PASS / CONTRACTS_FROZEN / REVIEW_ONLY
 next action: DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE
-mode: B3_CLOSE_REVIEW_NEXT_ONLY + NO_REPLAY_EXECUTOR_AUTHORIZATION + NO_SCHEMA + NO_PORT_JDBC + NO_API + NO_PROVIDER + NO_AGENT + NO_LIVE
+mode: MOCK_ONLY_DETERMINISTIC_REPLAY_NEXT + EXISTING_SNAPSHOT_PORT_ONLY + NO_SCHEMA + NO_PORT_JDBC + NO_API + NO_PROVIDER + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 B1/B2、B3 persistence work order、P1、P2、persistence schema blocker fix、milestone review retry 与 P3 canonical snapshot assembly/hash/persistence 均已完成。下一步只允许进入 B3/deterministic replay baseline 的独立 gate；当前仍不授权 deterministic replay executor。
+Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 B1/B2、B3 persistence P1/P2/P3 与 deterministic replay baseline gate 均已完成。下一步只允许实现冻结的 `QDR6-MOCK-REPLAY-1` usecase-local baseline；不得扩展 schema、port/JDBC、API 或外部 runtime。
 
 ## 2. 前置状态
 
@@ -62,11 +62,13 @@ ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: YES / CONSUMED
 ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: YES / CONSUMED
 ALLOW_DETERMINISTIC_HASH_IMPLEMENTATION_NOW: YES / CONSUMED
 ALLOW_IMMUTABLE_SNAPSHOT_PERSISTENCE_IN_P3: YES / CONSUMED
-ALLOW_B3_CLOSE_REVIEW: YES / NEXT_TASK_ONLY
+DETERMINISTIC_REPLAY_BASELINE_GATE: PASS
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_REPLAY_COMPARATOR_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_B3_CLOSE_REVIEW: NO / REPLAY_BASELINE_PENDING
 ALLOW_MIGRATION_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO
 ALLOW_EVIDENCE_CONSOLIDATION_IMPLEMENTATION_NOW: NO
-ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
 ALLOW_API_CHANGE_NOW: NO
 ALLOW_MIGRATION_NOW: NO
 ALLOW_REPOSITORY_EXPANSION_NOW: NO
@@ -220,6 +222,8 @@ B4 work order 已完成，范围限于 internal report / acceptance support boun
 禁止修改 V1-V10 migration。
 禁止新增 API / Controller / REST endpoint。
 禁止新增 Repository / JDBC；milestone retry 只重新授权 P3 assembler/canonicalizer/hash/persistence service 与显式 `REPEATABLE_READ` transaction boundary。
+deterministic replay implementation 只能复用现有 snapshot port/record/canonicalizer/hasher，不得重读可变 V5/V6/V8/V9 source。
+禁止把现有 `QdrRegressionComparator` 当作 deterministic replay comparator。
 禁止接真实 HTTP client。
 禁止接真实 provider / Provider SDK。
 禁止新增 OpenAI / Anthropic / Gemini / Ollama SDK。

@@ -3,6 +3,28 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE-GATE validation
+
+```text
+Task type: REVIEW_ONLY + DETERMINISTIC_REPLAY_CONTRACT_GATE + EXECUTOR_BOUNDARY_REVIEW + REPRODUCIBILITY_POLICY_REVIEW
+branch: dev
+HEAD: e54e6076dd3d15de88eb56c0250c2acffd739e5d
+start worktree: CLEAN
+start staged: EMPTY
+DETERMINISTIC_REPLAY_BASELINE_GATE: PASS
+```
+
+| Command / check | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS | 开工时 clean；staged/untracked 为空。 |
+| code reality review | PASS | record 可重建 snapshot；canonical bytes 可重新生成并与 persisted hash exact compare。 |
+| schema/port/JDBC/API expansion review | NOT_REQUIRED | 复用现有 exact snapshot read port 与 record。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19；root Checkstyle 0 violations；Spotless check 通过。 |
+| Maven tests | NOT_RUN | 本轮 review-only，不要求新增或执行 tests。 |
+| Docker/Testcontainers | NOT_RUN | 本轮未执行，不沿用为本轮 PASS。 |
+
+子模块 `checkstyle:check` 的 outputFile 提示为既有 non-blocking 输出；root aggregate Checkstyle 与 Spotless 均实际通过。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-P3-CANONICAL-SNAPSHOT-ASSEMBLY-HASH-PERSISTENCE validation
 
 ```text

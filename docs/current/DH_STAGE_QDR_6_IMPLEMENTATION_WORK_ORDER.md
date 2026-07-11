@@ -492,22 +492,15 @@ hash 输入必须包含 schema/canonicalization/replay algorithm versions；不�
 ### 8.7 Difference taxonomy
 
 ```text
-CORRELATION_CHANGED
-SNAPSHOT_CHANGED
-EVIDENCE_REF_CHANGED
-POLICY_VERSION_CHANGED
-MODEL_VERSION_CHANGED
-MODEL_GATEWAY_VERSION_CHANGED
-PROMPT_VERSION_CHANGED
-EXPECTED_SUMMARY_CHANGED
-PROVIDER_SUMMARY_HASH_CHANGED
-ALGORITHM_VERSION_CHANGED
-MISSING_INPUT
-INVALID_INPUT
-TENANT_MISMATCH
-UNSAFE_INPUT
-HASH_MISMATCH
-EXECUTION_FAILED
+CONTEXT_DIFFERENCE
+POLICY_VERSION_DIFFERENCE
+PROMPT_VERSION_DIFFERENCE
+MODEL_VERSION_DIFFERENCE
+GATEWAY_VERSION_DIFFERENCE
+EXPECTED_SUMMARY_DIFFERENCE
+EVIDENCE_DIFFERENCE
+OUTPUT_HASH_DIFFERENCE
+MISSING_REQUIRED_INPUT
 ```
 
 每个 `ReplayDifference` 只能保存 field/path、difference type、expected hash/ref、actual hash/ref 与脱敏 message，不保存 raw value。
@@ -516,17 +509,18 @@ EXECUTION_FAILED
 
 ```text
 REPRODUCIBLE
-DIFFERENT_INPUT
+DIFFERENT
 INCOMPLETE
-INVALID
-DENIED
-FAILED
+UNSUPPORTED_VERSION
+INVALID_INPUT
+EXECUTION_FAILED
 ```
 
 - 相同 input/version/hash：`REPRODUCIBLE`。
-- 已明确版本或 snapshot 变化：`DIFFERENT_INPUT` + differences，不伪装为 executor failure。
-- missing/incomplete/unsafe/cross-tenant：`INCOMPLETE/INVALID/DENIED`。
-- canonicalization/hash 内部异常：`FAILED`。
+- 已明确 baseline/replay output 变化：`DIFFERENT` + differences，不伪装为 executor failure。
+- missing/incomplete 为 `INCOMPLETE`；unsafe/cross-tenant/hash mismatch 为 `INVALID_INPUT`。
+- 不支持的 schema/canonicalization/executor version 为 `UNSUPPORTED_VERSION`。
+- persistence/transformation/canonicalization 内部异常为 `EXECUTION_FAILED`。
 
 ### 8.9 Snapshot sufficiency gate
 
@@ -557,6 +551,8 @@ ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION: NO
 2026-07-11 persistence schema blocker fix 已完成：write/persisted contract 分离、DB-generated `created_at`、V9 exact projection validation 与 V11 metadata comments 均通过 focused PostgreSQL evidence。后续 P3 必须整体遵循 `structured assembler -> QDR6-CJSON-1 canonicalization -> deterministic SHA-256 hash -> REPEATABLE_READ identity validation -> immutable persistence`，不得在 hash 生成前 insert snapshot。当前只允许 `DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY`，不授权 P3、canonicalizer 或 replay implementation。
 
 2026-07-11 persistence milestone review retry 已 `PASS`。四个原始 blocker 全部关闭；重新定义后的 P3 可在不新增 migration、port/JDBC 或 API 的边界内实现 `structured assembler -> QDR6-CJSON-1 canonicalizer -> deterministic SHA-256 -> REPEATABLE_READ identity validation -> immutable persistence`。该准入不包含 deterministic replay executor，也不授权 HTTP、Provider、NQ、Agent、LangGraph 或 LIVE。
+
+2026-07-11 P3 已由 commit `e54e607` 完成并通过 PostgreSQL/quality evidence。随后 deterministic replay baseline gate 复核确认：V10 persisted record 可无损重建 `ReplayInputSnapshot`，现有 canonicalizer/hasher 可重新生成 canonical bytes/hash，完整 version vector 已固定，因而不需要 schema、port、Repository/JDBC 或 API 扩展。Gate 冻结 `QDR6-MOCK-REPLAY-1` 为纯本地 storage/reproducibility 投影；它不重放真实 provider、prompt 或 policy runtime。`ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: YES / NEXT_TASK_ONLY`，B3 close review 仍为 NO。
 
 ### 8.10 B3 测试矩阵
 
@@ -747,16 +743,16 @@ B4_API_REVIEW_REQUIRED
 
 ```text
 STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
-STAGE_QDR_6_IMPLEMENTATION: B1_DONE / B2_DONE / B3_P1_DONE / B3_P2_DONE / B3_P3_ALLOWED_NEXT_ONLY
+STAGE_QDR_6_IMPLEMENTATION: B1_DONE / B2_DONE / B3_P1_DONE / B3_P2_DONE / B3_P3_DONE / REPLAY_GATE_PASS
 
 ALLOW_STAGE_QDR_6_B1_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_6_B2_IMPLEMENTATION_NOW: YES / CONSUMED
-ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION_NOW: YES / P3_NEXT_ONLY
-ALLOW_CANONICALIZER_IMPLEMENTATION: YES / P3_ONLY
-ALLOW_DETERMINISTIC_HASH_IMPLEMENTATION: YES / P3_ONLY
-ALLOW_IMMUTABLE_SNAPSHOT_PERSISTENCE_IN_P3: YES
-ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: NO
-ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: NO
+ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION_NOW: YES / REPLAY_BASELINE_NEXT_ONLY
+ALLOW_CANONICALIZER_IMPLEMENTATION: YES / CONSUMED
+ALLOW_DETERMINISTIC_HASH_IMPLEMENTATION: YES / CONSUMED
+ALLOW_IMMUTABLE_SNAPSHOT_PERSISTENCE_IN_P3: YES / CONSUMED
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_REPLAY_COMPARATOR_IMPLEMENTATION: YES / NEXT_TASK_ONLY
 ALLOW_SNAPSHOT_PERSISTENCE_GAP_WORK_ORDER: YES
 ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_6_FINAL_CLOSE_NOW: NO
@@ -776,5 +772,5 @@ ALLOW_LIVE: NO
 下一步唯一入口：
 
 ```text
-DH-STAGE-QDR-6-B3-P3-CANONICAL-SNAPSHOT-ASSEMBLY-HASH-PERSISTENCE
+DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE
 ```

@@ -1,5 +1,22 @@
 # Decision Hub Status
 
+## 2026-07-11 Stage-QDR-6 B3 deterministic replay baseline gate
+
+```text
+DH_STAGE_QDR_6_B3_DETERMINISTIC_REPLAY_BASELINE_GATE: PASS
+REPLAY_INPUT_CONTRACT: FROZEN
+EXECUTOR_BOUNDARY: FROZEN
+REPRODUCIBILITY_POLICY: FROZEN
+DIFFERENCE_TAXONOMY: FROZEN
+FAIL_CLOSED_TAXONOMY: FROZEN
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_REPLAY_COMPARATOR_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_B3_CLOSE_REVIEW_NOW: NO
+next action: DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE
+```
+
+现有 V10 persisted record 可无损重建 `ReplayInputSnapshot`，并通过现有 `QDR6-CJSON-1` 与 domain-separated SHA-256 重新生成 canonical bytes/hash；无需 schema、port、Repository/JDBC 或 API 扩展。准入只覆盖 `QDR6-MOCK-REPLAY-1` 纯本地 storage/reproducibility baseline，不重放真实 provider、prompt 或 policy runtime，不产生交易、执行、Provider、NQ、Agent 或 LIVE 授权。
+
 ## 2026-07-11 Stage-QDR-6 B3-P3 canonical snapshot assembly/hash/persistence
 
 ```text

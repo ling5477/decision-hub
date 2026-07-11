@@ -1,5 +1,28 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE-GATE
+
+- 只读核对 `e54e607` 的 persisted snapshot record、exact read port、V10 columns、`ReplayInputSnapshot`、`QDR6-CJSON-1`、hasher 与 version vector。
+- 确认 V10 虽不单独保存 canonical byte blob，但 record 已包含无损重建 snapshot 的全部 structured fields；实现可从数据库回读 record 重新 canonicalize/hash，无需新增 schema、port、Repository/JDBC 或 API。
+- 冻结 `DeterministicReplayCommand`、`DeterministicReplayResult`、`ReplayDifference`、`ReplayReproducibilityStatus`、`ReplayFailureCode`、difference taxonomy、fail-closed mapping 与 `QDR6-MOCK-REPLAY-1` 本地投影语义。
+- 明确现有 `QdrRegressionComparator` 不是 replay comparator；下一实现不得调用 provider/prompt/policy runtime，不得重读 V5/V6/V8/V9 mutable source，不得把 `REPRODUCIBLE` 当作任何授权。
+- 发现 `README.md`、`docs/current/README.md` 与 supporting `ROADMAP.md` 仍有早期 Stage-QDR-6 入口措辞；因不在本轮 allowlist 未修改，当前以 `STATUS.md`/`WORK_ORDER.md` 为准，不将其误判为 gate blocker。
+- `mvn -ntp -Pquality validate` 19/19 `BUILD SUCCESS`，Checkstyle 0、Spotless PASS；tests 与 Docker/Testcontainers 本轮 `NOT_RUN`。
+- 本轮仅修改允许的 `docs/current` 文档；未修改 Java、测试、V1-V11、API、port/JDBC 或 wiring，未 commit、未 push、未创建 tag。
+
+```text
+DETERMINISTIC_REPLAY_BASELINE_GATE: PASS
+REPLAY_INPUT_CONTRACT: FROZEN
+EXECUTOR_BOUNDARY: FROZEN
+REPRODUCIBILITY_POLICY: FROZEN
+DIFFERENCE_TAXONOMY: FROZEN
+FAIL_CLOSED_TAXONOMY: FROZEN
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_REPLAY_COMPARATOR_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_B3_CLOSE_REVIEW_NOW: NO
+next action: DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE
+```
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-P3-CANONICAL-SNAPSHOT-ASSEMBLY-HASH-PERSISTENCE
 
 - 新增完整结构化 `ReplayInputSnapshot`、tenant-bound exact source assembler、`QDR6-CJSON-1` canonicalizer 与 domain-separated SHA-256 hasher；hash domain 固定包含 snapshot schema、canonicalization、executor compatibility 与 hash algorithm version。
