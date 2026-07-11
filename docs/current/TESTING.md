@@ -3,6 +3,29 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE validation
+
+```text
+Task type: CODE_CHANGE + MOCK_ONLY_DETERMINISTIC_REPLAY + STRUCTURED_COMPARATOR + FAIL_CLOSED + UNIT_TESTS
+branch: dev
+HEAD before implementation: 3b0d5291dbbbab6bac069010d67a5279634fdf29
+start worktree: CLEAN
+start staged: EMPTY
+DETERMINISTIC_REPLAY_BASELINE: DONE / VERIFIED
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+```
+
+| Command / check | Result | Notes |
+| --- | --- | --- |
+| focused replay tests | BUILD SUCCESS | `DeterministicReplayExecutorTest` 11/11、`DeterministicReplayComparatorTest` 4/4；0 skipped。 |
+| `mvn -ntp -pl dh-usecase -am test` | BUILD SUCCESS | `dh-usecase` 503 tests、0 skipped。 |
+| `mvn -ntp test` | BUILD SUCCESS | reactor 19/19；Surefire 1001 tests、0 failures/errors/skipped。 |
+| PostgreSQL/Testcontainers regression | PASS | 真实 `postgres:17` / PostgreSQL 17.10；V1→V11 与 snapshot PostgreSQL 16/16 保持通过。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | root Checkstyle 0 violations；Spotless check 通过。 |
+| architecture/safety guard | PASS | 无 HTTP/provider/infra/clock/random/env dependency；executor 只调用 full-identity exact read，snapshot insert 0 次。 |
+
+首次 compile 因 `List.of()` 泛型推断为 `Object` 导致 comparator 类型不兼容，改为显式 `List<ReplayDifference>` 后通过。首次 focused test 发现 authorization guard 文案未显式形成 `not NQ` 语义，改为分别否定 Provider authorization、NQ integration、trading/execution 与 Paper/LIVE 后重跑通过。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE-GATE validation
 
 ```text

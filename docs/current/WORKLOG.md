@@ -1,5 +1,33 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE
+
+- 新增 `DeterministicReplayCommand`、`DeterministicReplayResult`、`DeterministicReplayExecutor`、冻结 status/difference/failure taxonomy 与 read-only local projection。
+- `ReplayInputSnapshot.fromPersistedRecord` 只从数据库回读 record 无损重建 canonical input；不重读 V5/V6/V8/V9 mutable sources，不使用 audit time、随机值或环境字段。
+- Executor 只调用现有 snapshot port 的 tenant + full identity exact read，复验 persisted/recomputed/command canonical input hash；不调用 insert、不写数据库、不修改 snapshot。
+- Replay output 使用 `QDR6-CJSON-1` 与独立 `DH-QDR6-DETERMINISTIC-REPLAY-OUTPUT` domain SHA-256；input hash 不能冒充 output hash。
+- Comparator 仅输出冻结的 9 类 difference，按 type/path 稳定排序；context/summary/evidence 只记录 fingerprints，不保存 raw values。
+- 所有异常与不兼容状态映射为冻结 result；`REPRODUCIBLE` 只表示内部 mock reproducibility evidence，不表示真实 Provider/prompt/policy replay 或任何授权。
+- 新增 15 个 focused tests；`dh-usecase` 503 tests、全仓 1001 tests 均 0 failures/errors/skipped。真实 PostgreSQL 17.10/Testcontainers 与 V1→V11 regression 通过；quality 19/19、Checkstyle 0、Spotless PASS。
+- 未修改 V1-V11、port/JDBC/Repository、wiring、API 或外部 runtime；未调用 HTTP/Provider/NQ/Agent/LangGraph，未持久化 replay result，未创建 tag，未 push。
+
+```text
+STAGE_QDR_6_B3_DETERMINISTIC_REPLAY_BASELINE: DONE / IMPLEMENTED / VERIFIED
+REPLAY_COMMAND_CONTRACT: PASS
+REPLAY_RESULT_CONTRACT: PASS
+MOCK_EXECUTOR: PASS
+INPUT_HASH_VERIFICATION: PASS
+OUTPUT_CANONICALIZATION: PASS
+OUTPUT_HASH: PASS
+STRUCTURED_COMPARATOR: PASS
+FAIL_CLOSED_BEHAVIOR: PASS
+TENANT_ISOLATION: PASS
+NO_EXTERNAL_IO: PASS
+ALLOW_B3_DETERMINISTIC_REPLAY_CLOSE_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_B4_INTERNAL_REPORT_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-CLOSE-REVIEW
+```
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-BASELINE-GATE
 
 - 只读核对 `e54e607` 的 persisted snapshot record、exact read port、V10 columns、`ReplayInputSnapshot`、`QDR6-CJSON-1`、hasher 与 version vector。

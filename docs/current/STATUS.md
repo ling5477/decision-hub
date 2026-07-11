@@ -1,5 +1,26 @@
 # Decision Hub Status
 
+## 2026-07-11 Stage-QDR-6 B3 deterministic replay baseline implementation
+
+```text
+DH_STAGE_QDR_6_B3_DETERMINISTIC_REPLAY_BASELINE: DONE / IMPLEMENTED / VERIFIED
+REPLAY_COMMAND_CONTRACT: PASS
+REPLAY_RESULT_CONTRACT: PASS
+MOCK_EXECUTOR: PASS
+INPUT_HASH_VERIFICATION: PASS
+OUTPUT_CANONICALIZATION: PASS
+OUTPUT_HASH: PASS
+STRUCTURED_COMPARATOR: PASS
+FAIL_CLOSED_BEHAVIOR: PASS
+TENANT_ISOLATION: PASS
+NO_EXTERNAL_IO: PASS
+ALLOW_B3_DETERMINISTIC_REPLAY_CLOSE_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_B4_INTERNAL_REPORT_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-CLOSE-REVIEW
+```
+
+`QDR6-MOCK-REPLAY-1` 已实现为 usecase-local、read-only deterministic baseline：只通过现有 tenant-bound full-identity snapshot port 回读 persisted record，重建 `ReplayInputSnapshot`，复验 `QDR6-CJSON-1` canonical input hash，执行纯本地 structured projection，并以独立 output domain 生成 SHA-256 与冻结 taxonomy differences。未新增 schema、port/JDBC、wiring 或 API；result 只表示内部 reproducibility evidence，不授权 Provider、NQ、交易、执行、Paper、LIVE 或 Agent。
+
 ## 2026-07-11 Stage-QDR-6 B3 deterministic replay baseline gate
 
 ```text

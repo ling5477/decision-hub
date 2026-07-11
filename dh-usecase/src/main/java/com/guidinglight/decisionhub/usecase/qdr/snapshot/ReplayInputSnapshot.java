@@ -95,6 +95,47 @@ public record ReplayInputSnapshot(
   }
 
   /**
+   * 仅使用数据库回读的 immutable record 重建 canonical replay input。
+   *
+   * <p>该方法不读取 V5/V6/V8/V9 source，不使用当前时间、随机值或环境配置；数据库主键与
+   * {@code createdAt} 也不会进入 snapshot。
+   *
+   * @param record tenant-bound persisted snapshot record。
+   * @return 与 P3 写入时 canonical input 等价的结构化 snapshot。
+   */
+  public static ReplayInputSnapshot fromPersistedRecord(
+      final CanonicalReplaySnapshotRecord record) {
+    final CanonicalReplaySnapshotRecord checked = Objects.requireNonNull(record, "record");
+    final CanonicalReplaySnapshotVersionVector versions = checked.versionVector();
+    return new ReplayInputSnapshot(
+        versions.snapshotSchemaVersion(),
+        checked.identity().tenantId(),
+        checked.identity().correlation().traceId(),
+        checked.identity().correlation().requestId(),
+        checked.identity().correlation().decisionId(),
+        checked.identity().decisionRunId(),
+        checked.source(),
+        checked.decisionType(),
+        checked.sourceCapturedAt(),
+        checked.subject(),
+        checked.contextSnapshot(),
+        checked.evidenceRefs(),
+        versions.policyVersion(),
+        versions.evaluationPolicyVersion(),
+        versions.modelVersionRef(),
+        versions.modelGatewayVersionRef(),
+        versions.promptVersionRef(),
+        checked.replayInputRef(),
+        checked.replayInputHash(),
+        checked.expectedDecisionSummary(),
+        checked.expectedSummaryHash(),
+        checked.providerSummaryHash(),
+        versions.replayExecutorVersion(),
+        versions.canonicalizationVersion(),
+        versions.hashAlgorithmVersion());
+  }
+
+  /**
    * 返回唯一 canonical hash input projection。
    *
    * <p>Map 顺序不参与语义；canonicalizer 会排序 keys。optional provider hash 缺失时省略，显式 null
