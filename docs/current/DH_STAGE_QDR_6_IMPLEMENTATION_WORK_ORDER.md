@@ -1,5 +1,7 @@
 # DH Stage-QDR-6 Implementation Work Order
 
+> 2026-07-11 final close update：B1/B2 已 `DONE / COMMITTED`，B3 已 `CLOSED / ACCEPTED`，B4 已 `DONE / COMMITTED / 964b493`；实现与安全验收项分别 PASS，但 `DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW` 因三个 current factsources 仍保留未实现/next B1 旧口径而 `BLOCKED`。Stage-QDR-6 当前为 `IMPLEMENTATION_COMPLETE / FINAL_CLOSE_BLOCKED / NOT_ARCHIVED / NOT_TAGGED`，下一步仅允许 `DH-STAGE-QDR-6-FINAL-CLOSE-BLOCKER-FIX`；不授权 archive/tag、Stage-QDR-7、代码、migration、API、Provider、NQ、Agent/LangGraph、交易或 LIVE。
+
 ## 1. 工单状态
 
 ```text

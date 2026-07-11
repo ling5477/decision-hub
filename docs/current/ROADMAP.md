@@ -9,6 +9,17 @@
 DH 的目标不是成为交易系统，而是成为 NQ 的 AI Agent 决策能力层。当前主线为 Quant Decision Review。
 
 ```text
+STAGE_QDR_6_FINAL_CLOSE_REVIEW: BLOCKED / CURRENT_FACTSOURCE_CONFLICT
+STAGE_QDR_6: IMPLEMENTATION_COMPLETE / FINAL_CLOSE_BLOCKED / NOT_ARCHIVED / NOT_TAGGED
+next action: DH-STAGE-QDR-6-FINAL-CLOSE-BLOCKER-FIX
+ALLOW_STAGE_QDR_6_ARCHIVE_PACKET: NO
+ALLOW_STAGE_QDR_6_TAG_CLOSE_AFTER_ARCHIVE: NO
+ALLOW_STAGE_QDR_7_PLAN_NOW: NO
+```
+
+Stage-QDR-6 实现与安全验收项分别通过，但 final close 被 current factsource 冲突阻断。下一步必须先同步三个不在本轮 allowlist 的 authority/entry 文档并重跑 review；不得创建 archive packet/tag。Stage-QDR-7 仍 `NOT_STARTED`，不得从本次验收直接进入 planning 或 implementation。
+
+```text
 stage-qdr-1: CLOSED / ACCEPTED
 stage-qdr-2: FINAL CLOSE CLOSED / ACCEPTED
 stage-qdr-3 implementation: DONE

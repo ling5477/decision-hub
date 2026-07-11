@@ -1,5 +1,20 @@
 # Decision Hub Archive Index
 
+## Stage-QDR-6 archive readiness（2026-07-11）
+
+```text
+STAGE_QDR_6_FINAL_CLOSE_REVIEW: BLOCKED / CURRENT_FACTSOURCE_CONFLICT
+STAGE_QDR_6: IMPLEMENTATION_COMPLETE / FINAL_CLOSE_BLOCKED / NOT_ARCHIVED / NOT_TAGGED
+ALLOW_STAGE_QDR_6_ARCHIVE_PACKET: NO
+ALLOW_STAGE_QDR_6_TAG_CLOSE_AFTER_ARCHIVE: NO
+archive packet: NOT_CREATED
+archive commit: NOT_CREATED
+tag: NOT_CREATED
+next action: DH-STAGE-QDR-6-FINAL-CLOSE-BLOCKER-FIX
+```
+
+Final close review 来源为 `docs/current/DH_STAGE_QDR_6_FINAL_CLOSE_REVIEW.md`。Stage-QDR-6 因 current factsource 冲突尚未通过 final close，不得创建 archive packet、archive commit 或 tag。必须先完成 blocker fix 并让 final close review PASS，之后才可进入 archive-before-tag 顺序。
+
 ## 1. 归档原则
 
 归档文件保留历史信息，不删除历史，不重写历史。归档文件不是 current factsource，不得覆盖 `docs/current/STATUS.md` 或 `docs/current/WORK_ORDER.md`。

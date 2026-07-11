@@ -1,5 +1,22 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW
+
+- 在 `dev` / `964b493`、clean worktree、empty staged 前提下完成 Stage-QDR-6 B1–B4、V10/V11、tenant/identity/hash/transaction、deterministic replay、internal report 与安全授权边界的只读终审。
+- B1/B2 contracts/aggregation、B3 canonical snapshot/mock replay、B4 internal report 均 `PASS`；未发现 P0/P1、安全边界、migration、tenant、hash、replay 或 authorization blocker。
+- 发现 current factsource blocker：`README.md`、`docs/current/README.md`、`docs/current/CODEX_PROJECT_INSTRUCTIONS.md` 仍写 Stage-QDR-6 未实现/next B1，与代码现实冲突且不在本轮 allowlist；按 `FACTSOURCE_POLICY.md` fail-closed 阻断 final close。
+- `mvn -ntp -pl dh-usecase,dh-infra -am test`、`mvn -ntp -pl dh-app -am test`、`mvn -ntp test` 与 `mvn -ntp -Pquality validate` 全部通过；全仓 1017 tests，0 failures/errors/skipped；PostgreSQL 17.10/Testcontainers、V1-V11、Checkstyle、Spotless、ArchitectureTest 均通过。
+- 只新增 final close review 并同步 allowlist current docs；未创建 archive packet、commit、tag 或 push。
+
+```text
+STAGE_QDR_6_FINAL_CLOSE_REVIEW: BLOCKED / CURRENT_FACTSOURCE_CONFLICT
+STAGE_QDR_6: IMPLEMENTATION_COMPLETE / FINAL_CLOSE_BLOCKED / NOT_ARCHIVED / NOT_TAGGED
+ALLOW_STAGE_QDR_6_ARCHIVE_PACKET: NO
+ALLOW_STAGE_QDR_6_TAG_CLOSE_AFTER_ARCHIVE: NO
+ALLOW_STAGE_QDR_7_PLAN_NOW: NO
+next action: DH-STAGE-QDR-6-FINAL-CLOSE-BLOCKER-FIX
+```
+
 ## 2026-07-11 DH-STAGE-QDR-6-B4-EVIDENCE-REPLAY-INTERNAL-REPORT
 
 - 新增 `DecisionEvidenceReplayInternalReport`、`DecisionEvidenceReplayReportService`、`InternalAcceptanceStatus` 与 `InternalAcceptanceFinding`，全部位于 `dh-usecase` 内部 `qdr/report` 包。

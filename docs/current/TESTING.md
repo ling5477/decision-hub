@@ -3,6 +3,30 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW validation
+
+```text
+git status --short: PASS / pre-review clean
+git diff --check: PASS
+git log --oneline -20: PASS / HEAD 964b493
+mvn -ntp -pl dh-usecase,dh-infra -am test: PASS / 0 failures / 0 errors / 0 skipped
+mvn -ntp -pl dh-app -am test: PASS / dh-app 106 tests / 0 skipped
+mvn -ntp test: PASS / 1017 tests / 0 failures / 0 errors / 0 skipped
+mvn -ntp -Pquality validate: PASS
+Checkstyle: PASS / 0 violations
+Spotless: PASS
+ArchitectureTest: PASS / 39 tests / 0 skipped
+PostgreSQL/Testcontainers: PASS / Docker Desktop / postgres:17 / PostgreSQL 17.10
+Flyway: PASS / V1-V11 validated and applied
+V10CanonicalReplaySnapshotFlywayPostgresTest: PASS / 16 tests / 0 skipped
+V1-V9 diff from Stage-QDR-6 plan baseline: empty
+V1-V11 worktree diff: empty
+staged: empty
+commit/push/tag: NOT_RUN
+```
+
+本轮四组用户要求的 Maven 命令均真实成功。PostgreSQL/Testcontainers 未 skip；V10 测试覆盖 clean migration、V1-V9 upgrade、tenant isolation、immutable UPDATE guard、payload/version constraints、duplicate/conflict、`REPEATABLE_READ` 与 rollback。系统 Maven 可用；`mvnw.cmd -v` 仍失败，错误为 `'\' is not recognized as an internal or external command` 且 wrapper jar 缺少主清单属性，继续记录为 P2 tooling risk。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B4-EVIDENCE-REPLAY-INTERNAL-REPORT validation
 
 ```text
