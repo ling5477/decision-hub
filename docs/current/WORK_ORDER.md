@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-6-B2-EVIDENCE-AGGREGATION-SERVICE
-current task status: DONE / COMMITTED
-next action: B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED
-mode: CODE_CHANGE + EVIDENCE_AGGREGATION + EXISTING_PORTS_ONLY + UNIT_TESTS + NO_REPOSITORY_EXPANSION + NO_MIGRATION + NO_API + NO_HTTP + NO_PROVIDER + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-6-B3-CANONICAL-SNAPSHOT-INPUT-CONTRACT-REVIEW
+current task status: DONE / CONTRACT_FROZEN / PERSISTENCE_BLOCKED
+next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
+mode: REVIEW_ONLY + PERSISTENCE_GAP_REVIEW + NO_IMPLEMENTATION + NO_REPOSITORY_EXPANSION_NOW + NO_MIGRATION_NOW + NO_API + NO_HTTP + NO_PROVIDER + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 plan、implementation work order、B1 contracts 与 B2 `DH-STAGE-QDR-6-B2-EVIDENCE-AGGREGATION-SERVICE` 已完成。B2 未扩展 Repository/JDBC/schema/API；当前 aggregate 只有 safe refs/findings，不携带 canonical snapshot 内容与完整版本输入，因此不得直接进入 B3，下一步固定为 `B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED`。
+Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 plan、implementation work order、B1 contracts 与 B2 已完成。B3 canonical snapshot input 合同已经 `FROZEN`，但真实 V5/V6/V8/V9 与现有 ports 无法提供完整 immutable context 和 version vector，故 `EXISTING_PERSISTENCE_SUFFICIENT: NO`、`B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED: YES`。下一步只能进行独立 persistence gap review，不得直接实现 B3。
 
 ## 2. 前置状态
 

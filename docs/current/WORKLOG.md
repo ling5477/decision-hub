@@ -4,6 +4,22 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-CANONICAL-SNAPSHOT-INPUT-CONTRACT-REVIEW
+
+完成 Stage-QDR-6 B3 canonical snapshot input contract 与 persistence sufficiency review。基于真实 V5/V6/V8/V9 migration、write/read model、tenant-bound ports、B1/B2 contracts 和 aggregate service，冻结 `ReplayInputSnapshot` 字段分类、完整 version vector、`QDR6-CJSON-1`、SHA-256 domain-separated hash material、`QDR6-MOCK-REPLAY-1` compatibility 与 fail-closed taxonomy。
+
+```text
+CANONICAL_SNAPSHOT_INPUT_CONTRACT: FROZEN
+EXISTING_PERSISTENCE_SUFFICIENT: NO
+B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED: YES
+ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: NO
+next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
+```
+
+主要阻断：V5 只有 snapshot metadata；V6 persisted payload 不通过现有 port 暴露；V8 prompt/gateway version 读取与 V6/V8 call identity 不完整；V9 无完整 schema/canonicalization/executor version vector；B2 aggregate 只有 refs/findings。本轮未修改生产代码、测试、V1-V9、Repository/JDBC/SQL、API/Controller、production port 或 runtime wiring，未实现 canonicalizer/hash/replay，未调用外部系统，未创建 tag，未 push。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B2-EVIDENCE-AGGREGATION-SERVICE
 
 完成 Stage-QDR-6 B2 internal evidence aggregation service。实现新增 `DecisionEvidenceAggregateService`、`DecisionEvidenceCorrelationResolver` 与 `DecisionEvidenceConsistencyEvaluator`，复用现有 V5/V6/V8/V9 ports/read models 和 Stage-QDR-5 provider health/readiness/observability safe models；未新增或修改 production port 合同、Repository/JDBC/SQL、migration、API、Controller 或 Spring wiring。

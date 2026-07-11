@@ -3,6 +3,48 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-CANONICAL-SNAPSHOT-INPUT-CONTRACT-REVIEW validation
+
+```text
+Task type: REVIEW_ONLY + CANONICAL_SNAPSHOT_CONTRACT + PERSISTENCE_SUFFICIENCY_REVIEW + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_MIGRATION + NO_REPOSITORY_EXPANSION + NO_API + NO_PROVIDER + NO_AGENT + NO_LIVE
+branch: dev
+start worktree: CLEAN
+start staged: EMPTY
+start HEAD: 78a67501701d1f46e47fa73c7d8d3c56870595aa
+CANONICAL_SNAPSHOT_INPUT_CONTRACT: FROZEN
+EXISTING_PERSISTENCE_SUFFICIENT: NO
+B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED: YES
+```
+
+### Review evidence
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| V5 persisted snapshot | INSUFFICIENT | JSON 可 tenant-bound 读取，但生产内容只有 snapshot metadata，无完整 immutable context/context schema version。 |
+| V6 correlation/readability | PARTIAL | decisionRun/correlation 可读；现有 port 不暴露 persisted input/context payload。 |
+| V8 version refs | INSUFFICIENT | gateway record 有 prompt/model IDs，但 prompt 无按 ID read port，gateway version 由 model version 派生，V6/V8 model-call identity 未证明。 |
+| V9 baseline | PARTIAL | tenant-bound structured refs/summary/hash/policy 可读；完整 version vector 与 QDR6 canonical/hash versions 缺失。 |
+| B2 aggregate | INSUFFICIENT | 只有 safe refs/findings，不携带 canonical snapshot 或完整 version inputs。 |
+| existing assembler/canonicalizer/hash | ABSENT | 未发现 `ReplayInputSnapshot` assembler、`QDR6-CJSON-1`、`QDR6-MOCK-REPLAY-1` 或对应 execution hash。 |
+| tests | NOT RUN / NOT REQUIRED | review-only；未新增或修改测试。 |
+| Docker/Testcontainers | NOT RUN / NOT PASS | 本轮不要求，未写为 PASS。 |
+
+### Validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS / EXPECTED_DOCS_ONLY | 5 个 tracked allowed docs 修改，1 个预期 review doc 新增；无其他文件。 |
+| `git diff --check` | PASS | exit 0；仅出现工作区 LF→CRLF 提示，不是 whitespace error。 |
+| `git diff --stat` / `git diff --name-only` | PASS / TRACKED_ONLY | tracked diff 仅 5 个 allowed docs；untracked review doc 由 `git status --short` 单独确认。 |
+| `git diff --cached --name-only` | PASS / EMPTY | 未暂存文件。 |
+| forbidden-scope diff | PASS / EMPTY | `dh-domain/dh-usecase/dh-memory/dh-eval/dh-connector/dh-api/dh-app/dh-infra/contracts/golden_cases` 均无 diff。 |
+| safety wording scan | REVIEWED / ALLOWED_DENYLIST_HITS_ONLY | 命中均为明确禁止项、fail-closed taxonomy 或既有 historical/supporting evidence；未发现授权语义。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | 19/19 reactor modules success。 |
+| Checkstyle | PASS | root 检查完成，0 violations；子模块提示无独立 outputFile，不改变 root 结果。 |
+| Spotless | PASS | `spotless:check` 完成，未报告违规。 |
+| Maven tests | NOT RUN / NOT REQUIRED | `validate` lifecycle 不运行 tests；review-only 未新增或修改测试。 |
+| Docker/Testcontainers | NOT RUN / NOT PASS | 本轮未运行，不写为 PASS。 |
+
 ## 2026-07-11 DH-STAGE-QDR-6-B2-EVIDENCE-AGGREGATION-SERVICE validation
 
 ```text

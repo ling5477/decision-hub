@@ -1,5 +1,20 @@
 # Decision Hub Status
 
+## 2026-07-11 Stage-QDR-6 B3 canonical snapshot input contract review
+
+```text
+DH_STAGE_QDR_6_B3_CANONICAL_SNAPSHOT_INPUT_CONTRACT_REVIEW: DONE / REVIEW_ONLY
+CANONICAL_SNAPSHOT_INPUT_CONTRACT: FROZEN
+EXISTING_PERSISTENCE_SUFFICIENT: NO
+B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED: YES
+ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: NO
+next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
+```
+
+V5 生产 snapshot 只包含 `snapshotPresent/snapshotId/capturedAt/evidenceCount`，V6 existing port 只暴露 summary/ref，V8 缺少可完整读取的 prompt/gateway version identity，V9 不含 decision/context/canonicalization/executor 完整 version vector；B2 aggregate 也只有 safe refs/findings。因此合同已冻结，但现有持久化和读取能力不足，B3 继续 fail-closed。不得用默认值、current time、`latest`、raw material、临时 SQL/JDBC/Repository 或 migration 绕过。
+
 ## 1. 当前状态表
 
 ```text
@@ -119,9 +134,9 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-6-B2-EVIDENCE-AGGREGATION-SERVICE
-current task status: DONE / COMMITTED
-next action: B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED
+current task: DH-STAGE-QDR-6-B3-CANONICAL-SNAPSHOT-INPUT-CONTRACT-REVIEW
+current task status: DONE / CONTRACT_FROZEN / PERSISTENCE_BLOCKED
+next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
 ```
 
 ## 2. 当前事实源集合
@@ -247,10 +262,11 @@ stage-qdr-5 recommended direction: Model Gateway Observability / Provider Readin
 stage-qdr-5 next action: DH-STAGE-QDR-6-PLAN / CONSUMED
 stage-qdr-6 B1: DONE / EVIDENCE_CORRELATION_AGGREGATE_CONTRACTS
 stage-qdr-6 B2: DONE / EVIDENCE_AGGREGATION_EXISTING_PORTS_ONLY
-stage-qdr-6 next action: B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED
+stage-qdr-6 B3 contract: FROZEN / PERSISTENCE_INSUFFICIENT_BLOCKED
+stage-qdr-6 next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
 ```
 
-B5 close review 的 ACCEPTED 结论已写回 current factsources。Stage-QDR-4 与 Stage-QDR-5 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-6 plan、implementation work order、B1 contracts 与 B2 Evidence Aggregation Service 已完成。B2 只组合现有 V5/V6/V8/V9 ports/read models，未扩展 Repository/JDBC/schema/API/runtime wiring；aggregate 只携带 safe refs/findings，尚不足以作为 B3 canonical snapshot input，因此 B3 保持未授权并进入 `B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED`。real HTTP/provider/SDK、Agent/LangGraph、NQ runtime integration 与 LIVE 均未授权。
+B5 close review 的 ACCEPTED 结论已写回 current factsources。Stage-QDR-4 与 Stage-QDR-5 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-6 plan、implementation work order、B1 contracts 与 B2 Evidence Aggregation Service 已完成。B3 canonical snapshot input contract 已冻结；B2 aggregate 只携带 safe refs/findings，且 V5/V6/V8/V9 仍缺完整 immutable context/version vector 读取能力，因此 B3 保持未授权并进入 `DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW`。real HTTP/provider/SDK、Agent/LangGraph、NQ runtime integration 与 LIVE 均未授权。
 
 ## 4. 禁止项
 

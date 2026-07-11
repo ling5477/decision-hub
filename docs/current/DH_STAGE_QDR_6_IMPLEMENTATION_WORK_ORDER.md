@@ -415,11 +415,15 @@ ReplayDifferenceType
 ReplayReproducibilityStatus
 ```
 
-### 8.3 Canonical snapshot source
+### 8.3 Canonical snapshot source（B3 contract review correction）
 
 ```text
-primary persisted snapshot:
+required primary persisted snapshot:
+  complete immutable safe decision context + contextSchemaVersion
+
+current V5 source:
   DecisionReplayContextView.contextSnapshotJson + evidenceRefsJson
+  INSUFFICIENT: production content is snapshot metadata only
 
 correlation cross-check:
   DecisionReplayRequestView + DecisionRunDetailView
@@ -427,12 +431,14 @@ correlation cross-check:
 replay/evaluation baseline:
   ReplayCaseRecord + EvaluationCaseRecord + RegressionVerdictRecord
 
-version/hash refs:
-  policyVersion + modelVersionRef + modelGatewayVersionRef
-  + promptVersionRef when present + providerSummaryHash when present
+required version/hash refs:
+  decisionSchemaVersion + contextSchemaVersion + policyVersion
+  + evaluationPolicyVersion + promptVersionRef + modelVersionRef
+  + modelGatewayVersionRef + canonicalizationVersion + replayExecutorVersion
+  + providerSummaryHash when actually present
 ```
 
-V6 `context_payload_json` 或 read-model summary 只能用于一致性佐证；不得在与 V5 snapshot 冲突时静默替换 canonical source。
+V6 `context_payload_json` 当前不通过 existing port 暴露；read-model summary 只能用于一致性佐证，不得在与 V5 snapshot 冲突或 V5 内容缺失时静默替换 canonical source。完整冻结合同以 `DH_STAGE_QDR_6_B3_CANONICAL_SNAPSHOT_CONTRACT_REVIEW.md` 为准。
 
 ### 8.4 ReplayInputSnapshot 字段
 
@@ -524,7 +530,7 @@ FAILED
 
 ### 8.9 Snapshot sufficiency gate
 
-当前持久化字段可支撑本工单定义的 mock-only baseline，因此本轮不触发 blocker。B3 开工前必须对 B2 实际 aggregate 再验证：
+2026-07-11 B3 contract review 已完成 B2 actual aggregate 与 V5/V6/V8/V9 persistence/read-port 核验。结论为现有持久化与读取能力不足，blocker 已触发：
 
 ```text
 canonical V5 snapshot missing
@@ -536,13 +542,13 @@ requires raw prompt/provider response
 requires new migration/schema
 ```
 
-任一条件成立立即输出：
-
 ```text
 B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED
+EXISTING_PERSISTENCE_SUFFICIENT: NO
+ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION: NO
 ```
 
-不得通过新增 migration、HTTP/provider call 或读取 raw material 绕过 blocker。
+具体缺口包括完整 immutable context、`contextSchemaVersion`、完整 version vector、prompt/gateway version tenant-bound resolution、V6/V8 stable call identity 与 canonical hash version/domain semantics。不得通过临时新增 migration、Repository/JDBC/SQL、HTTP/provider call、默认值、`latest` 或读取 raw material 绕过 blocker。下一步唯一入口为 `DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW`。
 
 ### 8.10 B3 测试矩阵
 
@@ -733,11 +739,13 @@ B4_API_REVIEW_REQUIRED
 
 ```text
 STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
-STAGE_QDR_6_IMPLEMENTATION: NOT_STARTED
+STAGE_QDR_6_IMPLEMENTATION: B1_DONE / B2_DONE / B3_BLOCKED
 
-ALLOW_STAGE_QDR_6_B1_IMPLEMENTATION: YES
-ALLOW_STAGE_QDR_6_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_6_B1_IMPLEMENTATION: YES / CONSUMED
+ALLOW_STAGE_QDR_6_B2_IMPLEMENTATION_NOW: YES / CONSUMED
 ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION_NOW: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: NO
 ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_6_FINAL_CLOSE_NOW: NO
 
@@ -756,5 +764,5 @@ ALLOW_LIVE: NO
 下一步唯一入口：
 
 ```text
-DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS
+DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
 ```
