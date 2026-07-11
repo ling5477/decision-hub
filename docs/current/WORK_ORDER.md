@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-6-B3-CANONICAL-SNAPSHOT-INPUT-CONTRACT-REVIEW
-current task status: DONE / CONTRACT_FROZEN / PERSISTENCE_BLOCKED
-next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
-mode: REVIEW_ONLY + PERSISTENCE_GAP_REVIEW + NO_IMPLEMENTATION + NO_REPOSITORY_EXPANSION_NOW + NO_MIGRATION_NOW + NO_API + NO_HTTP + NO_PROVIDER + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
+current task status: DONE / PERSISTENCE_DESIGN_FROZEN
+next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
+mode: WORK_ORDER_ONLY_NEXT + ADDITIVE_SCHEMA_AND_TENANT_BOUND_PORT_DESIGN + NO_IMPLEMENTATION_NOW + NO_API + NO_HTTP + NO_PROVIDER + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 plan、implementation work order、B1 contracts 与 B2 已完成。B3 canonical snapshot input 合同已经 `FROZEN`，但真实 V5/V6/V8/V9 与现有 ports 无法提供完整 immutable context 和 version vector，故 `EXISTING_PERSISTENCE_SUFFICIENT: NO`、`B3_SNAPSHOT_INPUT_INSUFFICIENT_BLOCKED: YES`。下一步只能进行独立 persistence gap review，不得直接实现 B3。
+Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 plan、implementation work order、B1 contracts 与 B2 已完成。B3 canonical snapshot input 合同与 persistence gap design 已冻结；推荐 Option D，通过未来 V10 独立 immutable snapshot 表和 tenant-bound source validation 补齐缺口。下一步只编制 persistence gap work order，不得直接实施 migration、port/JDBC、assembler、canonicalizer 或 replay。
 
 ## 2. 前置状态
 
@@ -46,6 +46,10 @@ ALLOW_STAGE_QDR_6_B1_IMPLEMENTATION: YES / CONSUMED
 STAGE_QDR_6_B2: DONE / EVIDENCE_AGGREGATION_EXISTING_PORTS_ONLY
 ALLOW_STAGE_QDR_6_B2_IMPLEMENTATION_NOW: YES / CONSUMED
 ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION_NOW: NO
+SNAPSHOT_PERSISTENCE_GAP_REVIEW: DONE
+PERSISTENCE_DESIGN_FROZEN: YES
+ALLOW_SNAPSHOT_PERSISTENCE_GAP_WORK_ORDER: YES
+ALLOW_MIGRATION_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO
 ALLOW_EVIDENCE_CONSOLIDATION_IMPLEMENTATION_NOW: NO
 ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO

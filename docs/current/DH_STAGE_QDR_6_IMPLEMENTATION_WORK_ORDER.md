@@ -7,9 +7,9 @@ task: DH-STAGE-QDR-6-IMPLEMENTATION-WORK-ORDER
 classification: WORK_ORDER_ONLY
 stage: Decision Pipeline Evidence Consolidation / Deterministic Replay Baseline
 work order status: DONE / WORK_ORDER_ONLY
-stage implementation status: NOT_STARTED
-current implementation authorization: B1_ONLY
-next action: DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS
+stage implementation status: B1_DONE / B2_DONE / B3_PERSISTENCE_DESIGN_FROZEN
+current implementation authorization: NONE / WORK_ORDER_ONLY_NEXT
+next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
 ```
 
 本工单只冻结 Stage-QDR-6 B1-B5 的实现边界、对象职责、依赖方向、测试矩阵、review 触发条件、回滚规则和 close 条件。本轮未修改生产代码、测试、migration、API、Controller、Repository/JDBC 或 runtime wiring。
@@ -548,7 +548,9 @@ EXISTING_PERSISTENCE_SUFFICIENT: NO
 ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION: NO
 ```
 
-具体缺口包括完整 immutable context、`contextSchemaVersion`、完整 version vector、prompt/gateway version tenant-bound resolution、V6/V8 stable call identity 与 canonical hash version/domain semantics。不得通过临时新增 migration、Repository/JDBC/SQL、HTTP/provider call、默认值、`latest` 或读取 raw material 绕过 blocker。下一步唯一入口为 `DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW`。
+具体缺口包括完整 immutable context、`contextSchemaVersion`、完整 version vector、prompt/gateway version tenant-bound resolution、V6/V8 stable call identity 与 canonical hash version/domain semantics。不得通过临时新增 migration、Repository/JDBC/SQL、HTTP/provider call、默认值、`latest` 或读取 raw material 绕过 blocker。
+
+2026-07-11 persistence gap review 已冻结 Option D：未来通过 `V10__qdr6_canonical_replay_snapshot.sql` 新增独立 immutable snapshot table，并以 tenant-bound source validation、完整 version vector、strict payload allowlist/size gate 和 local transaction 补齐。该结论只允许进入 `DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER`，不授权立即实现 migration、port/JDBC、assembler、canonicalizer 或 replay。
 
 ### 8.10 B3 测试矩阵
 
@@ -746,6 +748,7 @@ ALLOW_STAGE_QDR_6_B2_IMPLEMENTATION_NOW: YES / CONSUMED
 ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION_NOW: NO
 ALLOW_CANONICALIZER_IMPLEMENTATION: NO
 ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: NO
+ALLOW_SNAPSHOT_PERSISTENCE_GAP_WORK_ORDER: YES
 ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_6_FINAL_CLOSE_NOW: NO
 
@@ -764,5 +767,5 @@ ALLOW_LIVE: NO
 下一步唯一入口：
 
 ```text
-DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
+DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
 ```

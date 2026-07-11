@@ -4,6 +4,26 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
+
+完成 Stage-QDR-6 B3 snapshot persistence gap design review。基于 V5/V6/V8/V9 schema、ports、JDBC、现有 transaction precedent 与 frozen canonical contract，推荐并冻结 Option D：未来 V10 新增独立 append-only canonical snapshot 表，在单一 tenant-bound transaction 内验证 source identities，并物化完整 allowlisted context、version vector、refs 和 canonical hash。
+
+```text
+SNAPSHOT_PERSISTENCE_GAP_REVIEW: DONE
+PERSISTENCE_DESIGN_FROZEN: YES
+ADDITIVE_MIGRATION_REQUIRED: YES
+PRODUCTION_PORT_EXPANSION_REQUIRED: YES
+JDBC_EXPANSION_REQUIRED: YES
+ALLOW_SNAPSHOT_PERSISTENCE_GAP_WORK_ORDER: YES
+ALLOW_MIGRATION_IMPLEMENTATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
+```
+
+本轮未修改 Java、测试、migration、V1-V9、Repository/JDBC/SQL、API/Controller、production port 或 wiring；未实现 assembler/canonicalizer/hash/replay，未调用外部系统，未创建 tag，未 push。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-CANONICAL-SNAPSHOT-INPUT-CONTRACT-REVIEW
 
 完成 Stage-QDR-6 B3 canonical snapshot input contract 与 persistence sufficiency review。基于真实 V5/V6/V8/V9 migration、write/read model、tenant-bound ports、B1/B2 contracts 和 aggregate service，冻结 `ReplayInputSnapshot` 字段分类、完整 version vector、`QDR6-CJSON-1`、SHA-256 domain-separated hash material、`QDR6-MOCK-REPLAY-1` compatibility 与 fail-closed taxonomy。

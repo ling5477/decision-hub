@@ -276,3 +276,17 @@ DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
 ```
 
 该 review 必须先决定 additive persistence/port 的最小边界；在独立授权前不得创建 migration、Repository/JDBC/SQL、API 或 provisional B3 implementation。
+
+## 10. Persistence gap review resolution
+
+2026-07-11 后续 `DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW` 已完成，未修改本文件已冻结的字段、canonicalization、hash 或 executor 语义。确认结果：
+
+```text
+PERSISTENCE_DESIGN_FROZEN: YES
+recommended option: OPTION_D
+proposed migration: V10__qdr6_canonical_replay_snapshot.sql / DESIGN_ONLY
+legacy rows: LEGACY_NOT_REPLAYABLE / NO_AUTO_BACKFILL
+next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
+```
+
+该 resolution 只同步 persistence route，不授权 migration、production port/JDBC、canonicalizer 或 deterministic replay implementation。

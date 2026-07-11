@@ -1,5 +1,25 @@
 # Decision Hub Status
 
+## 2026-07-11 Stage-QDR-6 B3 snapshot persistence gap review
+
+```text
+DH_STAGE_QDR_6_B3_SNAPSHOT_PERSISTENCE_GAP_REVIEW: DONE / REVIEW_ONLY
+SNAPSHOT_PERSISTENCE_GAP_REVIEW: DONE
+PERSISTENCE_DESIGN_FROZEN: YES
+recommended option: OPTION_D / DEDICATED_IMMUTABLE_SNAPSHOT + TENANT_BOUND_SOURCE_VALIDATION
+ADDITIVE_MIGRATION_REQUIRED: YES
+PRODUCTION_PORT_EXPANSION_REQUIRED: YES
+JDBC_EXPANSION_REQUIRED: YES
+ALLOW_SNAPSHOT_PERSISTENCE_GAP_WORK_ORDER: YES
+ALLOW_MIGRATION_IMPLEMENTATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
+```
+
+持久化设计已冻结为后续 V10 additive migration：独立 append-only canonical snapshot 表、完整 version vector、tenant-aware identity constraints 和严格 payload allowlist/size gate。V1-V9 不修改，legacy row 不 backfill；本轮只允许进入独立 work order，不授权 migration、port/JDBC、assembler、canonicalizer 或 replay implementation。
+
 ## 2026-07-11 Stage-QDR-6 B3 canonical snapshot input contract review
 
 ```text
@@ -134,9 +154,9 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-6-B3-CANONICAL-SNAPSHOT-INPUT-CONTRACT-REVIEW
-current task status: DONE / CONTRACT_FROZEN / PERSISTENCE_BLOCKED
-next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
+current task: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
+current task status: DONE / PERSISTENCE_DESIGN_FROZEN
+next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
 ```
 
 ## 2. 当前事实源集合
@@ -262,11 +282,11 @@ stage-qdr-5 recommended direction: Model Gateway Observability / Provider Readin
 stage-qdr-5 next action: DH-STAGE-QDR-6-PLAN / CONSUMED
 stage-qdr-6 B1: DONE / EVIDENCE_CORRELATION_AGGREGATE_CONTRACTS
 stage-qdr-6 B2: DONE / EVIDENCE_AGGREGATION_EXISTING_PORTS_ONLY
-stage-qdr-6 B3 contract: FROZEN / PERSISTENCE_INSUFFICIENT_BLOCKED
-stage-qdr-6 next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW
+stage-qdr-6 B3 contract: FROZEN / PERSISTENCE_DESIGN_FROZEN / IMPLEMENTATION_NOT_AUTHORIZED
+stage-qdr-6 next action: DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
 ```
 
-B5 close review 的 ACCEPTED 结论已写回 current factsources。Stage-QDR-4 与 Stage-QDR-5 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-6 plan、implementation work order、B1 contracts 与 B2 Evidence Aggregation Service 已完成。B3 canonical snapshot input contract 已冻结；B2 aggregate 只携带 safe refs/findings，且 V5/V6/V8/V9 仍缺完整 immutable context/version vector 读取能力，因此 B3 保持未授权并进入 `DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW`。real HTTP/provider/SDK、Agent/LangGraph、NQ runtime integration 与 LIVE 均未授权。
+B5 close review 的 ACCEPTED 结论已写回 current factsources。Stage-QDR-4 与 Stage-QDR-5 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-6 plan、implementation work order、B1 contracts 与 B2 Evidence Aggregation Service 已完成。B3 canonical snapshot contract 与 persistence gap design 均已冻结；当前只允许进入 `DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER`，migration、port/JDBC、assembler、canonicalizer、replay implementation 仍未授权。real HTTP/provider/SDK、Agent/LangGraph、NQ runtime integration 与 LIVE 均未授权。
 
 ## 4. 禁止项
 

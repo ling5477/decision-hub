@@ -3,6 +3,50 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-REVIEW validation
+
+```text
+Task type: REVIEW_ONLY + PERSISTENCE_GAP_DESIGN + ADDITIVE_SCHEMA_REVIEW + TENANT_BOUND_PORT_REVIEW + VERSION_IDENTITY_REVIEW + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_MIGRATION_CHANGE + NO_API + NO_REPLAY_IMPLEMENTATION + NO_PROVIDER + NO_AGENT + NO_LIVE
+branch: dev
+start worktree: CLEAN
+start staged: EMPTY
+start HEAD: fc5c0547596924fb9393f4637cfde2e98dd3154b
+PERSISTENCE_DESIGN_FROZEN: YES
+ADDITIVE_MIGRATION_REQUIRED: YES
+PRODUCTION_PORT_EXPANSION_REQUIRED: YES
+JDBC_EXPANSION_REQUIRED: YES
+```
+
+### Review evidence
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| Option review | PASS / OPTION_D | 独立 materialized snapshot + transaction-time tenant-bound source validation。 |
+| V10 scope | FROZEN / DESIGN_ONLY | 新表、必要 composite unique/FK、append-only/size/version/hash constraints；未创建 migration。 |
+| tenant-bound ports | FROZEN / DESIGN_ONLY | 新 snapshot port、prompt-by-ID、exact gateway identity；复用 V5/V6/V9 与 model-by-ID。 |
+| identity mapping | FROZEN | V5/V6/V8/V9 physical/business IDs 分离，冲突 fail-closed。 |
+| legacy policy | FROZEN | 无 V10 snapshot 即 `LEGACY_NOT_REPLAYABLE`；禁止自动 backfill/default。 |
+| payload safety | FROZEN | strict allowlist + recursive guard + 256 KiB total bytes gate。 |
+| transaction | FROZEN | local PostgreSQL `REPEATABLE_READ`；任何失败整体回滚。 |
+| Maven tests | NOT RUN / NOT REQUIRED | review-only，未新增或修改测试。 |
+| Docker/Testcontainers | NOT RUN / NOT PASS | 本轮未运行，不写为 PASS。 |
+
+### Validation record
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `git status --short` | PASS / EXPECTED_DOCS_ONLY | 6 个 tracked allowlist docs 修改，1 个预期 review doc 新增。 |
+| `git diff --check` | PASS | exit 0；仅 LF→CRLF warning，不是 whitespace error。 |
+| `git diff --stat` / `git diff --name-only` | PASS / TRACKED_ONLY | tracked diff 仅 6 个 allowed docs；untracked review doc 由 status/others scan 单独确认。 |
+| `git diff --cached --name-only` | PASS / EMPTY | 暂存区为空。 |
+| forbidden-scope diff | PASS / EMPTY | Java、migration、V1-V9、contracts/golden_cases 均无 diff。 |
+| safety wording scan | REVIEWED / ALLOWED_DENYLIST_HITS_ONLY | 命中均为明确禁止项、historical/supporting evidence 或 fail-closed policy；无授权语义。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | 19/19 reactor modules success。 |
+| Checkstyle | PASS | root 0 violations；子模块无独立 outputFile 提示不改变 root 结果。 |
+| Spotless | PASS | `spotless:check` 未报告违规。 |
+| Maven tests | NOT RUN / NOT REQUIRED | `validate` lifecycle 不运行 tests；本轮未新增或修改测试。 |
+| Docker/Testcontainers | NOT RUN / NOT PASS | 本轮未运行，不写为 PASS。 |
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-CANONICAL-SNAPSHOT-INPUT-CONTRACT-REVIEW validation
 
 ```text
