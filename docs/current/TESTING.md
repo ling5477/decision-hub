@@ -3,6 +3,38 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW validation
+
+```text
+Task type: REVIEW_ONLY + MIGRATION_REVIEW + PORT_JDBC_REVIEW + TENANT_ISOLATION_REVIEW + PERSISTENCE_MILESTONE_GATE
+branch: dev
+HEAD: 35eb32cdf6e36a7e47dcd90677ffa0d512527690
+start worktree: CLEAN
+start staged: EMPTY
+B3_PERSISTENCE_MILESTONE_REVIEW: BLOCKED
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+```
+
+| Command / check | Result | Notes |
+| --- | --- | --- |
+| `git status --short` before docs | PASS | clean；staged empty。 |
+| `git diff --check` before docs | PASS | no output。 |
+| `git show --stat --oneline a3bf8bb` | PASS | P1 11 files，1561 insertions，7 deletions。 |
+| `git show --stat --oneline 35eb32c` | PASS | P2 16 files，1459 insertions，75 deletions。 |
+| V1-V9 immutability | PASS | `a3bf8bb^..35eb32c` 仅新增 V10；V1-V9 diff 为空。 |
+| `mvn -ntp -pl dh-usecase,dh-infra -am test` | BUILD SUCCESS | `dh-infra` 88 tests，0 skipped；Testcontainers 实际启动。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS | `dh-app` 96 tests，0 skipped；V10 PostgreSQL 9/9。 |
+| `mvn -ntp test` | BUILD SUCCESS | reactor 19/19；V10 PostgreSQL 9/9，0 skipped。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19；root Checkstyle 0 violations；Spotless success。 |
+| cross-tenant | PASS | snapshot/prompt/gateway cross-tenant exact reads empty。 |
+| immutable trigger | PASS | SQLSTATE `55000`。 |
+| transaction rollback | PASS | snapshot insert 参与真实 Spring transaction rollback。 |
+| architecture guards | PASS / COVERAGE_GAP | method surface guard 通过；未覆盖 canonical hash sequencing 与 V9 projection mismatch。 |
+
+测试均 green，但 review 发现的 contract mismatch 不在当前 test assertions 内：`canonical_input_hash` 无 P3 合法 source、`created_at` 由 caller 注入、V9 `ReplayInputRef`/expected summary structured projection 未由 JDBC exact source validation 覆盖。因此测试 evidence 记为 PASS，milestone gate 仍为 BLOCKED。
+
+首次 targeted Maven 调用因执行工具 timeout 设置过短，在约 5 秒时被外部终止，未形成测试结论；使用 120 秒 timeout 原命令重跑后 `BUILD SUCCESS`。该事件为 review harness timeout，不是代码或测试失败。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-P2-TENANT-BOUND-PORT-JDBC validation
 
 ```text

@@ -4,6 +4,26 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW
+
+完成 P1/P2 persistence milestone 的只读复核与 current docs 同步。实际读取 V10、V5/V6/V8/V9 migrations、canonical snapshot contracts、snapshot/prompt/gateway ports 与 JDBC、B1/B2 contracts/aggregate、P1/P2 PostgreSQL 与 architecture tests，并核对两个 commit 的实际 diff。
+
+验证全部 green：targeted `dh-usecase,dh-infra`、`dh-app -am`、full Maven 与 quality 均 `BUILD SUCCESS`；V10 PostgreSQL/Testcontainers 9/9、0 skipped，cross-tenant、immutable trigger 与 transaction rollback 均 PASS。Review 仍发现两类未被测试覆盖的 blocker：P3 在禁止 canonicalizer/hash 时无合法 `canonical_input_hash` 来源且 `created_at` 被 caller-supplied；P2 JDBC 未 exact compare V9 `ReplayInputRef`/hash 与 structured expected summary source projection。
+
+首次 targeted Maven 调用因执行工具 timeout 设置过短被外部终止；随后使用足够 timeout 原命令重跑并通过，故不将首次外部终止误记为代码失败。
+
+```text
+B3_PERSISTENCE_MILESTONE_REVIEW: BLOCKED
+B3_PERSISTENCE_SCHEMA_MISMATCH_BLOCKED
+B3_PERSISTENCE_PORT_BOUNDARY_BLOCKED
+TENANT_ISOLATION_REVIEW: PASS
+TRANSACTION_BOUNDARY_REVIEW: PASS
+ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX
+```
+
+本轮只修改允许的 `docs/current` review/status/work order/testing/worklog 文档；未修改生产代码、测试、migration、API、port/JDBC 或 runtime wiring，未实现 assembler/canonicalizer/hash/replay，未创建 tag，未 commit，未 push。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-P2-TENANT-BOUND-PORT-JDBC
 
 完成 Stage-QDR-6 B3-P2 tenant-bound persistence expansion。新增 `CanonicalReplaySnapshotPersistencePort`、结构化 persistence/conflict exceptions 与 `JdbcCanonicalReplaySnapshotRepository`；snapshot port 只暴露 `insert`、`findByTenantAndSnapshotId`、`findByTenantAndIdentity`，全部显式携带 tenant boundary，不提供 update/delete/latest/list/scan/fallback。

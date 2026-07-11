@@ -1,5 +1,28 @@
 # Decision Hub Status
 
+## 2026-07-11 Stage-QDR-6 B3 persistence milestone review
+
+```text
+DH_STAGE_QDR_6_B3_PERSISTENCE_MILESTONE_REVIEW: BLOCKED
+SCHEMA_REVIEW: FAIL
+PORT_JDBC_REVIEW: FAIL
+TENANT_ISOLATION_REVIEW: PASS
+IDENTITY_MAPPING_REVIEW: FAIL
+TRANSACTION_BOUNDARY_REVIEW: PASS
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+B3_PERSISTENCE_SCHEMA_MISMATCH_BLOCKED
+B3_PERSISTENCE_PORT_BOUNDARY_BLOCKED
+Stage-QDR-6 B3-P1: DONE / COMMITTED
+Stage-QDR-6 B3-P2: DONE / COMMITTED
+Stage-QDR-6 B3-P3: NOT_STARTED
+ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX
+```
+
+V10/PostgreSQL/Testcontainers、tenant isolation、immutable trigger、duplicate handling 与 transaction rollback 均真实通过；但 milestone review 发现 P3 在禁止 canonicalizer/hash 的边界内无法提供 V10 必填 `canonical_input_hash`，JDBC 还将冻结为 DB-generated 的 `created_at` 改为 caller-supplied。P2 source validation 未将 V9 `ReplayInputRef`/`replay_input_hash` 与 structured expected summary 投影对 source rows 做 exact comparison。以上为 schema sequencing 与 persistence boundary blocker，green tests 不足以授权 P3。
+
 ## 2026-07-11 Stage-QDR-6 B3-P2 tenant-bound port/JDBC
 
 ```text

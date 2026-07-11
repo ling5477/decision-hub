@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-6-B3-P2-TENANT-BOUND-PORT-JDBC
-current task status: DONE / IMPLEMENTED / POSTGRESQL_VERIFIED
-next action: DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW
-mode: REVIEW_NEXT + P1_P2_PERSISTENCE_EVIDENCE_ONLY + NO_ASSEMBLER + NO_CANONICALIZER + NO_REPLAY + NO_API + NO_HTTP + NO_PROVIDER + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW
+current task status: BLOCKED / SCHEMA_AND_PERSISTENCE_BOUNDARY_MISMATCH
+next action: DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX
+mode: BLOCKER_FIX_NEXT_ONLY + NO_P3 + NO_CANONICALIZER + NO_REPLAY + NO_API + NO_HTTP + NO_PROVIDER + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 B1/B2 与 B3 persistence work order 已完成。B3-P1 additive V10 与 P2 tenant-bound port/JDBC、prompt/gateway exact lookup、V5/V6/V8/V9 identity validation 均已实现并由 PostgreSQL/Testcontainers 真实验证。下一步仅允许独立执行 persistence milestone review；P3 assembler、canonicalizer、hash 计算与 replay 仍未授权。
+Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 B1/B2、B3 persistence work order、P1 与 P2 均已完成。Persistence milestone review 的 PostgreSQL/Testcontainers、tenant isolation 与 transaction evidence 为 PASS，但 canonical hash sequencing、DB-generated `created_at` 和 V9 structured projection exact validation 存在 blocker。P3 assembler 不准入；下一步只能独立处理 persistence schema/boundary blocker，canonicalizer、hash 计算与 replay 仍未授权。
 
 ## 2. 前置状态
 
@@ -54,7 +54,7 @@ STAGE_QDR_6_B3_P1: DONE / IMPLEMENTED / POSTGRESQL_VERIFIED
 ALLOW_B3_P1_MIGRATION_IMPLEMENTATION: YES / CONSUMED
 STAGE_QDR_6_B3_P2: DONE / IMPLEMENTED / POSTGRESQL_VERIFIED
 ALLOW_B3_P2_PORT_JDBC_IMPLEMENTATION_NOW: YES / CONSUMED
-ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW: YES / CONSUMED / BLOCKED
 ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
 ALLOW_MIGRATION_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO

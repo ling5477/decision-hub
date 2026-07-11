@@ -552,6 +552,8 @@ ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION: NO
 
 2026-07-11 persistence gap review 已冻结 Option D；后续 work order 已进一步拆成 P1 additive migration/persistence contract、P2 tenant-bound ports/JDBC/identity validation、P3 structured snapshot assembler/persistence integration。P1/P2 独立 commit 后统一做 persistence milestone review；P3 不实现 `QDR6-CJSON-1`、deterministic SHA-256 或 replay executor。下一步仅允许独立执行 `DH-STAGE-QDR-6-B3-P1-CANONICAL-SNAPSHOT-MIGRATION`，本轮不授权 migration 或代码变更。
 
+2026-07-11 persistence milestone review 已完成并 `BLOCKED`。PostgreSQL/Testcontainers、tenant isolation、immutable 与 transaction rollback evidence 为 PASS，但 V10 必填 `canonical_input_hash` 与 P3 禁止 canonicalizer/hash 的 sequencing 冲突，`created_at` 未保持 DB-generated，且 P2 JDBC 未 exact compare V9 structured input/summary projection。当前 `ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO`；下一步为 `DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX`，本轮不授权任何修复。
+
 ### 8.10 B3 测试矩阵
 
 1. same snapshot + same versions + same algorithm 产生相同 hash。

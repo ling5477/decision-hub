@@ -284,3 +284,16 @@ B3_NON_TRANSACTIONAL_MIGRATION_REVIEW_REQUIRED
 ```text
 DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER-BLOCKER-FIX
 ```
+
+## 12. Persistence milestone review resolution
+
+2026-07-11 P1/P2 milestone review 结论为 `BLOCKED`。PostgreSQL/Testcontainers、tenant isolation、duplicate/immutable 与 transaction rollback evidence 均通过，但出现 work order stop conditions：
+
+```text
+B3_PERSISTENCE_SCHEMA_MISMATCH_BLOCKED
+B3_PERSISTENCE_PORT_BOUNDARY_BLOCKED
+ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX
+```
+
+阻断原因是必填 `canonical_input_hash` 无 P3 合法 source、`created_at` 未保持 DB-generated，以及 V9 structured input/summary projection 缺少 JDBC exact source comparison。本 resolution 只同步 review 结论，不授权修改 V10、Java、测试、port/JDBC、API 或 runtime wiring。
