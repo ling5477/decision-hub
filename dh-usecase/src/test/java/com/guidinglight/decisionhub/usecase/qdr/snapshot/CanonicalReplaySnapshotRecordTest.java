@@ -13,12 +13,14 @@ import com.guidinglight.decisionhub.domain.qdr.replay.ReplayInputRef;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceCorrelation;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidencePolicy;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceRef;
+import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayCallPersistencePort;
+import com.guidinglight.decisionhub.usecase.qdr.model.PromptVersionPersistencePort;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.RedactionStatus;
-
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 
 /** Canonical replay snapshot P1 immutable persistence contracts 回归测试。 */
@@ -51,9 +53,11 @@ class CanonicalReplaySnapshotRecordTest {
     void rejectsUnpairedOptionalLineageIdentity() {
         final DecisionEvidenceCorrelation correlation = correlation();
 
-        final IllegalArgumentException error = assertThrows(
+    final IllegalArgumentException error =
+        assertThrows(
                 IllegalArgumentException.class,
-                () -> new CanonicalReplaySnapshotIdentity(
+            () ->
+                new CanonicalReplaySnapshotIdentity(
                         correlation,
                         "snapshot-1",
                         uuid(1),
@@ -78,9 +82,11 @@ class CanonicalReplaySnapshotRecordTest {
                 new DecisionEvidenceCorrelation("tenant-b", "trace-1", "request-1", "decision-1");
         final DecisionEvidenceRef mismatched = evidenceRef(other);
 
-        final IllegalArgumentException error = assertThrows(
+    final IllegalArgumentException error =
+        assertThrows(
                 IllegalArgumentException.class,
-                () -> new CanonicalReplaySnapshotRecord(
+            () ->
+                new CanonicalReplaySnapshotRecord(
                         valid.id(),
                         valid.identity(),
                         valid.source(),
@@ -107,7 +113,8 @@ class CanonicalReplaySnapshotRecordTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new CanonicalReplaySnapshotRecord(
+        () ->
+            new CanonicalReplaySnapshotRecord(
                         valid.id(),
                         valid.identity(),
                         valid.source(),
@@ -131,9 +138,11 @@ class CanonicalReplaySnapshotRecordTest {
     void rejectsPayloadOverFrozenLimit() {
         final CanonicalReplaySnapshotRecord valid = validRecord();
 
-        final IllegalArgumentException error = assertThrows(
+    final IllegalArgumentException error =
+        assertThrows(
                 IllegalArgumentException.class,
-                () -> new CanonicalReplaySnapshotRecord(
+            () ->
+                new CanonicalReplaySnapshotRecord(
                         valid.id(),
                         valid.identity(),
                         valid.source(),
@@ -154,9 +163,47 @@ class CanonicalReplaySnapshotRecordTest {
         assertTrue(error.getMessage().contains("262144"));
     }
 
+  @Test
+  void persistencePortExposesOnlyTenantBoundAppendAndExactReads() {
+    final Set<String> methods =
+        Arrays.stream(CanonicalReplaySnapshotPersistencePort.class.getDeclaredMethods())
+            .map(method -> method.getName())
+            .collect(java.util.stream.Collectors.toSet());
+
+    assertEquals(Set.of("insert", "findByTenantAndSnapshotId", "findByTenantAndIdentity"), methods);
+    assertTrue(
+        methods.stream()
+            .noneMatch(
+                name ->
+                    name.matches("(?i).*(update|delete|latest|first|list|all|scan|fallback).*")));
+  }
+
+  @Test
+  void promptAndGatewayPortsExposeExactTenantBoundLookupsWithoutFallbacks() {
+    final Set<String> promptMethods =
+        Arrays.stream(PromptVersionPersistencePort.class.getDeclaredMethods())
+            .map(method -> method.getName())
+            .collect(java.util.stream.Collectors.toSet());
+    final Set<String> gatewayMethods =
+        Arrays.stream(ModelGatewayCallPersistencePort.class.getDeclaredMethods())
+            .map(method -> method.getName())
+            .collect(java.util.stream.Collectors.toSet());
+
+    assertTrue(promptMethods.contains("findByTenantAndPromptVersionId"));
+    assertTrue(gatewayMethods.contains("findByTenantAndDecisionRunAndModelCallRef"));
+    assertTrue(
+        promptMethods.stream()
+            .noneMatch(name -> name.matches("(?i).*(latest|active|fallback|tenantless).*")));
+    assertTrue(
+        gatewayMethods.stream()
+            .noneMatch(
+                name -> name.matches("(?i).*(trace|provider|latest|fallback|tenantless).*")));
+  }
+
     private static CanonicalReplaySnapshotRecord validRecord() {
         final DecisionEvidenceCorrelation correlation = correlation();
-        final CanonicalReplaySnapshotIdentity identity = new CanonicalReplaySnapshotIdentity(
+    final CanonicalReplaySnapshotIdentity identity =
+        new CanonicalReplaySnapshotIdentity(
                 correlation,
                 "snapshot-1",
                 uuid(1),

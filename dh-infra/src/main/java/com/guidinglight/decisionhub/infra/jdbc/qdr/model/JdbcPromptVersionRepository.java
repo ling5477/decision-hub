@@ -7,7 +7,6 @@ import com.guidinglight.decisionhub.usecase.qdr.model.PromptVersionPersistencePo
 import com.guidinglight.decisionhub.usecase.qdr.model.PromptVersionRecord;
 import com.guidinglight.decisionhub.usecase.qdr.model.QdrPersistenceSafety;
 import com.guidinglight.decisionhub.usecase.qdr.model.SavePromptVersionCommand;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -25,9 +23,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /**
  * PromptVersion JDBC persistence adapter。
  *
- * <p>本 adapter 只访问 DH 自身 `qdr_prompt_template` / `qdr_prompt_version` 表。所有查询都带
- * `tenant_id`，不提供 UUID-only 访问；保存不同 checksum 的重复版本必须 fail-closed。不调用 HTTP、
- * provider、NQ 或交易路径。
+ * <p>本 adapter 只访问 DH 自身 `qdr_prompt_template` / `qdr_prompt_version` 表。所有查询都带 `tenant_id`，不提供
+ * UUID-only 访问；保存不同 checksum 的重复版本必须 fail-closed。不调用 HTTP、 provider、NQ 或交易路径。
  */
 public final class JdbcPromptVersionRepository implements PromptVersionPersistencePort {
 
@@ -50,11 +47,20 @@ public final class JdbcPromptVersionRepository implements PromptVersionPersisten
                     + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SELECT_BY_TENANT_TEMPLATE_VERSION =
-            "select " + COLUMNS
+      "select "
+          + COLUMNS
                     + " from qdr_prompt_version pv"
                     + " join qdr_prompt_template pt on pt.id = pv.prompt_template_id"
                     + " where pv.tenant_id = ? and pv.prompt_template_id = ? and pv.version = ?"
                     + " limit 1";
+
+  private static final String SELECT_BY_TENANT_VERSION_ID =
+      "select "
+          + COLUMNS
+          + " from qdr_prompt_version pv"
+          + " join qdr_prompt_template pt"
+          + " on pt.id = pv.prompt_template_id and pt.tenant_id = pv.tenant_id"
+          + " where pv.tenant_id = ? and pv.id = ?";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -135,6 +141,40 @@ public final class JdbcPromptVersionRepository implements PromptVersionPersisten
             throw new PromptVersionPersistenceException("find prompt version rejected", error);
         }
     }
+
+  @Override
+  public Optional<PromptVersionRecord> findByTenantAndPromptVersionId(
+      final String tenantId, final UUID promptVersionId) {
+    final String checkedTenant = QdrPersistenceSafety.requireText(tenantId, "tenantId");
+    final UUID checkedId = QdrPersistenceSafety.requireUuid(promptVersionId, "promptVersionId");
+    try {
+      final var rows =
+          jdbcTemplate.queryForList(SELECT_BY_TENANT_VERSION_ID, checkedTenant, checkedId);
+      if (rows.size() > 1) {
+        throw new PromptVersionPersistenceException(
+            "prompt version exact identity returned multiple rows");
+      }
+      return rows.stream()
+          .findFirst()
+          .map(this::mapRecord)
+          .map(
+              record -> {
+                if (!checkedTenant.equals(record.tenantId())
+                    || !checkedId.equals(record.promptVersionId())) {
+                  throw new PromptVersionPersistenceException(
+                      "prompt version exact identity mismatch");
+                }
+                return record;
+              });
+    } catch (final DataAccessException error) {
+      throw new PromptVersionPersistenceException("find prompt version by id failed", error);
+    } catch (final RuntimeException error) {
+      if (error instanceof PromptVersionPersistenceException persistenceException) {
+        throw persistenceException;
+      }
+      throw new PromptVersionPersistenceException("find prompt version by id rejected", error);
+    }
+  }
 
     private static PromptVersionRecord existingOrConflict(
             final PromptVersionRecord existing, final String checksum) {

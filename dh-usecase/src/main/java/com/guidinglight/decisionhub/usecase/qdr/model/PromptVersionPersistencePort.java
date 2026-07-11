@@ -6,8 +6,8 @@ import java.util.UUID;
 /**
  * PromptVersion persistence port。
  *
- * <p>所有方法都必须 tenant-bound；不得提供 UUID-only 查询或更新。重复保存相同 checksum 可幂等返回，
- * 重复保存不同 checksum 必须 fail-closed。
+ * <p>所有方法都必须 tenant-bound；不得提供 UUID-only 查询或更新。重复保存相同 checksum 可幂等返回， 重复保存不同 checksum 必须
+ * fail-closed。
  */
 public interface PromptVersionPersistencePort {
 
@@ -29,4 +29,16 @@ public interface PromptVersionPersistencePort {
      */
     Optional<PromptVersionRecord> findByTenantAndTemplateVersion(
             String tenantId, UUID promptTemplateId, String version);
+
+  /**
+   * 按 tenant + promptVersionId 精确查询 immutable prompt version。
+   *
+   * <p>该查询不得 fallback 到 active/latest version；属于其他 tenant 的 UUID 必须不可见。
+   *
+   * @param tenantId tenant 第一安全边界。
+   * @param promptVersionId prompt version 物理 UUID。
+   * @return 精确命中 record；跨 tenant 返回 empty。
+   */
+  Optional<PromptVersionRecord> findByTenantAndPromptVersionId(
+      String tenantId, UUID promptVersionId);
 }

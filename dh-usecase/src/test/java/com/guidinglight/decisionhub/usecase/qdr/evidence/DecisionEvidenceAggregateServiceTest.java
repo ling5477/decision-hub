@@ -545,5 +545,13 @@ class DecisionEvidenceAggregateServiceTest {
                 final String tenantId, final String modelCallRef) {
             return Optional.empty();
         }
+
+        @Override
+        public Optional<ModelGatewayCallRecord> findByTenantAndDecisionRunAndModelCallRef(
+                final String tenantId,
+                final UUID decisionRunId,
+                final String modelCallRef) {
+            return Optional.empty();
+        }
     }
 }

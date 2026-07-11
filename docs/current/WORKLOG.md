@@ -4,6 +4,27 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-P2-TENANT-BOUND-PORT-JDBC
+
+完成 Stage-QDR-6 B3-P2 tenant-bound persistence expansion。新增 `CanonicalReplaySnapshotPersistencePort`、结构化 persistence/conflict exceptions 与 `JdbcCanonicalReplaySnapshotRepository`；snapshot port 只暴露 `insert`、`findByTenantAndSnapshotId`、`findByTenantAndIdentity`，全部显式携带 tenant boundary，不提供 update/delete/latest/list/scan/fallback。
+
+既有 prompt persistence 增加 `tenantId + promptVersionId` exact lookup；gateway call persistence 增加 `tenantId + decisionRunId + modelCallRef` exact lookup。V10 adapter 使用参数化 SQL 插入全部 required 字段与完整 version vector，并在写入前、读取后重新校验 V5/V6/V8/V9 tenant、physical UUID、business ID、safe ref、trace/request 与 version/checksum。重复相同内容幂等返回；冲突、source drift 与 JDBC failure 均 fail-closed。
+
+```text
+STAGE_QDR_6_B3_P2: DONE / IMPLEMENTED / VERIFIED
+PORT_EXPANSION: IMPLEMENTED
+JDBC_EXPANSION: IMPLEMENTED
+TENANT_ISOLATION_EVIDENCE: PASS
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW
+```
+
+验证：P2 PostgreSQL targeted 9/9 PASS；`dh-usecase` 463 tests、`dh-infra` 88 tests、`dh-app` 96 tests，均 0 skipped；全仓 Surefire 957 tests、0 failures/errors/skipped；quality 19/19、Checkstyle 0、Spotless PASS。未修改 V1-V10、API/Controller、runtime wiring；未实现 assembler、canonicalizer、hash 或 deterministic replay；未调用 HTTP/provider/NQ/Agent/LangGraph/LIVE；未创建 tag，未 push。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-P1-CANONICAL-SNAPSHOT-MIGRATION
 
 完成 Stage-QDR-6 B3-P1 additive canonical snapshot persistence baseline。新增 V10 独立 immutable table、tenant-aware composite unique/FK、strict structured JSON shape、完整 version/hash metadata、total/per-field payload limits、UPDATE rejection trigger、必要索引和中文 COMMENT；未修改 V1-V9，未 backfill legacy row。

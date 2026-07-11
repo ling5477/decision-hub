@@ -1,5 +1,25 @@
 # Decision Hub Status
 
+## 2026-07-11 Stage-QDR-6 B3-P2 tenant-bound port/JDBC
+
+```text
+DH_STAGE_QDR_6_B3_P2_TENANT_BOUND_PORT_JDBC: DONE / IMPLEMENTED / VERIFIED
+PORT_EXPANSION: IMPLEMENTED
+JDBC_EXPANSION: IMPLEMENTED
+TENANT_ISOLATION_EVIDENCE: PASS
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+Stage-QDR-6 B3-P1: DONE / COMMITTED
+Stage-QDR-6 B3-P2: DONE / IMPLEMENTED / POSTGRESQL_VERIFIED
+Stage-QDR-6 B3-P3: NOT_STARTED
+ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW
+```
+
+P2 新增 tenant-bound append-only snapshot persistence port 与 V10 JDBC adapter，并为既有 prompt/gateway ports 增加 exact identity lookup。所有 snapshot 写入与读取均显式携带 `tenantId`；adapter 对 V5/V6/V8/V9 physical UUID、business ID、safe ref 与完整 version vector 做写前和读后精确校验。相同 identity 的相同内容可幂等返回，内容冲突、source drift、数据库异常均 fail-closed。未新增 tenantless、latest、fallback、scan、update、delete 或 overwrite 能力；未修改 V1-V10、API、runtime wiring，也未实现 assembler、canonicalizer、hash 或 replay。
+
 ## 2026-07-11 Stage-QDR-6 B3-P1 canonical snapshot migration
 
 ```text

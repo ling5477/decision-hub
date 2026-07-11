@@ -9,7 +9,6 @@ import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayCallTrustDec
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayFailureCode;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.SaveModelGatewayCallCommand;
 import com.guidinglight.decisionhub.usecase.qdr.model.QdrPersistenceSafety;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -19,7 +18,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,8 +25,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /**
  * ModelGatewayCall JDBC persistence adapter。
  *
- * <p>本 adapter 只访问 DH 自身 `qdr_model_gateway_call` 表；所有查询都带 `tenant_id`，不提供 UUID-only
- * 访问。写入失败必须 fail-closed，不能静默丢失 gateway call metadata。不调用 HTTP、provider、NQ 或交易路径。
+ * <p>本 adapter 只访问 DH 自身 `qdr_model_gateway_call` 表；所有查询都带 `tenant_id`，不提供 UUID-only 访问。写入失败必须
+ * fail-closed，不能静默丢失 gateway call metadata。不调用 HTTP、provider、NQ 或交易路径。
  */
 public final class JdbcModelGatewayCallRepository implements ModelGatewayCallPersistencePort {
 
@@ -51,10 +49,17 @@ public final class JdbcModelGatewayCallRepository implements ModelGatewayCallPer
                     + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SELECT_BY_TENANT_CALL_REF =
-            "select " + COLUMNS
+      "select "
+          + COLUMNS
                     + " from qdr_model_gateway_call"
                     + " where tenant_id = ? and model_call_ref = ?"
                     + " limit 1";
+
+  private static final String SELECT_BY_EXACT_IDENTITY =
+      "select "
+          + COLUMNS
+          + " from qdr_model_gateway_call"
+          + " where tenant_id = ? and decision_run_id = ? and model_call_ref = ?";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -130,6 +135,45 @@ public final class JdbcModelGatewayCallRepository implements ModelGatewayCallPer
             throw new ModelGatewayCallPersistenceException("find model gateway call rejected", error);
         }
     }
+
+  @Override
+  public Optional<ModelGatewayCallRecord> findByTenantAndDecisionRunAndModelCallRef(
+      final String tenantId, final UUID decisionRunId, final String modelCallRef) {
+    final String checkedTenant = QdrPersistenceSafety.requireText(tenantId, "tenantId");
+    final UUID checkedRun = QdrPersistenceSafety.requireUuid(decisionRunId, "decisionRunId");
+    final String checkedRef = QdrPersistenceSafety.requireSafeText(modelCallRef, "modelCallRef");
+    try {
+      final var rows =
+          jdbcTemplate.queryForList(
+              SELECT_BY_EXACT_IDENTITY, checkedTenant, checkedRun, checkedRef);
+      if (rows.size() > 1) {
+        throw new ModelGatewayCallPersistenceException(
+            "model gateway call exact identity returned multiple rows");
+      }
+      return rows.stream()
+          .findFirst()
+          .map(this::mapRecord)
+          .map(
+              record -> {
+                if (!checkedTenant.equals(record.tenantId())
+                    || !checkedRun.equals(record.decisionRunId())
+                    || !checkedRef.equals(record.modelCallRef())) {
+                  throw new ModelGatewayCallPersistenceException(
+                      "model gateway call exact identity mismatch");
+                }
+                return record;
+              });
+    } catch (final DataAccessException error) {
+      throw new ModelGatewayCallPersistenceException(
+          "find model gateway call by exact identity failed", error);
+    } catch (final RuntimeException error) {
+      if (error instanceof ModelGatewayCallPersistenceException persistenceException) {
+        throw persistenceException;
+      }
+      throw new ModelGatewayCallPersistenceException(
+          "find model gateway call by exact identity rejected", error);
+    }
+  }
 
     private static ModelGatewayCallRecord toRecord(final SaveModelGatewayCallCommand command) {
         return new ModelGatewayCallRecord(

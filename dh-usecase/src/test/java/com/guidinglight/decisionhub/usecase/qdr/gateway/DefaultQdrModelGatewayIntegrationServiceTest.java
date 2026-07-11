@@ -474,6 +474,15 @@ final class DefaultQdrModelGatewayIntegrationServiceTest {
                     .filter(record -> record.version().equals(version))
                     .findFirst();
         }
+
+        @Override
+        public Optional<PromptVersionRecord> findByTenantAndPromptVersionId(
+                final String tenantId, final UUID promptVersionId) {
+            return saved.stream()
+                    .filter(record -> record.tenantId().equals(tenantId))
+                    .filter(record -> record.promptVersionId().equals(promptVersionId))
+                    .findFirst();
+        }
     }
 
     private static final class RecordingModelVersionPersistence
@@ -566,6 +575,18 @@ final class DefaultQdrModelGatewayIntegrationServiceTest {
                 final String tenantId, final String modelCallRef) {
             return saved.stream()
                     .filter(record -> record.tenantId().equals(tenantId))
+                    .filter(record -> record.modelCallRef().equals(modelCallRef))
+                    .findFirst();
+        }
+
+        @Override
+        public Optional<ModelGatewayCallRecord> findByTenantAndDecisionRunAndModelCallRef(
+                final String tenantId,
+                final UUID decisionRunId,
+                final String modelCallRef) {
+            return saved.stream()
+                    .filter(record -> record.tenantId().equals(tenantId))
+                    .filter(record -> record.decisionRunId().equals(decisionRunId))
                     .filter(record -> record.modelCallRef().equals(modelCallRef))
                     .findFirst();
         }

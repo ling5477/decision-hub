@@ -3,6 +3,40 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-P2-TENANT-BOUND-PORT-JDBC validation
+
+```text
+Task type: CODE_CHANGE + PRODUCTION_PORT_EXPANSION + JDBC_IMPLEMENTATION + TENANT_BOUND_IDENTITY_VALIDATION + POSTGRESQL_TESTS + NO_MIGRATION_CHANGE + NO_API + NO_ASSEMBLER + NO_REPLAY_IMPLEMENTATION + NO_PROVIDER + NO_AGENT + NO_LIVE
+branch: dev
+start worktree: CLEAN
+start staged: EMPTY
+start HEAD: a3bf8bb3a3b536e87f27c34ce6f8a94c376d08e6
+STAGE_QDR_6_B3_P2: DONE / IMPLEMENTED / VERIFIED
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+```
+
+| Command / check | Result | Notes |
+| --- | --- | --- |
+| P2 targeted PostgreSQL test | BUILD SUCCESS | `V10CanonicalReplaySnapshotFlywayPostgresTest` 9 tests，0 failures/errors/skipped；真实 PostgreSQL 17.10。 |
+| snapshot JDBC insert/read | PASS | tenant-bound insert、tenant+snapshotId 与完整 composite identity exact read。 |
+| duplicate behavior | PASS | 相同 identity/相同内容幂等返回；相同 identity/不同 content hash 抛出 conflict。 |
+| prompt exact lookup | PASS | `tenantId + promptVersionId` 精确命中；cross-tenant empty；无 latest/fallback 方法。 |
+| gateway exact lookup | PASS | `tenantId + decisionRunId + modelCallRef` 三键精确命中；run/ref/tenant mismatch 均 empty。 |
+| V5/V6/V8/V9 identity validation | PASS | 分别篡改 trace/request/callRef/replay trace 后读取均结构化 fail-closed。 |
+| JDBC source failure | PASS | V10 table 不可用时抛出 `CanonicalReplaySnapshotPersistenceException`，不伪造成 empty/success。 |
+| transaction rollback | PASS | 外层 Spring transaction 标记 rollback 后 snapshot row 不可见。 |
+| immutable trigger regression | PASS | 既有 UPDATE rejection trigger 仍以 SQLSTATE `55000` 拒绝。 |
+| V1→V10 migration | PASS | clean migration、V1→V9 upgrade 再应用 V10、migration failure rollback 均通过。 |
+| `mvn -ntp -pl dh-usecase,dh-infra -am test` | BUILD SUCCESS | `dh-usecase` 463 tests、`dh-infra` 88 tests；0 failures/errors/skipped。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS | `dh-app` 96 tests；0 failures/errors/skipped；PostgreSQL tests 真实运行。 |
+| `mvn -ntp test` | BUILD SUCCESS | Surefire reports 汇总 957 tests，0 failures/errors/skipped。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19 success。 |
+| Checkstyle | PASS | root 0 violations。 |
+| Spotless | PASS | `spotless:check` 无违规。 |
+| formatter recovery | PASS / BOUNDED | 一次 root `spotless:apply` 机械改写全仓旧格式；已按开工 clean baseline 精确恢复全部无关 diff，最终只保留允许范围。 |
+
+首轮 P2 PostgreSQL test 为 8 tests，其中 2 项因 JDBC mapper 将 `forbiddenActions` 误套普通 safe-text 规则而失败；RCA 后对齐既有 replay mapping，仅允许禁止清单以禁止语义还原，随后 8/8 通过。补充 V5/V6/V8/V9 source drift 与结构化 JDBC failure 后，最终 targeted 为 9/9 PASS。最终 review 将 duplicate-identical 收口为实际持久化列比较后，首次 `dh-app` 重跑因测试仍对未落库的 local evidence summary 做全 record equality 而 1 failure；断言改为校验持久化 projection 后 targeted 9/9、`dh-app` 96/96 与全仓 957/957 均再次通过。首次模块级 `spotless:apply` 因 plugin prefix scope 失败且未修改文件；后续 root formatter 造成的无关机械 diff 已全部恢复，最终 quality gate 真实通过。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-P1-CANONICAL-SNAPSHOT-MIGRATION validation
 
 ```text

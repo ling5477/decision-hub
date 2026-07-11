@@ -3,15 +3,40 @@ package com.guidinglight.decisionhub;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.guidinglight.decisionhub.domain.decision.DecisionContextSnapshot;
+import com.guidinglight.decisionhub.domain.decision.DecisionEvidence;
+import com.guidinglight.decisionhub.domain.decision.DecisionSubject;
+import com.guidinglight.decisionhub.domain.qdr.RiskLevel;
+import com.guidinglight.decisionhub.domain.qdr.replay.ExpectedDecisionSummary;
+import com.guidinglight.decisionhub.domain.qdr.replay.ReplayInputRef;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcCanonicalReplaySnapshotRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcModelGatewayCallRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcPromptVersionRepository;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceCorrelation;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidencePolicy;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceRef;
+import com.guidinglight.decisionhub.usecase.qdr.readmodel.RedactionStatus;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotConflictException;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotIdentity;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotPersistenceException;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotRecord;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotVersionVector;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.FlywayException;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -19,9 +44,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 /**
  * V10 canonical replay snapshot 的真实 PostgreSQL/Flyway schema 回归测试。
  *
- * <p>测试使用一次性 PostgreSQL 17 Testcontainers，覆盖 clean migration、V1-V9 upgrade、tenant FK、
- * immutable trigger、payload/version constraints 与 migration transaction rollback。测试不访问生产数据库，
- * 不调用 HTTP/provider/NQ/Agent/LangGraph，也不实现 JDBC adapter 或 replay。
+ * <p>测试使用一次性 PostgreSQL 17 Testcontainers，覆盖 clean migration、V1-V9 upgrade、tenant FK、 immutable
+ * trigger、payload/version constraints、tenant-bound JDBC 与 transaction rollback。测试不访问 生产数据库，不调用
+ * HTTP/provider/NQ/Agent/LangGraph，也不实现 assembler、canonicalizer 或 replay。
  */
 @Testcontainers(disabledWithoutDocker = true)
 class V10CanonicalReplaySnapshotFlywayPostgresTest {
@@ -30,7 +55,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
     private static final String HASH_B = "b".repeat(64);
 
     @Container
-    static PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:17")
+  static PostgreSQLContainer<?> pg =
+      new PostgreSQLContainer<>("postgres:17")
             .withDatabaseName("decision_hub")
             .withUsername("decision_hub")
             .withPassword("decision_hub");
@@ -41,7 +67,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
 
         assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("10");
         try (Connection connection = connection()) {
-            assertThat(singleInt(
+      assertThat(
+              singleInt(
                             connection,
                             "select count(*) from information_schema.tables"
                                     + " where table_schema='public'"
@@ -62,7 +89,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
 
         assertThat(v10.info().current().getVersion().getVersion()).isEqualTo("10");
         try (Connection connection = connection()) {
-            assertThat(singleInt(
+      assertThat(
+              singleInt(
                             connection,
                             "select count(*) from flyway_schema_history"
                                     + " where success and version::integer between 1 and 9"))
@@ -73,9 +101,11 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
     @Test
     void safeStructuredSnapshotInsertsAndUpdateTriggerRejectsMutation() throws Exception {
         resetDatabase();
-        try (Connection connection = connection(); Statement statement = connection.createStatement()) {
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
             insertSources(statement);
-            statement.executeUpdate(snapshotInsert(
+      statement.executeUpdate(
+          snapshotInsert(
                     "00000000-0000-0000-0000-000000000010",
                     "tenant-a",
                     "snapshot-1",
@@ -86,7 +116,9 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
 
             assertThat(singleInt(connection, "select count(*) from qdr_canonical_replay_snapshot"))
                     .isEqualTo(1);
-            assertThatThrownBy(() -> statement.executeUpdate(
+      assertThatThrownBy(
+              () ->
+                  statement.executeUpdate(
                             "update qdr_canonical_replay_snapshot set payload_bytes=payload_bytes+1"
                                     + " where tenant_id='tenant-a' and snapshot_id='snapshot-1'"))
                     .isInstanceOf(SQLException.class)
@@ -95,13 +127,142 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
         }
     }
 
+  @Test
+  void tenantBoundJdbcInsertExactReadsIdempotencyAndIdentityIsolationWork() throws Exception {
+    resetDatabase();
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
+      insertSources(statement);
+    }
+    final JdbcTemplate jdbcTemplate = jdbcTemplate();
+    final JdbcCanonicalReplaySnapshotRepository snapshots =
+        new JdbcCanonicalReplaySnapshotRepository(jdbcTemplate, new ObjectMapper());
+    final CanonicalReplaySnapshotRecord record = snapshotRecord(HASH_A);
+
+    final CanonicalReplaySnapshotRecord persisted = snapshots.insert("tenant-a", record);
+    assertThat(persisted.identity()).isEqualTo(record.identity());
+    assertThat(persisted.versionVector()).isEqualTo(record.versionVector());
+    assertThat(persisted.canonicalInputHash()).isEqualTo(record.canonicalInputHash());
+    assertThat(persisted.evidenceRefs().getFirst().evidence().summary()).isEqualTo("V5");
+    assertThat(snapshots.findByTenantAndSnapshotId("tenant-a", "snapshot-jdbc"))
+        .contains(persisted);
+    assertThat(
+            snapshots.findByTenantAndIdentity("tenant-a", record.identity(), "QDR6-REPLAY-INPUT-1"))
+        .contains(persisted);
+    assertThat(snapshots.findByTenantAndSnapshotId("tenant-b", "snapshot-jdbc")).isEmpty();
+    assertThat(snapshots.insert("tenant-a", record)).isEqualTo(persisted);
+    assertThatThrownBy(() -> snapshots.insert("tenant-a", snapshotRecord(HASH_B)))
+        .isInstanceOf(CanonicalReplaySnapshotConflictException.class);
+
+    final JdbcPromptVersionRepository prompts = new JdbcPromptVersionRepository(jdbcTemplate);
+    assertThat(
+            prompts.findByTenantAndPromptVersionId(
+                "tenant-a", uuid("00000000-0000-0000-0000-000000000004")))
+        .isPresent();
+    assertThat(
+            prompts.findByTenantAndPromptVersionId(
+                "tenant-b", uuid("00000000-0000-0000-0000-000000000004")))
+        .isEmpty();
+
+    final JdbcModelGatewayCallRepository calls = new JdbcModelGatewayCallRepository(jdbcTemplate);
+    assertThat(
+            calls.findByTenantAndDecisionRunAndModelCallRef(
+                "tenant-a", uuid("00000000-0000-0000-0000-000000000002"), "call-1"))
+        .isPresent();
+    assertThat(
+            calls.findByTenantAndDecisionRunAndModelCallRef(
+                "tenant-a", uuid("00000000-0000-0000-0000-000000000099"), "call-1"))
+        .isEmpty();
+    assertThat(
+            calls.findByTenantAndDecisionRunAndModelCallRef(
+                "tenant-a", uuid("00000000-0000-0000-0000-000000000002"), "call-other"))
+        .isEmpty();
+    assertThat(
+            calls.findByTenantAndDecisionRunAndModelCallRef(
+                "tenant-b", uuid("00000000-0000-0000-0000-000000000002"), "call-1"))
+        .isEmpty();
+  }
+
+  @Test
+  void surroundingTransactionRollbackRemovesSnapshotInsert() throws Exception {
+    resetDatabase();
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
+      insertSources(statement);
+    }
+    final DriverManagerDataSource dataSource = dataSource();
+    final JdbcCanonicalReplaySnapshotRepository snapshots =
+        new JdbcCanonicalReplaySnapshotRepository(new JdbcTemplate(dataSource), new ObjectMapper());
+    final TransactionTemplate transaction =
+        new TransactionTemplate(new DataSourceTransactionManager(dataSource));
+
+    transaction.executeWithoutResult(
+        status -> {
+          snapshots.insert("tenant-a", snapshotRecord(HASH_A));
+          status.setRollbackOnly();
+        });
+
+    assertThat(snapshots.findByTenantAndSnapshotId("tenant-a", "snapshot-jdbc")).isEmpty();
+  }
+
+  @Test
+  void v5V6V8V9IdentityDriftAndJdbcFailureRemainStructuredFailClosed() throws Exception {
+    assertSourceMutationRejected(
+        "update dh_decision_request set trace_id='trace-other'"
+            + " where tenant_id='tenant-a' and decision_id='decision-1'");
+    assertSourceMutationRejected(
+        "update decision_request set request_id='request-other'"
+            + " where tenant_id='tenant-a'"
+            + " and id='00000000-0000-0000-0000-000000000001'");
+    assertSourceMutationRejected(
+        "update qdr_model_gateway_call set model_call_ref='call-other'"
+            + " where tenant_id='tenant-a'"
+            + " and id='00000000-0000-0000-0000-000000000008'");
+    assertSourceMutationRejected(
+        "update qdr_replay_case set trace_id='trace-other'"
+            + " where tenant_id='tenant-a'"
+            + " and id='00000000-0000-0000-0000-000000000022'");
+
+    resetDatabase();
+    final JdbcCanonicalReplaySnapshotRepository snapshots =
+        new JdbcCanonicalReplaySnapshotRepository(jdbcTemplate(), new ObjectMapper());
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
+      statement.execute("drop table qdr_canonical_replay_snapshot");
+    }
+    assertThatThrownBy(() -> snapshots.findByTenantAndSnapshotId("tenant-a", "snapshot-jdbc"))
+        .isInstanceOf(CanonicalReplaySnapshotPersistenceException.class)
+        .hasMessageContaining("find canonical replay snapshot failed");
+  }
+
+  private static void assertSourceMutationRejected(final String mutation) throws Exception {
+    resetDatabase();
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
+      insertSources(statement);
+    }
+    final JdbcCanonicalReplaySnapshotRepository snapshots =
+        new JdbcCanonicalReplaySnapshotRepository(jdbcTemplate(), new ObjectMapper());
+    snapshots.insert("tenant-a", snapshotRecord(HASH_A));
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
+      statement.executeUpdate(mutation);
+    }
+    assertThatThrownBy(() -> snapshots.findByTenantAndSnapshotId("tenant-a", "snapshot-jdbc"))
+        .isInstanceOf(CanonicalReplaySnapshotPersistenceException.class)
+        .hasMessageContaining("exact identity mismatch");
+  }
+
     @Test
     void requiredVersionDuplicateIdentityAndOrphanIdentityFailClosed() throws Exception {
         resetDatabase();
-        try (Connection connection = connection(); Statement statement = connection.createStatement()) {
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
             insertSources(statement);
 
-            assertSqlRejected(statement, snapshotInsert(
+      assertSqlRejected(
+          statement,
+          snapshotInsert(
                     "00000000-0000-0000-0000-000000000011",
                     "tenant-a",
                     "snapshot-null-version",
@@ -110,7 +271,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                     4096,
                     contextJson("context-null-version")));
 
-            statement.executeUpdate(snapshotInsert(
+      statement.executeUpdate(
+          snapshotInsert(
                     "00000000-0000-0000-0000-000000000012",
                     "tenant-a",
                     "snapshot-duplicate",
@@ -118,7 +280,9 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                     "00000000-0000-0000-0000-000000000004",
                     4096,
                     contextJson("context-duplicate")));
-            assertSqlRejected(statement, snapshotInsert(
+      assertSqlRejected(
+          statement,
+          snapshotInsert(
                     "00000000-0000-0000-0000-000000000013",
                     "tenant-a",
                     "snapshot-duplicate",
@@ -127,7 +291,9 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                     4096,
                     contextJson("context-duplicate")));
 
-            assertSqlRejected(statement, snapshotInsert(
+      assertSqlRejected(
+          statement,
+          snapshotInsert(
                     "00000000-0000-0000-0000-000000000014",
                     "tenant-a",
                     "snapshot-orphan",
@@ -136,7 +302,9 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                     4096,
                     contextJson("context-orphan")));
 
-            assertSqlRejected(statement, snapshotInsert(
+      assertSqlRejected(
+          statement,
+          snapshotInsert(
                     "00000000-0000-0000-0000-000000000015",
                     "tenant-b",
                     "snapshot-cross-tenant",
@@ -150,10 +318,13 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
     @Test
     void totalAndPerFieldPayloadLimitsRejectOversizeRows() throws Exception {
         resetDatabase();
-        try (Connection connection = connection(); Statement statement = connection.createStatement()) {
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
             insertSources(statement);
 
-            assertSqlRejected(statement, snapshotInsert(
+      assertSqlRejected(
+          statement,
+          snapshotInsert(
                     "00000000-0000-0000-0000-000000000016",
                     "tenant-a",
                     "snapshot-total-oversize",
@@ -162,7 +333,9 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                     262145,
                     contextJson("context-total-oversize")));
 
-            assertSqlRejected(statement, snapshotInsert(
+      assertSqlRejected(
+          statement,
+          snapshotInsert(
                     "00000000-0000-0000-0000-000000000017",
                     "tenant-a",
                     "snapshot-context-oversize",
@@ -171,7 +344,9 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                     200000,
                     contextJson("x".repeat(131073))));
 
-            assertSqlRejected(statement, snapshotInsertWithPayloads(
+      assertSqlRejected(
+          statement,
+          snapshotInsertWithPayloads(
                     "00000000-0000-0000-0000-000000000018",
                     "tenant-a",
                     "snapshot-evidence-oversize",
@@ -182,7 +357,9 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                     "[{\"refId\":\"" + "x".repeat(65537) + "\"}]",
                     expectedSummaryJson("MEDIUM")));
 
-            assertSqlRejected(statement, snapshotInsertWithPayloads(
+      assertSqlRejected(
+          statement,
+          snapshotInsertWithPayloads(
                     "00000000-0000-0000-0000-000000000019",
                     "tenant-a",
                     "snapshot-summary-oversize",
@@ -199,25 +376,114 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
     void failedV10MigrationRollsBackEarlierAlterStatements() throws Exception {
         cleanDatabase();
         flyway("9").migrate();
-        try (Connection connection = connection(); Statement statement = connection.createStatement()) {
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
             statement.execute("create table qdr_canonical_replay_snapshot(marker integer)");
         }
 
         assertThatThrownBy(() -> flyway(null).migrate()).isInstanceOf(FlywayException.class);
 
         try (Connection connection = connection()) {
-            assertThat(singleInt(
+      assertThat(
+              singleInt(
                             connection,
                             "select count(*) from pg_constraint"
                                     + " where conname='ux_dh_decision_request_tenant_decision'"))
                     .isZero();
-            assertThat(singleInt(
+      assertThat(
+              singleInt(
                             connection,
                             "select count(*) from pg_constraint"
                                     + " where conname='ux_qdr_model_gateway_call_tenant_wide_identity'"))
                     .isZero();
         }
     }
+
+  private static CanonicalReplaySnapshotRecord snapshotRecord(final String canonicalInputHash) {
+    final Instant capturedAt = Instant.parse("2026-07-11T00:00:00Z");
+    final DecisionEvidenceCorrelation correlation =
+        new DecisionEvidenceCorrelation("tenant-a", "trace-1", "request-1", "decision-1");
+    final CanonicalReplaySnapshotIdentity identity =
+        new CanonicalReplaySnapshotIdentity(
+            correlation,
+            "snapshot-jdbc",
+            uuid("00000000-0000-0000-0000-000000000001"),
+            uuid("00000000-0000-0000-0000-000000000002"),
+            uuid("00000000-0000-0000-0000-000000000008"),
+            "call-1",
+            uuid("00000000-0000-0000-0000-000000000004"),
+            uuid("00000000-0000-0000-0000-000000000007"),
+            uuid("00000000-0000-0000-0000-000000000022"),
+            "case-1",
+            null,
+            null,
+            null,
+            null);
+    final DecisionEvidenceRef evidence =
+        new DecisionEvidenceRef(
+                new DecisionEvidence("evidence-1", "REQUEST", "safe request summary"),
+            correlation,
+            DecisionEvidencePolicy.EvidenceType.REQUEST,
+            "evidence-1",
+            HASH_A,
+            "V5",
+            true,
+            RedactionStatus.REDACTED);
+    return new CanonicalReplaySnapshotRecord(
+        uuid("00000000-0000-0000-0000-000000000030"),
+        identity,
+        "TEST_SOURCE",
+        "READ_ONLY_RECOMMENDATION",
+        capturedAt,
+        new DecisionSubject("BTC-USDT", "SPOT", "1h", null, null),
+        new DecisionContextSnapshot("context-1", capturedAt, List.of("evidence-1")),
+        List.of(evidence),
+        new ReplayInputRef("SAFE_INPUT", "input-1", HASH_A),
+        new ExpectedDecisionSummary(
+            "READ_ONLY_RECOMMENDATION",
+            "OBSERVE",
+            "MEDIUM",
+            RiskLevel.LOW,
+            List.of("evidence-1"),
+            List.of("PLACE_ORDER")),
+        new CanonicalReplaySnapshotVersionVector(
+            "QDR6-REPLAY-INPUT-1",
+            "DECISION-1",
+            "QDR6-CONTEXT-1",
+            "policy-1",
+            "evaluation-policy-1",
+            "prompt-1",
+            HASH_A,
+            "model-1",
+            HASH_A,
+            "gateway-1",
+            "QDR6-CJSON-1",
+            "QDR6-MOCK-REPLAY-1",
+            "SHA-256"),
+        HASH_A,
+        HASH_A,
+        null,
+        canonicalInputHash,
+        4096,
+        Instant.parse("2026-07-11T00:00:02Z"));
+  }
+
+  private static JdbcTemplate jdbcTemplate() {
+    return new JdbcTemplate(dataSource());
+  }
+
+  private static DriverManagerDataSource dataSource() {
+    final DriverManagerDataSource dataSource = new DriverManagerDataSource();
+    dataSource.setDriverClassName("org.postgresql.Driver");
+    dataSource.setUrl(pg.getJdbcUrl());
+    dataSource.setUsername(pg.getUsername());
+    dataSource.setPassword(pg.getPassword());
+    return dataSource;
+  }
+
+  private static UUID uuid(final String value) {
+    return UUID.fromString(value);
+  }
 
     private static Flyway resetDatabase() {
         cleanDatabase();
@@ -231,7 +497,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
     }
 
     private static Flyway flyway(final String target) {
-        final var configuration = Flyway.configure()
+    final var configuration =
+        Flyway.configure()
                 .cleanDisabled(false)
                 .dataSource(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword())
                 .locations("filesystem:src/main/resources/db/migration");
@@ -246,7 +513,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
     }
 
     private static int singleInt(final Connection connection, final String sql) throws SQLException {
-        try (Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(sql)) {
+    try (Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(sql)) {
             assertThat(resultSet.next()).isTrue();
             return resultSet.getInt(1);
         }
@@ -257,7 +525,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
     }
 
     private static void insertSources(final Statement statement) throws SQLException {
-        statement.executeUpdate("""
+    statement.executeUpdate(
+        """
                 insert into dh_decision_request(
                   decision_id, request_id, trace_id, tenant_id, source, decision_type,
                   subject_json, context_ref, requested_at, schema_version, created_at
@@ -268,7 +537,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                   'context-1', '2026-07-11T00:00:00Z', 'DECISION-1', '2026-07-11T00:00:01Z'
                 )
                 """);
-        statement.executeUpdate("""
+    statement.executeUpdate(
+        """
                 insert into decision_request(
                   id, request_key, request_type, source_system, source_ref_id, tenant_id,
                   trace_id, request_id, input_payload_json, context_payload_json,
@@ -280,7 +550,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                   'ACCEPTED', '2026-07-11T00:00:00Z', '2026-07-11T00:00:00Z'
                 )
                 """);
-        statement.executeUpdate("""
+    statement.executeUpdate(
+        """
                 insert into decision_run(
                   id, decision_request_id, run_no, status, orchestrator_key, model_provider,
                   model_name, started_at, finished_at, latency_ms, created_at
@@ -292,7 +563,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                   '2026-07-11T00:00:00Z'
                 )
                 """);
-        statement.executeUpdate("""
+    statement.executeUpdate(
+        """
                 insert into qdr_prompt_template(
                   id, tenant_id, template_key, display_name, current_version_id,
                   status, created_at, updated_at
@@ -301,7 +573,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                   'Template 1', null, 'ACTIVE', '2026-07-11T00:00:00Z', '2026-07-11T00:00:00Z'
                 )
                 """);
-        statement.executeUpdate("""
+    statement.executeUpdate(
+        """
                 insert into qdr_prompt_version(
                   id, tenant_id, prompt_template_id, version, render_policy_key,
                   template_ref, template_hash, redacted_summary, status, checksum,
@@ -312,8 +585,10 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                   'template-ref-1', '%s', 'safe template metadata', 'ACTIVE', '%s',
                   '2026-07-11T00:00:00Z', 'test'
                 )
-                """.formatted(HASH_A, HASH_A));
-        statement.executeUpdate("""
+                """
+            .formatted(HASH_A, HASH_A));
+    statement.executeUpdate(
+        """
                 insert into qdr_model_profile(
                   id, tenant_id, provider_profile_id, provider_kind, provider_key,
                   model_key, display_name, capability_summary, context_window_tokens,
@@ -325,7 +600,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                   'ENABLED', 'trust-policy-1', '2026-07-11T00:00:00Z', '2026-07-11T00:00:00Z'
                 )
                 """);
-        statement.executeUpdate("""
+    statement.executeUpdate(
+        """
                 insert into qdr_model_version(
                   id, tenant_id, model_profile_id, model_name, model_version,
                   capability_summary, version_status, checksum, created_at
@@ -334,8 +610,10 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                   '00000000-0000-0000-0000-000000000005', 'mock-model', 'model-1',
                   'safe model metadata', 'ACTIVE', '%s', '2026-07-11T00:00:00Z'
                 )
-                """.formatted(HASH_A));
-        statement.executeUpdate("""
+                """
+            .formatted(HASH_A));
+    statement.executeUpdate(
+        """
                 insert into qdr_model_gateway_call(
                   id, tenant_id, trace_id, request_id, decision_run_id, prompt_version_id,
                   model_version_id, provider_profile_id, provider_kind, provider_identity_ref,
@@ -354,8 +632,10 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                   'safe input metadata', 'safe output metadata', '%s', '%s',
                   'audit-ref-1', 'trace-ref-1', '2026-07-11T00:00:00Z'
                 )
-                """.formatted(HASH_A, HASH_B));
-        statement.executeUpdate("""
+                """
+            .formatted(HASH_A, HASH_B));
+    statement.executeUpdate(
+        """
                 insert into qdr_replay_input_ref(
                   id, tenant_id, case_id, source_decision_id, source_request_id,
                   trace_id, request_id, policy_version, model_gateway_version_ref,
@@ -367,8 +647,10 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                   '{"refType":"SAFE_INPUT","refId":"input-1","contentHash":"%s"}'::jsonb,
                   '%s', '2026-07-11T00:00:00Z', '2026-07-11T00:00:00Z'
                 )
-                """.formatted(HASH_A, HASH_A));
-        statement.executeUpdate("""
+                """
+            .formatted(HASH_A, HASH_A));
+    statement.executeUpdate(
+        """
                 insert into qdr_expected_decision_summary(
                   id, tenant_id, case_id, source_decision_id, source_request_id,
                   trace_id, request_id, policy_version, model_gateway_version_ref,
@@ -384,8 +666,10 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                   '["evidence-1"]'::jsonb, '["PLACE_ORDER"]'::jsonb, '%s',
                   '2026-07-11T00:00:00Z', '2026-07-11T00:00:00Z'
                 )
-                """.formatted(HASH_A));
-        statement.executeUpdate("""
+                """
+            .formatted(HASH_A));
+    statement.executeUpdate(
+        """
                 insert into qdr_replay_case(
                   id, tenant_id, case_id, source_decision_id, source_request_id,
                   trace_id, request_id, policy_version, model_gateway_version_ref,
@@ -398,7 +682,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                   '00000000-0000-0000-0000-000000000021', '%s', '%s',
                   '2026-07-11T00:00:00Z', '2026-07-11T00:00:00Z'
                 )
-                """.formatted(HASH_A, HASH_B));
+                """
+            .formatted(HASH_A, HASH_B));
     }
 
     private static String snapshotInsert(
@@ -466,7 +751,8 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
                   'model-1', '%s', 'gateway-1', 'QDR6-CJSON-1',
                   'QDR6-MOCK-REPLAY-1', 'SHA-256', '%s', '%s', null, '%s', %d
                 )
-                """.formatted(
+                """
+        .formatted(
                 id,
                 tenantId,
                 snapshotId,
