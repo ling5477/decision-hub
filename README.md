@@ -41,7 +41,7 @@ STAGE_QDR_5_FINAL_CLOSE_REVIEW: PASS
 STAGE_QDR_5: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_5_ARCHIVE: DONE
 STAGE_QDR_5_TAG: DONE / dh-stage-qdr-5-close
-STAGE_QDR_6: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
+STAGE_QDR_6: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_6_PLAN: DONE / PLAN_ONLY
 STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
 STAGE_QDR_6_IMPLEMENTATION: COMPLETE / B1_DONE / B2_DONE / B3_CLOSED_ACCEPTED / B4_DONE_COMMITTED
@@ -51,12 +51,16 @@ STAGE_QDR_6_FINAL_CLOSE_REVIEW: PREVIOUS_BLOCKED / HISTORICAL_PRESERVED
 STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: PASS / 5961164
 CURRENT_FACTSOURCE_CONFLICT: CLEARED
 STAGE_QDR_6_ARCHIVE: DONE / docs/gates/stage-qdr-6/
-STAGE_QDR_6_TAG: PENDING / NOT_CREATED
-STAGE_QDR_7_PLAN: NOT_STARTED / NOT_ALLOWED_YET
+STAGE_QDR_6_TAG: DONE / dh-stage-qdr-6-close
+STAGE_QDR_6_TAG_TARGET: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
+STAGE_QDR_6_CURRENT_PROCESS_SOURCES: PRUNED
+STAGE_QDR_6_POST_TAG_CURRENT_CLEANUP: DONE
+STAGE_QDR_7_PLAN: NOT_STARTED / PLANNING_FIRST_ONLY
 ALLOW_STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: YES / CONSUMED / PASS
 ALLOW_STAGE_QDR_6_ARCHIVE_PACKET_NOW: YES / CONSUMED
-ALLOW_STAGE_QDR_6_TAG_CLOSE_NOW: YES / AFTER_ARCHIVE_COMMIT_AND_CLEAN_WORKTREE
-ALLOW_STAGE_QDR_7_PLAN_NOW: NO
+ALLOW_STAGE_QDR_6_TAG_CLOSE_NOW: NO / ALREADY_TAGGED
+ALLOW_STAGE_QDR_7_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
 STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_CLOSED_ACCEPTED / B4_DONE / FINAL_CLOSE_PASS
@@ -88,9 +92,9 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-6-ARCHIVE-TAG-CLOSE
-current task status: ARCHIVE_PACKET_READY / TAG_PENDING
-next action: annotated tag close for dh-stage-qdr-6-close
+current task: DH-STAGE-QDR-6-POST-TAG-CURRENT-CLEANUP
+current task status: DONE / CURRENT_PROCESS_SOURCES_PRUNED
+next action: DH-STAGE-QDR-7-PLAN
 ```
 
 ## Stage-QDR-4 归档状态
@@ -107,7 +111,7 @@ STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
 STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
 ```
 
-Stage-QDR-4 归档和 tag close 不授权 real HTTP、real provider、Provider SDK、Agent runtime、LangGraph runtime、LIVE、NQ mutation 或 trading execution。Stage-QDR-5 已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`，tag 为 `dh-stage-qdr-5-close`。Stage-QDR-6 B1–B4 与 implementation 已完成；previous final close review 因 current factsource 冲突而 `BLOCKED`，该冲突现已修复，下一步仅允许 `DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW-RETRY`。Archive、tag 与 Stage-QDR-7 planning 均未开始。
+Stage-QDR-4、Stage-QDR-5 与 Stage-QDR-6 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-6 tag 为 `dh-stage-qdr-6-close`，指向 archive commit `b9b68b3`；11 个 current process sources 已在 archive 一致性核验后清理。下一步只允许独立的 `DH-STAGE-QDR-7-PLAN` planning-first；不授权 implementation、real HTTP/provider、Provider SDK、Agent/LangGraph、NQ runtime integration、交易或 LIVE。
 
 ## 当前事实源
 
@@ -135,8 +139,6 @@ Stage-QDR-5 historical source docs 已归档到 `docs/gates/stage-qdr-5/SOURCE_D
 
 ```text
 docs/current/README.md                  当前文档索引
-docs/current/DH_STAGE_QDR_6_PLAN.md     Stage-QDR-6 当前规划与范围冻结
-docs/current/DH_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER.md Stage-QDR-6 实施工单与批次边界
 docs/current/STATUS.md                  唯一当前状态表
 docs/current/WORK_ORDER.md              唯一下一步入口
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md 当前 Codex / Claude 执行纪律

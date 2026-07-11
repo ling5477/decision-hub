@@ -5,18 +5,21 @@
 ```text
 STAGE_QDR_6_FINAL_CLOSE_REVIEW: PREVIOUS_BLOCKED / HISTORICAL_PRESERVED
 STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: PASS
-STAGE_QDR_6: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
+STAGE_QDR_6: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 ALLOW_STAGE_QDR_6_ARCHIVE_PACKET: YES / CONSUMED
 ALLOW_STAGE_QDR_6_CLOSE_DOCS_COMMIT: YES / CONSUMED / 5961164
 ALLOW_STAGE_QDR_6_TAG_CLOSE_AFTER_ARCHIVE: YES
 archive path: docs/gates/stage-qdr-6/
 archive packet: COMPLETE
 archive commit: THIS_ARCHIVE_COMMIT
-tag: NOT_CREATED
-next action: annotated tag close for dh-stage-qdr-6-close
+tag: DONE / dh-stage-qdr-6-close
+tag target: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
+current process sources: PRUNED / 11_REMOVED
+post-tag cleanup: DONE
+next action: DH-STAGE-QDR-7-PLAN
 ```
 
-Previous blocked review 来源为 `docs/current/DH_STAGE_QDR_6_FINAL_CLOSE_REVIEW.md`，retry PASS 来源为 `docs/current/DH_STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY.md`。完整 packet 位于 `docs/gates/stage-qdr-6/`；当前 tag 仍未创建。必须先提交 archive packet，再在 clean worktree 上创建 annotated tag。`ALLOW_STAGE_QDR_6_TAG_CLOSE_AFTER_ARCHIVE: YES` 不授权跳过 archive-before-tag。
+Previous blocked review与retry PASS已分别保存在`docs/gates/stage-qdr-6/SOURCE_DH_STAGE_QDR_6_FINAL_CLOSE_REVIEW.md`和`SOURCE_DH_STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY.md`。完整packet位于`docs/gates/stage-qdr-6/`；annotated tag `dh-stage-qdr-6-close`指向archive commit `b9b68b3`。11个current process sources已核验后清理，下一步只允许Stage-QDR-7 planning-first。
 
 ## 1. 归档原则
 

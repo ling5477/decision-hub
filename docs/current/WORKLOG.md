@@ -1,5 +1,22 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-6-POST-TAG-CURRENT-CLEANUP
+
+- Preflight确认`dev`/`b9b68b3` clean，local/remote annotated tag均指向archive commit。
+- 按archive `SOURCE_INDEX.md`逐份核验11个current process sources；11/11 archive副本存在且SHA-256一致，packet checksums 23/23通过。
+- 使用`git rm`删除11个已归档current process sources；未删除或修改archive packet。
+- Current factsources同步为Stage-QDR-6 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`、current sources `PRUNED`、cleanup `DONE`。
+- Stage-QDR-7保持`NOT_STARTED`；仅开放`DH-STAGE-QDR-7-PLAN` planning-first，implementation继续禁止。
+- `mvn -ntp -Pquality validate`通过，reactor 19/19、Checkstyle 0 violations、Spotless PASS；full tests和PostgreSQL/Testcontainers本轮未重跑。
+
+```text
+STAGE_QDR_6_POST_TAG_CURRENT_CLEANUP: DONE
+CURRENT_PROCESS_SOURCES: PRUNED / 11_REMOVED
+ALLOW_STAGE_QDR_7_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-7-PLAN
+```
+
 ## 2026-07-11 DH-STAGE-QDR-6-ARCHIVE-TAG-CLOSE
 
 - Preflight 通过：`dev` / `e09d5b4`、exact 7-file retry diff、staged empty、forbidden/V1-V11 diff empty，本地与远程 tag 均不存在。

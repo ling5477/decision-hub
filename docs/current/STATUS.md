@@ -1,5 +1,33 @@
 # Decision Hub Status
 
+## 2026-07-11 Stage-QDR-6 post-tag current cleanup
+
+```text
+STAGE_QDR_6: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+STAGE_QDR_6_ARCHIVE: DONE / docs/gates/stage-qdr-6/
+STAGE_QDR_6_ARCHIVE_COMMIT: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
+STAGE_QDR_6_TAG: DONE / dh-stage-qdr-6-close
+STAGE_QDR_6_TAG_TYPE: ANNOTATED
+STAGE_QDR_6_TAG_TARGET: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
+STAGE_QDR_6_CURRENT_PROCESS_SOURCES: PRUNED / 11_REMOVED
+STAGE_QDR_6_POST_TAG_CURRENT_CLEANUP: DONE
+STAGE_QDR_7: NOT_STARTED
+ALLOW_STAGE_QDR_7_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_PROVIDER_SDK: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_NQ_RUNTIME_INTEGRATION: NO
+ALLOW_LIVE: NO
+current task: DH-STAGE-QDR-6-POST-TAG-CURRENT-CLEANUP
+current task status: DONE / CURRENT_PROCESS_SOURCES_PRUNED
+next action: DH-STAGE-QDR-7-PLAN
+```
+
+Stage-QDR-6 annotated tag 的local/remote peeled target均为archive commit `b9b68b3`。11个current process sources已逐份通过`SOURCE_INDEX.md`、archive副本和SHA-256一致性核验后删除；archive packet与tag未修改。Stage-QDR-7仍未启动，只允许独立planning-first任务。
+
 ## 2026-07-11 Stage-QDR-6 archive close / tag pending
 
 ```text
@@ -513,8 +541,6 @@ next action: DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW-RETRY
 ```text
 README.md
 docs/current/README.md
-docs/current/DH_STAGE_QDR_6_PLAN.md
-docs/current/DH_STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md

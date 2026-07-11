@@ -3,6 +3,30 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-POST-TAG-CURRENT-CLEANUP validation
+
+```text
+preflight: PASS / dev / b9b68b3 / clean / staged empty
+archive source verification: PASS / 11 of 11 indexed and SHA-256 equal
+archive SHA256SUMS: PASS / 23 of 23
+archive packet modification: NONE
+current process sources: PRUNED / 11_REMOVED
+current residue: EMPTY
+tag type: annotated / unchanged
+local tag target: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
+remote peeled target: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
+git diff --check: PASS
+forbidden-scope diff: EMPTY
+V1-V11 diff: EMPTY
+mvn -ntp -Pquality validate: PASS / reactor 19 of 19
+Checkstyle: PASS / 0 violations
+Spotless: PASS
+full Maven tests: NOT_RERUN
+PostgreSQL/Testcontainers: NOT_RERUN
+```
+
+本轮只验证archive/current一致性、current pruning、tag stability与quality。Full tests和PostgreSQL/Testcontainers不重跑，也不得写为本轮PASS。
+
 ## 2026-07-11 DH-STAGE-QDR-6-ARCHIVE-TAG-CLOSE validation
 
 ```text

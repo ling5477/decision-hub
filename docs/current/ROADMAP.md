@@ -11,17 +11,21 @@ DH 的目标不是成为交易系统，而是成为 NQ 的 AI Agent 决策能力
 ```text
 STAGE_QDR_6_FINAL_CLOSE_REVIEW: PREVIOUS_BLOCKED / HISTORICAL_PRESERVED
 STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: PASS
-STAGE_QDR_6: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
+STAGE_QDR_6: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 STAGE_QDR_6_ARCHIVE: DONE / docs/gates/stage-qdr-6/
-STAGE_QDR_6_TAG: PENDING / NOT_CREATED
-next action: annotated tag close for dh-stage-qdr-6-close
+STAGE_QDR_6_TAG: DONE / dh-stage-qdr-6-close
+STAGE_QDR_6_TAG_TARGET: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
+STAGE_QDR_6_CURRENT_PROCESS_SOURCES: PRUNED
+STAGE_QDR_6_POST_TAG_CURRENT_CLEANUP: DONE
+next action: DH-STAGE-QDR-7-PLAN
 ALLOW_STAGE_QDR_6_ARCHIVE_PACKET: YES / CONSUMED
 ALLOW_STAGE_QDR_6_CLOSE_DOCS_COMMIT: NO
 ALLOW_STAGE_QDR_6_TAG_CLOSE_AFTER_ARCHIVE: YES
-ALLOW_STAGE_QDR_7_PLAN_NOW: NO
+ALLOW_STAGE_QDR_7_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
 ```
 
-Stage-QDR-6 final close retry 已通过并提交，previous BLOCKED review 仍作为历史记录保留；self-contained archive packet 已形成。下一步只允许 archive commit 后在 clean worktree 创建、push 与验证 annotated tag。Stage-QDR-7 仍 `NOT_STARTED / NOT_ALLOWED_YET`，不得进入 planning 或 implementation。
+Stage-QDR-6 已完成archive、annotated tag、remote verification与post-tag current pruning；previous BLOCKED与retry PASS继续保存在archive。下一步只允许 `DH-STAGE-QDR-7-PLAN` planning-first；Stage-QDR-7仍 `NOT_STARTED`，implementation继续禁止。
 
 ```text
 stage-qdr-1: CLOSED / ACCEPTED
