@@ -3,6 +3,25 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-FINAL-CLOSE-BLOCKER-FIX validation
+
+```text
+scope: docs-only current factsource alignment
+required files: README.md / docs/current/README.md / docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+git diff --check: PASS
+stale current wording scan: PASS / historical and negative-state hits classified
+mvn -ntp -Pquality validate: PASS / reactor 19 of 19
+Checkstyle: PASS / 0 violations
+Spotless: PASS
+Maven tests: NOT_RUN / NOT_REQUIRED
+Docker/Testcontainers: NOT_RUN / NOT_REQUIRED
+archive packet: NOT_CREATED
+tag: NOT_CREATED
+push: NOT_RUN
+```
+
+本节只记录本轮实际执行的 Git、wording scan 与 quality evidence；不复用 previous final close review 的 Maven tests 或 PostgreSQL/Testcontainers 结果冒充本轮验证。各子模块显示的 `unable to find checkstyle outputFile` 为既有聚合配置表现；root aggregate Checkstyle 实际完成且为 0 violations。
+
 ## 2026-07-11 DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW validation
 
 ```text

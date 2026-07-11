@@ -1,5 +1,23 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-6-FINAL-CLOSE-BLOCKER-FIX
+
+- 仅同步 `README.md`、`docs/current/README.md`、`docs/current/CODEX_PROJECT_INSTRUCTIONS.md` 的 Stage-QDR-6 current facts，并最小更新 `STATUS.md`、`WORK_ORDER.md`、`TESTING.md`、`WORKLOG.md`。
+- 清除 `IMPLEMENTATION_NOT_STARTED`、current implementation WO 与 next B1 的错误 current wording；Stage-QDR-6 implementation 统一为 `COMPLETE`。
+- Previous final close review 的 `BLOCKED` 历史结论保持不变；当前状态只推进到 `RETRY_PENDING`，不写 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。
+- Archive packet、tag、push 与 Stage-QDR-7 planning 均未开始；Java、测试、migration、API、Repository/JDBC、wiring 与 NQ 均未修改。
+- `git diff --check`、current facts/safety scans 与 `mvn -ntp -Pquality validate` 已通过；Checkstyle 0 violations，Spotless PASS。本轮未运行 Maven tests 或 Docker/Testcontainers。
+
+```text
+STAGE_QDR_6_FINAL_CLOSE_BLOCKER_FIX: DONE
+CURRENT_FACTSOURCE_CONFLICT: CLEARED
+ALLOW_STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_6_ARCHIVE_PACKET_NOW: NO
+ALLOW_STAGE_QDR_6_TAG_CLOSE_NOW: NO
+ALLOW_STAGE_QDR_7_PLAN_NOW: NO
+next action: DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW-RETRY
+```
+
 ## 2026-07-11 DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW
 
 - 在 `dev` / `964b493`、clean worktree、empty staged 前提下完成 Stage-QDR-6 B1–B4、V10/V11、tenant/identity/hash/transaction、deterministic replay、internal report 与安全授权边界的只读终审。
