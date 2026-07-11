@@ -13,12 +13,12 @@ public interface CanonicalReplaySnapshotPersistencePort {
   /**
    * 插入 immutable snapshot；相同 identity 的完全一致内容可幂等返回既有记录。
    *
-   * @param tenantId 第一安全边界，必须与 record identity 完全一致。
-   * @param record 已由上游构造并校验的 structured safe snapshot。
+   * @param tenantId 第一安全边界，必须与 command identity 完全一致。
+   * @param command 已完成 {@code QDR6-CJSON-1 + SHA-256} 且不含 caller audit time 的写入合同。
    * @return 新插入或幂等命中的既有 record。
    * @throws CanonicalReplaySnapshotPersistenceException 数据源失败或 identity/content 冲突时抛出。
    */
-  CanonicalReplaySnapshotRecord insert(String tenantId, CanonicalReplaySnapshotRecord record);
+  CanonicalReplaySnapshotRecord insert(String tenantId, CanonicalReplaySnapshotWriteCommand command);
 
   /**
    * 按 tenant + snapshot business ID 精确读取。

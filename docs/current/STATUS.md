@@ -1,5 +1,26 @@
 # Decision Hub Status
 
+## 2026-07-11 Stage-QDR-6 B3 persistence schema blocker fix
+
+```text
+DH_STAGE_QDR_6_B3_PERSISTENCE_SCHEMA_BLOCKER_FIX: DONE / IMPLEMENTED / VERIFIED
+HASH_SEQUENCING_FIX: PASS
+CREATED_AT_BOUNDARY_FIX: PASS
+V9_PROJECTION_VALIDATION: PASS
+V11_METADATA_FIX: PASS
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+Stage-QDR-6 B3-P3: NOT_STARTED
+ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW_RETRY: YES / NEXT_TASK_ONLY
+ALLOW_B3_P3_IMPLEMENTATION_NOW: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY
+```
+
+Snapshot write contract 已拆分为不含 `createdAt` 的完整 canonical write command 与数据库回读 persisted record；只有已完成 `QDR6-CJSON-1 + SHA-256` 且 canonical hash 非空、非 placeholder/default/moving alias 的 structured snapshot 才能调用 insert。JDBC 不再写入 `created_at`，insert 后按 exact identity 回读数据库值。V9 `ReplayInputRef`、`replay_input_hash`、structured expected summary 与 optional lineage 现均执行 tenant-bound exact validation；V11 只补 V10 constraints/indexes 的中文 `COMMENT`，V1-V10 无修改。
+
+后续 P3 顺序冻结为：`structured assembler -> QDR6-CJSON-1 canonicalization -> deterministic SHA-256 hash -> REPEATABLE_READ identity validation -> immutable persistence`。本轮未实现这些处理器，也不授权直接进入 P3；必须先独立重试 persistence milestone review。
+
 ## 2026-07-11 Stage-QDR-6 B3 persistence milestone review
 
 ```text

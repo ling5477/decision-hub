@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW
-current task status: BLOCKED / SCHEMA_AND_PERSISTENCE_BOUNDARY_MISMATCH
-next action: DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX
-mode: BLOCKER_FIX_NEXT_ONLY + NO_P3 + NO_CANONICALIZER + NO_REPLAY + NO_API + NO_HTTP + NO_PROVIDER + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX
+current task status: DONE / IMPLEMENTED / POSTGRESQL_VERIFIED
+next action: DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY
+mode: REVIEW_RETRY_NEXT_ONLY + NO_P3 + NO_CANONICALIZER_IMPLEMENTATION + NO_REPLAY + NO_API + NO_HTTP + NO_PROVIDER + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 B1/B2、B3 persistence work order、P1 与 P2 均已完成。Persistence milestone review 的 PostgreSQL/Testcontainers、tenant isolation 与 transaction evidence 为 PASS，但 canonical hash sequencing、DB-generated `created_at` 和 V9 structured projection exact validation 存在 blocker。P3 assembler 不准入；下一步只能独立处理 persistence schema/boundary blocker，canonicalizer、hash 计算与 replay 仍未授权。
+Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 B1/B2、B3 persistence work order、P1、P2 与 persistence schema blocker fix 均已完成。Blocker fix 已拆分 write/persisted contract、恢复 DB-generated `created_at`、补齐 V9 exact projection validation，并通过 V11 metadata-only forward migration 补齐 comments。下一步只能独立重试 persistence milestone review；P3、canonicalizer/hash 实现与 replay 仍未授权。
 
 ## 2. 前置状态
 
@@ -55,6 +55,8 @@ ALLOW_B3_P1_MIGRATION_IMPLEMENTATION: YES / CONSUMED
 STAGE_QDR_6_B3_P2: DONE / IMPLEMENTED / POSTGRESQL_VERIFIED
 ALLOW_B3_P2_PORT_JDBC_IMPLEMENTATION_NOW: YES / CONSUMED
 ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW: YES / CONSUMED / BLOCKED
+ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW_RETRY: YES / NEXT_TASK_ONLY
+DH_STAGE_QDR_6_B3_PERSISTENCE_SCHEMA_BLOCKER_FIX: DONE / POSTGRESQL_VERIFIED
 ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
 ALLOW_MIGRATION_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO
@@ -209,9 +211,8 @@ B3 implementation 与 close review 已完成，范围限于 provider readiness g
 B4 work order 已完成，范围限于 internal report / acceptance support boundary design。
 下一步只允许进入 Stage-QDR-6 planning-first。
 禁止跳过 Stage-QDR-6 planning-first 直接进入 implementation/runtime。
-禁止新增 migration。
-禁止修改 V1-V9 migration。
-禁止新增 V10。
+禁止新增 V12+ migration；V11 metadata-only blocker fix 已完成。
+禁止修改 V1-V10 migration。
 禁止新增 API / Controller / REST endpoint。
 禁止新增 Repository / JDBC / Service production expansion，除非 review 重新授权。
 禁止接真实 HTTP client。
@@ -232,5 +233,5 @@ B4 work order 已完成，范围限于 internal report / acceptance support boun
 ## 8. 下一任务
 
 ```text
-DH-STAGE-QDR-6-PLAN
+DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY
 ```

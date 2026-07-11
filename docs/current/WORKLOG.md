@@ -1,5 +1,15 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX
+
+- 从 `CanonicalReplaySnapshotRecord` 拆出 `CanonicalReplaySnapshotWriteCommand`；write command 不含 `createdAt`，只接受完整 `QDR6-CJSON-1 + SHA-256` material，并拒绝缺失、placeholder、moving alias 与 zero hash。
+- persistence port/JDBC insert 改为接收 write command；INSERT 排除 `created_at`，成功后按 tenant-bound exact identity 回读数据库实际 persisted record。
+- JDBC 对 V9 replay case 联接 `qdr_replay_input_ref` 与 `qdr_expected_decision_summary`，逐字段 exact compare `ReplayInputRef`、`replay_input_hash`、structured expected summary 和 hash；optional evaluation/verdict 仅在明确存在时校验同一 input/summary lineage。
+- duplicate-identical comparison 排除 DB-generated audit time，其余 persisted projection 保持 exact；duplicate-conflict、immutable trigger 与 transaction rollback 行为不变。
+- 新增 V11 metadata-only forward migration，为 V10 新增 constraints/indexes 补齐中文 `COMMENT`；未修改 V1-V10，也未改变 schema/data 语义。
+- focused PostgreSQL 17.10/Testcontainers 最终 15 tests 全部通过、0 skipped；过程中修复 JSONB `PGobject` array exact projection 解析并重跑。
+- 工作单将后续 P3 顺序冻结为 `structured assembler -> canonicalizer -> deterministic hash -> REPEATABLE_READ identity validation -> immutable persistence`；本轮未实现或授权 P3/canonicalizer/replay。
+
 > supporting document
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`

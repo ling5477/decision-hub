@@ -192,3 +192,18 @@ DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX
 ```
 
 该后续任务必须先重新授权 forward-only schema/contract/JDBC 修复范围，并同时收口 canonical hash sequencing、DB-generated `created_at` 与 V9 exact projection validation；不得在本 review 中顺手修复。
+
+## 10. Blocker fix follow-up resolution
+
+后续任务 `DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX` 已在独立授权范围内完成：write/persisted contract 已拆分，JDBC 恢复 DB-generated `created_at`，V9 structured projection exact validation 已补齐，V11 仅增加 constraints/indexes comments。该结果不回写或掩盖本 review 在当时基线上的 `BLOCKED` 历史结论；只将当前下一步推进为独立 review retry。
+
+```text
+HASH_SEQUENCING_FIX: PASS
+CREATED_AT_BOUNDARY_FIX: PASS
+V9_PROJECTION_VALIDATION: PASS
+V11_METADATA_FIX: PASS
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW_RETRY: YES / NEXT_TASK_ONLY
+ALLOW_B3_P3_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY
+```

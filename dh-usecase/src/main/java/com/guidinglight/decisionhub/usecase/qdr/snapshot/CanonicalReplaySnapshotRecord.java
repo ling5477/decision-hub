@@ -13,12 +13,13 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Canonical replay snapshot 的 immutable persistence record。
+ * Canonical replay snapshot 的数据库 persisted record。
  *
  * <p>该 record 复用已有 {@link DecisionSubject}、{@link DecisionContextSnapshot}、
  * {@link DecisionEvidenceRef}、{@link ReplayInputRef} 与 {@link ExpectedDecisionSummary}，只携带
  * structured safe material。它不包含 raw prompt、raw provider response、credential、订单或执行指令，
- * 也不提供 Repository/JDBC、canonicalizer、hash 计算或 replay 行为。
+ * 也不提供 Repository/JDBC、canonicalizer、hash 计算或 replay 行为。与 write command 不同，本 record 的
+ * {@code createdAt} 只能来自 insert 后数据库 exact read。
  *
  * @param id                       snapshot 物理 UUID。
  * @param identity                 tenant-bound physical/business identity。
@@ -58,75 +59,44 @@ public record CanonicalReplaySnapshotRecord(
         Instant createdAt) {
 
     /**
-     * 校验 P1 persistence record 的结构、安全边界、correlation 与 payload metadata。
+     * 校验 persisted record 的写入材料与数据库 audit time。
      *
      * <p>这里不序列化 JSON，也不计算 canonical hash；P3 只能在后续独立授权中负责 assembler。
      */
     public CanonicalReplaySnapshotRecord {
-        id = ReplayPersistenceGuard.requireUuid(id, "id");
-        identity = Objects.requireNonNull(identity, "identity");
-        source = ReplayPersistenceGuard.requireSafeText(source, "source");
-        decisionType = ReplayPersistenceGuard.requireSafeText(decisionType, "decisionType");
-        if (!"READ_ONLY_RECOMMENDATION".equals(decisionType)) {
-            throw new IllegalArgumentException("decisionType must be READ_ONLY_RECOMMENDATION");
-        }
-        sourceCapturedAt = ReplayPersistenceGuard.requireInstant(sourceCapturedAt, "sourceCapturedAt");
-        subject = requireSubject(subject);
-        contextSnapshot = requireContextSnapshot(contextSnapshot, sourceCapturedAt);
-        evidenceRefs = requireEvidenceRefs(evidenceRefs, identity);
-        replayInputRef = ReplayPersistenceGuard.requireInputRef(replayInputRef);
-        expectedDecisionSummary = ReplayPersistenceGuard.requireSummary(expectedDecisionSummary);
-        versionVector = Objects.requireNonNull(versionVector, "versionVector");
-        replayInputHash = ReplayPersistenceGuard.requireSha256Hex(replayInputHash, "replayInputHash");
-        expectedSummaryHash =
-                ReplayPersistenceGuard.requireSha256Hex(expectedSummaryHash, "expectedSummaryHash");
-        providerSummaryHash =
-                ReplayPersistenceGuard.optionalSha256Hex(providerSummaryHash, "providerSummaryHash");
-        canonicalInputHash =
-                ReplayPersistenceGuard.requireSha256Hex(canonicalInputHash, "canonicalInputHash");
-        if (payloadBytes <= 0 || payloadBytes > 262_144) {
-            throw new IllegalArgumentException("payloadBytes must be between 1 and 262144");
-        }
+        final CanonicalReplaySnapshotWriteCommand command = new CanonicalReplaySnapshotWriteCommand(
+                id, identity, source, decisionType, sourceCapturedAt, subject, contextSnapshot,
+                evidenceRefs, replayInputRef, expectedDecisionSummary, versionVector, replayInputHash,
+                expectedSummaryHash, providerSummaryHash, canonicalInputHash, payloadBytes);
+        evidenceRefs = command.evidenceRefs();
         createdAt = ReplayPersistenceGuard.requireInstant(createdAt, "createdAt");
     }
 
-    private static DecisionSubject requireSubject(final DecisionSubject value) {
-        final DecisionSubject checked = Objects.requireNonNull(value, "subject");
-        ReplayPersistenceGuard.requireSafeText(checked.symbol(), "subject.symbol");
-        ReplayPersistenceGuard.requireSafeText(checked.market(), "subject.market");
-        ReplayPersistenceGuard.requireSafeText(checked.timeframe(), "subject.timeframe");
-        ReplayPersistenceGuard.optionalSafeText(checked.strategyRef(), "subject.strategyRef");
-        ReplayPersistenceGuard.optionalSafeText(checked.researchRef(), "subject.researchRef");
-        return checked;
+    /** 返回不含数据库 {@code createdAt} 的 immutable write material，用于幂等 exact comparison。 */
+    public CanonicalReplaySnapshotWriteCommand toWriteCommand() {
+        return new CanonicalReplaySnapshotWriteCommand(
+                id, identity, source, decisionType, sourceCapturedAt, subject, contextSnapshot,
+                evidenceRefs, replayInputRef, expectedDecisionSummary, versionVector, replayInputHash,
+                expectedSummaryHash, providerSummaryHash, canonicalInputHash, payloadBytes);
     }
 
-    private static DecisionContextSnapshot requireContextSnapshot(
-            final DecisionContextSnapshot value, final Instant sourceCapturedAt) {
-        final DecisionContextSnapshot checked = Objects.requireNonNull(value, "contextSnapshot");
-        ReplayPersistenceGuard.requireSafeText(checked.snapshotId(), "contextSnapshot.snapshotId");
-        if (!sourceCapturedAt.equals(checked.capturedAt())) {
-            throw new IllegalArgumentException("sourceCapturedAt must match contextSnapshot.capturedAt");
-        }
-        if (checked.evidenceRefs().isEmpty()) {
-            throw new IllegalArgumentException("contextSnapshot.evidenceRefs must not be empty");
-        }
-        checked.evidenceRefs()
-                .forEach(ref -> ReplayPersistenceGuard.requireSafeText(ref, "contextSnapshot.evidenceRefs"));
-        return checked;
+    /**
+     * 将已校验 write command 与数据库回读的 audit time 组合为 persisted record。
+     *
+     * @param command 已完成 canonicalization/hash 的 immutable write material。
+     * @param createdAt 数据库实际生成的 {@code created_at}。
+     * @return persisted record。
+     */
+    public static CanonicalReplaySnapshotRecord persisted(
+            final CanonicalReplaySnapshotWriteCommand command, final Instant createdAt) {
+        final CanonicalReplaySnapshotWriteCommand checked = Objects.requireNonNull(command, "command");
+        return new CanonicalReplaySnapshotRecord(
+                checked.id(), checked.identity(), checked.source(), checked.decisionType(),
+                checked.sourceCapturedAt(), checked.subject(), checked.contextSnapshot(),
+                checked.evidenceRefs(), checked.replayInputRef(), checked.expectedDecisionSummary(),
+                checked.versionVector(), checked.replayInputHash(), checked.expectedSummaryHash(),
+                checked.providerSummaryHash(), checked.canonicalInputHash(), checked.payloadBytes(),
+                createdAt);
     }
 
-    private static List<DecisionEvidenceRef> requireEvidenceRefs(
-            final List<DecisionEvidenceRef> values, final CanonicalReplaySnapshotIdentity identity) {
-        final List<DecisionEvidenceRef> checked = values == null ? List.of() : List.copyOf(values);
-        if (checked.isEmpty()) {
-            throw new IllegalArgumentException("evidenceRefs must not be empty");
-        }
-        for (DecisionEvidenceRef ref : checked) {
-            final DecisionEvidenceRef present = Objects.requireNonNull(ref, "evidenceRefs item");
-            if (!identity.correlation().matches(present.correlation())) {
-                throw new IllegalArgumentException("evidenceRefs correlation must match snapshot identity");
-            }
-        }
-        return checked;
-    }
 }

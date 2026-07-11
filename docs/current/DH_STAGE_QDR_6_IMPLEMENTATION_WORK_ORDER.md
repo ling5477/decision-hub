@@ -554,6 +554,8 @@ ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION: NO
 
 2026-07-11 persistence milestone review 已完成并 `BLOCKED`。PostgreSQL/Testcontainers、tenant isolation、immutable 与 transaction rollback evidence 为 PASS，但 V10 必填 `canonical_input_hash` 与 P3 禁止 canonicalizer/hash 的 sequencing 冲突，`created_at` 未保持 DB-generated，且 P2 JDBC 未 exact compare V9 structured input/summary projection。当前 `ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO`；下一步为 `DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX`，本轮不授权任何修复。
 
+2026-07-11 persistence schema blocker fix 已完成：write/persisted contract 分离、DB-generated `created_at`、V9 exact projection validation 与 V11 metadata comments 均通过 focused PostgreSQL evidence。后续 P3 必须整体遵循 `structured assembler -> QDR6-CJSON-1 canonicalization -> deterministic SHA-256 hash -> REPEATABLE_READ identity validation -> immutable persistence`，不得在 hash 生成前 insert snapshot。当前只允许 `DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY`，不授权 P3、canonicalizer 或 replay implementation。
+
 ### 8.10 B3 测试矩阵
 
 1. same snapshot + same versions + same algorithm 产生相同 hash。

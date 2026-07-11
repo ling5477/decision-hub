@@ -19,6 +19,7 @@ import com.guidinglight.decisionhub.usecase.qdr.readmodel.RedactionStatus;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -200,7 +201,61 @@ class CanonicalReplaySnapshotRecordTest {
                 name -> name.matches("(?i).*(trace|provider|latest|fallback|tenantless).*")));
   }
 
+  @Test
+  void writeCommandRequiresCompletedCanonicalHashAndExcludesDatabaseAuditTime() {
+    final Set<String> components =
+        Arrays.stream(CanonicalReplaySnapshotWriteCommand.class.getRecordComponents())
+            .map(component -> component.getName().toLowerCase(Locale.ROOT))
+            .collect(java.util.stream.Collectors.toSet());
+
+    assertTrue(components.contains("canonicalinputhash"));
+    assertTrue(components.stream().noneMatch(name -> name.contains("createdat")));
+    assertThrows(NullPointerException.class, () -> commandWithCanonicalHash(null));
+    assertThrows(IllegalArgumentException.class, () -> commandWithCanonicalHash("placeholder"));
+    assertThrows(IllegalArgumentException.class, () -> commandWithCanonicalHash("default"));
+    assertThrows(IllegalArgumentException.class, () -> commandWithCanonicalHash("latest"));
+    assertThrows(IllegalArgumentException.class, () -> commandWithCanonicalHash("0".repeat(64)));
+  }
+
+  @Test
+  void writeCommandRejectsReplayInputHashDifferentFromStructuredRef() {
+    final CanonicalReplaySnapshotWriteCommand valid = validCommand();
+
+    final IllegalArgumentException error =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                new CanonicalReplaySnapshotWriteCommand(
+                    valid.id(),
+                    valid.identity(),
+                    valid.source(),
+                    valid.decisionType(),
+                    valid.sourceCapturedAt(),
+                    valid.subject(),
+                    valid.contextSnapshot(),
+                    valid.evidenceRefs(),
+                    valid.replayInputRef(),
+                    valid.expectedDecisionSummary(),
+                    valid.versionVector(),
+                    "b".repeat(64),
+                    valid.expectedSummaryHash(),
+                    valid.providerSummaryHash(),
+                    valid.canonicalInputHash(),
+                    valid.payloadBytes()));
+    assertTrue(error.getMessage().contains("replayInputHash"));
+  }
+
     private static CanonicalReplaySnapshotRecord validRecord() {
+        return CanonicalReplaySnapshotRecord.persisted(
+                validCommand(), CAPTURED_AT.plusSeconds(1));
+    }
+
+    private static CanonicalReplaySnapshotWriteCommand validCommand() {
+        return commandWithCanonicalHash(HASH);
+    }
+
+    private static CanonicalReplaySnapshotWriteCommand commandWithCanonicalHash(
+            final String canonicalInputHash) {
         final DecisionEvidenceCorrelation correlation = correlation();
     final CanonicalReplaySnapshotIdentity identity =
         new CanonicalReplaySnapshotIdentity(
@@ -218,7 +273,7 @@ class CanonicalReplaySnapshotRecordTest {
                 null,
                 null,
                 null);
-        return new CanonicalReplaySnapshotRecord(
+        return new CanonicalReplaySnapshotWriteCommand(
                 uuid(10),
                 identity,
                 "TEST_SOURCE",
@@ -239,9 +294,8 @@ class CanonicalReplaySnapshotRecordTest {
                 HASH,
                 HASH,
                 null,
-                HASH,
-                4096,
-                CAPTURED_AT.plusSeconds(1));
+                canonicalInputHash,
+                4096);
     }
 
     private static CanonicalReplaySnapshotVersionVector versionVector(final String policyVersion) {

@@ -3,6 +3,40 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX validation
+
+```text
+Task type: CODE_CHANGE + FORWARD_ONLY_MIGRATION_FIX + JDBC_BOUNDARY_FIX + V9_PROJECTION_VALIDATION + POSTGRESQL_TESTS
+branch: dev
+HEAD before implementation: 7dd12667da20c15b3f86b5ac667f96c028f082b0
+start worktree: CLEAN
+start staged: EMPTY
+focused PostgreSQL/Testcontainers: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+```
+
+| Command / check | Result | Notes |
+| --- | --- | --- |
+| focused contract test | BUILD SUCCESS | `CanonicalReplaySnapshotRecordTest` 10 tests，0 skipped；write command 无 `createdAt`，缺失/placeholder/default/latest/zero canonical hash fail-closed。 |
+| focused PostgreSQL/Flyway test | BUILD SUCCESS | `V10CanonicalReplaySnapshotFlywayPostgresTest` 13 tests，0 skipped；真实 PostgreSQL 17.10。 |
+| V11 presence test | BUILD SUCCESS | metadata-only，只有 constraint/index comments，无 schema/data mutation。 |
+| clean V1→V11 | PASS | Flyway 11 migrations success。 |
+| V1→V10→V11 upgrade | PASS | V10 snapshot row 保留；V11 comments 可查询。 |
+| DB-generated `created_at` | PASS | INSERT SQL 与 write command 均无 `created_at`；persisted value 与数据库查询值一致。 |
+| V9 projection | PASS | ReplayInputRef、replay hash、structured summary mismatch 均拒绝；cross-tenant projection 不 fallback。 |
+| duplicate/immutable/transaction | PASS | duplicate-identical/conflict 保持；UPDATE SQLSTATE `55000`；rollback 后 row 不可见。 |
+
+首次 focused Maven 命令因 PowerShell 未给 `-Dsurefire.failIfNoSpecifiedTests=false` 加引号而在 Maven 参数解析阶段失败，未进入测试；加引号后重跑成功。首次 PostgreSQL exact projection run 暴露 JSONB `PGobject` array 未解析，最小修复为使用既有 `ObjectMapper` 解析 JSON 文本；随后因旧断言只接受 `exact identity mismatch` 出现一次测试断言失败，放宽为验证结构化 `exact` rejection 后同组测试 15/15、0 skipped 通过。以上失败均已真实记录，最终全量命令结果在本节后续追加。
+
+最终命令结果：
+
+| Command | Result | Evidence |
+| --- | --- | --- |
+| `mvn -ntp -pl dh-usecase,dh-infra -am test` | BUILD SUCCESS | `dh-usecase` success；`dh-infra` 88 tests、0 skipped；PostgreSQL Testcontainers 实际启动。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS | `dh-app` 102 tests、0 skipped；snapshot PostgreSQL 13/13，V11 presence 2/2。 |
+| `mvn -ntp test` | BUILD SUCCESS | reactor 19/19 success；Surefire reports 合计 965 tests、0 failures/errors/skipped；PostgreSQL 17.10 实际运行，snapshot PostgreSQL 13/13。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | root Checkstyle 0 violations；Spotless check success。 |
+| `mvn -ntp spotless:apply` | NOT AVAILABLE / NON-BLOCKING | 项目未暴露该 plugin prefix，未修改文件；正式 `-Pquality validate` 的 Spotless binding 已通过。 |
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW validation
 
 ```text

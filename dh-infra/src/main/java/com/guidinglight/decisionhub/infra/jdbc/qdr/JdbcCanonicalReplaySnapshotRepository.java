@@ -20,6 +20,7 @@ import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshot
 import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotPersistencePort;
 import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotRecord;
 import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotVersionVector;
+import com.guidinglight.decisionhub.usecase.qdr.snapshot.CanonicalReplaySnapshotWriteCommand;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -54,7 +55,7 @@ public final class JdbcCanonicalReplaySnapshotRepository
   private static final TypeReference<List<Map<String, Object>>> LIST_OF_MAPS_TYPE =
       new TypeReference<>() {};
 
-  private static final String COLUMNS =
+  private static final String INSERT_COLUMNS =
       "id, tenant_id, snapshot_id, decision_id, decision_request_id, decision_run_id,"
           + " trace_id, request_id, source, decision_type, source_captured_at,"
           + " model_call_id, model_call_ref, prompt_version_id, model_version_id,"
@@ -68,25 +69,27 @@ public final class JdbcCanonicalReplaySnapshotRepository
           + " model_gateway_version_ref, canonicalization_version,"
           + " replay_executor_version, hash_algorithm_version, replay_input_hash,"
           + " expected_summary_hash, provider_summary_hash, canonical_input_hash,"
-          + " payload_bytes, created_at";
+          + " payload_bytes";
+
+  private static final String SELECT_COLUMNS = INSERT_COLUMNS + ", created_at";
 
   private static final String INSERT =
       "insert into qdr_canonical_replay_snapshot ("
-          + COLUMNS
+          + INSERT_COLUMNS
           + ") values ("
           + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,"
           + " ?::jsonb, ?::jsonb, ?::jsonb, ?::jsonb, ?::jsonb,"
-          + " ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+          + " ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
   private static final String SELECT_BY_SNAPSHOT =
       "select "
-          + COLUMNS
+          + SELECT_COLUMNS
           + " from qdr_canonical_replay_snapshot"
           + " where tenant_id = ? and snapshot_id = ?";
 
   private static final String SELECT_BY_IDENTITY =
       "select "
-          + COLUMNS
+          + SELECT_COLUMNS
           + " from qdr_canonical_replay_snapshot"
           + " where tenant_id = ? and snapshot_id = ? and decision_id = ?"
           + " and decision_request_id = ? and decision_run_id = ?"
@@ -116,25 +119,25 @@ public final class JdbcCanonicalReplaySnapshotRepository
 
   @Override
   public CanonicalReplaySnapshotRecord insert(
-      final String tenantId, final CanonicalReplaySnapshotRecord record) {
-    final String checkedTenant = requireTenantMatch(tenantId, record);
-    validateSourceIdentity(checkedTenant, record);
-    final Optional<CanonicalReplaySnapshotRecord> existing = findExistingIdentity(record);
+      final String tenantId, final CanonicalReplaySnapshotWriteCommand command) {
+    final String checkedTenant = requireTenantMatch(tenantId, command);
+    validateSourceIdentity(checkedTenant, command);
+    final Optional<CanonicalReplaySnapshotRecord> existing = findExistingIdentity(command);
     if (existing.isPresent()) {
-      return identicalOrConflict(existing.get(), record);
+      return identicalOrConflict(existing.get(), command);
     }
     try {
-      jdbcTemplate.update(INSERT, insertArguments(record));
+      jdbcTemplate.update(INSERT, insertArguments(command));
       return findByTenantAndIdentity(
-              checkedTenant, record.identity(), record.versionVector().snapshotSchemaVersion())
-          .map(found -> identicalOrConflict(found, record))
+              checkedTenant, command.identity(), command.versionVector().snapshotSchemaVersion())
+          .map(found -> identicalOrConflict(found, command))
           .orElseThrow(
               () ->
                   new CanonicalReplaySnapshotPersistenceException(
                       "inserted canonical replay snapshot was not readable by exact identity"));
     } catch (final DuplicateKeyException error) {
-      return findExistingIdentity(record)
-          .map(found -> identicalOrConflict(found, record))
+      return findExistingIdentity(command)
+          .map(found -> identicalOrConflict(found, command))
           .orElseThrow(() -> new CanonicalReplaySnapshotConflictException());
     } catch (final DataAccessException error) {
       throw new CanonicalReplaySnapshotPersistenceException(
@@ -161,7 +164,7 @@ public final class JdbcCanonicalReplaySnapshotRepository
               throw new CanonicalReplaySnapshotPersistenceException(
                   "snapshot result identity mismatch");
             }
-            validateSourceIdentity(checkedTenant, record);
+            validateSourceIdentity(checkedTenant, record.toWriteCommand());
           });
       return found;
     } catch (final DataAccessException error) {
@@ -217,7 +220,7 @@ public final class JdbcCanonicalReplaySnapshotRepository
               throw new CanonicalReplaySnapshotPersistenceException(
                   "composite snapshot result identity mismatch");
             }
-            validateSourceIdentity(checkedTenant, record);
+            validateSourceIdentity(checkedTenant, record.toWriteCommand());
           });
       return found;
     } catch (final DataAccessException error) {
@@ -229,16 +232,16 @@ public final class JdbcCanonicalReplaySnapshotRepository
   }
 
   private Optional<CanonicalReplaySnapshotRecord> findExistingIdentity(
-      final CanonicalReplaySnapshotRecord record) {
+      final CanonicalReplaySnapshotWriteCommand command) {
     final Optional<CanonicalReplaySnapshotRecord> bySnapshot =
-        findByTenantAndSnapshotId(record.identity().tenantId(), record.identity().snapshotId());
+        findByTenantAndSnapshotId(command.identity().tenantId(), command.identity().snapshotId());
     if (bySnapshot.isPresent()) {
       return bySnapshot;
     }
     return findByTenantAndIdentity(
-        record.identity().tenantId(),
-        record.identity(),
-        record.versionVector().snapshotSchemaVersion());
+        command.identity().tenantId(),
+        command.identity(),
+        command.versionVector().snapshotSchemaVersion());
   }
 
   private Optional<CanonicalReplaySnapshotRecord> single(
@@ -251,9 +254,9 @@ public final class JdbcCanonicalReplaySnapshotRepository
   }
 
   private static String requireTenantMatch(
-      final String tenantId, final CanonicalReplaySnapshotRecord record) {
+      final String tenantId, final CanonicalReplaySnapshotWriteCommand command) {
     final String checkedTenant = ReplayPersistenceGuard.requireTenantId(tenantId);
-    final CanonicalReplaySnapshotRecord checked = Objects.requireNonNull(record, "record");
+    final CanonicalReplaySnapshotWriteCommand checked = Objects.requireNonNull(command, "command");
     if (!checkedTenant.equals(checked.identity().tenantId())) {
       throw new CanonicalReplaySnapshotPersistenceException(
           "tenantId must match canonical snapshot record");
@@ -262,9 +265,10 @@ public final class JdbcCanonicalReplaySnapshotRepository
   }
 
   private CanonicalReplaySnapshotRecord identicalOrConflict(
-      final CanonicalReplaySnapshotRecord existing, final CanonicalReplaySnapshotRecord requested) {
-    // 只比较实际持久化列；DecisionEvidence 的本地 summary 未落库，不能把它误判为内容冲突。
-    if (!Arrays.deepEquals(insertArguments(existing), insertArguments(requested))) {
+      final CanonicalReplaySnapshotRecord existing,
+      final CanonicalReplaySnapshotWriteCommand requested) {
+    // DB-generated created_at 不属于 caller material；其余实际持久化列必须 exact match。
+    if (!Arrays.deepEquals(insertArguments(existing.toWriteCommand()), insertArguments(requested))) {
       throw new CanonicalReplaySnapshotConflictException();
     }
     return existing;
@@ -278,11 +282,11 @@ public final class JdbcCanonicalReplaySnapshotRepository
     return new CanonicalReplaySnapshotPersistenceException(message, error);
   }
 
-  private Object[] insertArguments(final CanonicalReplaySnapshotRecord record) {
-    final CanonicalReplaySnapshotIdentity identity = record.identity();
-    final CanonicalReplaySnapshotVersionVector versions = record.versionVector();
+  private Object[] insertArguments(final CanonicalReplaySnapshotWriteCommand command) {
+    final CanonicalReplaySnapshotIdentity identity = command.identity();
+    final CanonicalReplaySnapshotVersionVector versions = command.versionVector();
     return new Object[] {
-      record.id(),
+      command.id(),
       identity.tenantId(),
       identity.snapshotId(),
       identity.correlation().decisionId(),
@@ -290,9 +294,9 @@ public final class JdbcCanonicalReplaySnapshotRepository
       identity.decisionRunId(),
       identity.correlation().traceId(),
       identity.correlation().requestId(),
-      record.source(),
-      record.decisionType(),
-      Timestamp.from(record.sourceCapturedAt()),
+      command.source(),
+      command.decisionType(),
+      Timestamp.from(command.sourceCapturedAt()),
       identity.modelCallId(),
       identity.modelCallRef(),
       identity.promptVersionId(),
@@ -303,11 +307,11 @@ public final class JdbcCanonicalReplaySnapshotRepository
       identity.evaluationCaseId(),
       identity.regressionVerdictRowId(),
       identity.regressionVerdictId(),
-      writeJson(subjectPayload(record.subject()), "subject"),
-      writeJson(contextPayload(record.contextSnapshot()), "contextSnapshot"),
-      writeJson(evidencePayload(record.evidenceRefs()), "evidenceRefs"),
-      writeJson(record.replayInputRef(), "replayInputRef"),
-      writeJson(summaryPayload(record.expectedDecisionSummary()), "expectedDecisionSummary"),
+      writeJson(subjectPayload(command.subject()), "subject"),
+      writeJson(contextPayload(command.contextSnapshot()), "contextSnapshot"),
+      writeJson(evidencePayload(command.evidenceRefs()), "evidenceRefs"),
+      writeJson(command.replayInputRef(), "replayInputRef"),
+      writeJson(summaryPayload(command.expectedDecisionSummary()), "expectedDecisionSummary"),
       versions.snapshotSchemaVersion(),
       versions.decisionSchemaVersion(),
       versions.contextSchemaVersion(),
@@ -321,12 +325,11 @@ public final class JdbcCanonicalReplaySnapshotRepository
       versions.canonicalizationVersion(),
       versions.replayExecutorVersion(),
       versions.hashAlgorithmVersion(),
-      record.replayInputHash(),
-      record.expectedSummaryHash(),
-      record.providerSummaryHash(),
-      record.canonicalInputHash(),
-      record.payloadBytes(),
-      Timestamp.from(record.createdAt())
+      command.replayInputHash(),
+      command.expectedSummaryHash(),
+      command.providerSummaryHash(),
+      command.canonicalInputHash(),
+      command.payloadBytes()
     };
   }
 
@@ -397,10 +400,10 @@ public final class JdbcCanonicalReplaySnapshotRepository
    * 名称或字符串相似性推断关联。
    */
   private void validateSourceIdentity(
-      final String tenantId, final CanonicalReplaySnapshotRecord record) {
-    final CanonicalReplaySnapshotIdentity id = record.identity();
+      final String tenantId, final CanonicalReplaySnapshotWriteCommand command) {
+    final CanonicalReplaySnapshotIdentity id = command.identity();
     final DecisionEvidenceCorrelation correlation = id.correlation();
-    final CanonicalReplaySnapshotVersionVector versions = record.versionVector();
+    final CanonicalReplaySnapshotVersionVector versions = command.versionVector();
 
     requireSourceRow(
         "select decision_id from dh_decision_request"
@@ -411,7 +414,7 @@ public final class JdbcCanonicalReplaySnapshotRepository
         correlation.decisionId(),
         correlation.traceId(),
         correlation.requestId(),
-        record.source(),
+        command.source(),
         versions.decisionSchemaVersion());
     requireSourceRow(
         "select dr.id from decision_request dr join decision_run run"
@@ -424,7 +427,7 @@ public final class JdbcCanonicalReplaySnapshotRepository
         id.decisionRunId(),
         correlation.traceId(),
         correlation.requestId(),
-        record.source());
+        command.source());
     requireSourceRow(
         "select id from qdr_prompt_version where tenant_id=? and id=?"
             + " and version=? and checksum=?",
@@ -455,30 +458,17 @@ public final class JdbcCanonicalReplaySnapshotRepository
         id.modelCallRef(),
         correlation.traceId(),
         correlation.requestId());
-    requireSourceRow(
-        "select id from qdr_replay_case"
-            + " where tenant_id=? and id=? and case_id=?"
-            + " and source_decision_id=? and source_request_id=?"
-            + " and trace_id=? and request_id=? and policy_version=?"
-            + " and model_gateway_version_ref=? and expected_summary_hash=?",
-        "V9 replay case",
+    final V9Projection projection = requireV9Projection(
         tenantId,
-        id.replayCaseRowId(),
-        id.replayCaseId(),
-        correlation.decisionId(),
-        correlation.requestId(),
-        correlation.traceId(),
-        correlation.requestId(),
-        versions.policyVersion(),
-        versions.modelGatewayVersionRef(),
-        record.expectedSummaryHash());
+        command);
     if (id.evaluationCaseRowId() != null) {
       requireSourceRow(
           "select id from qdr_evaluation_case"
               + " where tenant_id=? and id=? and evaluation_id=? and case_id=?"
               + " and source_decision_id=? and source_request_id=?"
               + " and trace_id=? and request_id=? and policy_version=?"
-              + " and model_version_ref=? and model_gateway_version_ref=?",
+              + " and model_version_ref=? and model_gateway_version_ref=?"
+              + " and input_ref_id=? and expected_summary_id=? and expected_summary_hash=?",
           "V9 evaluation case",
           tenantId,
           id.evaluationCaseRowId(),
@@ -490,7 +480,10 @@ public final class JdbcCanonicalReplaySnapshotRepository
           correlation.requestId(),
           versions.evaluationPolicyVersion(),
           versions.modelVersionRef(),
-          versions.modelGatewayVersionRef());
+          versions.modelGatewayVersionRef(),
+          projection.inputRefId(),
+          projection.expectedSummaryId(),
+          command.expectedSummaryHash());
     }
     if (id.regressionVerdictRowId() != null) {
       requireSourceRow(
@@ -498,7 +491,8 @@ public final class JdbcCanonicalReplaySnapshotRepository
               + " where tenant_id=? and id=? and verdict_id=? and case_id=?"
               + " and evaluation_id=? and source_decision_id=? and source_request_id=?"
               + " and trace_id=? and request_id=? and policy_version=?"
-              + " and model_gateway_version_ref=?",
+              + " and model_gateway_version_ref=? and input_ref_id=?"
+              + " and expected_summary_id=? and expected_summary_hash=?",
           "V9 regression verdict",
           tenantId,
           id.regressionVerdictRowId(),
@@ -510,9 +504,97 @@ public final class JdbcCanonicalReplaySnapshotRepository
           correlation.traceId(),
           correlation.requestId(),
           versions.evaluationPolicyVersion(),
-          versions.modelGatewayVersionRef());
+          versions.modelGatewayVersionRef(),
+          projection.inputRefId(),
+          projection.expectedSummaryId(),
+          command.expectedSummaryHash());
     }
   }
+
+  /**
+   * 通过 tenant + replay physical/business ID 精确读取 V9 input/summary projection，并逐字段比较。
+   *
+   * <p>这里不接受 checksum-only、latest、时间顺序或 safe-ref 近似匹配；source 不存在、跨 tenant、JSON/字段漂移均
+   * fail-closed。返回的 UUID 仅用于可选 evaluation/verdict lineage 的同源验证。
+   */
+  private V9Projection requireV9Projection(
+      final String tenantId, final CanonicalReplaySnapshotWriteCommand command) {
+    final CanonicalReplaySnapshotIdentity id = command.identity();
+    final DecisionEvidenceCorrelation correlation = id.correlation();
+    final CanonicalReplaySnapshotVersionVector versions = command.versionVector();
+    final String sql =
+        "select replay.input_ref_id, replay.expected_summary_id, replay.expected_summary_hash,"
+            + " input.ref_type, input.ref_id, input.input_ref, input.content_hash,"
+            + " summary.summary_role, summary.decision_type, summary.action_label,"
+            + " summary.confidence_band, summary.risk_level, summary.summary_json,"
+            + " summary.required_evidence_refs_json,"
+            + " summary.forbidden_actions_json, summary.summary_hash"
+            + " from qdr_replay_case replay"
+            + " join qdr_replay_input_ref input"
+            + " on input.tenant_id=replay.tenant_id and input.id=replay.input_ref_id"
+            + " join qdr_expected_decision_summary summary"
+            + " on summary.tenant_id=replay.tenant_id and summary.id=replay.expected_summary_id"
+            + " where replay.tenant_id=? and replay.id=? and replay.case_id=?"
+            + " and replay.source_decision_id=? and replay.source_request_id=?"
+            + " and replay.trace_id=? and replay.request_id=? and replay.policy_version=?"
+            + " and replay.model_gateway_version_ref=?";
+    final Map<String, Object> row =
+        requireSourceProjection(
+            sql,
+            "V9 replay input/summary projection",
+            tenantId,
+            id.replayCaseRowId(),
+            id.replayCaseId(),
+            correlation.decisionId(),
+            correlation.requestId(),
+            correlation.traceId(),
+            correlation.requestId(),
+            versions.policyVersion(),
+            versions.modelGatewayVersionRef());
+
+    final ReplayInputRef expectedInput = command.replayInputRef();
+    final Map<String, Object> storedInput = readMap(row.get("input_ref"), "V9 replay input ref");
+    if (!expectedInput.refType().equals(text(row, "ref_type"))
+        || !expectedInput.refId().equals(text(row, "ref_id"))
+        || !expectedInput.contentHash().equals(text(row, "content_hash"))
+        || !expectedInput.refType().equals(string(storedInput, "refType"))
+        || !expectedInput.refId().equals(string(storedInput, "refId"))
+        || !expectedInput.contentHash().equals(string(storedInput, "contentHash"))
+        || !command.replayInputHash().equals(text(row, "content_hash"))) {
+      throw new CanonicalReplaySnapshotPersistenceException(
+          "V9 ReplayInputRef or replay_input_hash exact projection mismatch");
+    }
+
+    final ExpectedDecisionSummary expected = command.expectedDecisionSummary();
+    if (!"EXPECTED".equals(text(row, "summary_role"))
+        || !expected.equals(readSummary(row.get("summary_json")))
+        || !expected.decisionType().equals(text(row, "decision_type"))
+        || !expected.actionLabel().equals(text(row, "action_label"))
+        || !expected.confidenceBand().equals(text(row, "confidence_band"))
+        || !expected.riskLevel().name().equals(text(row, "risk_level"))
+        || !expected.requiredEvidenceRefs()
+            .equals(stringList(row.get("required_evidence_refs_json"), "requiredEvidenceRefs"))
+        || !expected.forbiddenActions()
+            .equals(stringList(row.get("forbidden_actions_json"), "forbiddenActions"))
+        || !command.expectedSummaryHash().equals(text(row, "summary_hash"))
+        || !command.expectedSummaryHash().equals(text(row, "expected_summary_hash"))) {
+      throw new CanonicalReplaySnapshotPersistenceException(
+          "V9 expected decision summary exact projection mismatch");
+    }
+    return new V9Projection(uuid(row, "input_ref_id"), uuid(row, "expected_summary_id"));
+  }
+
+  private Map<String, Object> requireSourceProjection(
+      final String sql, final String sourceName, final Object... arguments) {
+    final List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, arguments);
+    if (rows.size() != 1) {
+      throw new CanonicalReplaySnapshotPersistenceException(sourceName + " exact identity mismatch");
+    }
+    return rows.getFirst();
+  }
+
+  /** V9 replay case 已冻结的 input/expected-summary physical lineage。 */
+  private record V9Projection(UUID inputRefId, UUID expectedSummaryId) {}
 
   private void requireSourceRow(
       final String sql, final String sourceName, final Object... arguments) {
@@ -667,8 +749,18 @@ public final class JdbcCanonicalReplaySnapshotRepository
   }
 
   private List<String> stringList(final Object value, final String fieldName) {
-    final Object safe =
-        objectMapper.convertValue(Objects.requireNonNull(value, fieldName), Object.class);
+    final Object present = Objects.requireNonNull(value, fieldName);
+    final Object safe;
+    try {
+      // PostgreSQL JSONB 由驱动返回 PGobject；内存 Map/List 路径则保持 convertValue，二者必须同一语义。
+      safe =
+          present instanceof List<?>
+              ? objectMapper.convertValue(present, Object.class)
+              : objectMapper.readValue(present.toString(), Object.class);
+    } catch (final JsonProcessingException error) {
+      throw new CanonicalReplaySnapshotPersistenceException(
+          "parse " + fieldName + " failed", error);
+    }
     ReplayPersistenceGuard.rejectUnsafeJson(safe, fieldName);
     if (!(safe instanceof List<?> list)) {
       throw new CanonicalReplaySnapshotPersistenceException(fieldName + " must be a JSON array");

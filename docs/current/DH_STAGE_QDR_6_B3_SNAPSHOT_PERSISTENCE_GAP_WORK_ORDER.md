@@ -297,3 +297,27 @@ next action: DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX
 ```
 
 阻断原因是必填 `canonical_input_hash` 无 P3 合法 source、`created_at` 未保持 DB-generated，以及 V9 structured input/summary projection 缺少 JDBC exact source comparison。本 resolution 只同步 review 结论，不授权修改 V10、Java、测试、port/JDBC、API 或 runtime wiring。
+
+## 13. Persistence schema blocker fix resolution
+
+2026-07-11 blocker fix 已完成并通过真实 PostgreSQL/Testcontainers focused validation。V1-V10 保持 immutable；V11 只补 V10 constraints/indexes comments。Snapshot 写入合同只接受已完成 canonicalization/hash 的完整 material，且不允许 caller 提供 `created_at`；V9 input/hash/summary/optional lineage 均由 tenant-bound exact projection validation 保护。
+
+后续 P3 原有“assembler 可先于 hash insert”的边界作废，固定顺序重排为：
+
+```text
+structured assembler
+-> QDR6-CJSON-1 canonicalization
+-> deterministic SHA-256 hash
+-> REPEATABLE_READ identity validation
+-> immutable persistence
+```
+
+当前授权保持：
+
+```text
+ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW_RETRY: YES / NEXT_TASK_ONLY
+ALLOW_B3_P3_IMPLEMENTATION_NOW: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY
+```
