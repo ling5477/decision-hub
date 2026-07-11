@@ -1,5 +1,24 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-6-B4-EVIDENCE-REPLAY-INTERNAL-REPORT
+
+- 新增 `DecisionEvidenceReplayInternalReport`、`DecisionEvidenceReplayReportService`、`InternalAcceptanceStatus` 与 `InternalAcceptanceFinding`，全部位于 `dh-usecase` 内部 `qdr/report` 包。
+- Report 复用现有 evidence aggregate、deterministic replay result、regression report view、provider readiness evaluation 与 observability report，不复制 source model，不新增 input port。
+- 状态按固定 fail-closed 优先级映射为 `FAILED / INVALID / UNSUPPORTED / INCOMPLETE / REJECTED / ACCEPTED`；只有 evidence complete、replay reproducible、regression pass、readiness ready 且 observability pass 才允许 `ACCEPTED`。
+- tenant/trace/request/decision 与 provider/readiness identity 必须 exact match；source 或转换异常只返回固定脱敏 `FAILED` finding，不透出异常内容。
+- Evidence refs、observability refs、replay differences 与统一 findings 均稳定排序；finding constructor 拒绝 raw material、credential-like material 与可执行交易动作。
+- Report 强制携带 internal-only safety declaration，所有 acceptance status authorization helper 固定返回 false。
+- 新增 16 个 B4 回归；focused、`dh-usecase` 519 tests、全仓 1017 tests 均 0 failures/errors/skipped。真实 PostgreSQL 17.10/Testcontainers、V1→V11、quality、Checkstyle 与 Spotless 全部通过。
+- 未修改 migration、V1-V11、production port/JDBC、API/Controller 或 runtime wiring；未持久化 report，未调用 HTTP/Provider/NQ/Agent/LangGraph，未创建 tag，未 push。
+
+```text
+STAGE_QDR_6_B4_INTERNAL_REPORT: DONE / IMPLEMENTED / VERIFIED
+B4_REPORT_INPUT_BOUNDARY_EXPANSION_REQUIRED: NO
+ALLOW_STAGE_QDR_6_FINAL_CLOSE_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_ADDITIONAL_B4_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-FINAL-CLOSE-REVIEW
+```
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-CLOSE-REVIEW
 
 - 在 `dev` / `ae4c944`、clean worktree、empty staged 前提下完成 B3-P1/P2/P3、deterministic replay gate 与 baseline 的只读 close review。

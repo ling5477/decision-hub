@@ -3,6 +3,31 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B4-EVIDENCE-REPLAY-INTERNAL-REPORT validation
+
+```text
+Task type: CODE_CHANGE + INTERNAL_REPORT + EVIDENCE_REPLAY_CONSOLIDATION + FAIL_CLOSED + UNIT_TESTS
+branch: dev
+HEAD before implementation: de6f96f9d637d8ef49fcacf088846d5e543982aa
+start worktree: CLEAN
+start staged: EMPTY
+STAGE_QDR_6_B4_INTERNAL_REPORT: DONE / VERIFIED
+B4_REPORT_INPUT_BOUNDARY_EXPANSION_REQUIRED: NO
+POSTGRESQL_REGRESSION_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+```
+
+| Command / check | Result | Notes |
+| --- | --- | --- |
+| focused B4 report tests | BUILD SUCCESS | 16 tests，覆盖 6 状态映射、tenant/correlation、source failure、stable ordering、unsafe material、authorization 与 architecture guard；0 skipped。 |
+| `mvn -ntp -pl dh-usecase -am test` | BUILD SUCCESS | `dh-usecase` 519 tests，0 failures/errors/skipped。 |
+| `mvn -ntp test` | BUILD SUCCESS | reactor 19/19；Surefire XML 汇总 1017 tests，0 failures/errors/skipped。 |
+| PostgreSQL/Testcontainers regression | PASS | `postgres:17` / PostgreSQL 17.10 实际启动；V1→V11 clean migration；V10 snapshot 16/16、V9 1/1。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | reactor 19/19；root Checkstyle 0 violations；Spotless PASS。 |
+| architecture/security guard | PASS | report package 无 API、persistence、HTTP、Provider、NQ、Agent、clock/random/environment 或交易依赖。 |
+| forbidden-scope diff | PASS | migration、V1-V11、production port/JDBC、API、Controller 与 wiring diff 为空。 |
+
+首次 full-test 命令使用短探测超时，被命令包装器在 5 秒终止；随后以完整超时重新运行并 `BUILD SUCCESS`，不属于产品测试失败。Full tests 的 Mockito/Byte Buddy dynamic agent future-JDK warning 与既有编译 deprecated warning 均为 non-blocking tooling risk。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-DETERMINISTIC-REPLAY-CLOSE-REVIEW validation
 
 ```text
