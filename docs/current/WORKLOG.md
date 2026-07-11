@@ -1,5 +1,13 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY
+
+- 在 `dev` / `990c1bb`、clean worktree、empty staged、V1-V10 blocker-fix diff 为空的前提下执行只读复审。
+- 确认 write/persisted contract 分离、DB-generated `created_at`、V9 tenant-bound exact structured projection 与 V11 metadata-only forward migration 四个原始 blocker 均关闭。
+- 真实运行 targeted usecase/infra、dh-app PostgreSQL、full Maven 与 quality；均 `BUILD SUCCESS`。Snapshot PostgreSQL 13/13、PostgreSQL 17.10、Surefire 合计 965 tests、0 skipped，root Checkstyle 0 violations、Spotless 通过。
+- P3 readiness 判定为 PASS；下一步只允许 `structured assembler -> QDR6-CJSON-1 -> SHA-256 -> REPEATABLE_READ identity validation -> immutable persistence`，不允许 deterministic replay executor、schema/port/JDBC/API/provider/runtime 扩张。
+- 本轮仅修改允许的 `docs/current` 复审结论文档；未修改代码、测试或 migration，未 commit、未 push、未创建 tag。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX
 
 - 从 `CanonicalReplaySnapshotRecord` 拆出 `CanonicalReplaySnapshotWriteCommand`；write command 不含 `createdAt`，只接受完整 `QDR6-CJSON-1 + SHA-256` material，并拒绝缺失、placeholder、moving alias 与 zero hash。

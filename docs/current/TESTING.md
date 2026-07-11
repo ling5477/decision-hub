@@ -3,6 +3,32 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY validation
+
+```text
+Task type: REVIEW_ONLY + MIGRATION_REVIEW + JDBC_BOUNDARY_REVIEW + V9_PROJECTION_REVIEW + HASH_SEQUENCING_REVIEW + P3_READINESS_GATE
+branch: dev
+HEAD: 990c1bb3376cb0edf13a660ffa295b56292da3e9
+start worktree: CLEAN
+start staged: EMPTY
+B3_PERSISTENCE_MILESTONE_REVIEW_RETRY: PASS
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+```
+
+| Command / check | Result | Notes |
+| --- | --- | --- |
+| `git status --short` / staged / untracked | PASS | 开工时 clean；staged 与 untracked 均为空。 |
+| `git diff --check` | PASS | 开工时无输出。 |
+| P1/P2/HEAD `git show --stat` | PASS | `a3bf8bb`、`35eb32c`、`990c1bb` 均可读。 |
+| V1-V10 blocker-fix diff | PASS | `HEAD^..HEAD` 无 V1-V10 migration 修改。 |
+| `mvn -ntp -pl dh-usecase,dh-infra -am test` | BUILD SUCCESS | `dh-infra` 88 tests、0 skipped；Testcontainers 实际启动。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS | `dh-app` 102 tests、0 skipped；snapshot PostgreSQL 13/13。 |
+| `mvn -ntp test` | BUILD SUCCESS | reactor 19/19；Surefire 合计 965 tests、0 failures/errors/skipped。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | root Checkstyle 0 violations；Spotless check 通过；子模块 `checkstyle outputFile` 提示为既有 non-blocking 输出。 |
+| clean V1→V11 / V1→V10→V11 | PASS | PostgreSQL 17.10；11 migrations success，V10 row 保留，V11 comments 可查询。 |
+| created_at / hash sequencing | PASS | DB-generated 回读；write command 无 audit time，placeholder/default/latest/zero hash 拒绝。 |
+| V9 / tenant / duplicate / immutable / rollback | PASS | projection drift 与 cross-tenant 拒绝；duplicate-identical/conflict、SQLSTATE 55000、transaction rollback 通过。 |
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX validation
 
 ```text

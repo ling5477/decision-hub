@@ -154,7 +154,7 @@ review 未通过不得实施 P3。migration、production JDBC/SQL、tenant/corre
 
 ### 7.1 Boundary
 
-允许：依据冻结合同读取 safe structured sources、构造完整 `ReplayInputSnapshot` persistence record、执行 identity/version/safety/size 校验，并在单一 local PostgreSQL transaction 中 insert/find。禁止：`QDR6-CJSON-1` canonicalizer、deterministic SHA-256、replay executor、API/provider/NQ/Agent/LIVE。
+重新定义后的 P3 允许：依据冻结合同读取 safe structured sources、构造完整 `ReplayInputSnapshot`、执行 `QDR6-CJSON-1` canonicalization 与 deterministic SHA-256、执行 identity/version/safety/size 校验，并在单一 local PostgreSQL transaction 中 insert/find。禁止：deterministic replay executor、migration、port/JDBC/API 扩张、provider/NQ/Agent/LIVE。
 
 ### 7.2 Transaction boundary
 
@@ -312,7 +312,7 @@ structured assembler
 -> immutable persistence
 ```
 
-当前授权保持：
+blocker fix 完成时的授权记录如下，现已由后续独立 retry review 消费并取代：
 
 ```text
 ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW_RETRY: YES / NEXT_TASK_ONLY
@@ -320,4 +320,21 @@ ALLOW_B3_P3_IMPLEMENTATION_NOW: NO
 ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: NO
 ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
 next action: DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY
+```
+
+## 14. Persistence milestone review retry resolution
+
+2026-07-11 独立复审在 `990c1bb` 上确认四个原始 blocker 全部关闭，真实 PostgreSQL 17.10/Testcontainers 与全量 Maven/quality evidence 均通过。
+
+```text
+B3_PERSISTENCE_MILESTONE_REVIEW_RETRY: PASS
+ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION: YES
+ALLOW_CANONICALIZER_IMPLEMENTATION: YES
+ALLOW_DETERMINISTIC_HASH_IMPLEMENTATION: YES
+ALLOW_IMMUTABLE_SNAPSHOT_PERSISTENCE_IN_P3: YES
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+ALLOW_ADDITIONAL_SCHEMA_CHANGE_NOW: NO
+ALLOW_PORT_JDBC_EXPANSION_NOW: NO
+ALLOW_API_CHANGE_NOW: NO
+next action: DH-STAGE-QDR-6-B3-P3-CANONICAL-SNAPSHOT-ASSEMBLY-HASH-PERSISTENCE
 ```

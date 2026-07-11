@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-6-B3-PERSISTENCE-SCHEMA-BLOCKER-FIX
-current task status: DONE / IMPLEMENTED / POSTGRESQL_VERIFIED
-next action: DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY
-mode: REVIEW_RETRY_NEXT_ONLY + NO_P3 + NO_CANONICALIZER_IMPLEMENTATION + NO_REPLAY + NO_API + NO_HTTP + NO_PROVIDER + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY
+current task status: PASS / REVIEWED / POSTGRESQL_VERIFIED
+next action: DH-STAGE-QDR-6-B3-P3-CANONICAL-SNAPSHOT-ASSEMBLY-HASH-PERSISTENCE
+mode: P3_NEXT_ONLY + ASSEMBLER + QDR6_CJSON_1 + SHA_256 + REPEATABLE_READ + IMMUTABLE_PERSISTENCE + NO_REPLAY_EXECUTOR + NO_SCHEMA + NO_PORT_JDBC + NO_API + NO_PROVIDER + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 B1/B2、B3 persistence work order、P1、P2 与 persistence schema blocker fix 均已完成。Blocker fix 已拆分 write/persisted contract、恢复 DB-generated `created_at`、补齐 V9 exact projection validation，并通过 V11 metadata-only forward migration 补齐 comments。下一步只能独立重试 persistence milestone review；P3、canonicalizer/hash 实现与 replay 仍未授权。
+Stage-QDR-5 final close review、archive close、tag close 与 current cleanup 均已完成。Stage-QDR-6 B1/B2、B3 persistence work order、P1、P2、persistence schema blocker fix 与 milestone review retry 均已完成。四个原始 blocker 已关闭；下一步只允许实施重新定义的 P3 canonical snapshot assembly/hash/persistence，不包含 deterministic replay executor。
 
 ## 2. 前置状态
 
@@ -55,9 +55,12 @@ ALLOW_B3_P1_MIGRATION_IMPLEMENTATION: YES / CONSUMED
 STAGE_QDR_6_B3_P2: DONE / IMPLEMENTED / POSTGRESQL_VERIFIED
 ALLOW_B3_P2_PORT_JDBC_IMPLEMENTATION_NOW: YES / CONSUMED
 ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW: YES / CONSUMED / BLOCKED
-ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW_RETRY: YES / NEXT_TASK_ONLY
+ALLOW_B3_PERSISTENCE_MILESTONE_REVIEW_RETRY: YES / CONSUMED / PASS
 DH_STAGE_QDR_6_B3_PERSISTENCE_SCHEMA_BLOCKER_FIX: DONE / POSTGRESQL_VERIFIED
-ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
+ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: YES / NEXT_TASK_ONLY
+ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: YES / P3_ONLY
+ALLOW_DETERMINISTIC_HASH_IMPLEMENTATION_NOW: YES / P3_ONLY
+ALLOW_IMMUTABLE_SNAPSHOT_PERSISTENCE_IN_P3: YES
 ALLOW_MIGRATION_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO
 ALLOW_EVIDENCE_CONSOLIDATION_IMPLEMENTATION_NOW: NO
@@ -214,7 +217,7 @@ B4 work order 已完成，范围限于 internal report / acceptance support boun
 禁止新增 V12+ migration；V11 metadata-only blocker fix 已完成。
 禁止修改 V1-V10 migration。
 禁止新增 API / Controller / REST endpoint。
-禁止新增 Repository / JDBC / Service production expansion，除非 review 重新授权。
+禁止新增 Repository / JDBC；milestone retry 只重新授权 P3 assembler/canonicalizer/hash/persistence service 与显式 `REPEATABLE_READ` transaction boundary。
 禁止接真实 HTTP client。
 禁止接真实 provider / Provider SDK。
 禁止新增 OpenAI / Anthropic / Gemini / Ollama SDK。
@@ -233,5 +236,5 @@ B4 work order 已完成，范围限于 internal report / acceptance support boun
 ## 8. 下一任务
 
 ```text
-DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY
+DH-STAGE-QDR-6-B3-P3-CANONICAL-SNAPSHOT-ASSEMBLY-HASH-PERSISTENCE
 ```

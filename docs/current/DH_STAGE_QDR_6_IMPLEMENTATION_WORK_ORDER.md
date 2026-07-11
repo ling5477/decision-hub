@@ -556,6 +556,8 @@ ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION: NO
 
 2026-07-11 persistence schema blocker fix 已完成：write/persisted contract 分离、DB-generated `created_at`、V9 exact projection validation 与 V11 metadata comments 均通过 focused PostgreSQL evidence。后续 P3 必须整体遵循 `structured assembler -> QDR6-CJSON-1 canonicalization -> deterministic SHA-256 hash -> REPEATABLE_READ identity validation -> immutable persistence`，不得在 hash 生成前 insert snapshot。当前只允许 `DH-STAGE-QDR-6-B3-PERSISTENCE-MILESTONE-REVIEW-RETRY`，不授权 P3、canonicalizer 或 replay implementation。
 
+2026-07-11 persistence milestone review retry 已 `PASS`。四个原始 blocker 全部关闭；重新定义后的 P3 可在不新增 migration、port/JDBC 或 API 的边界内实现 `structured assembler -> QDR6-CJSON-1 canonicalizer -> deterministic SHA-256 -> REPEATABLE_READ identity validation -> immutable persistence`。该准入不包含 deterministic replay executor，也不授权 HTTP、Provider、NQ、Agent、LangGraph 或 LIVE。
+
 ### 8.10 B3 测试矩阵
 
 1. same snapshot + same versions + same algorithm 产生相同 hash。
@@ -745,12 +747,15 @@ B4_API_REVIEW_REQUIRED
 
 ```text
 STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
-STAGE_QDR_6_IMPLEMENTATION: B1_DONE / B2_DONE / B3_BLOCKED
+STAGE_QDR_6_IMPLEMENTATION: B1_DONE / B2_DONE / B3_P1_DONE / B3_P2_DONE / B3_P3_ALLOWED_NEXT_ONLY
 
 ALLOW_STAGE_QDR_6_B1_IMPLEMENTATION: YES / CONSUMED
 ALLOW_STAGE_QDR_6_B2_IMPLEMENTATION_NOW: YES / CONSUMED
-ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION_NOW: NO
-ALLOW_CANONICALIZER_IMPLEMENTATION: NO
+ALLOW_STAGE_QDR_6_B3_IMPLEMENTATION_NOW: YES / P3_NEXT_ONLY
+ALLOW_CANONICALIZER_IMPLEMENTATION: YES / P3_ONLY
+ALLOW_DETERMINISTIC_HASH_IMPLEMENTATION: YES / P3_ONLY
+ALLOW_IMMUTABLE_SNAPSHOT_PERSISTENCE_IN_P3: YES
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: NO
 ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION: NO
 ALLOW_SNAPSHOT_PERSISTENCE_GAP_WORK_ORDER: YES
 ALLOW_STAGE_QDR_6_B4_IMPLEMENTATION_NOW: NO
@@ -771,5 +776,5 @@ ALLOW_LIVE: NO
 下一步唯一入口：
 
 ```text
-DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
+DH-STAGE-QDR-6-B3-P3-CANONICAL-SNAPSHOT-ASSEMBLY-HASH-PERSISTENCE
 ```
