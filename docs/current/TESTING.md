@@ -3,6 +3,32 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-7-PLAN validation
+
+```text
+preflight: PASS / dev / 363dadf / clean / staged empty
+Stage-QDR-6 tag: PASS / local and remote annotated tag peeled target b9b68b3
+Stage-QDR-6 current residue: EMPTY
+planning scope: DOCS_ONLY / 9 allowed documents
+git diff --check: PASS
+unexpected files: NONE
+forbidden-scope diff: EMPTY
+migration diff: EMPTY
+current fact consistency: PASS / current sections aligned; historical hits classified
+safety wording scan: PASS
+mvn -ntp -Pquality validate: PASS / reactor 19 of 19
+Checkstyle: PASS / 0 violations
+Spotless: PASS
+full Maven tests: NOT_RUN / planning-only task
+PostgreSQL/Testcontainers: NOT_RUN / planning-only task
+staged files: EMPTY
+commit: NOT_RUN
+push: NOT_RUN
+tag: NOT_CHANGED
+```
+
+本轮只执行 planning docs、current fact synchronization、scope scan 与 Maven quality。Full tests 和 PostgreSQL/Testcontainers 未运行，不得写为本轮 PASS。Stage-QDR-6 tag 未创建、删除、移动或覆盖；Stage-QDR-7 implementation 未启动。
+
 ## 2026-07-11 DH-STAGE-QDR-6-POST-TAG-CURRENT-CLEANUP validation
 
 ```text

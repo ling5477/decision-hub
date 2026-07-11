@@ -55,11 +55,13 @@ STAGE_QDR_6_TAG: DONE / dh-stage-qdr-6-close
 STAGE_QDR_6_TAG_TARGET: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
 STAGE_QDR_6_CURRENT_PROCESS_SOURCES: PRUNED
 STAGE_QDR_6_POST_TAG_CURRENT_CLEANUP: DONE
-STAGE_QDR_7_PLAN: NOT_STARTED / PLANNING_FIRST_ONLY
+STAGE_QDR_7: PLANNING / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_7_PLAN: DONE / PLAN_ONLY
 ALLOW_STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: YES / CONSUMED / PASS
 ALLOW_STAGE_QDR_6_ARCHIVE_PACKET_NOW: YES / CONSUMED
 ALLOW_STAGE_QDR_6_TAG_CLOSE_NOW: NO / ALREADY_TAGGED
-ALLOW_STAGE_QDR_7_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_7_PLAN: YES / CONSUMED
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
@@ -92,9 +94,9 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-6-POST-TAG-CURRENT-CLEANUP
-current task status: DONE / CURRENT_PROCESS_SOURCES_PRUNED
-next action: DH-STAGE-QDR-7-PLAN
+current task: DH-STAGE-QDR-7-PLAN
+current task status: DONE / PLAN_ONLY
+next action: DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## Stage-QDR-4 归档状态
@@ -111,7 +113,7 @@ STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
 STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
 ```
 
-Stage-QDR-4、Stage-QDR-5 与 Stage-QDR-6 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-6 tag 为 `dh-stage-qdr-6-close`，指向 archive commit `b9b68b3`；11 个 current process sources 已在 archive 一致性核验后清理。下一步只允许独立的 `DH-STAGE-QDR-7-PLAN` planning-first；不授权 implementation、real HTTP/provider、Provider SDK、Agent/LangGraph、NQ runtime integration、交易或 LIVE。
+Stage-QDR-4、Stage-QDR-5 与 Stage-QDR-6 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-6 tag 为 `dh-stage-qdr-6-close`，指向 archive commit `b9b68b3`；11 个 current process sources 已在 archive 一致性核验后清理。Stage-QDR-7 planning 已 `DONE / PLAN_ONLY`，当前为 `PLANNING / IMPLEMENTATION_NOT_STARTED`；下一步只允许 `DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER`，不授权 implementation、real HTTP/provider、Provider SDK、Agent/LangGraph、NQ runtime integration、交易或 LIVE。
 
 ## 当前事实源
 
@@ -120,6 +122,7 @@ Stage-QDR-5 已归档并完成 tag close。当前事实源只保留全局状态�
 ```text
 README.md
 docs/current/README.md
+docs/current/DH_STAGE_QDR_7_PLAN.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
@@ -139,6 +142,7 @@ Stage-QDR-5 historical source docs 已归档到 `docs/gates/stage-qdr-5/SOURCE_D
 
 ```text
 docs/current/README.md                  当前文档索引
+docs/current/DH_STAGE_QDR_7_PLAN.md     Stage-QDR-7 limited dry-run readiness 计划
 docs/current/STATUS.md                  唯一当前状态表
 docs/current/WORK_ORDER.md              唯一下一步入口
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md 当前 Codex / Claude 执行纪律

@@ -55,11 +55,13 @@ STAGE_QDR_6_TAG: DONE / dh-stage-qdr-6-close
 STAGE_QDR_6_TAG_TARGET: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
 STAGE_QDR_6_CURRENT_PROCESS_SOURCES: PRUNED
 STAGE_QDR_6_POST_TAG_CURRENT_CLEANUP: DONE
-STAGE_QDR_7_PLAN: NOT_STARTED / PLANNING_FIRST_ONLY
+STAGE_QDR_7: PLANNING / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_7_PLAN: DONE / PLAN_ONLY
 ALLOW_STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: YES / CONSUMED / PASS
 ALLOW_STAGE_QDR_6_ARCHIVE_PACKET_NOW: YES / CONSUMED
 ALLOW_STAGE_QDR_6_TAG_CLOSE_NOW: NO / ALREADY_TAGGED
-ALLOW_STAGE_QDR_7_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_7_PLAN: YES / CONSUMED
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
@@ -93,9 +95,9 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-6-POST-TAG-CURRENT-CLEANUP
-current task status: DONE / CURRENT_PROCESS_SOURCES_PRUNED
-next action: DH-STAGE-QDR-7-PLAN
+current task: DH-STAGE-QDR-7-PLAN
+current task status: DONE / PLAN_ONLY
+next action: DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER
 ```
 
 ## Stage-QDR-4 归档状态
@@ -112,7 +114,7 @@ STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
 STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
 ```
 
-Stage-QDR-4、Stage-QDR-5 与 Stage-QDR-6 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-6 tag 为 `dh-stage-qdr-6-close`，指向 archive commit `b9b68b3`；11 个 current process sources 已清理且archive副本继续保留。下一步只允许 `DH-STAGE-QDR-7-PLAN` planning-first，不授权 implementation/runtime。
+Stage-QDR-4、Stage-QDR-5 与 Stage-QDR-6 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-6 tag 为 `dh-stage-qdr-6-close`，指向 archive commit `b9b68b3`；11 个 current process sources 已清理且archive副本继续保留。Stage-QDR-7 planning 已 `DONE / PLAN_ONLY`，当前为 `PLANNING / IMPLEMENTATION_NOT_STARTED`；下一步只允许 implementation work order，不授权 implementation/runtime。
 
 ## 当前事实源
 
@@ -120,6 +122,7 @@ Stage-QDR-5 已完成 archive close、tag close 与 current cleanup。当前事�
 
 ```text
 README.md
+docs/current/DH_STAGE_QDR_7_PLAN.md
 docs/current/README.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
@@ -144,6 +147,7 @@ docs/current/DB_SCHEMA.md
 
 ```text
 STATUS.md                  当前状态表
+DH_STAGE_QDR_7_PLAN.md     Stage-QDR-7 limited dry-run readiness planning-only 基线
 WORK_ORDER.md              下一步唯一入口
 CODEX_PROJECT_INSTRUCTIONS.md 当前执行纪律
 TESTING.md                 当前验证证据与工具风险

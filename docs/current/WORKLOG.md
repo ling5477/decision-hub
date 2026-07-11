@@ -1,5 +1,22 @@
 # Decision Hub Worklog
 
+## 2026-07-11 DH-STAGE-QDR-7-PLAN
+
+- Preflight确认`dev`/`363dadf` clean、staged empty；Stage-QDR-6 local/remote annotated tag peeled target仍为`b9b68b3`，current QDR-6 residue为空。
+- 基于当前代码现实形成`DH_STAGE_QDR_7_PLAN.md`：既有DH-only limited dry-run inbound endpoint默认关闭，已有HMAC/timestamp/nonce/tenant-source、JDBC replay、payload/memory cap、feature flag、kill switch与audit fail-closed基线。
+- 推荐主线为`Runtime Safety and Guard Baseline`；优先关闭persistent multi-instance rate limit、idempotency/duplicate handling、dynamic kill、resource/deadline/backpressure与redaction evidence缺口。
+- 规划B1 contract/policy、B2 persistent guards、B3 operational resilience、B4 protected entry acceptance、B5 stage close discipline；API/Controller、migration、production Repository/JDBC和security semantics变化必须独立review。
+- NQ-DH runtime alignment、Provider dry-run与Agent/LangGraph/Python runtime继续后置；未启动Stage-QDR-7 implementation。
+
+```text
+STAGE_QDR_7: PLANNING / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_7_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_7_MAINLINE: LIMITED_DRY_RUN_RUNTIME_READINESS
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER
+```
+
 ## 2026-07-11 DH-STAGE-QDR-6-POST-TAG-CURRENT-CLEANUP
 
 - Preflight确认`dev`/`b9b68b3` clean，local/remote annotated tag均指向archive commit。

@@ -1,5 +1,38 @@
 # Decision Hub Status
 
+## 2026-07-11 Stage-QDR-7 limited dry-run runtime readiness plan
+
+```text
+STAGE_QDR_6: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+STAGE_QDR_6_TAG: DONE / dh-stage-qdr-6-close
+STAGE_QDR_6_POST_TAG_CURRENT_CLEANUP: DONE
+STAGE_QDR_7: PLANNING / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_7_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_7_MAINLINE: LIMITED_DRY_RUN_RUNTIME_READINESS
+STAGE_QDR_7_RECOMMENDED_DIRECTION: A / RUNTIME_SAFETY_AND_GUARD_BASELINE
+ALLOW_STAGE_QDR_7_PLAN: YES / CONSUMED
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
+ALLOW_RUNTIME_CONTRACT_IMPLEMENTATION_NOW: NO
+ALLOW_RATE_LIMIT_IMPLEMENTATION_NOW: NO
+ALLOW_IDEMPOTENCY_IMPLEMENTATION_NOW: NO
+ALLOW_API_CHANGE_NOW: NO
+ALLOW_MIGRATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_PROVIDER_SDK: NO
+ALLOW_NQ_RUNTIME_INTEGRATION: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+current task: DH-STAGE-QDR-7-PLAN
+current task status: DONE / PLAN_ONLY
+next action: DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER
+```
+
+Stage-QDR-7 计划基于当前代码现实完成：仓库已有默认关闭的 DH-only limited dry-run inbound endpoint、HMAC/timestamp/nonce/tenant-source gate、JDBC replay guard、payload/memory cap、feature flag、kill switch 与 audit fail-closed；这不等于 NQ runtime integration，也不授权 real HTTP、Provider、Agent 或 LIVE。当前主要 blocker 是 JVM-local rate limit、key-only in-memory idempotency、multi-instance duplicate semantics、动态 emergency kill、deadline/backpressure/resilience 合同和正式 protected-entry acceptance。后续只允许先创建 implementation work order；如需 migration、API/Controller、production Repository/JDBC 或 authentication/guard 语义变化，必须独立 review。
+
 ## 2026-07-11 Stage-QDR-6 post-tag current cleanup
 
 ```text

@@ -17,15 +17,19 @@ STAGE_QDR_6_TAG: DONE / dh-stage-qdr-6-close
 STAGE_QDR_6_TAG_TARGET: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
 STAGE_QDR_6_CURRENT_PROCESS_SOURCES: PRUNED
 STAGE_QDR_6_POST_TAG_CURRENT_CLEANUP: DONE
-next action: DH-STAGE-QDR-7-PLAN
+STAGE_QDR_7: PLANNING / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_7_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_7_MAINLINE: LIMITED_DRY_RUN_RUNTIME_READINESS
+next action: DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER
 ALLOW_STAGE_QDR_6_ARCHIVE_PACKET: YES / CONSUMED
 ALLOW_STAGE_QDR_6_CLOSE_DOCS_COMMIT: NO
 ALLOW_STAGE_QDR_6_TAG_CLOSE_AFTER_ARCHIVE: YES
-ALLOW_STAGE_QDR_7_PLAN: YES / PLANNING_FIRST_ONLY
+ALLOW_STAGE_QDR_7_PLAN: YES / CONSUMED
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
 ```
 
-Stage-QDR-6 已完成archive、annotated tag、remote verification与post-tag current pruning；previous BLOCKED与retry PASS继续保存在archive。下一步只允许 `DH-STAGE-QDR-7-PLAN` planning-first；Stage-QDR-7仍 `NOT_STARTED`，implementation继续禁止。
+Stage-QDR-6 已完成archive、annotated tag、remote verification与post-tag current pruning；previous BLOCKED与retry PASS继续保存在archive。Stage-QDR-7 planning 已完成，推荐先关闭 persistent multi-instance rate limit、idempotency、replay interaction、resource caps、kill switch与fail-closed policy，再做 operational resilience 和既有 protected entry acceptance。下一步只允许 implementation work order；Stage-QDR-7 implementation仍未启动。
 
 ```text
 stage-qdr-1: CLOSED / ACCEPTED
@@ -91,7 +95,7 @@ STAGE_QDR_6: IMPLEMENTING / WORK_ORDER_DONE / B1_DONE / B2_DONE / B3_WORK_ORDER_
 STAGE_QDR_6_PLAN: DONE / PLAN_ONLY
 STAGE_QDR_6_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
 STAGE_QDR_6_IMPLEMENTATION: B1_DONE / B2_DONE / B3_NOT_STARTED
-STAGE_QDR_7: NOT_STARTED
+STAGE_QDR_7: PLANNING / IMPLEMENTATION_NOT_STARTED
 STAGE_QDR_8: NOT_STARTED
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
@@ -145,7 +149,7 @@ Stage-QDR-6 主线已冻结：
 
 ```text
 Stage-QDR-6 = Decision Pipeline Evidence Consolidation / Deterministic Replay Baseline
-Stage-QDR-7 = Limited Dry Run Runtime Readiness / NOT_STARTED
+Stage-QDR-7 = Limited Dry Run Runtime Readiness / PLANNING / IMPLEMENTATION_NOT_STARTED
 Stage-QDR-8 = Agent Runtime Contract Baseline / NOT_STARTED
 ```
 
