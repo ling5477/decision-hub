@@ -4,6 +4,26 @@
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-P1-CANONICAL-SNAPSHOT-MIGRATION
+
+完成 Stage-QDR-6 B3-P1 additive canonical snapshot persistence baseline。新增 V10 独立 immutable table、tenant-aware composite unique/FK、strict structured JSON shape、完整 version/hash metadata、total/per-field payload limits、UPDATE rejection trigger、必要索引和中文 COMMENT；未修改 V1-V9，未 backfill legacy row。
+
+新增 `CanonicalReplaySnapshotIdentity`、`CanonicalReplaySnapshotVersionVector` 与 `CanonicalReplaySnapshotRecord`，复用 B1 correlation 和既有 subject/context/evidence/replay contracts，只做 immutable local validation，不新增 port、Repository、JDBC、assembler、canonicalizer、hash 计算或 replay。
+
+```text
+P1_PREFLIGHT: PASS
+V10_MIGRATION: IMPLEMENTED
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+STAGE_QDR_6_B3_P1: DONE / IMPLEMENTED / VERIFIED
+ALLOW_B3_P2_PORT_JDBC_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-P2-TENANT-BOUND-PORT-JDBC
+```
+
+验证：P1 targeted 15/15 PASS；PostgreSQL/Flyway 真实验证 clean V1-V10、V1-V9 upgrade、tenant FK、version/duplicate/orphan/cross-tenant rejection、UPDATE SQLSTATE 55000、total/context/evidence/summary payload limits 和 transaction rollback；全仓 Surefire 952 tests、0 failures/errors/skipped；quality 19/19、Checkstyle 0、Spotless PASS。未新增 API/Controller、JDBC/Repository/query SQL、runtime wiring、HTTP/provider/NQ/Agent/LangGraph 或交易能力；未创建 tag，未 push。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER
 
 完成 Stage-QDR-6 B3 persistence gap work order。基于 frozen canonical snapshot contract、Option D persistence review 与实际 V5/V6/V8/V9 schema/ports/JDBC/transaction/test patterns，将后续实现拆成 P1 additive migration + persistence contract、P2 tenant-bound ports/JDBC + identity validation、P3 structured snapshot assembler + local transaction persistence。

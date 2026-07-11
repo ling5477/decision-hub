@@ -3,6 +3,58 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-11 DH-STAGE-QDR-6-B3-P1-CANONICAL-SNAPSHOT-MIGRATION validation
+
+```text
+Task type: CODE_CHANGE + ADDITIVE_MIGRATION + PERSISTENCE_CONTRACTS + POSTGRESQL_TESTS + NO_JDBC_IMPLEMENTATION + NO_API + NO_REPLAY_IMPLEMENTATION + NO_PROVIDER + NO_AGENT + NO_LIVE
+branch: dev
+start worktree: CLEAN
+start staged: EMPTY
+start HEAD: 9085b0a582ba17239effd0c57a2e60680bdebb15
+P1_PREFLIGHT: PASS
+V10_MIGRATION: IMPLEMENTED
+POSTGRESQL_TEST_EVIDENCE: PASS
+```
+
+### PostgreSQL V1-V9 preflight
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| PostgreSQL environment | PASS | 一次性本地 PostgreSQL 17.10；Docker Server 29.6.1。 |
+| V1-V9 load | PASS | V1-V9 全部在独立 transaction 中成功加载；49 张 public tables。 |
+| related row counts | PASS / ALL_ZERO | V5 request、V6 request/run、V8 prompt/model/call、V9 replay/evaluation/verdict 共 9 表均为 0 rows。 |
+| duplicate candidates | PASS / ZERO | 6 个拟新增 composite unique key 均无 duplicate。 |
+| required identity nulls | PASS / ZERO | V5/V6/V8 拟纳入 composite identity 的 required columns 均无 null。 |
+| orphan candidates | PASS / ZERO | run→request、gateway→run/prompt/model 均无 orphan。 |
+| index/constraint inventory | REVIEWED | 已读取 9 张 source table 的现有 PK/unique/FK/check/index。 |
+| lock risk | PASS / EMPTY_BASELINE | source tables 为 40-98 KiB empty relations；普通事务型 unique constraint scan 风险低，不需要 concurrent index。 |
+| Flyway transaction compatibility | PASS | V10 failure case 显示 `Changes successfully rolled back`，此前新增 composite constraints 未残留。 |
+| concurrent index sentinel | NOT_TRIGGERED | 未使用或需要 `CREATE UNIQUE INDEX CONCURRENTLY`。 |
+
+### Implementation and validation record
+
+| Command / check | Result | Notes |
+| --- | --- | --- |
+| contract test | PASS | `CanonicalReplaySnapshotRecordTest`：6 tests，0 failure/error/skipped。 |
+| migration presence test | PASS | 3 tests，覆盖 V10 顺序、结构、安全与无 concurrent index/runtime dependency。 |
+| PostgreSQL/Flyway test | PASS | 6 tests，PostgreSQL 17.10，0 skipped。 |
+| clean migration | PASS | Flyway validated/applied V1-V10。 |
+| V1-V9 upgrade | PASS | 先 target V9，再单独应用 V10；V1-V9 history 9/9 保留。 |
+| safe structured insert | PASS | 完整 tenant-bound snapshot 成功插入。 |
+| tenant composite constraints | PASS | orphan 与 cross-tenant source identity 均被 FK 拒绝。 |
+| immutable trigger | PASS | UPDATE 被 SQLSTATE `55000` 拒绝。 |
+| payload limits | PASS | 262144 total、131072 context、65536 evidence refs、32768 expected summary 上限均真实验证。 |
+| migration rollback | PASS | 预置冲突对象导致 V10 失败，先前 ALTER constraints 整体回滚。 |
+| targeted tests | BUILD SUCCESS | 15 tests，0 failures/errors/skipped。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS | 所有 reactor modules success；PostgreSQL tests 真实运行。 |
+| `mvn -ntp test` | BUILD SUCCESS | Surefire 汇总 952 tests，0 failures/errors/skipped。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | 19/19 reactor modules success。 |
+| Checkstyle | PASS | root 0 violations。 |
+| Spotless | PASS | `spotless:check` 无违规。 |
+| Docker/Testcontainers | PASS | Docker Desktop 可用；P1 PostgreSQL 6/6 与既有 V9 PostgreSQL test 均未 skip。 |
+
+首次定向测试因 `dh-usecase` 未声明 AssertJ 而 test compile 失败；未新增依赖，改用现有 JUnit assertions 后通过。第二次失败仅为测试证据 SQL 对 Flyway version 做字符串区间比较；改为 `version::integer` 后全部通过。两次均为测试代码问题，不是 migration failure。
+
 ## 2026-07-11 DH-STAGE-QDR-6-B3-SNAPSHOT-PERSISTENCE-GAP-WORK-ORDER validation
 
 ```text

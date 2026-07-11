@@ -1,5 +1,24 @@
 # Decision Hub Status
 
+## 2026-07-11 Stage-QDR-6 B3-P1 canonical snapshot migration
+
+```text
+DH_STAGE_QDR_6_B3_P1_CANONICAL_SNAPSHOT_MIGRATION: DONE / IMPLEMENTED / VERIFIED
+P1_PREFLIGHT: PASS
+V10_MIGRATION: IMPLEMENTED
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / 0_SKIPPED
+canonical snapshot persistence contracts: IMPLEMENTED
+Stage-QDR-6 B3-P2: NOT_STARTED
+Stage-QDR-6 B3-P3: NOT_STARTED
+ALLOW_B3_P2_PORT_JDBC_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_B3_P3_ASSEMBLER_IMPLEMENTATION_NOW: NO
+ALLOW_CANONICALIZER_IMPLEMENTATION_NOW: NO
+ALLOW_DETERMINISTIC_REPLAY_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-6-B3-P2-TENANT-BOUND-PORT-JDBC
+```
+
+V10 已以 additive、事务型 Flyway migration 新增 `qdr_canonical_replay_snapshot`，并为 V5/V6/V8 补充冻结的 tenant-aware composite unique keys。新表包含完整 structured snapshot/version/hash metadata、tenant-aware FK、256 KiB 总量与分字段 payload constraints、UPDATE rejection trigger、必要索引和中文 COMMENT；V1-V9 未修改，legacy row 未 backfill。P1 仅新增 immutable persistence value/record contracts，不包含 port、Repository、JDBC、assembler、canonicalizer、hash 计算、replay 或 runtime wiring。
+
 ## 2026-07-11 Stage-QDR-6 B3 snapshot persistence gap work order
 
 ```text
