@@ -1,5 +1,19 @@
 # Decision Hub Roadmap
 
+## 2026-07-12 Stage-QDR-7 B1 resource capacity blocker
+
+```text
+Stage-QDR-7 implementation: NOT_STARTED
+B1 guard/truth/domain/duplicate/state/error/redaction contract: FROZEN
+B1 resource budgets: BLOCKED / B1_RESOURCE_CAPACITY_EVIDENCE_BLOCKED
+B2 schema/security review: NOT_AUTHORIZED
+B2 implementation: NOT_AUTHORIZED
+required evidence: latency percentiles + target instances + DB contention + growth/recovery/cleanup + kill propagation SLO
+next action: DH-STAGE-QDR-7-B1-RESOURCE-CAPACITY-BLOCKER
+```
+
+当前只能保留 65536-byte raw payload 与 32768-byte decision context 兼容上限。不得把 JVM-local rate limit 的 1 秒/20 请求、通用 idempotency 的 10 分钟 TTL 或其他模块 timeout 直接升级为 protected endpoint 的容量合同。
+
 ## 2026-07-12 Stage-QDR-7 implementation route
 
 ```text

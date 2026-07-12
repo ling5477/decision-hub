@@ -1,5 +1,23 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY
+
+- Preflight 确认 `dev` / `3ce1cee9`、clean worktree、staged empty；Stage-QDR-7 implementation work order 已提交，B1 未启动 implementation。
+- 逐项映射 implementation work order 的 15 步目标 guard 顺序与现有 filter/controller/authenticator/service/JDBC 现实。
+- 冻结 runtime truth table、四类 key domain、`QDR7-DRYRUN-CJSON-1` hash 字段、nonce/idempotency 交互、duplicate semantics、`RECEIVED/IN_PROGRESS/COMPLETED/FAILED/EXPIRED` 状态机、error taxonomy 和 audit/redaction policy。
+- 记录当前实现差距：feature gate 过晚、rate-limit 早于 HMAC/nonce、idempotency filter 早于 Controller、dynamic kill 缺失、nonce store failure 与 replay 无法区分。
+- 65536-byte payload 与 32768-byte context 作为既有兼容上限冻结；deadline、concurrency、queue、persistent rate quota、idempotency lease/TTL、cleanup/retention 与 kill propagation 缺少容量证据。
+- 按 fail-closed 规则输出 `B1_RESOURCE_CAPACITY_EVIDENCE_BLOCKED`；B2 schema/security review 与 implementation 均未授权。
+- `mvn -ntp -Pquality validate` 通过：reactor 19/19、Checkstyle 0 violations、Spotless PASS；full tests、capacity/load tests 与 Docker/Testcontainers 本轮未运行。
+
+```text
+STAGE_QDR_7_B1_RUNTIME_CONTRACT_SAFETY_POLICY: BLOCKED
+CONTRACT_VERDICT: PARTIALLY_FROZEN / RESOURCE_CAPACITY_BLOCKED
+RESOURCE_BUDGETS: BLOCKED
+ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: NO
+next action: DH-STAGE-QDR-7-B1-RESOURCE-CAPACITY-BLOCKER
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER
 
 - Preflight 确认 `dev` / `a752e113`、clean worktree、staged empty；最新提交为 Stage-QDR-7 plan。

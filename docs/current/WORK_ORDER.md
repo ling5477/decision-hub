@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER
-current task status: DONE / WORK_ORDER_ONLY
-next action: DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY
-mode: CONTRACT_FREEZE_ONLY + NO_STAGE_QDR_7_IMPLEMENTATION + NO_CODE + NO_TEST + NO_SCHEMA + NO_API + NO_PROVIDER + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY
+current task status: BLOCKED / B1_RESOURCE_CAPACITY_EVIDENCE_BLOCKED
+next action: DH-STAGE-QDR-7-B1-RESOURCE-CAPACITY-BLOCKER
+mode: REVIEW_ONLY + RESOURCE_CAPACITY_EVIDENCE + NO_STAGE_QDR_7_IMPLEMENTATION + NO_CODE + NO_TEST + NO_SCHEMA + NO_API + NO_PROVIDER + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-6 已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`；Stage-QDR-7 plan 与 implementation work order 已完成，implementation 仍为 `NOT_STARTED`。下一步只允许 `DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY` 做合同冻结；B2–B4、migration、production port/JDBC、API、Provider、NQ、Agent、LangGraph、交易和 LIVE 均未授权。
+Stage-QDR-6 已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`；Stage-QDR-7 implementation work order 已提交为 `3ce1cee9`，implementation 仍为 `NOT_STARTED`。B1 已冻结 guard、truth table、domain、duplicate/state machine、error 与 redaction 语义，但 resource capacity evidence 不足，整体 `BLOCKED`。下一步只能补齐 endpoint-specific capacity evidence；B2 schema/security review 与 B2–B4 implementation 均未授权。
 
 ## 2. 前置状态
 

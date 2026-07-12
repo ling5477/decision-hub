@@ -3,6 +3,30 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-12 DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY validation
+
+```text
+preflight: PASS / dev / 3ce1cee9 / clean / staged empty
+task scope: REVIEW_ONLY / 7 allowed documents
+git diff --check: PASS / EOL conversion warnings only
+unexpected files: NONE
+forbidden production/test/API/contracts diff: EMPTY
+migration diff: EMPTY
+current fact consistency: PASS / B1 BLOCKED, implementation NOT_STARTED
+safety wording scan: PASS / B2 review and implementation remain NO
+mvn -ntp -Pquality validate: PASS / reactor 19 of 19 / BUILD SUCCESS
+Checkstyle: PASS / 0 violations
+Spotless: PASS
+full Maven tests: NOT_RUN / review-only task; validate lifecycle does not execute test phase
+PostgreSQL/Testcontainers: NOT_RUN / no code, test, migration or persistence change
+staged files: EMPTY
+commit: NOT_RUN
+push: NOT_RUN
+tag: NOT_CHANGED
+```
+
+本轮只执行 docs review、代码现实只读映射、scope scan 与 Maven quality。Quality 通过不关闭 `B1_RESOURCE_CAPACITY_EVIDENCE_BLOCKED`；full tests、load/capacity tests 与 PostgreSQL/Testcontainers 均未运行，不能作为 resource capacity evidence。
+
 ## 2026-07-12 DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER validation
 
 ```text

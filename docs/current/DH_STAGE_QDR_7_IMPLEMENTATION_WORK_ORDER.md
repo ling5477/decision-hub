@@ -6,6 +6,10 @@
 > mainline: `Limited Dry Run Runtime Readiness`  
 > endpoint: `POST /api/ai/decision-dry-runs`（既有，不新增 endpoint）
 
+## B1 review outcome（2026-07-12）
+
+`DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY` 已冻结 guard、truth table、key domain、duplicate/state machine、error taxonomy 与 audit/redaction 语义，但 resource capacity evidence 不足，结论为 `BLOCKED / B1_RESOURCE_CAPACITY_EVIDENCE_BLOCKED`。B2 schema/security review 暂不授权；下一步为 `DH-STAGE-QDR-7-B1-RESOURCE-CAPACITY-BLOCKER`。本结果不修改本工作单的 15 步目标顺序，也不表示 Stage-QDR-7 implementation started。
+
 ## 1. 目标与停止规则
 
 本工作单冻结 Stage-QDR-7 的实施批次、依赖、review 门槛、测试矩阵和回滚策略。本轮不修改生产代码、测试、migration、API、Controller、Repository/JDBC 或 runtime wiring，不启动 Stage-QDR-7 implementation。
