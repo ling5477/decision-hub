@@ -75,6 +75,75 @@ class PersistentGuardedDecisionDryRunServiceTest {
     assertEquals(DecisionDryRunErrorCode.IDEMPOTENCY_STORE_UNAVAILABLE, result.errorCode());
   }
 
+  @Test
+  void admissionCommitUnknownDoesNotExecuteOrReplayBusiness() {
+    final PersistentGuardIdentity identity =
+        new PersistentGuardIdentity(
+            "test",
+            PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
+            PersistentGuardIdentity.NQ_DRYRUN_SOURCE,
+            "tenant-a");
+    final IdempotencyGuardPort admittedPort =
+        new IdempotencyGuardPort() {
+          @Override
+          public IdempotencyAdmissionResult admit(final IdempotencyAdmissionCommand admission) {
+            return new IdempotencyAdmissionResult(
+                com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyAdmissionStatus.ADMITTED,
+                new IdempotencyRecordView(
+                    UUID.randomUUID(),
+                    identity,
+                    admission.requestId(),
+                    admission.requestHash(),
+                    com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyState.RECEIVED,
+                    0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    Instant.now().plusSeconds(60),
+                    Instant.now().plusSeconds(120)));
+          }
+
+          @Override
+          public IdempotencyRecordView transition(final IdempotencyTransitionCommand transition) {
+            throw new AssertionError("commit-unknown must not transition");
+          }
+
+          @Override
+          public IdempotencyRecordView findExact(
+              final PersistentGuardIdentity ignoredIdentity,
+              final String requestId,
+              final String requestHash) {
+            throw new AssertionError("commit-unknown requires later explicit reconcile");
+          }
+        };
+    final DecisionDryRunService service =
+        new PersistentGuardedDecisionDryRunService(
+            rejectingDelegate(),
+            admittedPort,
+            new com.guidinglight.decisionhub.usecase.qdr.guard.GuardTransactionBoundary() {
+              @Override
+              public <T> T required(final java.util.function.Supplier<T> action) {
+                action.get();
+                throw new IllegalStateException("deterministic after-admission commit unknown");
+              }
+            },
+            new InMemoryDecisionAuditRepository(),
+            new DecisionDryRunRequestFingerprint(),
+            new DecisionDryRunSafeResultProjector(query -> null),
+            properties(),
+            Clock.systemUTC());
+
+    final DecisionDryRunResult result = service.execute(command());
+
+    assertFalse(result.success());
+    assertEquals(503, result.status());
+    assertEquals(DecisionDryRunErrorCode.IDEMPOTENCY_COMMIT_UNKNOWN, result.errorCode());
+  }
+
   private static DecisionDryRunService rejectingDelegate() {
     return new DecisionDryRunService() {
       @Override

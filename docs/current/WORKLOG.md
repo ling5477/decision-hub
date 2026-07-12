@@ -8,7 +8,7 @@
 - Idempotency cleanup改为bounded CAS到`EXPIRED`，清理result/failure细节但永久保留identity tombstone；rate cleanup增加DB current-window与safety-grace保护。
 - Heartbeat校验owner/token/state/version；recovery仅接管DB判定已过期lease；duplicate客户端不触发接管。
 - 补齐真实PostgreSQL/JDBC transaction、result reference、并发cleanup和after-commit connection failure证据。
-- 验证：targeted PG 14、full 1054 tests均0 failures/errors/skips；quality Checkstyle 0、Spotless PASS。
+- 验证：targeted PG 14、full 1055 tests均0 failures/errors/skips；quality Checkstyle 0、Spotless PASS。
 - 未修改NQ、V1-V12、API/OpenAPI、Controller/DTO、HMAC/nonce/source；未运行capacity benchmark；未进入B3；未push/tag。
 
 ```text

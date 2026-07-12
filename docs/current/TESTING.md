@@ -17,7 +17,7 @@
 | commit unknown | PASS | test-only Connection代理真实commit后抛异常；分类`RATE_LIMIT_COMMIT_UNKNOWN`，exact reconcile后确认不重新admit。 |
 | targeted PostgreSQL suite | PASS | 14 tests，0 failures/errors/skipped；PostgreSQL 17.10。 |
 | owning modules | PASS | `mvn -ntp -pl dh-usecase,dh-infra,dh-security,dh-api,dh-app -am test`，BUILD SUCCESS。 |
-| full Maven | PASS | `mvn -ntp test`，155 reports、1054 tests、0 failures/errors/skipped。 |
+| full Maven | PASS | `mvn -ntp test`，155 reports、1055 tests、0 failures/errors/skipped。 |
 | quality | PASS | `mvn -ntp -Pquality validate`，19/19，Checkstyle 0，Spotless PASS。 |
 
 首次owning run因120秒工具上限被终止，随后以300秒上限原命令重跑并通过；不把被终止运行计为PASS。`mvn spotless:apply` prefix不可用，最终使用锁定坐标与`-N -Pquality`成功格式化。未运行capacity benchmark。

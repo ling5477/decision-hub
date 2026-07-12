@@ -54,7 +54,7 @@ Rate cleanup只删除`window_end < transaction_timestamp() - safety_grace`的bou
 ```text
 targeted PostgreSQL/Flyway suite: 14 tests / 0 failures / 0 errors / 0 skipped
 owning modules: BUILD SUCCESS
-full Maven: 155 reports / 1054 tests / 0 failures / 0 errors / 0 skipped
+full Maven: 155 reports / 1055 tests / 0 failures / 0 errors / 0 skipped
 quality: BUILD SUCCESS / Checkstyle 0 / Spotless PASS
 PostgreSQL: 17.10 via Testcontainers
 capacity benchmark: NOT RUN / NOT ALLOWED
