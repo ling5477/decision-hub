@@ -212,6 +212,9 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
   private DecisionDryRunResult completedDuplicate(
       final DecisionDryRunCommand command, final IdempotencyRecordView record) {
     try {
+      if (!RESULT_TYPE_DECISION_OUTPUT.equals(record.resultType())) {
+        return rejected(command, 503, DecisionDryRunErrorCode.IDEMPOTENCY_RESULT_UNAVAILABLE);
+      }
       final DecisionDryRunSnapshot snapshot =
           transactions.required(
               () -> resultProjector.project(command.tenantId(), record.resultId()));

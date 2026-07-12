@@ -3,6 +3,21 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| pre-V13 compatibility / V14 | PASS | `V12PersistentRuntimeGuardsFlywayPostgresTest`覆盖fresh V1→V14、padded FAILED V12→V14、V13→V14、空error与33字符result type fail-closed、V1-V13 checksum不变。 |
+| lifecycle DB clock | PASS | production源码architecture guard禁止JVM absolute clock/absolute command input；真实Spring/JDBC以caller `+48h/-48h` probe证明window、TTL、retention、lease、heartbeat和cleanup仍按DB clock。 |
+| result / completion atomicity | PASS | production-equivalent `DecisionDryRunRuntimeWiringConfig`的同一DataSource、`DataSourceTransactionManager`与`GuardTransactionBoundary`；missing/wrong tenant/type/checksum/unreadable均为503，四种completion失败均rollback。 |
+| commit unknown / cleanup | PASS | test-only connection在delegate commit后抛异常，idempotency映射`IDEMPOTENCY_COMMIT_UNKNOWN`并拒绝自动重放；两个独立JDBC cleanup worker证明`SKIP LOCKED`、CAS miss与安全重试。 |
+| targeted PostgreSQL | PASS | `mvn -ntp -pl dh-app -am "-Dtest=V12PersistentRuntimeGuardsFlywayPostgresTest,PersistentGuardProductionWiringPostgresTest,PersistentGuardLifecycleClockArchitectureTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`：23 / 0 / 0 / 0；PostgreSQL 17.10/Testcontainers，callback实际执行。 |
+| owning modules | PASS | `mvn -ntp -pl dh-usecase,dh-infra,dh-security,dh-api,dh-app -am test`：BUILD SUCCESS；135 / 0 / 0 / 0。首次120秒工具超时未计入，后以300秒原命令完整通过。 |
+| full Maven | PASS | `mvn -ntp test`：BUILD SUCCESS；Surefire XML 157 reports / 1064 tests / 0 failures / 0 errors / 0 skipped。 |
+| quality | PASS | `mvn -ntp -Pquality validate`：19/19 reactor成功、Checkstyle 0、Spotless check通过。 |
+
+Mockito/ByteBuddy dynamic-agent提示和一次测试期Hikari closed-connection warning均未改变命令exit 0；属于future-JDK/tooling风险，不是本轮测试失败。未运行capacity benchmark。
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY validation
 
 | Check | Result | Evidence |

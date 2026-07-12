@@ -63,7 +63,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Stage-QDR-7 V12真实PostgreSQL 17/Flyway/并发/CAS/cleanup回归。
+ * Stage-QDR-7 V12→V14真实PostgreSQL 17/Flyway/并发/CAS/cleanup回归。
  *
  * <p>测试只连接一次性container，不调用HTTP、Provider、NQ、Agent/LangGraph、订单、账户、ledger、Paper或LIVE。
  */
@@ -93,8 +93,8 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
   }
 
   @Test
-  void cleanAndExistingV12DatabasesMigrateToV13WithoutChangingHistory() {
-    assertThat(flyway(null).info().current().getVersion().getVersion()).isEqualTo("13");
+  void cleanAndPaddedV12FailedRowsMigrateToV14WithoutChangingHistory() {
+    assertThat(flyway(null).info().current().getVersion().getVersion()).isEqualTo("14");
     assertThat(tableExists("dh_qdr7_rate_limit_bucket")).isTrue();
     assertThat(tableExists("dh_qdr7_idempotency_guard")).isTrue();
 
@@ -102,36 +102,102 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
     final Flyway v11 = flyway("12");
     v11.migrate();
     final Map<String, Integer> checksumsBefore = checksums(v11.info().applied());
-    seedDecisionOutput("tenant-upgrade", "result-upgrade");
     jdbc = new JdbcTemplate(dataSource());
     jdbc.update(
         "insert into dh_qdr7_idempotency_guard"
             + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,hash_version,state,"
-            + "state_version,result_id,result_checksum,completed_at,expires_at,retention_until)"
+            + "state_version,stable_error_code,completed_at,expires_at,retention_until)"
             + " values (?,'test',?,'NQ_DRYRUN','tenant-upgrade','request-upgrade',?,'QDR7-DRYRUN-CJSON-1',"
-            + "'COMPLETED',1,'result-upgrade',?,transaction_timestamp(),transaction_timestamp()+interval '1 hour',"
+            + "'FAILED',1,' SAFE_FAILURE ',transaction_timestamp(),transaction_timestamp()+interval '1 hour',"
             + "transaction_timestamp()+interval '2 hour')",
         UUID.randomUUID(),
         PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
-        HASH_A,
-        HASH_B);
+        HASH_A);
 
     final Flyway v12 = flyway(null);
     v12.migrate();
 
-    assertThat(v12.info().current().getVersion().getVersion()).isEqualTo("13");
+    assertThat(v12.info().current().getVersion().getVersion()).isEqualTo("14");
     final Map<String, Integer> checksumsAfter = checksums(v12.info().applied());
     checksumsBefore.forEach(
         (version, checksum) -> assertThat(checksumsAfter.get(version)).isEqualTo(checksum));
     assertThat(
-            jdbc.queryForObject(
-                "select count(*) from dh_decision_output where tenant_id = 'tenant-upgrade'",
-                Integer.class))
-        .isEqualTo(1);
-    assertThat(jdbc.queryForMap("select result_type,completed_at,failed_at,expired_at from dh_qdr7_idempotency_guard where request_id='request-upgrade'"))
-        .containsEntry("result_type", "DH_DECISION_OUTPUT")
-        .containsEntry("failed_at", null)
+            jdbc.queryForMap(
+                "select stable_error_code,completed_at,failed_at,expired_at"
+                    + " from dh_qdr7_idempotency_guard where request_id='request-upgrade'"))
+        .containsEntry("stable_error_code", "SAFE_FAILURE")
+        .containsEntry("completed_at", null)
         .containsEntry("expired_at", null);
+    assertThat(
+            jdbc.queryForObject(
+                "select data_type || ':' || character_maximum_length"
+                    + " from information_schema.columns"
+                    + " where table_schema='public' and table_name='dh_qdr7_idempotency_guard'"
+                    + " and column_name='result_type'",
+                String.class))
+        .isEqualTo("character varying:32");
+  }
+
+  @Test
+  void v13DatabaseMigratesToV14AndRejectsOversizedResultType() {
+    flyway(null).clean();
+    final Flyway v13 = flyway("13");
+    v13.migrate();
+    assertThat(v13.info().current().getVersion().getVersion()).isEqualTo("13");
+    final Map<String, Integer> checksumsBeforeV14 = checksums(v13.info().applied());
+
+    seedDecisionOutput("tenant-v13", "result-v13");
+    final Flyway v14 = flyway(null);
+    v14.migrate();
+    assertThat(v14.info().current().getVersion().getVersion()).isEqualTo("14");
+    final Map<String, Integer> checksumsAfterV14 = checksums(v14.info().applied());
+    checksumsBeforeV14.forEach(
+        (version, checksum) -> assertThat(checksumsAfterV14.get(version)).isEqualTo(checksum));
+
+    flyway(null).clean();
+    flyway("13").migrate();
+    jdbc = new JdbcTemplate(dataSource());
+    seedDecisionOutput("tenant-overflow", "result-overflow");
+    jdbc.execute(
+        "alter table dh_qdr7_idempotency_guard"
+            + " drop constraint chk_dh_qdr7_idempotency_state_fields");
+    jdbc.execute(
+        "alter table dh_qdr7_idempotency_guard"
+            + " drop constraint chk_dh_qdr7_idempotency_result_type");
+    jdbc.update(
+        "insert into dh_qdr7_idempotency_guard"
+            + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,hash_version,state,"
+            + " state_version,result_type,result_id,result_checksum,completed_at,expires_at,retention_until)"
+            + " values (?,'test',?,'NQ_DRYRUN','tenant-overflow','request-overflow',?,'QDR7-DRYRUN-CJSON-1',"
+            + " 'COMPLETED',1,?,'result-overflow',?,transaction_timestamp(),"
+            + " transaction_timestamp()+interval '1 hour',transaction_timestamp()+interval '2 hour')",
+        UUID.randomUUID(),
+        PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
+        HASH_A,
+        "x".repeat(33),
+        HASH_B);
+    assertThatThrownBy(() -> flyway(null).migrate()).isInstanceOf(org.flywaydb.core.api.FlywayException.class);
+  }
+
+  @Test
+  void preV13CompatibilityRejectsBlankFailedErrorCodeWithoutDefaulting() {
+    flyway(null).clean();
+    flyway("12").migrate();
+    jdbc = new JdbcTemplate(dataSource());
+    jdbc.execute(
+        "alter table dh_qdr7_idempotency_guard"
+            + " drop constraint chk_dh_qdr7_idempotency_state_fields");
+    jdbc.update(
+        "insert into dh_qdr7_idempotency_guard"
+            + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,hash_version,state,"
+            + " state_version,stable_error_code,completed_at,expires_at,retention_until)"
+            + " values (?,'test',?,'NQ_DRYRUN','tenant-invalid','request-invalid-failed',?,'QDR7-DRYRUN-CJSON-1',"
+            + " 'FAILED',1,'   ',transaction_timestamp(),transaction_timestamp()+interval '1 hour',"
+            + " transaction_timestamp()+interval '2 hour')",
+        UUID.randomUUID(),
+        PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
+        HASH_A);
+    assertThatThrownBy(() -> flyway(null).migrate()).isInstanceOf(org.flywaydb.core.api.FlywayException.class);
   }
 
   @Test
@@ -743,7 +809,7 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
 
   private static Map<String, Integer> checksums(final MigrationInfo[] migrations) {
     return Arrays.stream(migrations)
-        .filter(info -> info.getVersion() != null && info.getVersion().getVersion().matches("[1-9]|1[0-2]"))
+        .filter(info -> info.getVersion() != null && info.getVersion().getVersion().matches("[1-9]|1[0-3]"))
         .collect(
             Collectors.toMap(
                 info -> info.getVersion().getVersion(), MigrationInfo::getChecksum));

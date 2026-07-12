@@ -1,5 +1,23 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY
+
+- Preflight确认`dev`、HEAD `865257a`、worktree/staged clean、`origin/dev...HEAD=0/0`、migration max `V13`；未修改NQ。
+- 新增only-pre-V13 SQL callback：只在guard表存在且V13尚未成功时规范化FAILED `stable_error_code`；空值以`23514`拒绝，且为V13 typed terminal timestamp迁移临时替换旧CHECK顺序冲突。
+- 新增forward-only V14：先拒绝超过32字符的非空`result_type`，再收窄至冻结`varchar(32)`；未修改V1-V13。
+- 增加实际Spring/JDBC PostgreSQL证据：caller时钟偏移、result reference 503 taxonomy、同DataSource completion rollback、idempotency真实after-commit unknown、两worker cleanup与CAS miss。
+- 修改completed duplicate入口，先校验固定`DH_DECISION_OUTPUT` type；异常reference统一fail-closed为`IDEMPOTENCY_RESULT_UNAVAILABLE / 503`。
+- 完成targeted 23、owning 135、full 1064 tests，均0 failures/errors/skipped；PostgreSQL 17.10/Testcontainers实际运行，quality通过。
+- 同步root/current factsources为`B1 FROZEN`、`B2 BLOCKER_FIX_RETRY_DONE / REVIEW_PENDING`；previous milestone review保持历史`BLOCKED`，未运行capacity benchmark、未进入B3、未push/tag。
+
+```text
+STAGE_QDR_7_B2_PERSISTENT_GUARDS_BLOCKER_FIX_RETRY: DONE / REVIEW_PENDING
+ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW_RETRY_2: YES
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY-2
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY
 
 - Preflight确认`dev`、HEAD `74cfeb917...`、initial worktree/staged clean；本地相对`origin/dev` behind 0、ahead 4。

@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY
-current task status: BLOCKED / P1_FIX_RETRY_REQUIRED
-next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY
-mode: P1_FIX_RETRY + FORWARD_MIGRATION_COMPATIBILITY + ACTUAL_JDBC_TRANSACTION_EVIDENCE + NO_CAPACITY_BENCHMARK + NO_B3 + NO_API_CHANGE + NO_EXTERNAL_HTTP + NO_PROVIDER + NO_NQ + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY-2
+current task status: REVIEW_PENDING
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY-2
+mode: REVIEW_ONLY + P1_FIX_VERIFICATION + FORWARD_MIGRATION_REVIEW + TRANSACTION_ATOMICITY_REVIEW + POSTGRESQL_REGRESSION + NO_CAPACITY_BENCHMARK + NO_B3 + NO_API_CHANGE + NO_EXTERNAL_HTTP + NO_PROVIDER + NO_NQ + NO_AGENT + NO_LIVE
 ```
 
-Milestone review retry仍为`BLOCKED`，previous milestone review的`BLOCKED`历史结论保持不变。下一步只允许修复V12→V13合法历史行兼容性和冻结schema漂移，并补idempotency真实JDBC after-commit unknown、production Spring同DataSource事务装配、JVM clock offset、actual JDBC result mapping与idempotency concurrent cleanup证据；capacity benchmark、B3、API/OpenAPI、external HTTP/provider/NQ/Agent/LangGraph/LIVE继续禁止。
+Blocker-fix retry已完成：pre-V13 compatibility callback、V14 type alignment、JVM clock isolation、production Spring/JDBC result/transaction、idempotency commit-unknown和concurrent cleanup均已有真实PostgreSQL证据。previous milestone review的`BLOCKED`历史结论保持不变；本工单仅授权独立review retry-2，capacity benchmark、B3、API/OpenAPI、external HTTP/provider/NQ/Agent/LangGraph/LIVE继续禁止。
 
 ## 2. 前置状态
 

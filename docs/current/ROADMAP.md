@@ -1,5 +1,21 @@
 # Decision Hub Roadmap
 
+## 2026-07-12 Stage-QDR-7 B2 blocker-fix retry done
+
+```text
+B1 runtime contract: FROZEN
+B2 implementation: BLOCKER_FIX_RETRY_DONE / REVIEW_PENDING
+pre-V13 compatibility + V14 schema alignment: PASS
+JVM clock / actual JDBC result / production transaction / commit unknown / concurrent cleanup: PASS
+PostgreSQL regression: PASS / 17.10 / ZERO_SKIPS
+previous milestone review: BLOCKED / HISTORICAL_PRESERVED
+post-B2 capacity acceptance: NOT_ALLOWED
+B3 operational safety: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY-2
+```
+
+本轮仅关闭P1修复与证据缺口；B2尚未由独立review接受，不得运行capacity harness或进入B3。
+
 ## 2026-07-12 Stage-QDR-7 B2 milestone review retry blocked
 
 ```text
