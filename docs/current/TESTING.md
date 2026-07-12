@@ -3,6 +3,22 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-SCHEMA-SECURITY-REVIEW validation
+
+本节只记录review与本轮真实命令。候选V12、ports、Repository/JDBC和tests均未创建；因此PostgreSQL/Testcontainers B2实现矩阵为`PLANNED / NOT_RUN`，不得写成PASS。最终Git/Maven结果在本轮命令结束后写入。
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git preflight | PASS_WITH_INPUT_MISMATCH | `dev` / `e3b60e4` / clean / unstaged；`origin/dev...HEAD=0/0`，不同于任务文本“本地领先”。 |
+| migration baseline | PASS | V1-V11实际存在；max=V11；候选next=V12且本轮未创建；V4 nonce、V5 audit/output、V6 Decision Core、V8-V11 QDR persistence已审查。 |
+| current guard reality | PASS | rate为JVM-local fixed window；idempotency为generic in-memory key-only；persistent guard不存在。 |
+| schema/security design | PASS / FROZEN | fixed-window、exact key、idempotency state/lease/result ref、atomic/CAS、cleanup、error taxonomy与port/JDBC边界已冻结。 |
+| PostgreSQL/Testcontainers B2 tests | PLANNED / NOT_RUN | implementation尚未发生；后续必须PostgreSQL 17、Flyway V1-V12、multi-instance/concurrency/rollback/commit-unknown且0 skipped。 |
+| `git diff --check` | PASS_WITH_EOL_WARNING | exit 0；无whitespace error，仅tracked文档LF->CRLF提示。 |
+| forbidden-scope diff | PASS / EMPTY | Java production/test、migration、contracts、API/OpenAPI均无diff。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | 19/19 reactor SUCCESS；root Checkstyle 0 violations；Spotless check通过。validate阶段未执行Maven tests。 |
+| staged/commit/push/tag | EMPTY / NOT_CREATED / NOT_PUSHED / NOT_CREATED | review-only边界保持。 |
+
 ## 2026-07-12 DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-FIX-REVIEW validation
 
 | Check | Result | Evidence |

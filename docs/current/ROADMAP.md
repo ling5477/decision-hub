@@ -1,5 +1,23 @@
 # Decision Hub Roadmap
 
+## 2026-07-12 Stage-QDR-7 B2 schema/security freeze
+
+```text
+B1 runtime contract: FROZEN
+B2 schema/security review: PASS / DESIGN_FROZEN
+B2 selected rate algorithm: FIXED_WINDOW_COUNTER
+B2 migration candidate: V12 / NOT_CREATED
+B2 persistent guards: NOT_IMPLEMENTED
+B2 implementation: NEXT_TASK_ONLY
+B2 actual-wiring 2xx harness: AFTER_IMPLEMENTATION
+post-B2 capacity acceptance: REQUIRED
+B3 operational safety: BLOCKED_UNTIL_B2_IMPLEMENTATION_AND_CAPACITY_ACCEPTANCE
+B4 protected-entry acceptance: BLOCKED_UNTIL_CAPACITY_ACCEPTANCE
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION
+```
+
+Implementation必须保持exact`environment + endpoint + source + tenant`key、PostgreSQL fail-closed、无in-memory fallback、条件状态转换、immutable result reference和bounded cleanup。最终window/quota、lease/TTL、retention与cleanup默认值仍不在本review冻结。
+
 ## 2026-07-12 Stage-QDR-7 B1 capacity gate resequencing
 
 ```text

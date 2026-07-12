@@ -12,6 +12,18 @@
 
 原 resource capacity evidence 确认 actual app-wired endpoint 无有效 2xx benchmark 样本、Docker/Testcontainers unavailable、server queue 与 future persistent guard 容量不可证。该证据保持有效，但已后置为 B2 capacity acceptance 输入；当前禁止在 persistent guards 实现前重跑同一 benchmark。
 
+## B2 schema/security review outcome（2026-07-12）
+
+`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-SCHEMA-SECURITY-REVIEW`已`PASS / DESIGN_FROZEN`：选择PostgreSQL fixed-window counter，冻结V12候选schema、exact key、idempotency state/lease/result reference、atomic/CAS transaction、store failure、cleanup/retention、ports/JDBC与PostgreSQL test matrix。该PASS只开放独立`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION`；本review未创建migration、ports、Repository/JDBC或tests。
+
+```text
+ALLOW_STAGE_QDR_7_B2_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_MIGRATION_IMPLEMENTATION_NOW: NO
+ALLOW_REPOSITORY_JDBC_IMPLEMENTATION_NOW: NO
+ALLOW_CAPACITY_BENCHMARK_RETRY_NOW: NO
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION
+```
+
 ## 1. 目标与停止规则
 
 本工作单冻结 Stage-QDR-7 的实施批次、依赖、review 门槛、测试矩阵和回滚策略。本轮不修改生产代码、测试、migration、API、Controller、Repository/JDBC 或 runtime wiring，不启动 Stage-QDR-7 implementation。
@@ -334,10 +346,12 @@ dynamic kill switch
 ```text
 STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: DONE
 STAGE_QDR_7_B1_CAPACITY_BLOCKER_RESOLUTION: DONE
-B1_SOURCE_NORMALIZATION_CONTRACT_FIX_REQUIRED
-ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: NO / SOURCE_FIX_FIRST
-ALLOW_STAGE_QDR_7_B2_IMPLEMENTATION_NOW: NO
+B1_SOURCE_NORMALIZATION_CONTRACT: PASS / CLOSED
+STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: PASS / DESIGN_FROZEN
+ALLOW_STAGE_QDR_7_B2_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_MIGRATION_IMPLEMENTATION_NOW: NO / REVIEW_TASK_BOUNDARY
+ALLOW_REPOSITORY_JDBC_IMPLEMENTATION_NOW: NO / REVIEW_TASK_BOUNDARY
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_7_B4_ACCEPTANCE_NOW: NO
-next action: DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION
 ```

@@ -1,5 +1,19 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-SCHEMA-SECURITY-REVIEW
+
+- 只读核验Git、current factsources、Flyway V1-V11、nonce/audit/QDR snapshot表、现有rate/idempotency、JDBC事务/cleanup、ports与PostgreSQL/Testcontainers基础。
+- 选择PostgreSQL fixed-window counter，冻结exact key、DB UTC window、原子upsert winner、bounded retry和commit-unknown fail-closed。
+- 冻结`dh_qdr7_rate_limit_bucket`与`dh_qdr7_idempotency_guard`候选结构、state machine、lease/crash recovery、duplicate semantics和existing `dh_decision_output` safe result reference。
+- 冻结usecase-owned transaction coordinator、capability ports、infra JDBC包边界、production no-fallback wiring、bounded `SKIP LOCKED` cleanup和post-B2 capacity gate。
+- 未修改Java、测试、migration、API/OpenAPI、HMAC/nonce/source合同；未实现persistent guards，未运行capacity benchmark，未push/tag。
+
+```text
+STAGE_QDR_7_B2_PERSISTENT_GUARDS_SCHEMA_SECURITY_REVIEW: PASS
+ALLOW_STAGE_QDR_7_B2_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-FIX-REVIEW
 
 - 只读审核`044afba fix(qdr): preserve canonical dry-run source semantics`，确认提交未触及Controller/DTO、OpenAPI、migration、Repository/JDBC或HMAC production implementation。
