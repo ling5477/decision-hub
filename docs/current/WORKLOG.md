@@ -1,5 +1,20 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW
+
+- 只读复核`19666e5`的51-file commit范围、V12、ports/JDBC、transaction boundary、result projector、cleanup、Controller/filter/wiring、taxonomy与直接测试。
+- 确认V1-V11、contracts/OpenAPI、HMAC/nonce无diff；rate conditional upsert、exact key、CAS/version/token、tenant-bound FK、nonce-first guard order和no-in-memory-fallback方向通过。
+- 发现P1 blockers：`expires_at`只写不读且terminal EXPIRED不可达；cleanup使用caller-controlled cutoff而非DB now/safety grace；V12缺冻结的`lease_owner/result_type/failed_at`；lease/TTL/retention混用JVM/DB clock；actual completion/result/cleanup transaction matrix不足。
+- 运行owning、full和quality；PostgreSQL 17.10/Testcontainers真实执行，875/1045 tests均0 failures/errors/skips。绿色测试不覆盖上述P1，因此milestone保持BLOCKED。
+- 未修改Java、测试、V1-V12、API/OpenAPI、HMAC/nonce/source、Repository/JDBC或NQ；未运行capacity benchmark；未push/tag/commit。
+
+```text
+STAGE_QDR_7_B2_PERSISTENT_GUARDS_MILESTONE_REVIEW: BLOCKED
+B2_IMPLEMENTATION_STATUS: BLOCKED / FIX_REQUIRED
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION
 
 - 开工前确认`dev`、`f2573c4`、clean/unstaged、B2 review已提交、max migration V11且V12不存在。

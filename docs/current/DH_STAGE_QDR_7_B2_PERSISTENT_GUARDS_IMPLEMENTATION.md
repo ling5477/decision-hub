@@ -6,6 +6,16 @@
 > endpoint: `POST /api/ai/decision-dry-runs`（既有合同未修改）
 > next action: `DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW`
 
+## Milestone review disposition（2026-07-12）
+
+后续独立milestone review结论为`BLOCKED / P1_FIX_REQUIRED`。本文件保留implementation当时的local validation事实，但不得再将其解释为B2 accepted。阻断项为terminal expiry不可达、cleanup caller-controlled cutoff、冻结schema字段漂移、JVM/DB clock混用和mandatory actual-JDBC transaction/result/cleanup evidence不足。
+
+```text
+B2_IMPLEMENTATION_STATUS: BLOCKED / REVIEW_NOT_ACCEPTED
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX
+```
+
 ## 1. 实施结论
 
 本批次按已冻结的 schema/security review 实现 PostgreSQL multi-instance persistent guards。新增 additive V12、fixed-window atomic admission、persistent idempotency state/CAS/lease、bounded cleanup、tenant-first capability ports、JDBC adapters、usecase transaction orchestration和production wiring。PostgreSQL/store/commit不确定均fail-closed，未提供JVM-local或generic in-memory fallback。

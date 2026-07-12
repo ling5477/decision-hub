@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION
-current task status: DONE / LOCAL_VALIDATED
-next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW
-mode: REVIEW_ONLY + MIGRATION_SECURITY_REVIEW + TRANSACTION_CONCURRENCY_REVIEW + POSTGRESQL_EVIDENCE_REVIEW + NO_NEW_IMPLEMENTATION + NO_CAPACITY_BENCHMARK + NO_API_CHANGE + NO_EXTERNAL_HTTP + NO_PROVIDER + NO_NQ + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW
+current task status: BLOCKED / P1_SCHEMA_EXPIRY_CLEANUP_SAFETY_GAPS
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX
+mode: BLOCKER_FIX + FORWARD_ONLY_SCHEMA + EXPIRY_CLEANUP_DB_TIME + TRANSACTION_REGRESSION + NO_CAPACITY_BENCHMARK + NO_API_CHANGE + NO_EXTERNAL_HTTP + NO_PROVIDER + NO_NQ + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-7 B2已按冻结设计实现并完成本地PostgreSQL 17.10、owning-module、全仓与quality验证。下一步只允许独立milestone review复核V12/schema、事务并发、错误分类、cleanup、scope和测试证据；不得在review中追加实现或运行capacity benchmark。API/OpenAPI、HMAC/nonce/source、external HTTP/provider/NQ/Agent/LangGraph/LIVE继续禁止。
+Milestone review已阻断B2 acceptance。下一步只允许修复terminal expiry不可达、cleanup caller-controlled cutoff、JVM/DB clock混用、冻结schema字段漂移，并补actual JDBC completion/audit/result/cleanup regression。已提交V12不得修改，只能forward-fix；capacity benchmark、B3、API/OpenAPI、external HTTP/provider/NQ/Agent/LangGraph/LIVE继续禁止。
 
 ## 2. 前置状态
 

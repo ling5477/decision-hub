@@ -3,6 +3,25 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git/commit scope | PASS | `dev` / `19666e5` / clean / staged empty；origin/dev 0 behind、1 ahead；51 files均为B2允许范围。 |
+| V1-V11 integrity | PASS | target commit中V1-V11 diff为空；contracts/OpenAPI、HMAC/nonce diff为空。 |
+| owning modules | PASS / BUILD SUCCESS | 875 tests，0 failures/errors/skips；PostgreSQL/Testcontainers实际执行。 |
+| full Maven | PASS / BUILD SUCCESS | 155 reports、1045 tests，0 failures/errors/skips。 |
+| quality | PASS / BUILD SUCCESS | 19/19 reactor；Checkstyle 0；Spotless PASS。 |
+| PostgreSQL | PASS / EXECUTED | PostgreSQL 17.10；V12 suite 7 tests、0 skipped。 |
+| expiry lifecycle | BLOCKED | `expires_at`只写不读；terminal→EXPIRED禁止；production EXPIRED路径不可达。 |
+| cleanup DB-time safety | BLOCKED | caller-provided cutoff直接进入DELETE predicate；无database-now/current-window/safety-grace保护。 |
+| frozen schema alignment | BLOCKED | V12缺少冻结的`lease_owner/result_type/failed_at`，且terminal timestamp语义漂移。 |
+| clock semantics | BLOCKED | lease/TTL/retention absolute times来自JVM clock，DB以transaction time判断。 |
+| result/transaction matrix | INSUFFICIENT | 缺completed missing/checksum mismatch、output/audit/COMPLETED rollback、admission audit rollback、并发cleanup和connection-loss真实JDBC测试。 |
+| milestone verdict | BLOCKED | Maven全绿不能替代缺失的安全不变量与mandatory evidence。 |
+
+Mockito/ByteBuddy dynamic-agent warning为non-blocking tooling risk；Maven wrapper风险未变化。本轮未运行capacity benchmark。
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION validation
 
 | Check | Result | Evidence |

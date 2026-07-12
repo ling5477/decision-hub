@@ -1,5 +1,22 @@
 # Decision Hub Roadmap
 
+## 2026-07-12 Stage-QDR-7 B2 milestone blocked
+
+```text
+B1 runtime contract: FROZEN
+B2 implementation: DONE / REVIEW_BLOCKED
+B2 milestone review: BLOCKED / P1_FIX_REQUIRED
+expiry lifecycle: BLOCKED
+cleanup DB-time safety: BLOCKED
+frozen schema alignment: BLOCKED
+completion/result transaction evidence: INSUFFICIENT
+post-B2 capacity acceptance: NOT_ALLOWED
+B3 operational safety: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX
+```
+
+Blocker fix必须保持V12 immutable并采用forward-only additive migration；如决定删除冻结的`lease_owner/result_type/failed_at`要求，必须先单独完成schema/security errata review。capacity harness不得与blocker fix混跑。
+
 ## 2026-07-12 Stage-QDR-7 B2 persistent guards implemented
 
 ```text

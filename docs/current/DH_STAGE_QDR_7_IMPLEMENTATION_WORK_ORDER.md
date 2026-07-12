@@ -6,6 +6,19 @@
 > mainline: `Limited Dry Run Runtime Readiness`  
 > endpoint: `POST /api/ai/decision-dry-runs`（既有，不新增 endpoint）
 
+## B2 milestone review outcome（2026-07-12）
+
+`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW`结论为`BLOCKED`。尽管PostgreSQL 17.10、owning 875 tests、full 1045 tests与quality全部通过，review发现terminal expiry不可达、cleanup cutoff未由DB time封闭、V12与冻结schema字段漂移、JVM/DB clock混用和关键actual-JDBC事务测试证据不足。
+
+```text
+B2_IMPLEMENTATION_STATUS: BLOCKED / FIX_REQUIRED
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX
+```
+
+Blocker fix必须forward-only；不得修改已提交V12。若要改变冻结schema要求，必须先单独review schema/security errata。
+
 ## B2 implementation outcome（2026-07-12）
 
 `DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION`已`DONE / LOCAL_VALIDATED`。V12、PostgreSQL fixed-window、persistent idempotency state/CAS/lease/result reference、tenant-first ports/JDBC、required transaction orchestration、bounded cleanup和production no-fallback wiring已实现；PostgreSQL 17.10/Testcontainers、owning-module 875 tests、full Maven 1045 tests与quality均通过，0 skipped。
