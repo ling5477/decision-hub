@@ -115,7 +115,7 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
         v9.migrate();
         assertThat(v9.info().current().getVersion().getVersion()).isEqualTo("9");
 
-        final Flyway v11 = flyway(null);
+        final Flyway v11 = flyway("11");
         v11.migrate();
 
         assertThat(v11.info().current().getVersion().getVersion()).isEqualTo("11");
@@ -147,7 +147,7 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
               contextJson("context-v10-upgrade")));
     }
 
-    final Flyway v11 = flyway(null);
+    final Flyway v11 = flyway("11");
     v11.migrate();
 
     assertThat(v11.info().current().getVersion().getVersion()).isEqualTo("11");
@@ -535,7 +535,7 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
             statement.execute("create table qdr_canonical_replay_snapshot(marker integer)");
         }
 
-        assertThatThrownBy(() -> flyway(null).migrate()).isInstanceOf(FlywayException.class);
+        assertThatThrownBy(() -> flyway("11").migrate()).isInstanceOf(FlywayException.class);
 
         try (Connection connection = connection()) {
       assertThat(
@@ -852,7 +852,7 @@ class V10CanonicalReplaySnapshotFlywayPostgresTest {
 
     private static Flyway resetDatabase() {
         cleanDatabase();
-        final Flyway flyway = flyway(null);
+        final Flyway flyway = flyway("11");
         flyway.migrate();
         return flyway;
     }

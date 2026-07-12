@@ -1,5 +1,22 @@
 # Decision Hub Roadmap
 
+## 2026-07-12 Stage-QDR-7 B2 persistent guards implemented
+
+```text
+B1 runtime contract: FROZEN
+B2 schema/security review: PASS / DESIGN_FROZEN
+B2 implementation: DONE / LOCAL_VALIDATED
+B2 migration: V12 / POSTGRESQL_17_10_VERIFIED
+B2 persistent guards: IMPLEMENTED / NO_IN_MEMORY_FALLBACK
+B2 milestone review: NEXT_TASK_ONLY
+post-B2 capacity acceptance: REQUIRED / NOT_STARTED
+B3 operational safety: BLOCKED_UNTIL_MILESTONE_REVIEW_AND_CAPACITY_ACCEPTANCE
+B4 protected-entry acceptance: BLOCKED_UNTIL_CAPACITY_ACCEPTANCE
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW
+```
+
+Milestone review必须复核V12兼容性、exact key、atomic winner、CAS/lease/result reference、audit transaction coupling、cleanup和store/commit taxonomy。只有review通过后才可另起capacity acceptance；本轮实现未选择最终window/quota、lease/TTL、retention或cleanup默认值。
+
 ## 2026-07-12 Stage-QDR-7 B2 schema/security freeze
 
 ```text

@@ -85,7 +85,8 @@ class DecisionContractGapGuardTest {
                     "/dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDryRunAuthRequest.java",
                     "/dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDryRunAuthResult.java",
                     "/dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DecisionDryRun",
-                    "/dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DefaultDecisionDryRunService.java");
+                    "/dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DefaultDecisionDryRunService.java",
+                    "/dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/guard/");
 
     @Test
     void sourceNqDryrunRemainsReviewGatedAndIsNotProductionAllowlisted() throws Exception {

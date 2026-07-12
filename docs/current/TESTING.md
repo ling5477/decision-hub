@@ -3,6 +3,25 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| preflight | PASS | `dev`；起始HEAD `f2573c4`；clean/unstaged；B2 review已提交；max migration V11且V12原先不存在。 |
+| targeted classification | PASS | persistent rate/idempotency transaction-start store failure回归共4 tests，0 failures/errors/skips。 |
+| owning-module Maven | PASS / BUILD SUCCESS | `mvn -ntp -pl dh-usecase,dh-infra,dh-security,dh-api,dh-app -am test`；875 tests，0 failures/errors/skips；exit 0。 |
+| full Maven | PASS / BUILD SUCCESS | `mvn -ntp test`；19-module reactor；155 reports、1045 tests、0 failures/errors/skips；exit 0。 |
+| V12 migration | PASS | clean V1→V12、existing V11→V12、V1-V11 checksum不变、constraint/index/rollback验证通过。 |
+| PostgreSQL/Testcontainers | PASS / EXECUTED | PostgreSQL 17.10真实运行；V12 suite 7 tests，0 failures/errors/skips。 |
+| rate/idempotency concurrency | PASS | fixed-window并发winner精确；两adapter事务模拟多实例；idempotency首次admission单winner；tenant/environment隔离。 |
+| CAS/lease/cleanup/rollback | PASS | expected state/version/token、heartbeat、expired lease recovery、terminal overwrite拒绝、bounded cleanup、active lease保留、rollback通过。 |
+| store/commit taxonomy | PASS | rate/idempotency store unavailable与commit unknown保持独立；无in-memory fallback。 |
+| architecture/security | PASS | generic filter精确排除dry-run route；source/HMAC/nonce与Stage-QDR-6 regression通过；ArchitectureTest通过。 |
+| quality | PASS / BUILD SUCCESS | `mvn -ntp -Pquality validate`；Checkstyle 0 violations；Spotless check通过。 |
+| capacity benchmark | NOT RUN / OUT_OF_SCOPE | 最终生产参数仍由post-B2 capacity acceptance选择。 |
+
+Mockito/ByteBuddy dynamic-agent future-JDK warning为non-blocking tooling risk；本轮无test skip。Maven wrapper既有风险未改变，验证使用系统`mvn`。
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-SCHEMA-SECURITY-REVIEW validation
 
 本节只记录review与本轮真实命令。候选V12、ports、Repository/JDBC和tests均未创建；因此PostgreSQL/Testcontainers B2实现矩阵为`PLANNED / NOT_RUN`，不得写成PASS。最终Git/Maven结果在本轮命令结束后写入。

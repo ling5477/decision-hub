@@ -1,5 +1,23 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION
+
+- 开工前确认`dev`、`f2573c4`、clean/unstaged、B2 review已提交、max migration V11且V12不存在。
+- 新增additive`V12__qdr7_persistent_runtime_guards.sql`，创建rate bucket与idempotency guard表，并为existing`dh_decision_output`补tenant-bound result reference unique constraint；V1-V11未修改。
+- 新增tenant-first capability ports与JDBC adapters，实现DB UTC fixed-window conditional upsert、exact admission/reread、expected state/version/token CAS、heartbeat、expired lease recovery和bounded`SKIP LOCKED` cleanup。
+- 新增domain-separated request fingerprint、safe result projector、persistent idempotency wrapper、persistent rate bridge、strict guard properties与required transaction boundary。
+- 调整dry-run内部wiring与guard顺序：HMAC/timestamp/nonce后才消费persistent rate；generic key-only idempotency filter精确排除dry-run route；NQ feedback原limiter保持不变。
+- 补充Flyway/PostgreSQL并发、CAS/lease/cleanup/rollback、store/commit分类、route exclusion、configuration与architecture regression；修正transaction-start store unavailable被误归类为commit unknown的收口问题。
+- owning-module为875 tests，full Maven为1045 tests；均0 failures/errors/skips。PostgreSQL 17.10/Testcontainers与quality validate通过。
+- 未修改API/OpenAPI/DTO/HMAC canonical material/nonce identity/NQ；未接外部HTTP、Provider、Agent、LangGraph；未触碰交易/Paper/LIVE；未跑capacity benchmark；未push/tag。
+
+```text
+STAGE_QDR_7_B2_PERSISTENT_GUARDS_IMPLEMENTATION: DONE / LOCAL_VALIDATED
+ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: NO
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-SCHEMA-SECURITY-REVIEW
 
 - 只读核验Git、current factsources、Flyway V1-V11、nonce/audit/QDR snapshot表、现有rate/idempotency、JDBC事务/cleanup、ports与PostgreSQL/Testcontainers基础。

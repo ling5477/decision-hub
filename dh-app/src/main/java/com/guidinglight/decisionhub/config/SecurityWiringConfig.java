@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -139,6 +140,7 @@ public class SecurityWiringConfig {
    * @return 有界 fail-closed 限流器。
    */
   @Bean
+  @Primary
   public RateLimiter nqFeedbackRateLimiter(
       @Value("${decisionhub.security.nq-feedback.rate-limit.window-seconds:1}")
           final int windowSeconds,

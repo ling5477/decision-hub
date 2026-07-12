@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -89,7 +90,7 @@ public final class DecisionDryRunController {
   public DecisionDryRunController(
       final DecisionDryRunService dryRunService,
       final HmacNqDryRunAuthenticator dryRunAuthenticator,
-      final RateLimiter rateLimiter,
+      @Qualifier("decisionDryRunRateLimiter") final RateLimiter rateLimiter,
       final ObjectMapper objectMapper) {
     this.dryRunService = Objects.requireNonNull(dryRunService, "dryRunService");
     this.dryRunAuthenticator =
@@ -130,18 +131,6 @@ public final class DecisionDryRunController {
         return toResponse(bodyHeaderBinding, httpTraceId);
       }
 
-      final RateLimitResult rateLimit =
-          rateLimiter.check(headers.source(), tenantId, ROUTE, TimeProvider.now());
-      if (!rateLimit.allowed()) {
-        return toResponse(
-            dryRunService.reject(
-                command,
-                429,
-                DecisionDryRunErrorCode.RATE_LIMITED,
-                "dry-run request rate limited"),
-            httpTraceId);
-      }
-
       final NqDhHeaderValidationResult headerBinding =
           headerValidator.validate(headers, tenantId, parsed.request().requestId(), parsed.request().traceId());
       if (!headerBinding.valid()) {
@@ -179,6 +168,26 @@ public final class DecisionDryRunController {
                 authResult.status(),
                 DecisionDryRunErrorCode.valueOf(authResult.errorCode()),
                 authResult.reason()),
+            httpTraceId);
+      }
+
+      // 必须先完成HMAC/timestamp/nonce认证，再消费persistent rate状态；same nonce不能读取后续guard结果。
+      final RateLimitResult rateLimit =
+          rateLimiter.check(
+              headers.source(),
+              tenantId,
+              ROUTE,
+              TimeProvider.now(),
+              parsed.request().requestId(),
+              parsed.request().traceId());
+      if (!rateLimit.allowed()) {
+        final DecisionDryRunErrorCode errorCode = rateErrorCode(rateLimit.reason());
+        return toResponse(
+            dryRunService.reject(
+                command,
+                errorCode == DecisionDryRunErrorCode.RATE_LIMITED ? 429 : 503,
+                errorCode,
+                "dry-run persistent rate guard rejected request"),
             httpTraceId);
       }
 
@@ -391,6 +400,19 @@ public final class DecisionDryRunController {
     return field == null
         ? ""
         : field.replace("_", "").replace("-", "").trim().toLowerCase(Locale.ROOT);
+  }
+
+  private static DecisionDryRunErrorCode rateErrorCode(final String reason) {
+    if (RateLimitResult.REASON_RATE_LIMITED.equals(reason)) {
+      return DecisionDryRunErrorCode.RATE_LIMITED;
+    }
+    if (RateLimitResult.REASON_STORE_UNAVAILABLE.equals(reason)) {
+      return DecisionDryRunErrorCode.RATE_LIMIT_STORE_UNAVAILABLE;
+    }
+    if (RateLimitResult.REASON_COMMIT_UNKNOWN.equals(reason)) {
+      return DecisionDryRunErrorCode.RATE_LIMIT_COMMIT_UNKNOWN;
+    }
+    return DecisionDryRunErrorCode.GUARD_CONFIGURATION_INVALID;
   }
 
   private record ParsedRequest(

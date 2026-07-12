@@ -2,9 +2,23 @@
 
 > task: `DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER`  
 > mode: `WORK_ORDER_ONLY`  
-> stage: `Stage-QDR-7 / PLANNING / IMPLEMENTATION_NOT_STARTED`  
+> stage: `Stage-QDR-7 / IMPLEMENTING / B2_IMPLEMENTED`
 > mainline: `Limited Dry Run Runtime Readiness`  
 > endpoint: `POST /api/ai/decision-dry-runs`（既有，不新增 endpoint）
+
+## B2 implementation outcome（2026-07-12）
+
+`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION`已`DONE / LOCAL_VALIDATED`。V12、PostgreSQL fixed-window、persistent idempotency state/CAS/lease/result reference、tenant-first ports/JDBC、required transaction orchestration、bounded cleanup和production no-fallback wiring已实现；PostgreSQL 17.10/Testcontainers、owning-module 875 tests、full Maven 1045 tests与quality均通过，0 skipped。
+
+```text
+ALLOW_STAGE_QDR_7_B2_IMPLEMENTATION: YES / CONSUMED
+ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW
+```
+
+该结果不授权capacity benchmark、最终production defaults、B3、API/OpenAPI、external HTTP/provider/NQ/Agent/LangGraph或LIVE。Milestone review必须先复核migration compatibility、transaction concurrency、error taxonomy、cleanup、test evidence和boundary diff。
 
 ## B1 review outcome（2026-07-12）
 

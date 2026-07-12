@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-SCHEMA-SECURITY-REVIEW
-current task status: PASS / DESIGN_FROZEN
-next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION
-mode: IMPLEMENTATION_ONLY + V12_ADDITIVE_MIGRATION + PERSISTENT_GUARDS + POSTGRESQL_TESTCONTAINERS + NO_API_CHANGE + NO_CAPACITY_BENCHMARK + NO_EXTERNAL_HTTP + NO_PROVIDER + NO_NQ + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-IMPLEMENTATION
+current task status: DONE / LOCAL_VALIDATED
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW
+mode: REVIEW_ONLY + MIGRATION_SECURITY_REVIEW + TRANSACTION_CONCURRENCY_REVIEW + POSTGRESQL_EVIDENCE_REVIEW + NO_NEW_IMPLEMENTATION + NO_CAPACITY_BENCHMARK + NO_API_CHANGE + NO_EXTERNAL_HTTP + NO_PROVIDER + NO_NQ + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-7 B2 schema/security review已`PASS / DESIGN_FROZEN`。下一步只允许按`DH_STAGE_QDR_7_B2_PERSISTENT_GUARDS_SCHEMA_SECURITY_REVIEW.md`另起B2 implementation；本review本身未授权或执行migration/Repository/JDBC。API/OpenAPI、HMAC/nonce/source合同、capacity benchmark、external HTTP/provider/NQ/Agent/LangGraph/LIVE继续禁止；如需扩大边界，先进入独立boundary expansion review。
+Stage-QDR-7 B2已按冻结设计实现并完成本地PostgreSQL 17.10、owning-module、全仓与quality验证。下一步只允许独立milestone review复核V12/schema、事务并发、错误分类、cleanup、scope和测试证据；不得在review中追加实现或运行capacity benchmark。API/OpenAPI、HMAC/nonce/source、external HTTP/provider/NQ/Agent/LangGraph/LIVE继续禁止。
 
 ## 2. 前置状态
 

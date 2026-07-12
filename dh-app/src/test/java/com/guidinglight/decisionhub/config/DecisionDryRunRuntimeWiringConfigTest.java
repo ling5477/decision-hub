@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunRuntimeProperties;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunGuardProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 
@@ -35,6 +36,19 @@ class DecisionDryRunRuntimeWiringConfigTest {
         assertThrows(IllegalArgumentException.class, () -> properties("Nq_Dryrun", ""));
         assertThrows(IllegalArgumentException.class, () -> properties("unknown-source", ""));
         assertThrows(IllegalArgumentException.class, () -> properties("NQ_DRYRUN", "tenant-a:nq_dryrun"));
+    }
+
+    @Test
+    void enabledPersistentGuardRequiresExplicitBoundedConfiguration() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> config.decisionDryRunGuardProperties(true, "", 0, 0, 0, 0, 0));
+
+        final DecisionDryRunGuardProperties properties =
+                config.decisionDryRunGuardProperties(true, "test", 1, 20, 30, 600, 3600);
+
+        assertEquals("test", properties.environment());
+        assertEquals(20, properties.rateLimitValue());
     }
 
     private DecisionDryRunRuntimeProperties properties(

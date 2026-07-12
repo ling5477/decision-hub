@@ -37,5 +37,17 @@ public enum DecisionAuditEventType {
   HUMAN_APPROVAL_DECISION_NEEDS_REVIEW,
 
   /** Human Approval Packet 状态转移被状态机拒绝。 */
-  HUMAN_APPROVAL_TRANSITION_DENIED
+  HUMAN_APPROVAL_TRANSITION_DENIED,
+
+  /** Stage-QDR-7 persistent rate admission结果；不包含quota或identity明文。 */
+  QDR7_RATE_LIMIT_ADMISSION,
+
+  /** Stage-QDR-7 exact idempotency admission结果。 */
+  QDR7_IDEMPOTENCY_ADMISSION,
+
+  /** Stage-QDR-7 idempotency已与safe result原子完成。 */
+  QDR7_IDEMPOTENCY_COMPLETED,
+
+  /** Stage-QDR-7 idempotency已冻结stable failure。 */
+  QDR7_IDEMPOTENCY_FAILED
 }

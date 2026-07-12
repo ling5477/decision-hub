@@ -31,4 +31,25 @@ public interface RateLimiter {
    * @return 限流结果；{@link RateLimitResult#allowed()} 为 false 时 controller 映射 HTTP 429 RATE_LIMITED。
    */
   RateLimitResult check(String source, String tenantId, String route, Instant now);
+
+  /**
+   * 带安全审计关联字段的admission；legacy实现默认保持原行为，persistent dry-run实现覆盖此方法。
+   *
+   * @param source canonical source。
+   * @param tenantId 已认证tenant。
+   * @param route canonical route。
+   * @param now legacy实现时钟；persistent实现不得用于window identity。
+   * @param requestId 安全request reference。
+   * @param traceId 安全trace reference。
+   * @return 独立rate/store错误分类。
+   */
+  default RateLimitResult check(
+      final String source,
+      final String tenantId,
+      final String route,
+      final Instant now,
+      final String requestId,
+      final String traceId) {
+    return check(source, tenantId, route, now);
+  }
 }

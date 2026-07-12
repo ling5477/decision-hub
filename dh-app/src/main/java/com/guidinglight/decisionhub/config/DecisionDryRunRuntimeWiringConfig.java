@@ -3,16 +3,31 @@ package com.guidinglight.decisionhub.config;
 import com.guidinglight.decisionhub.security.nq.HmacNqDryRunAuthenticator;
 import com.guidinglight.decisionhub.security.nq.NonceReplayGuard;
 import com.guidinglight.decisionhub.security.nq.NonceReplayGuardType;
+import com.guidinglight.decisionhub.security.nq.RateLimiter;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcGuardCleanupAdapter;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcIdempotencyGuardAdapter;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcRateLimitAdmissionAdapter;
+import com.guidinglight.decisionhub.qdr7.PersistentDecisionDryRunRateLimiter;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditRepository;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOrchestrator;
+import com.guidinglight.decisionhub.usecase.decision.DecisionReplayQueryRepository;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunGuardProperties;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunRequestFingerprint;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunRuntimeProperties;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunSafeResultProjector;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunService;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DefaultDecisionDryRunService;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.PersistentGuardedDecisionDryRunService;
 import com.guidinglight.decisionhub.usecase.qdr.DecisionRequestRepository;
 import com.guidinglight.decisionhub.usecase.qdr.DecisionRunRepository;
 import com.guidinglight.decisionhub.usecase.qdr.QuantDecisionRepository;
 import com.guidinglight.decisionhub.usecase.qdr.QuantSignalRepository;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationPort;
+import com.guidinglight.decisionhub.usecase.qdr.guard.GuardCleanupPort;
+import com.guidinglight.decisionhub.usecase.qdr.guard.GuardTransactionBoundary;
+import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyGuardPort;
+import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardStoreException;
+import com.guidinglight.decisionhub.usecase.qdr.guard.RateLimitAdmissionPort;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -26,6 +41,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Integration-1 limited dry-run endpoint 装配。
@@ -35,6 +54,107 @@ import org.springframework.core.env.Environment;
  */
 @Configuration
 public class DecisionDryRunRuntimeWiringConfig {
+
+    /**
+     * 装配B2 persistent guard配置。Runtime关闭时0值保持惰性；一旦开启，缺失或非法值立即阻断启动。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public DecisionDryRunGuardProperties decisionDryRunGuardProperties(
+            @Value("${decisionhub.integration1.runtime.enabled:false}") final boolean enabled,
+            @Value("${decisionhub.integration1.runtime.guard.environment:}") final String environment,
+            @Value("${decisionhub.integration1.runtime.guard.rate-window-seconds:0}") final int rateWindowSeconds,
+            @Value("${decisionhub.integration1.runtime.guard.rate-limit-value:0}") final int rateLimitValue,
+            @Value("${decisionhub.integration1.runtime.guard.lease-seconds:0}") final long leaseSeconds,
+            @Value("${decisionhub.integration1.runtime.guard.idempotency-ttl-seconds:0}") final long ttlSeconds,
+            @Value("${decisionhub.integration1.runtime.guard.retention-seconds:0}") final long retentionSeconds) {
+        return new DecisionDryRunGuardProperties(
+                enabled,
+                environment,
+                rateWindowSeconds,
+                rateLimitValue,
+                Duration.ofSeconds(leaseSeconds),
+                Duration.ofSeconds(ttlSeconds),
+                Duration.ofSeconds(retentionSeconds));
+    }
+
+    /** 装配DB UTC fixed-window production port；无in-memory fallback。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public RateLimitAdmissionPort rateLimitAdmissionPort(final JdbcTemplate jdbcTemplate) {
+        return new JdbcRateLimitAdmissionAdapter(jdbcTemplate);
+    }
+
+    /** 装配exact identity/CAS idempotency production port。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public IdempotencyGuardPort idempotencyGuardPort(final JdbcTemplate jdbcTemplate) {
+        return new JdbcIdempotencyGuardAdapter(jdbcTemplate);
+    }
+
+    /** 装配bounded cleanup primitives；本轮不创建调度频率。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public GuardCleanupPort guardCleanupPort(final JdbcTemplate jdbcTemplate) {
+        return new JdbcGuardCleanupAdapter(jdbcTemplate);
+    }
+
+    /**
+     * 装配 required local PostgreSQL transaction boundary；缺少 transaction manager 会阻断 bean 创建。
+     *
+     * <p>事务无法开始属于明确的 store unavailable；事务已开始后的提交异常保留原异常并由调用方按
+     * commit-unknown fail-closed，不能自动重放业务执行。
+     *
+     * @param transactionManager DH datasource 对应的 transaction manager。
+     * @return 只暴露 required transaction 能力的 guard boundary。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public GuardTransactionBoundary guardTransactionBoundary(
+            final PlatformTransactionManager transactionManager) {
+        final TransactionTemplate transaction = new TransactionTemplate(transactionManager);
+        return new GuardTransactionBoundary() {
+            @Override
+            public <T> T required(final java.util.function.Supplier<T> action) {
+                try {
+                    final T result = transaction.execute(status -> action.get());
+                    if (result == null) {
+                        throw new IllegalStateException("guard transaction returned null");
+                    }
+                    return result;
+                } catch (final CannotCreateTransactionException error) {
+                    throw new PersistentGuardStoreException(
+                            "persistent guard transaction store unavailable", error);
+                }
+            }
+        };
+    }
+
+    /** 装配canonical request fingerprint，不暴露canonical bytes。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public DecisionDryRunRequestFingerprint decisionDryRunRequestFingerprint() {
+        return new DecisionDryRunRequestFingerprint();
+    }
+
+    /** 装配existing dh_decision_output safe-result projector。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public DecisionDryRunSafeResultProjector decisionDryRunSafeResultProjector(
+            final DecisionReplayQueryRepository replayRepository) {
+        return new DecisionDryRunSafeResultProjector(replayRepository);
+    }
+
+    /** 装配dry-run专用persistent rate bridge；Controller通过qualifier选择，不影响NQ feedback。 */
+    @Bean("decisionDryRunRateLimiter")
+    public RateLimiter decisionDryRunRateLimiter(
+            final RateLimitAdmissionPort admissionPort,
+            final GuardTransactionBoundary transactions,
+            final DecisionAuditRepository auditRepository,
+            final DecisionDryRunGuardProperties properties) {
+        return new PersistentDecisionDryRunRateLimiter(
+                admissionPort, transactions, auditRepository, properties, Clock.systemUTC());
+    }
 
     /**
      * 装配 dry-run runtime feature gate 配置。
@@ -107,8 +227,13 @@ public class DecisionDryRunRuntimeWiringConfig {
      * @param quantSignalRepository     stage-qdr-1 signal 主线 repository。
      * @param quantDecisionRepository   stage-qdr-1 decision 主线 repository。
      * @param qdrModelGatewayIntegration stage-qdr-3 B4 mock gateway integration。
+     * @param fingerprint                不返回 canonical bytes 的 request fingerprint service。
+     * @param resultProjector            tenant-bound immutable safe result projector。
+     * @param idempotencyGuardPort       exact identity/CAS persistent idempotency port。
+     * @param transactions               usecase-owned required transaction boundary。
+     * @param guardProperties            persistent guard 严格配置快照。
      * @param properties                dry-run runtime 配置。
-     * @return dry-run usecase service。
+     * @return 由 persistent idempotency wrapper 封闭的 dry-run usecase service。
      */
     @Bean
     @ConditionalOnMissingBean
@@ -120,8 +245,13 @@ public class DecisionDryRunRuntimeWiringConfig {
             final QuantSignalRepository quantSignalRepository,
             final QuantDecisionRepository quantDecisionRepository,
             final QdrModelGatewayIntegrationPort qdrModelGatewayIntegration,
+            final DecisionDryRunRequestFingerprint fingerprint,
+            final DecisionDryRunSafeResultProjector resultProjector,
+            final IdempotencyGuardPort idempotencyGuardPort,
+            final GuardTransactionBoundary transactions,
+            final DecisionDryRunGuardProperties guardProperties,
             final DecisionDryRunRuntimeProperties properties) {
-        return new DefaultDecisionDryRunService(
+        final DecisionDryRunService delegate = new DefaultDecisionDryRunService(
                 orchestrator,
                 auditRepository,
                 qdrModelGatewayIntegration,
@@ -130,6 +260,15 @@ public class DecisionDryRunRuntimeWiringConfig {
                 quantSignalRepository,
                 quantDecisionRepository,
                 properties,
+                Clock.systemUTC());
+        return new PersistentGuardedDecisionDryRunService(
+                delegate,
+                idempotencyGuardPort,
+                transactions,
+                auditRepository,
+                fingerprint,
+                resultProjector,
+                guardProperties,
                 Clock.systemUTC());
     }
 

@@ -29,11 +29,21 @@ import java.time.Duration;
 @Order(Ordered.HIGHEST_PRECEDENCE + 30)
 public class IdempotencyFilter extends OncePerRequestFilter {
 
+  private static final String PERSISTENT_GUARD_ROUTE = "/api/ai/decision-dry-runs";
+
   private final IdempotencyStore store;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   public IdempotencyFilter(IdempotencyStore store) {
     this.store = store;
+  }
+
+  /**
+   * Stage-QDR-7 protected route由认证后的persistent state machine负责，禁止generic key-only filter提前占位。
+   */
+  @Override
+  protected boolean shouldNotFilter(final HttpServletRequest request) {
+    return PERSISTENT_GUARD_ROUTE.equals(request.getRequestURI());
   }
 
   @Override

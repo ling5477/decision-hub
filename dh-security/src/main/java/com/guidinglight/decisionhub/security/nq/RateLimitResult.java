@@ -26,6 +26,15 @@ public record RateLimitResult(
   /** 超限审计码（用于可观测记录）。 */
   public static final String AUDIT_RATE_LIMITED = "RATE_LIMITED";
 
+  /** Persistent store不可用。 */
+  public static final String REASON_STORE_UNAVAILABLE = "RATE_LIMIT_STORE_UNAVAILABLE";
+
+  /** Persistent transaction提交结果未知。 */
+  public static final String REASON_COMMIT_UNKNOWN = "RATE_LIMIT_COMMIT_UNKNOWN";
+
+  /** Persistent guard配置与stored bucket不一致。 */
+  public static final String REASON_CONFIGURATION_INVALID = "GUARD_CONFIGURATION_INVALID";
+
   /** 放行（静态工厂命名为 pass，避免与 record 自动生成的 {@code allowed()} 访问器冲突）。 */
   public static RateLimitResult pass() {
     return new RateLimitResult(true, REASON_OK, null, null);
@@ -39,5 +48,21 @@ public record RateLimitResult(
    */
   public static RateLimitResult limited(final Integer retryAfterSeconds) {
     return new RateLimitResult(false, REASON_RATE_LIMITED, retryAfterSeconds, AUDIT_RATE_LIMITED);
+  }
+
+  /** Persistent store不可用，必须返回503而不是伪装成429。 */
+  public static RateLimitResult storeUnavailable() {
+    return new RateLimitResult(false, REASON_STORE_UNAVAILABLE, null, REASON_STORE_UNAVAILABLE);
+  }
+
+  /** Transaction commit未知，调用方不得自动重放。 */
+  public static RateLimitResult commitUnknown() {
+    return new RateLimitResult(false, REASON_COMMIT_UNKNOWN, null, REASON_COMMIT_UNKNOWN);
+  }
+
+  /** Guard配置漂移，runtime必须fail-closed。 */
+  public static RateLimitResult configurationInvalid() {
+    return new RateLimitResult(
+        false, REASON_CONFIGURATION_INVALID, null, REASON_CONFIGURATION_INVALID);
   }
 }

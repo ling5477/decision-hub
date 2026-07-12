@@ -60,6 +60,23 @@ final class IdempotencyFilterSecurityTest {
     assertEquals(200, response.getStatus());
   }
 
+  @Test
+  void protectedDryRunRouteSkipsGenericKeyOnlyIdempotencyStore() throws Exception {
+    final RecordingStore store = new RecordingStore(true);
+    final IdempotencyFilter filter = new IdempotencyFilter(store);
+    final MockHttpServletRequest request =
+        new MockHttpServletRequest("POST", "/api/ai/decision-dry-runs");
+    final MockHttpServletResponse response = new MockHttpServletResponse();
+    request.addHeader("Idempotency-Key", "must-not-be-consumed");
+    request.setAttribute(AuthenticatedRequest.TENANT_ID_ATTR, "tenant-a");
+
+    filter.doFilter(request, response, new MockFilterChain());
+
+    assertNull(store.tenantId);
+    assertNull(store.key);
+    assertEquals(200, response.getStatus());
+  }
+
   /** 记录幂等写入参数，避免测试依赖真实 store 的时间清理行为。 */
   private static final class RecordingStore implements IdempotencyStore {
     private final boolean result;

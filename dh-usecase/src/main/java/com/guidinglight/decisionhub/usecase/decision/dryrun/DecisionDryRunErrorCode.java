@@ -31,6 +31,36 @@ public enum DecisionDryRunErrorCode {
   /** 入站限流拒绝。 */
   RATE_LIMITED,
 
+  /** Persistent rate-limit store不可用。 */
+  RATE_LIMIT_STORE_UNAVAILABLE,
+
+  /** Persistent rate-limit transaction提交结果未知。 */
+  RATE_LIMIT_COMMIT_UNKNOWN,
+
+  /** Same requestId/hash仍在处理。 */
+  IDEMPOTENCY_IN_PROGRESS,
+
+  /** Same requestId使用不同业务hash。 */
+  IDEMPOTENCY_CONFLICT,
+
+  /** Idempotency tombstone已过期，必须使用新requestId。 */
+  IDEMPOTENCY_EXPIRED,
+
+  /** Persistent idempotency store不可用。 */
+  IDEMPOTENCY_STORE_UNAVAILABLE,
+
+  /** Persistent idempotency transaction提交结果未知。 */
+  IDEMPOTENCY_COMMIT_UNKNOWN,
+
+  /** Idempotency状态损坏或CAS非法。 */
+  IDEMPOTENCY_STATE_INVALID,
+
+  /** COMPLETED safe result缺失或checksum不符。 */
+  IDEMPOTENCY_RESULT_UNAVAILABLE,
+
+  /** Persistent guard配置非法；正常应在启动时阻断。 */
+  GUARD_CONFIGURATION_INVALID,
+
   /** dry-run 上下文超过内存上限。 */
   MEMORY_LIMIT_EXCEEDED,
 
