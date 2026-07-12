@@ -1,5 +1,45 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-B1-CAPACITY-BLOCKER-RESOLUTION
+
+- 以 review-only 方式核对 OpenAPI、DTO、Controller、HMAC authenticator、runtime source allowlist/pair、application profiles、fixtures/tests、resource evidence、persistent guard 与 metrics 现实。
+- 冻结 canonical source 为 case-sensitive exact `NQ_DRYRUN`：request 不 trim/不改写，config 仅 trim 并保留 case，signature 使用原始 wire value，allowlist/pair 精确比较。
+- 发现 `DecisionDryRunRuntimeProperties` lowercases source 而 authenticator 坚持 exact-wire，裁定为 `PRODUCTION_CODE_DRIFT`；OpenAPI coverage ambiguity 与历史 fixture/诊断 harness drift 作为伴随发现记录。
+- 将容量门禁拆为 pre-B2 safety contract 与 post-B2 measured defaults；冻结配置类型/单位/合法范围/absolute ceiling/跨字段约束，未选择运行默认值。
+- 修正路线为 B1 → B2 schema/security review → persistent guards → actual-wiring 2xx harness → B2 capacity acceptance → B3 → B4；persistent store failure 禁止 in-memory fallback。
+- 本轮未运行 benchmark、Docker/Testcontainers 或 Maven tests，未修改代码/测试/migration/API/OpenAPI/wiring/NQ，未 commit/push/tag。
+- `mvn -ntp -Pquality validate` 通过：reactor 19/19 `SUCCESS`、root Checkstyle 0 violations、Spotless PASS；未把 validate 写成 Maven tests PASS。
+
+```text
+STAGE_QDR_7_B1_CAPACITY_BLOCKER_RESOLUTION: DONE
+SOURCE_DRIFT_DISPOSITION: CODE_FIX_REQUIRED
+B1_SOURCE_NORMALIZATION_CONTRACT_FIX_REQUIRED
+CAPACITY_GATE_SEQUENCE: FROZEN
+PRE_B2_SAFETY_LIMITS: FROZEN
+POST_B2_CAPACITY_ACCEPTANCE: REQUIRED
+ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: NO / SOURCE_FIX_FIRST
+next action: DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX
+```
+
+## 2026-07-12 DH-STAGE-QDR-7-B1-RESOURCE-CAPACITY-BLOCKER
+
+- Preflight确认`dev`/`8543f691` clean、staged empty；B1 contract为`PARTIALLY_FROZEN / RESOURCE_CAPACITY_BLOCKED`。
+- 采集Windows/CPU/内存/JDK/Maven/JVM、Tomcat/Hikari/PostgreSQL/Docker/Testcontainers与current rate/idempotency环境事实。
+- 启动test-profile loopback应用与唯一隔离PostgreSQL数据库；未使用生产凭证或真实业务数据，结束后已停止应用并删除临时库。
+- Existing standalone MockMvc不经过Tomcat/Hikari/PostgreSQL，不能作为capacity harness。
+- 正式4 payload × 5 concurrency × warmup/100 samples尝试全部`SOURCE_DENIED / 403`；lowercase wiring诊断随后在mock gateway处`UNKNOWN_ERROR / 500`。有效2xx samples为0，所有耗时/吞吐数据排除。
+- Actuator确认Hikari max/min 10，但Tomcat worker/queue未暴露；applicationTaskExecutor呈无界配置，不能作为bounded endpoint queue。
+- Docker daemon不可用；全仓1017 tests通过但21个PostgreSQL/Testcontainers tests skipped。
+- 不填临时默认数值，维持`RESOURCE_CAPACITY_EVIDENCE: INSUFFICIENT`与B2禁止。
+
+```text
+STAGE_QDR_7_B1_RESOURCE_CAPACITY_BLOCKER: BLOCKED
+VALID_SUCCESS_SAMPLES: 0
+RESOURCE_CAPACITY_EVIDENCE: INSUFFICIENT
+ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: NO
+next action: DH-STAGE-QDR-7-B1-RESOURCE-CAPACITY-BLOCKER-RETRY
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY
 
 - Preflight 确认 `dev` / `3ce1cee9`、clean worktree、staged empty；Stage-QDR-7 implementation work order 已提交，B1 未启动 implementation。

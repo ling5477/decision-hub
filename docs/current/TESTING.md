@@ -3,6 +3,48 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-12 DH-STAGE-QDR-7-B1-CAPACITY-BLOCKER-RESOLUTION validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| source contract code reality | REVIEWED / CODE_FIX_REQUIRED | Authenticator exact-wire 且 tests 拒绝 lowercase/alias；runtime properties 执行 lowercase；OpenAPI 未声明 dry-run endpoint/source。 |
+| capacity gate sequence | FROZEN | pre-B2 safety contract 与 post-B2 measured defaults 已拆分；不要求在 persistent guards 实现前测量 contention/lease/cleanup。 |
+| capacity benchmark | NOT RUN / FORBIDDEN_THIS_TASK | 既有 0 个 2xx 证据保留；source fix 和 persistent guards 前不重跑。 |
+| Maven tests | NOT RUN / REVIEW_ONLY | 本轮不修改 Java 或测试；`quality validate` lifecycle 不等于 tests。 |
+| Docker/Testcontainers | NOT RUN / REQUIRED_LATER | 后续 actual-wiring 2xx harness 要求 0 skipped；本轮不启动。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | Reactor 19/19 `SUCCESS`；root Checkstyle 0 violations；Spotless check通过。子模块缺少独立 Checkstyle outputFile 的提示不改变root结果。 |
+
+本轮不沿用历史 benchmark 或 Docker 结果作为 PASS，不把 pre-B2 absolute ceiling 写成生产默认值。
+
+## 2026-07-12 DH-STAGE-QDR-7-B1-RESOURCE-CAPACITY-BLOCKER validation
+
+```text
+preflight: PASS / dev / 8543f691 / clean / staged empty
+environment inventory: PASS / Windows 11 / 16C32T / Java 21.0.9 / Maven 3.9.12
+embedded server dependency: PASS / Tomcat 10.1.50
+runtime datasource: PASS / isolated PostgreSQL 17.7 / Hikari max 10 observed
+Docker daemon: UNAVAILABLE
+Testcontainers capacity evidence: NOT_AVAILABLE
+actual test-profile app start: PASS / loopback / health UP after disabling Redis health indicator for test process only
+benchmark matrix attempt: INVALID / 2400 formal attempts all SOURCE_DENIED 403
+lowercase diagnostic path: INVALID / mock gateway UNKNOWN_ERROR 500
+valid success samples: 0
+benchmark repeatability: FAIL / no reproducible 2xx success harness
+temporary app: STOPPED
+temporary database: REMOVED
+mvn -ntp test: PASS / BUILD SUCCESS
+Surefire: 148 suites / 1017 tests / 0 failures / 0 errors / 21 skipped
+PostgreSQL/Testcontainers suites: 21 skipped / Docker unavailable
+mvn -ntp -Pquality validate: PASS / reactor 19 of 19
+Checkstyle: PASS / 0 violations
+Spotless: PASS
+commit: NOT_RUN
+push: NOT_RUN
+tag: NOT_CHANGED
+```
+
+403/500请求耗时属于拒绝/失败路径，全部排除，未写入capacity budget。Full tests通过不等于容量证据充分；Testcontainers skipped不能写为PASS。
+
 ## 2026-07-12 DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY validation
 
 ```text

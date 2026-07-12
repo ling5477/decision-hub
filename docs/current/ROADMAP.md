@@ -1,5 +1,37 @@
 # Decision Hub Roadmap
 
+## 2026-07-12 Stage-QDR-7 B1 capacity gate resequencing
+
+```text
+B1: safety semantics + config model + legal ranges + absolute hard ceiling / FROZEN
+source contract: NQ_DRYRUN exact wire / FROZEN
+source production-code drift: CODE_FIX_REQUIRED
+B2 schema/security review: AFTER_SOURCE_FIX / FINAL_DEFAULTS_NOT_REQUIRED
+B2 implementation: NOT_AUTHORIZED
+B2 actual-wiring 2xx harness: AFTER_PERSISTENT_GUARDS
+B2 capacity acceptance: REQUIRED / NOT_STARTED
+B3 operational safety: AFTER_B2_IMPLEMENTATION
+B4 protected-entry acceptance: BLOCKED_UNTIL_CAPACITY_ACCEPTANCE
+next action: DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX
+```
+
+最终 deadline、concurrency、queue、rate、lease/TTL、cleanup 与 retention 默认值不得在 B1 编造。B2 schema/security review 先消费 pre-B2 safety contract；persistent guards 完成后，以 canonical source/HMAC、deterministic mock gateway、loopback、isolated PostgreSQL、Docker/Testcontainers 0 skipped 和完整 Tomcat/Hikari/JVM/HTTP metrics 运行可重复 2xx harness，再冻结 measured defaults。Store failure 禁止回退 in-memory。
+
+## 2026-07-12 Stage-QDR-7 B1 capacity evidence retry
+
+```text
+B1 capacity evidence: BLOCKED / INSUFFICIENT
+valid success samples: 0
+Docker/Testcontainers: UNAVAILABLE / 21_SKIPPED
+actual app-wired success harness: NOT_READY
+Tomcat worker/queue metrics: NOT_OBSERVABLE
+future persistent guard capacity: NOT_IMPLEMENTED / NOT_MEASURABLE
+B2 schema/security review: NOT_AUTHORIZED
+next action: DH-STAGE-QDR-7-B1-RESOURCE-CAPACITY-BLOCKER-RETRY
+```
+
+Retry前必须先提供不修改正式合同的2xx mock-only runtime seed/harness、可观测server queue/threads、Docker/PostgreSQL并发环境及future persistent guard容量测量路径。不得用403/500拒绝路径或standalone MockMvc结果冻结生产预算。
+
 ## 2026-07-12 Stage-QDR-7 B1 resource capacity blocker
 
 ```text

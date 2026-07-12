@@ -4,24 +4,37 @@
 > mode: `REVIEW_ONLY`  
 > endpoint: `POST /api/ai/decision-dry-runs`  
 > implementation: `NOT_STARTED`  
-> verdict: `BLOCKED / B1_RESOURCE_CAPACITY_EVIDENCE_BLOCKED`
+> verdict: `BLOCKED / SOURCE_CODE_FIX_REQUIRED`
+> capacity sequence: `FROZEN / POST_B2_MEASUREMENT_REQUIRED`
+
+## Capacity blocker resolution outcome（2026-07-12）
+
+`DH-STAGE-QDR-7-B1-CAPACITY-BLOCKER-RESOLUTION` 已将容量门禁拆为 pre-B2 safety contract 与 post-B2 measured defaults。Payload `65536 bytes`、context `32768 bytes`、所有配置字段类型/单位、合法范围、绝对 hard ceiling、跨字段关系、invalid-config startup failure、bounded-only 与 no-in-memory-fallback 已冻结；deadline/concurrency/queue/rate/lease/TTL/cleanup/retention 的运行默认值全部后置到 B2 persistent guards + actual-wiring 2xx harness 之后。
+
+Source contract 冻结为 exact case-sensitive `NQ_DRYRUN`、request 不 trim/不改写、config 仅 trim 且保留 case、signature 使用原始 wire value。但 `DecisionDryRunRuntimeProperties` 仍 lowercase source，属于 `PRODUCTION_CODE_DRIFT`，因此触发 `B1_SOURCE_NORMALIZATION_CONTRACT_FIX_REQUIRED`。B1 runtime contract 仍因 source 代码修复保持 `BLOCKED`；当前不重跑 capacity benchmark。
+
+## Resource capacity evidence outcome（2026-07-12）
+
+`DH-STAGE-QDR-7-B1-RESOURCE-CAPACITY-BLOCKER` 已完成环境与 harness 核验，但 actual app-wired endpoint 无 2xx successful sample，Docker/Testcontainers 为 21 skipped，Tomcat queue 与 future persistent guard evidence 缺失。证据结论仍为 `RESOURCE_CAPACITY_EVIDENCE_INSUFFICIENT`，但其 gate 位置已纠正为 post-B2 capacity acceptance；不再要求在 persistent guards 实现前测量其 contention、lease、cleanup 或吞吐。
 
 ## 1. Review 结论
 
-本 review 冻结 Stage-QDR-7 limited dry-run entry 的目标安全合同，但不确认当前实现已满足该合同。Guard 目标顺序、truth table、key domain、duplicate semantics、idempotency 状态机、error taxonomy 与 audit/redaction policy 已形成唯一语义；resource budgets 因 endpoint-specific capacity evidence 不足无法完整冻结，因此 B1 整体保持 `BLOCKED`，B2 schema/security review 不准入。
+本 review 冻结 Stage-QDR-7 limited dry-run entry 的目标安全合同，但不确认当前实现已满足该合同。Guard 目标顺序、truth table、key domain、duplicate semantics、idempotency 状态机、error taxonomy、audit/redaction、pre-B2 安全上限和容量门禁顺序已形成唯一语义。B1 仅因 source production-code drift 保持 `BLOCKED`；最终运行默认值属于 post-B2 acceptance，不是 B1 冻结条件。
 
 ```text
-STAGE_QDR_7_B1_RUNTIME_CONTRACT_SAFETY_POLICY: BLOCKED
+STAGE_QDR_7_B1_RUNTIME_CONTRACT_SAFETY_POLICY: BLOCKED / SOURCE_CODE_FIX_REQUIRED
 GUARD_ORDER: FROZEN / CURRENT_IMPLEMENTATION_DRIFT_RECORDED
 FEATURE_KILL_TRUTH_TABLE: FROZEN / IMPLEMENTATION_MISSING
 KEY_DOMAIN_SEPARATION: FROZEN
 DUPLICATE_REQUEST_SEMANTICS: FROZEN
 IDEMPOTENCY_STATE_MACHINE: FROZEN
 ERROR_TAXONOMY: FROZEN / IMPLEMENTATION_MAPPING_REQUIRED
-RESOURCE_BUDGETS: BLOCKED / B1_RESOURCE_CAPACITY_EVIDENCE_BLOCKED
+PRE_B2_SAFETY_LIMITS: FROZEN
+POST_B2_CAPACITY_ACCEPTANCE: REQUIRED / NOT_STARTED
 AUDIT_REDACTION_POLICY: FROZEN / ACCEPTANCE_EVIDENCE_PENDING
-ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: NO
+ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: NO / SOURCE_FIX_FIRST
 ALLOW_STAGE_QDR_7_B2_IMPLEMENTATION_NOW: NO
+ALLOW_CAPACITY_BENCHMARK_RETRY_NOW: NO
 ```
 
 ## 2. 现有代码与 15 步目标顺序映射
@@ -345,7 +358,7 @@ Audit 写失败必须返回 `AUDIT_FAILURE` 或安全 `UNKNOWN_ERROR` 并 fail-c
 
 ## 13. Implementation implications
 
-- B1 resource blocker 关闭前不进入 B2 schema/security review。
+- B1 resource capacity 不再作为 B2 schema/security review 的循环前置；当前须先关闭 source normalization production-code blocker。
 - 后续实现必须重新排序当前 feature/rate/idempotency guards；不得把现有顺序视作 frozen contract。
 - Persistent rate/idempotency 需要独立 schema/port/JDBC review；不得复用 nonce 表。
 - Error taxonomy 实现需保持既有 response envelope；如必须改 wire shape、Controller 或 OpenAPI，停止并进入独立 API/security review。
@@ -354,17 +367,19 @@ Audit 写失败必须返回 `AUDIT_FAILURE` 或安全 `UNKNOWN_ERROR` 并 fail-c
 ## 14. Readiness decision
 
 ```text
-STAGE_QDR_7_B1_RUNTIME_CONTRACT_SAFETY_POLICY: BLOCKED
-CONTRACT_VERDICT: PARTIALLY_FROZEN / RESOURCE_CAPACITY_BLOCKED
+STAGE_QDR_7_B1_RUNTIME_CONTRACT_SAFETY_POLICY: BLOCKED / SOURCE_CODE_FIX_REQUIRED
+CONTRACT_VERDICT: SAFETY_AND_SEQUENCE_FROZEN / SOURCE_CODE_FIX_REQUIRED
 GUARD_ORDER: FROZEN
 FEATURE_KILL_TRUTH_TABLE: FROZEN
 KEY_DOMAIN_SEPARATION: FROZEN
 DUPLICATE_REQUEST_SEMANTICS: FROZEN
 IDEMPOTENCY_STATE_MACHINE: FROZEN
 ERROR_TAXONOMY: FROZEN
-RESOURCE_BUDGETS: BLOCKED
+PRE_B2_SAFETY_LIMITS: FROZEN
+POST_B2_CAPACITY_ACCEPTANCE: REQUIRED / NOT_STARTED
 AUDIT_REDACTION_POLICY: FROZEN
-ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: NO
+ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: NO / SOURCE_FIX_FIRST
 ALLOW_STAGE_QDR_7_B2_IMPLEMENTATION_NOW: NO
-next action: DH-STAGE-QDR-7-B1-RESOURCE-CAPACITY-BLOCKER
+ALLOW_CAPACITY_BENCHMARK_RETRY_NOW: NO
+next action: DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX
 ```

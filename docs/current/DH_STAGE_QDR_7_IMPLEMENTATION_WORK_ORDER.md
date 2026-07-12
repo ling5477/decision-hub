@@ -8,7 +8,9 @@
 
 ## B1 review outcome（2026-07-12）
 
-`DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY` 已冻结 guard、truth table、key domain、duplicate/state machine、error taxonomy 与 audit/redaction 语义，但 resource capacity evidence 不足，结论为 `BLOCKED / B1_RESOURCE_CAPACITY_EVIDENCE_BLOCKED`。B2 schema/security review 暂不授权；下一步为 `DH-STAGE-QDR-7-B1-RESOURCE-CAPACITY-BLOCKER`。本结果不修改本工作单的 15 步目标顺序，也不表示 Stage-QDR-7 implementation started。
+`DH-STAGE-QDR-7-B1-CAPACITY-BLOCKER-RESOLUTION` 已冻结 source 合同、pre-B2 安全上限与 post-B2 容量验收顺序。B2 schema/security review 不依赖最终吞吐默认值；persistent guards 实现后才运行 actual-wiring 2xx harness 并冻结 measured defaults。当前 `DecisionDryRunRuntimeProperties` 存在 source lowercase 生产代码漂移，B1 仍 `BLOCKED / SOURCE_CODE_FIX_REQUIRED`，下一步为 `DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX`。
+
+原 resource capacity evidence 确认 actual app-wired endpoint 无有效 2xx benchmark 样本、Docker/Testcontainers unavailable、server queue 与 future persistent guard 容量不可证。该证据保持有效，但已后置为 B2 capacity acceptance 输入；当前禁止在 persistent guards 实现前重跑同一 benchmark。
 
 ## 1. 目标与停止规则
 
@@ -90,7 +92,7 @@ B1 只冻结合同与安全策略文档，不修改 Controller、OpenAPI、生�
 - 冻结既有 request/response envelope；不新增 endpoint，不增加 wire 字段。
 - 冻结 canonical error taxonomy，至少区分：authentication/policy、timestamp、nonce replay、rate limited、idempotency conflict/in-progress/unknown、deadline、backpressure、invalid configuration、guard storage unavailable、audit failure、unknown failure。
 - 冻结 feature flag / production gate / dynamic kill truth table。
-- 冻结 payload、context、deadline、concurrency 和 queue budgets 的配置名称、单位、合法范围、默认关闭策略和 failure mapping；数值在 B1 基于容量证据确定，不能在 B2/B3 任意漂移。
+- 冻结 payload/context hard limit，以及 deadline、concurrency、queue、rate、lease、TTL、cleanup、retention 的配置类型、单位、合法范围、绝对 hard ceiling、默认关闭策略和 failure mapping；这些 pre-B2 ceiling 不是生产默认值。最终运行默认值由 B2 implementation 后的 capacity acceptance 基于测量冻结。
 - 冻结 rate-limit、nonce、requestId/idempotency key、request hash 的 domain separation。
 - 冻结 duplicate semantics、guard 顺序、audit/redaction 字段 allowlist 和 metrics label cardinality。
 - 给 B2 schema/security milestone review 提供状态机、唯一键、索引、retention、事务和并发不变量。
@@ -192,9 +194,11 @@ unknown / partial / illegal transition: fail-closed
 - `FAILED` 只保存冻结的安全失败分类与安全引用，不保存原始异常/请求。
 - retention/expiry/cleanup 不得让 still-running 请求被第二实例重复执行。
 
-### 5.4 B2 milestone review
+### 5.4 B2 milestone review 与 capacity acceptance
 
-Migration + production port/JDBC 作为一个 milestone 统一 review，不为每个小类重复创建 standalone review。Review 必须有 PostgreSQL/Testcontainers 并发、rollback、storage-failure、cleanup 和跨实例证据。通过后才可进入 B3。
+Migration + production port/JDBC 作为一个 milestone 统一 review，不为每个小类重复创建 standalone review。Schema/security review 先审查字段类型、合法范围、absolute ceiling、唯一键、索引、锁/隔离、事务、tenant/environment isolation、retention/cleanup 安全与 storage failure；它不依赖最终吞吐调优值。当前须先关闭 source normalization production-code blocker，且 review 本身不授权 implementation。
+
+Review 通过并另行授权后，B2 implementation 必须配置驱动、严格范围校验，并实现 persistent guards；store failure 禁止回退 in-memory。随后才建立 actual Spring wiring、canonical source/HMAC、deterministic mock gateway、loopback、isolated PostgreSQL、Docker/Testcontainers 0 skipped 和 Tomcat/Hikari/JVM/HTTP metrics 完整的 2xx harness。B2 capacity acceptance 基于该证据冻结运行默认值；未通过前不得进入 B4。
 
 ## 6. B3 — Operational Safety / Resilience
 
@@ -225,7 +229,7 @@ B3 为普通实现批次，不单独重复创建 review；只有安全语义变�
 
 ## 7. B4 — Protected Entry Readiness Acceptance
 
-B4 只读验收既有 endpoint，不修改 API/Controller。验收必须逐项提供代码、配置和测试证据：
+B4 只读验收既有 endpoint，不修改 API/Controller。B2 capacity acceptance 是硬前置；deadline/concurrency/queue/rate/lease/TTL/cleanup/retention measured defaults 未冻结时禁止进入 B4。验收必须逐项提供代码、配置和测试证据：
 
 - default-disabled；production gate 独立关闭；dynamic kill 可立即拒绝且多实例一致。
 - HMAC、timestamp、same nonce always reject、tenant/source enforced。
@@ -329,9 +333,11 @@ dynamic kill switch
 
 ```text
 STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: DONE
-ALLOW_STAGE_QDR_7_B1_CONTRACT_FREEZE: YES / NEXT_TASK_ONLY
+STAGE_QDR_7_B1_CAPACITY_BLOCKER_RESOLUTION: DONE
+B1_SOURCE_NORMALIZATION_CONTRACT_FIX_REQUIRED
+ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: NO / SOURCE_FIX_FIRST
 ALLOW_STAGE_QDR_7_B2_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_7_B4_ACCEPTANCE_NOW: NO
-next action: DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY
+next action: DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX
 ```
