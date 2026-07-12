@@ -10,6 +10,10 @@
 
 `DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY`已`DONE / REVIEW_PENDING`。pre-V13 compatibility callback、V14 schema alignment、clock isolation、actual JDBC result reference、production Spring completion rollback、idempotency real commit-unknown与concurrent cleanup均已有PostgreSQL 17.10/Testcontainers证据。历史milestone review保持`BLOCKED`，不得把本结果写成B2 acceptance。
 
+## B2 milestone review retry-2 outcome（2026-07-12）
+
+独立review为`BLOCKED / P1_FIX_REQUIRED`。callback scope/lock、V14 no-truncation/retry、terminal DB-clock、actual service completion与cleanup CAS-miss证据不足，且三份入口factsources仍有旧current task。capacity acceptance与B3继续禁止。
+
 ```text
 ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW_RETRY_2: YES / NEXT_TASK_ONLY
 ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO

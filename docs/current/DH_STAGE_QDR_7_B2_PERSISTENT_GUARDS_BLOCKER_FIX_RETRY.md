@@ -11,6 +11,10 @@
 
 本轮关闭上轮P1-1至P1-5的实现和真实证据缺口，不修改V1-V13、API、Controller、DTO、OpenAPI、HMAC、nonce、source合同或NQ。previous milestone review保持`BLOCKED / HISTORICAL_PRESERVED`；本文件不把B2标为accepted，也不授权capacity acceptance或B3。
 
+## Retry-2 review disposition（2026-07-12）
+
+后续独立`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY-2`为`BLOCKED / P1_FIX_REQUIRED`。实现的green PostgreSQL回归保持真实，但callback scope/lock、V14 no-truncation retry、terminal timestamp offset、actual service completion和cleanup CAS-miss尚无足够P1证据；入口factsources也未一致。该历史实现记录不替代review结论。
+
 ```text
 STAGE_QDR_7_B2_PERSISTENT_GUARDS_BLOCKER_FIX_RETRY: DONE / REVIEW_PENDING
 PRE_V13_COMPATIBILITY: PASS

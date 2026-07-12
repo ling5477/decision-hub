@@ -1,5 +1,22 @@
 # Decision Hub Roadmap
 
+## 2026-07-12 Stage-QDR-7 B2 milestone review retry-2 blocked
+
+```text
+B1 runtime contract: FROZEN
+B2 implementation: BLOCKED / P1_FIX_REQUIRED
+callback security: BLOCKED / UNBOUNDED_TABLE_SCOPE
+V14 narrowing: BLOCKED / EXPLICIT_CAST_AND_RETRY_EVIDENCE_GAP
+actual completion / lifecycle terminal timestamp / cleanup CAS-miss evidence: INSUFFICIENT
+current factsource consistency: BLOCKED
+PostgreSQL regression: PASS / 17.10 / ZERO_SKIPS / INSUFFICIENT_FOR_P1
+post-B2 capacity acceptance: NOT_ALLOWED
+B3 operational safety: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY-2
+```
+
+绿色测试不解除callback作用域、migration fail-closed语义、实际service completion和factsources冲突。修复必须另起受控blocker-fix任务。
+
 ## 2026-07-12 Stage-QDR-7 B2 blocker-fix retry done
 
 ```text

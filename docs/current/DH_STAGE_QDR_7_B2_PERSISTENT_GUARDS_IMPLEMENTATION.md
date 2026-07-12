@@ -10,6 +10,10 @@
 
 `DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY`完成pre-V13 compatibility callback、V14 `result_type varchar(32)`对齐、JVM时钟隔离及production-equivalent Spring/JDBC P1证据。B2仍为`REVIEW_PENDING`，不得写为accepted；previous milestone review保持`BLOCKED / HISTORICAL_PRESERVED`。
 
+## Milestone review retry-2 disposition（2026-07-12）
+
+`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY-2`为`BLOCKED / P1_FIX_REQUIRED`。callback的V12表级无界操作、V14显式收窄cast、terminal clock matrix、actual service completion、cleanup CAS-miss及入口factsources均未达到关闭条件；不得把B2写为accepted。
+
 ```text
 B2_IMPLEMENTATION_STATUS: BLOCKER_FIX_RETRY_DONE / REVIEW_PENDING
 ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW_RETRY_2: YES

@@ -1,5 +1,23 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY-2
+
+- 独立复核`865257a..8660f4e`：范围仅含P1 callback/V14、直接测试、usecase小修和允许文档；V1-V13、API/Controller/DTO/OpenAPI、HMAC/nonce/source、NQ与previous review未变化。
+- 真实Flyway/Testcontainers日志确认callback发现和before-migrate顺序，targeted 23、owning 135、full 1064测试均0 failures/errors/skipped，PostgreSQL 17.10实际运行，quality通过。
+- 发现P1 callback安全缺口：V12条件下执行表级CHECK删除/重建和FAILED无界UPDATE，没有锁预算、batch或失败后schema恢复证据。
+- 发现V14 fail-closed缺口：显式`result_type::varchar(32)`收窄cast；overflow路径未验证原值保持与修复后retry。
+- 发现证据缺口：caller clock matrix未覆盖三类terminal timestamp；completion rollback不是actual service completion路径；cleanup未注入CAS miss。
+- 发现`README.md`、`docs/current/README.md`、`docs/current/CODEX_PROJECT_INSTRUCTIONS.md`的current-phase块仍指向旧work order/B1 action，而`STATUS.md`/`WORK_ORDER.md`为retry-2，形成当前factsources冲突；本任务allowlist不含前三者，未越界修复。
+- 本轮只修改允许review文档；未修改Java、测试、callback、migration、API/NQ或交易边界；未运行capacity benchmark、未进入B3、未push/tag。
+
+```text
+STAGE_QDR_7_B2_PERSISTENT_GUARDS_MILESTONE_REVIEW_RETRY_2: BLOCKED
+B2_IMPLEMENTATION_STATUS: BLOCKED / P1_FIX_REQUIRED
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY-2
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY
 
 - Preflight确认`dev`、HEAD `865257a`、worktree/staged clean、`origin/dev...HEAD=0/0`、migration max `V13`；未修改NQ。

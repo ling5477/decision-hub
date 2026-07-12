@@ -3,6 +3,25 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY-2 validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| callback discovery/order | PASS | 本轮targeted Flyway日志显示`Executing SQL callback: beforeMigrate - qdr7 v13 compatibility`，随后迁移V1…V14；PostgreSQL 17.10/Testcontainers实际运行。 |
+| callback safety | BLOCKED | callback在满足V12条件时`ALTER TABLE`替换state CHECK，并对所有FAILED候选执行无界`UPDATE`；无bounded batch、无锁预算、无失败后schema状态断言。 |
+| V12→V13 failure/retry matrix | BLOCKED | blank error与padded error覆盖存在，但未断言失败后仍为V12、identity/hash/state/version/timestamp保持、修复后可重试。 |
+| V14 no-truncation/retry matrix | BLOCKED | V14使用`result_type::varchar(32)`；overflow测试只断言FlywayException，未断言原33字符值不变或修正后可安全retry。 |
+| DB clock offset matrix | BLOCKED | `+48h/-48h`真实JDBC覆盖rate/TTL/retention/lease/heartbeat/cleanup，但未以该offset matrix验证completed_at、failed_at、expired_at。 |
+| result reference / commit unknown | PASS | production-equivalent Spring context和真实JDBC验证completed duplicate的tenant/type/checksum/503，以及after-commit异常、exact reconcile和无自动readmit。 |
+| completion atomicity | BLOCKED | 同DataSource/transaction manager和手工boundary组合rollback已验证，但未通过实际`PersistentGuardedDecisionDryRunService.executeFirst`成功/失败路径验证output+audit+COMPLETED整体原子性。 |
+| concurrent cleanup | BLOCKED | `SKIP LOCKED`、active lease、retention与rollback retry已验证；未制造真实state/version CAS miss并断言它不计成功。 |
+| targeted PostgreSQL | PASS | 23 / 0 / 0 / 0。 |
+| owning modules | PASS | 135 / 0 / 0 / 0。 |
+| full Maven | PASS | 157 reports / 1064 tests / 0 failures / 0 errors / 0 skipped。 |
+| quality | PASS | 19/19 reactor、Checkstyle 0、Spotless PASS。 |
+
+Mockito/ByteBuddy dynamic-agent提示为future-JDK tooling风险，不是本轮失败；未运行capacity benchmark。
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY validation
 
 | Check | Result | Evidence |
