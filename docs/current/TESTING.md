@@ -1,5 +1,21 @@
 # Decision Hub Testing
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-REVIEW validation
+
+| 验证 | 结果 |
+| --- | --- |
+| Git preflight | `dev` / `032f759` / clean / staged empty / `HEAD == origin/dev` |
+| Flyway version/config | 11.7.2；validate=true、outOfOrder=false、group=false、mixed=false、executeInTransaction=true |
+| PostgreSQL | Testcontainers PostgreSQL 17.10真实运行 |
+| repository focused suite | 16 tests，0 failures/errors/skipped，BUILD SUCCESS |
+| `beforeMigrate` failure experiment | V13失败后CHECK缺失、trim已提交；拒绝该事件 |
+| `beforeEachMigrate` failure experiment | CHECK与原值rollback，history保持前一版本，无failed row |
+| selected-option retry | 初次V13失败rollback；修正后安全重试至V14 |
+| blank legacy | DDL/DML前失败，原值和CHECK保持 |
+| V12.1 on completed V14 | validate/migrate均`FlywayValidateException` |
+
+临时实验只位于ignored `target/`并在固化证据后清理；没有修改生产migration、callback、Java或tests。`mvn -ntp -Pquality validate`为`BUILD SUCCESS`，reactor 19/19、Checkstyle 0 violations、Spotless PASS；该命令不是全量Maven tests。
+
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 

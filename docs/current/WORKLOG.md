@@ -1,5 +1,20 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-REVIEW
+
+- 只读核验V12 CHECK、V13执行顺序、V14 narrowing、Flyway 11.7.2配置和current factsources。
+- PostgreSQL 17.10实验拒绝现有`beforeMigrate`事务模型，并证明`beforeEachMigrate`与单个migration共同rollback。
+- 拒绝V12.1 interstitial migration：已完成V14环境在当前validation/outOfOrder策略下发生`FlywayValidateException`。
+- 选择`beforeEachMigrate TRANSACTIONAL_CALLBACK`；冻结history/constraint fingerprint、pre-write validation、同名临时CHECK、timeout、1000行repair ceiling、retry/no-op和测试矩阵。
+- 未修改callback、V1–V14、Java、测试、API/OpenAPI或安全合同；未运行capacity benchmark；未进入B3；未push/tag。
+
+```text
+STAGE_QDR_7_B2_SCHEMA_ERRATA_REVIEW: PASS
+ALLOW_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_MILESTONE_REVIEW_RETRY_3_NOW: NO
+next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY-2
 
 - 独立复核`865257a..8660f4e`：范围仅含P1 callback/V14、直接测试、usecase小修和允许文档；V1-V13、API/Controller/DTO/OpenAPI、HMAC/nonce/source、NQ与previous review未变化。
