@@ -183,6 +183,51 @@ class HmacNqDryRunAuthenticatorTest {
   }
 
   @Test
+  void whitespaceAndHeaderBodyCaseMismatchAreDeniedWithoutChangingWireValue() {
+    final NqDryRunAuthResult whitespace =
+        authenticator().authenticate(signedWithSource(" NQ_DRYRUN ", "tenant-a", "nonce-source-whitespace"));
+    final NqDryRunAuthResult headerBodyMismatch =
+        authenticator()
+            .authenticate(
+                signedWithHeaderAndBodySource(
+                    "NQ_DRYRUN", "nq_dryrun", "tenant-a", "nonce-source-case-mismatch"));
+
+    assertEquals("SOURCE_DENIED", whitespace.errorCode());
+    assertEquals(403, whitespace.status());
+    assertEquals("SOURCE_DENIED", headerBodyMismatch.errorCode());
+    assertEquals(403, headerBodyMismatch.status());
+  }
+
+  @Test
+  void sourceAndBodyMutationInvalidateAnExistingSignature() {
+    final NqDryRunAuthRequest canonical =
+        signed("nonce-source-mutation", NOW.toString(), BODY);
+    final String mutatedBody = BODY.replace("NQ_DRYRUN", "nq_dryrun");
+    final NqDryRunAuthRequest mutated =
+        new NqDryRunAuthRequest(
+            canonical.method(),
+            canonical.path(),
+            "nq_dryrun",
+            "nq_dryrun",
+            canonical.authenticatedTenantId(),
+            canonical.tenantId(),
+            canonical.timestampHeader(),
+            canonical.nonce(),
+            canonical.signature(),
+            canonical.requestId(),
+            canonical.traceId(),
+            canonical.schemaVersion(),
+            mutatedBody,
+            mutatedBody.length(),
+            canonical.now());
+
+    final NqDryRunAuthResult result = authenticator().authenticate(mutated);
+
+    assertEquals("SIGNATURE_INVALID", result.errorCode());
+    assertEquals(401, result.status());
+  }
+
+  @Test
   void signatureMaterialMismatchStillReturnsSignatureInvalid() {
     final NqDryRunAuthRequest unsigned =
         new NqDryRunAuthRequest(
@@ -278,6 +323,28 @@ class HmacNqDryRunAuthenticatorTest {
             "/api/ai/decision-dry-runs",
             source,
             source,
+            "tenant-a",
+            tenantId,
+            NOW.toString(),
+            nonce,
+            "",
+            "req-1",
+            "trace-1",
+            "1.0.0",
+            BODY,
+            BODY.length(),
+            NOW);
+    return withSignature(unsigned);
+  }
+
+  private static NqDryRunAuthRequest signedWithHeaderAndBodySource(
+      final String sourceHeader, final String sourceBody, final String tenantId, final String nonce) {
+    final NqDryRunAuthRequest unsigned =
+        new NqDryRunAuthRequest(
+            "POST",
+            "/api/ai/decision-dry-runs",
+            sourceHeader,
+            sourceBody,
             "tenant-a",
             tenantId,
             NOW.toString(),

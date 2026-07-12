@@ -271,6 +271,33 @@ class DecisionDryRunControllerWebMvcTest {
     }
 
     @Test
+    void sourceWireValueMustBeExactInBodyAndHeader() throws Exception {
+        final Map<String, Object> lowercase = legalEnvelope("req-source-lowercase");
+        lowercase.put("source", "nq_dryrun");
+        final String lowercaseBody = objectMapper.writeValueAsString(lowercase);
+        mockMvc
+                .perform(signedPost(lowercase, lowercaseBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("SOURCE_DENIED"));
+
+        final Map<String, Object> whitespace = legalEnvelope("req-source-whitespace");
+        whitespace.put("source", " NQ_DRYRUN ");
+        final String whitespaceBody = objectMapper.writeValueAsString(whitespace);
+        mockMvc
+                .perform(signedPost(whitespace, whitespaceBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("SOURCE_DENIED"));
+
+        final Map<String, Object> mismatch = legalEnvelope("req-source-mismatch");
+        mismatch.put("source", "nq_dryrun");
+        final String mismatchBody = objectMapper.writeValueAsString(mismatch);
+        mockMvc
+                .perform(signedPostWithSourceHeader(mismatch, mismatchBody, "NQ_DRYRUN"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("SOURCE_DENIED"));
+    }
+
+    @Test
     void dryRunFalseAndForbiddenExecutionMaterialReturnPolicyDenied() throws Exception {
         final Map<String, Object> notDryRun = legalEnvelope("req-not-dryrun");
         notDryRun.put("dryRun", false);
@@ -617,11 +644,27 @@ class DecisionDryRunControllerWebMvcTest {
 
     private MockHttpServletRequestBuilder signedPost(
             final Map<String, Object> envelope, final String body) {
-        return signedPostWithNonceHeader(envelope, body, value(envelope.get("nonce")));
+        return signedPostWithSourceHeaderAndNonce(
+                envelope, body, value(envelope.get("source")), value(envelope.get("nonce")));
     }
 
     private MockHttpServletRequestBuilder signedPostWithNonceHeader(
             final Map<String, Object> envelope, final String body, final String headerNonce) {
+        return signedPostWithSourceHeaderAndNonce(
+                envelope, body, value(envelope.get("source")), headerNonce);
+    }
+
+    private MockHttpServletRequestBuilder signedPostWithSourceHeader(
+            final Map<String, Object> envelope, final String body, final String sourceHeader) {
+        return signedPostWithSourceHeaderAndNonce(
+                envelope, body, sourceHeader, value(envelope.get("nonce")));
+    }
+
+    private MockHttpServletRequestBuilder signedPostWithSourceHeaderAndNonce(
+            final Map<String, Object> envelope,
+            final String body,
+            final String sourceHeader,
+            final String headerNonce) {
         final NqDryRunAuthRequest unsigned =
                 new NqDryRunAuthRequest(
                         "POST",
@@ -643,7 +686,7 @@ class DecisionDryRunControllerWebMvcTest {
                 HmacNqDryRunAuthenticator.hmacSha256Hex(
                         SECRET, HmacNqDryRunAuthenticator.signatureMaterial(unsigned));
         return authenticatedPost(body)
-                .header("X-NQ-DH-Source", value(envelope.get("source")))
+                .header("X-NQ-DH-Source", sourceHeader)
                 .header("X-NQ-DH-Tenant-Id", value(envelope.get("tenantId")))
                 .header("X-NQ-DH-Request-Id", value(envelope.get("requestId")))
                 .header("X-NQ-DH-Trace-Id", value(envelope.get("traceId")))

@@ -65,8 +65,8 @@ public class DecisionDryRunRuntimeWiringConfig {
                 productionEnabled,
                 killSwitchEnabled,
                 devOrTest,
-                splitCsv(allowedSources),
-                splitCsv(allowedTenantSourcePairs),
+                splitRequiredSourceCsv(allowedSources),
+                splitOptionalPairCsv(allowedTenantSourcePairs),
                 memoryCapBytes);
     }
 
@@ -133,13 +133,34 @@ public class DecisionDryRunRuntimeWiringConfig {
                 Clock.systemUTC());
     }
 
-    private static Set<String> splitCsv(final String value) {
-        if (value == null || value.isBlank()) {
+    /**
+     * 将 source allowlist CSV 保留为显式配置项，不能将空/空白 source 静默折叠为空集合。
+     *
+     * <p>真正的 source 合法性由 {@link DecisionDryRunRuntimeProperties} 校验；这里使用 {@code -1} 保留末尾
+     * 空条目，确保 {@code NQ_DRYRUN,} 与空白值均在 Spring bean 创建时 fail-closed。唯一例外是完全空的
+     * CSV，它表达 production profile 的空 allowlist，而不是一个 source 条目。
+     */
+    private static Set<String> splitRequiredSourceCsv(final String value) {
+        if (value == null || value.isEmpty()) {
             return Set.of();
         }
-        return Arrays.stream(value.split(","))
+        return Arrays.stream(value.split(",", -1))
                 .map(String::trim)
-                .filter(s -> !s.isBlank())
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    /**
+     * 将可选 tenant/source pair CSV 映射为集合。
+     *
+     * <p>空字符串表示当前 profile 未授权任何 tenant/source 组合；但非空字符串中的空白或非法 pair 会由
+     * {@link DecisionDryRunRuntimeProperties} 拒绝，不能被 parser 丢弃。
+     */
+    private static Set<String> splitOptionalPairCsv(final String value) {
+        if (value == null || value.isEmpty()) {
+            return Set.of();
+        }
+        return Arrays.stream(value.split(",", -1))
+                .map(String::trim)
                 .collect(Collectors.toUnmodifiableSet());
     }
 }

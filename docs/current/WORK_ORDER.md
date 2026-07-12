@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-7-B1-CAPACITY-BLOCKER-RESOLUTION
-current task status: DONE / SOURCE_CODE_FIX_REQUIRED
-next action: DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX
-mode: BLOCKER_FIX_ONLY + SOURCE_CONTRACT_EXACT_WIRE + NO_CAPACITY_BENCHMARK + NO_STAGE_QDR_7_B2_IMPLEMENTATION + NO_EXTERNAL_HTTP + NO_PROVIDER + NO_NQ + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX
+current task status: DONE / SOURCE_FIX_REVIEW_PENDING
+next action: DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-FIX-REVIEW
+mode: SECURITY_FIX_REVIEW_ONLY + SOURCE_CONTRACT_EXACT_WIRE + NO_CAPACITY_BENCHMARK + NO_STAGE_QDR_7_B2_IMPLEMENTATION + NO_EXTERNAL_HTTP + NO_PROVIDER + NO_NQ + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-7 容量顺序已纠正：B2 schema/security review 不依赖最终吞吐默认值，persistent guards 实现与 actual-wiring 2xx harness 之后才做 B2 capacity acceptance。当前唯一 next action 先修复 `DecisionDryRunRuntimeProperties` source lowercase 与 exact-wire authenticator 之间的 production-code drift，并同步所需测试/contract；该独立任务必须明确授权后执行。本轮仍不授权 API、migration、repository expansion、B2 implementation 或 benchmark retry。
+Stage-QDR-7 source production-code drift已修复：runtime properties不再lowercase request source，配置source与tenant/source pair均保持canonical case并在非法时fail-closed。下一步只允许独立source fix review；B2 schema/security review仍须等待review通过，B2 implementation、API、migration、repository expansion和benchmark retry继续未授权。
 
 ## 2. 前置状态
 

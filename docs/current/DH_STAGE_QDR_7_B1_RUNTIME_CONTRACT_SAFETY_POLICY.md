@@ -4,14 +4,14 @@
 > mode: `REVIEW_ONLY`  
 > endpoint: `POST /api/ai/decision-dry-runs`  
 > implementation: `NOT_STARTED`  
-> verdict: `BLOCKED / SOURCE_CODE_FIX_REQUIRED`
+> verdict: `FROZEN / SOURCE_FIX_REVIEW_PENDING`
 > capacity sequence: `FROZEN / POST_B2_MEASUREMENT_REQUIRED`
 
 ## Capacity blocker resolution outcome（2026-07-12）
 
 `DH-STAGE-QDR-7-B1-CAPACITY-BLOCKER-RESOLUTION` 已将容量门禁拆为 pre-B2 safety contract 与 post-B2 measured defaults。Payload `65536 bytes`、context `32768 bytes`、所有配置字段类型/单位、合法范围、绝对 hard ceiling、跨字段关系、invalid-config startup failure、bounded-only 与 no-in-memory-fallback 已冻结；deadline/concurrency/queue/rate/lease/TTL/cleanup/retention 的运行默认值全部后置到 B2 persistent guards + actual-wiring 2xx harness 之后。
 
-Source contract 冻结为 exact case-sensitive `NQ_DRYRUN`、request 不 trim/不改写、config 仅 trim 且保留 case、signature 使用原始 wire value。但 `DecisionDryRunRuntimeProperties` 仍 lowercase source，属于 `PRODUCTION_CODE_DRIFT`，因此触发 `B1_SOURCE_NORMALIZATION_CONTRACT_FIX_REQUIRED`。B1 runtime contract 仍因 source 代码修复保持 `BLOCKED`；当前不重跑 capacity benchmark。
+Source contract 冻结为 exact case-sensitive `NQ_DRYRUN`、request 不 trim/不改写、config 仅 trim 且保留 case、signature 使用原始 wire value。`DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX` 已移除 `DecisionDryRunRuntimeProperties` 的 request source lowercase并增加fail-closed配置校验；当前状态为 `FIXED / REVIEW_PENDING`。本轮仍不重跑 capacity benchmark。
 
 ## Resource capacity evidence outcome（2026-07-12）
 
@@ -19,10 +19,10 @@ Source contract 冻结为 exact case-sensitive `NQ_DRYRUN`、request 不 trim/�
 
 ## 1. Review 结论
 
-本 review 冻结 Stage-QDR-7 limited dry-run entry 的目标安全合同，但不确认当前实现已满足该合同。Guard 目标顺序、truth table、key domain、duplicate semantics、idempotency 状态机、error taxonomy、audit/redaction、pre-B2 安全上限和容量门禁顺序已形成唯一语义。B1 仅因 source production-code drift 保持 `BLOCKED`；最终运行默认值属于 post-B2 acceptance，不是 B1 冻结条件。
+本 review 冻结 Stage-QDR-7 limited dry-run entry 的目标安全合同，但不确认当前实现已满足全部后续guard要求。Guard目标顺序、truth table、key domain、duplicate semantics、idempotency状态机、error taxonomy、audit/redaction、pre-B2安全上限和容量门禁顺序已形成唯一语义。Source production-code drift已修复并等待独立review；最终运行默认值属于post-B2 acceptance，不是B1冻结条件。
 
 ```text
-STAGE_QDR_7_B1_RUNTIME_CONTRACT_SAFETY_POLICY: BLOCKED / SOURCE_CODE_FIX_REQUIRED
+STAGE_QDR_7_B1_RUNTIME_CONTRACT_SAFETY_POLICY: FROZEN / SOURCE_FIX_REVIEW_PENDING
 GUARD_ORDER: FROZEN / CURRENT_IMPLEMENTATION_DRIFT_RECORDED
 FEATURE_KILL_TRUTH_TABLE: FROZEN / IMPLEMENTATION_MISSING
 KEY_DOMAIN_SEPARATION: FROZEN
@@ -32,7 +32,9 @@ ERROR_TAXONOMY: FROZEN / IMPLEMENTATION_MAPPING_REQUIRED
 PRE_B2_SAFETY_LIMITS: FROZEN
 POST_B2_CAPACITY_ACCEPTANCE: REQUIRED / NOT_STARTED
 AUDIT_REDACTION_POLICY: FROZEN / ACCEPTANCE_EVIDENCE_PENDING
-ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: NO / SOURCE_FIX_FIRST
+SOURCE_DRIFT_DISPOSITION: FIXED / REVIEW_PENDING
+ALLOW_STAGE_QDR_7_B1_SOURCE_FIX_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: NO / SOURCE_FIX_REVIEW_FIRST
 ALLOW_STAGE_QDR_7_B2_IMPLEMENTATION_NOW: NO
 ALLOW_CAPACITY_BENCHMARK_RETRY_NOW: NO
 ```

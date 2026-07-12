@@ -3,6 +3,22 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-12 DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| properties/config binding regression | PASS | canonical config、outer trim、lowercase/mixed/unknown/blank/trailing-empty source、lowercase pair与pair/allowlist矛盾均有回归。 |
+| HMAC source boundary | PASS | canonical source、nonce replay、lowercase/alias/whitespace/header-body mismatch拒绝、source/body修改后旧签名失效。 |
+| WebMvc source boundary | PASS | canonical request保持通过；lowercase、whitespace和header/body case mismatch均`SOURCE_DENIED / 403`。 |
+| targeted Maven tests | PASS | `mvn -ntp -pl dh-security,dh-api,dh-app -am "-Dtest=DecisionDryRunRuntimePropertiesTest,DecisionDryRunRuntimeWiringConfigTest,HmacNqDryRunAuthenticatorTest,DecisionDryRunControllerWebMvcTest" "-Dsurefire.failIfNoSpecifiedTests=false" test`。 |
+| owning-module Maven tests | PASS / BUILD SUCCESS | `mvn -ntp -pl dh-security,dh-api,dh-app -am test`成功；15个reactor module、108 tests、0 failures、0 errors、0 skipped。 |
+| full Maven tests | PASS / BUILD SUCCESS | `mvn -ntp test`成功；Surefire XML汇总150个报告、1026 tests、0 failures、0 errors、0 skipped。 |
+| PostgreSQL/Testcontainers | PASS / EXECUTED | PostgreSQL 17 containers启动；Flyway V1–V11 regression执行，未写为skip。 |
+| capacity benchmark | NOT RUN / OUT_OF_SCOPE | actual-wiring mock-only 2xx harness仍未就绪。 |
+| quality validation | PASS / BUILD SUCCESS | `mvn -ntp -Pquality validate`成功；19/19 reactor、Checkstyle 0 violations、Spotless check通过。 |
+
+本轮仅修复source合同，不改变HMAC material格式、Controller/DTO/OpenAPI、nonce/replay、rate/idempotency或任何外部/runtime边界。
+
 ## 2026-07-12 DH-STAGE-QDR-7-B1-CAPACITY-BLOCKER-RESOLUTION validation
 
 | Check | Result | Evidence |

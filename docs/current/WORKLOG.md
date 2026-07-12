@@ -1,5 +1,21 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX
+
+- 复核发现路径为`DecisionDryRunRuntimeWiringConfig` CSV binding到`DecisionDryRunRuntimeProperties`的lowercase normalization；该语义与HMAC exact-wire source冲突。
+- 删除request source的case normalization；配置只允许outer trim，`NQ_DRYRUN`之外的lowercase、mixed-case、alias、unknown、blank、trailing-empty和非canonical tenant/source pair在bean创建时fail-closed。
+- 保留prod profile空allowlist作为no-source deny state；既有`DecisionContractGapGuardTest`要求prod不得allowlist`NQ_DRYRUN`，未修改该合同或测试。
+- 补充properties/wiring/HMAC/WebMvc回归，覆盖canonical成功、exact wire拒绝、source/body篡改签名失效、nonce replay与tenant/source isolation。
+- `mvn -ntp test`通过；Docker/Testcontainers PostgreSQL 17和Flyway V1–V11实际执行。未运行capacity benchmark，未改API/OpenAPI、nonce/replay、rate/idempotency、migration、Repository/JDBC、NQ或外部依赖。
+
+```text
+STAGE_QDR_7_B1_SOURCE_NORMALIZATION_BLOCKER_FIX: DONE
+SOURCE_DRIFT_DISPOSITION: FIXED / REVIEW_PENDING
+ALLOW_STAGE_QDR_7_B1_SOURCE_FIX_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW_NOW: NO
+next action: DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-FIX-REVIEW
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-B1-CAPACITY-BLOCKER-RESOLUTION
 
 - 以 review-only 方式核对 OpenAPI、DTO、Controller、HMAC authenticator、runtime source allowlist/pair、application profiles、fixtures/tests、resource evidence、persistent guard 与 metrics 现实。
