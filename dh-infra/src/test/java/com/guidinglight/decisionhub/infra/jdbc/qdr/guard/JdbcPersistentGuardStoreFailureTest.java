@@ -10,7 +10,7 @@ import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyAdmissionStatus
 import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardIdentity;
 import com.guidinglight.decisionhub.usecase.qdr.guard.RateLimitAdmissionCommand;
 import com.guidinglight.decisionhub.usecase.qdr.guard.RateLimitAdmissionStatus;
-import java.time.Instant;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -26,7 +26,10 @@ class JdbcPersistentGuardStoreFailureTest {
 
   @Test
   void rateStoreFailureFailsClosedWithoutRateLimitedClassification() {
-    when(jdbcTemplate.queryForMap(anyString(), any(Object[].class)))
+    when(jdbcTemplate.query(
+            anyString(),
+            any(org.springframework.jdbc.core.RowMapper.class),
+            any(Object[].class)))
         .thenThrow(new DataAccessResourceFailureException("unavailable"));
 
     final var result =
@@ -40,8 +43,6 @@ class JdbcPersistentGuardStoreFailureTest {
   void idempotencyStoreFailureFailsClosedWithoutConflictClassification() {
     when(jdbcTemplate.update(anyString(), any(Object[].class)))
         .thenThrow(new DataAccessResourceFailureException("unavailable"));
-    final Instant now = Instant.parse("2026-07-12T00:00:00Z");
-
     final var result =
         new JdbcIdempotencyGuardAdapter(jdbcTemplate)
             .admit(
@@ -50,8 +51,8 @@ class JdbcPersistentGuardStoreFailureTest {
                     "request-1",
                     "a".repeat(64),
                     IdempotencyAdmissionCommand.HASH_VERSION,
-                    now.plusSeconds(600),
-                    now.plusSeconds(3600)));
+                    Duration.ofMinutes(10),
+                    Duration.ofHours(1)));
 
     assertThat(result.status()).isEqualTo(IdempotencyAdmissionStatus.STORE_UNAVAILABLE);
   }

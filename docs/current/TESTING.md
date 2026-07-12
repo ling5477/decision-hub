@@ -3,6 +3,25 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| V1→V13 / V12→V13 | PASS | PostgreSQL 17.10/Flyway实际迁移；V12历史COMPLETED显式回填；V1-V12 checksum保持。 |
+| V13 schema/lifecycle | PASS | typed result、独立failed/expired时间、owner/token一致性CHECK；EXPIRED tombstone不物理删除。 |
+| DB clock / cleanup | PASS | TTL/retention/lease仅传Duration；SQL使用`transaction_timestamp()`；current/future window与safety grace受保护。 |
+| concurrent cleanup | PASS | 两个adapter、bounded batch、`FOR UPDATE SKIP LOCKED`，无重复/越界。 |
+| admission rollback | PASS | rate+audit与idempotency+audit在真实Spring transaction/JDBC中audit失败整体rollback。 |
+| completion rollback | PASS | output+audit+COMPLETED成功原子提交；audit/FK/CAS失败无孤立output、伪success audit或错误COMPLETED。 |
+| result reference | PASS | tenant-bound valid reference；missing/wrong-tenant拒绝；missing/checksum mismatch映射为`IDEMPOTENCY_RESULT_UNAVAILABLE`。 |
+| commit unknown | PASS | test-only Connection代理真实commit后抛异常；分类`RATE_LIMIT_COMMIT_UNKNOWN`，exact reconcile后确认不重新admit。 |
+| targeted PostgreSQL suite | PASS | 14 tests，0 failures/errors/skipped；PostgreSQL 17.10。 |
+| owning modules | PASS | `mvn -ntp -pl dh-usecase,dh-infra,dh-security,dh-api,dh-app -am test`，BUILD SUCCESS。 |
+| full Maven | PASS | `mvn -ntp test`，155 reports、1054 tests、0 failures/errors/skipped。 |
+| quality | PASS | `mvn -ntp -Pquality validate`，19/19，Checkstyle 0，Spotless PASS。 |
+
+首次owning run因120秒工具上限被终止，随后以300秒上限原命令重跑并通过；不把被终止运行计为PASS。`mvn spotless:apply` prefix不可用，最终使用锁定坐标与`-N -Pquality`成功格式化。未运行capacity benchmark。
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW validation
 
 | Check | Result | Evidence |

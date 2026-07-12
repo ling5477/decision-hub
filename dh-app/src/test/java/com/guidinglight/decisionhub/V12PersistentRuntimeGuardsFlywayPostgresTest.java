@@ -6,7 +6,20 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcGuardCleanupAdapter;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcIdempotencyGuardAdapter;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcRateLimitAdmissionAdapter;
+import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionAuditRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.guidinglight.decisionhub.domain.decision.DecisionAction;
+import com.guidinglight.decisionhub.domain.decision.DecisionPolicyStatus;
+import com.guidinglight.decisionhub.domain.decision.DecisionRiskLevel;
+import com.guidinglight.decisionhub.domain.decision.DecisionType;
+import com.guidinglight.decisionhub.usecase.decision.DecisionAuditEventStatus;
+import com.guidinglight.decisionhub.usecase.decision.DecisionAuditEventType;
+import com.guidinglight.decisionhub.usecase.decision.DecisionPersistenceRecords;
 import com.guidinglight.decisionhub.usecase.qdr.guard.GuardCleanupCommand;
+import com.guidinglight.decisionhub.usecase.qdr.guard.GuardTransactionBoundary;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunGuardProperties;
+import com.guidinglight.decisionhub.qdr7.PersistentDecisionDryRunRateLimiter;
+import com.guidinglight.decisionhub.security.nq.RateLimitResult;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyAdmissionCommand;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyAdmissionStatus;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyRecordView;
@@ -14,6 +27,7 @@ import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyState;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyTransitionCommand;
 import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardIdentity;
 import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardStateException;
+import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardStoreException;
 import com.guidinglight.decisionhub.usecase.qdr.guard.RateLimitAdmissionCommand;
 import com.guidinglight.decisionhub.usecase.qdr.guard.RateLimitAdmissionStatus;
 import java.sql.Connection;
@@ -21,13 +35,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
+import java.time.Clock;
+import javax.sql.DataSource;
 import java.util.stream.Collectors;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationInfo;
@@ -72,21 +93,33 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
   }
 
   @Test
-  void cleanAndExistingV11DatabasesMigrateToV12WithoutChangingHistory() {
-    assertThat(flyway(null).info().current().getVersion().getVersion()).isEqualTo("12");
+  void cleanAndExistingV12DatabasesMigrateToV13WithoutChangingHistory() {
+    assertThat(flyway(null).info().current().getVersion().getVersion()).isEqualTo("13");
     assertThat(tableExists("dh_qdr7_rate_limit_bucket")).isTrue();
     assertThat(tableExists("dh_qdr7_idempotency_guard")).isTrue();
 
     flyway(null).clean();
-    final Flyway v11 = flyway("11");
+    final Flyway v11 = flyway("12");
     v11.migrate();
     final Map<String, Integer> checksumsBefore = checksums(v11.info().applied());
     seedDecisionOutput("tenant-upgrade", "result-upgrade");
+    jdbc = new JdbcTemplate(dataSource());
+    jdbc.update(
+        "insert into dh_qdr7_idempotency_guard"
+            + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,hash_version,state,"
+            + "state_version,result_id,result_checksum,completed_at,expires_at,retention_until)"
+            + " values (?,'test',?,'NQ_DRYRUN','tenant-upgrade','request-upgrade',?,'QDR7-DRYRUN-CJSON-1',"
+            + "'COMPLETED',1,'result-upgrade',?,transaction_timestamp(),transaction_timestamp()+interval '1 hour',"
+            + "transaction_timestamp()+interval '2 hour')",
+        UUID.randomUUID(),
+        PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
+        HASH_A,
+        HASH_B);
 
     final Flyway v12 = flyway(null);
     v12.migrate();
 
-    assertThat(v12.info().current().getVersion().getVersion()).isEqualTo("12");
+    assertThat(v12.info().current().getVersion().getVersion()).isEqualTo("13");
     final Map<String, Integer> checksumsAfter = checksums(v12.info().applied());
     checksumsBefore.forEach(
         (version, checksum) -> assertThat(checksumsAfter.get(version)).isEqualTo(checksum));
@@ -95,6 +128,10 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
                 "select count(*) from dh_decision_output where tenant_id = 'tenant-upgrade'",
                 Integer.class))
         .isEqualTo(1);
+    assertThat(jdbc.queryForMap("select result_type,completed_at,failed_at,expired_at from dh_qdr7_idempotency_guard where request_id='request-upgrade'"))
+        .containsEntry("result_type", "DH_DECISION_OUTPUT")
+        .containsEntry("failed_at", null)
+        .containsEntry("expired_at", null);
   }
 
   @Test
@@ -154,8 +191,8 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
             "request-concurrent",
             HASH_A,
             IdempotencyAdmissionCommand.HASH_VERSION,
-            now.plusSeconds(600),
-            now.plusSeconds(3600));
+            Duration.ofMinutes(10),
+            Duration.ofHours(1));
     final var executor = Executors.newFixedThreadPool(8);
     try {
       final Callable<IdempotencyAdmissionStatus> attempt =
@@ -203,6 +240,91 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
   }
 
   @Test
+  void v13StateConstraintsRejectMissingTypedTerminalFieldsAndPartialLease() {
+    final UUID guard = UUID.randomUUID();
+    assertThatThrownBy(
+            () -> jdbc.update(
+                "insert into dh_qdr7_idempotency_guard"
+                    + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,hash_version,state,"
+                    + "state_version,result_id,result_checksum,completed_at,expires_at,retention_until)"
+                    + " values (?,'test',?,'NQ_DRYRUN','tenant-check','missing-type',?,'QDR7-DRYRUN-CJSON-1',"
+                    + "'COMPLETED',1,'missing',?,transaction_timestamp(),transaction_timestamp()+interval '1 hour',"
+                    + "transaction_timestamp()+interval '2 hour')",
+                guard, PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT, HASH_A, HASH_B))
+        .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () -> jdbc.update(
+                "insert into dh_qdr7_idempotency_guard"
+                    + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,hash_version,state,"
+                    + "state_version,stable_error_code,expires_at,retention_until)"
+                    + " values (?,'test',?,'NQ_DRYRUN','tenant-check','missing-failed-at',?,'QDR7-DRYRUN-CJSON-1',"
+                    + "'FAILED',1,'SAFE_FAILURE',transaction_timestamp()+interval '1 hour',"
+                    + "transaction_timestamp()+interval '2 hour')",
+                UUID.randomUUID(), PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT, HASH_A))
+        .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () -> jdbc.update(
+                "insert into dh_qdr7_idempotency_guard"
+                    + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,hash_version,state,"
+                    + "state_version,lease_owner,expires_at,retention_until)"
+                    + " values (?,'test',?,'NQ_DRYRUN','tenant-check','partial-lease',?,'QDR7-DRYRUN-CJSON-1',"
+                    + "'IN_PROGRESS',1,'worker',transaction_timestamp()+interval '1 hour',"
+                    + "transaction_timestamp()+interval '2 hour')",
+                UUID.randomUUID(), PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT, HASH_A))
+        .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+  }
+
+  @Test
+  void databaseClockCreatesLifecycleAndCleanupPreservesExpiredIdentityTombstone() {
+    final JdbcIdempotencyGuardAdapter adapter = new JdbcIdempotencyGuardAdapter(jdbc);
+    final IdempotencyAdmissionCommand command = new IdempotencyAdmissionCommand(
+        identity("tenant-tombstone"), "request-tombstone", HASH_A,
+        IdempotencyAdmissionCommand.HASH_VERSION, Duration.ofSeconds(2), Duration.ofSeconds(3));
+    final Instant dbBefore = jdbc.queryForObject("select transaction_timestamp()", Instant.class);
+    final var admitted = transaction.execute(status -> adapter.admit(command));
+    final Instant dbAfter = jdbc.queryForObject("select transaction_timestamp()", Instant.class);
+    assertThat(admitted.record().expiresAt()).isBetween(dbBefore.plusMillis(1500), dbAfter.plusMillis(2500));
+    jdbc.update("update dh_qdr7_idempotency_guard set created_at=transaction_timestamp()-interval '3 second',"
+        + " updated_at=transaction_timestamp()-interval '3 second',expires_at=transaction_timestamp()-interval '2 second',"
+        + " retention_until=transaction_timestamp()-interval '1 second' where request_id='request-tombstone'");
+    final var cleanup = new JdbcGuardCleanupAdapter(jdbc);
+    final Integer expired = transaction.execute(status -> cleanup.cleanupRetainedIdempotency(
+        new GuardCleanupCommand("test", PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
+            PersistentGuardIdentity.NQ_DRYRUN_SOURCE, Duration.ofMillis(1), 10)));
+    assertThat(expired).isEqualTo(1);
+    assertThat(transaction.execute(status -> adapter.admit(command)).status()).isEqualTo(IdempotencyAdmissionStatus.EXPIRED);
+    final var conflict = new IdempotencyAdmissionCommand(identity("tenant-tombstone"), "request-tombstone", HASH_B,
+        IdempotencyAdmissionCommand.HASH_VERSION, Duration.ofSeconds(2), Duration.ofSeconds(3));
+    assertThat(transaction.execute(status -> adapter.admit(conflict)).status()).isEqualTo(IdempotencyAdmissionStatus.CONFLICT);
+    assertThat(jdbc.queryForObject("select count(*) from dh_qdr7_idempotency_guard where request_id='request-tombstone'", Integer.class)).isEqualTo(1);
+  }
+
+  @Test
+  void cleanupUsesDatabaseGraceAndConcurrentAdaptersDoNotCrossCurrentWindow() throws Exception {
+    jdbc.update("insert into dh_qdr7_rate_limit_bucket(environment,endpoint,source,tenant_id,window_start,window_end,"
+        + "window_seconds,limit_value,request_count) values"
+        + "('test',?,'NQ_DRYRUN','old-a',transaction_timestamp()-interval '120 second',transaction_timestamp()-interval '60 second',60,10,1),"
+        + "('test',?,'NQ_DRYRUN','current-a',date_trunc('minute',transaction_timestamp()),date_trunc('minute',transaction_timestamp())+interval '60 second',60,10,1),"
+        + "('test',?,'NQ_DRYRUN','future-a',transaction_timestamp()+interval '60 second',transaction_timestamp()+interval '120 second',60,10,1)",
+        PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT, PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
+        PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT);
+    final GuardCleanupCommand command = new GuardCleanupCommand("test", PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
+        PersistentGuardIdentity.NQ_DRYRUN_SOURCE, Duration.ofSeconds(1), 10);
+    final var pool = Executors.newFixedThreadPool(2);
+    try {
+      final var calls = java.util.List.<Callable<Integer>>of(
+          () -> transaction.execute(s -> new JdbcGuardCleanupAdapter(jdbc).cleanupExpiredRateBuckets(command)),
+          () -> transaction.execute(s -> new JdbcGuardCleanupAdapter(jdbc).cleanupExpiredRateBuckets(command)));
+      int total = 0;
+      for (final var result : pool.invokeAll(calls)) total += result.get(10, TimeUnit.SECONDS);
+      assertThat(total).isEqualTo(1);
+    } finally {
+      pool.shutdownNow();
+    }
+    assertThat(jdbc.queryForObject("select count(*) from dh_qdr7_rate_limit_bucket where tenant_id in ('current-a','future-a')", Integer.class)).isEqualTo(2);
+  }
+
+  @Test
   void idempotencyAdmissionCasLeaseCompletionAndDuplicateSemanticsArePersistent()
       throws Exception {
     final JdbcIdempotencyGuardAdapter adapter = new JdbcIdempotencyGuardAdapter(jdbc);
@@ -213,8 +335,8 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
             "request-1",
             HASH_A,
             IdempotencyAdmissionCommand.HASH_VERSION,
-            now.plusSeconds(600),
-            now.plusSeconds(3600));
+            Duration.ofMinutes(10),
+            Duration.ofHours(1));
     final var admitted = transaction.execute(status -> adapter.admit(command));
     assertThat(admitted.status()).isEqualTo(IdempotencyAdmissionStatus.ADMITTED);
 
@@ -279,8 +401,8 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
                         "request-1",
                         HASH_B,
                         IdempotencyAdmissionCommand.HASH_VERSION,
-                        now.plusSeconds(600),
-                        now.plusSeconds(3600))));
+                        Duration.ofMinutes(10),
+                        Duration.ofHours(1))));
     assertThat(conflict.status()).isEqualTo(IdempotencyAdmissionStatus.CONFLICT);
     assertThatThrownBy(
             () ->
@@ -310,8 +432,8 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
             "request-recovery",
             HASH_A,
             IdempotencyAdmissionCommand.HASH_VERSION,
-            now.plusSeconds(600),
-            now.plusSeconds(3600));
+            Duration.ofMinutes(10),
+            Duration.ofHours(1));
     final var admitted = transaction.execute(status -> adapter.admit(command));
     final UUID firstLease = UUID.randomUUID();
     final IdempotencyRecordView active =
@@ -353,14 +475,14 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
             "test",
             PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
             PersistentGuardIdentity.NQ_DRYRUN_SOURCE,
-            Instant.now(),
+            Duration.ofMillis(1),
             1);
     final Integer cleanedRate =
         transaction.execute(status -> cleanup.cleanupExpiredRateBuckets(cleanupCommand));
     final Integer cleanedIdempotency =
         transaction.execute(status -> cleanup.cleanupRetainedIdempotency(cleanupCommand));
     assertThat(cleanedRate).isEqualTo(1);
-    assertThat(cleanedIdempotency).isEqualTo(1);
+    assertThat(cleanedIdempotency).isZero();
     assertThat(
             jdbc.queryForObject(
                 "select count(*) from dh_qdr7_idempotency_guard where request_id = ?",
@@ -393,6 +515,159 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
         .isZero();
   }
 
+  @Test
+  void realJdbcAdmissionAndAuditFailuresRollbackRateAndIdempotency() {
+    final JdbcDecisionAuditRepository audit = new JdbcDecisionAuditRepository(jdbc, new ObjectMapper());
+    audit.saveAuditEvent(audit("duplicate-audit", "seed-decision", "tenant-atomic"));
+    assertThatThrownBy(() -> transaction.execute(status -> {
+      assertThat(new JdbcRateLimitAdmissionAdapter(jdbc)
+          .tryAcquire(new RateLimitAdmissionCommand(identity("tenant-rate-audit-rollback"), 60, 5)).status())
+          .isEqualTo(RateLimitAdmissionStatus.ACCEPTED);
+      audit.saveAuditEvent(audit("duplicate-audit", "rate-decision", "tenant-rate-audit-rollback"));
+      return true;
+    })).isInstanceOf(RuntimeException.class);
+    assertThat(jdbc.queryForObject("select count(*) from dh_qdr7_rate_limit_bucket where tenant_id='tenant-rate-audit-rollback'", Integer.class)).isZero();
+
+    final IdempotencyAdmissionCommand command = new IdempotencyAdmissionCommand(identity("tenant-idem-audit-rollback"),
+        "request-idem-audit-rollback", HASH_A, IdempotencyAdmissionCommand.HASH_VERSION,
+        Duration.ofMinutes(10), Duration.ofHours(1));
+    assertThatThrownBy(() -> transaction.execute(status -> {
+      assertThat(new JdbcIdempotencyGuardAdapter(jdbc).admit(command).status()).isEqualTo(IdempotencyAdmissionStatus.ADMITTED);
+      audit.saveAuditEvent(audit("duplicate-audit", "idem-decision", "tenant-idem-audit-rollback"));
+      return true;
+    })).isInstanceOf(RuntimeException.class);
+    assertThat(jdbc.queryForObject("select count(*) from dh_qdr7_idempotency_guard where request_id='request-idem-audit-rollback'", Integer.class)).isZero();
+  }
+
+  @Test
+  void realJdbcOutputAuditAndTerminalCasCommitOrRollbackAtomically() {
+    final JdbcDecisionAuditRepository repository = new JdbcDecisionAuditRepository(jdbc, new ObjectMapper());
+    final JdbcIdempotencyGuardAdapter adapter = new JdbcIdempotencyGuardAdapter(jdbc);
+    final IdempotencyAdmissionCommand command = new IdempotencyAdmissionCommand(identity("tenant-completion"),
+        "request-completion", HASH_A, IdempotencyAdmissionCommand.HASH_VERSION, Duration.ofMinutes(10), Duration.ofHours(1));
+    final var admitted = transaction.execute(status -> adapter.admit(command));
+    final UUID lease = UUID.randomUUID();
+    final var progress = transaction.execute(status -> adapter.transition(transition(admitted.record(), IdempotencyState.RECEIVED,
+        IdempotencyState.IN_PROGRESS, null, lease, Instant.now().plusSeconds(30), null, null, null)));
+    transaction.executeWithoutResult(status -> {
+      repository.saveOutput(output("result-atomic", "tenant-completion", "request-completion"));
+      repository.saveAuditEvent(audit("audit-atomic", "result-atomic", "tenant-completion"));
+      adapter.transition(transition(progress, IdempotencyState.IN_PROGRESS, IdempotencyState.COMPLETED,
+          lease, null, null, "result-atomic", HASH_B, null));
+    });
+    assertThat(jdbc.queryForObject("select count(*) from dh_decision_output where decision_id='result-atomic'", Integer.class)).isEqualTo(1);
+    assertThat(adapter.admit(command).status()).isEqualTo(IdempotencyAdmissionStatus.COMPLETED);
+
+    final IdempotencyAdmissionCommand rollbackCommand = new IdempotencyAdmissionCommand(identity("tenant-completion"),
+        "request-completion-rollback", HASH_A, IdempotencyAdmissionCommand.HASH_VERSION, Duration.ofMinutes(10), Duration.ofHours(1));
+    final var rollbackAdmitted = transaction.execute(status -> adapter.admit(rollbackCommand));
+    final UUID rollbackLease = UUID.randomUUID();
+    final var rollbackProgress = transaction.execute(status -> adapter.transition(transition(rollbackAdmitted.record(),
+        IdempotencyState.RECEIVED, IdempotencyState.IN_PROGRESS, null, rollbackLease, Instant.now().plusSeconds(30), null, null, null)));
+    assertThatThrownBy(() -> transaction.executeWithoutResult(status -> {
+      repository.saveOutput(output("result-rollback", "tenant-completion", "request-completion-rollback"));
+      repository.saveAuditEvent(audit("audit-atomic", "result-rollback", "tenant-completion"));
+      adapter.transition(transition(rollbackProgress, IdempotencyState.IN_PROGRESS, IdempotencyState.COMPLETED,
+          rollbackLease, null, null, "result-rollback", HASH_B, null));
+    })).isInstanceOf(RuntimeException.class);
+    assertThat(jdbc.queryForObject("select count(*) from dh_decision_output where decision_id='result-rollback'", Integer.class)).isZero();
+    assertThat(adapter.findExact(identity("tenant-completion"), "request-completion-rollback", HASH_A).state())
+        .isEqualTo(IdempotencyState.IN_PROGRESS);
+  }
+
+  @Test
+  void completionRejectsMissingAndWrongTenantResultReferences() {
+    final JdbcIdempotencyGuardAdapter adapter = new JdbcIdempotencyGuardAdapter(jdbc);
+    final IdempotencyAdmissionCommand command = new IdempotencyAdmissionCommand(
+        identity("tenant-result-ref"), "request-result-ref", HASH_A,
+        IdempotencyAdmissionCommand.HASH_VERSION, Duration.ofMinutes(10), Duration.ofHours(1));
+    final var admitted = transaction.execute(status -> adapter.admit(command));
+    final UUID lease = UUID.randomUUID();
+    final var progress = transaction.execute(status -> adapter.transition(transition(admitted.record(),
+        IdempotencyState.RECEIVED, IdempotencyState.IN_PROGRESS, null, lease,
+        Instant.now().plusSeconds(30), null, null, null)));
+    assertThatThrownBy(() -> transaction.executeWithoutResult(status -> adapter.transition(transition(progress,
+        IdempotencyState.IN_PROGRESS, IdempotencyState.COMPLETED, lease, null, null,
+        "missing-result", HASH_B, null)))).isInstanceOf(PersistentGuardStoreException.class);
+    seedDecisionOutput("other-tenant", "wrong-tenant-result");
+    assertThatThrownBy(() -> transaction.executeWithoutResult(status -> adapter.transition(transition(progress,
+        IdempotencyState.IN_PROGRESS, IdempotencyState.COMPLETED, lease, null, null,
+        "wrong-tenant-result", HASH_B, null)))).isInstanceOf(PersistentGuardStoreException.class);
+    assertThat(adapter.findExact(identity("tenant-result-ref"), "request-result-ref", HASH_A).state())
+        .isEqualTo(IdempotencyState.IN_PROGRESS);
+  }
+
+  @Test
+  void afterCommitConnectionFailureIsCommitUnknownAndDoesNotReadmit() {
+    final AtomicBoolean failFirstCommit = new AtomicBoolean();
+    final DataSource uncertain = afterCommitFailureDataSource(dataSource(), failFirstCommit);
+    final JdbcTemplate uncertainJdbc = new JdbcTemplate(uncertain);
+    final TransactionTemplate uncertainTransaction =
+        new TransactionTemplate(new DataSourceTransactionManager(uncertain));
+    final GuardTransactionBoundary boundary = new GuardTransactionBoundary() {
+      @Override
+      public <T> T required(final java.util.function.Supplier<T> action) {
+        return uncertainTransaction.execute(status -> action.get());
+      }
+    };
+    final var limiter = new PersistentDecisionDryRunRateLimiter(
+        new JdbcRateLimitAdmissionAdapter(uncertainJdbc), boundary,
+        new JdbcDecisionAuditRepository(uncertainJdbc, new ObjectMapper()),
+        new DecisionDryRunGuardProperties(true, "test", 60, 1, Duration.ofSeconds(5),
+            Duration.ofMinutes(10), Duration.ofHours(1)),
+        Clock.systemUTC());
+    final RateLimitResult uncertainResult = limiter.check("NQ_DRYRUN", "tenant-commit-unknown",
+        PersistentDecisionDryRunRateLimiter.ROUTE, Instant.EPOCH, "request-commit-unknown", "trace-commit-unknown");
+    assertThat(uncertainResult.reason()).isEqualTo(RateLimitResult.REASON_COMMIT_UNKNOWN);
+    assertThat(jdbc.queryForObject("select request_count from dh_qdr7_rate_limit_bucket where tenant_id='tenant-commit-unknown'", Integer.class)).isEqualTo(1);
+    final var reconciledDuplicate = transaction.execute(status ->
+        new JdbcRateLimitAdmissionAdapter(jdbc).tryAcquire(
+            new RateLimitAdmissionCommand(identity("tenant-commit-unknown"), 60, 1)));
+    assertThat(reconciledDuplicate.status()).isEqualTo(RateLimitAdmissionStatus.RATE_LIMITED);
+    assertThat(jdbc.queryForObject("select request_count from dh_qdr7_rate_limit_bucket where tenant_id='tenant-commit-unknown'", Integer.class)).isEqualTo(1);
+  }
+
+  private static DecisionPersistenceRecords.AuditEventRecord audit(
+      final String id, final String decisionId, final String tenant) {
+    return new DecisionPersistenceRecords.AuditEventRecord(id, decisionId, tenant, "trace-atomic",
+        DecisionAuditEventType.QDR7_IDEMPOTENCY_COMPLETED, DecisionAuditEventStatus.SUCCESS,
+        Map.of("state", "safe"), null, Instant.now());
+  }
+
+  private static DecisionPersistenceRecords.OutputRecord output(
+      final String decisionId, final String tenant, final String requestId) {
+    return new DecisionPersistenceRecords.OutputRecord(decisionId, tenant, "trace-atomic", requestId,
+        DecisionType.READ_ONLY_RECOMMENDATION, DecisionAction.NO_TRADE, DecisionRiskLevel.LOW,
+        DecisionPolicyStatus.ALLOWED, new BigDecimal("0.5"), Map.of(), Instant.now());
+  }
+
+  private static DataSource afterCommitFailureDataSource(
+      final DataSource delegate, final AtomicBoolean failed) {
+    return (DataSource) Proxy.newProxyInstance(DataSource.class.getClassLoader(),
+        new Class<?>[] {DataSource.class}, (proxy, method, args) -> {
+          try {
+            final Object value = method.invoke(delegate, args);
+            if ("getConnection".equals(method.getName()) && value instanceof Connection connection) {
+              return Proxy.newProxyInstance(Connection.class.getClassLoader(),
+                  new Class<?>[] {Connection.class}, (connectionProxy, connectionMethod, connectionArgs) -> {
+                    try {
+                      if ("commit".equals(connectionMethod.getName()) && !failed.getAndSet(true)) {
+                        connection.commit();
+                        throw new SQLException("deterministic after-commit connection failure");
+                      }
+                      return connectionMethod.invoke(connection, connectionArgs);
+                    } catch (final InvocationTargetException error) {
+                      throw error.getCause();
+                    }
+                  });
+            }
+            return value;
+          } catch (final InvocationTargetException error) {
+            throw error.getCause();
+          }
+        });
+  }
+
   private static IdempotencyTransitionCommand transition(
       final IdempotencyRecordView record,
       final IdempotencyState expected,
@@ -409,14 +684,18 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
         record.requestHash(),
         expected,
         record.stateVersion(),
+        expectedLease == null ? null : record.leaseOwner(),
         expectedLease,
         target,
+        newLease == null ? null : "worker-test",
         newLease,
-        leaseExpiry,
+        leaseExpiry == null
+            ? null
+            : Duration.ofMillis(Math.max(1L, Duration.between(Instant.now(), leaseExpiry).toMillis())),
+        target == IdempotencyState.COMPLETED ? "DH_DECISION_OUTPUT" : null,
         resultId,
         checksum,
-        errorCode,
-        Instant.now());
+        errorCode);
   }
 
   private void seedDecisionOutput(final String tenant, final String decisionId) {
@@ -443,7 +722,7 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
     jdbc.update(
         "insert into dh_qdr7_idempotency_guard"
             + " (guard_id, environment, endpoint, source, tenant_id, request_id, request_hash,"
-            + " hash_version, state, state_version, created_at, updated_at, completed_at, expires_at,"
+            + " hash_version, state, state_version, created_at, updated_at, expired_at, expires_at,"
             + " retention_until) values (?, 'test', ?, 'NQ_DRYRUN', 'tenant-cleanup', 'request-cleanup',"
             + " ?, 'QDR7-DRYRUN-CJSON-1', 'EXPIRED', 1, transaction_timestamp() - interval '3 hour',"
             + " transaction_timestamp() - interval '2 hour', transaction_timestamp() - interval '2 hour',"
@@ -464,7 +743,7 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
 
   private static Map<String, Integer> checksums(final MigrationInfo[] migrations) {
     return Arrays.stream(migrations)
-        .filter(info -> info.getVersion() != null && info.getVersion().getVersion().matches("[1-9]|1[01]"))
+        .filter(info -> info.getVersion() != null && info.getVersion().getVersion().matches("[1-9]|1[0-2]"))
         .collect(
             Collectors.toMap(
                 info -> info.getVersion().getVersion(), MigrationInfo::getChecksum));

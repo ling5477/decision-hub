@@ -7,6 +7,10 @@
 > verdict: `FROZEN / SOURCE_FIX_REVIEW_PASS`
 > capacity sequence: `FROZEN / POST_B2_MEASUREMENT_REQUIRED`
 
+## B2 blocker fix consumption（2026-07-12）
+
+B1冻结的database-time、lease、TTL、cleanup、retention与fail-closed要求已由B2 blocker fix消费并形成V13与真实PostgreSQL事务证据。该结论只允许milestone review retry；post-B2 capacity measurement仍未授权，本文原始historical blocker段落不覆盖当前`STATUS.md`。
+
 ## B2 schema/security review consumption（2026-07-12）
 
 本B1合同已由`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-SCHEMA-SECURITY-REVIEW`消费；B2 review结论为`PASS / DESIGN_FROZEN`，下一步为独立implementation。本文后部保留的原始`BLOCKED / SOURCE_CODE_FIX_REQUIRED`与capacity blocker段落是review当时的historical checkpoint，不再覆盖本段、`STATUS.md`或B2 review文档。

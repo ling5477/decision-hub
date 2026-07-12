@@ -20,16 +20,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public final class JdbcRateLimitAdmissionAdapter implements RateLimitAdmissionPort {
 
-  private static final String DB_WINDOW_SQL =
-      "select transaction_timestamp() as db_now,"
-          + " to_timestamp(floor(extract(epoch from transaction_timestamp()) / ?) * ?)"
-          + " as window_start";
-
   private static final String UPSERT_SQL =
-      "insert into dh_qdr7_rate_limit_bucket"
+      "with db_window as (select"
+          + " to_timestamp(floor(extract(epoch from transaction_timestamp()) / ?) * ?) as window_start)"
+          + " insert into dh_qdr7_rate_limit_bucket"
           + " (environment, endpoint, source, tenant_id, window_start, window_end,"
           + " window_seconds, limit_value, request_count, created_at, updated_at)"
-          + " values (?, ?, ?, ?, ?, ?, ?, ?, 1, transaction_timestamp(), transaction_timestamp())"
+          + " select ?, ?, ?, ?, window_start, window_start+(? * interval '1 second'),"
+          + " ?, ?, 1, transaction_timestamp(), transaction_timestamp() from db_window"
           + " on conflict (environment, endpoint, source, tenant_id, window_start) do update"
           + " set request_count = dh_qdr7_rate_limit_bucket.request_count + 1,"
           + " updated_at = transaction_timestamp()"
@@ -37,7 +35,7 @@ public final class JdbcRateLimitAdmissionAdapter implements RateLimitAdmissionPo
           + " and dh_qdr7_rate_limit_bucket.window_seconds = excluded.window_seconds"
           + " and dh_qdr7_rate_limit_bucket.window_end = excluded.window_end"
           + " and dh_qdr7_rate_limit_bucket.request_count < dh_qdr7_rate_limit_bucket.limit_value"
-          + " returning window_start, window_end, request_count, limit_value";
+          + " returning window_start, window_end, transaction_timestamp() as db_now, request_count, limit_value";
 
   private static final String SELECT_EXACT_SQL =
       "select window_start, window_end, window_seconds, request_count, limit_value"
@@ -56,11 +54,6 @@ public final class JdbcRateLimitAdmissionAdapter implements RateLimitAdmissionPo
   public RateLimitAdmissionResult tryAcquire(final RateLimitAdmissionCommand command) {
     final RateLimitAdmissionCommand checked = Objects.requireNonNull(command, "command");
     try {
-      final Map<String, Object> dbWindow =
-          jdbcTemplate.queryForMap(
-              DB_WINDOW_SQL, checked.windowSeconds(), checked.windowSeconds());
-      final Instant windowStart = timestamp(dbWindow.get("window_start"));
-      final Instant windowEnd = windowStart.plusSeconds(checked.windowSeconds());
       final List<RateLimitAdmissionResult> accepted =
           jdbcTemplate.query(
               UPSERT_SQL,
@@ -69,21 +62,23 @@ public final class JdbcRateLimitAdmissionAdapter implements RateLimitAdmissionPo
                       RateLimitAdmissionStatus.ACCEPTED,
                       rs.getTimestamp("window_start").toInstant(),
                       rs.getTimestamp("window_end").toInstant(),
+                      rs.getTimestamp("db_now").toInstant(),
                       rs.getLong("request_count"),
                       rs.getInt("limit_value")),
+              checked.windowSeconds(),
+              checked.windowSeconds(),
               checked.identity().environment(),
               checked.identity().endpoint(),
               checked.identity().source(),
               checked.identity().tenantId(),
-              Timestamp.from(windowStart),
-              Timestamp.from(windowEnd),
+              checked.windowSeconds(),
               checked.windowSeconds(),
               checked.limitValue());
       if (accepted.size() == 1) {
         return accepted.get(0);
       }
       if (!accepted.isEmpty()) {
-        return invalid(windowStart, windowEnd, checked.limitValue());
+        return invalid(null, null, checked.limitValue());
       }
       final List<Map<String, Object>> rows =
           jdbcTemplate.queryForList(
@@ -92,15 +87,21 @@ public final class JdbcRateLimitAdmissionAdapter implements RateLimitAdmissionPo
               checked.identity().endpoint(),
               checked.identity().source(),
               checked.identity().tenantId(),
-              Timestamp.from(windowStart));
+              Timestamp.from(
+                  accepted.isEmpty()
+                      ? currentWindowStart(checked.windowSeconds())
+                      : accepted.get(0).windowStart()));
       if (rows.size() != 1) {
-        return invalid(windowStart, windowEnd, checked.limitValue());
+        return invalid(null, null, checked.limitValue());
       }
       final Map<String, Object> row = rows.get(0);
       final long count = number(row, "request_count").longValue();
       final int storedLimit = number(row, "limit_value").intValue();
       final int storedWindow = number(row, "window_seconds").intValue();
+      final Instant windowStart = timestamp(row.get("window_start"));
       final Instant storedEnd = timestamp(row.get("window_end"));
+      final Instant windowEnd = windowStart.plusSeconds(storedWindow);
+      final Instant databaseNow = databaseNow();
       if (storedLimit != checked.limitValue()
           || storedWindow != checked.windowSeconds()
           || !storedEnd.equals(windowEnd)) {
@@ -110,6 +111,7 @@ public final class JdbcRateLimitAdmissionAdapter implements RateLimitAdmissionPo
           RateLimitAdmissionStatus.RATE_LIMITED,
           windowStart,
           windowEnd,
+          databaseNow,
           count,
           storedLimit);
     } catch (final DataAccessException error) {
@@ -117,10 +119,24 @@ public final class JdbcRateLimitAdmissionAdapter implements RateLimitAdmissionPo
     }
   }
 
+  private Instant currentWindowStart(final int windowSeconds) {
+    return jdbcTemplate.queryForObject(
+        "select to_timestamp(floor(extract(epoch from transaction_timestamp()) / ?) * ?)",
+        (rs, rowNum) -> rs.getTimestamp(1).toInstant(),
+        windowSeconds,
+        windowSeconds);
+  }
+
+  private Instant databaseNow() {
+    return jdbcTemplate.queryForObject(
+        "select transaction_timestamp()",
+        (rs, rowNum) -> rs.getTimestamp(1).toInstant());
+  }
+
   private static RateLimitAdmissionResult invalid(
       final Instant start, final Instant end, final int limit) {
     return new RateLimitAdmissionResult(
-        RateLimitAdmissionStatus.CONFIGURATION_INVALID, start, end, null, limit);
+        RateLimitAdmissionStatus.CONFIGURATION_INVALID, start, end, null, null, limit);
   }
 
   private static Instant timestamp(final Object value) {

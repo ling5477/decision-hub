@@ -143,10 +143,13 @@ public final class PersistentDecisionDryRunRateLimiter implements RateLimiter {
   }
 
   private static Integer retryAfter(final RateLimitAdmissionResult result) {
-    if (result.windowEnd() == null) {
+    if (result.windowEnd() == null || result.databaseNow() == null) {
       return null;
     }
-    return (int) Math.max(1L, result.windowEnd().getEpochSecond() - Instant.now().getEpochSecond());
+    return (int)
+        Math.max(
+            1L,
+            result.windowEnd().getEpochSecond() - result.databaseNow().getEpochSecond());
   }
 
   private static String safe(final String value, final String fallback) {

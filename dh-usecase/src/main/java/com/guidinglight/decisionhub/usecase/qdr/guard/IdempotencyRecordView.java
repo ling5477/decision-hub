@@ -12,8 +12,10 @@ import java.util.UUID;
  * @param requestHash SHA-256。
  * @param state 当前状态。
  * @param stateVersion CAS版本。
+ * @param leaseOwner 低敏感内部实例标识；不得进入响应或日志。
  * @param leaseToken opaque内部lease；不得进入响应或日志。
  * @param leaseExpiresAt lease截止时间。
+ * @param resultType safe result类型。
  * @param resultId safe result reference。
  * @param resultChecksum safe projection checksum。
  * @param stableErrorCode 冻结失败码。
@@ -27,8 +29,10 @@ public record IdempotencyRecordView(
     String requestHash,
     IdempotencyState state,
     long stateVersion,
+    String leaseOwner,
     UUID leaseToken,
     Instant leaseExpiresAt,
+    String resultType,
     String resultId,
     String resultChecksum,
     String stableErrorCode,

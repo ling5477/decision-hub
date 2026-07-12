@@ -6,6 +6,10 @@
 > endpoint: `POST /api/ai/decision-dry-runs`（既有合同未修改）
 > next action: `DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW`
 
+## Blocker fix disposition（2026-07-12）
+
+后续`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX`已`DONE / REVIEW_RETRY_READY`，以V13、DB-time lifecycle/tombstone/cleanup和真实JDBC事务证据关闭P1-1至P1-5。本文仍保留原implementation与previous review时点事实；B2尚未accepted，下一步为独立milestone review retry。
+
 ## Milestone review disposition（2026-07-12）
 
 后续独立milestone review结论为`BLOCKED / P1_FIX_REQUIRED`。本文件保留implementation当时的local validation事实，但不得再将其解释为B2 accepted。阻断项为terminal expiry不可达、cleanup caller-controlled cutoff、冻结schema字段漂移、JVM/DB clock混用和mandatory actual-JDBC transaction/result/cleanup evidence不足。

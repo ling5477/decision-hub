@@ -15,7 +15,6 @@ import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardException;
 import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardIdentity;
 import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardStoreException;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -29,6 +28,8 @@ import java.util.UUID;
  */
 public final class PersistentGuardedDecisionDryRunService implements DecisionDryRunService {
 
+  private static final String RESULT_TYPE_DECISION_OUTPUT = "DH_DECISION_OUTPUT";
+
   private final DecisionDryRunService delegate;
   private final IdempotencyGuardPort idempotencyPort;
   private final GuardTransactionBoundary transactions;
@@ -37,6 +38,7 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
   private final DecisionDryRunSafeResultProjector resultProjector;
   private final DecisionDryRunGuardProperties guardProperties;
   private final Clock clock;
+  private final String leaseOwner;
 
   /** 创建persistent idempotency orchestration。 */
   public PersistentGuardedDecisionDryRunService(
@@ -56,6 +58,7 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
     this.resultProjector = Objects.requireNonNull(resultProjector, "resultProjector");
     this.guardProperties = Objects.requireNonNull(guardProperties, "guardProperties");
     this.clock = Objects.requireNonNull(clock, "clock");
+    this.leaseOwner = "qdr7-" + UUID.randomUUID();
   }
 
   @Override
@@ -66,7 +69,6 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
     final DecisionDryRunCommand checked = Objects.requireNonNull(command, "command");
     final PersistentGuardIdentity identity = identity(checked);
     final String requestHash = fingerprint.hash(checked);
-    final Instant now = clock.instant();
     final IdempotencyAdmissionResult admission;
     try {
       admission =
@@ -79,8 +81,8 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
                             checked.requestId(),
                             requestHash,
                             IdempotencyAdmissionCommand.HASH_VERSION,
-                            now.plus(guardProperties.idempotencyTtl()),
-                            now.plus(guardProperties.retentionPeriod())));
+                            guardProperties.idempotencyTtl(),
+                            guardProperties.retentionPeriod()));
                 if (result.status()
                     != com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyAdmissionStatus
                         .STORE_UNAVAILABLE) {
@@ -139,7 +141,6 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
       return transactions.required(
           () -> {
             final UUID leaseToken = UUID.randomUUID();
-            final Instant startedAt = clock.instant();
             final IdempotencyRecordView inProgress =
                 idempotencyPort.transition(
                     new IdempotencyTransitionCommand(
@@ -149,13 +150,15 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
                         IdempotencyState.RECEIVED,
                         received.stateVersion(),
                         null,
+                        null,
                         IdempotencyState.IN_PROGRESS,
+                        leaseOwner,
                         leaseToken,
-                        startedAt.plus(guardProperties.leaseDuration()),
+                        guardProperties.leaseDuration(),
                         null,
                         null,
                         null,
-                        startedAt));
+                        null));
             final DecisionDryRunResult delegated = delegate.execute(command);
             if (!delegated.success()) {
               idempotencyPort.transition(
@@ -246,14 +249,16 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
         requestHash,
         IdempotencyState.IN_PROGRESS,
         inProgress.stateVersion(),
+        inProgress.leaseOwner(),
         leaseToken,
         target,
         null,
         null,
+        null,
+        target == IdempotencyState.COMPLETED ? RESULT_TYPE_DECISION_OUTPUT : null,
         resultId,
         checksum,
-        errorCode,
-        clock.instant());
+        errorCode);
   }
 
   private PersistentGuardIdentity identity(final DecisionDryRunCommand command) {

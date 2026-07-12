@@ -1,5 +1,24 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX
+
+- Preflight确认`dev`、HEAD `e3fd401`、blocker review已提交、worktree/staged clean、V12存在且V13不存在。
+- 新增forward-only V13；V12保持不变。补齐`lease_owner/result_type/failed_at/expired_at`、安全回填、状态CHECK与cleanup索引。
+- 将admission/lease/TTL/retention/cleanup输入收口为严格`Duration`；所有持久化guard绝对时间与资格判断统一到PostgreSQL `transaction_timestamp()`。
+- Idempotency cleanup改为bounded CAS到`EXPIRED`，清理result/failure细节但永久保留identity tombstone；rate cleanup增加DB current-window与safety-grace保护。
+- Heartbeat校验owner/token/state/version；recovery仅接管DB判定已过期lease；duplicate客户端不触发接管。
+- 补齐真实PostgreSQL/JDBC transaction、result reference、并发cleanup和after-commit connection failure证据。
+- 验证：targeted PG 14、full 1054 tests均0 failures/errors/skips；quality Checkstyle 0、Spotless PASS。
+- 未修改NQ、V1-V12、API/OpenAPI、Controller/DTO、HMAC/nonce/source；未运行capacity benchmark；未进入B3；未push/tag。
+
+```text
+STAGE_QDR_7_B2_PERSISTENT_GUARDS_BLOCKER_FIX: DONE / REVIEW_RETRY_READY
+ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW_RETRY: YES
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW
 
 - 只读复核`19666e5`的51-file commit范围、V12、ports/JDBC、transaction boundary、result projector、cleanup、Controller/filter/wiring、taxonomy与直接测试。

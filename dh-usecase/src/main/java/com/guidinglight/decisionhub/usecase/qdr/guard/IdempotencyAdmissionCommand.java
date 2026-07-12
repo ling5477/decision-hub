@@ -1,6 +1,6 @@
 package com.guidinglight.decisionhub.usecase.qdr.guard;
 
-import java.time.Instant;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -11,16 +11,16 @@ import java.util.regex.Pattern;
  * @param requestId exact requestId。
  * @param requestHash lowercase SHA-256。
  * @param hashVersion 固定canonicalization版本。
- * @param expiresAt duplicate语义过期时间。
- * @param retentionUntil 最早物理清理时间。
+ * @param timeToLive duplicate语义TTL；绝对时间只能由PostgreSQL生成。
+ * @param retentionPeriod terminal保留期；绝对时间只能由PostgreSQL生成。
  */
 public record IdempotencyAdmissionCommand(
     PersistentGuardIdentity identity,
     String requestId,
     String requestHash,
     String hashVersion,
-    Instant expiresAt,
-    Instant retentionUntil) {
+    Duration timeToLive,
+    Duration retentionPeriod) {
 
   /** 固定hash版本。 */
   public static final String HASH_VERSION = "QDR7-DRYRUN-CJSON-1";
@@ -37,10 +37,10 @@ public record IdempotencyAdmissionCommand(
     if (!HASH_VERSION.equals(hashVersion)) {
       throw new IllegalArgumentException("unsupported idempotency hashVersion");
     }
-    expiresAt = Objects.requireNonNull(expiresAt, "expiresAt");
-    retentionUntil = Objects.requireNonNull(retentionUntil, "retentionUntil");
-    if (retentionUntil.isBefore(expiresAt)) {
-      throw new IllegalArgumentException("retentionUntil must not precede expiresAt");
+    timeToLive = requireDuration(timeToLive, Duration.ofDays(7), "timeToLive");
+    retentionPeriod = requireDuration(retentionPeriod, Duration.ofDays(90), "retentionPeriod");
+    if (retentionPeriod.compareTo(timeToLive) < 0) {
+      throw new IllegalArgumentException("retentionPeriod must not precede timeToLive");
     }
   }
 
@@ -48,6 +48,15 @@ public record IdempotencyAdmissionCommand(
     final String checked = Objects.requireNonNull(value, field);
     if (checked.isBlank() || !checked.equals(checked.trim())) {
       throw new IllegalArgumentException(field + " must be exact and non-blank");
+    }
+    return checked;
+  }
+
+  private static Duration requireDuration(
+      final Duration value, final Duration ceiling, final String field) {
+    final Duration checked = Objects.requireNonNull(value, field);
+    if (checked.isZero() || checked.isNegative() || checked.compareTo(ceiling) > 0) {
+      throw new IllegalArgumentException(field + " outside safety ceiling");
     }
     return checked;
   }

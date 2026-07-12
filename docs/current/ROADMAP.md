@@ -1,5 +1,21 @@
 # Decision Hub Roadmap
 
+## 2026-07-12 Stage-QDR-7 B2 blocker fix done
+
+```text
+B1 runtime contract: FROZEN
+B2 implementation: DONE / REVIEW_RETRY_READY
+P1 blocker fix: DONE
+V13 forward fix: PASS
+expiry tombstone / DB clock / cleanup / transaction evidence: PASS
+previous milestone review: BLOCKED / HISTORICAL_PRESERVED
+post-B2 capacity acceptance: NOT_ALLOWED
+B3 operational safety: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY
+```
+
+Review retry必须独立复核本轮证据；通过前不得运行capacity harness或进入B3。
+
 ## 2026-07-12 Stage-QDR-7 B2 milestone blocked
 
 ```text

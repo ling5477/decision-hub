@@ -1,6 +1,6 @@
 package com.guidinglight.decisionhub.usecase.qdr.guard;
 
-import java.time.Instant;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -12,14 +12,16 @@ import java.util.UUID;
  * @param requestHash immutable request hash。
  * @param expectedState expected source state。
  * @param expectedVersion expected CAS version。
+ * @param expectedLeaseOwner IN_PROGRESS转换的current owner。
  * @param expectedLeaseToken IN_PROGRESS转换的current token。
  * @param targetState 合法目标状态。
+ * @param newLeaseOwner 进入/续租IN_PROGRESS的新owner。
  * @param newLeaseToken 进入/续租IN_PROGRESS的新token。
- * @param leaseExpiresAt 新lease截止时间。
+ * @param leaseDuration 新lease时长；绝对截止时间由PostgreSQL生成。
+ * @param resultType COMPLETED结果类型，当前仅允许DH_DECISION_OUTPUT。
  * @param resultId COMPLETED safe result id。
  * @param resultChecksum COMPLETED checksum。
  * @param stableErrorCode FAILED stable error。
- * @param transitionedAt DB-facing业务时间；adapter仍使用DB transaction time写updated_at。
  */
 public record IdempotencyTransitionCommand(
     PersistentGuardIdentity identity,
@@ -27,14 +29,16 @@ public record IdempotencyTransitionCommand(
     String requestHash,
     IdempotencyState expectedState,
     long expectedVersion,
+    String expectedLeaseOwner,
     UUID expectedLeaseToken,
     IdempotencyState targetState,
+    String newLeaseOwner,
     UUID newLeaseToken,
-    Instant leaseExpiresAt,
+    Duration leaseDuration,
+    String resultType,
     String resultId,
     String resultChecksum,
-    String stableErrorCode,
-    Instant transitionedAt) {
+    String stableErrorCode) {
 
   /** 校验基本CAS输入；具体合法边由port实现再次封闭。 */
   public IdempotencyTransitionCommand {
@@ -43,9 +47,14 @@ public record IdempotencyTransitionCommand(
     requestHash = Objects.requireNonNull(requestHash, "requestHash");
     expectedState = Objects.requireNonNull(expectedState, "expectedState");
     targetState = Objects.requireNonNull(targetState, "targetState");
-    transitionedAt = Objects.requireNonNull(transitionedAt, "transitionedAt");
     if (expectedVersion < 0) {
       throw new IllegalArgumentException("expectedVersion must not be negative");
+    }
+    if (leaseDuration != null
+        && (leaseDuration.isZero()
+            || leaseDuration.isNegative()
+            || leaseDuration.compareTo(Duration.ofHours(1)) > 0)) {
+      throw new IllegalArgumentException("leaseDuration outside safety ceiling");
     }
   }
 }
