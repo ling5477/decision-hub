@@ -1,5 +1,25 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER
+
+- Preflight 确认 `dev` / `a752e113`、clean worktree、staged empty；最新提交为 Stage-QDR-7 plan。
+- 只读核验既有 `POST /api/ai/decision-dry-runs`、guard ordering、HMAC/timestamp/nonce、tenant/source、JVM-local rate limit、key-only in-memory idempotency、JDBC nonce replay、payload/context cap、feature/production flags、kill snapshot、audit/redaction 与 PostgreSQL/Testcontainers 基础。
+- 新增 `DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md`，冻结 B1–B5、identity/domain separation、duplicate semantics、truth table、resource/deadline/backpressure、review、测试、回滚和 archive/tag 纪律。
+- 明确 same nonce always reject；same requestId + same canonical request 按状态复用冻结结果；same requestId + different hash conflict；unknown/incomplete state fail-closed。
+- 明确 B2 不得复用 replay nonce 表，migration + production port/JDBC 必须先做统一 schema/security milestone review；guard store unavailable 禁止 fallback in-memory。
+- 明确 outbound HTTP/Provider retry 与 circuit breaker 因没有真实目标继续后置；Stage-QDR-7 implementation 未启动。
+- `mvn -ntp -Pquality validate` 通过：reactor 19/19、Checkstyle 0 violations、Spotless PASS；本轮未运行 full Maven tests 或 Docker/Testcontainers。
+
+```text
+STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
+STAGE_QDR_7_IMPLEMENTATION: NOT_STARTED
+ALLOW_STAGE_QDR_7_B1_CONTRACT_FREEZE: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_7_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_7_B4_ACCEPTANCE_NOW: NO
+next action: DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY
+```
+
 ## 2026-07-11 DH-STAGE-QDR-7-PLAN
 
 - Preflight确认`dev`/`363dadf` clean、staged empty；Stage-QDR-6 local/remote annotated tag peeled target仍为`b9b68b3`，current QDR-6 residue为空。

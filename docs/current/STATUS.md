@@ -1,5 +1,36 @@
 # Decision Hub Status
 
+## 2026-07-12 Stage-QDR-7 implementation work order
+
+```text
+STAGE_QDR_6: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+STAGE_QDR_7: PLANNING / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_7_PLAN: DONE / PLAN_ONLY
+STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: DONE / WORK_ORDER_ONLY
+STAGE_QDR_7_MAINLINE: LIMITED_DRY_RUN_RUNTIME_READINESS
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: YES / CONSUMED
+ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_7_B1_CONTRACT_FREEZE: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_7_B2_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_7_B4_ACCEPTANCE_NOW: NO
+ALLOW_MIGRATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
+ALLOW_API_CHANGE_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_PROVIDER_SDK: NO
+ALLOW_NQ_RUNTIME_INTEGRATION: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+current task: DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER
+current task status: DONE / WORK_ORDER_ONLY
+next action: DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY
+```
+
+工作单已冻结 B1–B5、guard 顺序、identity/domain separation、duplicate request semantics、feature/production/kill truth table、resource/deadline/backpressure、review/test/rollback 与 archive-before-tag 纪律。当前代码仍只有 JVM-local rate limit、key-only in-memory idempotency 和启动时 kill switch snapshot；payload/context cap 非法值仍会 fallback，不能写成 persistent/dynamic/fail-closed 已实现。B1 是唯一获准的下一任务且仅做安全语义合同冻结；B2 migration + production port/JDBC 必须先通过统一 schema/security milestone review。
+
 ## 2026-07-11 Stage-QDR-7 limited dry-run runtime readiness plan
 
 ```text

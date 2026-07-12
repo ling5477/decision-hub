@@ -1,5 +1,23 @@
 # Decision Hub Roadmap
 
+## 2026-07-12 Stage-QDR-7 implementation route
+
+```text
+Stage-QDR-7 plan: DONE / PLAN_ONLY
+Stage-QDR-7 implementation work order: DONE / WORK_ORDER_ONLY
+Stage-QDR-7 implementation: NOT_STARTED
+B1: Runtime Contract / Safety Policy Freeze / NEXT_TASK_ONLY
+B2: Persistent Multi-instance Guards / NOT_AUTHORIZED / SCHEMA_SECURITY_REVIEW_FIRST
+B3: Operational Safety / Resilience / NOT_AUTHORIZED
+B4: Protected Entry Readiness Acceptance / NOT_AUTHORIZED
+B5: Final Close -> Archive -> Annotated Tag -> Push -> Cleanup / NOT_STARTED
+outbound HTTP retry: DEFERRED / NO_REAL_TARGET
+Provider retry/circuit breaker: DEFERRED / NO_REAL_TARGET
+next action: DH-STAGE-QDR-7-B1-RUNTIME-CONTRACT-SAFETY-POLICY
+```
+
+B1 只冻结合同，不改 Controller/OpenAPI/production code。B2 必须先完成 migration、schema、production port/JDBC 与 security 的统一 milestone review；B3 只实现当前有真实目标的 deadline、bounded concurrency/backpressure、dynamic kill、environment isolation、redaction/audit/metrics 与 invalid configuration fail-closed。B4 只读验收既有 protected endpoint；如需 API/Controller 变化则独立阻断。
+
 > supporting document
 > not primary stage gate source
 > old history must not override `docs/current/STATUS.md` or `docs/current/WORK_ORDER.md`
