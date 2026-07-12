@@ -8,7 +8,7 @@
 
 ## B1 review outcome（2026-07-12）
 
-`DH-STAGE-QDR-7-B1-CAPACITY-BLOCKER-RESOLUTION` 已冻结 source 合同、pre-B2 安全上限与 post-B2 容量验收顺序。B2 schema/security review 不依赖最终吞吐默认值；persistent guards 实现后才运行 actual-wiring 2xx harness 并冻结 measured defaults。当前 `DecisionDryRunRuntimeProperties` 存在 source lowercase 生产代码漂移，B1 仍 `BLOCKED / SOURCE_CODE_FIX_REQUIRED`，下一步为 `DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX`。
+`DH-STAGE-QDR-7-B1-CAPACITY-BLOCKER-RESOLUTION` 已冻结 source 合同、pre-B2 安全上限与 post-B2 容量验收顺序。B2 schema/security review 不依赖最终吞吐默认值；persistent guards 实现后才运行 actual-wiring 2xx harness 并冻结 measured defaults。`044afba`的source lowercase production drift已由独立review关闭，B1 runtime contract为`FROZEN`；下一步为`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-SCHEMA-SECURITY-REVIEW`。
 
 原 resource capacity evidence 确认 actual app-wired endpoint 无有效 2xx benchmark 样本、Docker/Testcontainers unavailable、server queue 与 future persistent guard 容量不可证。该证据保持有效，但已后置为 B2 capacity acceptance 输入；当前禁止在 persistent guards 实现前重跑同一 benchmark。
 

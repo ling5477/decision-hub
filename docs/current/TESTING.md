@@ -3,6 +3,21 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-12 DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-FIX-REVIEW validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| review target | PASS | `044afba`仅包含source properties、直接wiring/validation、直接测试和Stage-QDR-7 current docs；Controller/DTO/OpenAPI/migration/Repository/JDBC/HMAC production implementation无diff。 |
+| source contract review | PASS | `NQ_DRYRUN`为唯一canonical value；wire exact、无trim/alias/case folding；config仅outer trim且非法值bean creation failure。 |
+| signature/replay review | PASS | HMAC material字段、顺序、编码和raw-body hash无diff；source mutation签名失效，nonce replay与tenant/source isolation回归通过。 |
+| owning-module Maven tests | PASS / BUILD SUCCESS | `mvn -ntp -pl dh-usecase,dh-security,dh-api,dh-app -am test`成功；15个reactor module、108 tests、0 failures、0 errors、0 skipped。 |
+| full Maven tests | PASS / BUILD SUCCESS | `mvn -ntp test`成功；19个reactor module；Surefire汇总150个报告、1026 tests、0 failures、0 errors、0 skipped。 |
+| PostgreSQL/Testcontainers | PASS / EXECUTED | PostgreSQL 17 Testcontainers启动；Flyway V1–V11 regression实际执行，0 skipped。 |
+| quality validation | PASS / BUILD SUCCESS | `mvn -ntp -Pquality validate`成功；19/19 reactor、Checkstyle 0 violations、Spotless check通过。 |
+| capacity benchmark | NOT RUN / STILL_BLOCKED | actual-wiring 2xx harness与persistent guards不是本评审范围。 |
+
+Mockito dynamic-agent warning仍为JDK future compatibility提示，不影响本次`BUILD SUCCESS`。`mvnw.cmd`维持既有`UNUSABLE / P2 TOOLING RISK`，本轮使用系统`mvn`。
+
 ## 2026-07-12 DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX validation
 
 | Check | Result | Evidence |

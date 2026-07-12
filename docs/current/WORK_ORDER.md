@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX
-current task status: DONE / SOURCE_FIX_REVIEW_PENDING
-next action: DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-FIX-REVIEW
-mode: SECURITY_FIX_REVIEW_ONLY + SOURCE_CONTRACT_EXACT_WIRE + NO_CAPACITY_BENCHMARK + NO_STAGE_QDR_7_B2_IMPLEMENTATION + NO_EXTERNAL_HTTP + NO_PROVIDER + NO_NQ + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-FIX-REVIEW
+current task status: PASS / SOURCE_PRODUCTION_DRIFT_CLOSED
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-SCHEMA-SECURITY-REVIEW
+mode: SCHEMA_SECURITY_REVIEW_ONLY + SOURCE_CONTRACT_EXACT_WIRE + NO_CAPACITY_BENCHMARK + NO_STAGE_QDR_7_B2_IMPLEMENTATION + NO_EXTERNAL_HTTP + NO_PROVIDER + NO_NQ + NO_AGENT + NO_LIVE
 ```
 
-Stage-QDR-7 source production-code drift已修复：runtime properties不再lowercase request source，配置source与tenant/source pair均保持canonical case并在非法时fail-closed。下一步只允许独立source fix review；B2 schema/security review仍须等待review通过，B2 implementation、API、migration、repository expansion和benchmark retry继续未授权。
+Stage-QDR-7 source production-code drift已由`044afba`与独立security fix review关闭：runtime properties不再lowercase request source，配置source与tenant/source pair均保持canonical case并在非法时fail-closed。下一步只允许B2 persistent guards schema/security review；B2 implementation、API、migration、repository expansion和benchmark retry继续未授权。
 
 ## 2. 前置状态
 

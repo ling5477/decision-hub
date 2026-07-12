@@ -1,5 +1,22 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-FIX-REVIEW
+
+- 只读审核`044afba fix(qdr): preserve canonical dry-run source semantics`，确认提交未触及Controller/DTO、OpenAPI、migration、Repository/JDBC或HMAC production implementation。
+- 以配置输入→Wiring CSV binding→`DecisionDryRunRuntimeProperties` canonical validation→HMAC exact wire comparison→Controller `SOURCE_DENIED / 403`追踪source合同；`NQ_DRYRUN`为唯一canonical值，request不trim/不case-fold/不alias。
+- 确认完全空allowlist是production deny-all状态；非空CSV中的blank/trailing-empty、非canonical source、非canonical pair与pair/allowlist矛盾在bean creation时fail-closed。
+- 确认HMAC material字段、顺序、编码和raw-body hash不变，source篡改签名失效，nonce replay与tenant/source isolation不变；无新增敏感日志、外部HTTP、Provider、NQ、Agent或LangGraph依赖。
+- 运行owning-module Maven、完整Maven和quality validation；PostgreSQL 17 Testcontainers/Flyway V1–V11实际执行，full Surefire为1026 tests、0 failures/errors/skips。
+
+```text
+SOURCE_NORMALIZATION_FIX_REVIEW: PASS
+SOURCE_PRODUCTION_DRIFT: CLOSED
+STAGE_QDR_7_B1_RUNTIME_CONTRACT: FROZEN
+ALLOW_STAGE_QDR_7_B2_SCHEMA_SECURITY_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_7_B2_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-SCHEMA-SECURITY-REVIEW
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-B1-SOURCE-NORMALIZATION-BLOCKER-FIX
 
 - 复核发现路径为`DecisionDryRunRuntimeWiringConfig` CSV binding到`DecisionDryRunRuntimeProperties`的lowercase normalization；该语义与HMAC exact-wire source冲突。
