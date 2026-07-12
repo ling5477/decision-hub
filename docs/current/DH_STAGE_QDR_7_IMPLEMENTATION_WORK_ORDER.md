@@ -6,6 +6,16 @@
 > mainline: `Limited Dry Run Runtime Readiness`  
 > endpoint: `POST /api/ai/decision-dry-runs`（既有，不新增 endpoint）
 
+## B2 milestone review retry outcome（2026-07-12）
+
+`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY`为`BLOCKED / P1_FIX_RETRY_REQUIRED`。EXPIRED tombstone、DB clock、cleanup与rollback方向已确认，但V12→V13合法历史行兼容、冻结`result_type`类型、idempotency真实JDBC commit-unknown、production Spring同DataSource transaction wiring、JVM clock offset、actual JDBC result mapping和idempotency concurrent cleanup证据仍未关闭。
+
+```text
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY
+```
+
 ## B2 blocker fix outcome（2026-07-12）
 
 `DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX`已`DONE / REVIEW_RETRY_READY`。V13、EXPIRED tombstone、database clock、bounded cleanup、lease owner/recovery、tenant-bound result和actual JDBC transaction/commit-unknown evidence均已验证；V12与外部合同未修改。Previous milestone review保持`BLOCKED`历史状态。

@@ -6,6 +6,10 @@
 > endpoint: `POST /api/ai/decision-dry-runs`（既有合同未修改）
 > next action: `DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW`
 
+## Milestone review retry disposition（2026-07-12）
+
+后续`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY`仍为`BLOCKED / P1_FIX_RETRY_REQUIRED`。本文件的implementation事实与local validation保留，但不得解释为B2 accepted；remaining P1为V12→V13 compatibility、冻结schema漂移、idempotency real-JDBC commit unknown和mandatory production wiring/lifecycle/result/concurrent-cleanup evidence不足。下一步为`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY`。
+
 ## Blocker fix disposition（2026-07-12）
 
 后续`DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX`已`DONE / REVIEW_RETRY_READY`，以V13、DB-time lifecycle/tombstone/cleanup和真实JDBC事务证据关闭P1-1至P1-5。本文仍保留原implementation与previous review时点事实；B2尚未accepted，下一步为独立milestone review retry。

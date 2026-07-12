@@ -3,13 +3,13 @@
 ## 1. 唯一下一步
 
 ```text
-current task: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX
-current task status: DONE / REVIEW_RETRY_READY
-next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY
-mode: REVIEW_ONLY + P1_FIX_VERIFICATION + NO_CAPACITY_BENCHMARK + NO_B3 + NO_API_CHANGE + NO_EXTERNAL_HTTP + NO_PROVIDER + NO_NQ + NO_AGENT + NO_LIVE
+current task: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY
+current task status: BLOCKED / P1_FIX_RETRY_REQUIRED
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY
+mode: P1_FIX_RETRY + FORWARD_MIGRATION_COMPATIBILITY + ACTUAL_JDBC_TRANSACTION_EVIDENCE + NO_CAPACITY_BENCHMARK + NO_B3 + NO_API_CHANGE + NO_EXTERNAL_HTTP + NO_PROVIDER + NO_NQ + NO_AGENT + NO_LIVE
 ```
 
-P1 blocker fix已完成，但previous milestone review的`BLOCKED`历史结论保持不变。下一步只允许独立review retry复核V13、tombstone、DB clock、cleanup、lease/result和事务证据；capacity benchmark、B3、API/OpenAPI、external HTTP/provider/NQ/Agent/LangGraph/LIVE继续禁止。
+Milestone review retry仍为`BLOCKED`，previous milestone review的`BLOCKED`历史结论保持不变。下一步只允许修复V12→V13合法历史行兼容性和冻结schema漂移，并补idempotency真实JDBC after-commit unknown、production Spring同DataSource事务装配、JVM clock offset、actual JDBC result mapping与idempotency concurrent cleanup证据；capacity benchmark、B3、API/OpenAPI、external HTTP/provider/NQ/Agent/LangGraph/LIVE继续禁止。
 
 ## 2. 前置状态
 

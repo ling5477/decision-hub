@@ -1,5 +1,24 @@
 # Decision Hub Roadmap
 
+## 2026-07-12 Stage-QDR-7 B2 milestone review retry blocked
+
+```text
+B1 runtime contract: FROZEN
+B2 implementation: BLOCKED / P1_FIX_RETRY_REQUIRED
+B2 milestone review retry: BLOCKED
+V12→V13 compatibility: BLOCKED
+V13 frozen schema alignment: BLOCKED
+idempotency real-JDBC commit unknown: MISSING
+production transaction wiring evidence: INSUFFICIENT
+JVM clock offset / actual JDBC result / idempotency concurrent cleanup: INSUFFICIENT
+PostgreSQL regression: PASS / 17.10 / ZERO_SKIPS
+post-B2 capacity acceptance: NOT_ALLOWED
+B3 operational safety: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY
+```
+
+下一轮必须保持V1-V13 immutable并采用新的forward migration，或先做明确schema errata review；不得把现有1055个绿色测试解释为P1证据已完整。capacity harness仍不得运行。
+
 ## 2026-07-12 Stage-QDR-7 B2 blocker fix done
 
 ```text

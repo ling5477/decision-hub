@@ -6,6 +6,10 @@
 > review history: previous milestone review remains `BLOCKED`
 > next action: `DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY`
 
+## Review retry disposition（2026-07-12）
+
+独立review retry结论为`BLOCKED / P1_FIX_RETRY_REQUIRED`。本文件记录的blocker-fix实现和绿色回归保持为当时事实，但“P1-1至P1-5已关闭”的自报结论未获review接受。V12→V13兼容性、冻结`result_type`类型、idempotency真实JDBC commit-unknown、production Spring同DataSource wiring、JVM clock offset、actual JDBC result mapping和idempotency concurrent cleanup证据仍需下一轮修复；capacity acceptance与B3继续禁止。
+
 ## 1. 修复结论
 
 本轮以forward-only V13关闭P1-1至P1-5。V12保持不变；HTTP API、Controller/DTO、OpenAPI、HMAC、nonce与source合同均未修改。B2尚未被本实现自行标记为accepted，只允许进入独立milestone review retry。

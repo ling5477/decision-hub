@@ -1,5 +1,23 @@
 # Decision Hub Worklog
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY
+
+- Preflight确认`dev`、HEAD `74cfeb917...`、initial worktree/staged clean；本地相对`origin/dev` behind 0、ahead 4。
+- 复核`e3fd401..74cfeb9`的23-file diff、V12/V13、cleanup/admission/idempotency adapters、usecase transaction coordinator、result projector、production wiring与相关测试；previous milestone review blob未变化。
+- 确认EXPIRED tombstone、DB-time lifecycle、rate/current-window保护、active lease predicate、owner/token CAS、tenant-bound FK、rollback和rate real-JDBC commit-unknown方向成立。
+- 发现remaining P1：合法V12 FAILED行可能被V13 trim CHECK阻断；`result_type`长度与冻结schema不一致；idempotency commit-unknown仍为fake boundary；production Spring同DataSource wiring、JVM clock offset、actual JDBC result mapping和idempotency concurrent cleanup证据不足。
+- 发现root/current README与`CODEX_PROJECT_INSTRUCTIONS.md`仍保留旧planning/B1 next-action；三者不在本任务allowlist，本轮未越界修复并记录为factsource residual。
+- 运行targeted、full和quality；PostgreSQL 17.10/Testcontainers实际执行，155 reports / 1055 tests / 0 failures/errors/skips，Checkstyle 0、Spotless PASS。绿色回归不覆盖上述mandatory P1。
+- 本轮只修改允许的current review文档；未修改Java、测试、migration、API/OpenAPI、HMAC/nonce/source、Repository/JDBC或NQ；未运行capacity benchmark；未push/tag/commit。
+
+```text
+STAGE_QDR_7_B2_PERSISTENT_GUARDS_MILESTONE_REVIEW_RETRY: BLOCKED
+B2_IMPLEMENTATION_STATUS: BLOCKED / P1_FIX_RETRY_REQUIRED
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX-RETRY
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX
 
 - Preflight确认`dev`、HEAD `e3fd401`、blocker review已提交、worktree/staged clean、V12存在且V13不存在。

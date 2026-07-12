@@ -3,6 +3,32 @@
 > supporting role: current validation evidence
 > primary stage gate source: only for actual command results and tooling risk
 
+## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-MILESTONE-REVIEW-RETRY validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git/commit scope | PASS | `dev` / `74cfeb917...` / initial clean / staged empty；`origin/dev...HEAD=0/4`；review target为`e3fd401..74cfeb9`。 |
+| V1-V12 integrity | PASS | review target中V1-V12 diff为空；previous milestone review blob hash未变化。 |
+| API/security boundary | PASS | API/Controller/DTO/OpenAPI、HMAC/nonce/source diff为空；无NQ、HTTP、Provider、Agent、LangGraph、交易扩张。 |
+| current factsource consistency | RESIDUAL / OUT_OF_SCOPE | root/current README与`CODEX_PROJECT_INSTRUCTIONS.md`仍为旧planning/B1口径；不在本任务allowlist，未修改。 |
+| V12→V13 compatibility | BLOCKED | 合法V12 FAILED可含首尾空格`stable_error_code`；V13新增trim CHECK且无兼容回填。升级测试只覆盖COMPLETED。 |
+| frozen schema alignment | BLOCKED | 冻结`result_type varchar(32)`，V13实际为`varchar(64)`。 |
+| expiry/tombstone | PASS | DB-time bounded CAS转EXPIRED并保留identity/hash；same hash expired、different hash conflict；不物理删除。 |
+| DB clock/rate cleanup | PASS | production absolute lifecycle使用`transaction_timestamp()`；validated Duration/grace、bounded batch、index candidate和`SKIP LOCKED`。 |
+| idempotency cleanup | PASS_WITH_EVIDENCE_GAP | SQL保护active lease并按DB time转tombstone；缺idempotency concurrent workers/CAS miss真实并发测试。 |
+| result reference | BLOCKED | 真实JDBC只覆盖FK missing/wrong-tenant；503 mapping与checksum mismatch为fake projector单测，不是actual JDBC end-to-end。 |
+| admission rollback | PASS | 真实PostgreSQL/JDBC `TransactionTemplate`下rate/idempotency admission + audit失败整体rollback。 |
+| completion atomicity | BLOCKED | 手工TransactionTemplate证明rollback，但未以production Spring context证明实际bean、transaction manager和JdbcTemplate同DataSource。 |
+| commit unknown | BLOCKED | rate经过真实delegate commit后异常；idempotency `74cfeb9`只使用fake boundary，没有真实JDBC commit/reconcile。 |
+| JVM clock isolation | BLOCKED | 代码路径不接受absolute cutoff/window/lease expiry，但未找到JVM clock大幅偏移回归。 |
+| targeted Maven | PASS | `mvn -ntp -pl dh-usecase,dh-infra,dh-security,dh-api,dh-app -am test`，BUILD SUCCESS。 |
+| full Maven | PASS | `mvn -ntp test`；155 reports、1055 tests、0 failures/errors/skipped。 |
+| PostgreSQL/Testcontainers | PASS / EXECUTED | PostgreSQL 17.10；V12/V13 suite 14 tests、0 skipped；clean V1→V13实际迁移。 |
+| quality | PASS | `mvn -ntp -Pquality validate`；19/19、Checkstyle 0、Spotless PASS。 |
+| milestone verdict | BLOCKED | mandatory migration/transaction/security evidence仍缺失；不得进入capacity acceptance或B3。 |
+
+Mockito/ByteBuddy dynamic-agent提示仍为future-JDK tooling risk，不影响本轮命令exit 0。本轮未运行capacity benchmark。
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-PERSISTENT-GUARDS-BLOCKER-FIX validation
 
 | Check | Result | Evidence |
