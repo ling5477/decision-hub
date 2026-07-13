@@ -1,18 +1,18 @@
 # Decision Hub
 
-## Current authority — Stage-QDR-7 B2 schema errata
+## Current authority — Stage-QDR-7 B2 schema errata implementation
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2: BLOCKED / SCHEMA_ERRATA_REVIEWED
-schema errata review: PASS / beforeEachMigrate TRANSACTIONAL_CALLBACK_SELECTED
+B2 schema errata implementation: DONE / REVIEW_PENDING
+B2 milestone acceptance: NOT_YET
 capacity acceptance: NOT_ALLOWED
 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-REVIEW / DONE
-next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION / DONE
+next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
 ```
 
-现有`beforeMigrate`事务模型已被真实PostgreSQL实验拒绝；实施仅允许迁移为`beforeEachMigrate`并补齐冻结的安全证据，不授权milestone retry-3、capacity或B3。
+`beforeEachMigrate` callback已替代被拒绝的`beforeMigrate`事件，并以冻结的`5s`/`60s` transaction-local timeout、V12 fingerprint与bounded repair提供PostgreSQL 17证据。该结果不是B2 acceptance，不授权milestone retry-3、capacity或B3。
 
 Decision Hub 是 NexusQuant 的 AI Agent 决策能力层，不是交易执行系统。DH 负责候选方案、风险解释、审计记录、结构化报告和辅助决策；交易核心、账户资产、订单状态机、风控执行、正式回测、模拟盘/实盘执行和交易事实源仍由 NexusQuant 承担。
 

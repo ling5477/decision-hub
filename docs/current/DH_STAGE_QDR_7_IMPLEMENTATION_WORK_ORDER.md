@@ -6,6 +6,19 @@
 > mainline: `Limited Dry Run Runtime Readiness`  
 > endpoint: `POST /api/ai/decision-dry-runs`（既有，不新增 endpoint）
 
+## B2 schema errata implementation（2026-07-13）
+
+`DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION`已`DONE / REVIEW_PENDING`。旧`beforeMigrate` callback已改为`beforeEachMigrate`，只在成功V12且V13不存在的窗口读取guard表；其余路径仅读取history并返回。实施冻结`SET LOCAL lock_timeout = '5s'`、`SET LOCAL statement_timeout = '60s'`、V12 table/CHECK fingerprint、FAILED error precheck、1000行repair ceiling和按`guard_id`排序的单批trim。V13故障、lock timeout、statement timeout均由真实PostgreSQL事务整体rollback。
+
+```text
+STAGE_QDR_7_B1: FROZEN
+B2 schema errata implementation: DONE / REVIEW_PENDING
+B2 milestone acceptance: NOT_YET
+capacity acceptance: NOT_ALLOWED
+B3: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
+```
+
 ## B2 schema errata review outcome（2026-07-12）
 
 `DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-REVIEW`已`PASS / TRANSACTIONAL_CALLBACK_SELECTED`。现有`beforeMigrate`因不与V13共用事务而拒绝；唯一允许路线是`beforeEachMigrate`，使临时DDL、bounded trim和V13共同rollback。V1–V14继续immutable，B2仍`BLOCKED`。

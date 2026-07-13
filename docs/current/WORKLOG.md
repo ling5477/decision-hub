@@ -1,5 +1,23 @@
 # Decision Hub Worklog
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION
+
+- 预检确认`dev`、HEAD `3ac87a2`、worktree clean、staged empty；未读取敏感配置，未触碰NQ。
+- 使用Git rename将`beforeMigrate__qdr7_v13_compatibility.sql`替换为`beforeEachMigrate__qdr7_v13_compatibility.sql`；V1–V14未修改。
+- callback仅在成功V12且V13不存在时访问guard表；对history异常、V12 table/CHECK fingerprint、FAILED blank/length和超过1000行repair均fail-closed。
+- 冻结并实现`SET LOCAL lock_timeout = '5s'`和`SET LOCAL statement_timeout = '60s'`；repair按`guard_id`排序、最大1000行，temporary CHECK仅暂时放开V13必需的FAILED/EXPIRED terminal timestamp转换。
+- 新增真实PostgreSQL 17/Testcontainers回归：11 tests、0 failures/errors/skipped，覆盖callback发现、事务rollback/retry、两类timeout、ceiling、fingerprint、completed no-op和V14 no-truncation/retry。
+- 本机Surefire manifest-JAR绝对路径根冲突仅在首次定向命令以`-Dsurefire.useManifestOnlyJar=false`规避；未修改POM、Surefire或全局JVM配置。随后`mvn -ntp -pl dh-app -am test`、`mvn -ntp test`和`mvn -ntp -Pquality validate`均实际`BUILD SUCCESS`；完整Surefire XML为158 reports / 1075 tests / 0 failures / 0 errors / 0 skipped，根项目Checkstyle 0、Spotless PASS。
+
+```text
+STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION: DONE / REVIEW_PENDING
+B2_MILESTONE_ACCEPTANCE: NOT_YET
+ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW_RETRY_3_NOW: NO
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
+```
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-REVIEW
 
 - 只读核验V12 CHECK、V13执行顺序、V14 narrowing、Flyway 11.7.2配置和current factsources。

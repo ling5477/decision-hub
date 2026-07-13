@@ -1,18 +1,21 @@
 # Decision Hub 当前工单
 
-## Current authority — 2026-07-12 schema errata review outcome
+## Current authority — 2026-07-13 schema errata implementation outcome
 
 ```text
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-REVIEW
-current task status: DONE / PASS / TRANSACTIONAL_CALLBACK_SELECTED
-next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION
-ALLOW_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION
+current task status: DONE / REVIEW_PENDING
+next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
+STAGE_QDR_7_B1: FROZEN
+B2_MILESTONE_ACCEPTANCE: NOT_YET
+LOCK_TIMEOUT: 5s / SET_LOCAL
+STATEMENT_TIMEOUT: 60s / SET_LOCAL
 ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW_RETRY_3_NOW: NO
 ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-下一任务只允许迁移callback事件并实现review冻结的history/fingerprint/precheck/timeout/bounded repair与PostgreSQL证据；不得修改V1–V14。
+implementation已完成review冻结的history/fingerprint/precheck/timeout/bounded repair与PostgreSQL证据；不得修改V1–V14。下一任务仅为独立implementation review。
 
 ## 1. Historical retry-2 entry（原结论保留）
 

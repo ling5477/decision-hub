@@ -1,5 +1,23 @@
 # Decision Hub Testing
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION targeted validation
+
+| 验证 | 结果 |
+| --- | --- |
+| Git preflight | `dev` / `3ac87a2` / clean / staged empty（实施前） |
+| callback discovery | PASS：Flyway 11.7.2日志实际输出`beforeEachMigrate - qdr7 v13 compatibility`。 |
+| PostgreSQL | PASS：Testcontainers PostgreSQL `17.10`真实运行。 |
+| transactional callback suite | PASS：`V13TransactionalCompatibilityCallbackFlywayPostgresTest`，11 tests / 0 failures / 0 errors / 0 skipped，132.912s。 |
+| migration paths | PASS：fresh V1→V14、V11→V14、V12 clean/padded FAILED→V14。 |
+| fail-closed matrix | PASS：blank legacy、1001 repair ceiling、CHECK missing/drift、V13 injected failure、5s lock timeout、60s statement timeout均回滚至V12。 |
+| retry/no-op/V14 | PASS：V13 failure retry、V13/V14 completed lock trap no-op、32字符成功、33字符原值/`varchar(64)`保留及修正后retry。 |
+| Surefire Windows workaround | 本机Surefire manifest-JAR绝对路径根冲突，最终命令仅附加`-Dsurefire.useManifestOnlyJar=false`；未修改POM或全局配置。 |
+| `mvn -ntp -pl dh-app -am test` | BUILD SUCCESS：15-module reactor；`dh-app` 146 tests / 0 failures / 0 errors / 0 skipped；总耗时6分22秒。 |
+| `mvn -ntp test` | BUILD SUCCESS：19-module reactor；Surefire XML 158 reports / 1075 tests / 0 failures / 0 errors / 0 skipped；总耗时6分38秒。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS：19-module reactor；根项目 Checkstyle 0 violations；Spotless check passed。 |
+
+该验证不等于B2 milestone acceptance；实现状态保持`DONE / REVIEW_PENDING`，未运行capacity benchmark。
+
 ## 2026-07-12 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-REVIEW validation
 
 | 验证 | 结果 |

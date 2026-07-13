@@ -1,17 +1,17 @@
 # Decision Hub Roadmap
 
-## 2026-07-12 Stage-QDR-7 B2 schema errata route
+## 2026-07-13 Stage-QDR-7 B2 schema errata implementation
 
 ```text
 B1: FROZEN
-B2: BLOCKED / SCHEMA_ERRATA_REVIEWED
-schema errata decision: PASS / beforeEachMigrate TRANSACTIONAL_CALLBACK
+B2 schema errata implementation: DONE / REVIEW_PENDING
+B2 milestone acceptance: NOT_YET
 capacity acceptance: NOT_ALLOWED
 B3: NOT_ALLOWED
-next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION
+next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
 ```
 
-实施通过后仍须回到P1 blocker-fix证据链；不得从本review直接进入milestone retry-3、capacity acceptance或B3。
+实施记录已提供`beforeEachMigrate` transaction、V12 fingerprint、1000行ceiling、`SET LOCAL 5s/60s`和PostgreSQL回滚证据；仍须独立review，且不得进入milestone retry-3、capacity acceptance或B3。
 
 ## 2026-07-12 Stage-QDR-7 B2 milestone review retry-2 blocked
 

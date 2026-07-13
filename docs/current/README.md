@@ -1,18 +1,18 @@
 # Decision Hub Current Docs
 
-## Current authority — Stage-QDR-7 B2 schema errata
+## Current authority — Stage-QDR-7 B2 schema errata implementation
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2: BLOCKED / SCHEMA_ERRATA_REVIEWED
-schema errata review: PASS / beforeEachMigrate TRANSACTIONAL_CALLBACK_SELECTED
+B2 schema errata implementation: DONE / REVIEW_PENDING
+B2 milestone acceptance: NOT_YET
 capacity acceptance: NOT_ALLOWED
 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-REVIEW / DONE
-next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION / DONE
+next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
 ```
 
-当前裁定文档：`DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_REVIEW.md`。历史milestone review的`BLOCKED`结论未被改写。
+当前实施记录：`DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION.md`；前置裁定保留在`DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_REVIEW.md`。历史milestone review的`BLOCKED`结论未被改写。
 
 本目录是 Decision Hub 当前事实源入口。当前阶段的 close review 不应再从旧 work order、旧 freeze 记录、旧 blocker fix 过程文档或归档文档推导当前状态。
 
