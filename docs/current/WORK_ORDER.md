@@ -1,21 +1,24 @@
 # Decision Hub 当前工单
 
-## Current authority — 2026-07-13 schema errata implementation review blocked
+## Current authority — 2026-07-13 schema errata implementation blocker fix
 
 ```text
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
-current task status: BLOCKED / P1_FIX_REQUIRED
-next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX
-STAGE_QDR_7_B1: FROZEN
-B2_MILESTONE_ACCEPTANCE: NOT_YET
-LOCK_TIMEOUT: FAIL / SET_LOCAL_AFTER_PRECHECK
-STATEMENT_TIMEOUT: 60s / SET_LOCAL
+Stage-QDR-7 B1: FROZEN
+B2 schema errata blocker fix: DONE / REVIEW_PENDING
+B2 milestone acceptance: NOT_YET
+capacity acceptance: NOT_ALLOWED
+B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX
+current task status: DONE / REVIEW_PENDING
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
+LOCK_TIMEOUT: PASS / 5s / SET_LOCAL_BEFORE_PRECHECK
+STATEMENT_TIMEOUT: PASS / 60s / SET_LOCAL_BEFORE_PRECHECK
 ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW_RETRY_3_NOW: NO
 ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-implementation的history/fingerprint/bounded repair/rollback/V14证据通过，但5秒lock timeout未覆盖constraint/data precheck；current入口另有旧状态残留。下一任务仅允许受控blocker fix；不得修改V1–V14或扩张到capacity/B3。
+blocker fix已将冻结5秒lock timeout和60秒statement timeout前移到首次guard precheck之前，并用真实PostgreSQL 17锁回归确认回滚、session隔离和retry。下一任务仅允许独立implementation review retry；不得进入milestone retry-3、capacity或B3。
 
 ## 1. Historical retry-2 entry（原结论保留）
 

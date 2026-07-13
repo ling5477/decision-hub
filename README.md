@@ -1,18 +1,18 @@
 # Decision Hub
 
-## Current authority — Stage-QDR-7 B2 schema errata implementation
+## Current authority — Stage-QDR-7 B2 schema errata blocker fix
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2 schema errata implementation: DONE / REVIEW_PENDING
+B2 schema errata blocker fix: DONE / REVIEW_PENDING
 B2 milestone acceptance: NOT_YET
 capacity acceptance: NOT_ALLOWED
 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION / DONE
-next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX / DONE
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
 ```
 
-`beforeEachMigrate` callback已替代被拒绝的`beforeMigrate`事件，并以冻结的`5s`/`60s` transaction-local timeout、V12 fingerprint与bounded repair提供PostgreSQL 17证据。该结果不是B2 acceptance，不授权milestone retry-3、capacity或B3。
+`beforeEachMigrate` callback已将冻结的`5s`/`60s` transaction-local timeout前移到history-only no-op gate之后、首次guard precheck之前；真实PostgreSQL 17锁陷阱证明约5秒失败、整体回滚与释放锁后安全retry。该结果不是B2 acceptance，不授权milestone retry-3、capacity或B3。
 
 Decision Hub 是 NexusQuant 的 AI Agent 决策能力层，不是交易执行系统。DH 负责候选方案、风险解释、审计记录、结构化报告和辅助决策；交易核心、账户资产、订单状态机、风控执行、正式回测、模拟盘/实盘执行和交易事实源仍由 NexusQuant 承担。
 
@@ -69,16 +69,16 @@ STAGE_QDR_6_TAG: DONE / dh-stage-qdr-6-close
 STAGE_QDR_6_TAG_TARGET: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
 STAGE_QDR_6_CURRENT_PROCESS_SOURCES: PRUNED
 STAGE_QDR_6_POST_TAG_CURRENT_CLEANUP: DONE
-STAGE_QDR_7: IMPLEMENTING / B1_FROZEN / B2_SCHEMA_ERRATA_REVIEWED
+STAGE_QDR_7: IMPLEMENTING / B1_FROZEN / B2_SCHEMA_ERRATA_BLOCKER_FIX_REVIEW_PENDING
 STAGE_QDR_7_B1: FROZEN
-STAGE_QDR_7_B2_IMPLEMENTATION: BLOCKED / SCHEMA_ERRATA_REVIEWED
+STAGE_QDR_7_B2_SCHEMA_ERRATA_BLOCKER_FIX: DONE / REVIEW_PENDING
 ALLOW_STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: YES / CONSUMED / PASS
 ALLOW_STAGE_QDR_6_ARCHIVE_PACKET_NOW: YES / CONSUMED
 ALLOW_STAGE_QDR_6_TAG_CLOSE_NOW: NO / ALREADY_TAGGED
 ALLOW_STAGE_QDR_7_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: YES / CONSUMED
 ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
-ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW_RETRY_2: NO / SCHEMA_ERRATA_IMPLEMENTATION_FIRST
+ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW_RETRY_3: NO / SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY_FIRST
 ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ALLOW_STAGE_QDR_7_B4_ACCEPTANCE_NOW: NO
@@ -113,9 +113,9 @@ Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
 current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-REVIEW
-current task status: DONE / PASS
-next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX
+current task status: DONE / REVIEW_PENDING
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
 ```
 
 ## Stage-QDR-4 归档状态
@@ -132,7 +132,7 @@ STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
 STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
 ```
 
-Stage-QDR-4、Stage-QDR-5 与 Stage-QDR-6 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-7 B1为`FROZEN`，B2为`BLOCKED / SCHEMA_ERRATA_REVIEWED`；下一步仅允许`DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION`。capacity acceptance与B3仍为`NOT_ALLOWED`；不授权API、real HTTP/provider、Provider SDK、Agent/LangGraph、NQ runtime integration、交易或LIVE。
+Stage-QDR-4、Stage-QDR-5 与 Stage-QDR-6 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-7 B1为`FROZEN`，B2 schema errata blocker fix为`DONE / REVIEW_PENDING`；下一步仅允许`DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY`。capacity acceptance与B3仍为`NOT_ALLOWED`；不授权API、real HTTP/provider、Provider SDK、Agent/LangGraph、NQ runtime integration、交易或LIVE。
 
 ## 当前事实源
 

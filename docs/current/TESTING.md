@@ -1,5 +1,21 @@
 # Decision Hub Testing
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| timeout source order | PASS | `SET LOCAL lock_timeout = '5s'` / `statement_timeout = '60s'`位于history-only no-op gate之后、首次guard table/catalog precheck之前。 |
+| precheck lock trap | PASS | 真实PostgreSQL 17.10/Testcontainers；`ACCESS EXCLUSIVE`持锁后callback在precheck阶段失败，日志观测约5.195秒，不接近60秒。 |
+| rollback / retry | PASS | 失败后history=V12、strict CHECK和padded原值不变、V13/V14 success=0；释放锁后retry到V14。 |
+| session isolation | PASS | 同一migration connection失败后`SHOW lock_timeout`=`0`、`SHOW statement_timeout`=`0`。 |
+| targeted timeout tests | PASS | 2 tests / 0 failures / 0 errors / 0 skipped；60秒statement rollback与precheck 5秒lock rollback/retry。 |
+| owning Maven | PASS | 最终diff上执行`mvn -ntp -pl dh-app -am test`；15/15 reactor，`BUILD SUCCESS`，总耗时8分47秒。 |
+| full Maven | PASS | 最终diff上执行`mvn -ntp test`；19/19 reactor，158 reports / 1076 tests / 0 failures / 0 errors / 0 skipped，总耗时7分11秒。 |
+| quality | PASS | `mvn -ntp -Pquality validate`；19/19 reactor，Checkstyle 0 violations，Spotless PASS。 |
+| scope | PASS | V1–V14、Java生产代码、API/OpenAPI无diff；未运行capacity benchmark。 |
+
+首轮目标类的60秒statement timeout用例在慢宿主机上被JUnit外层`@Timeout(75)`中止；这不是数据库timeout值漂移。仅将测试watchdog调整为90秒后，目标类12/12、owning和full回归均通过。
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW validation
 
 | Check | Result | Evidence |

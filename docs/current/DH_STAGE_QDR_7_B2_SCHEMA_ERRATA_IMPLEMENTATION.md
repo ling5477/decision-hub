@@ -9,14 +9,14 @@
 
 旧`beforeMigrate__qdr7_v13_compatibility.sql`已删除；唯一callback为`beforeEachMigrate__qdr7_v13_compatibility.sql`。callback先读取`flyway_schema_history`：V12未成功、V13成功或V14成功时不访问`dh_qdr7_idempotency_guard`；仅成功V12且无V13记录时进入兼容路径。
 
-兼容路径先验证V12表结构和`chk_dh_qdr7_idempotency_state_fields`的schema/table/type/validated/`pg_get_constraintdef`指纹，再检查FAILED error code、trim后长度和repair总数。超过1000行立即fail-closed，不部分修复。通过precheck后只在当前migration事务设置：
+兼容路径在history-only no-op gate后立即仅为当前migration事务设置：
 
 ```sql
 SET LOCAL lock_timeout = '5s';
 SET LOCAL statement_timeout = '60s';
 ```
 
-repair以`guard_id`排序并限制1000行；只trim符合条件的FAILED `stable_error_code`。随后以同名temporary CHECK衔接V13的FAILED/EXPIRED terminal timestamp转换；V13建立最终CHECK。callback、temporary CHECK、repair、V13 DDL/DML和history成功写入同一PostgreSQL事务，任一失败整体rollback。
+然后才验证V12表结构和`chk_dh_qdr7_idempotency_state_fields`的schema/table/type/validated/`pg_get_constraintdef`指纹，并检查FAILED error code、trim后长度和repair总数。超过1000行立即fail-closed，不部分修复。repair以`guard_id`排序并限制1000行；只trim符合条件的FAILED `stable_error_code`。随后以同名temporary CHECK衔接V13的FAILED/EXPIRED terminal timestamp转换；V13建立最终CHECK。callback、temporary CHECK、repair、V13 DDL/DML和history成功写入同一PostgreSQL事务，任一失败整体rollback。
 
 V14未改动。它既有的overflow precheck在`result_type`超过32字符时失败，保留原值和`varchar(64)`；修正为32字符后可重试。
 
@@ -38,5 +38,5 @@ B2 schema errata implementation: DONE / REVIEW_PENDING
 B2 milestone acceptance: NOT_YET
 capacity acceptance: NOT_ALLOWED
 B3: NOT_ALLOWED
-next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
 ```

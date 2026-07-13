@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.FlywayException;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -74,6 +76,10 @@ class V13TransactionalCompatibilityCallbackFlywayPostgresTest {
         .contains("offline governance required");
     assertThat(source.indexOf("qdr7 compatibility rejected invalid FAILED stable_error_code"))
         .isLessThan(source.indexOf("alter table public.dh_qdr7_idempotency_guard"));
+    assertThat(source.indexOf("set local lock_timeout = '5s';"))
+        .isLessThan(source.indexOf("to_regclass('public.dh_qdr7_idempotency_guard')"));
+    assertThat(source.indexOf("set local statement_timeout = '60s';"))
+        .isLessThan(source.indexOf("from pg_attribute"));
     long versionedMigrationCount = 0;
     try (DirectoryStream<Path> migrations = Files.newDirectoryStream(MIGRATION_ROOT)) {
       for (Path migration : migrations) {
@@ -250,7 +256,50 @@ class V13TransactionalCompatibilityCallbackFlywayPostgresTest {
   }
 
   @Test
-  @Timeout(value = 75, unit = TimeUnit.SECONDS)
+  void precheckAccessExclusiveLockTimesOutTransactionLocallyAndRetriesSafely() throws Exception {
+    migrateToV12();
+    seedFailed("precheck-lock", " SAFE_FAILURE ");
+    final String v12Constraint = constraintDefinition();
+
+    try (Connection lockedConnection = dataSource().getConnection();
+        Statement lockStatement = lockedConnection.createStatement();
+        Connection migrationConnection = dataSource().getConnection()) {
+      lockedConnection.setAutoCommit(false);
+      lockStatement.execute("lock table " + GUARD_TABLE + " in access exclusive mode");
+      assertThat(connectionSetting(migrationConnection, "lock_timeout")).isEqualTo("0");
+      assertThat(connectionSetting(migrationConnection, "statement_timeout")).isEqualTo("0");
+      final DataSource migrationDataSource =
+          new SingleConnectionDataSource(migrationConnection, true);
+      final long startedAt = System.nanoTime();
+
+      final Throwable failure =
+          migrateInSeparateThreadExpectingFailure(
+              flyway(null, MIGRATION_ROOT, migrationDataSource), 15);
+      final long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
+
+      assertThat(messages(failure)).contains("lock timeout");
+      assertThat(elapsedMillis).isBetween(4_000L, 15_000L);
+      assertThat(connectionSetting(migrationConnection, "lock_timeout")).isEqualTo("0");
+      assertThat(connectionSetting(migrationConnection, "statement_timeout")).isEqualTo("0");
+
+      // Release the deliberate DDL blocker before inspecting the guard table from other sessions.
+      lockedConnection.rollback();
+      assertThat(currentSuccessfulVersion()).isEqualTo("12");
+      assertThat(stableErrorCode("precheck-lock")).isEqualTo(" SAFE_FAILURE ");
+      assertThat(constraintDefinition()).isEqualTo(v12Constraint);
+      assertThat(hasColumn("lease_owner")).isFalse();
+      assertThat(successfulHistoryRows("13")).isZero();
+      assertThat(successfulHistoryRows("14")).isZero();
+    }
+
+    flyway(null, MIGRATION_ROOT).migrate();
+
+    assertThat(currentSuccessfulVersion()).isEqualTo("14");
+    assertThat(stableErrorCode("precheck-lock")).isEqualTo("SAFE_FAILURE");
+  }
+
+  @Test
+  @Timeout(value = 90, unit = TimeUnit.SECONDS)
   void statementTimeoutAfterSixtySecondsRollsBackCallbackAndV13(@TempDir Path tempDir)
       throws IOException {
     migrateToV12();
@@ -379,11 +428,16 @@ class V13TransactionalCompatibilityCallbackFlywayPostgresTest {
 
   private Throwable migrateInSeparateThreadExpectingFailure(final Path location, final int timeoutSeconds)
       throws InterruptedException {
+    return migrateInSeparateThreadExpectingFailure(flyway(null, location), timeoutSeconds);
+  }
+
+  private Throwable migrateInSeparateThreadExpectingFailure(
+      final Flyway migration, final int timeoutSeconds) throws InterruptedException {
     final ExecutorService executor = Executors.newSingleThreadExecutor();
     try {
-      final Future<?> migration = executor.submit(() -> flyway(null, location).migrate());
+      final Future<?> migrationResult = executor.submit(migration::migrate);
       try {
-        migration.get(timeoutSeconds, TimeUnit.SECONDS);
+        migrationResult.get(timeoutSeconds, TimeUnit.SECONDS);
         throw new AssertionError("migration unexpectedly succeeded");
       } catch (ExecutionException failure) {
         return failure.getCause();
@@ -468,6 +522,15 @@ class V13TransactionalCompatibilityCallbackFlywayPostgresTest {
             columnName));
   }
 
+  private String connectionSetting(final Connection connection, final String settingName)
+      throws Exception {
+    try (Statement statement = connection.createStatement();
+        final var result = statement.executeQuery("show " + settingName)) {
+      assertThat(result.next()).isTrue();
+      return result.getString(1);
+    }
+  }
+
   private static String messages(final Throwable throwable) {
     final StringBuilder messages = new StringBuilder();
     Throwable current = throwable;
@@ -481,10 +544,15 @@ class V13TransactionalCompatibilityCallbackFlywayPostgresTest {
   }
 
   private static Flyway flyway(final String target, final Path location) {
+    return flyway(target, location, dataSource());
+  }
+
+  private static Flyway flyway(
+      final String target, final Path location, final DataSource migrationDataSource) {
     final var configuration =
         Flyway.configure()
             .cleanDisabled(false)
-            .dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())
+            .dataSource(migrationDataSource)
             .locations("filesystem:" + location.toString().replace('\\', '/'));
     if (target != null) {
       configuration.target(target);

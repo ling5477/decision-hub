@@ -67,6 +67,11 @@ begin
     return;
   end if;
 
+  -- Freeze both budgets immediately after the history-only no-op gates. From this point onward,
+  -- every guard-table catalog lookup, data precheck, repair and DDL is transaction-bounded.
+  set local lock_timeout = '5s';
+  set local statement_timeout = '60s';
+
   if to_regclass('public.dh_qdr7_idempotency_guard') is null then
     raise exception using
       errcode = 'P0001',
@@ -139,11 +144,6 @@ begin
       errcode = 'P0001',
       message = 'qdr7 compatibility repair ceiling exceeded; offline governance required';
   end if;
-
-  -- These are transaction-local by contract. PostgreSQL restores both settings on V13/callback
-  -- failure, and lock/statement timeouts surface to Flyway as migration failures.
-  set local lock_timeout = '5s';
-  set local statement_timeout = '60s';
 
   -- The primary-key ordered CTE confines mutation to the prechecked target set. Its row count
   -- must exactly match the count observed before any DDL, preventing partial repair semantics.

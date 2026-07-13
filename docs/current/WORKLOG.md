@@ -1,5 +1,24 @@
 # Decision Hub Worklog
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX
+
+- 预检确认`dev`、HEAD `6a1794d`、worktree/staged clean、`origin/dev...HEAD=0/0`；实施commit `f144a42`与历史review `6a1794d`均存在。
+- 仅将callback的`SET LOCAL lock_timeout = '5s'`和`SET LOCAL statement_timeout = '60s'`前移到history-only no-op gate之后、首次guard precheck之前；V1–V14未改。
+- 新增真实PostgreSQL 17.10/Testcontainers `ACCESS EXCLUSIVE`锁回归；约5.195秒lock timeout后保留V12 history、strict CHECK和padded原值，释放锁后retry至V14。
+- 同一migration connection验证失败后`lock_timeout`/`statement_timeout`均恢复为`0`，证明`SET LOCAL`未污染session默认值。
+- 首轮目标类在慢宿主机上由JUnit 75秒watchdog中止；仅调整测试watchdog为90秒后，冻结的60秒DB timeout和其它生产语义不变。
+- 定向timeout用例2/2、目标类12/12、owning/full与quality均通过；完整Surefire为158 reports / 1076 tests / 0 failures / 0 errors / 0 skipped。
+- 同步root/current factsources为`B2 schema errata blocker fix: DONE / REVIEW_PENDING`；历史implementation review的`BLOCKED`段落保留，capacity acceptance和B3仍禁止。
+
+```text
+STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX: DONE / REVIEW_PENDING
+B2_MILESTONE_ACCEPTANCE: NOT_YET
+ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW_RETRY_3_NOW: NO
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
+```
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
 
 - 只读复核`3ac87a2..f144a42`，确认旧`beforeMigrate`删除、新`beforeEachMigrate`发现，V1–V14、Java生产代码、API/OpenAPI及security contracts无diff。
