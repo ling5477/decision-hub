@@ -82,15 +82,18 @@ docs/current/TESTING.md
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2 schema errata implementation: DONE / REVIEW_PENDING
+B2 schema errata implementation: DONE
+B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
 B2 milestone acceptance: NOT_YET
 capacity acceptance: NOT_ALLOWED
 B3: NOT_ALLOWED
+current task:
+DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
 next task:
-DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
+DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
 ```
 
-`AGENTS.md`是执行指导；权威当前状态仍以`STATUS.md`、`WORK_ORDER.md`和`FACTSOURCE_POLICY.md`指定的文件为准。
+`AGENTS.md`是执行指导，不是primary current-state authority；权威当前状态仍以`STATUS.md`、`WORK_ORDER.md`和`FACTSOURCE_POLICY.md`指定的文件为准。
 
 Integration-0 safety gate 已 `CLOSED / ACCEPTED`；P1-4 residual、header alignment、timestamp alignment、code reality audit blockers 均已关闭或修复。`DH-STAGE4-DECISION-PIPELINE-MVP-PLAN` 与 `DH-STAGE4-DECISION-PIPELINE-MVP-WO` 已 `ACCEPTED / CLOSED`；K1-K8 已 `CLOSED / ACCEPTED`，Decision Pipeline MVP 已以 DH Stage4 canonical 命名关闭。旧 `DH-GATEK-DECISION-PIPELINE-MVP` 与旧 `docs/gates/dh-gatek-decision-pipeline-mvp/` 只能作为 historical naming error；当前 canonical 目录为 `docs/gates/dh-stage4-decision-pipeline-mvp/`。旧 `NQ-DH-GATEK-INTEGRATION1-PLAN-PACK` 只能作为 historical reference，当前标记为 `SUPERSEDED / REBASE_REQUIRED`；NQ 已进入 GateN，后续 Integration-1 必须基于 GateN rebase 重新规划。当前不允许启动 Integration-1 runtime、真实 NQ runtime、真实 Provider、真实 HTTP、LangGraph runtime、AI / Agent runtime 或 LIVE。
 

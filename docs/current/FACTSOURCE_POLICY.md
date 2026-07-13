@@ -2,23 +2,30 @@
 
 ## 1. 目的
 
-本文件定义 Stage-QDR-4 归档后的 current factsource、tag close 前的 blocker 规则和归档文档边界。目标是防止旧阶段文档、过期 work order、历史 review 记录和阶段中间产物继续覆盖当前状态。
+本文件定义Decision Hub current factsource权威层级、blocker规则和历史文档边界。目标是防止旧阶段文档、过期work order、历史review记录和阶段中间产物继续覆盖当前状态。
 
 ## 2. CURRENT_FACTSOURCE_CAN_BLOCK_CLOSE
 
-以下文件可以作为 close review blocker source：
+当前状态与下一任务的主权威只有：
+
+```text
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+```
+
+以下入口和执行指导必须与主权威一致，但不得覆盖主权威：
 
 ```text
 README.md
+CLAUDE.md
+AGENTS.md
 docs/current/README.md
-docs/current/STATUS.md
-docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/FACTSOURCE_POLICY.md
 docs/current/TESTING.md
-docs/current/ARCHIVE_INDEX.md
 ```
 
-若这些文件与当前状态冲突，tag close 可以阻断。
+若入口或执行指导与主权威冲突，review/close可以阻断；修复时以`STATUS.md`和`WORK_ORDER.md`为准。
 
 ## 3. SUPPORTING_DOCS_NOT_BLOCKERS_BY_DEFAULT
 
@@ -27,11 +34,12 @@ docs/current/ARCHIVE_INDEX.md
 ```text
 docs/current/WORKLOG.md
 docs/current/ROADMAP.md
+docs/current/ARCHIVE_INDEX.md
 docs/current/API.md
 docs/current/DB_SCHEMA.md
 ```
 
-这些文件可以提供背景、验证证据、变更记录、API / DB 摘要或历史复盘，但不得覆盖 `STATUS.md` 与 `WORK_ORDER.md` 的当前结论。
+这些文件可以提供背景、验证证据、变更记录、API / DB 摘要或历史复盘，但不得覆盖 `STATUS.md` 与 `WORK_ORDER.md` 的当前结论。其内部旧`next action`、旧`current task`或旧阶段状态一律按historical/consumed解释，除非主权威在当前块中显式引用。
 
 ## 3.1 ARCHIVED_DOCS_NOT_BLOCKERS
 
@@ -55,7 +63,7 @@ Provider SDK introduced
 LangGraph started
 Agent runtime started
 LIVE enabled
-stage-qdr-4 implementation 被写成已启动
+已关闭或历史阶段被重新写成当前implementation
 stage-qdr-3 acceptance/final close 与 current factsources 冲突
 gateway result can trade
 raw prompt 或 raw provider response 被写成可保存
@@ -66,26 +74,18 @@ NQ mutation allowed
 ## 5. 当前状态
 
 ```text
-stage-qdr-2: FINAL CLOSE CLOSED / ACCEPTED
-stage-qdr-3 implementation: DONE
-stage-qdr-3 B1: DONE / COMMITTED
-stage-qdr-3 B2: DONE / FREEZE ACCEPTED / COMMITTED
-stage-qdr-3 B3: DONE / FREEZE ACCEPTED / COMMITTED
-stage-qdr-3 B4: DONE / FREEZE ACCEPTED / COMMITTED
-stage-qdr-3 close review: YES / B5 ACCEPTED
-stage-qdr-3 acceptance: ACCEPTED
-stage-qdr-3 final close: CLOSED / ACCEPTED
-stage-qdr-4 planning: DONE / PLAN_ACCEPTED
-stage-qdr-4: CLOSED / ACCEPTED / ARCHIVED
-stage-qdr-4 tag: PENDING
+Stage-QDR-7 B1: FROZEN
+B2 schema errata implementation: DONE
+B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
+B2 milestone acceptance: NOT_YET
+capacity acceptance: NOT_ALLOWED
+B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
 real HTTP: NO
 real provider: NO
-Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: use Get-Location per run
-current task: DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION
-next action after cleanup: DH-STAGE-QDR-4-TAG-CLOSE
 ```
 
 ## 6. Archive Rule
@@ -94,8 +94,8 @@ next action after cleanup: DH-STAGE-QDR-4-TAG-CLOSE
 
 归档文件可以说明过去某一轮任务当时的状态，但不能作为当前事实源。若归档文档与 current factsources 冲突，以 `STATUS.md` 与 `WORK_ORDER.md` 为准。
 
-## 7. Documentation Discipline Cleanup Rule
+## 7. Current Alignment Rule
 
-当前 `DH-DOCS-DISCIPLINE-CLEANUP-IMPLEMENTATION` 只修复文档纪律、workflow authority、skill policy、archive policy 和 current factsource。它不创建 tag，不进入 Stage-QDR-5，不修改 Java、测试、migration、API、contracts、golden_cases 或 NQ。
+当前`DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY`只修复仓库入口、authority hierarchy和current factsources。它不修改callback、Java、测试、migration、API、contracts、golden_cases或NQ。
 
-cleanup 完成且工作区 clean 后，才允许另起独立 `DH-STAGE-QDR-4-TAG-CLOSE`。Stage-QDR-5 只能在 tag close 后 planning-first，不得从 cleanup、archive 或 tag 任务直接进入 implementation。
+factsources对齐并通过验证后，只允许进入独立`DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2`。该review通过前不得写B2 `ACCEPTED`，不得进入milestone retry-3、capacity acceptance或B3。

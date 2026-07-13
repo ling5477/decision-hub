@@ -1,5 +1,31 @@
 # Decision Hub Worklog
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+
+- 基线确认`dev`、HEAD `d827fce`、worktree/staged clean；上一轮review已作为独立commit保留。
+- 仅对齐root/current README、CODEX、FACTSOURCE_POLICY、CLAUDE、AGENTS及current authority docs；未修改代码、测试、callback或migration。
+- `STATUS.md`与`WORK_ORDER.md`明确为当前状态与下一任务主权威；README、CODEX、CLAUDE、AGENTS只作为入口/执行指导。
+- Stage3-B3、Integration-0-PLAN、旧Stage-QDR-4入口、Stage-QDR-7 implementation-not-started与旧work order均删除或移入明确historical/consumed区域。
+- 历史`BLOCKED` review原文未修改；B2保持未accepted，capacity acceptance与B3继续禁止。
+- 指定stale wording scan共378个命中，`HISTORICAL_MARKED=323`、`NEGATIVE_SAFETY_STATEMENT=55`；严格旧current入口pattern为0。
+- forbidden-scope diff、callback diff、V1–V14 diff、Java生产/测试diff与API/contracts diff均为空；历史BLOCKED review零diff。
+- `mvn -ntp -Pquality validate`为19/19 `BUILD SUCCESS`、Checkstyle 0、Spotless通过；Maven tests和PostgreSQL/Testcontainers按附件要求未重跑。
+
+```text
+STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX_RETRY: DONE
+schema errata technical implementation: PASS
+schema errata independent acceptance: BLOCKED only by factsource drift
+callback/migration code changes: NOT_REQUIRED
+CURRENT_FACTSOURCE_CONSISTENCY: PASS
+ALLOW_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY_2: YES
+ALLOW_MILESTONE_REVIEW_RETRY_3_NOW: NO
+next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
+```
+
+## Historical worklog records — 以下全部内容均为非当前任务
+
+下方日期记录保留历史事实；其旧`current task`、`next action`或阶段状态不得覆盖本节。
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
 
 - 预检确认`dev`、HEAD `479dbcab6b4a29a005cb524afc5a146d224ae2af`、worktree/staged clean、`HEAD == origin/dev`。

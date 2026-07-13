@@ -1,5 +1,27 @@
 # Decision Hub Roadmap
 
+## Current route — 2026-07-13 schema errata factsource alignment
+
+```text
+Stage-QDR-7 B1: FROZEN
+B2 schema errata implementation: DONE
+B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
+B2 milestone acceptance: NOT_YET
+capacity acceptance: NOT_ALLOWED
+B3: NOT_ALLOWED
+schema errata technical implementation: PASS
+schema errata independent acceptance: BLOCKED only by factsource drift
+callback/migration code changes: NOT_REQUIRED
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
+```
+
+当前路线只允许完成factsources对齐后进入独立review retry-2。milestone retry-3、capacity acceptance与B3继续禁止。
+
+## Historical routes — 以下全部内容均为非当前路线
+
+下方日期记录及旧`当前路线`/`当前下一步`标题均为historical/consumed快照，不得覆盖上方current route。
+
 ## 2026-07-13 Stage-QDR-7 B2 schema errata implementation review retry blocked
 
 ```text

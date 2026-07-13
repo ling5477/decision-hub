@@ -1,22 +1,25 @@
 # Decision Hub Current Docs
 
-## Current authority — Stage-QDR-7 B2 schema errata blocker fix
+## Current authority — Stage-QDR-7 B2 schema errata factsource alignment
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2 schema errata blocker fix: DONE / REVIEW_PENDING
+B2 schema errata implementation: DONE
+B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
 B2 milestone acceptance: NOT_YET
 capacity acceptance: NOT_ALLOWED
 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX / DONE
-next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
 ```
 
-当前blocker fix记录：`DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX.md`；原实施与前置裁定分别保留在`DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION.md`和`DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_REVIEW.md`。历史implementation review的`BLOCKED`结论未被改写。
+当前factsources修复记录：`DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX_RETRY.md`。原实施、blocker fix与历史review均保留；历史implementation review的`BLOCKED`结论未被改写。
 
 本目录是 Decision Hub 当前事实源入口。当前阶段的 close review 不应再从旧 work order、旧 freeze 记录、旧 blocker fix 过程文档或归档文档推导当前状态。
 
-## 当前状态
+## 已关闭阶段历史摘要（非当前）
+
+本节只保留Stage-QDR-2至Stage-QDR-6及已消费入口的historical/consumed记录。当前任务和下一任务只以上方`Current authority`、`STATUS.md`和`WORK_ORDER.md`为准。
 
 ```text
 stage-qdr-2: FINAL CLOSE CLOSED / ACCEPTED
@@ -69,19 +72,11 @@ STAGE_QDR_6_TAG: DONE / dh-stage-qdr-6-close
 STAGE_QDR_6_TAG_TARGET: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
 STAGE_QDR_6_CURRENT_PROCESS_SOURCES: PRUNED
 STAGE_QDR_6_POST_TAG_CURRENT_CLEANUP: DONE
-STAGE_QDR_7: IMPLEMENTING / B1_FROZEN / B2_SCHEMA_ERRATA_BLOCKER_FIX_REVIEW_PENDING
-STAGE_QDR_7_B1: FROZEN
-STAGE_QDR_7_B2_SCHEMA_ERRATA_BLOCKER_FIX: DONE / REVIEW_PENDING
 ALLOW_STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: YES / CONSUMED / PASS
 ALLOW_STAGE_QDR_6_ARCHIVE_PACKET_NOW: YES / CONSUMED
 ALLOW_STAGE_QDR_6_TAG_CLOSE_NOW: NO / ALREADY_TAGGED
 ALLOW_STAGE_QDR_7_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: YES / CONSUMED
-ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
-ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW_RETRY_3: NO / SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY_FIRST
-ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
-ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
-ALLOW_STAGE_QDR_7_B4_ACCEPTANCE_NOW: NO
 ARCHIVE_POLICY: REPAIRED
 ARCHIVE_PACKET_POLICY: REQUIRED_FOR_ALL_FUTURE_STAGES
 STAGE_QDR_5_IMPLEMENTATION: B1_DONE / B2_DONE / B3_CLOSED_ACCEPTED / B4_DONE / FINAL_CLOSE_PASS
@@ -113,10 +108,7 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-current workspace: use Get-Location per run
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX
-current task status: DONE / REVIEW_PENDING
-next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
+historical workspace note: use Get-Location per run
 ```
 
 ## Stage-QDR-4 归档状态
@@ -133,7 +125,7 @@ STAGE_QDR_4_TAG: DONE / dh-stage-qdr-4-close
 STAGE_QDR_4_TAG_TARGET: 62c8020 docs(workflow): repair documentation discipline and skill policy
 ```
 
-Stage-QDR-4、Stage-QDR-5 与 Stage-QDR-6 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-7 B1为`FROZEN`，B2 schema errata blocker fix为`DONE / REVIEW_PENDING`；下一步仅允许`DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY`。capacity acceptance与B3仍为`NOT_ALLOWED`，不授权API或runtime扩张。
+Stage-QDR-4、Stage-QDR-5 与 Stage-QDR-6 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。本节不是Stage-QDR-7当前入口；当前B2状态只以上方authority与`STATUS.md`/`WORK_ORDER.md`为准。
 
 ## 当前事实源
 
@@ -141,13 +133,14 @@ Stage-QDR-5 已完成 archive close、tag close 与 current cleanup。当前事�
 
 ```text
 README.md
-docs/current/DH_STAGE_QDR_7_PLAN.md
 docs/current/README.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX_RETRY.md
+docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY.md historical BLOCKED review
 docs/current/TESTING.md
-docs/current/ARCHIVE_INDEX.md
+docs/current/ARCHIVE_INDEX.md historical archive index / supporting only
 ```
 
 Stage-QDR-4 和 Stage-QDR-5 的详细 plan / work order / implementation work order 已归档到 `docs/gates/stage-qdr-4/` 与 `docs/gates/stage-qdr-5/`，不再保留在 `docs/current`。Stage-QDR-5 historical source docs 使用 `SOURCE_` 前缀，旧状态只作为 historical record。
@@ -166,14 +159,15 @@ docs/current/DB_SCHEMA.md
 
 ```text
 STATUS.md                  当前状态表
-DH_STAGE_QDR_7_PLAN.md     Stage-QDR-7 limited dry-run readiness planning-only 基线
-DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Stage-QDR-7 B1-B5 实施治理工作单
-DH_STAGE_QDR_7_B2_PERSISTENT_GUARDS_BLOCKER_FIX_RETRY.md B2 P1 blocker-fix retry证据
+DH_STAGE_QDR_7_PLAN.md     Historical / consumed Stage-QDR-7 planning baseline
+DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed implementation work order
+DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX_RETRY.md 当前factsources修复记录
+DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY.md Historical / previous BLOCKED review
 WORK_ORDER.md              下一步唯一入口
 CODEX_PROJECT_INSTRUCTIONS.md 当前执行纪律
 TESTING.md                 当前验证证据与工具风险
 FACTSOURCE_POLICY.md       事实源与 blocker 规则
-ARCHIVE_INDEX.md           已归档文档索引
+ARCHIVE_INDEX.md           已归档文档索引，historical/supporting only
 WORKLOG.md                 本轮文档治理记录，supporting only
 ROADMAP.md                 路线摘要，supporting only
 API.md                     API 实现状态摘要，supporting only

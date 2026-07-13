@@ -1,5 +1,33 @@
 # Decision Hub 当前工单
 
+## Current authority — 2026-07-13 schema errata factsource alignment
+
+```text
+Stage-QDR-7 B1: FROZEN
+B2 schema errata implementation: DONE
+B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
+B2 milestone acceptance: NOT_YET
+capacity acceptance: NOT_ALLOWED
+B3: NOT_ALLOWED
+schema errata technical implementation: PASS
+schema errata independent acceptance: BLOCKED only by factsource drift
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+current task status: DONE / VALIDATED / REVIEW_RETRY_2_PENDING
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
+callback/migration code changes: NOT_REQUIRED
+CURRENT_FACTSOURCE_CONSISTENCY: PASS
+ALLOW_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY_2: YES
+ALLOW_MILESTONE_REVIEW_RETRY_3_NOW: NO
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+```
+
+本任务只允许入口与factsources对齐。本地验证通过后进入独立review retry-2，由其确认factsource drift blocker是否关闭；review通过前不得接受B2，不得运行capacity benchmark或进入B3。
+
+## Historical records — 以下全部内容均为非当前工单
+
+从下一个authority/日期段落起，旧`current task`与`next task/action`均为historical/consumed快照，不得覆盖上方唯一当前工单。
+
 ## Current authority — 2026-07-13 schema errata implementation review retry blocked
 
 ```text

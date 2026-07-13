@@ -1,5 +1,33 @@
 # Decision Hub Status
 
+## Current authority — 2026-07-13 schema errata factsource alignment
+
+```text
+Stage-QDR-7 B1: FROZEN
+B2 schema errata implementation: DONE
+B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
+B2 milestone acceptance: NOT_YET
+capacity acceptance: NOT_ALLOWED
+B3: NOT_ALLOWED
+schema errata technical implementation: PASS
+schema errata independent acceptance: BLOCKED only by factsource drift
+callback/migration code changes: NOT_REQUIRED
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+current task status: DONE / VALIDATED / REVIEW_RETRY_2_PENDING
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
+CURRENT_FACTSOURCE_CONSISTENCY: PASS
+ALLOW_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY_2: YES
+ALLOW_MILESTONE_REVIEW_RETRY_3_NOW: NO
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+```
+
+schema errata技术实现、callback timeout顺序、锁超时、事务回滚、migration retry、V14 no-truncation与PostgreSQL证据均已通过。本任务已完成factsources本地对齐，但该blocker只能由独立review retry-2确认关闭；不得提前写B2 `ACCEPTED`。
+
+## Historical records — 以下全部内容均为非当前快照
+
+从下一个日期段落起，即使旧字段包含`当前`、`current task`或`next action`，也只表示该日期任务当时的状态，不得覆盖上方current authority。
+
 ## 2026-07-13 Stage-QDR-7 B2 schema errata implementation review retry
 
 ```text

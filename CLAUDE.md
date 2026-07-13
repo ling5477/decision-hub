@@ -45,8 +45,10 @@ docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/README.md
 docs/current/STATUS.md
 docs/current/ROADMAP.md
-docs/current/WORKFLOW.md
 docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/ARCHIVE_INDEX.md
+docs/current/FACTSOURCE_POLICY.md
 ```
 
 涉及 DH/NQ 集成时，还必须读取：
@@ -57,7 +59,9 @@ docs/current/DH_REFACTOR_STAGE1_WORK_ORDER.md
 docs/current/NQ_DH_INTEGRATION_SECURITY_AUDIT_REPORT.md
 ```
 
-`docs/current` 是唯一当前事实源。
+`docs/current` 是唯一当前事实源。`STATUS.md`和`WORK_ORDER.md`分别是当前状态与下一任务的主权威。
+
+`CLAUDE.md` is execution guidance, not the primary current-state authority. 本文件不得覆盖`STATUS.md`和`WORK_ORDER.md`的当前结论。
 
 `docs/codex` 只保留历史计划与辅助执行区，不得覆盖 `docs/current` 的当前结论。
 
@@ -84,26 +88,33 @@ docs/current/TESTING.md
 ## 4. 当前阶段
 
 ```text
-Current stage: Stage3-B3 DH Backtest Request Adapter IMPL completed
-Next stage:    Integration-0-PLAN
-Source of truth: docs/current
+Stage-QDR-7 B1: FROZEN
+B2 schema errata implementation: DONE
+B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
+B2 milestone acceptance: NOT_YET
+capacity acceptance: NOT_ALLOWED
+B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
 ```
 
-Stage3-B3 已于 2026-05-26 完成：DH 端 backtest adapter 可插拔骨架（dh-usecase service + DTO + Repository / dh-connector Fake + Disabled client / dh-app Stage3NqBacktestWiringConfig 三层 gate / ArchUnit 扩到 12 条）；190 tests 全绿；无真实 HTTP；无 RealNqBacktestClient。
-
-当前唯一下一步是 `Integration-0-PLAN`，且只允许做只读边界、契约冻结、权限模型、审计模型、风险清单和验收标准。Stage3-B2 / NQ Feedback Outbox / 真实 HTTP / event / NQ client / RealClient / real provider 均为 historical / superseded / deferred / gated，不是当前 next，不允许作为当前实现任务。任何 NQ 相关实现必须先通过 Integration-0-PLAN。Stage3 规划冻结快照位于 docs/gates/dh-stage3-plan/。
+Stage3-B3与`Integration-0-PLAN`均为historical/consumed记录，不是当前入口。Integration-0已`CLOSED / ACCEPTED`，但仍只代表contract/mock/documentation work line，不代表runtime integration。
 
 NQ / DH 三轮只读审计（NQ 全仓 / DH 全仓 / NQ-DH 联合边界 + 汇总）已完成，结论同步在 `docs/current/STATUS.md` §1.1。当前口径固定为：
 
 ```text
 NQ-DH:            not integrated；runtime connection none
-Integration-0:    allowed only as contract / mock / documentation work line, not runtime integration
+Integration-0:    CLOSED / ACCEPTED as contract / mock / documentation work line, not runtime integration
 Allowed work:     docs, contract freeze, mock, stub, contract test, security policy
 Forbidden work:   real NQ connection, RealClient, real Provider, trading,
                   credential access, NQ DB access, LIVE
-Security baseline: P1-1 / P1-2 / P1-3 closed
-Remaining issue:  P1-4 residual rate limit / memory cap / replay nonce persistence
-                  -> blocks Integration-1, not Integration-0
+Security baseline: FULL
+Fail-closed state: FULL
+P1-4 residual:     CLOSED
+Integration-1:     NOT STARTED
+Runtime integration: NOT STARTED
+AI / Agent runtime: NOT STARTED
+LIVE:              DISABLED
 ```
 
 不得把 Integration-0 写成真实集成；不得把 NQ integration 写成 started；不得把 DH 写成 integrated；不得把 LIVE 写成 enabled。
@@ -307,28 +318,31 @@ PRESENTATION         Presentations + Documents + Canva
 DH 是多 Agent 决策系统，不是交易执行系统。
 DH 当前只允许研究、分析、候选信号、风险解释、审计记录。
 DH 不允许下单、撤单、修改策略状态、启动 Paper Run、访问交易所密钥、直接读写 NQ DB。
-DH 到 NQ 的任何未来接入都必须从 Integration-0-PLAN 开始。
-Integration-0 只能是只读边界、契约冻结、权限模型、审计模型，不允许真实业务打通。
-Integration-0 only as contract / mock / documentation work line, not runtime integration.
+DH到NQ的任何未来runtime接入都必须在Integration-0 `CLOSED / ACCEPTED`之后另起GateN rebase planning。
+Integration-0已`CLOSED / ACCEPTED`，但仍只是contract/mock/documentation work line，不允许真实业务打通。
 NQ integration not started.
-Integration-0 not started / plan only.
+Integration-1 NOT STARTED.
+Runtime integration NOT STARTED.
+DH integrated NO.
+AI / Agent runtime NOT STARTED.
 RealClient forbidden.
 real provider forbidden.
-LIVE trading forbidden.
+LIVE DISABLED.
 NQ mutation forbidden.
-P1-1 / P1-2 / P1-3 closed; P1-4 residual rate limit / memory cap / replay nonce persistence
-  blocks Integration-1, not Integration-0.
 ```
 
 ### 11.3 当前 Codex / Claude workflow 文档入口
 
 ```text
-docs/current/CODEX_WORKFLOW_INDEX.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
-docs/current/DH_CODEX_PLUGIN_WORKFLOW.md
-docs/current/DH_WORKFLOW_ROUTER_SKILL.md
-docs/current/DH_CODEX_TASK_TEMPLATES.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/TESTING.md
+docs/current/ARCHIVE_INDEX.md
+docs/current/FACTSOURCE_POLICY.md
 .agents/skills/nq-dh-workflow-router/SKILL.md
+.agents/skills/dh-docs-writer/SKILL.md
 ```
 ## 12. Claude 执行纪律
 

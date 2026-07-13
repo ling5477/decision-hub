@@ -1,10 +1,11 @@
 # Codex Project Instructions
 
-## Current authority — 2026-07-13 schema errata implementation blocker fix
+## Current authority — 2026-07-13 schema errata factsource alignment
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2 schema errata blocker fix: DONE / REVIEW_PENDING
+B2 schema errata implementation: DONE
+B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
 B2 milestone acceptance: NOT_YET
 capacity acceptance: NOT_ALLOWED
 B3: NOT_ALLOWED
@@ -14,12 +15,12 @@ STATEMENT_TIMEOUT_CONTRACT: 60s / TRANSACTION_LOCAL / BEFORE_GUARD_PRECHECK
 ALLOW_STAGE_QDR_7_B2_MILESTONE_REVIEW_RETRY_3_NOW: NO
 ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
-CURRENT_TASK: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX
-CURRENT_TASK_STATUS: DONE / REVIEW_PENDING
-next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
+CURRENT_TASK: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+CURRENT_TASK_STATUS: DONE / VALIDATED / REVIEW_RETRY_2_PENDING
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
 ```
 
-本轮blocker fix仅前移callback的transaction-local timeout、补充PostgreSQL precheck锁回归并对齐current factsources；禁止修改V1–V14、API、外部合同、容量默认值或runtime边界。B2仍未accepted。
+schema errata技术实现和独立技术证据均已通过；本轮只对齐仓库入口和current factsources，不修改callback、测试、V1–V14、API、外部合同、容量默认值或runtime边界。`FACTSOURCE_FIX_PENDING`表示等待独立review retry-2确认，B2仍未accepted。
 
 > 项目: Decision Hub
 > 必需前置 skill: `nq-dh-workflow-router`
@@ -27,7 +28,9 @@ next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
 > 当前事实源: `docs/current`
 > 当前工作区: 每轮用 `Get-Location` 确认；不得把本机盘符路径写成唯一事实
 
-## 1. 当前状态锁定
+## 1. 当前状态与已关闭历史摘要
+
+下方Stage-QDR-2至Stage-QDR-6条目均为historical/consumed摘要，不是当前任务或next action。Stage-QDR-7当前状态只以本节末尾的`CURRENT_TASK`/`NEXT_TASK`及文件顶部authority为准。
 
 ```text
 stage-qdr-2: FINAL CLOSE CLOSED / ACCEPTED
@@ -104,9 +107,10 @@ STAGE_QDR_6_TAG: DONE / dh-stage-qdr-6-close
 STAGE_QDR_6_TAG_TARGET: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
 STAGE_QDR_6_CURRENT_PROCESS_SOURCES: PRUNED
 STAGE_QDR_6_POST_TAG_CURRENT_CLEANUP: DONE
-STAGE_QDR_7: IMPLEMENTING / B1_FROZEN / B2_SCHEMA_ERRATA_BLOCKER_FIX_REVIEW_PENDING
+STAGE_QDR_7: IMPLEMENTING / B1_FROZEN / B2_SCHEMA_ERRATA_TECHNICAL_PASS
 STAGE_QDR_7_B1: FROZEN
-STAGE_QDR_7_B2_SCHEMA_ERRATA_BLOCKER_FIX: DONE / REVIEW_PENDING
+STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION: DONE
+STAGE_QDR_7_B2_SCHEMA_ERRATA_REVIEW: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
 ALLOW_STAGE_QDR_6_FINAL_CLOSE_REVIEW_RETRY: YES / CONSUMED / PASS
 ALLOW_STAGE_QDR_6_ARCHIVE_PACKET_NOW: YES / CONSUMED
 ALLOW_STAGE_QDR_6_TAG_CLOSE_NOW: NO / ALREADY_TAGGED
@@ -153,10 +157,10 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-CURRENT_TASK: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-REVIEW
-CURRENT_TASK_STATUS: DONE / PASS
-NEXT_TASK: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION
-MODE: CONTRACT_FREEZE_ONLY + NO_STAGE_QDR_7_IMPLEMENTATION + NO_API + NO_MIGRATION + NO_PROVIDER + NO_AGENT + NO_LIVE
+CURRENT_TASK: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+CURRENT_TASK_STATUS: DOC_FIX / FACTSOURCE_ALIGNMENT
+NEXT_TASK: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
+MODE: DOC_FIX + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_MIGRATION_CHANGE + NO_API + NO_PROVIDER + NO_AGENT + NO_LIVE
 ```
 
 ## 2. 前置分类规则
@@ -181,27 +185,27 @@ Next concrete action:
 
 ## 3. 当前事实源规则
 
-Stage-QDR-4 与 Stage-QDR-5 均已归档并完成 tag close。当前 factsource 文件包括：
+`STATUS.md`与`WORK_ORDER.md`是当前状态和下一任务的主权威。README、CODEX、CLAUDE、AGENTS是入口或执行指导，不得覆盖这两个主权威。当前factsource集合包括：
 
 ```text
 README.md
-docs/current/DH_STAGE_QDR_7_PLAN.md
-docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md
 docs/current/README.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/FACTSOURCE_POLICY.md
 docs/current/TESTING.md
-docs/current/ARCHIVE_INDEX.md
+docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX_RETRY.md
 ```
 
-Stage-QDR-4 的详细 plan / work order / implementation work order 已移动到 `docs/gates/stage-qdr-4/`；Stage-QDR-5 source docs 已移动到 `docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_*.md`。Stage-QDR-6 self-contained packet 位于 `docs/gates/stage-qdr-6/`；本任务按要求保留 `docs/current` Stage-QDR-6 过程源，等待 post-tag cleanup。这些 archive files 只能作为 historical evidence，不覆盖 current factsources。
+Stage-QDR-4至Stage-QDR-6 archive以及已完成的Stage-QDR-7 plan/work order只作为historical/consumed evidence，不覆盖current factsources。未被当前authority显式列为current task的task-specific文档，一律按历史快照解释。
 
 以下文件默认 supporting only，不作为 primary stage gate source：
 
 ```text
 docs/current/WORKLOG.md
 docs/current/ROADMAP.md
+docs/current/ARCHIVE_INDEX.md
 docs/current/API.md
 docs/current/DB_SCHEMA.md
 ```
@@ -213,7 +217,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让 supporting docs 升级为 blocker。Stage-QDR-4、Stage-QDR-5 与 Stage-QDR-6 均已 `CLOSED / ACCEPTED / ARCHIVED / TAGGED`。Stage-QDR-7 B1已`FROZEN`，B2 schema errata blocker fix为`DONE / REVIEW_PENDING`；下一步仅允许`DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY`。capacity acceptance、B3、API、Provider、HTTP、Agent、LangGraph、NQ runtime integration与LIVE均未授权。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让supporting docs升级为blocker。Stage-QDR-7 B1为`FROZEN`；schema errata implementation为`DONE`，技术review为`TECHNICAL_PASS / FACTSOURCE_FIX_PENDING`。下一步仅允许`DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2`；capacity acceptance、B3、API、Provider、HTTP、Agent、LangGraph、NQ runtime integration与LIVE均未授权。
 
 ## 4. 安全边界
 
@@ -258,7 +262,9 @@ mvn -ntp -Pquality validate
 
 `mvnw.cmd` 当前仍不可写成可用。Docker/Testcontainers skip 只能写成环境型 skip，不得写成 PASS。
 
-## 7. Stage-QDR-4 当前入口
+## 7. Historical / Consumed entries（非当前）
+
+以下内容是Stage-QDR-4至Stage-QDR-7早期阶段的historical/consumed快照。即使原始字段包含`next action`或`IMPLEMENTATION_NOT_STARTED`，也不得解释为当前任务；当前入口只看文件顶部authority、`STATUS.md`和`WORK_ORDER.md`。
 
 ```text
 previous task: DH-STAGE-QDR-4-ARCHIVE-CONTENT-FIX / DONE
@@ -341,10 +347,10 @@ STAGE_QDR_6_TAG: DONE / dh-stage-qdr-6-close
 STAGE_QDR_6_TAG_TARGET: b9b68b3c4ea35813959ac5bf5a4566e5393e20be
 STAGE_QDR_6_CURRENT_PROCESS_SOURCES: PRUNED
 STAGE_QDR_6_POST_TAG_CURRENT_CLEANUP: DONE
-STAGE_QDR_7: PLANNING / IMPLEMENTATION_NOT_STARTED
+STAGE_QDR_7: PLANNING / IMPLEMENTATION_NOT_STARTED / HISTORICAL_SNAPSHOT
 STAGE_QDR_7_PLAN: DONE / PLAN_ONLY
 ALLOW_STAGE_QDR_7_PLAN: YES / CONSUMED
 ALLOW_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER: YES
 ALLOW_STAGE_QDR_7_IMPLEMENTATION_NOW: NO
-next action: DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER
+historical next action: DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER / CONSUMED
 ```

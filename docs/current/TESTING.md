@@ -1,5 +1,27 @@
 # Decision Hub Testing
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git preflight | PASS | `dev` / `d827fce` / clean / staged empty。 |
+| current authority alignment | PASS | root/current README、CODEX、FACTSOURCE_POLICY、CLAUDE、AGENTS、STATUS/WORK_ORDER/ROADMAP统一到本任务与review retry-2。 |
+| independent acceptance status | BLOCKED only by factsource drift | 本地对齐已通过；只允许独立review retry-2确认blocker关闭，不提前接受B2。 |
+| stale wording classification | PASS | 指定scan 378个命中全部分类：`HISTORICAL_MARKED=323`、`NEGATIVE_SAFETY_STATEMENT=55`；两类均不作为current入口。 |
+| current conflict count | PASS / 0 | 严格旧current入口pattern为0。 |
+| forbidden-scope diff | PASS | callback、Java、测试、V1–V14、API/contracts均无diff。 |
+| quality | PASS | `mvn -ntp -Pquality validate`；19/19，17.669秒，`BUILD SUCCESS`。 |
+| Checkstyle | PASS | 0 violations。 |
+| Spotless | PASS | check goal通过。 |
+| Maven tests | NOT_RUN / NOT_REQUIRED | 本轮为docs-only，附件明确不要求重跑。 |
+| PostgreSQL/Testcontainers | NOT_RUN / NOT_REQUIRED | 本轮不修改callback、测试或migration。 |
+
+Maven全局settings在`D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml:227`报告未识别`profiles`标签；不影响本轮exit 0。`mvnw.cmd`未执行，未把wrapper写成PASS。
+
+## Historical validation records — 以下全部内容均为非当前验证结论
+
+下方日期记录保留真实历史命令结果；其旧`current task`、`next action`或阶段状态不得覆盖本节。
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY validation
 
 | Check | Result | Evidence |
