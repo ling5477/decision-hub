@@ -1,5 +1,20 @@
 # Decision Hub Testing
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git scope | PASS | `3ac87a2..f144a42`仅callback replacement、直接测试与允许文档；V1–V14、Java生产代码、API/Controller/DTO/OpenAPI、security contracts无diff。 |
+| callback discovery | PASS | Flyway真实日志：`beforeEachMigrate - qdr7 v13 compatibility`。 |
+| targeted PG suite | PASS / INSUFFICIENT_FOR_P1 | 11 tests / 0 failures / 0 errors / 0 skipped；PostgreSQL 17.10；未覆盖precheck `ACCESS EXCLUSIVE`锁。 |
+| independent precheck lock probe | FAIL / P1 | V12表持有`ACCESS EXCLUSIVE`；未修改callback在constraint fingerprint处等待，外加8秒statement timeout于8436ms终止，不是冻结的5秒lock timeout。 |
+| owning Maven | PASS | `mvn -ntp -pl dh-app -am test`；158 reports / 1075 tests / 0 failures / 0 errors / 0 skipped。 |
+| full Maven | PASS | `mvn -ntp test`；158 reports / 1075 tests / 0 failures / 0 errors / 0 skipped。 |
+| quality | PASS | `mvn -ntp -Pquality validate`；19/19 reactor、根Checkstyle 0、Spotless PASS。 |
+| current factsources | FAIL | root/current README与CODEX instruction存在旧B2状态及旧next action；三文件不在本轮allowlist。 |
+
+首次定向命令因PowerShell解析`-D`参数而未进入测试；以`mvn --%`原样传参重跑后通过。未运行capacity benchmark。
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION targeted validation
 
 | 验证 | 结果 |

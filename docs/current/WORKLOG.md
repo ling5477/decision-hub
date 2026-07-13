@@ -1,5 +1,21 @@
 # Decision Hub Worklog
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
+
+- 只读复核`3ac87a2..f144a42`，确认旧`beforeMigrate`删除、新`beforeEachMigrate`发现，V1–V14、Java生产代码、API/OpenAPI及security contracts无diff。
+- 既有PostgreSQL 17.10 suite 11/11通过，覆盖rollback/retry、1000/1001、fingerprint、completed no-op与V14 no-truncation。
+- 独立真库实验发现P1：callback在guard constraint/data precheck之后才设置5秒`lock_timeout`；`ACCESS EXCLUSIVE`锁下precheck超过5秒并由外加8秒statement timeout终止。
+- 发现current factsources残留：root/current README与CODEX instruction后部仍为旧B2/next-action；不在本轮allowlist，未越界修改。
+- owning/full均为158 reports / 1075 tests / 0 failures/errors/skipped；quality 19/19、Checkstyle 0、Spotless PASS。绿色回归不覆盖P1。
+- 本轮仅修改review/current文档；未修改callback、Java、测试、V1–V14、API/NQ；未运行capacity、未进入B3、未push/tag。
+
+```text
+STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW: BLOCKED
+SCHEMA_ERRATA_IMPLEMENTATION_STATUS: BLOCKED / P1_FIX_REQUIRED
+ALLOW_MILESTONE_REVIEW_RETRY_3: NO
+next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX
+```
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION
 
 - 预检确认`dev`、HEAD `3ac87a2`、worktree clean、staged empty；未读取敏感配置，未触碰NQ。

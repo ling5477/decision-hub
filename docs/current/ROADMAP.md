@@ -1,17 +1,17 @@
 # Decision Hub Roadmap
 
-## 2026-07-13 Stage-QDR-7 B2 schema errata implementation
+## 2026-07-13 Stage-QDR-7 B2 schema errata implementation review blocked
 
 ```text
 B1: FROZEN
-B2 schema errata implementation: DONE / REVIEW_PENDING
+B2 schema errata implementation: BLOCKED / P1_FIX_REQUIRED
 B2 milestone acceptance: NOT_YET
 capacity acceptance: NOT_ALLOWED
 B3: NOT_ALLOWED
-next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW
+next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX
 ```
 
-实施记录已提供`beforeEachMigrate` transaction、V12 fingerprint、1000行ceiling、`SET LOCAL 5s/60s`和PostgreSQL回滚证据；仍须独立review，且不得进入milestone retry-3、capacity acceptance或B3。
+独立review确认transaction、fingerprint、1000行ceiling、rollback/retry和V14 no-truncation，但5秒lock timeout在guard precheck之后才设置，且current入口仍有旧状态残留。必须先完成受控blocker fix；不得进入milestone retry-3、capacity acceptance或B3。
 
 ## 2026-07-12 Stage-QDR-7 B2 milestone review retry-2 blocked
 
