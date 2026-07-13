@@ -1,5 +1,24 @@
 # Decision Hub Testing
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| commit scope | PASS | `6a1794d..479dbc`仅callback timeout顺序、直接相关PostgreSQL测试与current docs；V1–V14、Java生产、API/OpenAPI无diff。 |
+| callback timeout order | PASS | `SET LOCAL 5s/60s`位于history no-op gate之后、首次guard/catalog precheck之前。 |
+| precheck lock trap | PASS | PostgreSQL 17.10/Testcontainers；`ACCESS EXCLUSIVE`；无外部session timeout；全量日志观测上界约5.138秒。 |
+| rollback / retry | PASS | history仍为V12，V13/V14 success=0，strict CHECK/padded原值保持、V13列不存在；解锁后retry到V14。 |
+| session isolation | PASS | 同一migration connection失败/成功后`SHOW lock_timeout`与`SHOW statement_timeout`均为`0`。 |
+| completed V13/V14 no-op | PASS | guard表被`ACCESS EXCLUSIVE`锁定时repeatable probe仍在门限内完成。 |
+| callback PostgreSQL suite | PASS | 12 tests / 0 failures / 0 errors / 0 skipped。 |
+| owning Maven | PASS | `mvn -ntp -pl dh-app -am test`；15/15；dh-app 147 / 0 / 0 / 0；7分17秒。 |
+| full Maven | PASS | `mvn -ntp test`；19/19；158 reports / 1076 tests / 0 failures / 0 errors / 0 skipped；11分04秒。 |
+| quality | PASS | `mvn -ntp -Pquality validate`；19/19；Checkstyle 0 violations；Spotless PASS。 |
+| PostgreSQL/Testcontainers | PASS | Docker Desktop 29.6.1；PostgreSQL 17.10；0 skipped。 |
+| current factsources | FAIL / P1 | CODEX、FACTSOURCE_POLICY与仓库CLAUDE含未标historical的旧current入口。 |
+
+正常无锁迁移没有触发冻结的60秒statement timeout，故无需输出`B2_SCHEMA_ERRATA_TIMEOUT_EVIDENCE_REQUIRED`。Hikari在Testcontainers关闭后的后台connection-refused warning未形成测试失败；Maven全局settings的`profiles` warning不影响exit 0。
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX validation
 
 | Check | Result | Evidence |

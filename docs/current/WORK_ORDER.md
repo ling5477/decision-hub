@@ -1,5 +1,26 @@
 # Decision Hub 当前工单
 
+## Current authority — 2026-07-13 schema errata implementation review retry blocked
+
+```text
+Stage-QDR-7 B1: FROZEN
+B2 schema errata implementation: BLOCKED / CURRENT_FACTSOURCE_FIX_REQUIRED
+B2 milestone acceptance: NOT_YET
+capacity acceptance: NOT_ALLOWED
+B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
+current task status: BLOCKED / CURRENT_FACTSOURCE_FIX_REQUIRED
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+CALLBACK_TIMEOUT_ORDER: PASS
+PRECHECK_LOCK_TIMEOUT: PASS
+CURRENT_FACTSOURCE_CONSISTENCY: FAIL
+ALLOW_MILESTONE_REVIEW_RETRY_3: NO
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+```
+
+本review retry确认`479dbc`已关闭callback timeout scope、rollback、retry、completed no-op与session isolation技术缺口；但current factsources仍含未标historical的旧Stage-QDR-7/Stage-QDR-4入口，整体必须`BLOCKED`。下一任务只允许受控factsources blocker fix retry；不得修改callback、测试、migration或进入milestone retry-3、capacity、B3。
+
 ## Current authority — 2026-07-13 schema errata implementation blocker fix
 
 ```text

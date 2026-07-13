@@ -1,5 +1,26 @@
 # Decision Hub Worklog
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
+
+- 预检确认`dev`、HEAD `479dbcab6b4a29a005cb524afc5a146d224ae2af`、worktree/staged clean、`HEAD == origin/dev`。
+- 只读审查`6a1794d..479dbc`：callback仅前移冻结timeout及相邻说明；新增直接相关PostgreSQL锁测试并调整既有60秒测试的JUnit外层watchdog；V1–V14、Java生产、API/OpenAPI及安全合同无diff。
+- callback精确顺序通过：history读取/no-op gate后立即`SET LOCAL lock_timeout = '5s'`与`statement_timeout = '60s'`，随后才首次访问guard表、`pg_attribute`、`pg_constraint`和`pg_class`。
+- 真实PostgreSQL 17.10 `ACCESS EXCLUSIVE`回归无外部session timeout，约5秒lock timeout后完整保留V12 history、strict CHECK和padded原值；解锁后安全retry至V14，session setting恢复`0`/`0`。
+- 目标类12/12、owning dh-app 147/147、全量158 reports / 1076 tests均0 failure/error/skip；quality 19/19、Checkstyle 0、Spotless PASS。
+- 发现P1 current factsources/入口规范冲突：CODEX后部仍有未标historical的Stage-QDR-7 planning入口，FACTSOURCE_POLICY仍有旧Stage-QDR-4 current task，仓库CLAUDE仍声明Stage3-B3/Integration-0-PLAN；三者不在本轮allowlist，未越界修复。
+- 本轮仅修改允许的review/current文档；未修改callback、Java、测试、V1–V14、API/NQ；未运行capacity、未进入B3、未push/tag。
+
+```text
+STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY: BLOCKED
+CALLBACK_TIMEOUT_ORDER: PASS
+PRECHECK_LOCK_TIMEOUT: PASS
+TRANSACTION_ROLLBACK_SAFETY: PASS
+CURRENT_FACTSOURCE_CONSISTENCY: FAIL
+SCHEMA_ERRATA_IMPLEMENTATION_STATUS: BLOCKED
+ALLOW_MILESTONE_REVIEW_RETRY_3: NO
+next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+```
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX
 
 - 预检确认`dev`、HEAD `6a1794d`、worktree/staged clean、`origin/dev...HEAD=0/0`；实施commit `f144a42`与历史review `6a1794d`均存在。

@@ -1,5 +1,33 @@
 # Decision Hub Status
 
+## 2026-07-13 Stage-QDR-7 B2 schema errata implementation review retry
+
+```text
+Stage-QDR-7 B1: FROZEN
+B2 schema errata implementation: BLOCKED / CURRENT_FACTSOURCE_FIX_REQUIRED
+B2 milestone acceptance: NOT_YET
+capacity acceptance: NOT_ALLOWED
+B3: NOT_ALLOWED
+CALLBACK_TIMEOUT_ORDER: PASS
+PRECHECK_LOCK_TIMEOUT: PASS
+TRANSACTION_ROLLBACK_SAFETY: PASS
+FAILED_MIGRATION_RETRY: PASS
+COMPLETED_ENVIRONMENT_NO_OP: PASS
+SESSION_SETTING_ISOLATION: PASS
+V1_V14_IMMUTABILITY: PASS
+CURRENT_FACTSOURCE_CONSISTENCY: FAIL
+POSTGRESQL_TEST_EVIDENCE: PASS / POSTGRESQL_17_10 / ZERO_SKIPS
+SCHEMA_ERRATA_IMPLEMENTATION_STATUS: BLOCKED
+ALLOW_MILESTONE_REVIEW_RETRY_3: NO
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY
+current task status: BLOCKED / CURRENT_FACTSOURCE_FIX_REQUIRED
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+```
+
+`479dbc`已关闭callback timeout scope技术blocker：两个`SET LOCAL`位于history-only no-op gate之后、首次guard/catalog precheck之前，真实PostgreSQL 17.10锁回归证明约5秒失败、整体rollback、解锁retry与session isolation。但`CODEX_PROJECT_INSTRUCTIONS.md`、`FACTSOURCE_POLICY.md`和仓库`CLAUDE.md`仍存在未标historical的旧current入口，命中本review的阻断规则；schema errata implementation不得accepted，milestone retry-3不得启动。
+
 ## 2026-07-13 Stage-QDR-7 B2 schema errata implementation blocker fix
 
 ```text

@@ -1,5 +1,21 @@
 # Decision Hub Roadmap
 
+## 2026-07-13 Stage-QDR-7 B2 schema errata implementation review retry blocked
+
+```text
+Stage-QDR-7 B1: FROZEN
+B2 schema errata implementation: BLOCKED / CURRENT_FACTSOURCE_FIX_REQUIRED
+B2 milestone acceptance: NOT_YET
+capacity acceptance: NOT_ALLOWED
+B3: NOT_ALLOWED
+callback timeout scope: PASS
+PostgreSQL rollback/retry/session isolation: PASS
+current factsource consistency: FAIL
+next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
+```
+
+技术blocker已由`479dbc`关闭，但current factsources仍存在未标historical的旧阶段入口，因此不能进入milestone review retry-3。下一步仅允许current factsources最小修复与独立复核；capacity acceptance和B3继续禁止。
+
 ## 2026-07-13 Stage-QDR-7 B2 schema errata implementation blocker fix
 
 ```text
