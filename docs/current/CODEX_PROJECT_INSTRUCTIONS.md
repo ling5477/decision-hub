@@ -1,27 +1,31 @@
 # Codex Project Instructions
 
-## Current authority — 2026-07-13 capacity criteria evidence blocker
+## Current authority — 2026-07-13 guard hard-ceiling blocker closed
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2: CLOSED / ACCEPTED
 Schema errata implementation: ACCEPTED
 Persistent guards implementation: ACCEPTED
+Guard hard-ceiling contract: CLOSED / ACCEPTED
+Guard configuration bypass: CLOSED
+Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
 Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
-Full regression: INCOMPLETE / PREVIOUS JVM_NATIVE_MEMORY_OOM
+Capacity calibration: NOT_STARTED / NEXT
+Full regression: PASS / 1091 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Stage-QDR-7 B3: NOT_ALLOWED
 ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO
 ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
 ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
-CURRENT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
-CURRENT_TASK_STATUS: BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT
-NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
+CURRENT_TASK: DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
+CURRENT_TASK_STATUS: DONE / CLOSED_ACCEPTED
+NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
 ```
 
-schema errata、persistent guards与B2 milestone保持`ACCEPTED`。本轮criteria freeze因有效2xx容量样本、tail latency、throughput、cleanup与资源preflight数值缺失而`BLOCKED`；只允许下一任务补齐阈值证据，不授权harness work order/implementation、capacity execution、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
+schema errata、persistent guards与B2 milestone保持`ACCEPTED`。Properties与command的hard-ceiling校验已统一到`PersistentGuardHardCeilings`，bypass关闭；criteria仍因有效2xx容量样本、tail latency、throughput、cleanup与资源数值缺失而`BLOCKED`。只允许下一任务执行threshold evidence retry，不授权harness work order/implementation、capacity execution、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
 
 > 项目: Decision Hub
 > 必需前置 skill: `nq-dh-workflow-router`

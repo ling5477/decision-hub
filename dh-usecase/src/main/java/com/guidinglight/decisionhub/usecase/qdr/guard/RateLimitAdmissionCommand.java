@@ -15,11 +15,15 @@ public record RateLimitAdmissionCommand(
   /** 校验正数和B1安全hard ceiling，防止溢出或无界配置。 */
   public RateLimitAdmissionCommand {
     identity = Objects.requireNonNull(identity, "identity");
-    if (windowSeconds <= 0 || windowSeconds > 86_400) {
-      throw new IllegalArgumentException("windowSeconds must be within 1..86400");
+    if (windowSeconds <= 0
+        || windowSeconds > PersistentGuardHardCeilings.MAX_RATE_WINDOW_SECONDS) {
+      throw new IllegalArgumentException(
+          "windowSeconds must be within 1.."
+              + PersistentGuardHardCeilings.MAX_RATE_WINDOW_SECONDS);
     }
-    if (limitValue <= 0 || limitValue > 1_000_000) {
-      throw new IllegalArgumentException("limitValue must be within 1..1000000");
+    if (limitValue <= 0 || limitValue > PersistentGuardHardCeilings.MAX_RATE_QUOTA) {
+      throw new IllegalArgumentException(
+          "limitValue must be within 1.." + PersistentGuardHardCeilings.MAX_RATE_QUOTA);
     }
   }
 }

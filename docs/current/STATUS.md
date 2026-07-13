@@ -1,31 +1,37 @@
 # Decision Hub Status
 
-## Current authority — 2026-07-13 capacity criteria evidence blocker
+## Current authority — 2026-07-13 guard hard-ceiling blocker closed
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2: CLOSED / ACCEPTED
 Schema errata implementation: ACCEPTED
 Persistent guards implementation: ACCEPTED
+Guard hard-ceiling contract: CLOSED / ACCEPTED
+Guard configuration bypass: CLOSED
+Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
 Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
-Full regression: INCOMPLETE / PREVIOUS JVM_NATIVE_MEMORY_OOM
+Capacity calibration: NOT_STARTED / NEXT
+Full regression: PASS / 1091 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
-current task status: BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
+current task: DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
+current task status: DONE / CLOSED_ACCEPTED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
 POSTGRESQL_TEST_EVIDENCE: CURRENT_PASS / POSTGRESQL_17_10 / ZERO_SKIPS
-CAPACITY_CRITERIA_AUTHORITY: FAIL / HARD_CEILING_CONFLICT
+HARD_CEILING_CONFLICT: CLOSED
+CAPACITY_CRITERIA_AUTHORITY: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 PROJECT_ACCEPTANCE_BASELINE: BLOCKED
+ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY: YES / NEXT_TASK_ONLY
 ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO
 ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
 ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-Criteria freeze确认现有8线程/40 attempts/quota 10等数值只能作为correctness fixture；B1容量尝试没有有效2xx样本，无法证明throughput、p95/p99、cleanup duration或成功full-regression所需资源下限。另发现B1 rate window/quota/lease ceiling分别为3600秒/100000/900秒，而当前代码允许86400秒/1000000/3600秒，criteria authority不能闭合。本轮未执行capacity、targeted PostgreSQL suite或full regression；B2既有`CLOSED / ACCEPTED`不回退，B3继续`NOT_ALLOWED`。
+`PersistentGuardHardCeilings`现为properties与command共同引用的唯一B1上限权威；window `3600`、quota `100000`、lease `900`本身允许，max+1在配置或command构造阶段fail-closed。定向24项、persistent guard PostgreSQL 41项与完整1091项回归均为0 failures/errors/skipped。Criteria仍因actual-wiring protected 2xx、throughput、p95/p99、cleanup和资源采样证据缺失而`BLOCKED`；B2既有`CLOSED / ACCEPTED`不回退，B3继续`NOT_ALLOWED`。
 
 权威层级固定为：
 

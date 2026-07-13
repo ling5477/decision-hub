@@ -11,7 +11,7 @@
 
 ## Current follow-up disposition（2026-07-13）
 
-后续`DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE`无法从现有证据形成全部确定阈值，结论为`CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT_BLOCKED`。本报告原始`BLOCKED`结论、38项correctness证据、两次native-memory OOM和原始hash保持不变；下一任务为`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER`。该follow-up不授权harness work order/implementation、capacity execution或B3。
+后续criteria freeze仍为`CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT_BLOCKED`；本报告原始`BLOCKED`结论、38项correctness证据、两次native-memory OOM和原始hash保持不变。`DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER`已通过单一`PersistentGuardHardCeilings`关闭hard-ceiling实现分叉，并取得本轮1091项完整回归成功证据；这不等于capacity acceptance。下一任务为`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY`，不授权harness work order/implementation、capacity execution或B3。
 
 > Historical task record：从下一节开始是本验收任务当时的原始结论，其中`next task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE`已经被本轮消费，不再是current next task。
 

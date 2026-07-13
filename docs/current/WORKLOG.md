@@ -1,5 +1,29 @@
 # Decision Hub Worklog
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
+
+- 预检确认`dev`、task前HEAD `7c69ad3b4846eabf0cab04be18feeccda040d3cb`；仅继承上一任务允许的4个Java/测试变更，staged为空，三个scope包含关系成立。
+- 新增无状态、无Spring注解的`PersistentGuardHardCeilings`，唯一声明rate window `3600`秒、quota `100000`、idempotency lease `900`秒；`DecisionDryRunGuardProperties`与`RateLimitAdmissionCommand`共同引用，移除两处独立数字。
+- 新增`RateLimitAdmissionCommandTest`，覆盖1、冻结最大值、0、max+1、缺失/非法identity以及超限不调用adapter；保留并完成properties、Spring binding/wiring与source合同回归。
+- production-equivalent PostgreSQL wiring确认合法最大值到达`JdbcRateLimitAdmissionAdapter`，window/quota max+1在构造阶段失败且不增加bucket行；无in-memory fallback。
+- 定向24项、persistent guard PostgreSQL 41项、完整1091项均为0 failures/errors/skipped；PostgreSQL 17.10/Testcontainers与V1–V14实际运行，完整回归无native-memory OOM。
+- `mvn -ntp -Pquality validate`通过，19/19 modules、Checkstyle 0 violations、Spotless PASS。
+- Hard-ceiling contract与configuration bypass关闭；capacity criteria、post-B2 capacity acceptance继续`BLOCKED`，未执行calibration、未实现harness、未进入B3。
+
+```text
+GUARD_CONFIGURATION_BYPASS_BLOCKER: DONE
+SINGLE_HARD_CEILING_AUTHORITY: PASS
+HARD_CEILING_CONFLICT_COUNT: 0
+FULL_REGRESSION: PASS / 1091 TESTS
+QUALITY_GATE: PASS
+B2_IMPLEMENTATION_STATUS: ACCEPTED
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED
+Stage-QDR-7 B3: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
+```
+
+> Historical / consumed：从下一节开始均为任务当时的真实记录，其旧`next action`、BLOCKED原因和测试总数不得覆盖上方current worklog。
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
 
 - 预检确认`dev`、HEAD `1f75373cbe17b44ae99bb76cb73f0fdb2d52275c`；工作区只含上一任务允许继承的12个文档和1个BLOCKED报告，无Java、测试、callback、V1–V14、API/OpenAPI/contracts或NQ diff。

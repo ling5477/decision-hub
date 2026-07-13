@@ -1,23 +1,27 @@
 # Decision Hub
 
-## Current authority — Stage-QDR-7 capacity criteria evidence blocker
+## Current authority — Stage-QDR-7 guard hard-ceiling blocker closed
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2: CLOSED / ACCEPTED
 Schema errata implementation: ACCEPTED
 Persistent guards implementation: ACCEPTED
+Guard hard-ceiling contract: CLOSED / ACCEPTED
+Guard configuration bypass: CLOSED
+Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
 Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
-Full regression: INCOMPLETE / PREVIOUS JVM_NATIVE_MEMORY_OOM
+Capacity calibration: NOT_STARTED / NEXT
+Full regression: PASS / 1091 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
-current task status: BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
+current task: DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
+current task status: DONE / CLOSED_ACCEPTED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
 ```
 
-schema errata、persistent guards与B2 milestone保持`ACCEPTED`。Criteria freeze无法从0个有效2xx样本推导throughput、latency、cleanup或环境数值，且B1 hard ceiling与当前代码校验范围存在冲突，因此`CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT_BLOCKED`。下一步只允许补齐阈值证据，不授权harness implementation、capacity execution、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
+schema errata、persistent guards与B2 milestone保持`ACCEPTED`。`PersistentGuardHardCeilings`现为properties与command共同引用的唯一上限权威，直接构造command不能再绕过B1冻结范围；本轮full regression与真实PostgreSQL回归通过。Capacity criteria仍因actual-wiring 2xx、throughput、tail latency、cleanup与资源采样证据缺失而`BLOCKED`。下一步只允许threshold evidence retry，不授权harness implementation、capacity execution、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
 
 权威层级固定为：
 

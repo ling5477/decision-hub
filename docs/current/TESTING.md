@@ -1,5 +1,23 @@
 # Decision Hub Testing
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git preflight | PASS | `dev` / task前HEAD `7c69ad3b4846eabf0cab04be18feeccda040d3cb`；仅继承4个已声明Java/测试变更，staged为空。 |
+| task scope design | PASS | 三个scope包含关系全部成立；新增authority、command及直接测试均在write allowlist。 |
+| single hard-ceiling authority | PASS | `PersistentGuardHardCeilings`唯一声明window `3600`、quota `100000`、lease `900`；properties与command共同引用。 |
+| command direct validation | PASS | window/quota的1与最大值允许；0与max+1拒绝；超限时adapter调用数为0。 |
+| Spring/JDBC wiring | PASS | 合法最大值装配`JdbcRateLimitAdmissionAdapter`并到达PostgreSQL；超限在command构造前失败且bucket行数不增加。 |
+| targeted tests | PASS | `mvn -ntp -pl dh-usecase,dh-app -am "-Dtest=*DecisionDryRunGuardProperties*,*RateLimitAdmissionCommand*,*DecisionDryRunRuntimeWiring*,*PersistentGuardProductionWiring*" "-Dsurefire.failIfNoSpecifiedTests=false" test`；跨Reactor共24 tests，0 failures/errors/skipped。 |
+| persistent guard PostgreSQL suite | PASS | 指定5类suite；PostgreSQL 17.10/Testcontainers，跨Reactor共41 tests，0 failures/errors/skipped，V1–V14实际执行。 |
+| full regression | PASS | `mvn -ntp test`；19/19 modules，1091 tests，0 failures/errors/skipped，总耗时4:51，无native-memory OOM。 |
+| quality gate | PASS | `mvn -ntp -Pquality validate`；19/19 modules，Checkstyle 0 violations，Spotless PASS。 |
+| capacity execution | NOT_RUN | 本任务未执行calibration或正式capacity harness；criteria继续`BLOCKED`。 |
+| next task | LOCKED | `DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY`。 |
+
+> Historical / consumed：从下一节开始保留各任务当时的真实验证结果，其旧`next task`、失败环境和测试总数不得覆盖上方current validation。
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE validation
 
 | Check | Result | Evidence |

@@ -1,23 +1,27 @@
 # Decision Hub Roadmap
 
-## Current route — 2026-07-13 capacity threshold evidence blocker
+## Current route — 2026-07-13 capacity threshold evidence retry
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2: CLOSED / ACCEPTED
 Schema errata implementation: ACCEPTED
 Persistent guards implementation: ACCEPTED
+Guard hard-ceiling contract: CLOSED / ACCEPTED
+Guard configuration bypass: CLOSED
+Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
 Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
-Full regression: INCOMPLETE / PREVIOUS JVM_NATIVE_MEMORY_OOM
+Capacity calibration: NOT_STARTED / NEXT
+Full regression: PASS / 1091 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
-current task status: BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
+current task: DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
+current task status: DONE / CLOSED_ACCEPTED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
 ```
 
-Criteria freeze未能形成可追溯的throughput、latency、cleanup、restart和environment数值，且hard ceiling authority存在冲突。下一路线只允许补齐与审查阈值证据；B2保持`CLOSED / ACCEPTED`，capacity harness与B3仍禁止。
+Hard-ceiling authority与command bypass已关闭；criteria仍未形成可追溯的throughput、latency、cleanup、restart和environment数值。下一路线只允许重新收集与审查阈值证据；B2保持`CLOSED / ACCEPTED`，capacity harness与B3仍禁止。
 
 ## Historical routes — 以下全部内容均为非当前路线
 

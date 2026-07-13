@@ -1,12 +1,13 @@
 package com.guidinglight.decisionhub.usecase.decision.dryrun;
 
+import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardHardCeilings;
 import java.time.Duration;
 
 /**
  * Stage-QDR-7 persistent guard配置快照。
  *
- * <p>当runtimeEnabled=true时所有字段必须显式配置且满足B1 hard ceiling；默认0只用于endpoint关闭状态，不能作为
- * production fallback或最终容量默认值。
+ * <p>当runtimeEnabled=true时所有字段必须显式配置且满足B1 hard ceiling；默认0只用于endpoint关闭状态，不能作为 production
+ * fallback或最终容量默认值。
  *
  * @param runtimeEnabled protected runtime是否启用。
  * @param environment deployment identity。
@@ -35,13 +36,24 @@ public record DecisionDryRunGuardProperties(
       if (!java.util.Set.of("dev", "test", "staging", "prod").contains(environment)) {
         throw new IllegalArgumentException("guard environment must be explicitly configured");
       }
-      if (rateWindowSeconds <= 0 || rateWindowSeconds > 86_400) {
-        throw new IllegalArgumentException("guard rate window outside B1 hard ceiling");
+      if (rateWindowSeconds <= 0
+          || rateWindowSeconds > PersistentGuardHardCeilings.MAX_RATE_WINDOW_SECONDS) {
+        throw new IllegalArgumentException(
+            "guard rate window must be between 1 and "
+                + PersistentGuardHardCeilings.MAX_RATE_WINDOW_SECONDS
+                + " seconds");
       }
-      if (rateLimitValue <= 0 || rateLimitValue > 1_000_000) {
-        throw new IllegalArgumentException("guard quota outside B1 hard ceiling");
+      if (rateLimitValue <= 0
+          || rateLimitValue > PersistentGuardHardCeilings.MAX_RATE_QUOTA) {
+        throw new IllegalArgumentException(
+            "guard quota must be between 1 and "
+                + PersistentGuardHardCeilings.MAX_RATE_QUOTA
+                + " requests per window/key");
       }
-      requirePositiveBounded(leaseDuration, Duration.ofHours(1), "leaseDuration");
+      requirePositiveBounded(
+          leaseDuration,
+          Duration.ofSeconds(PersistentGuardHardCeilings.MAX_IDEMPOTENCY_LEASE_SECONDS),
+          "leaseDuration");
       requirePositiveBounded(idempotencyTtl, Duration.ofDays(7), "idempotencyTtl");
       requirePositiveBounded(retentionPeriod, Duration.ofDays(90), "retentionPeriod");
       if (idempotencyTtl.compareTo(leaseDuration) <= 0) {
@@ -56,7 +68,8 @@ public record DecisionDryRunGuardProperties(
   private static void requirePositiveBounded(
       final Duration value, final Duration ceiling, final String field) {
     if (value.isZero() || value.isNegative() || value.compareTo(ceiling) > 0) {
-      throw new IllegalArgumentException(field + " outside B1 hard ceiling");
+      throw new IllegalArgumentException(
+          field + " must be positive and at most " + ceiling.toSeconds() + " seconds");
     }
   }
 }

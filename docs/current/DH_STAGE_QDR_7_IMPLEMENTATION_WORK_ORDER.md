@@ -2,27 +2,31 @@
 
 > task: `DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER`  
 > mode: `WORK_ORDER_ONLY`  
-> stage: `Stage-QDR-7 / CAPACITY_CRITERIA_EVIDENCE_BLOCKED`
+> stage: `Stage-QDR-7 / GUARD_HARD_CEILING_CLOSED / CAPACITY_CRITERIA_EVIDENCE_BLOCKED`
 > mainline: `Limited Dry Run Runtime Readiness`  
 > endpoint: `POST /api/ai/decision-dry-runs`（既有，不新增 endpoint）
 
-## Current capacity criteria freeze addendum（2026-07-13）
+## Current guard hard-ceiling closure addendum（2026-07-13）
 
-本work order已被B2实施与最终验收消费，B2保持`CLOSED / ACCEPTED`。Criteria freeze确认本work order与B1材料未提供有效2xx容量样本、tail latency/throughput、cleanup duration或成功full-regression资源基线；B1 rate window/quota/lease ceiling与当前代码校验范围也不一致。`PROJECT_ACCEPTANCE_BASELINE`不能在不发明数值的前提下完成，harness work order继续禁止。
+本work order已被B2实施与最终验收消费，B2保持`CLOSED / ACCEPTED`。`PersistentGuardHardCeilings`已统一properties与command的冻结上限，直接构造bypass关闭；定向、PostgreSQL与完整回归均通过。Criteria仍缺少actual-wiring 2xx、tail latency/throughput、cleanup duration和资源采样证据，`PROJECT_ACCEPTANCE_BASELINE`保持`BLOCKED`，harness work order继续禁止。
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2: CLOSED / ACCEPTED
 Schema errata implementation: ACCEPTED
 Persistent guards implementation: ACCEPTED
+Guard hard-ceiling contract: CLOSED / ACCEPTED
+Guard configuration bypass: CLOSED
+Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
 Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
-Full regression: INCOMPLETE / PREVIOUS JVM_NATIVE_MEMORY_OOM
+Capacity calibration: NOT_STARTED / NEXT
+Full regression: PASS / 1091 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
-current task status: BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
+current task: DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
+current task status: DONE / CLOSED_ACCEPTED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
 ```
 
 > Historical / Consumed：从下一节开始均为B2实施、blocker fix与previous review attempt的当时记录；其中旧`next action`、`BLOCKED`和`NOT_YET`不再表示current状态，也不得覆盖`STATUS.md`与`WORK_ORDER.md`。

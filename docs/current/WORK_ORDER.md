@@ -1,30 +1,36 @@
 # Decision Hub 当前工单
 
-## Current authority — 2026-07-13 capacity criteria evidence blocker
+## Current authority — 2026-07-13 guard hard-ceiling blocker closed
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2: CLOSED / ACCEPTED
 Schema errata implementation: ACCEPTED
 Persistent guards implementation: ACCEPTED
+Guard hard-ceiling contract: CLOSED / ACCEPTED
+Guard configuration bypass: CLOSED
+Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
 Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
-Full regression: INCOMPLETE / PREVIOUS JVM_NATIVE_MEMORY_OOM
+Capacity calibration: NOT_STARTED / NEXT
+Full regression: PASS / 1091 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
-current task status: BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
+current task: DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
+current task status: DONE / CLOSED_ACCEPTED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
-CAPACITY_CRITERIA_AUTHORITY: FAIL / HARD_CEILING_CONFLICT
+HARD_CEILING_CONFLICT: CLOSED
+CAPACITY_CRITERIA_AUTHORITY: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 PROJECT_ACCEPTANCE_BASELINE: BLOCKED
+ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY: YES / NEXT_TASK_ONLY
 ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO
 ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
 ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-本轮仅冻结criteria合同，未执行任何容量、PostgreSQL或full regression命令。由于0个有效2xx容量样本、mandatory scenario数值缺口、环境成功基线缺失及B1 ceiling/code范围冲突，criteria freeze为`BLOCKED`。下一任务仅允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER`；B2 acceptance不回退，harness work order与B3均不得进入。
+本轮已用单一`PersistentGuardHardCeilings`关闭properties/command上限分叉和直接构造bypass，并通过定向、PostgreSQL 17.10/Testcontainers、完整Maven与质量门。Criteria freeze原始`BLOCKED`结论保持不变，因为mandatory actual-wiring容量证据仍未收集。下一任务仅允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY`；B2 acceptance不回退，harness work order与B3均不得进入。
 
 权威层级固定为：
 

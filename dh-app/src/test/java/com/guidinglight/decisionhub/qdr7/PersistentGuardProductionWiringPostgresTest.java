@@ -14,6 +14,7 @@ import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionAuditReposit
 import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionReplayQueryRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcGuardCleanupAdapter;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcIdempotencyGuardAdapter;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcRateLimitAdmissionAdapter;
 import com.guidinglight.decisionhub.security.nq.NonceReplayGuard;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditEventStatus;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditEventType;
@@ -24,24 +25,31 @@ import com.guidinglight.decisionhub.usecase.decision.DecisionReplayQueryReposito
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunCommand;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunContext;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunErrorCode;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunGuardProperties;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunRequestFingerprint;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunResult;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunRuntimeProperties;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunSafeResultProjector;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunService;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.PersistentGuardedDecisionDryRunService;
 import com.guidinglight.decisionhub.usecase.qdr.DecisionRequestRepository;
 import com.guidinglight.decisionhub.usecase.qdr.DecisionRunRepository;
 import com.guidinglight.decisionhub.usecase.qdr.QuantDecisionRepository;
 import com.guidinglight.decisionhub.usecase.qdr.QuantSignalRepository;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.QdrModelGatewayIntegrationPort;
 import com.guidinglight.decisionhub.usecase.qdr.guard.GuardCleanupCommand;
+import com.guidinglight.decisionhub.usecase.qdr.guard.GuardCleanupPort;
 import com.guidinglight.decisionhub.usecase.qdr.guard.GuardTransactionBoundary;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyAdmissionCommand;
-import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyAdmissionStatus;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyGuardPort;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyRecordView;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyState;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyTransitionCommand;
+import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardHardCeilings;
 import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardIdentity;
+import com.guidinglight.decisionhub.usecase.qdr.guard.RateLimitAdmissionCommand;
+import com.guidinglight.decisionhub.usecase.qdr.guard.RateLimitAdmissionPort;
+import com.guidinglight.decisionhub.usecase.qdr.guard.RateLimitAdmissionStatus;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
@@ -49,6 +57,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -105,31 +114,143 @@ class PersistentGuardProductionWiringPostgresTest {
       final String resultId = "result-completed";
       completeGuard(context, command, resultId);
 
-      final DecisionDryRunResult result = context.getBean(DecisionDryRunService.class).execute(command);
+      final DecisionDryRunResult result =
+          context.getBean(DecisionDryRunService.class).execute(command);
 
       assertThat(result.success()).isTrue();
       assertThat(result.status()).isEqualTo(200);
       assertThat(result.snapshot().decisionId()).isEqualTo(resultId);
-      assertThat(result.snapshot().traceSummary()).containsOnly("result:" + resultId, "idempotency:completed");
+      assertThat(result.snapshot().traceSummary())
+          .containsOnly("result:" + resultId, "idempotency:completed");
       assertThat(result.snapshot().reasons()).containsOnly("SAFE_REASON");
+    }
+  }
+
+  @Test
+  void frozenCeilingsCreateCompleteJdbcPersistentGuardRuntimeWiring() {
+    try (AnnotationConfigApplicationContext context =
+        springContext(
+            dataSource(),
+            Map.of(
+                "decisionhub.integration1.runtime.guard.rate-window-seconds",
+                Integer.toString(PersistentGuardHardCeilings.MAX_RATE_WINDOW_SECONDS),
+                "decisionhub.integration1.runtime.guard.rate-limit-value",
+                Integer.toString(PersistentGuardHardCeilings.MAX_RATE_QUOTA),
+                "decisionhub.integration1.runtime.guard.lease-seconds",
+                Integer.toString(PersistentGuardHardCeilings.MAX_IDEMPOTENCY_LEASE_SECONDS),
+                "decisionhub.integration1.runtime.guard.idempotency-ttl-seconds",
+                Integer.toString(
+                    PersistentGuardHardCeilings.MAX_IDEMPOTENCY_LEASE_SECONDS + 1)))) {
+      final DecisionDryRunGuardProperties properties =
+          context.getBean(DecisionDryRunGuardProperties.class);
+
+      assertThat(properties.rateWindowSeconds())
+          .isEqualTo(PersistentGuardHardCeilings.MAX_RATE_WINDOW_SECONDS);
+      assertThat(properties.rateLimitValue())
+          .isEqualTo(PersistentGuardHardCeilings.MAX_RATE_QUOTA);
+      assertThat(properties.leaseDuration())
+          .isEqualTo(
+              Duration.ofSeconds(PersistentGuardHardCeilings.MAX_IDEMPOTENCY_LEASE_SECONDS));
+      assertThat(context.getBean(RateLimitAdmissionPort.class))
+          .isInstanceOf(JdbcRateLimitAdmissionAdapter.class);
+      assertThat(context.getBean(IdempotencyGuardPort.class))
+          .isInstanceOf(JdbcIdempotencyGuardAdapter.class);
+      assertThat(context.getBean(GuardCleanupPort.class))
+          .isInstanceOf(JdbcGuardCleanupAdapter.class);
+      assertThat(context.getBean(GuardTransactionBoundary.class)).isNotNull();
+      assertThat(context.getBean(NonceReplayGuard.class)).isNotNull();
+      assertThat(context.getBean(DecisionDryRunService.class))
+          .isInstanceOf(PersistentGuardedDecisionDryRunService.class);
+      assertThat(context.getBean(DecisionDryRunRuntimeProperties.class).allowedSources())
+          .containsExactly("NQ_DRYRUN");
+    }
+  }
+
+  @Test
+  void valuesAboveFrozenCeilingsFailContextBeforeRuntimeBeansAreCreated() {
+    assertContextFailsClosed(
+        Map.of(
+            "decisionhub.integration1.runtime.guard.rate-window-seconds",
+            Integer.toString(PersistentGuardHardCeilings.MAX_RATE_WINDOW_SECONDS + 1)));
+    assertContextFailsClosed(
+        Map.of(
+            "decisionhub.integration1.runtime.guard.rate-limit-value",
+            Integer.toString(PersistentGuardHardCeilings.MAX_RATE_QUOTA + 1)));
+    assertContextFailsClosed(
+        Map.of(
+            "decisionhub.integration1.runtime.guard.lease-seconds",
+            Integer.toString(PersistentGuardHardCeilings.MAX_IDEMPOTENCY_LEASE_SECONDS + 1)));
+  }
+
+  @Test
+  void rateCommandMaximumReachesJdbcAndOverflowCannotMutatePostgres() {
+    try (AnnotationConfigApplicationContext context = springContext(dataSource())) {
+      final RateLimitAdmissionPort adapter = context.getBean(RateLimitAdmissionPort.class);
+      final PersistentGuardIdentity identity =
+          new PersistentGuardIdentity(
+              "test",
+              PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
+              PersistentGuardIdentity.NQ_DRYRUN_SOURCE,
+              "tenant-ceiling");
+
+      assertThat(
+              adapter
+                  .tryAcquire(
+                      new RateLimitAdmissionCommand(
+                          identity,
+                          PersistentGuardHardCeilings.MAX_RATE_WINDOW_SECONDS,
+                          PersistentGuardHardCeilings.MAX_RATE_QUOTA))
+                  .status())
+          .isEqualTo(RateLimitAdmissionStatus.ACCEPTED);
+      final Integer rowsBeforeOverflow =
+          jdbc.queryForObject(
+              "select count(*) from dh_qdr7_rate_limit_bucket where tenant_id = ?",
+              Integer.class,
+              "tenant-ceiling");
+
+      assertThatThrownBy(
+              () ->
+                  adapter.tryAcquire(
+                      new RateLimitAdmissionCommand(
+                          identity,
+                          PersistentGuardHardCeilings.MAX_RATE_WINDOW_SECONDS + 1,
+                          PersistentGuardHardCeilings.MAX_RATE_QUOTA)))
+          .isInstanceOf(IllegalArgumentException.class);
+      assertThatThrownBy(
+              () ->
+                  adapter.tryAcquire(
+                      new RateLimitAdmissionCommand(
+                          identity,
+                          PersistentGuardHardCeilings.MAX_RATE_WINDOW_SECONDS,
+                          PersistentGuardHardCeilings.MAX_RATE_QUOTA + 1)))
+          .isInstanceOf(IllegalArgumentException.class);
+      assertThat(
+              jdbc.queryForObject(
+                  "select count(*) from dh_qdr7_rate_limit_bucket where tenant_id = ?",
+                  Integer.class,
+                  "tenant-ceiling"))
+          .isEqualTo(rowsBeforeOverflow);
     }
   }
 
   @Test
   void actualJdbcDuplicateMapsMissingWrongTenantWrongTypeChecksumAndUnreadableToUnavailable() {
     assertUnavailableAfterDatabaseCorruption(
-        "missing", jdbc -> {
+        "missing",
+        jdbc -> {
           dropResultForeignKey(jdbc);
           jdbc.update("delete from dh_decision_output where decision_id = ?", "result-missing");
         });
     assertUnavailableAfterDatabaseCorruption(
-        "wrong-tenant", jdbc -> {
+        "wrong-tenant",
+        jdbc -> {
           dropResultForeignKey(jdbc);
           deleteReplay(jdbc, "tenant-a", "result-wrong-tenant");
           seedReplay(jdbc, "tenant-b", "result-wrong-tenant", "request-wrong-tenant");
         });
     assertUnavailableAfterDatabaseCorruption(
-        "wrong-type", jdbc -> {
+        "wrong-type",
+        jdbc -> {
           jdbc.execute(
               "alter table dh_qdr7_idempotency_guard"
                   + " drop constraint chk_dh_qdr7_idempotency_state_fields");
@@ -142,13 +263,15 @@ class PersistentGuardProductionWiringPostgresTest {
               "request-wrong-type");
         });
     assertUnavailableAfterDatabaseCorruption(
-        "checksum", jdbc ->
+        "checksum",
+        jdbc ->
             jdbc.update(
                 "update dh_qdr7_idempotency_guard set result_checksum = ? where request_id = ?",
                 HASH_B,
                 "request-checksum"));
     assertUnavailableAfterDatabaseCorruption(
-        "unreadable", jdbc ->
+        "unreadable",
+        jdbc ->
             jdbc.update(
                 "delete from dh_decision_context_snapshot where decision_id = ?",
                 "result-unreadable"));
@@ -173,7 +296,8 @@ class PersistentGuardProductionWiringPostgresTest {
             return Boolean.TRUE;
           });
 
-      final IdempotencyRecordView outputFailure = startInProgress(boundary, guards, "output-failure");
+      final IdempotencyRecordView outputFailure =
+          startInProgress(boundary, guards, "output-failure");
       seedOutput(contextJdbc, "result-output-failure", "tenant-a", "request-output-failure");
       assertThatThrownBy(
               () ->
@@ -181,7 +305,8 @@ class PersistentGuardProductionWiringPostgresTest {
                       () -> {
                         audit.saveOutput(
                             output("result-output-failure", "tenant-a", "request-output-failure"));
-                        audit.saveAuditEvent(audit("audit-output-failure", "result-output-failure"));
+                        audit.saveAuditEvent(
+                            audit("audit-output-failure", "result-output-failure"));
                         complete(guards, outputFailure, HASH_A);
                         return Boolean.TRUE;
                       }))
@@ -194,7 +319,8 @@ class PersistentGuardProductionWiringPostgresTest {
               () ->
                   boundary.required(
                       () -> {
-                        audit.saveOutput(output("result-audit-failure", "tenant-a", "request-audit-failure"));
+                        audit.saveOutput(
+                            output("result-audit-failure", "tenant-a", "request-audit-failure"));
                         audit.saveAuditEvent(audit("duplicate-audit", "result-audit-failure"));
                         complete(guards, auditFailure, HASH_A);
                         return Boolean.TRUE;
@@ -207,13 +333,17 @@ class PersistentGuardProductionWiringPostgresTest {
           .isZero();
       assertInProgressAndNoAudit(contextJdbc, guards, auditFailure, "audit-audit-failure");
 
-      final IdempotencyRecordView checksumFailure = startInProgress(boundary, guards, "checksum-failure");
+      final IdempotencyRecordView checksumFailure =
+          startInProgress(boundary, guards, "checksum-failure");
       assertThatThrownBy(
               () ->
                   boundary.required(
                       () -> {
-                        audit.saveOutput(output("result-checksum-failure", "tenant-a", "request-checksum-failure"));
-                        audit.saveAuditEvent(audit("audit-checksum-failure", "result-checksum-failure"));
+                        audit.saveOutput(
+                            output(
+                                "result-checksum-failure", "tenant-a", "request-checksum-failure"));
+                        audit.saveAuditEvent(
+                            audit("audit-checksum-failure", "result-checksum-failure"));
                         complete(guards, checksumFailure, "not-a-checksum");
                         return Boolean.TRUE;
                       }))
@@ -230,9 +360,11 @@ class PersistentGuardProductionWiringPostgresTest {
               () ->
                   boundary.required(
                       () -> {
-                        audit.saveOutput(output("result-cas-failure", "tenant-a", "request-cas-failure"));
+                        audit.saveOutput(
+                            output("result-cas-failure", "tenant-a", "request-cas-failure"));
                         audit.saveAuditEvent(audit("audit-cas-failure", "result-cas-failure"));
-                        completeWithVersion(guards, casFailure, casFailure.stateVersion() + 1, HASH_A);
+                        completeWithVersion(
+                            guards, casFailure, casFailure.stateVersion() + 1, HASH_A);
                         return Boolean.TRUE;
                       }))
           .isInstanceOf(RuntimeException.class);
@@ -252,7 +384,8 @@ class PersistentGuardProductionWiringPostgresTest {
     final String requestHash = new DecisionDryRunRequestFingerprint().hash(command);
     try (AnnotationConfigApplicationContext uncertain =
         springContext(afterCommitFailureDataSource(dataSource(), failed))) {
-      final DecisionDryRunResult result = uncertain.getBean(DecisionDryRunService.class).execute(command);
+      final DecisionDryRunResult result =
+          uncertain.getBean(DecisionDryRunService.class).execute(command);
       assertThat(result.success()).isFalse();
       assertThat(result.status()).isEqualTo(503);
       assertThat(result.errorCode()).isEqualTo(DecisionDryRunErrorCode.IDEMPOTENCY_COMMIT_UNKNOWN);
@@ -276,7 +409,8 @@ class PersistentGuardProductionWiringPostgresTest {
         .isZero();
 
     try (AnnotationConfigApplicationContext normal = springContext(dataSource())) {
-      final DecisionDryRunResult retry = normal.getBean(DecisionDryRunService.class).execute(command);
+      final DecisionDryRunResult retry =
+          normal.getBean(DecisionDryRunService.class).execute(command);
       assertThat(retry.success()).isFalse();
       assertThat(retry.errorCode()).isEqualTo(DecisionDryRunErrorCode.IDEMPOTENCY_IN_PROGRESS);
     }
@@ -287,27 +421,32 @@ class PersistentGuardProductionWiringPostgresTest {
     try (AnnotationConfigApplicationContext context = springContext(dataSource())) {
       final GuardTransactionBoundary boundary = context.getBean(GuardTransactionBoundary.class);
       final IdempotencyGuardPort guards = context.getBean(IdempotencyGuardPort.class);
-      final var limiter = context.getBean("decisionDryRunRateLimiter", com.guidinglight.decisionhub.security.nq.RateLimiter.class);
+      final var limiter =
+          context.getBean(
+              "decisionDryRunRateLimiter",
+              com.guidinglight.decisionhub.security.nq.RateLimiter.class);
       final Instant dbBefore = jdbc.queryForObject("select transaction_timestamp()", Instant.class);
 
       assertThat(
-              limiter.check(
-                  "NQ_DRYRUN",
-                  "tenant-plus",
-                  PersistentDecisionDryRunRateLimiter.ROUTE,
-                  dbBefore.plus(Duration.ofHours(48)),
-                  "request-rate-plus",
-                  "trace-rate-plus")
+              limiter
+                  .check(
+                      "NQ_DRYRUN",
+                      "tenant-plus",
+                      PersistentDecisionDryRunRateLimiter.ROUTE,
+                      dbBefore.plus(Duration.ofHours(48)),
+                      "request-rate-plus",
+                      "trace-rate-plus")
                   .allowed())
           .isTrue();
       assertThat(
-              limiter.check(
-                  "NQ_DRYRUN",
-                  "tenant-minus",
-                  PersistentDecisionDryRunRateLimiter.ROUTE,
-                  dbBefore.minus(Duration.ofHours(48)),
-                  "request-rate-minus",
-                  "trace-rate-minus")
+              limiter
+                  .check(
+                      "NQ_DRYRUN",
+                      "tenant-minus",
+                      PersistentDecisionDryRunRateLimiter.ROUTE,
+                      dbBefore.minus(Duration.ofHours(48)),
+                      "request-rate-minus",
+                      "trace-rate-minus")
                   .allowed())
           .isTrue();
       final Instant dbAfter = jdbc.queryForObject("select transaction_timestamp()", Instant.class);
@@ -316,7 +455,8 @@ class PersistentGuardProductionWiringPostgresTest {
               "select window_start from dh_qdr7_rate_limit_bucket"
                   + " where tenant_id in ('tenant-plus','tenant-minus') order by tenant_id",
               (rs, row) -> rs.getTimestamp(1).toInstant());
-      assertThat(windows).allSatisfy(window -> assertThat(window).isBetween(dbBefore.minusSeconds(60), dbAfter));
+      assertThat(windows)
+          .allSatisfy(window -> assertThat(window).isBetween(dbBefore.minusSeconds(60), dbAfter));
 
       final DecisionDryRunCommand command = command("clock");
       final String hash = new DecisionDryRunRequestFingerprint().hash(command);
@@ -365,11 +505,14 @@ class PersistentGuardProductionWiringPostgresTest {
                           null,
                           null,
                           null)));
-      assertThat(received.expiresAt()).isBetween(dbBefore.plusSeconds(540), dbAfter.plusSeconds(660));
+      assertThat(received.expiresAt())
+          .isBetween(dbBefore.plusSeconds(540), dbAfter.plusSeconds(660));
       assertThat(received.retentionUntil())
           .isBetween(dbBefore.plusSeconds(3_540), dbAfter.plusSeconds(3_660));
-      assertThat(lease.leaseExpiresAt()).isBetween(dbBefore.plusSeconds(50), dbAfter.plusSeconds(70));
-      assertThat(heartbeat.leaseExpiresAt()).isBetween(dbBefore.plusSeconds(110), dbAfter.plusSeconds(130));
+      assertThat(lease.leaseExpiresAt())
+          .isBetween(dbBefore.plusSeconds(50), dbAfter.plusSeconds(70));
+      assertThat(heartbeat.leaseExpiresAt())
+          .isBetween(dbBefore.plusSeconds(110), dbAfter.plusSeconds(130));
 
       jdbc.update(
           "update dh_qdr7_idempotency_guard set created_at = transaction_timestamp()-interval '3 hour',"
@@ -384,13 +527,17 @@ class PersistentGuardProductionWiringPostgresTest {
                   new JdbcGuardCleanupAdapter(context.getBean(JdbcTemplate.class))
                       .cleanupRetainedIdempotency(cleanupCommand()));
       assertThat(expired).isEqualTo(1);
-      assertThat(new JdbcIdempotencyGuardAdapter(jdbc).findExact(identity("tenant-a"), command.requestId(), hash).state())
+      assertThat(
+              new JdbcIdempotencyGuardAdapter(jdbc)
+                  .findExact(identity("tenant-a"), command.requestId(), hash)
+                  .state())
           .isEqualTo(IdempotencyState.EXPIRED);
     }
   }
 
   @Test
-  void concurrentIdempotencyCleanupUsesSkipLockedAndLeavesLockedOrIneligibleRowsUnprocessed() throws Exception {
+  void concurrentIdempotencyCleanupUsesSkipLockedAndLeavesLockedOrIneligibleRowsUnprocessed()
+      throws Exception {
     try (AnnotationConfigApplicationContext context = springContext(dataSource())) {
       final GuardTransactionBoundary boundary = context.getBean(GuardTransactionBoundary.class);
       final JdbcTemplate contextJdbc = context.getBean(JdbcTemplate.class);
@@ -405,10 +552,14 @@ class PersistentGuardProductionWiringPostgresTest {
             List.of(
                 () ->
                     boundary.required(
-                        () -> new JdbcGuardCleanupAdapter(contextJdbc).cleanupRetainedIdempotency(cleanupCommand())),
+                        () ->
+                            new JdbcGuardCleanupAdapter(contextJdbc)
+                                .cleanupRetainedIdempotency(cleanupCommand())),
                 () ->
                     boundary.required(
-                        () -> new JdbcGuardCleanupAdapter(contextJdbc).cleanupRetainedIdempotency(cleanupCommand())));
+                        () ->
+                            new JdbcGuardCleanupAdapter(contextJdbc)
+                                .cleanupRetainedIdempotency(cleanupCommand())));
         int transitioned = 0;
         for (final var future : workers.invokeAll(work)) {
           transitioned += future.get(10, TimeUnit.SECONDS);
@@ -422,19 +573,24 @@ class PersistentGuardProductionWiringPostgresTest {
       assertThat(state(contextJdbc, "cleanup-future")).isEqualTo("FAILED");
       assertThat(
               boundary.required(
-                  () -> new JdbcGuardCleanupAdapter(contextJdbc).cleanupRetainedIdempotency(cleanupCommand())))
+                  () ->
+                      new JdbcGuardCleanupAdapter(contextJdbc)
+                          .cleanupRetainedIdempotency(cleanupCommand())))
           .isZero();
 
       seedEligibleFailed(contextJdbc, "cleanup-locked");
       try (Connection locked = dataSource().getConnection()) {
         locked.setAutoCommit(false);
-        try (var statement = locked.prepareStatement(
-            "select guard_id from dh_qdr7_idempotency_guard where request_id = ? for update")) {
+        try (var statement =
+            locked.prepareStatement(
+                "select guard_id from dh_qdr7_idempotency_guard where request_id = ? for update")) {
           statement.setString(1, "cleanup-locked");
           statement.executeQuery();
           assertThat(
                   boundary.required(
-                      () -> new JdbcGuardCleanupAdapter(contextJdbc).cleanupRetainedIdempotency(cleanupCommand())))
+                      () ->
+                          new JdbcGuardCleanupAdapter(contextJdbc)
+                              .cleanupRetainedIdempotency(cleanupCommand())))
               .isZero();
           assertThat(state(contextJdbc, "cleanup-locked")).isEqualTo("FAILED");
         }
@@ -442,7 +598,9 @@ class PersistentGuardProductionWiringPostgresTest {
       }
       assertThat(
               boundary.required(
-                  () -> new JdbcGuardCleanupAdapter(contextJdbc).cleanupRetainedIdempotency(cleanupCommand())))
+                  () ->
+                      new JdbcGuardCleanupAdapter(contextJdbc)
+                          .cleanupRetainedIdempotency(cleanupCommand())))
           .isEqualTo(1);
 
       seedEligibleFailed(contextJdbc, "cleanup-rollback");
@@ -458,7 +616,9 @@ class PersistentGuardProductionWiringPostgresTest {
       assertThat(state(contextJdbc, "cleanup-rollback")).isEqualTo("FAILED");
       assertThat(
               boundary.required(
-                  () -> new JdbcGuardCleanupAdapter(contextJdbc).cleanupRetainedIdempotency(cleanupCommand())))
+                  () ->
+                      new JdbcGuardCleanupAdapter(contextJdbc)
+                          .cleanupRetainedIdempotency(cleanupCommand())))
           .isEqualTo(1);
     }
   }
@@ -471,10 +631,12 @@ class PersistentGuardProductionWiringPostgresTest {
       final String resultId = "result-" + suffix;
       completeGuard(context, command, resultId);
       corruption.accept(jdbc);
-      final DecisionDryRunResult result = context.getBean(DecisionDryRunService.class).execute(command);
+      final DecisionDryRunResult result =
+          context.getBean(DecisionDryRunService.class).execute(command);
       assertThat(result.success()).isFalse();
       assertThat(result.status()).isEqualTo(503);
-      assertThat(result.errorCode()).isEqualTo(DecisionDryRunErrorCode.IDEMPOTENCY_RESULT_UNAVAILABLE);
+      assertThat(result.errorCode())
+          .isEqualTo(DecisionDryRunErrorCode.IDEMPOTENCY_RESULT_UNAVAILABLE);
     }
   }
 
@@ -539,7 +701,9 @@ class PersistentGuardProductionWiringPostgresTest {
   }
 
   private IdempotencyRecordView startInProgress(
-      final GuardTransactionBoundary boundary, final IdempotencyGuardPort guards, final String suffix) {
+      final GuardTransactionBoundary boundary,
+      final IdempotencyGuardPort guards,
+      final String suffix) {
     final DecisionDryRunCommand command = command(suffix);
     final String hash = new DecisionDryRunRequestFingerprint().hash(command);
     final IdempotencyRecordView received =
@@ -573,7 +737,9 @@ class PersistentGuardProductionWiringPostgresTest {
   }
 
   private static IdempotencyRecordView complete(
-      final IdempotencyGuardPort guards, final IdempotencyRecordView record, final String checksum) {
+      final IdempotencyGuardPort guards,
+      final IdempotencyRecordView record,
+      final String checksum) {
     return completeWithVersion(guards, record, record.stateVersion(), checksum);
   }
 
@@ -670,7 +836,10 @@ class PersistentGuardProductionWiringPostgresTest {
   }
 
   private static void seedReplay(
-      final JdbcTemplate jdbc, final String tenant, final String decisionId, final String requestId) {
+      final JdbcTemplate jdbc,
+      final String tenant,
+      final String decisionId,
+      final String requestId) {
     jdbc.update(
         "insert into dh_decision_request"
             + " (decision_id,request_id,trace_id,tenant_id,source,decision_type,subject_json,context_ref,"
@@ -708,7 +877,10 @@ class PersistentGuardProductionWiringPostgresTest {
   }
 
   private static void seedOutput(
-      final JdbcTemplate jdbc, final String decisionId, final String tenant, final String requestId) {
+      final JdbcTemplate jdbc,
+      final String decisionId,
+      final String tenant,
+      final String requestId) {
     jdbc.update(
         "insert into dh_decision_output"
             + " (decision_id,tenant_id,trace_id,request_id,decision_type,action,risk_level,policy_status,"
@@ -722,11 +894,26 @@ class PersistentGuardProductionWiringPostgresTest {
 
   private static void deleteReplay(
       final JdbcTemplate jdbc, final String tenant, final String decisionId) {
-    jdbc.update("delete from dh_decision_audit_event where tenant_id = ? and decision_id = ?", tenant, decisionId);
-    jdbc.update("delete from dh_decision_trace_step where tenant_id = ? and decision_id = ?", tenant, decisionId);
-    jdbc.update("delete from dh_decision_context_snapshot where tenant_id = ? and decision_id = ?", tenant, decisionId);
-    jdbc.update("delete from dh_decision_output where tenant_id = ? and decision_id = ?", tenant, decisionId);
-    jdbc.update("delete from dh_decision_request where tenant_id = ? and decision_id = ?", tenant, decisionId);
+    jdbc.update(
+        "delete from dh_decision_audit_event where tenant_id = ? and decision_id = ?",
+        tenant,
+        decisionId);
+    jdbc.update(
+        "delete from dh_decision_trace_step where tenant_id = ? and decision_id = ?",
+        tenant,
+        decisionId);
+    jdbc.update(
+        "delete from dh_decision_context_snapshot where tenant_id = ? and decision_id = ?",
+        tenant,
+        decisionId);
+    jdbc.update(
+        "delete from dh_decision_output where tenant_id = ? and decision_id = ?",
+        tenant,
+        decisionId);
+    jdbc.update(
+        "delete from dh_decision_request where tenant_id = ? and decision_id = ?",
+        tenant,
+        decisionId);
   }
 
   private static DecisionPersistenceRecords.OutputRecord output(
@@ -764,11 +951,14 @@ class PersistentGuardProductionWiringPostgresTest {
       final IdempotencyGuardPort guards,
       final IdempotencyRecordView record,
       final String auditId) {
-    assertThat(guards.findExact(record.identity(), record.requestId(), record.requestHash()).state())
+    assertThat(
+            guards.findExact(record.identity(), record.requestId(), record.requestHash()).state())
         .isEqualTo(IdempotencyState.IN_PROGRESS);
     assertThat(
             jdbc.queryForObject(
-                "select count(*) from dh_decision_audit_event where id = ?", Integer.class, auditId))
+                "select count(*) from dh_decision_audit_event where id = ?",
+                Integer.class,
+                auditId))
         .isZero();
   }
 
@@ -782,7 +972,9 @@ class PersistentGuardProductionWiringPostgresTest {
         "insert into dh_qdr7_idempotency_guard"
             + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,hash_version,state,"
             + " state_version,stable_error_code,created_at,updated_at,failed_at,expires_at,retention_until)"
-            + " values (?,'test',?,'NQ_DRYRUN','tenant-cleanup',?,'" + HASH_A + "',"
+            + " values (?,'test',?,'NQ_DRYRUN','tenant-cleanup',?,'"
+            + HASH_A
+            + "',"
             + " 'QDR7-DRYRUN-CJSON-1','FAILED',0,'SAFE_FAILURE',transaction_timestamp()-interval '4 hour',"
             + " transaction_timestamp()-interval '4 hour',transaction_timestamp()-interval '3 hour',"
             + " transaction_timestamp()-interval '2 hour',transaction_timestamp()-interval '1 hour')",
@@ -796,7 +988,9 @@ class PersistentGuardProductionWiringPostgresTest {
         "insert into dh_qdr7_idempotency_guard"
             + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,hash_version,state,"
             + " state_version,lease_owner,lease_token,created_at,updated_at,lease_expires_at,expires_at,retention_until)"
-            + " values (?,'test',?,'NQ_DRYRUN','tenant-cleanup',?,'" + HASH_A + "',"
+            + " values (?,'test',?,'NQ_DRYRUN','tenant-cleanup',?,'"
+            + HASH_A
+            + "',"
             + " 'QDR7-DRYRUN-CJSON-1','IN_PROGRESS',0,'worker-active',?,transaction_timestamp()-interval '4 hour',"
             + " transaction_timestamp()-interval '4 hour',transaction_timestamp()+interval '1 hour',"
             + " transaction_timestamp()-interval '2 hour',"
@@ -812,7 +1006,9 @@ class PersistentGuardProductionWiringPostgresTest {
         "insert into dh_qdr7_idempotency_guard"
             + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,hash_version,state,"
             + " state_version,stable_error_code,created_at,updated_at,failed_at,expires_at,retention_until)"
-            + " values (?,'test',?,'NQ_DRYRUN','tenant-cleanup',?,'" + HASH_A + "',"
+            + " values (?,'test',?,'NQ_DRYRUN','tenant-cleanup',?,'"
+            + HASH_A
+            + "',"
             + " 'QDR7-DRYRUN-CJSON-1','FAILED',0,'SAFE_FAILURE',transaction_timestamp()-interval '4 hour',"
             + " transaction_timestamp()-interval '4 hour',transaction_timestamp()-interval '3 hour',"
             + " transaction_timestamp()-interval '2 hour',transaction_timestamp()+interval '1 hour')",
@@ -828,7 +1024,9 @@ class PersistentGuardProductionWiringPostgresTest {
 
   private static String state(final JdbcTemplate jdbc, final String requestId) {
     return jdbc.queryForObject(
-        "select state from dh_qdr7_idempotency_guard where request_id = ?", String.class, requestId);
+        "select state from dh_qdr7_idempotency_guard where request_id = ?",
+        String.class,
+        requestId);
   }
 
   private static DataSource afterCommitFailureDataSource(
@@ -840,13 +1038,15 @@ class PersistentGuardProductionWiringPostgresTest {
             (proxy, method, args) -> {
               try {
                 final Object value = method.invoke(delegate, args);
-                if ("getConnection".equals(method.getName()) && value instanceof Connection connection) {
+                if ("getConnection".equals(method.getName())
+                    && value instanceof Connection connection) {
                   return Proxy.newProxyInstance(
                       Connection.class.getClassLoader(),
                       new Class<?>[] {Connection.class},
                       (connectionProxy, connectionMethod, connectionArgs) -> {
                         try {
-                          if ("commit".equals(connectionMethod.getName()) && !failed.getAndSet(true)) {
+                          if ("commit".equals(connectionMethod.getName())
+                              && !failed.getAndSet(true)) {
                             connection.commit();
                             throw new SQLException("deterministic after-commit connection failure");
                           }
@@ -864,31 +1064,55 @@ class PersistentGuardProductionWiringPostgresTest {
   }
 
   private static AnnotationConfigApplicationContext springContext(final DataSource dataSource) {
+    return springContext(dataSource, Map.of());
+  }
+
+  private static AnnotationConfigApplicationContext springContext(
+      final DataSource dataSource, final Map<String, Object> overrides) {
+    final AnnotationConfigApplicationContext context =
+        unrefreshedSpringContext(dataSource, overrides);
+    context.refresh();
+    return context;
+  }
+
+  private static AnnotationConfigApplicationContext unrefreshedSpringContext(
+      final DataSource dataSource, final Map<String, Object> overrides) {
     final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
     context.getEnvironment().setActiveProfiles("test");
+    final Map<String, Object> properties = new HashMap<>();
+    properties.put("decisionhub.integration1.runtime.enabled", "true");
+    properties.put("decisionhub.integration1.runtime.guard.environment", "test");
+    properties.put("decisionhub.integration1.runtime.guard.rate-window-seconds", "60");
+    properties.put("decisionhub.integration1.runtime.guard.rate-limit-value", "20");
+    properties.put("decisionhub.integration1.runtime.guard.lease-seconds", "300");
+    properties.put("decisionhub.integration1.runtime.guard.idempotency-ttl-seconds", "600");
+    properties.put("decisionhub.integration1.runtime.guard.retention-seconds", "3600");
+    properties.put("decisionhub.integration1.runtime.allowed-sources", "NQ_DRYRUN");
+    properties.put(
+        "decisionhub.integration1.runtime.allowed-tenant-source-pairs", "tenant-a:NQ_DRYRUN");
+    properties.putAll(overrides);
     context
         .getEnvironment()
         .getPropertySources()
-        .addFirst(
-            new MapPropertySource(
-                "qdr7-test-properties",
-                Map.of(
-                    "decisionhub.integration1.runtime.enabled", "true",
-                    "decisionhub.integration1.runtime.guard.environment", "test",
-                    "decisionhub.integration1.runtime.guard.rate-window-seconds", "60",
-                    "decisionhub.integration1.runtime.guard.rate-limit-value", "20",
-                    "decisionhub.integration1.runtime.guard.lease-seconds", "300",
-                    "decisionhub.integration1.runtime.guard.idempotency-ttl-seconds", "600",
-                    "decisionhub.integration1.runtime.guard.retention-seconds", "3600",
-                    "decisionhub.integration1.runtime.allowed-sources", "NQ_DRYRUN",
-                    "decisionhub.integration1.runtime.allowed-tenant-source-pairs", "tenant-a:NQ_DRYRUN")));
+        .addFirst(new MapPropertySource("qdr7-test-properties", properties));
     context.register(DecisionDryRunRuntimeWiringConfig.class, TestDependencies.class);
     context.registerBean(DataSource.class, () -> dataSource);
     context.registerBean(JdbcTemplate.class, () -> new JdbcTemplate(dataSource));
     context.registerBean(
         PlatformTransactionManager.class, () -> new DataSourceTransactionManager(dataSource));
-    context.refresh();
     return context;
+  }
+
+  private static void assertContextFailsClosed(final Map<String, Object> overrides) {
+    final AnnotationConfigApplicationContext context =
+        unrefreshedSpringContext(dataSource(), overrides);
+    try {
+      assertThatThrownBy(context::refresh).hasRootCauseInstanceOf(IllegalArgumentException.class);
+      assertThat(context.getBeanFactory().containsSingleton("decisionDryRunRateLimiter")).isFalse();
+      assertThat(context.getBeanFactory().containsSingleton("decisionDryRunService")).isFalse();
+    } finally {
+      context.close();
+    }
   }
 
   private static Flyway flyway() {

@@ -7,6 +7,12 @@
 > post-B2 capacity acceptance: `BLOCKED`
 > Stage-QDR-7 B3: `NOT_ALLOWED`
 
+## Current hard-ceiling disposition（2026-07-13）
+
+`DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER`已关闭B1 hard-ceiling实现分叉：`PersistentGuardHardCeilings`是properties与command共同引用的唯一数值权威，window `3600`、quota `100000`、lease `900`本身允许，max+1 fail-closed。定向24项、PostgreSQL 41项与完整1091项回归均为0 failures/errors/skipped。
+
+本次关闭只移除criteria的hard-ceiling authority冲突，不提供actual-wiring容量样本；本文件继续`BLOCKED / NOT_ACCEPTED`。下一任务为`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY`，不得直接冻结criteria、实现正式harness或进入B3。
+
 ## 1. Freeze decision
 
 ```text
@@ -43,18 +49,18 @@ CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST: PASS
 3. Stage-QDR-7 B1 capacity evidence；
 4. 具有完整推导链的`PROJECT_ACCEPTANCE_BASELINE`。
 
-### 3.1 Hard-ceiling authority conflict
+### 3.1 Hard-ceiling authority reconciliation
 
 | Item | B1 current contract | Current code validation | Decision |
 |---|---:|---:|---|
-| rate window | 1–3600 seconds | 1–86400 seconds | `CONFLICT / CODE_WIDER_THAN_FROZEN_CEILING` |
-| rate quota | 1–100000 per window/key | 1–1000000 | `CONFLICT / CODE_WIDER_THAN_FROZEN_CEILING` |
-| idempotency lease | 1–900 seconds | 1–3600 seconds | `CONFLICT / CODE_WIDER_THAN_FROZEN_CEILING` |
+| rate window | 1–3600 seconds | 1–3600 seconds / shared authority | `ALIGNED` |
+| rate quota | 1–100000 per window/key | 1–100000 / shared authority | `ALIGNED` |
+| idempotency lease | 1–900 seconds | 1–900 seconds / shared authority | `ALIGNED` |
 | idempotency TTL | 1 ms–30 days | greater than 0 and at most 7 days | `CODE_STRICTER / COMPATIBLE_SUBSET` |
 | retention | 1 ms–90 days | greater than 0 and at most 90 days | `ALIGNED_AT_UPPER_BOUND` |
 | cleanup batch | 1–10000 rows | 1–1000 rows | `CODE_STRICTER / COMPATIBLE_SUBSET` |
 
-`DecisionDryRunGuardProperties`没有选择运行默认值，base/dev/test/prod配置也没有提供已启用persistent guard的rate/lease/TTL/retention数值。当前runtime保持disabled，因此上述冲突没有被本轮执行触发；但在authority冲突关闭前，不得冻结运行阈值或授权harness implementation。
+`PersistentGuardHardCeilings`由`DecisionDryRunGuardProperties`与`RateLimitAdmissionCommand`共同引用，直接command构造不再接受更宽window/quota。Properties仍没有选择运行默认值，base/dev/test/prod配置也没有提供已启用persistent guard的rate/lease/TTL/retention数值，runtime保持disabled。Authority冲突已关闭，但这些ceiling仍不是容量阈值或运行默认值。
 
 ## 4. Traceable numeric evidence
 
@@ -217,7 +223,7 @@ failed diagnostic matrix != accepted threshold
 5. cleanup backlog收敛曲线；
 6. Spring context与PostgreSQL volume-preserving restart结果；
 7. 至少一次资源充足环境中的完整`mvn -ntp test`成功样本；
-8. B1 hard ceiling与当前代码校验范围的authority reconciliation。
+8. B1 hard ceiling与当前代码校验范围的authority reconciliation：`CLOSED / ACCEPTED`；不得把该结论替代前7项容量证据。
 
 在这些证据形成前，不允许进入capacity harness work order、harness implementation、capacity execution或Stage-QDR-7 B3。
 
@@ -225,16 +231,18 @@ failed diagnostic matrix != accepted threshold
 
 ```text
 CAPACITY_ACCEPTANCE_CRITERIA_FREEZE: BLOCKED
-CAPACITY_CRITERIA_AUTHORITY: FAIL
+CAPACITY_CRITERIA_AUTHORITY: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 PROJECT_ACCEPTANCE_BASELINE: BLOCKED
 SCENARIO_MATRIX: FAIL / MANDATORY_NUMERIC_FIELDS_INCOMPLETE
 NUMERIC_THRESHOLDS: BLOCKED
 THRESHOLD_JUSTIFICATION: FAIL
 HARNESS_CONTRACT: BLOCKED
 ENVIRONMENT_PREFLIGHT: BLOCKED
-FULL_REGRESSION_CONTRACT: BLOCKED / RESOURCE_BASELINE_MISSING
-CURRENT_FACTSOURCE_SYNC_REQUIRED: YES
+FULL_REGRESSION_CONTRACT: CURRENT_RUN_PASS / CAPACITY_REPRESENTATIVENESS_PENDING
+CURRENT_FACTSOURCE_SYNC_REQUIRED: NO / CURRENT_ALIGNED
+HARD_CEILING_AUTHORITY: NORMATIVE_SECURITY_LIMIT / IMPLEMENTATION_ALIGNED
+GUARD_CONFIGURATION_BYPASS: CLOSED
 POST_B2_CAPACITY_ACCEPTANCE: BLOCKED
 Stage-QDR-7 B3: NOT_ALLOWED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
 ```
