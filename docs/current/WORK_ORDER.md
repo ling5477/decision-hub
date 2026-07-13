@@ -1,23 +1,30 @@
 # Decision Hub 当前工单
 
-## Current authority — 2026-07-13 B2 factsource alignment and final acceptance
+## Current authority — 2026-07-13 capacity criteria evidence blocker
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2: CLOSED / ACCEPTED
 Schema errata implementation: ACCEPTED
 Persistent guards implementation: ACCEPTED
-Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
+Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
+Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
+Full regression: INCOMPLETE / PREVIOUS JVM_NATIVE_MEMORY_OOM
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
-current task status: DONE / B2_MILESTONE_CLOSED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
+current task status: BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
-ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: YES / NEXT_TASK_ONLY
+CAPACITY_CRITERIA_AUTHORITY: FAIL / HARD_CEILING_CONFLICT
+PROJECT_ACCEPTANCE_BASELINE: BLOCKED
+ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO
+ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
+ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-本工单已完成8-file current factsources对齐、初始BLOCKED审计保留、scope治理修复与B2 milestone close；未修改生产代码、测试、callback、V1–V14或API。下一任务仅为post-B2 capacity acceptance，仍不得进入B3。
+本轮仅冻结criteria合同，未执行任何容量、PostgreSQL或full regression命令。由于0个有效2xx容量样本、mandatory scenario数值缺口、环境成功基线缺失及B1 ceiling/code范围冲突，criteria freeze为`BLOCKED`。下一任务仅允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER`；B2 acceptance不回退，harness work order与B3均不得进入。
 
 权威层级固定为：
 

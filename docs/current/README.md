@@ -1,20 +1,23 @@
 # Decision Hub Current Docs
 
-## Current authority — Stage-QDR-7 B2 milestone close
+## Current authority — Stage-QDR-7 capacity criteria evidence blocker
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2: CLOSED / ACCEPTED
 Schema errata implementation: ACCEPTED
 Persistent guards implementation: ACCEPTED
-Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
+Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
+Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
+Full regression: INCOMPLETE / PREVIOUS JVM_NATIVE_MEMORY_OOM
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
-current task status: DONE / B2_MILESTONE_CLOSED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
+current task status: BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
 ```
 
-当前B2 milestone close记录：`DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md`。同一review文档保留初始`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`，并记录scope扩展、8-file对齐与最终`PASS / B2 ACCEPTED`；技术证据未重跑，按原始证据复用。
+当前criteria审查记录：`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`；上一轮容量验收记录：`DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md`。Criteria文件记录可追溯数值和未能证明的mandatory thresholds，最终为`BLOCKED`，不是accepted标准。下一步只允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER`。
 
 权威层级固定为：
 
@@ -161,8 +164,10 @@ docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/FACTSOURCE_POLICY.md
+docs/current/DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md Current criteria freeze blocker / threshold evidence required
+docs/current/DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md Previous capacity acceptance / BLOCKED preserved
 docs/current/DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md B2 milestone close / includes previous BLOCKED review
-docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed work order with B2 close addendum
+docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed work order with criteria blocker addendum
 docs/current/TESTING.md
 docs/current/ARCHIVE_INDEX.md historical archive index / supporting only
 ```
@@ -184,8 +189,10 @@ docs/current/DB_SCHEMA.md
 ```text
 STATUS.md                  当前状态表
 DH_STAGE_QDR_7_PLAN.md     Historical / consumed Stage-QDR-7 planning baseline
+DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md Current criteria blocker；不是accepted标准
+DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md Previous capacity acceptance / BLOCKED preserved
 DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md B2 milestone close；保留Previous review attempt / BLOCKED
-DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed；顶部含B2 close addendum
+DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed；顶部含criteria blocker addendum
 WORK_ORDER.md              下一步唯一入口
 CODEX_PROJECT_INSTRUCTIONS.md 当前执行纪律
 TESTING.md                 当前验证证据与工具风险

@@ -1,5 +1,55 @@
 # Decision Hub Worklog
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
+
+- 预检确认`dev`、HEAD `1f75373cbe17b44ae99bb76cb73f0fdb2d52275c`；工作区只含上一任务允许继承的12个文档和1个BLOCKED报告，无Java、测试、callback、V1–V14、API/OpenAPI/contracts或NQ diff。
+- 使用`nq-dh-workflow-router`分类为`DOCUMENTATION`，并按`dh-docs-writer`只修改附件allowlist内current文档；三个scope包含关系成立。
+- 对比current B1合同、生产校验代码、配置、B1 resource evidence、correctness tests、Maven/Surefire和Testcontainers配置；未运行capacity、targeted PostgreSQL suite或full regression。
+- 可追溯的correctness常量包括rate 8线程/40 attempts/quota 10、idempotency 8线程/24 attempts/1 winner、cleanup 2 workers/batch 10；这些数值不具备throughput、tail latency、duration或重复轮次证明。
+- B1 diagnostic matrix虽尝试1/2/4/8/16并发、20次warm-up和100次measured attempts，但有效2xx样本为0，原报告已排除全部latency/throughput结果。
+- 发现hard-ceiling authority冲突：B1 rate window/quota/lease为3600秒/100000/900秒，当前代码允许86400秒/1000000/3600秒；cleanup代码上限1000行比B1文档10000行更严格。本轮未修改代码或既有B1文档。
+- 新增`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`，记录可追溯数值、mandatory gap、证据分离、OOM规则和blocker要求；最终为`CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT_BLOCKED`，不是accepted criteria。
+- 为上一轮BLOCKED报告添加follow-up disposition，原始38项correctness证据、两次OOM、hash与原始结论保持不变。
+- `mvn -ntp -Pquality validate` exit 0，19/19 `SUCCESS`、Checkstyle 0 violations、Spotless通过、总耗时6.149秒。
+- Current factsources统一为criteria blocked、harness未实现且被criteria阻断、post-B2 capacity pending criteria/harness、B3 not allowed；下一任务仅为threshold evidence blocker。
+
+```text
+CAPACITY_ACCEPTANCE_CRITERIA_FREEZE: BLOCKED
+CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT_BLOCKED
+CAPACITY_CRITERIA_AUTHORITY: FAIL
+PROJECT_ACCEPTANCE_BASELINE: BLOCKED
+HARNESS_CONTRACT: BLOCKED
+ENVIRONMENT_PREFLIGHT: BLOCKED
+QUALITY_GATE: PASS
+B2_IMPLEMENTATION_STATUS: ACCEPTED
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED / PENDING CRITERIA AND HARNESS
+Stage-QDR-7 B3: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
+```
+
+## 2026-07-13 DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
+
+- 预检确认`dev`、HEAD `1f75373cbe17b44ae99bb76cb73f0fdb2d52275c`、worktree/staged clean、accepted baseline即当前HEAD；`origin/dev...HEAD=0/0`与任务预期`0/1`不一致，但无技术提交漂移。
+- 三个scope包含关系全部成立；task前未发现Java生产/测试、callback、V1–V14、API/OpenAPI/contracts或NQ diff。
+- 扫描current work order、B1 capacity resolution/evidence、配置、生产实现和测试；确认只冻结absolute hard ceiling与future harness合同，measured defaults仍`NOT_SELECTED`，没有正式容量命令、测量轮次、吞吐/延迟阈值或metrics-complete actual-wiring 2xx harness。
+- 真实执行persistent guard相关PostgreSQL 17.10/Testcontainers suite：38 tests、0 failures、0 errors、0 skipped；rate/idempotency原子竞争、tenant/environment隔离、cleanup、callback timeout/rollback、commit-unknown与nonce restart correctness通过。
+- same-nonce concurrent race、callback/cleanup capacity、throughput、p50/p95/p99、pool saturation与正式pressure rounds没有现有harness，未伪造或推导数值。
+- 两次完整`mvn -ntp test`均在`dh-app` Surefire fork因本机native-memory OOM中止；诊断日志移入root `target/**`并记录hash。未把旧1076项证据写成本轮PASS。
+- `mvn -ntp -Pquality validate` exit 0，19/19 `SUCCESS`、Checkstyle 0 violations、Spotless通过、总耗时11.494秒。
+- 最小同步current factsources与本报告；未修改Java、测试、callback、migration、API/contracts、HMAC/nonce/tenant/source合同或NQ，未进入B3，未push、未tag。
+
+```text
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED
+CAPACITY_CRITERIA_FROZEN: FAIL
+CAPACITY_HARNESS_AVAILABLE: FAIL
+REAL_POSTGRESQL_EXECUTION: PASS
+FULL_REGRESSION: FAIL / JVM_NATIVE_MEMORY_OOM
+QUALITY_GATE: PASS
+B2_IMPLEMENTATION_STATUS: ACCEPTED
+Stage-QDR-7 B3: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
+```
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
 
 - 预检确认仓库、分支和task前HEAD；staged为空，dirty仅为用户预告的current review变更，未发现技术范围dirty。

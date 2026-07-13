@@ -1,20 +1,23 @@
 # Decision Hub
 
-## Current authority — Stage-QDR-7 B2 milestone close
+## Current authority — Stage-QDR-7 capacity criteria evidence blocker
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2: CLOSED / ACCEPTED
 Schema errata implementation: ACCEPTED
 Persistent guards implementation: ACCEPTED
-Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
+Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
+Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
+Full regression: INCOMPLETE / PREVIOUS JVM_NATIVE_MEMORY_OOM
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
-current task status: DONE / B2_MILESTONE_CLOSED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
+current task status: BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
 ```
 
-schema errata与persistent guards已基于既有技术证据正式`ACCEPTED`，B2 milestone已`CLOSED / ACCEPTED`。下一步只允许独立执行post-B2 capacity acceptance；本结论不授权capacity benchmark在本任务运行，也不授权B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
+schema errata、persistent guards与B2 milestone保持`ACCEPTED`。Criteria freeze无法从0个有效2xx样本推导throughput、latency、cleanup或环境数值，且B1 hard ceiling与当前代码校验范围存在冲突，因此`CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT_BLOCKED`。下一步只允许补齐阈值证据，不授权harness implementation、capacity execution、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
 
 权威层级固定为：
 

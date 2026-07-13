@@ -1,24 +1,31 @@
 # Decision Hub Status
 
-## Current authority — 2026-07-13 B2 factsource alignment and final acceptance
+## Current authority — 2026-07-13 capacity criteria evidence blocker
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2: CLOSED / ACCEPTED
 Schema errata implementation: ACCEPTED
 Persistent guards implementation: ACCEPTED
-Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
+Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
+Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
+Full regression: INCOMPLETE / PREVIOUS JVM_NATIVE_MEMORY_OOM
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
-current task status: DONE / B2_MILESTONE_CLOSED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
+current task status: BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
-POSTGRESQL_TEST_EVIDENCE: REUSED_PASS / POSTGRESQL_17_10 / ZERO_SKIPS
-ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: YES / NEXT_TASK_ONLY
+POSTGRESQL_TEST_EVIDENCE: CURRENT_PASS / POSTGRESQL_17_10 / ZERO_SKIPS
+CAPACITY_CRITERIA_AUTHORITY: FAIL / HARD_CEILING_CONFLICT
+PROJECT_ACCEPTANCE_BASELINE: BLOCKED
+ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO
+ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
+ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-初始consolidated review的技术结论为PASS，唯一阻断为`CURRENT_FACTSOURCE_SCOPE_CONFLICT`。同一任务扩展write allowlist覆盖全部8个validated factsources后，current冲突已清零；技术artifact未变化，原技术证据继续复用，因此schema errata、persistent guards与B2 milestone正式`ACCEPTED`。下一步只开放post-B2 capacity acceptance，B3继续禁止。
+Criteria freeze确认现有8线程/40 attempts/quota 10等数值只能作为correctness fixture；B1容量尝试没有有效2xx样本，无法证明throughput、p95/p99、cleanup duration或成功full-regression所需资源下限。另发现B1 rate window/quota/lease ceiling分别为3600秒/100000/900秒，而当前代码允许86400秒/1000000/3600秒，criteria authority不能闭合。本轮未执行capacity、targeted PostgreSQL suite或full regression；B2既有`CLOSED / ACCEPTED`不回退，B3继续`NOT_ALLOWED`。
 
 权威层级固定为：
 

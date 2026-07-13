@@ -1,5 +1,54 @@
 # Decision Hub Testing
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git preflight | PASS / INHERITED DOCS ONLY | `dev` / HEAD `1f75373cbe17b44ae99bb76cb73f0fdb2d52275c`；继承12个modified docs和1个untracked BLOCKED report；技术范围diff为空。 |
+| task scope design | PASS | `VALIDATION_SCOPE ⊆ READ_SCOPE`、`FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST`、`CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST`全部成立。 |
+| correctness numeric evidence | PARTIAL | rate 8线程/40 attempts/quota 10、idempotency 8线程/24 attempts/1 winner、cleanup 2 workers/batch 10可追溯，但仅属于correctness fixture。 |
+| B1 capacity evidence | FAIL / ZERO VALID 2XX | 旧matrix为1/2/4/8/16、warm-up 20、measured attempts 100，但0个有效2xx样本，latency/throughput全部被原报告排除。 |
+| hard-ceiling authority | FAIL | B1 rate window/quota/lease为3600秒/100000/900秒；当前代码允许86400秒/1000000/3600秒。Cleanup代码1000行上限比B1文档10000行更严格。 |
+| nonce race | BLOCKED | 现有JDBC原子insert与restart correctness可追溯；没有same-nonce并发线程/attempt/round证据。 |
+| source isolation | BLOCKED | production identity只允许一个canonical source `NQ_DRYRUN`；不得修改source合同制造第二合法source。 |
+| lifecycle/callback capacity | BLOCKED | Flyway callback与runtime idempotency lifecycle已区分；无claim/terminal throughput或latency证据。 |
+| cleanup capacity | BLOCKED | 无concurrent writer、backlog收敛和cleanup duration证据；hard ceiling不能作为运行batch。 |
+| environment preflight | BLOCKED | previous OOM环境只证明约0.77–1.96 GiB available memory不足；没有成功full regression样本证明最低host/Docker/JVM数值。 |
+| placeholder scan | PASS / 0 | 标准文件和active current段落未命中附件禁止的placeholder或越级状态词。 |
+| capacity benchmark | NOT_RUN / PROHIBITED | 本轮只做criteria freeze审查。 |
+| PostgreSQL/Testcontainers | NOT_RUN | 上一轮38项correctness证据保留，本轮未重跑。 |
+| full Maven regression | NOT_RUN | 继续记录上一轮`INCOMPLETE / JVM_NATIVE_MEMORY_OOM`，本轮未重跑。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | exit 0；19/19 `SUCCESS`；总耗时6.149秒。 |
+| Checkstyle | PASS | root 0 violations；各子模块无独立outputFile提示为既有非阻断行为。 |
+| Spotless | PASS | `spotless:3.1.0:check`通过。 |
+| current factsources | PASS / 0 CONFLICTS | 9个primary/entry/policy active-current区域统一为criteria blocked、harness未实现、capacity pending criteria/harness、B3 not allowed。 |
+| final criteria decision | BLOCKED | `CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT_BLOCKED`；不得进入harness work order、implementation或capacity execution。 |
+| next task | LOCKED | `DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER`。 |
+
+本轮不复用上一轮命令结果宣称新的test、PostgreSQL或capacity execution。Criteria文件是阻断证据，不是accepted标准；B2保持`CLOSED / ACCEPTED`，B3保持`NOT_ALLOWED`。
+
+## 2026-07-13 DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git preflight | PASS | `dev` / task前HEAD `1f75373cbe17b44ae99bb76cb73f0fdb2d52275c` / worktree clean / staged empty；`origin/dev...HEAD=0/0`，与预期`0/1`不同但不阻断基线。 |
+| task scope design | PASS | 三个scope包含关系全部成立；task前Java、测试、callback、V1–V14、API/OpenAPI/contracts diff为空。 |
+| capacity criteria scan | FAIL / NOT_FROZEN | current文档只有absolute hard ceiling与future harness合同；measured defaults仍`NOT_SELECTED`，无正式轮次、并发矩阵、throughput/latency threshold或benchmark command。 |
+| capacity harness | FAIL / UNAVAILABLE | 未发现metrics-complete actual-wiring 2xx capacity/stress harness；旧B1 matrix为0个有效2xx样本，明确不可复用。 |
+| targeted persistent guard suite | PASS / BUILD SUCCESS | 38 tests、0 failures、0 errors、0 skipped；涵盖V12/V13、production wiring、lifecycle clock、nonce persistence。 |
+| PostgreSQL/Testcontainers | PASS / REAL EXECUTION | `postgres:17`真实容器；Flyway确认PostgreSQL 17.10；Testcontainers 1.20.4；0 skipped。 |
+| concurrency correctness | PASS / TEST LOAD ONLY | rate 8线程/40 attempts/limit 10严格接受10；idempotency 8线程/24 attempts只有1个winner；2-worker cleanup保留active/locked/ineligible记录。 |
+| replay nonce race | FAIL / NOT EXECUTED | restart simulation与scope隔离通过，但仓库无same-nonce concurrent race harness。 |
+| formal capacity metrics | NOT_AVAILABLE | throughput、p50/p95/p99、max latency、pool usage、cleanup duration与measured rounds均不可用。 |
+| full Maven regression | FAIL / ENVIRONMENT BLOCKED | `mvn -ntp test`连续两次在`dh-app` Surefire fork因JVM native-memory OOM中止；已完成报告无assertion failure，但reactor未完成。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | exit 0；19/19 `SUCCESS`；总耗时11.494秒。 |
+| Checkstyle | PASS | root 0 violations；子模块无独立outputFile提示保持非阻断。 |
+| Spotless | PASS | `spotless:3.1.0:check`通过。 |
+| current factsources | PASS / 0 CONFLICTS | active current blocks统一为capacity `BLOCKED`、B2 `CLOSED / ACCEPTED`、B3 `NOT_ALLOWED`、next task criteria freeze。 |
+| final acceptance | BLOCKED | `CAPACITY_ACCEPTANCE_CRITERIA_NOT_FROZEN_BLOCKED`；同时记录`CAPACITY_ACCEPTANCE_HARNESS_UNAVAILABLE_BLOCKED`与full regression环境阻断。 |
+
+原始JVM诊断日志位于root `target/capacity-full-regression-*.log`，SHA-256记录在`DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md`。这些target证据不stage、不commit。系统Maven继续报告全局settings line 227的`profiles`未识别warning；Maven wrapper既有`UNUSABLE / P2 TOOLING RISK`不变。
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE validation
 
 | Check | Result | Evidence |

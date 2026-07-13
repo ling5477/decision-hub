@@ -1,19 +1,23 @@
 # Decision Hub Roadmap
 
-## Current route — 2026-07-13 B2 accepted / capacity acceptance next
+## Current route — 2026-07-13 capacity threshold evidence blocker
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2: CLOSED / ACCEPTED
 Schema errata implementation: ACCEPTED
 Persistent guards implementation: ACCEPTED
-Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
+Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
+Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
+Full regression: INCOMPLETE / PREVIOUS JVM_NATIVE_MEMORY_OOM
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
+current task status: BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
 ```
 
-8个current factsources已对齐，初始`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`保留为previous review attempt，B2正式关闭。下一路线只允许post-B2 capacity acceptance；B3仍`NOT_ALLOWED`。
+Criteria freeze未能形成可追溯的throughput、latency、cleanup、restart和environment数值，且hard ceiling authority存在冲突。下一路线只允许补齐与审查阈值证据；B2保持`CLOSED / ACCEPTED`，capacity harness与B3仍禁止。
 
 ## Historical routes — 以下全部内容均为非当前路线
 

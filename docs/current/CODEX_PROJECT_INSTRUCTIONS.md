@@ -1,22 +1,27 @@
 # Codex Project Instructions
 
-## Current authority — 2026-07-13 B2 milestone close
+## Current authority — 2026-07-13 capacity criteria evidence blocker
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2: CLOSED / ACCEPTED
 Schema errata implementation: ACCEPTED
 Persistent guards implementation: ACCEPTED
-Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
+Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
+Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
+Full regression: INCOMPLETE / PREVIOUS JVM_NATIVE_MEMORY_OOM
 Stage-QDR-7 B3: NOT_ALLOWED
-ALLOW_POST_B2_CAPACITY_ACCEPTANCE: YES / NEXT_TASK_ONLY
+ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO
+ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
+ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
-CURRENT_TASK: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
-CURRENT_TASK_STATUS: DONE / B2_MILESTONE_CLOSED
-NEXT_TASK: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
+CURRENT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
+CURRENT_TASK_STATUS: BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT
+NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-BLOCKER
 ```
 
-schema errata与persistent guards已基于既有技术证据正式`ACCEPTED`，B2 milestone已`CLOSED / ACCEPTED`。下一步只允许post-B2 capacity acceptance；本任务未运行capacity benchmark，也不授权B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
+schema errata、persistent guards与B2 milestone保持`ACCEPTED`。本轮criteria freeze因有效2xx容量样本、tail latency、throughput、cleanup与资源preflight数值缺失而`BLOCKED`；只允许下一任务补齐阈值证据，不授权harness work order/implementation、capacity execution、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
 
 > 项目: Decision Hub
 > 必需前置 skill: `nq-dh-workflow-router`
