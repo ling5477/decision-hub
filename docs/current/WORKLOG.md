@@ -1,5 +1,75 @@
 # Decision Hub Worklog
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
+
+- 预检确认`dev`、task前HEAD `962b348761e4837f7aa433f45ba567201d8e67d1`、staged为空；工作区只有用户声明可继承的14个current/entry文档和1个untracked上一轮证据报告，三个scope包含关系成立，范围外技术diff为0。
+- 代码审计确认`ProviderProfile.id`是lookup key，tenant/provider/capability/status/trust字段组成immutable config equivalence；`createdAt`为创建审计元数据，但既有registry通过record equality比较完整snapshot。`ProviderProfile`没有model字段，model identity/version由独立`ModelVersion`合同承担。
+- 根因为`DefaultQdrMockModelGatewayBaseline.prepare`每次使用请求级`clock.instant()`重建相同stable ID、不同`createdAt`的profile，触发严格registry mismatch。选择最小修复：bean构造时只读取一次`Clock`并保存`final baselineCreatedAt`，后续重复与并发bootstrap复用确定时间；未修改`ProviderProfile`或`InMemoryProviderProfileRegistry`，未放宽冲突检测。
+- 新增baseline直接测试，覆盖连续两次、stable ID/provider/model/config/createdAt以及8-worker起跑屏障并发；新增registry直接测试，逐字段验证provider kind/key、capability、status、trust policy与`createdAt`冲突fail-closed且不得覆盖原profile。
+- 新增PostgreSQL actual-wiring回归：`@SpringBootTest(RANDOM_PORT)`显式绑定`127.0.0.1`，同一Context完成5次顺序与8-worker同步起跑并发请求；13/13均为结构化`200`，nonce/idempotency/rate数据库证据各覆盖13次请求，`qdr_model_gateway_call`为13条`MOCK/SUCCEEDED`、0条`FAILED`。
+- 定向测试首次因`dh-usecase`无Mockito依赖而test compile失败；在不新增依赖的前提下改用advancing `Clock`和纯Java无状态fake。下一次运行进入actual-wiring后又暴露测试错误期待内部`MODEL_GATEWAY_MOCK_CALL`出现在外部response；改为对外`NO_TRADE`/`MOCK_NO_TRADE`合同和gateway-call数据库证据，最终定向命令`BUILD SUCCESS`。
+- 指定PostgreSQL persistent guard suite跨Reactor共41 tests（`dh-app` 38 + `dh-infra` 3）、0 failures/errors/skipped，PostgreSQL 17.10与V12–V14/callback compatibility实际执行；`mvn -ntp -pl dh-app -am package`未跳过测试并成功生成Boot jar。
+- 第一次临时probe已实际发出5次顺序+8次并发且应用日志均为`200`，但Windows锁定Java stdout导致证据读取脚本exit 1；保留失败run，使用新runId、新container/volume和`FileShare.ReadWrite`最小修复脚本后完整重跑。
+- 成功probe在单一jar PID/一次Spring Context下取得13/13结构化2xx，0个5xx、`UNKNOWN_ERROR`或profile mismatch，13个唯一requestId/nonce/HMAC，PostgreSQL rate bucket/idempotency/nonce为1/13/13；未执行正式capacity matrix，target artifacts未纳入Git。
+- 完整`mvn -ntp test`为19/19、1101 tests、0 failures/errors/skipped，PostgreSQL/Testcontainers实际执行；`mvn -ntp -Pquality validate`为19/19、Checkstyle 0 violations、Spotless PASS。
+- 上一轮证据报告保持原样：首个protected `200`、同一Context第二请求`500 / UNKNOWN_ERROR`、0轮rate matrix、cleanup/contention证据不完整及`commit: NO / EVIDENCE_INSUFFICIENT`均作为历史事实保留。
+- 本轮未修改NQ、callback、V1–V14、API/Controller/DTO/OpenAPI/contracts、HMAC/nonce/tenant/source合同；未接外部HTTP/真实Provider、NQ、Agent/LangGraph、Paper或LIVE，未实现正式capacity harness，未进入B3，未push/tag。
+
+```text
+CAPACITY_CALIBRATION_PATH_BLOCKER: CLOSED
+PROFILE_IDENTITY_CONTRACT: PASS
+DETERMINISTIC_BASELINE_PROFILE: PASS
+STRICT_REGISTRY_CONFLICT_DETECTION: PASS
+REGISTRY_OVERWRITE_PREVENTION: PASS
+REPEATABLE_PROTECTED_2XX: PASS
+UNKNOWN_ERROR_REGRESSION: PASS
+POSTGRESQL_REGRESSION: PASS
+FULL_REGRESSION: PASS / 1101 TESTS
+QUALITY_GATE: PASS
+CAPACITY_THRESHOLD_EVIDENCE: BLOCKED / RETRY REQUIRED
+CANDIDATE_THRESHOLD_EVIDENCE: INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED
+ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: YES / NEXT_TASK_ONLY
+ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO
+Stage-QDR-7 B3: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
+```
+
+> Historical / consumed：从下一节开始保留上一轮threshold evidence retry及更早任务的真实记录；旧`next action`、第二请求失败、0轮matrix和旧测试总数不得覆盖本节current worklog。
+
+## 2026-07-13 DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
+
+- 预检确认`dev`、HEAD `962b348761e4837f7aa433f45ba567201d8e67d1`、worktree/staged clean；三个scope包含关系成立，task前技术diff为0。
+- 使用exact-HEAD Boot jar与专用PostgreSQL 17.10容器/持久volume，仅绑定`127.0.0.1:18137`；临时token、HMAC secret、数据库密码、nonce、requestId和signature只在内存中生成，未持久化。
+- 实际`POST /api/ai/decision-dry-runs`取得1个经过完整安全链的`200`；同一Spring Context第二个新nonce/requestId合法请求因`InMemoryProviderProfileRegistry`的provider profile bootstrap mismatch返回`500 / UNKNOWN_ERROR`。
+- 因warm-up在第2请求前失败，1/2/4/8/16、每点3轮、warm-up 20、measured 100的rate matrix为0 completed rounds；未把500/rejection latency写成throughput或tail-latency evidence。
+- Actual localhost same-nonce race为8线程/24 attempts/1轮：1个`200`、23个`409 NONCE_REPLAY`、0 unexpected errors，PostgreSQL最终1行；非canonical source为`403 SOURCE_DENIED`。
+- Exact-HEAD PostgreSQL correctness suites为25 tests、0 failures/errors/skipped，覆盖rate exact winner、tenant/environment隔离、idempotency lifecycle、rollback、commit-unknown、cleanup及hard ceiling；这些结果未提升为capacity threshold。
+- Spring Context与PostgreSQL persistent-volume restart后committed replay继续`409 NONCE_REPLAY`；database unavailable请求`500 UNKNOWN_ERROR`且恢复后nonce行0，health恢复`UP`。
+- Cleanup production path correctness通过，但缺并发writer、duration和持续backlog timeline；PostgreSQL contention缺持续lock-wait、connection-acquire和Hikari saturation序列。
+- 完整`mvn -ntp test`为19/19、1091 tests、0 failures/errors/skipped，Maven Total time `06:01 min`、resource sampler wall `363 s`，Surefire正常退出、无native-memory OOM；PostgreSQL 17.10/Testcontainers实际执行。
+- `mvn -ntp -Pquality validate`为19/19 SUCCESS、Checkstyle 0、Spotless PASS。
+- 证据目录含全部必需artifact，manifest 65 entries，secret scan 64 files/8 patterns/0 findings；target未stage。
+- 新增threshold evidence报告并同步current facts；未修改Java、测试、migration、callback、API/contracts或NQ，未实现正式harness，未进入B3，未commit/push/tag。
+
+```text
+THRESHOLD_EVIDENCE_COLLECTION: BLOCKED
+ACTUAL_WIRING_PROTECTED_2XX: PASS / SINGLE_SAMPLE
+RATE_LIMIT_CALIBRATION: FAIL / WARM_UP_PREREQUISITE
+REPLAY_NONCE_RACE_EVIDENCE: PASS
+IDEMPOTENCY_LIFECYCLE_EVIDENCE: PASS / CORRECTNESS_ONLY
+CLEANUP_BACKLOG_EVIDENCE: FAIL
+POSTGRESQL_CONTENTION_EVIDENCE: FAIL / INCOMPLETE
+RESTART_PERSISTENCE_EVIDENCE: PASS
+FULL_REGRESSION_RESOURCE_BASELINE: PASS
+CANDIDATE_THRESHOLD_EVIDENCE: INSUFFICIENT
+ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO
+Stage-QDR-7 B3: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
+```
+
+> Historical / consumed：从下一节开始均为更早任务当时的真实记录，其旧`next action`、BLOCKED原因和测试总数不得覆盖文件顶部current worklog。
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
 
 - 预检确认`dev`、task前HEAD `7c69ad3b4846eabf0cab04be18feeccda040d3cb`；仅继承上一任务允许的4个Java/测试变更，staged为空，三个scope包含关系成立。
@@ -22,7 +92,7 @@ Stage-QDR-7 B3: NOT_ALLOWED
 next action: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
 ```
 
-> Historical / consumed：从下一节开始均为任务当时的真实记录，其旧`next action`、BLOCKED原因和测试总数不得覆盖上方current worklog。
+> Historical / consumed：从下一节开始均为更早任务当时的真实记录，其旧`next action`、BLOCKED原因和测试总数不得覆盖文件顶部current worklog。
 
 ## 2026-07-13 DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE
 

@@ -7,11 +7,25 @@
 > post-B2 capacity acceptance: `BLOCKED`
 > Stage-QDR-7 B3: `NOT_ALLOWED`
 
-## Current hard-ceiling disposition（2026-07-13）
+## Current calibration path blocker closure disposition（2026-07-13）
+
+`DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER`通过构造期一次性冻结mock baseline profile创建时间，关闭了同一Spring Context重复bootstrap不确定性；stable profile ID、provider/config字段、strict registry mismatch与overwrite prevention均未放宽。同一Context与packaged jar各自完成5次顺序和8次并发protected请求，均为13/13结构化2xx，0个5xx、`UNKNOWN_ERROR`或profile mismatch；PostgreSQL 17.10、完整1101项回归与质量门均通过。
+
+该结果只允许进入`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2`重新采集证据，不把5+8 repeatability样本写成1/2/4/8/16 rate matrix或accepted threshold。Criteria freeze、formal harness、capacity acceptance与B3继续禁止。
+
+## Previous threshold evidence retry disposition（historical / consumed，2026-07-13）
+
+`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY`在exact-HEAD Boot jar上取得1个完整安全链protected `200`，并完成same-nonce race、canonical source fail-closed、Spring Context/PostgreSQL persistent-volume restart、成功full regression与资源采样。但同一Context第二个合法请求因mock provider profile bootstrap mismatch返回`500 / UNKNOWN_ERROR`，20次warm-up只完成1次，1/2/4/8/16 matrix没有有效measured round；cleanup缺并发writer/duration/timeline，PostgreSQL contention缺持续lock-wait/connection-acquire序列。
+
+因此本文件继续`BLOCKED / NOT_ACCEPTED`，且当前不允许criteria freeze retry。完整证据见`DH_STAGE_QDR_7_B2_CAPACITY_THRESHOLD_EVIDENCE.md`；下一任务为`DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER`，不得把single 2xx、nonce rejection latency、correctness fixture或成功full-regression资源基线写成accepted threshold。
+
+## Previous hard-ceiling disposition（historical / consumed，2026-07-13）
 
 `DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER`已关闭B1 hard-ceiling实现分叉：`PersistentGuardHardCeilings`是properties与command共同引用的唯一数值权威，window `3600`、quota `100000`、lease `900`本身允许，max+1 fail-closed。定向24项、PostgreSQL 41项与完整1091项回归均为0 failures/errors/skipped。
 
-本次关闭只移除criteria的hard-ceiling authority冲突，不提供actual-wiring容量样本；本文件继续`BLOCKED / NOT_ACCEPTED`。下一任务为`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY`，不得直接冻结criteria、实现正式harness或进入B3。
+该次关闭只移除criteria的hard-ceiling authority冲突，不提供actual-wiring容量样本；本文件继续`BLOCKED / NOT_ACCEPTED`。当时的下一任务`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY`现已执行并形成文件顶部的新disposition；本段不得覆盖当前next task。
+
+> Historical / consumed：以下§1–§9保留criteria freeze任务当时的证据缺口、OOM样本与阈值判断，不得覆盖文件顶部的current disposition。第10节是current consolidated decision；其中repeatable 2xx、当前full regression与next task字段以本轮实测补正，仍不代表criteria已冻结。
 
 ## 1. Freeze decision
 
@@ -242,7 +256,16 @@ FULL_REGRESSION_CONTRACT: CURRENT_RUN_PASS / CAPACITY_REPRESENTATIVENESS_PENDING
 CURRENT_FACTSOURCE_SYNC_REQUIRED: NO / CURRENT_ALIGNED
 HARD_CEILING_AUTHORITY: NORMATIVE_SECURITY_LIMIT / IMPLEMENTATION_ALIGNED
 GUARD_CONFIGURATION_BYPASS: CLOSED
+CANDIDATE_THRESHOLD_EVIDENCE: INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX
+CAPACITY_CALIBRATION_PATH_BLOCKER: CLOSED
+REPEATABLE_PROTECTED_2XX: PASS
+ACTUAL_WIRING_PROTECTED_2XX: PASS / REPEATABLE_PATH_AVAILABLE
+RATE_LIMIT_CALIBRATION: BLOCKED / RETRY_REQUIRED
+CLEANUP_BACKLOG_EVIDENCE: FAIL / MANDATORY_FIELDS_MISSING
+POSTGRESQL_CONTENTION_EVIDENCE: FAIL / INCOMPLETE
+ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: YES / NEXT_TASK_ONLY
+ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO
 POST_B2_CAPACITY_ACCEPTANCE: BLOCKED
 Stage-QDR-7 B3: NOT_ALLOWED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
 ```

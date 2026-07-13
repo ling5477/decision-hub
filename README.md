@@ -1,6 +1,6 @@
 # Decision Hub
 
-## Current authority — Stage-QDR-7 guard hard-ceiling blocker closed
+## Current authority — Stage-QDR-7 calibration path blocker closed
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -12,16 +12,20 @@ Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
-Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
-Capacity calibration: NOT_STARTED / NEXT
-Full regression: PASS / 1091 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Post-B2 capacity acceptance: BLOCKED
+Capacity calibration path blocker: CLOSED
+Repeatable protected 2xx: PASS
+Capacity threshold evidence: BLOCKED / RETRY REQUIRED
+Candidate threshold evidence: INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX
+Allow capacity criteria freeze retry: NO
+Full regression: PASS / 1101 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
-current task status: DONE / CLOSED_ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
+current task status: DONE / CLOSED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
 ```
 
-schema errata、persistent guards与B2 milestone保持`ACCEPTED`。`PersistentGuardHardCeilings`现为properties与command共同引用的唯一上限权威，直接构造command不能再绕过B1冻结范围；本轮full regression与真实PostgreSQL回归通过。Capacity criteria仍因actual-wiring 2xx、throughput、tail latency、cleanup与资源采样证据缺失而`BLOCKED`。下一步只允许threshold evidence retry，不授权harness implementation、capacity execution、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
+schema errata、persistent guards与B2 milestone保持`ACCEPTED`。上一轮calibration仍保留为历史失败证据：首个protected请求为`200`，同一Spring Context第二个合法请求因mock provider profile bootstrap mismatch返回`500 / UNKNOWN_ERROR`，rate matrix为0轮，cleanup/contention证据不完整。本轮以确定性baseline profile关闭该路径阻断，并在同一Context与packaged jar上分别取得5次顺序、8次并发共13个结构化2xx；完整1101项回归和质量门通过。该结果只证明repeatable protected 2xx，不构成容量阈值或矩阵证据；下一步只允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2`，不授权criteria freeze、正式harness、capacity acceptance、B3、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
 
 权威层级固定为：
 

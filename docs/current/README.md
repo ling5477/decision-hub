@@ -1,6 +1,6 @@
 # Decision Hub Current Docs
 
-## Current authority — Stage-QDR-7 guard hard-ceiling blocker closed
+## Current authority — Stage-QDR-7 calibration path blocker closed
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -12,16 +12,20 @@ Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
-Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
-Capacity calibration: NOT_STARTED / NEXT
-Full regression: PASS / 1091 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Post-B2 capacity acceptance: BLOCKED
+Capacity calibration path blocker: CLOSED
+Repeatable protected 2xx: PASS
+Capacity threshold evidence: BLOCKED / RETRY REQUIRED
+Candidate threshold evidence: INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX
+Allow capacity criteria freeze retry: NO
+Full regression: PASS / 1101 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
-current task status: DONE / CLOSED_ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
+current task status: DONE / CLOSED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
 ```
 
-当前criteria审查记录：`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`；上一轮容量验收记录：`DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md`。Criteria继续为`BLOCKED`而非accepted标准；hard-ceiling与command bypass已关闭，下一步只允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY`收集实际证据。
+上一轮失败证据报告：`DH_STAGE_QDR_7_B2_CAPACITY_THRESHOLD_EVIDENCE.md`；criteria审查记录：`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`；上一轮容量验收记录：`DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md`。失败报告中的首个`200`、第二请求`500 / UNKNOWN_ERROR`、0轮rate matrix及cleanup/contention缺口保持不变。本轮只关闭repeatable 2xx路径阻断，criteria仍为`BLOCKED`而非accepted标准；下一步只允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2`。
 
 权威层级固定为：
 

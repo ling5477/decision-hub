@@ -1,6 +1,6 @@
 # Decision Hub 当前工单
 
-## Current authority — 2026-07-13 guard hard-ceiling blocker closed
+## Current authority — 2026-07-13 calibration path blocker closed
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -12,25 +12,30 @@ Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
-Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
-Capacity calibration: NOT_STARTED / NEXT
-Full regression: PASS / 1091 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Post-B2 capacity acceptance: BLOCKED
+Capacity calibration path blocker: CLOSED
+Repeatable protected 2xx: PASS
+Capacity threshold evidence: BLOCKED / RETRY REQUIRED
+Candidate threshold evidence: INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX
+Allow capacity criteria freeze retry: NO
+Full regression: PASS / 1101 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
-current task status: DONE / CLOSED_ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
+current task status: DONE / CLOSED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
 HARD_CEILING_CONFLICT: CLOSED
 CAPACITY_CRITERIA_AUTHORITY: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 PROJECT_ACCEPTANCE_BASELINE: BLOCKED
-ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY: YES / NEXT_TASK_ONLY
+ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: YES / NEXT_TASK_ONLY
+ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO
 ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO
 ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
 ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-本轮已用单一`PersistentGuardHardCeilings`关闭properties/command上限分叉和直接构造bypass，并通过定向、PostgreSQL 17.10/Testcontainers、完整Maven与质量门。Criteria freeze原始`BLOCKED`结论保持不变，因为mandatory actual-wiring容量证据仍未收集。下一任务仅允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY`；B2 acceptance不回退，harness work order与B3均不得进入。
+上一轮threshold evidence retry仍是历史失败证据：首个protected请求为`200`，同一Context第二个合法请求返回`500 / UNKNOWN_ERROR`，rate matrix为0轮，cleanup与PostgreSQL contention mandatory evidence不完整。本轮确定性baseline profile已使同一Context与packaged jar各自的5次顺序、8次并发请求全部返回结构化2xx，完整1101项回归及质量门通过；该结果只关闭calibration path blocker。下一任务仅允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2`重新采集阈值证据，不授权criteria freeze、formal harness、capacity acceptance或B3；B2 acceptance不回退。
 
 权威层级固定为：
 

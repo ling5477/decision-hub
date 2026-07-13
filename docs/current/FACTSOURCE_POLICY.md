@@ -124,13 +124,17 @@ Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
-Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
-Capacity calibration: NOT_STARTED / NEXT
-Full regression: PASS / 1091 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Post-B2 capacity acceptance: BLOCKED
+Capacity calibration path blocker: CLOSED
+Repeatable protected 2xx: PASS
+Capacity threshold evidence: BLOCKED / RETRY REQUIRED
+Candidate threshold evidence: INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX
+Allow capacity criteria freeze retry: NO
+Full regression: PASS / 1101 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
-current task status: DONE / CLOSED_ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
+current task status: DONE / CLOSED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
 real HTTP: NO
 real provider: NO
 Agent / LangGraph: NO
@@ -145,6 +149,6 @@ LIVE: DISABLED
 
 ## 7. Current Alignment Rule
 
-`DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE`已在不修改callback、Java、测试、V1–V14、API、contracts、golden_cases或NQ的前提下完成8-file对齐，并保留初始`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`审计记录。
+`DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE`已在不修改callback、Java、测试、V1–V14、API、contracts、golden_cases或NQ的前提下完成8-file对齐，并保留初始`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`审计记录；其旧capacity acceptance路线已被后续任务消费，只作为historical record。
 
-B2已`CLOSED / ACCEPTED`。下一步只允许`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE`；B3继续`NOT_ALLOWED`，不得从B2 acceptance推导API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE授权。
+B2已`CLOSED / ACCEPTED`。Calibration path blocker已`CLOSED`，repeatable protected 2xx为`PASS`；上一轮candidate threshold evidence仍`INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX`，threshold evidence保持`BLOCKED / RETRY REQUIRED`。下一步只允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2`重新采集证据。B3继续`NOT_ALLOWED`，不得从B2 acceptance或5+8 repeatability样本推导criteria freeze、正式harness、capacity acceptance、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE授权。

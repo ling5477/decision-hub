@@ -53,7 +53,13 @@ public final class DefaultQdrMockModelGatewayBaseline implements QdrModelGateway
     private final ProviderProfileRegistryPort providerProfileRegistry;
     private final PromptVersionPersistencePort promptVersionPersistence;
     private final ModelVersionPersistencePort modelVersionPersistence;
-    private final Clock clock;
+    /**
+     * 当前 baseline bean 的不可变创建时间。
+     *
+     * <p>Why：prompt/model/provider refs 都是稳定版本槽，不能把请求级时间当成 profile 版本。构造时只读取一次
+     * {@link Clock}，保证同一 bean 内的重复与并发 bootstrap 使用完全一致的 metadata，同时不引入全局可变缓存。
+     */
+    private final Instant baselineCreatedAt;
 
     /**
      * 创建 mock baseline bootstrap。
@@ -63,7 +69,7 @@ public final class DefaultQdrMockModelGatewayBaseline implements QdrModelGateway
      * @param providerProfileRegistry  B4 provider profile registry。
      * @param promptVersionPersistence B3 prompt persistence port。
      * @param modelVersionPersistence  B3 model persistence port。
-     * @param clock                    时间源。
+     * @param clock                    时间源；仅在构造时读取一次。
      */
     public DefaultQdrMockModelGatewayBaseline(
             final PromptVersionRegistryPort promptVersionRegistry,
@@ -82,13 +88,13 @@ public final class DefaultQdrMockModelGatewayBaseline implements QdrModelGateway
                 Objects.requireNonNull(promptVersionPersistence, "promptVersionPersistence");
         this.modelVersionPersistence =
                 Objects.requireNonNull(modelVersionPersistence, "modelVersionPersistence");
-        this.clock = Objects.requireNonNull(clock, "clock");
+        this.baselineCreatedAt = Objects.requireNonNull(clock, "clock").instant();
     }
 
     @Override
     public QdrModelGatewayBaseline prepare(final QdrModelGatewayBaselineCommand command) {
         final QdrModelGatewayBaselineCommand checked = Objects.requireNonNull(command, "command");
-        final Instant now = clock.instant();
+        final Instant now = baselineCreatedAt;
         final UUID promptTemplateId = stableUuid(checked.tenantId(), "prompt-template");
         final UUID promptVersionId = stableUuid(checked.tenantId(), "prompt-version", PROMPT_VERSION);
         final UUID modelProfileId = stableUuid(checked.tenantId(), "model-profile");

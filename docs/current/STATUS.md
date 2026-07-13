@@ -1,6 +1,6 @@
 # Decision Hub Status
 
-## Current authority — 2026-07-13 guard hard-ceiling blocker closed
+## Current authority — 2026-07-13 calibration path blocker closed
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -12,26 +12,31 @@ Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
-Post-B2 capacity acceptance: BLOCKED / PENDING CRITERIA AND HARNESS
-Capacity calibration: NOT_STARTED / NEXT
-Full regression: PASS / 1091 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Post-B2 capacity acceptance: BLOCKED
+Capacity calibration path blocker: CLOSED
+Repeatable protected 2xx: PASS
+Capacity threshold evidence: BLOCKED / RETRY REQUIRED
+Candidate threshold evidence: INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX
+Allow capacity criteria freeze retry: NO
+Full regression: PASS / 1101 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER
-current task status: DONE / CLOSED_ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
+current task status: DONE / CLOSED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
 POSTGRESQL_TEST_EVIDENCE: CURRENT_PASS / POSTGRESQL_17_10 / ZERO_SKIPS
 HARD_CEILING_CONFLICT: CLOSED
 CAPACITY_CRITERIA_AUTHORITY: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
 PROJECT_ACCEPTANCE_BASELINE: BLOCKED
-ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY: YES / NEXT_TASK_ONLY
+ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: YES / NEXT_TASK_ONLY
+ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO
 ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO
 ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
 ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-`PersistentGuardHardCeilings`现为properties与command共同引用的唯一B1上限权威；window `3600`、quota `100000`、lease `900`本身允许，max+1在配置或command构造阶段fail-closed。定向24项、persistent guard PostgreSQL 41项与完整1091项回归均为0 failures/errors/skipped。Criteria仍因actual-wiring protected 2xx、throughput、p95/p99、cleanup和资源采样证据缺失而`BLOCKED`；B2既有`CLOSED / ACCEPTED`不回退，B3继续`NOT_ALLOWED`。
+上一轮exact-HEAD calibration失败轨迹保持不变：首个完整安全链protected请求为`200`，同一Spring Context第二个使用新nonce/requestId的合法请求因mock provider profile bootstrap mismatch返回`500 / UNKNOWN_ERROR`，20次warm-up只完成1次，15个计划rate rounds全部未执行，cleanup/contention证据不完整。本轮在baseline bean构造时冻结profile创建时间，未放宽registry；同一ApplicationContext的5次顺序与8次并发请求、以及独立packaged-jar localhost 5+8 probe均为13/13结构化2xx，0个5xx、`UNKNOWN_ERROR`或profile mismatch。PostgreSQL 17.10 suite、完整1101项回归和质量门通过。该结论只关闭repeatability路径阻断；上一轮candidate threshold evidence仍`INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX`，post-B2 capacity acceptance保持`BLOCKED`，B3继续`NOT_ALLOWED`。
 
 权威层级固定为：
 

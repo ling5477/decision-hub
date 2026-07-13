@@ -1,5 +1,66 @@
 # Decision Hub Testing
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git preflight | PASS / INHERITED ALLOWLIST ONLY | `dev` / task前HEAD `962b348761e4837f7aa433f45ba567201d8e67d1`；继承14个允许的current/entry文档和1个untracked上一轮证据报告，staged为空，技术范围diff为0。 |
+| task scope design | PASS | `VALIDATION_SCOPE ⊆ READ_SCOPE`、`FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST`、`CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST`全部成立。 |
+| profile identity contract | PASS | lookup key为`ProviderProfile.id`；immutable config equivalence包含`tenantId`、`providerKind`、`providerKey`、`displayName`、`capabilitySummary`、`status`、`trustPolicyRef`。`createdAt`是创建审计元数据，不是provider行为版本；registry仍比较完整record，未放宽。Model identity/version由独立`ModelVersion`合同承担，`ProviderProfile`没有model字段。 |
+| deterministic baseline profile | PASS | `DefaultQdrMockModelGatewayBaseline`在bean构造时只读取一次`Clock`并保存`final baselineCreatedAt`；每次`prepare`保留相同stable UUID、provider/model/profile配置与创建时间，无全局可变状态。 |
+| baseline unit tests | PASS | 连续两次与8-worker起跑屏障并发回归通过；advancing `Clock`断言同一baseline实例只读取一次时间，不调用真实Provider或HTTP。 |
+| strict registry direct tests | PASS | 首次注册、等价重复幂等通过；`providerKind`、`providerKey`、capability、status、trust policy与`createdAt`逐字段冲突均抛出`provider profile bootstrap mismatch`，原profile保持不变。 |
+| targeted tests | PASS | 用户指定`mvn -ntp -pl dh-domain,dh-usecase,dh-app -am ... test`为`BUILD SUCCESS`；首次重跑暴露测试错误期待内部marker，RCA后改用外部契约及数据库gateway-call证据并通过。 |
+| actual-wiring regression | PASS | `@SpringBootTest(RANDOM_PORT)`显式绑定`127.0.0.1`，同一ApplicationContext中5次顺序与8-worker起跑屏障并发请求共13/13为结构化`200`；unique nonce/requestId、HMAC、tenant/source/timestamp均生效。 |
+| actual-wiring persistence | PASS | PostgreSQL 17.10中nonce、completed idempotency与rate admission均为13条请求证据；`qdr_model_gateway_call`为13条`MOCK/SUCCEEDED`、0条`FAILED`。 |
+| persistent guard PostgreSQL suite | PASS | 指定5类suite实际运行PostgreSQL 17.10/Testcontainers；跨Reactor共41 tests（`dh-app` 38 + `dh-infra` 3），0 failures，0 errors，0 skipped，V12–V14与callback compatibility保持通过。 |
+| packaged runtime | PASS | `mvn -ntp -pl dh-app -am package`未跳过测试，19-module依赖reactor成功并生成repackaged Boot jar。 |
+| localhost repeatability probe | PASS | ignored `target/capacity-calibration-path-blocker/20260713T153556/`；单一jar PID/一次Spring Context，5次顺序+8个先创建后等待的并发请求共13/13结构化2xx，0个5xx、`UNKNOWN_ERROR`或profile mismatch；rate bucket/idempotency/nonce为1/13/13，PostgreSQL 17.10。 |
+| probe RCA | PASS / HISTORICAL FAILED RUN PRESERVED | 首次run `20260713T152412`的13个HTTP请求均为`200`，但Windows拒绝读取仍被Java持有的stdout，脚本exit 1；保留该run，使用新runId、新数据库和`FileShare.ReadWrite`完成重跑，未把首次脚本失败写成runtime PASS。 |
+| full Maven regression | PASS | `mvn -ntp test`；19/19 modules，1101 tests，0 failures，0 errors，0 skipped，Maven Total time `06:25 min`，PostgreSQL/Testcontainers实际执行。 |
+| quality gate | PASS | `mvn -ntp -Pquality validate`；19/19 modules，Checkstyle 0 violations，Spotless PASS。 |
+| profile-construction scan | PASS / CONFLICT 0 | 用户指定`rg`扫描共419个命中/103个文件；分类为`STABLE_PROFILE_CONSTRUCTION` 42/8、`STRICT_REGISTRY_VALIDATION` 29/4、`REQUEST_SCOPED_TIME` 58/13、`UNRELATED_TIMESTAMP` 290/83、`CONFLICT` 0。 |
+| final scope diff | PASS | production Java仅1个allowlist baseline文件，直接测试仅3个allowlist文件；callback、V1–V14、migration、API/Controller/DTO/OpenAPI/contracts与NQ diff均为0，unexpected files为0。 |
+| current fact scan | PASS / CONFLICT 0 | 允许的current/entry文件顶部current blocks统一为blocker `CLOSED`、repeatable 2xx `PASS`、threshold evidence `BLOCKED / RETRY REQUIRED`、post-B2 `BLOCKED`、B3 `NOT_ALLOWED`及next retry-2；历史失败段落保留且不计为current conflict。 |
+| target staging boundary | PASS | `target/capacity-threshold-evidence/**`与`target/capacity-calibration-path-blocker/**`均保持ignored；最终暂存前检查为0个target artifact。 |
+| capacity matrix | NOT_RUN | 未执行warm-up、1/2/4/8/16、measured rounds、throughput或percentile计算；本轮5+8只证明repeatability。 |
+| candidate threshold evidence | INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX | 上一轮0轮rate matrix及cleanup/contention缺口保持不变；只允许进入threshold evidence retry-2。 |
+| next task | LOCKED | `DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2`。 |
+
+本轮成功artifact位于ignored `target/capacity-calibration-path-blocker/20260713T153556/`；Boot jar SHA-256为`92b1969357afdc6d05a935274b949280868d934f3c33d4ae7aa7aa81aba7eb0f`。该artifact不得提交，也不得据此冻结threshold、声明production SLO/capacity或进入B3。
+
+> Historical / consumed：从下一节开始保留上一轮threshold evidence retry及更早任务当时的真实结果；其中第二请求`500 / UNKNOWN_ERROR`、0轮matrix、旧`next task`和旧测试总数不得被上方current validation改写。
+
+## 2026-07-13 DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git preflight | PASS | `dev` / HEAD `962b348761e4837f7aa433f45ba567201d8e67d1` / worktree clean / staged empty。 |
+| task scope design | PASS | 三个scope包含关系全部成立；raw artifacts只写入`target/capacity-threshold-evidence/20260713T213431/`，tracked写入仅限文档allowlist。 |
+| exact-HEAD runtime package | PASS | `mvn -ntp -pl dh-app -am package`；Boot jar SHA-256 `c0bc9e6bcbf70bea055770ba1a56bbb892e1b5a35a984925e402cb9b418a91a6`。 |
+| actual wiring protected 2xx | PASS / SINGLE SAMPLE | `POST /api/ai/decision-dry-runs`经过payload/source/HMAC/timestamp/nonce/tenant/persistent rate/persistent idempotency/Controller/service wiring返回1个`200`。 |
+| repeatable protected 2xx | FAIL / PATH BLOCKED | 同一Context第二个新nonce/requestId合法请求返回`500 / UNKNOWN_ERROR`；mock provider profile bootstrap mismatch使warm-up在第2请求前失败。 |
+| rate-limit calibration | FAIL / NOT EXECUTED | 1/2/4/8/16、每点3轮、warm-up 20、measured 100；每轮只完成1/20 warm-up，0 measured attempts，禁止报告throughput或tail latency。 |
+| tenant/environment isolation | PASS / CORRECTNESS ONLY | PostgreSQL suite在test-defined quota下隔离通过；不作为capacity threshold。 |
+| canonical source | PASS | 非`NQ_DRYRUN`实际localhost请求返回`403 / SOURCE_DENIED`；cross-source capacity不适用。 |
+| same-nonce race | PASS | 8线程 / 24 attempts / 1 round；1个`200`、23个`409 NONCE_REPLAY`、0 unexpected errors；PostgreSQL最终1行。 |
+| idempotency lifecycle | PASS / CORRECTNESS ONLY | exact-HEAD PostgreSQL suites 25 tests、0 failures/errors/skipped；single winner、active lease、expiry、rollback、commit-unknown、hard-ceiling-before-JDBC通过。 |
+| cleanup backlog | FAIL / INCOMPLETE | production adapter correctness通过且无误删/重复处理；concurrent writer=0，duration和持续backlog timeline缺失。 |
+| PostgreSQL contention | FAIL / INCOMPLETE | timeout/rollback/DB unavailable fail-closed正确性通过；缺持续lock-wait、connection acquire与Hikari saturation序列。 |
+| restart persistence | PASS | Spring Context restart与PostgreSQL persistent-volume restart后replay均`409 NONCE_REPLAY`；不可用attempt恢复后nonce行0；health `UP`。 |
+| Hikari snapshot | PARTIAL | active 1 / idle 6 / pending 0 / max 10 / min 2；只是post-scenario快照。 |
+| full Maven regression | PASS | `mvn -ntp test`；19/19，1091 tests，0 failures/errors/skipped；Maven Total time `06:01 min`，resource sampler wall `363 s`；Surefire fork正常退出，无native-memory OOM。 |
+| PostgreSQL/Testcontainers | PASS / REAL EXECUTION | Testcontainers 1.20.4，PostgreSQL 17.10，0 skipped。 |
+| successful resource baseline | PASS / LOCALHOST ONLY | free memory start/min/end 12,411,355,136 / 8,258,981,888 / 11,558,051,840 bytes；Maven/Surefire max working set 454,246,400 / 935,165,952 bytes；Docker max CPU 64.42%、memory 0.35%。 |
+| quality gate | PASS | `mvn -ntp -Pquality validate`；19/19，Checkstyle 0 violations，Spotless PASS。 |
+| evidence integrity | PASS | 13个必需文件存在；manifest 65 entries；secret scan 64 files / 8 patterns / 0 findings；target staged 0。 |
+| candidate threshold evidence | INSUFFICIENT | repeatable 2xx、rate matrix、cleanup和contention mandatory evidence不完整。 |
+| next task | LOCKED | `DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER`。 |
+
+证据目录为`target/capacity-threshold-evidence/20260713T213431/`；manifest自身SHA-256为`d41da1ca38cedb60559547fedbc42ba2257865347d2f462d78e372728379a5cc`。本轮不冻结threshold，不声明production SLO/capacity或B3 readiness。
+
+> Historical / consumed：从下一节开始保留各任务当时的真实验证结果，其旧`next task`、失败环境和测试总数不得覆盖上方current validation。
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-GUARD-CONFIGURATION-BYPASS-BLOCKER validation
 
 | Check | Result | Evidence |
@@ -16,7 +77,7 @@
 | capacity execution | NOT_RUN | 本任务未执行calibration或正式capacity harness；criteria继续`BLOCKED`。 |
 | next task | LOCKED | `DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY`。 |
 
-> Historical / consumed：从下一节开始保留各任务当时的真实验证结果，其旧`next task`、失败环境和测试总数不得覆盖上方current validation。
+> Historical / consumed：从下一节开始保留更早任务当时的真实验证结果，其旧`next task`、失败环境和测试总数不得覆盖文件顶部current validation。
 
 ## 2026-07-13 DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE validation
 
