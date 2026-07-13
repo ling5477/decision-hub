@@ -63,6 +63,26 @@ docs/current/NQ_DH_INTEGRATION_SECURITY_AUDIT_REPORT.md
 
 `CLAUDE.md` is execution guidance, not the primary current-state authority. 本文件不得覆盖`STATUS.md`和`WORK_ORDER.md`的当前结论。
 
+权威层级固定为：
+
+```text
+Primary current-state authority:
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+
+Policy authority:
+docs/current/FACTSOURCE_POLICY.md
+
+Execution guidance:
+AGENTS.md
+CLAUDE.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+
+Entry/index documents:
+README.md
+docs/current/README.md
+```
+
 `docs/codex` 只保留历史计划与辅助执行区，不得覆盖 `docs/current` 的当前结论。
 
 ## 3. 标准工作流
@@ -89,13 +109,14 @@ docs/current/TESTING.md
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2 schema errata implementation: DONE
-B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
-B2 milestone acceptance: NOT_YET
-capacity acceptance: NOT_ALLOWED
-B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
-next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
+Stage-QDR-7 B2: CLOSED / ACCEPTED
+Schema errata implementation: ACCEPTED
+Persistent guards implementation: ACCEPTED
+Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Stage-QDR-7 B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
+current task status: DONE / B2_MILESTONE_CLOSED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
 ```
 
 Stage3-B3与`Integration-0-PLAN`均为historical/consumed记录，不是当前入口。Integration-0已`CLOSED / ACCEPTED`，但仍只代表contract/mock/documentation work line，不代表runtime integration。

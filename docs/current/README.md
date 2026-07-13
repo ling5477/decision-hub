@@ -1,19 +1,42 @@
 # Decision Hub Current Docs
 
-## Current authority — Stage-QDR-7 B2 schema errata factsource alignment
+## Current authority — Stage-QDR-7 B2 milestone close
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2 schema errata implementation: DONE
-B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
-B2 milestone acceptance: NOT_YET
-capacity acceptance: NOT_ALLOWED
-B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
-next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
+Stage-QDR-7 B2: CLOSED / ACCEPTED
+Schema errata implementation: ACCEPTED
+Persistent guards implementation: ACCEPTED
+Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Stage-QDR-7 B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
+current task status: DONE / B2_MILESTONE_CLOSED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
 ```
 
-当前factsources修复记录：`DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX_RETRY.md`。原实施、blocker fix与历史review均保留；历史implementation review的`BLOCKED`结论未被改写。
+当前B2 milestone close记录：`DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md`。同一review文档保留初始`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`，并记录scope扩展、8-file对齐与最终`PASS / B2 ACCEPTED`；技术证据未重跑，按原始证据复用。
+
+权威层级固定为：
+
+```text
+Primary current-state authority:
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+
+Policy authority:
+docs/current/FACTSOURCE_POLICY.md
+
+Execution guidance:
+AGENTS.md
+CLAUDE.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+
+Entry/index documents:
+README.md
+docs/current/README.md
+```
+
+执行指导和入口不得覆盖主权威。
 
 本目录是 Decision Hub 当前事实源入口。当前阶段的 close review 不应再从旧 work order、旧 freeze 记录、旧 blocker fix 过程文档或归档文档推导当前状态。
 
@@ -137,8 +160,9 @@ docs/current/README.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
-docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX_RETRY.md
-docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY.md historical BLOCKED review
+docs/current/FACTSOURCE_POLICY.md
+docs/current/DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md B2 milestone close / includes previous BLOCKED review
+docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed work order with B2 close addendum
 docs/current/TESTING.md
 docs/current/ARCHIVE_INDEX.md historical archive index / supporting only
 ```
@@ -160,9 +184,8 @@ docs/current/DB_SCHEMA.md
 ```text
 STATUS.md                  当前状态表
 DH_STAGE_QDR_7_PLAN.md     Historical / consumed Stage-QDR-7 planning baseline
-DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed implementation work order
-DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX_RETRY.md 当前factsources修复记录
-DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY.md Historical / previous BLOCKED review
+DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md B2 milestone close；保留Previous review attempt / BLOCKED
+DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed；顶部含B2 close addendum
 WORK_ORDER.md              下一步唯一入口
 CODEX_PROJECT_INSTRUCTIONS.md 当前执行纪律
 TESTING.md                 当前验证证据与工具风险

@@ -1,28 +1,46 @@
 # Decision Hub Status
 
-## Current authority — 2026-07-13 schema errata factsource alignment
+## Current authority — 2026-07-13 B2 factsource alignment and final acceptance
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2 schema errata implementation: DONE
-B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
-B2 milestone acceptance: NOT_YET
-capacity acceptance: NOT_ALLOWED
-B3: NOT_ALLOWED
-schema errata technical implementation: PASS
-schema errata independent acceptance: BLOCKED only by factsource drift
-callback/migration code changes: NOT_REQUIRED
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
-current task status: DONE / VALIDATED / REVIEW_RETRY_2_PENDING
-next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
-CURRENT_FACTSOURCE_CONSISTENCY: PASS
-ALLOW_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY_2: YES
-ALLOW_MILESTONE_REVIEW_RETRY_3_NOW: NO
-ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: NO
+Stage-QDR-7 B2: CLOSED / ACCEPTED
+Schema errata implementation: ACCEPTED
+Persistent guards implementation: ACCEPTED
+Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Stage-QDR-7 B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
+current task status: DONE / B2_MILESTONE_CLOSED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
+POSTGRESQL_TEST_EVIDENCE: REUSED_PASS / POSTGRESQL_17_10 / ZERO_SKIPS
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: YES / NEXT_TASK_ONLY
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-schema errata技术实现、callback timeout顺序、锁超时、事务回滚、migration retry、V14 no-truncation与PostgreSQL证据均已通过。本任务已完成factsources本地对齐，但该blocker只能由独立review retry-2确认关闭；不得提前写B2 `ACCEPTED`。
+初始consolidated review的技术结论为PASS，唯一阻断为`CURRENT_FACTSOURCE_SCOPE_CONFLICT`。同一任务扩展write allowlist覆盖全部8个validated factsources后，current冲突已清零；技术artifact未变化，原技术证据继续复用，因此schema errata、persistent guards与B2 milestone正式`ACCEPTED`。下一步只开放post-B2 capacity acceptance，B3继续禁止。
+
+权威层级固定为：
+
+```text
+Primary current-state authority:
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+
+Policy authority:
+docs/current/FACTSOURCE_POLICY.md
+
+Execution guidance:
+AGENTS.md
+CLAUDE.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+
+Entry/index documents:
+README.md
+docs/current/README.md
+```
+
+执行指导和入口不得覆盖主权威。
 
 ## Historical records — 以下全部内容均为非当前快照
 

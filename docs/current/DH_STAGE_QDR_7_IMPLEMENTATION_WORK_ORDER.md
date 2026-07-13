@@ -2,9 +2,26 @@
 
 > task: `DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER`  
 > mode: `WORK_ORDER_ONLY`  
-> stage: `Stage-QDR-7 / IMPLEMENTING / B2_IMPLEMENTED`
+> stage: `Stage-QDR-7 / IMPLEMENTING / B2_CLOSED_ACCEPTED`
 > mainline: `Limited Dry Run Runtime Readiness`  
 > endpoint: `POST /api/ai/decision-dry-runs`（既有，不新增 endpoint）
+
+## Current B2 milestone close addendum（2026-07-13）
+
+本work order已被B2实施与最终验收消费。`DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE`保留consolidated review初始`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`，在同一任务扩展write allowlist并对齐8个current factsources后，以未变化的技术artifact复用既有证据，最终结论为`PASS / B2 ACCEPTED`。
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2: CLOSED / ACCEPTED
+Schema errata implementation: ACCEPTED
+Persistent guards implementation: ACCEPTED
+Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Stage-QDR-7 B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
+```
+
+> Historical / Consumed：从下一节开始均为B2实施、blocker fix与previous review attempt的当时记录；其中旧`next action`、`BLOCKED`和`NOT_YET`不再表示current状态，也不得覆盖`STATUS.md`与`WORK_ORDER.md`。
 
 ## B2 schema errata implementation（2026-07-13）
 

@@ -27,6 +27,47 @@ docs/current/TESTING.md
 
 若入口或执行指导与主权威冲突，review/close可以阻断；修复时以`STATUS.md`和`WORK_ORDER.md`为准。
 
+权威层级固定为：
+
+```text
+Primary current-state authority:
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+
+Policy authority:
+docs/current/FACTSOURCE_POLICY.md
+
+Execution guidance:
+AGENTS.md
+CLAUDE.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+
+Entry/index documents:
+README.md
+docs/current/README.md
+```
+
+## 2.1 TASK_SCOPE_DESIGN_VALIDATION
+
+所有任务在实施前必须满足：
+
+```text
+VALIDATION_SCOPE ⊆ READ_SCOPE
+FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST
+CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST
+```
+
+任一包含关系不成立时，不得开始实施，必须输出`TASK_SCOPE_DESIGN_INVALID`。
+
+## 2.2 REVIEW_CLOSEOUT_RULE
+
+1. 技术验收已通过且唯一阻断为current docs漂移时，必须在同一任务内修复文档并完成最终验收。
+2. 禁止创建`docs fix -> review -> docs fix -> review`循环。
+3. `STATUS.md`和`WORK_ORDER.md`冲突可以阻断阶段close。
+4. 其他入口文档漂移必须修复，但不得自动降级为migration、事务或安全实现失败。
+5. 只有新的真实P0/P1代码、安全、tenant、事务、migration或API问题，才能阻断技术acceptance。
+6. 要求`current conflict count = 0`的文件必须全部位于当前任务`WRITE_ALLOWLIST`。
+
 ## 3. SUPPORTING_DOCS_NOT_BLOCKERS_BY_DEFAULT
 
 以下文件默认不是 primary stage gate source，也不是 close review blocker：
@@ -75,13 +116,14 @@ NQ mutation allowed
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2 schema errata implementation: DONE
-B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
-B2 milestone acceptance: NOT_YET
-capacity acceptance: NOT_ALLOWED
-B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
-next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
+Stage-QDR-7 B2: CLOSED / ACCEPTED
+Schema errata implementation: ACCEPTED
+Persistent guards implementation: ACCEPTED
+Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Stage-QDR-7 B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
+current task status: DONE / B2_MILESTONE_CLOSED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
 real HTTP: NO
 real provider: NO
 Agent / LangGraph: NO
@@ -96,6 +138,6 @@ LIVE: DISABLED
 
 ## 7. Current Alignment Rule
 
-当前`DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY`只修复仓库入口、authority hierarchy和current factsources。它不修改callback、Java、测试、migration、API、contracts、golden_cases或NQ。
+`DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE`已在不修改callback、Java、测试、V1–V14、API、contracts、golden_cases或NQ的前提下完成8-file对齐，并保留初始`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`审计记录。
 
-factsources对齐并通过验证后，只允许进入独立`DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2`。该review通过前不得写B2 `ACCEPTED`，不得进入milestone retry-3、capacity acceptance或B3。
+B2已`CLOSED / ACCEPTED`。下一步只允许`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE`；B3继续`NOT_ALLOWED`，不得从B2 acceptance推导API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE授权。

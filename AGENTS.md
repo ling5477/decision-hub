@@ -58,6 +58,53 @@ docs/gates/**
 
 `docs/codex` 只保留历史计划与辅助执行区，不得覆盖 `docs/current` 的当前结论。
 
+权威层级固定为：
+
+```text
+Primary current-state authority:
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+
+Policy authority:
+docs/current/FACTSOURCE_POLICY.md
+
+Execution guidance:
+AGENTS.md
+CLAUDE.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+
+Entry/index documents:
+README.md
+docs/current/README.md
+```
+
+执行指导和入口文件必须与主权威一致，但不得覆盖`STATUS.md`与`WORK_ORDER.md`。
+
+### 2.1 任务scope设计与review收口（强制）
+
+所有任务在实施前必须满足：
+
+```text
+VALIDATION_SCOPE ⊆ READ_SCOPE
+FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST
+CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST
+```
+
+任一包含关系不成立时，不得开始实施，必须输出：
+
+```text
+TASK_SCOPE_DESIGN_INVALID
+```
+
+Review收口规则固定为：
+
+1. 技术验收已通过且唯一阻断为current docs漂移时，必须在同一任务内修复文档并完成最终验收。
+2. 不再创建`docs fix -> review -> docs fix -> review`循环。
+3. `STATUS.md`和`WORK_ORDER.md`冲突可以阻断阶段close。
+4. 其他入口文档漂移必须修复，但不得自动降级为migration、事务或安全实现失败。
+5. 只有新的真实P0/P1代码、安全、tenant、事务、migration或API问题，才能阻断技术acceptance。
+6. 要求`current conflict count = 0`的文件必须全部出现在当前任务`WRITE_ALLOWLIST`中。
+
 ## 3. 标准工作流
 
 DH 采用与 NQ 一致的阶段化流程：
@@ -82,15 +129,14 @@ docs/current/TESTING.md
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2 schema errata implementation: DONE
-B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
-B2 milestone acceptance: NOT_YET
-capacity acceptance: NOT_ALLOWED
-B3: NOT_ALLOWED
-current task:
-DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
-next task:
-DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
+Stage-QDR-7 B2: CLOSED / ACCEPTED
+Schema errata implementation: ACCEPTED
+Persistent guards implementation: ACCEPTED
+Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Stage-QDR-7 B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
+current task status: DONE / B2_MILESTONE_CLOSED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
 ```
 
 `AGENTS.md`是执行指导，不是primary current-state authority；权威当前状态仍以`STATUS.md`、`WORK_ORDER.md`和`FACTSOURCE_POLICY.md`指定的文件为准。

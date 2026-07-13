@@ -1,5 +1,53 @@
 # Decision Hub Worklog
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
+
+- 预检确认仓库、分支和task前HEAD；staged为空，dirty仅为用户预告的current review变更，未发现技术范围dirty。
+- 读取8个current factsources、Stage-QDR-7 implementation work order、consolidated review、STATUS/ROADMAP/WORK_ORDER/TESTING/WORKLOG和archive/factsource入口；未把historical文档升级为current authority。
+- 将8个current factsources统一为B1 `FROZEN`、B2 `CLOSED / ACCEPTED`、schema errata `ACCEPTED`、persistent guards `ACCEPTED`、post-B2 capacity acceptance `NOT_STARTED / NEXT`、B3 `NOT_ALLOWED`。
+- 在同一consolidated review中保留初始`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`及完整技术证据，记录6-file allowlist root cause、同任务scope扩展与最终`PASS / B2 ACCEPTED`。
+- 将三个scope包含关系、`TASK_SCOPE_DESIGN_INVALID`和review同任务收口规则同步至AGENTS、CODEX、FACTSOURCE_POLICY与WORK_ORDER。
+- 8-file状态扫描分类为`CURRENT_ALIGNED=70`、`HISTORICAL_MARKED=202`、`NEGATIVE_SAFETY_STATEMENT=18`、`CURRENT_CONFLICT=0`。
+- 仅修改用户允许的文档；未修改Java、测试、callback、V1–V14、API/OpenAPI、HMAC/nonce/source合同或NQ，未运行capacity benchmark，未进入B3。
+- `mvn -ntp -Pquality validate` exit 0，Reactor 19/19 `SUCCESS`、Checkstyle 0 violations、Spotless通过、总耗时6.276秒；full tests与PostgreSQL/Testcontainers均`NOT_RERUN`，仅复用1076项与PostgreSQL 17.10真实执行证据。
+
+```text
+STAGE_QDR_7_B2_FACTSOURCE_ALIGNMENT_AND_FINAL_ACCEPTANCE: DONE
+TASK_SCOPE_DESIGN: PASS
+VALIDATION_WRITE_ALLOWLIST_ALIGNMENT: PASS
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
+SCHEMA_ERRATA_IMPLEMENTATION: ACCEPTED
+PERSISTENT_GUARDS_IMPLEMENTATION: ACCEPTED
+B2_IMPLEMENTATION_STATUS: ACCEPTED
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE: YES / NEXT_TASK_ONLY
+next action: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
+```
+
+## Previous review attempt — Historical / BLOCKED preserved
+
+以下记录是同一consolidated review的初始尝试，不是当前验收结论；其`BLOCKED`事实与当时技术证据保持原样。
+
+## 2026-07-13 DH-STAGE-QDR-7-B2-CONSOLIDATED-FINAL-ACCEPTANCE-REVIEW
+
+- 预检确认`dev`、HEAD `04a98a8a09866bc0dd20a0fbbbdc8b12ca6c175c`、worktree/staged clean、`origin/dev...HEAD=0/0`，关键提交均存在。
+- 独立复核callback、V12–V14、persistent rate/idempotency、CAS/tombstone、DB clock、bounded cleanup、result reference、Spring completion transaction、commit unknown与Controller guard顺序；没有发现新的实现、安全、事务、migration或tenant P0/P1。
+- 真实PostgreSQL 17.10/Testcontainers回归确认5秒precheck lock timeout、60秒statement timeout、整体rollback、解锁retry、session isolation与完整migration矩阵，0 skipped。
+- targeted 15/15、全仓19/19与quality 19/19均`BUILD SUCCESS`；全仓XML为158 reports / 1076 tests / 0 failures / 0 errors / 0 skipped；Checkstyle 0、Spotless通过。
+- 8个指定current入口中有6个仍指向旧schema-errata alignment/retry，且不在本轮allowlist；未越界修改。由于`current conflict count`无法达到0，consolidated acceptance必须阻断。
+- 仅新增consolidated review并同步允许的STATUS/WORK_ORDER/ROADMAP/TESTING/WORKLOG；未修改生产代码、测试、callback、V1–V14、API/OpenAPI或安全合同。
+
+```text
+STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW: BLOCKED
+SCHEMA_ERRATA_TECHNICAL_REVIEW: PASS
+PERSISTENT_GUARDS_TECHNICAL_REVIEW: PASS
+CURRENT_FACTSOURCE_CONSISTENCY: FAIL / 6 FILES
+B2_IMPLEMENTATION_STATUS: BLOCKED
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE: NO
+next action: DH-STAGE-QDR-7-B2-CONSOLIDATED-BLOCKER-FIX
+```
+
+## Other historical worklog records — 以下全部内容均为非当前任务
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
 
 - 基线确认`dev`、HEAD `d827fce`、worktree/staged clean；上一轮review已作为独立commit保留。
@@ -21,8 +69,6 @@ ALLOW_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY_2: YES
 ALLOW_MILESTONE_REVIEW_RETRY_3_NOW: NO
 next action: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
 ```
-
-## Historical worklog records — 以下全部内容均为非当前任务
 
 下方日期记录保留历史事实；其旧`current task`、`next action`或阶段状态不得覆盖本节。
 

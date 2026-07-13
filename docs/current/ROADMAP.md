@@ -1,22 +1,19 @@
 # Decision Hub Roadmap
 
-## Current route — 2026-07-13 schema errata factsource alignment
+## Current route — 2026-07-13 B2 accepted / capacity acceptance next
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2 schema errata implementation: DONE
-B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
-B2 milestone acceptance: NOT_YET
-capacity acceptance: NOT_ALLOWED
-B3: NOT_ALLOWED
-schema errata technical implementation: PASS
-schema errata independent acceptance: BLOCKED only by factsource drift
-callback/migration code changes: NOT_REQUIRED
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
-next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
+Stage-QDR-7 B2: CLOSED / ACCEPTED
+Schema errata implementation: ACCEPTED
+Persistent guards implementation: ACCEPTED
+Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Stage-QDR-7 B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
 ```
 
-当前路线只允许完成factsources对齐后进入独立review retry-2。milestone retry-3、capacity acceptance与B3继续禁止。
+8个current factsources已对齐，初始`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`保留为previous review attempt，B2正式关闭。下一路线只允许post-B2 capacity acceptance；B3仍`NOT_ALLOWED`。
 
 ## Historical routes — 以下全部内容均为非当前路线
 

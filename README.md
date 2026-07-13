@@ -1,19 +1,42 @@
 # Decision Hub
 
-## Current authority — Stage-QDR-7 B2 schema errata factsource alignment
+## Current authority — Stage-QDR-7 B2 milestone close
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2 schema errata implementation: DONE
-B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
-B2 milestone acceptance: NOT_YET
-capacity acceptance: NOT_ALLOWED
-B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
-next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
+Stage-QDR-7 B2: CLOSED / ACCEPTED
+Schema errata implementation: ACCEPTED
+Persistent guards implementation: ACCEPTED
+Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Stage-QDR-7 B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
+current task status: DONE / B2_MILESTONE_CLOSED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
 ```
 
-schema errata技术实现与独立技术证据均已通过；本任务只对齐仓库入口和current factsources。`FACTSOURCE_FIX_PENDING`表示仍需下一轮独立review retry-2确认，不等于B2 acceptance，不授权milestone retry-3、capacity或B3。
+schema errata与persistent guards已基于既有技术证据正式`ACCEPTED`，B2 milestone已`CLOSED / ACCEPTED`。下一步只允许独立执行post-B2 capacity acceptance；本结论不授权capacity benchmark在本任务运行，也不授权B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
+
+权威层级固定为：
+
+```text
+Primary current-state authority:
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+
+Policy authority:
+docs/current/FACTSOURCE_POLICY.md
+
+Execution guidance:
+AGENTS.md
+CLAUDE.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+
+Entry/index documents:
+README.md
+docs/current/README.md
+```
+
+执行指导和入口不得覆盖主权威。
 
 Decision Hub 是 NexusQuant 的 AI Agent 决策能力层，不是交易执行系统。DH 负责候选方案、风险解释、审计记录、结构化报告和辅助决策；交易核心、账户资产、订单状态机、风控执行、正式回测、模拟盘/实盘执行和交易事实源仍由 NexusQuant 承担。
 
@@ -136,12 +159,12 @@ docs/current/README.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
-docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX_RETRY.md
-docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY.md historical BLOCKED review
+docs/current/FACTSOURCE_POLICY.md
+docs/current/DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md B2 milestone close / includes previous BLOCKED review
+docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed work order with B2 close addendum
 docs/current/TESTING.md
 docs/current/WORKLOG.md
 docs/current/ROADMAP.md
-docs/current/FACTSOURCE_POLICY.md
 docs/current/ARCHIVE_INDEX.md historical archive index / supporting only
 docs/gates/stage-qdr-4/                 Stage-QDR-4 归档目录与阶段文档
 docs/gates/stage-qdr-5/                 Stage-QDR-5 归档目录与阶段文档
@@ -155,9 +178,8 @@ Stage-QDR-5 historical source docs 已归档到 `docs/gates/stage-qdr-5/SOURCE_D
 ```text
 docs/current/README.md                  当前文档索引
 docs/current/DH_STAGE_QDR_7_PLAN.md     Historical / consumed Stage-QDR-7 planning baseline
-docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed implementation work order
-docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX_RETRY.md 当前factsources修复记录
-docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY.md Historical / previous BLOCKED review
+docs/current/DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md B2 milestone close；保留Previous review attempt / BLOCKED
+docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed；顶部含B2 close addendum
 docs/current/STATUS.md                  唯一当前状态表
 docs/current/WORK_ORDER.md              唯一下一步入口
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md 当前 Codex / Claude 执行纪律

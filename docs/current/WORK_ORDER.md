@@ -1,28 +1,58 @@
 # Decision Hub 当前工单
 
-## Current authority — 2026-07-13 schema errata factsource alignment
+## Current authority — 2026-07-13 B2 factsource alignment and final acceptance
 
 ```text
 Stage-QDR-7 B1: FROZEN
-B2 schema errata implementation: DONE
-B2 schema errata review: TECHNICAL_PASS / FACTSOURCE_FIX_PENDING
-B2 milestone acceptance: NOT_YET
-capacity acceptance: NOT_ALLOWED
-B3: NOT_ALLOWED
-schema errata technical implementation: PASS
-schema errata independent acceptance: BLOCKED only by factsource drift
-current task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY
-current task status: DONE / VALIDATED / REVIEW_RETRY_2_PENDING
-next task: DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-REVIEW-RETRY-2
-callback/migration code changes: NOT_REQUIRED
-CURRENT_FACTSOURCE_CONSISTENCY: PASS
-ALLOW_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY_2: YES
-ALLOW_MILESTONE_REVIEW_RETRY_3_NOW: NO
-ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: NO
+Stage-QDR-7 B2: CLOSED / ACCEPTED
+Schema errata implementation: ACCEPTED
+Persistent guards implementation: ACCEPTED
+Post-B2 capacity acceptance: NOT_STARTED / NEXT
+Stage-QDR-7 B3: NOT_ALLOWED
+current task: DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE
+current task status: DONE / B2_MILESTONE_CLOSED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_NOW: YES / NEXT_TASK_ONLY
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-本任务只允许入口与factsources对齐。本地验证通过后进入独立review retry-2，由其确认factsource drift blocker是否关闭；review通过前不得接受B2，不得运行capacity benchmark或进入B3。
+本工单已完成8-file current factsources对齐、初始BLOCKED审计保留、scope治理修复与B2 milestone close；未修改生产代码、测试、callback、V1–V14或API。下一任务仅为post-B2 capacity acceptance，仍不得进入B3。
+
+权威层级固定为：
+
+```text
+Primary current-state authority:
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+
+Policy authority:
+docs/current/FACTSOURCE_POLICY.md
+
+Execution guidance:
+AGENTS.md
+CLAUDE.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+
+Entry/index documents:
+README.md
+docs/current/README.md
+```
+
+执行指导和入口不得覆盖主权威。
+
+### Current task scope validation（已满足）
+
+```text
+VALIDATION_SCOPE ⊆ READ_SCOPE: PASS
+FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+WRITE_ALLOWLIST: all 8 current factsources plus approved supporting close documents
+```
+
+所有后续任务实施前必须重新验证上述三个包含关系；任一不成立时不得实施，并输出`TASK_SCOPE_DESIGN_INVALID`。
+
+Review收口规则：技术验收已通过且唯一阻断为current docs漂移时，必须在同一任务内修复并最终验收，禁止`docs fix -> review`循环；`STATUS.md`/`WORK_ORDER.md`冲突可阻断close，其他入口漂移必须修复但不自动降级技术PASS；只有新的真实P0/P1代码、安全、tenant、事务、migration或API问题可阻断技术acceptance；要求`current conflict count = 0`的文件必须全部进入`WRITE_ALLOWLIST`。
 
 ## Historical records — 以下全部内容均为非当前工单
 

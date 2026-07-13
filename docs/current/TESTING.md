@@ -1,5 +1,50 @@
 # Decision Hub Testing
 
+## 2026-07-13 DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git preflight | PASS | `F:\project\decision-hub` / `dev` / task前HEAD `04a98a8a09866bc0dd20a0fbbbdc8b12ca6c175c` / staged empty；dirty仅为用户预告的5个tracked current docs和1个untracked review。 |
+| unexpected technical scope | PASS / EMPTY | 预检未发现Java生产/测试、callback、V1–V14、API/OpenAPI、contracts、golden_cases或NQ变更。 |
+| task scope design | PASS | `VALIDATION_SCOPE ⊆ READ_SCOPE`、`FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST`、`CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST`全部成立。 |
+| initial review preservation | PASS | consolidated review保留`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`、technical PASS、6-file allowlist root cause与原始证据。 |
+| current factsources | PASS / 0 CONFLICTS | 8个current factsources统一到B2 `CLOSED / ACCEPTED`、capacity `NOT_STARTED / NEXT`及capacity acceptance next task。分类计数：`CURRENT_ALIGNED=70`、`HISTORICAL_MARKED=202`、`NEGATIVE_SAFETY_STATEMENT=18`、`CURRENT_CONFLICT=0`。 |
+| B2 milestone close | PASS | schema errata与persistent guards均`ACCEPTED`；B2 `CLOSED / ACCEPTED`；B3继续`NOT_ALLOWED`。 |
+| Maven tests | NOT_RERUN | Reused evidence：1076 tests / 0 failures / 0 errors / 0 skipped。 |
+| PostgreSQL/Testcontainers | NOT_RERUN | Reused evidence：PostgreSQL 17.10 / real execution。 |
+| `mvn -ntp -Pquality validate` | PASS / BUILD SUCCESS | exit 0；Reactor 19/19 `SUCCESS`；总耗时6.276秒。本轮唯一Maven验证，不据此宣称重跑full tests或PostgreSQL。 |
+| Checkstyle | PASS | root报告0 violations。各子模块提示未找到独立`checkstyle:checkstyle` outputFile，最终root聚合门仍为0 violations且构建成功。 |
+| Spotless | PASS | `spotless:3.1.0:check`通过。 |
+
+系统Maven继续报告`D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml:227`的`profiles`未识别warning，但不影响exit 0。`mvnw.cmd`本轮未执行；既有`UNUSABLE / P2 TOOLING RISK`不变。capacity benchmark未运行，B3未进入。
+
+## Previous review attempt — Historical / BLOCKED preserved
+
+以下记录是同一consolidated review的初始尝试，不是当前验收结论；其`BLOCKED`事实与当时技术命令证据保持原样。
+
+## 2026-07-13 DH-STAGE-QDR-7-B2-CONSOLIDATED-FINAL-ACCEPTANCE-REVIEW validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git preflight | PASS | `dev` / `04a98a8a09866bc0dd20a0fbbbdc8b12ca6c175c` / 开工时clean / staged empty / `origin/dev...HEAD=0/0`。 |
+| schema errata technical review | PASS | history-only no-op gate、5s/60s `SET LOCAL`、rollback/retry、session isolation、repair ceiling与V14 no-truncation均通过。 |
+| persistent guards technical review | PASS | rate/idempotency/CAS/tombstone/DB clock/cleanup/result reference/Spring transaction/commit unknown/guard order均通过。 |
+| precheck ACCESS EXCLUSIVE lock | PASS | callback进入`15:33:56.949`，失败路径返回`15:34:02.050`，日志观测约5.101秒；未使用外部session timeout。 |
+| targeted Maven | PASS | `mvn -ntp -pl dh-usecase,dh-infra,dh-security,dh-api,dh-app -am test`；15/15；dh-app 147 / 0 / 0 / 0；7分43秒。 |
+| full Maven | PASS | `mvn -ntp test`；19/19；158 reports / 1076 tests / 0 failures / 0 errors / 0 skipped；7分05秒。 |
+| architecture guards | PASS | `ArchitectureTest` 39 / 0 / 0 / 0。 |
+| quality | PASS | `mvn -ntp -Pquality validate`；19/19；9.307秒；`BUILD SUCCESS`。 |
+| Checkstyle | PASS | 0 violations。 |
+| Spotless | PASS | check goal通过。 |
+| PostgreSQL/Testcontainers | PASS | Docker Desktop 29.6.1 / Testcontainers 1.20.4 / `postgres:17` / PostgreSQL 17.10 / 0 skipped。 |
+| V1–V14 immutability | PASS | 实施review基线后V1–V14 diff为空；本轮未修改migration。 |
+| current conflict count | FAIL / 6 FILES | AGENTS、CLAUDE、root/current README、CODEX、FACTSOURCE_POLICY仍是旧current入口，且均在本轮allowlist外。 |
+| acceptance | BLOCKED | 技术面通过，但current conflict硬验收未满足；不授权capacity acceptance或B3。 |
+
+Maven全局settings的`profiles` warning、Mockito future-JDK warning及Testcontainers关闭后Hikari后台connection warning均未形成失败，按任务规则为非阻断项。
+
+## Other historical validation records — 以下全部内容均为非当前验证结论
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-SCHEMA-ERRATA-IMPLEMENTATION-BLOCKER-FIX-RETRY validation
 
 | Check | Result | Evidence |
@@ -17,8 +62,6 @@
 | PostgreSQL/Testcontainers | NOT_RUN / NOT_REQUIRED | 本轮不修改callback、测试或migration。 |
 
 Maven全局settings在`D:\Tool\Maven\apache-maven-3.9.12\conf\settings.xml:227`报告未识别`profiles`标签；不影响本轮exit 0。`mvnw.cmd`未执行，未把wrapper写成PASS。
-
-## Historical validation records — 以下全部内容均为非当前验证结论
 
 下方日期记录保留真实历史命令结果；其旧`current task`、`next action`或阶段状态不得覆盖本节。
 
