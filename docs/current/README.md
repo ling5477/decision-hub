@@ -1,6 +1,6 @@
 # Decision Hub Current Docs
 
-## Current authority — Stage-QDR-7 calibration path blocker closed
+## Current authority — Stage-QDR-7 PostgreSQL same-pool recovery accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -10,22 +10,33 @@ Persistent guards implementation: ACCEPTED
 Guard hard-ceiling contract: CLOSED / ACCEPTED
 Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
-Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
+Capacity acceptance criteria: BLOCKED / NOT_FROZEN
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
 Post-B2 capacity acceptance: BLOCKED
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
-Capacity threshold evidence: BLOCKED / RETRY REQUIRED
-Candidate threshold evidence: INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX
-Allow capacity criteria freeze retry: NO
-Full regression: PASS / 1101 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PromptVersion atomic bootstrap: CLOSED / ACCEPTED
+Cleanup tenant-scoped contract: CLOSED / ACCEPTED
+Rate matrix: PASS / 15 OF 15 MEASURED ROUNDS
+Quota atomicity: PASS / COLD_START 3 OF 3
+Cleanup protected-row safety: PASS / TENANT_SCOPED
+Cleanup capacity evidence: PASS / 10 + 100 + 1000
+PostgreSQL same-pool recovery: CLOSED / ACCEPTED / 3 OF 3
+PostgreSQL contention evidence: PASS / SAME_POOL_RECOVERY_AND_SERIES_COMPLETE
+Restart reproducibility: PASS / SPRING_CONTEXT 3 OF 3 / POSTGRESQL_SAME_CONTAINER 3 OF 3
+Capacity threshold evidence: CLOSED / SUFFICIENT
+Candidate threshold evidence: SUFFICIENT
+Allow capacity criteria freeze retry: YES / NEXT_TASK_ONLY
+Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
+Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
-current task status: DONE / CLOSED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
+current task: DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER
+current task status: CLOSED / ACCEPTED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
 ```
 
-上一轮失败证据报告：`DH_STAGE_QDR_7_B2_CAPACITY_THRESHOLD_EVIDENCE.md`；criteria审查记录：`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`；上一轮容量验收记录：`DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md`。失败报告中的首个`200`、第二请求`500 / UNKNOWN_ERROR`、0轮rate matrix及cleanup/contention缺口保持不变。本轮只关闭repeatable 2xx路径阻断，criteria仍为`BLOCKED`而非accepted标准；下一步只允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2`。
+证据报告：`DH_STAGE_QDR_7_B2_CAPACITY_THRESHOLD_EVIDENCE.md`；criteria审查记录：`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`；容量验收记录：`DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md`。报告保留全部历史失败，并在顶部登记run `20260714T154500Z`：same-pool recovery、连续Hikari/PostgreSQL序列、两类3轮restart、100请求恢复后并发、1114项回归与Surefire资源采样均通过。Candidate evidence为`SUFFICIENT`；criteria仍`BLOCKED / NOT_FROZEN`，下一任务仅为criteria freeze retry。
 
 权威层级固定为：
 

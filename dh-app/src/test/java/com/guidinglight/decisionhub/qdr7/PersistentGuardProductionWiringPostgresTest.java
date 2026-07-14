@@ -139,18 +139,15 @@ class PersistentGuardProductionWiringPostgresTest {
                 "decisionhub.integration1.runtime.guard.lease-seconds",
                 Integer.toString(PersistentGuardHardCeilings.MAX_IDEMPOTENCY_LEASE_SECONDS),
                 "decisionhub.integration1.runtime.guard.idempotency-ttl-seconds",
-                Integer.toString(
-                    PersistentGuardHardCeilings.MAX_IDEMPOTENCY_LEASE_SECONDS + 1)))) {
+                Integer.toString(PersistentGuardHardCeilings.MAX_IDEMPOTENCY_LEASE_SECONDS + 1)))) {
       final DecisionDryRunGuardProperties properties =
           context.getBean(DecisionDryRunGuardProperties.class);
 
       assertThat(properties.rateWindowSeconds())
           .isEqualTo(PersistentGuardHardCeilings.MAX_RATE_WINDOW_SECONDS);
-      assertThat(properties.rateLimitValue())
-          .isEqualTo(PersistentGuardHardCeilings.MAX_RATE_QUOTA);
+      assertThat(properties.rateLimitValue()).isEqualTo(PersistentGuardHardCeilings.MAX_RATE_QUOTA);
       assertThat(properties.leaseDuration())
-          .isEqualTo(
-              Duration.ofSeconds(PersistentGuardHardCeilings.MAX_IDEMPOTENCY_LEASE_SECONDS));
+          .isEqualTo(Duration.ofSeconds(PersistentGuardHardCeilings.MAX_IDEMPOTENCY_LEASE_SECONDS));
       assertThat(context.getBean(RateLimitAdmissionPort.class))
           .isInstanceOf(JdbcRateLimitAdmissionAdapter.class);
       assertThat(context.getBean(IdempotencyGuardPort.class))
@@ -525,7 +522,7 @@ class PersistentGuardProductionWiringPostgresTest {
           boundary.required(
               () ->
                   new JdbcGuardCleanupAdapter(context.getBean(JdbcTemplate.class))
-                      .cleanupRetainedIdempotency(cleanupCommand()));
+                      .cleanupRetainedIdempotency(cleanupCommand("tenant-a")));
       assertThat(expired).isEqualTo(1);
       assertThat(
               new JdbcIdempotencyGuardAdapter(jdbc)
@@ -620,6 +617,27 @@ class PersistentGuardProductionWiringPostgresTest {
                       new JdbcGuardCleanupAdapter(contextJdbc)
                           .cleanupRetainedIdempotency(cleanupCommand())))
           .isEqualTo(1);
+    }
+  }
+
+  @Test
+  void cleanupIsTenantAndEnvironmentScoped() {
+    try (AnnotationConfigApplicationContext context = springContext(dataSource())) {
+      final GuardTransactionBoundary boundary = context.getBean(GuardTransactionBoundary.class);
+      final JdbcTemplate contextJdbc = context.getBean(JdbcTemplate.class);
+      seedEligibleFailed(contextJdbc, "cleanup-target");
+      seedEligibleFailed(contextJdbc, "cleanup-other-tenant", "test", "tenant-other");
+      seedEligibleFailed(contextJdbc, "cleanup-other-environment", "staging", "tenant-cleanup");
+
+      assertThat(
+              boundary.required(
+                  () ->
+                      new JdbcGuardCleanupAdapter(contextJdbc)
+                          .cleanupRetainedIdempotency(cleanupCommand())))
+          .isEqualTo(1);
+      assertThat(state(contextJdbc, "cleanup-target")).isEqualTo("EXPIRED");
+      assertThat(state(contextJdbc, "cleanup-other-tenant")).isEqualTo("FAILED");
+      assertThat(state(contextJdbc, "cleanup-other-environment")).isEqualTo("FAILED");
     }
   }
 
@@ -827,10 +845,15 @@ class PersistentGuardProductionWiringPostgresTest {
   }
 
   private static GuardCleanupCommand cleanupCommand() {
+    return cleanupCommand("tenant-cleanup");
+  }
+
+  private static GuardCleanupCommand cleanupCommand(final String tenantId) {
     return new GuardCleanupCommand(
         "test",
         PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
         PersistentGuardIdentity.NQ_DRYRUN_SOURCE,
+        tenantId,
         Duration.ofSeconds(1),
         10);
   }
@@ -968,19 +991,28 @@ class PersistentGuardProductionWiringPostgresTest {
   }
 
   private static void seedEligibleFailed(final JdbcTemplate jdbc, final String requestId) {
+    seedEligibleFailed(jdbc, requestId, "test", "tenant-cleanup");
+  }
+
+  private static void seedEligibleFailed(
+      final JdbcTemplate jdbc,
+      final String requestId,
+      final String environment,
+      final String tenantId) {
     jdbc.update(
         "insert into dh_qdr7_idempotency_guard"
             + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,hash_version,state,"
             + " state_version,stable_error_code,created_at,updated_at,failed_at,expires_at,retention_until)"
-            + " values (?,'test',?,'NQ_DRYRUN','tenant-cleanup',?,'"
-            + HASH_A
-            + "',"
-            + " 'QDR7-DRYRUN-CJSON-1','FAILED',0,'SAFE_FAILURE',transaction_timestamp()-interval '4 hour',"
+            + " values (?,?,?,'NQ_DRYRUN',?,?,?,'QDR7-DRYRUN-CJSON-1','FAILED',0,'SAFE_FAILURE',"
+            + " transaction_timestamp()-interval '4 hour',"
             + " transaction_timestamp()-interval '4 hour',transaction_timestamp()-interval '3 hour',"
             + " transaction_timestamp()-interval '2 hour',transaction_timestamp()-interval '1 hour')",
         UUID.randomUUID(),
+        environment,
         PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
-        requestId);
+        tenantId,
+        requestId,
+        HASH_A);
   }
 
   private static void seedActiveLease(final JdbcTemplate jdbc, final String requestId) {

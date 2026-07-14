@@ -1,5 +1,104 @@
 # Decision Hub Worklog
 
+## 2026-07-14 DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER
+
+- 预检确认仓库`E:/Project/decision-hub`、分支`dev`、HEAD `e2cb1ff966eb611f05d3703893fab002ea6142b4`、staged empty；23个inherited dirty files全部保留，未执行reset/checkout/restore/clean。8个current factsources全部纳入read/validation/scan/write scope，`TASK_SCOPE_DESIGN: PASS`、初始`CURRENT_CONFLICT=0`。
+- 先修正`FACTSOURCE_POLICY.md`旧active task/next task/1101口径；旧值保留为Historical / Previous attempt / Superseded current state / Consumed evidence。Primary authority保持`STATUS.md`与`WORK_ORDER.md`。
+- RCA确认上一轮probe的`127.0.0.1::5432`随机宿主端口在容器stop/start后可能重新分配，应用DataSource仍持有启动时JDBC URL；旧probe只检查容器内`pg_isready`，未比较endpoint或direct JDBC。根因分类为`PROBE_CONTAINER_ENDPOINT_CHANGED / RECOVERY_PROBE_INVALID`。
+- 代码现实检查确认persistent guard通过`JdbcTemplate`逐次获取连接，不缓存`Connection`或事务对象；production `application*.yml`没有特殊Hikari recovery参数。本任务未修改production Java或配置。
+- 新增`DecisionDryRunSamePoolRecoveryPostgresTest`，使用固定loopback endpoint、同一ApplicationContext/DataSource/Hikari pool、同一PostgreSQL容器和persistent volume。首次编译因AssertJ版本不支持`isNotBetween`失败；第二次因数据库已停止时probe错误查询idempotency失败；均只做test probe最小修正并保留失败事实。
+- 最终run `20260714T154500Z`完成same-pool recovery 3/3：database ready `487–512 ms`，protected 2xx恢复`3792–3864 ms`。Outage 9个真实请求全部`5xx / UNKNOWN_ERROR`、false 2xx=0；已提交nonce/idempotency、tenant隔离、PromptVersion canonical row保持，未提交事务未恢复为成功。
+- Hikari/PostgreSQL连续序列37 rows，三轮outage各9个采样点，最大间隔1048 ms；恢复后8并发/100请求全部2xx、0个4xx/5xx。Spring Context restart与PostgreSQL same-container persistent-volume restart分别3/3。
+- 定向recovery/persistent-guard/actual-wiring集合12项通过；累计PromptVersion/cleanup/rate-limit/persistent-guard/DecisionDryRun组合回归`BUILD SUCCESS`。完整`mvn -ntp test`为19/19 reactor SUCCESS、166 suites、1114/0/0/0。
+- 完整回归资源采样捕获Surefire 380 rows/7 PIDs；每个发现fork至少1条样本，覆盖module/start/end/working set/private bytes/CPU，只采集owned Maven后代Java进程。`mvn -ntp -Pquality validate`通过，Checkstyle 0 violations，Spotless PASS。
+- Final evidence位于ignored `target/postgresql-same-pool-recovery/20260714T154500Z/`；secret scan 11 files/8 patterns/0 findings，SHA-256 manifest 14 entries/0 mismatch。历史三个capacity evidence目录保持不变。
+- Candidate threshold evidence现为`SUFFICIENT`，只开放下一任务`DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY`。Criteria尚未冻结，formal harness、capacity acceptance、B3、API、外部HTTP/provider、NQ、Agent/LangGraph与LIVE继续禁止。
+
+```text
+POSTGRESQL_SAME_POOL_RECOVERY: CLOSED / ACCEPTED
+HIKARI_POSTGRESQL_SERIES: PASS
+RESTART_REPRODUCIBILITY: PASS / 3 OF 3 + 3 OF 3
+FULL_REGRESSION: PASS / 1114 / 0 / 0 / 0
+CANDIDATE_THRESHOLD_EVIDENCE: SUFFICIENT
+ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: YES / NEXT_TASK_ONLY
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED
+Stage-QDR-7 B3: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
+```
+
+> Historical / consumed：从下一节开始保留capacity scenario retry、threshold evidence retry-2及更早worklog；旧`BLOCKED`、`next action`和旧测试总数不得覆盖本节current disposition。
+
+## 2026-07-14 DH-STAGE-QDR-7-B2-CAPACITY-SCENARIO-EVIDENCE-BLOCKER-RETRY
+
+- 预检确认仓库`E:/Project/decision-hub`、分支`dev`、HEAD `e2cb1ff966eb611f05d3703893fab002ea6142b4`、staged empty；继承14个current/entry文档修改，未发现write allowlist外dirty path。
+- `JdbcPromptVersionRepository`改用无目标`ON CONFLICT DO NOTHING`，insert后读取canonical row并比较稳定身份/语义内容；删除`SELECT -> INSERT -> DuplicateKeyException -> same-transaction SELECT`，相同定义幂等返回canonical row，不同定义fail-closed。
+- `GuardCleanupCommand`要求明确tenant，拒绝null、blank与`*`；`JdbcGuardCleanupAdapter`的rate/idempotency候选SQL增加`tenant_id = ?`。未新增scheduler、API或global cleanup bypass。
+- 增补真实PostgreSQL PromptVersion并发/语义冲突、cleanup tenant isolation与command校验测试；V12 commit-unknown测试fixed-window从60秒调整为3600秒，仅消除跨分钟suite不稳定，不修改production rate contract。
+- 定向测试、40项PostgreSQL suite与fresh `dh-app` package通过；actual-wiring preflight 13/13、rate matrix 15/15、cold-start quota 3/3通过。HTTP parser对无`decisionId`非2xx的StrictMode误判已只在`target`临时脚本修正。
+- Cleanup临时driver首次因旧构造参数顺序fail-closed；保留失败日志后只修正`target` driver。正式10/100/1000、2 workers、1 writer、batch 10全部PASS，跨tenant/environment、active、locked、not-expired与duplicate deletion均为0。
+- PostgreSQL unavailable期间protected请求fail-closed且无内存fallback。恢复后同一ApplicationContext/同一Hikari pool在规定60秒内没有合法protected 2xx；脚本按60次请求而非elapsed deadline继续采样，晚恢复不计PASS。未修改datasource/global config，restart下游证据未完成。
+- Full-regression sampler先后暴露空CSV StrictMode、Windows短生命周期parent process和PowerShell runtime-specific SHA-256问题；失败attempt与probe均保留。最终exact-repository Maven + Surefire descendant采样通过，未持久化原始command line。
+- `mvn -ntp test`最终为19/19 reactor SUCCESS、1110/0/0/0；PostgreSQL/Testcontainers为8 suites/60 tests/0 skipped；资源baseline PASS。`mvn -ntp -Pquality validate`为19/19 SUCCESS。
+- Evidence root `target/capacity-scenario-evidence/20260714T210052/`完成secret scan 117 files/8 patterns/0 findings与SHA-256 manifest 118 entries/0 mismatch；历史两个capacity-threshold目录未修改。
+- 本轮未修改V1–V14 migration、Flyway callback、API/Controller/DTO/OpenAPI/contracts、HMAC/timestamp/nonce/source外部合同、datasource/global config、NQ、Provider、Agent/LangGraph或LIVE；未实现formal harness，未commit/push/tag。
+
+```text
+PROMPT_VERSION_ATOMIC_BOOTSTRAP: CLOSED / ACCEPTED
+CLEANUP_TENANT_SCOPED_CONTRACT: CLOSED / ACCEPTED
+COLD_START_QUOTA: PASS / 3 OF 3
+CLEANUP_CAPACITY_EVIDENCE: PASS / 10 + 100 + 1000
+FULL_REGRESSION_RESOURCE_BASELINE: PASS
+POSTGRESQL_SAME_POOL_RECOVERY_BLOCKED
+CANDIDATE_THRESHOLD_EVIDENCE: INSUFFICIENT
+ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED
+Stage-QDR-7 B3: NOT_ALLOWED
+next action: wait for a formally assigned same-pool recovery task; do not invent a task ID
+```
+
+> Historical / consumed：从下一节开始保留threshold evidence retry-2及更早worklog；旧`next action`不得覆盖本节current disposition。
+
+## 2026-07-14 DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
+
+- 预检确认仓库`E:/Project/decision-hub`、分支`dev`、HEAD `e2cb1ff966eb611f05d3703893fab002ea6142b4`、tracked worktree clean、staged empty；`origin/dev...HEAD = 0/0`，用户输入的ahead 1已发生漂移。
+- 使用新run `20260714T012507`、localhost Boot jar、专用PostgreSQL 17.10容器和持久volume；临时token、HMAC secret、数据库密码、nonce、requestId和signature不打印、不持久化，未访问外部HTTP。
+- Actual-wiring preflight为5/5 sequential + 8/8 concurrent structured 2xx；完整rate matrix 15/15轮、1500 measured requests全部完成。记录throughput `8.582 / 32.775 / 92.667 req/s`和p50/p95/p99 `107.671 / 212.887 / 275.611 ms`，未将其冻结为threshold。
+- Cold-start quota三轮均为3个2xx、30个429、7个503，DB winner严格为10且oversell为0；warmed retry三轮为10 accepted/30 rejected/0 unexpected。数据库rate bucket原子性通过，但用户要求的end-to-end quota scenario失败。
+- Tenant/environment isolation与`403 / SOURCE_DENIED`通过；same-nonce race 3/3轮均为1 accepted/23 replay/1 DB winner；idempotency lifecycle 3轮合计75/0/0/0。
+- Production `JdbcGuardCleanupAdapter`完成10/100/1000规模、96 timeline rows、2 workers、1 writer、batch 10和duration 59/51/410 ms。Actual cleanup合同按environment/endpoint/source，不含tenant；other-tenant eligible deletion为1/10/100，因此任务要求的cross-tenant safety失败。
+- Contention覆盖c=8/16 normal和lock pressure，Hikari pending max 13、PostgreSQL lock waits max 4；temporary DB unavailable请求fail-closed为`500 / UNKNOWN_ERROR`且无partial state，但同一pool未在30次bounded retry内恢复。Sampler在DB unavailable空结果上触发StrictMode错误，recovery series不完整。
+- Spring ApplicationContext与PostgreSQL persistent-volume restart各3/3通过，committed nonce/idempotency继续受保护，uncommitted transaction未恢复为success，tenant isolation保持。
+- Exact `mvn -ntp test`为19/19 Reactor SUCCESS、1101/0/0/0、PostgreSQL/Testcontainers实际执行、无native-memory OOM；host/Maven JVM/Docker资源已采样，但Surefire JVM rows=0，因此full-regression resource baseline不完整。
+- `mvn -ntp -Pquality validate`为19/19 SUCCESS、Checkstyle 0 violations、Spotless PASS。Secret scan为106 files/8 patterns/0 findings；SHA-256 manifest为107 entries、0 mismatch。
+- 历史run `20260713T213431`的首个`200`、第二请求`500 / UNKNOWN_ERROR`、provider-profile mismatch根因和0轮rate matrix保持不变；path fix commit `e2cb1ff966eb611f05d3703893fab002ea6142b4`保持`CLOSED`。
+- 本轮未修改Java生产代码、Java测试、migration、callback、V1–V14、API/Controller/DTO/OpenAPI/contracts、HMAC/nonce/tenant/source合同或NQ；未实现formal harness，未访问外部Provider，未进入B3，未commit/push/tag。
+
+```text
+THRESHOLD_EVIDENCE_COLLECTION: BLOCKED
+ACTUAL_WIRING_PROTECTED_2XX: PASS
+RATE_MATRIX: PASS / 15 OF 15
+QUOTA_ATOMICITY: FAIL
+TENANT_ENVIRONMENT_ISOLATION: PASS
+CANONICAL_SOURCE_FAIL_CLOSED: PASS
+REPLAY_NONCE_RACE_EVIDENCE: PASS
+IDEMPOTENCY_LIFECYCLE_EVIDENCE: PASS
+CLEANUP_BACKLOG_EVIDENCE: FAIL
+CLEANUP_PROTECTED_ROW_SAFETY: FAIL
+POSTGRESQL_CONTENTION_EVIDENCE: FAIL
+HIKARI_SERIES: FAIL / INCOMPLETE
+RESTART_PERSISTENCE_EVIDENCE: PASS
+FULL_REGRESSION_RESOURCE_BASELINE: FAIL
+CANDIDATE_THRESHOLD_EVIDENCE: INSUFFICIENT
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
+QUALITY_GATE: PASS
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED
+ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO
+Stage-QDR-7 B3: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-CAPACITY-SCENARIO-EVIDENCE-BLOCKER
+```
+
+> Historical / consumed：从下一节开始保留calibration path blocker及更早任务的真实记录；其旧`next action`不得覆盖上方retry-2 current worklog。
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
 
 - 预检确认`dev`、task前HEAD `962b348761e4837f7aa433f45ba567201d8e67d1`、staged为空；工作区只有用户声明可继承的14个current/entry文档和1个untracked上一轮证据报告，三个scope包含关系成立，范围外技术diff为0。

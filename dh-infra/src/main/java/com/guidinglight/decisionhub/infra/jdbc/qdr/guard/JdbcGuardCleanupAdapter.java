@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public final class JdbcGuardCleanupAdapter implements GuardCleanupPort {
   private static final String RATE_SQL =
       "with candidates as (select environment,endpoint,source,tenant_id,window_start"
-          + " from dh_qdr7_rate_limit_bucket where environment=? and endpoint=? and source=?"
+          + " from dh_qdr7_rate_limit_bucket where environment=? and endpoint=? and source=? and tenant_id=?"
           + " and window_end < transaction_timestamp()-(? * interval '1 millisecond')"
           + " order by window_end,tenant_id,window_start limit ? for update skip locked)"
           + " delete from dh_qdr7_rate_limit_bucket target using candidates where"
@@ -21,7 +21,7 @@ public final class JdbcGuardCleanupAdapter implements GuardCleanupPort {
           + " and target.window_start=candidates.window_start";
   private static final String IDEMPOTENCY_SQL =
       "with candidates as (select guard_id,state,state_version from dh_qdr7_idempotency_guard"
-          + " where environment=? and endpoint=? and source=? and state<>'EXPIRED'"
+          + " where environment=? and endpoint=? and source=? and tenant_id=? and state<>'EXPIRED'"
           + " and (lease_expires_at is null or lease_expires_at < transaction_timestamp())"
           + " and ((state in ('COMPLETED','FAILED') and retention_until < transaction_timestamp()-(? * interval '1 millisecond'))"
           + " or (state in ('RECEIVED','IN_PROGRESS') and expires_at < transaction_timestamp()-(? * interval '1 millisecond')))"
@@ -35,7 +35,9 @@ public final class JdbcGuardCleanupAdapter implements GuardCleanupPort {
 
   private final JdbcTemplate jdbc;
 
-  /** @param jdbcTemplate DH-owned PostgreSQL JdbcTemplate。 */
+  /**
+   * @param jdbcTemplate DH-owned PostgreSQL JdbcTemplate。
+   */
   public JdbcGuardCleanupAdapter(final JdbcTemplate jdbcTemplate) {
     this.jdbc = Objects.requireNonNull(jdbcTemplate, "jdbcTemplate");
   }
@@ -43,17 +45,38 @@ public final class JdbcGuardCleanupAdapter implements GuardCleanupPort {
   @Override
   public int cleanupExpiredRateBuckets(final GuardCleanupCommand command) {
     final var c = Objects.requireNonNull(command, "command");
-    return bounded(c, () -> jdbc.update(RATE_SQL, c.environment(), c.endpoint(), c.source(), millis(c.safetyGrace()), c.batchSize()));
+    return bounded(
+        c,
+        () ->
+            jdbc.update(
+                RATE_SQL,
+                c.environment(),
+                c.endpoint(),
+                c.source(),
+                c.tenantId(),
+                millis(c.safetyGrace()),
+                c.batchSize()));
   }
 
   @Override
   public int cleanupRetainedIdempotency(final GuardCleanupCommand command) {
     final var c = Objects.requireNonNull(command, "command");
-    return bounded(c, () -> jdbc.update(IDEMPOTENCY_SQL, c.environment(), c.endpoint(), c.source(),
-        millis(c.safetyGrace()), millis(c.safetyGrace()), c.batchSize()));
+    return bounded(
+        c,
+        () ->
+            jdbc.update(
+                IDEMPOTENCY_SQL,
+                c.environment(),
+                c.endpoint(),
+                c.source(),
+                c.tenantId(),
+                millis(c.safetyGrace()),
+                millis(c.safetyGrace()),
+                c.batchSize()));
   }
 
-  private int bounded(final GuardCleanupCommand command, final java.util.function.IntSupplier action) {
+  private int bounded(
+      final GuardCleanupCommand command, final java.util.function.IntSupplier action) {
     try {
       final int affected = action.getAsInt();
       if (affected < 0 || affected > command.batchSize())

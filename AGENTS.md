@@ -135,19 +135,30 @@ Persistent guards implementation: ACCEPTED
 Guard hard-ceiling contract: CLOSED / ACCEPTED
 Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
-Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
+Capacity acceptance criteria: BLOCKED / NOT_FROZEN
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
 Post-B2 capacity acceptance: BLOCKED
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
-Capacity threshold evidence: BLOCKED / RETRY REQUIRED
-Candidate threshold evidence: INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX
-Allow capacity criteria freeze retry: NO
-Full regression: PASS / 1101 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PromptVersion atomic bootstrap: CLOSED / ACCEPTED
+Cleanup tenant-scoped contract: CLOSED / ACCEPTED
+Rate matrix: PASS / 15 OF 15 MEASURED ROUNDS
+Quota atomicity: PASS / COLD_START 3 OF 3
+Cleanup protected-row safety: PASS / TENANT_SCOPED
+Cleanup capacity evidence: PASS / 10 + 100 + 1000
+PostgreSQL same-pool recovery: CLOSED / ACCEPTED / 3 OF 3
+PostgreSQL contention evidence: PASS / SAME_POOL_RECOVERY_AND_SERIES_COMPLETE
+Restart reproducibility: PASS / SPRING_CONTEXT 3 OF 3 / POSTGRESQL_SAME_CONTAINER 3 OF 3
+Capacity threshold evidence: CLOSED / SUFFICIENT
+Candidate threshold evidence: SUFFICIENT
+Allow capacity criteria freeze retry: YES / NEXT_TASK_ONLY
+Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
+Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
-current task status: DONE / CLOSED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
+current task: DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER
+current task status: CLOSED / ACCEPTED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
 ```
 
 `AGENTS.md`是执行指导，不是primary current-state authority；权威当前状态仍以`STATUS.md`、`WORK_ORDER.md`和`FACTSOURCE_POLICY.md`指定的文件为准。

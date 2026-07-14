@@ -1,5 +1,68 @@
 # Decision Hub Testing
 
+## 2026-07-14 DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git/scope preflight | PASS | `E:/Project/decision-hub`、`dev`、HEAD `e2cb1ff966eb611f05d3703893fab002ea6142b4`、staged empty；23个inherited dirty files全部保留；`TASK_SCOPE_DESIGN: PASS` |
+| current factsources pre-RCA | PASS | 8个current factsources全部进入read/validation/scan/write scope；旧1101、calibration task与旧next task只保留为Historical / Previous attempt / Superseded current state / Consumed evidence；`CURRENT_CONFLICT=0` |
+| RCA | PASS | 旧probe使用随机宿主端口，stop/start后mapped port可漂移；分类`PROBE_CONTAINER_ENDPOINT_CHANGED / RECOVERY_PROBE_INVALID`；production DataSource/Hikari配置与Java代码无需修改 |
+| direct recovery test | PASS | `DecisionDryRunSamePoolRecoveryPostgresTest`：4 tests / 0 failures / 0 errors / 0 skipped；run `20260714T154500Z` |
+| same-pool identity | PASS | 3轮均保持同一ApplicationContext、DataSource、Hikari pool、container ID、mapped port、JDBC URL hash与persistent volume |
+| PostgreSQL unavailable | PASS / FAIL_CLOSED | 9个真实protected请求全部`5xx / UNKNOWN_ERROR`；false 2xx=0、outage idempotency rows=0、无内存fallback、未提交事务未恢复为成功 |
+| recovery timing | PASS / DIAGNOSTIC | database ready `487–512 ms`；protected 2xx恢复`3792–3864 ms`；旧60秒只作为previous observation window，不是正式阈值 |
+| recovery series | PASS | 37 rows；每轮outage 9个采样点；最大间隔1048 ms；包含container/`pg_isready`/direct JDBC/HTTP/Hikari/PostgreSQL/application state |
+| persistent state | PASS | 已提交nonce仍拒绝replay，idempotency保持`COMPLETED`；tenant隔离与PromptVersion canonical row保持 |
+| post-recovery concurrency | PASS | concurrency 8 / 100 requests；100个2xx、0个4xx、0个unexpected 5xx；pool无持续pending |
+| restart 3+3 | PASS | Spring ApplicationContext restart 3/3；PostgreSQL same-container persistent-volume restart 3/3；两类证据分开 |
+| recovery/persistent-guard/actual-wiring suite | PASS | 指定`*Postgres*Recovery*/*PersistentGuard*/*DecisionDryRunActualWiring*`；12 tests / 0 failures/errors/skipped |
+| accumulated blocker suite | PASS | 指定`*PromptVersion*/*GuardCleanup*/*RateLimit*/*PersistentGuard*/*DecisionDryRun*`；15-module reactor `BUILD SUCCESS` |
+| reused scenario evidence | PASS / CONSUMED | run `20260714T210052`的actual-wiring 13/13、rate matrix 15/15、cold-start quota 3/3与cleanup 10/100/1000继续有效；本恢复任务未修改对应生产路径 |
+| full regression | PASS | `mvn -ntp test`；19/19 reactor SUCCESS；166 suites / 1114 tests / 0 failures / 0 errors / 0 skipped |
+| full-regression resources | PASS | Surefire 380 rows / 7 PIDs；每个发现fork至少1样本；记录module/start/end/working set/private bytes/CPU；只采集owned Maven后代Java进程 |
+| quality gate | PASS | `mvn -ntp -Pquality validate` exit 0；19/19 reactor SUCCESS；Checkstyle 0 violations；Spotless PASS |
+| secret scan | PASS | final evidence 11 files、8 patterns、0 findings；match values未持久化 |
+| SHA-256 manifest | PASS | 14 entries、0 mismatch |
+
+```text
+POSTGRESQL_SAME_POOL_RECOVERY: CLOSED / ACCEPTED
+CANDIDATE_THRESHOLD_EVIDENCE: SUFFICIENT
+ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: YES / NEXT_TASK_ONLY
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
+```
+
+> Historical / consumed：从下一节开始保留capacity scenario retry、threshold evidence retry-2与更早验证记录；旧`BLOCKED`、`next action`和旧测试总数不得覆盖本节current validation。
+
+## 2026-07-14 DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2 validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git preflight | PASS | `dev` / `e2cb1ff966eb611f05d3703893fab002ea6142b4`；tracked worktree clean、staged empty；`origin/dev...HEAD = 0/0`，与任务输入的ahead 1不同。 |
+| task scope design | PASS | `VALIDATION_SCOPE ⊆ READ_SCOPE`、`FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST`、`CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST`全部成立。 |
+| actual-wiring preflight | PASS | 真实`POST /api/ai/decision-dry-runs`，5/5 sequential + 8/8 concurrent structured 2xx，0 unexpected 5xx、0 `UNKNOWN_ERROR`、0 provider-profile mismatch。 |
+| rate matrix | PASS | concurrency 1/2/4/8/16，每点3轮；15/15 measured rounds、1500 measured requests，unexpected errors与5xx均为0。 |
+| rate observations | RECORDED / NOT_FROZEN | throughput min/median/max `8.582 / 32.775 / 92.667 req/s`；p50/p95/p99/max `107.671 / 212.887 / 275.611 / 6532.981 ms`；variance `110274.699992`。 |
+| quota atomicity | FAIL / COLD_START_END_TO_END | 三轮均为3 accepted、30 `429`、7 `503`、DB accepted=10、oversell=0；warmed retry三轮为10/30/0，但不能覆盖cold-start失败。 |
+| tenant/environment isolation | PASS | A saturation不消费B quota；cross-scope rows=0；noncanonical source为`403 / SOURCE_DENIED`。 |
+| nonce race | PASS | 3/3轮均为1 accepted、23 `NONCE_REPLAY`、DB winner=1、unexpected errors=0。 |
+| idempotency lifecycle | PASS WITH LIMITATION | 3轮、75/0/0/0；runtime lifecycle与Flyway evidence分开。Round 1/2无保留direct XML，使用完整零失败suite log加exact-HEAD inventory；round 3有direct XML。 |
+| cleanup calibration | FAIL / TASK SAFETY CONTRACT | Production adapter完成10/100/1000规模、96 timeline rows、2 workers、1 writer、batch 10、duration 59/51/410 ms；duplicate=0、cross-environment=0，但other-tenant eligible deletion为1/10/100。 |
+| contention calibration | FAIL / RECOVERY_AND_SERIES_INCOMPLETE | c=8/16 normal与lock pressure已采样；Hikari pending max=13，PostgreSQL lock waits max=4。DB临时不可用后同一pool未在30次bounded retry内恢复，sampler在空PostgreSQL结果下触发StrictMode错误。 |
+| restart reproducibility | PASS | Spring ApplicationContext 3/3；PostgreSQL persistent-volume restart 3/3；committed replay保持`409 / NONCE_REPLAY`，idempotency保持`COMPLETED`，uncommitted state未恢复为成功。 |
+| full Maven regression | PASS | Exact command `mvn -ntp test`；19/19 Reactor SUCCESS，1101 tests，0 failures/errors/skipped，Maven Total time `05:44 min`，PostgreSQL/Testcontainers实际执行，无native-memory OOM。 |
+| regression resource baseline | FAIL / INCOMPLETE | host 102 samples、Maven JVM 100 rows、Docker 168 rows；Surefire JVM sample rows=0，runner `overallPass=false`。 |
+| quality validate | PASS | `mvn -ntp -Pquality validate`；19/19 SUCCESS，Checkstyle 0 violations，Spotless PASS。 |
+| evidence integrity | PASS | `target/capacity-threshold-evidence/20260714T012507/`；SHA-256 manifest 107 entries、0 mismatch；secret scan 106 files/8 patterns/0 findings。 |
+| current fact scan | PASS / 0 CONFLICTS | 扫描14个允许的entry/current/supporting文件active区段；历史段按显式marker排除，current task、next task与candidate evidence状态一致。 |
+| overall | BLOCKED / INSUFFICIENT | Mandatory evidence未全部通过；不允许criteria freeze retry，不提交文档。 |
+| next task | LOCKED | `DH-STAGE-QDR-7-B2-CAPACITY-SCENARIO-EVIDENCE-BLOCKER`。 |
+
+本轮观测仅为localhost calibration evidence，不是accepted threshold、production SLO、production capacity、production certification、capacity acceptance PASS或B3 readiness。
+
+> Historical / consumed：从下一节开始保留calibration path blocker及更早任务的真实结果；其旧`next task`与旧current disposition不得覆盖上方retry-2 validation。
+
 ## 2026-07-13 DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER validation
 
 | Check | Result | Evidence |

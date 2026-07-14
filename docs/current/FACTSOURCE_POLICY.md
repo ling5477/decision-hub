@@ -122,23 +122,46 @@ Persistent guards implementation: ACCEPTED
 Guard hard-ceiling contract: CLOSED / ACCEPTED
 Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
-Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
+Capacity acceptance criteria: BLOCKED / NOT_FROZEN
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
 Post-B2 capacity acceptance: BLOCKED
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
-Capacity threshold evidence: BLOCKED / RETRY REQUIRED
-Candidate threshold evidence: INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX
-Allow capacity criteria freeze retry: NO
-Full regression: PASS / 1101 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PromptVersion atomic bootstrap: CLOSED / ACCEPTED
+Cleanup tenant-scoped contract: CLOSED / ACCEPTED
+Rate matrix: PASS / 15 OF 15 MEASURED ROUNDS
+Quota atomicity: PASS / COLD_START 3 OF 3
+Cleanup protected-row safety: PASS / TENANT_SCOPED
+Cleanup capacity evidence: PASS / 10 + 100 + 1000
+PostgreSQL same-pool recovery: CLOSED / ACCEPTED / 3 OF 3
+PostgreSQL contention evidence: PASS / SAME_POOL_RECOVERY_AND_SERIES_COMPLETE
+Restart reproducibility: PASS / SPRING_CONTEXT 3 OF 3 / POSTGRESQL_SAME_CONTAINER 3 OF 3
+Capacity threshold evidence: CLOSED / SUFFICIENT
+Candidate threshold evidence: SUFFICIENT
+Allow capacity criteria freeze retry: YES / NEXT_TASK_ONLY
+Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
+Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
-current task status: DONE / CLOSED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
+current task: DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER
+current task status: CLOSED / ACCEPTED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
 real HTTP: NO
 real provider: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
+```
+
+## 5.1 Previous attempt / Superseded current state / Consumed evidence
+
+以下状态只记录上一轮任务当时的真实结果，属于`Historical / Previous attempt / Superseded current state / Consumed evidence`，不得覆盖第5节active current state：
+
+```text
+previous current task: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
+previous next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
+previous full regression: PASS / 1101 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+previous same-pool attempt full regression: PASS / 1110 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+previous same-pool result: BLOCKED / RECOVERY_PROBE_INVALID
 ```
 
 ## 6. Archive Rule
@@ -151,4 +174,4 @@ LIVE: DISABLED
 
 `DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE`已在不修改callback、Java、测试、V1–V14、API、contracts、golden_cases或NQ的前提下完成8-file对齐，并保留初始`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`审计记录；其旧capacity acceptance路线已被后续任务消费，只作为historical record。
 
-B2已`CLOSED / ACCEPTED`。Calibration path blocker已`CLOSED`，repeatable protected 2xx为`PASS`；上一轮candidate threshold evidence仍`INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX`，threshold evidence保持`BLOCKED / RETRY REQUIRED`。下一步只允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2`重新采集证据。B3继续`NOT_ALLOWED`，不得从B2 acceptance或5+8 repeatability样本推导criteria freeze、正式harness、capacity acceptance、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE授权。
+B2已`CLOSED / ACCEPTED`。Calibration path blocker、PromptVersion atomic bootstrap、cold-start quota、tenant-scoped cleanup、same-pool recovery、两类restart与Surefire资源采样缺口均已关闭，candidate threshold evidence为`SUFFICIENT`。当前任务仍登记为`DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER / CLOSED / ACCEPTED`，下一任务只允许`DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY`。Criteria尚未冻结，Post-B2 capacity acceptance继续`BLOCKED`，B3继续`NOT_ALLOWED`；不得推导正式harness、capacity acceptance、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE授权。

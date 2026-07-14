@@ -1,6 +1,6 @@
 # Decision Hub Status
 
-## Current authority — 2026-07-13 calibration path blocker closed
+## Current authority — 2026-07-14 PostgreSQL same-pool recovery accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -10,33 +10,44 @@ Persistent guards implementation: ACCEPTED
 Guard hard-ceiling contract: CLOSED / ACCEPTED
 Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
-Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
+Capacity acceptance criteria: BLOCKED / NOT_FROZEN
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
 Post-B2 capacity acceptance: BLOCKED
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
-Capacity threshold evidence: BLOCKED / RETRY REQUIRED
-Candidate threshold evidence: INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX
-Allow capacity criteria freeze retry: NO
-Full regression: PASS / 1101 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PromptVersion atomic bootstrap: CLOSED / ACCEPTED
+Cleanup tenant-scoped contract: CLOSED / ACCEPTED
+Rate matrix: PASS / 15 OF 15 MEASURED ROUNDS
+Quota atomicity: PASS / COLD_START 3 OF 3
+Cleanup protected-row safety: PASS / TENANT_SCOPED
+Cleanup capacity evidence: PASS / 10 + 100 + 1000
+PostgreSQL same-pool recovery: CLOSED / ACCEPTED / 3 OF 3
+PostgreSQL contention evidence: PASS / SAME_POOL_RECOVERY_AND_SERIES_COMPLETE
+Restart reproducibility: PASS / SPRING_CONTEXT 3 OF 3 / POSTGRESQL_SAME_CONTAINER 3 OF 3
+Capacity threshold evidence: CLOSED / SUFFICIENT
+Candidate threshold evidence: SUFFICIENT
+Allow capacity criteria freeze retry: YES / NEXT_TASK_ONLY
+Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
+Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
-current task status: DONE / CLOSED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
+current task: DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER
+current task status: CLOSED / ACCEPTED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
 POSTGRESQL_TEST_EVIDENCE: CURRENT_PASS / POSTGRESQL_17_10 / ZERO_SKIPS
 HARD_CEILING_CONFLICT: CLOSED
-CAPACITY_CRITERIA_AUTHORITY: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
+CAPACITY_CRITERIA_AUTHORITY: BLOCKED / NOT_FROZEN
 PROJECT_ACCEPTANCE_BASELINE: BLOCKED
-ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: YES / NEXT_TASK_ONLY
-ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO
+ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: NO / CONSUMED_BLOCKED
+ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: YES / NEXT_TASK_ONLY
 ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO
 ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
 ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-上一轮exact-HEAD calibration失败轨迹保持不变：首个完整安全链protected请求为`200`，同一Spring Context第二个使用新nonce/requestId的合法请求因mock provider profile bootstrap mismatch返回`500 / UNKNOWN_ERROR`，20次warm-up只完成1次，15个计划rate rounds全部未执行，cleanup/contention证据不完整。本轮在baseline bean构造时冻结profile创建时间，未放宽registry；同一ApplicationContext的5次顺序与8次并发请求、以及独立packaged-jar localhost 5+8 probe均为13/13结构化2xx，0个5xx、`UNKNOWN_ERROR`或profile mismatch。PostgreSQL 17.10 suite、完整1101项回归和质量门通过。该结论只关闭repeatability路径阻断；上一轮candidate threshold evidence仍`INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX`，post-B2 capacity acceptance保持`BLOCKED`，B3继续`NOT_ALLOWED`。
+历史calibration与same-pool失败轨迹保持不变，并明确按Previous attempt / consumed evidence解释。run `20260714T154500Z`证明旧probe因随机宿主端口在容器stop/start后漂移而无效，根因分类为`PROBE_CONTAINER_ENDPOINT_CHANGED / RECOVERY_PROBE_INVALID`；production DataSource/Hikari配置和Java代码无需修改。修正后的固定loopback probe在同一ApplicationContext、DataSource、Hikari pool、PostgreSQL容器、mapped port、JDBC URL hash与persistent volume上完成3/3恢复，database ready为487–512 ms，protected 2xx恢复为3.792–3.864 s；outage 9个真实请求全部fail-closed，37条序列最大采样间隔1048 ms，恢复后8并发/100请求全部2xx。Spring Context restart与PostgreSQL same-container restart分别3/3；`mvn -ntp test`为1114/0/0/0，Surefire 380 rows/7 PIDs，质量门通过。Candidate evidence为`SUFFICIENT`，只开放criteria freeze retry；post-B2 capacity acceptance仍`BLOCKED`，B3仍`NOT_ALLOWED`。
 
 权威层级固定为：
 

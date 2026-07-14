@@ -1,6 +1,6 @@
 # Codex Project Instructions
 
-## Current authority — 2026-07-13 calibration path blocker closed
+## Current authority — 2026-07-14 PostgreSQL same-pool recovery accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -10,27 +10,38 @@ Persistent guards implementation: ACCEPTED
 Guard hard-ceiling contract: CLOSED / ACCEPTED
 Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
-Capacity acceptance criteria: BLOCKED / THRESHOLD_EVIDENCE_REQUIRED
+Capacity acceptance criteria: BLOCKED / NOT_FROZEN
 Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
 Post-B2 capacity acceptance: BLOCKED
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
-Capacity threshold evidence: BLOCKED / RETRY REQUIRED
-Candidate threshold evidence: INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX
-Allow capacity criteria freeze retry: NO
-Full regression: PASS / 1101 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PromptVersion atomic bootstrap: CLOSED / ACCEPTED
+Cleanup tenant-scoped contract: CLOSED / ACCEPTED
+Rate matrix: PASS / 15 OF 15 MEASURED ROUNDS
+Quota atomicity: PASS / COLD_START 3 OF 3
+Cleanup protected-row safety: PASS / TENANT_SCOPED
+Cleanup capacity evidence: PASS / 10 + 100 + 1000
+PostgreSQL same-pool recovery: CLOSED / ACCEPTED / 3 OF 3
+PostgreSQL contention evidence: PASS / SAME_POOL_RECOVERY_AND_SERIES_COMPLETE
+Restart reproducibility: PASS / SPRING_CONTEXT 3 OF 3 / POSTGRESQL_SAME_CONTAINER 3 OF 3
+Capacity threshold evidence: CLOSED / SUFFICIENT
+Candidate threshold evidence: SUFFICIENT
+Allow capacity criteria freeze retry: YES / NEXT_TASK_ONLY
+Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
+Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: YES / NEXT_TASK_ONLY
+ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: NO / CONSUMED_BLOCKED
 ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO
 ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
 ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
-CURRENT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
-CURRENT_TASK_STATUS: DONE / CLOSED
-NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
+CURRENT_TASK: DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER
+CURRENT_TASK_STATUS: CLOSED / ACCEPTED
+NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
 ```
 
-schema errata、persistent guards与B2 milestone保持`ACCEPTED`。上一轮exact-HEAD证据中的首个`200`、第二请求`500 / UNKNOWN_ERROR`、0轮rate matrix及cleanup/contention缺口作为历史失败轨迹保留。本轮通过构造期一次性冻结mock baseline profile时间关闭repeatability路径阻断，同一Context与packaged jar各自的5次顺序、8次并发请求全部为结构化2xx。Candidate threshold evidence仍为`INSUFFICIENT / PREVIOUS RUN INVALID FOR RATE MATRIX`；只允许下一任务`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2`，不授权criteria freeze、harness work order/implementation、capacity acceptance、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
+schema errata、persistent guards与B2 milestone保持`ACCEPTED`，历史失败轨迹继续保留。run `20260714T154500Z`以固定loopback endpoint完成same-pool recovery 3/3、outage fail-closed、持久状态、连续Hikari/PostgreSQL序列、Spring Context restart 3/3、恢复后8并发/100请求、1114项完整回归、Surefire资源采样与质量门。Candidate threshold evidence为`SUFFICIENT`，当前任务`CLOSED / ACCEPTED`，下一任务只允许criteria freeze retry；不授权harness work order/implementation、capacity acceptance、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
 
 > 项目: Decision Hub
 > 必需前置 skill: `nq-dh-workflow-router`
@@ -167,10 +178,10 @@ real provider: NO
 Provider SDK: NO
 Agent / LangGraph: NO
 LIVE: DISABLED
-CURRENT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-CALIBRATION-PATH-BLOCKER
-CURRENT_TASK_STATUS: DONE / CLOSED
-NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2
-MODE: P1_RUNTIME_DETERMINISM_BLOCKER_FIX + DIRECT_TEST_CHANGE + POSTGRESQL_REGRESSION + CURRENT_FACTSOURCE_SYNC + NO_MIGRATION_CHANGE + NO_API + NO_PROVIDER + NO_AGENT + NO_LIVE
+CURRENT_TASK: DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER
+CURRENT_TASK_STATUS: CLOSED / ACCEPTED
+NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
+MODE: CODE_AND_EVIDENCE_FIX + ACTUAL_WIRING_VALIDATION + LOCALHOST_PROTECTED_HTTP + REAL_POSTGRESQL + FULL_REGRESSION + CURRENT_FACTSOURCE_SYNC + NO_MIGRATION_CHANGE + NO_API + NO_PROVIDER + NO_AGENT + NO_LIVE
 ```
 
 ## 2. 前置分类规则
@@ -268,7 +279,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让supporting docs升级为blocker。Stage-QDR-7 B1为`FROZEN`；B2、schema errata与persistent guards均已`ACCEPTED`。Calibration path blocker已`CLOSED`，repeatable protected 2xx为`PASS`；threshold evidence仍`BLOCKED / RETRY REQUIRED`，下一步仅允许`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2`重新采集证据。Criteria freeze、正式harness、capacity acceptance、B3、API、Provider、外部HTTP、Agent、LangGraph、NQ runtime integration与LIVE均未授权。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让supporting docs升级为blocker。Stage-QDR-7 B1为`FROZEN`；B2、schema errata与persistent guards均已`ACCEPTED`。Calibration path blocker、PromptVersion atomic bootstrap、cold-start quota、tenant cleanup与Surefire sampling缺口已关闭；repeatable protected 2xx与15/15 rate rounds为`PASS`。Threshold evidence仅因same-pool recovery在60秒deadline内失败及其restart下游缺口而`BLOCKED / INSUFFICIENT`；下一formal task ID尚未分配。Criteria freeze、正式harness、capacity acceptance、B3、API、Provider、外部HTTP、Agent、LangGraph、NQ runtime integration与LIVE均未授权。
 
 ## 4. 安全边界
 

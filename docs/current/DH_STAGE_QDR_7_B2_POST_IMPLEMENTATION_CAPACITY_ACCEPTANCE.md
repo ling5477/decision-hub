@@ -9,7 +9,19 @@
 > B2 implementation status: `CLOSED / ACCEPTED`
 > B3 readiness: `NOT_ALLOWED`
 
-## Current follow-up disposition（2026-07-13）
+## Current same-pool recovery disposition（2026-07-14）
+
+`DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER`确认旧probe存在mapped-port漂移，并以固定loopback endpoint完成同一ApplicationContext/DataSource/Hikari pool恢复3/3、outage fail-closed、持久状态、37条连续序列、恢复后8并发/100请求、Spring Context restart 3/3和PostgreSQL same-container restart 3/3。完整回归1114/0/0/0、Surefire 380 rows/7 PIDs与质量门通过，candidate threshold evidence现为`SUFFICIENT`。
+
+因此本报告原始`POST_B2_CAPACITY_ACCEPTANCE: BLOCKED`结论仍不变：criteria尚未在独立retry中冻结，formal harness也未获授权。B2 implementation仍`CLOSED / ACCEPTED`，criteria仍`BLOCKED / NOT_FROZEN`，但`ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: YES / NEXT_TASK_ONLY`；下一任务只允许`DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY`，不得提前声明capacity acceptance PASS或进入B3。
+
+## Previous threshold evidence retry-2 disposition（historical / consumed，2026-07-14）
+
+`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2`完成了13/13 protected preflight、15/15 rate rounds、tenant/environment isolation、same-nonce race、idempotency lifecycle和两类3轮restart；完整`mvn -ntp test`为1101/0/0/0，质量门通过。与此同时，cold-start quota、cleanup tenant-scope safety、PostgreSQL/Hikari unavailable recovery series和Surefire资源采样未满足mandatory条件。
+
+因此本报告原始`POST_B2_CAPACITY_ACCEPTANCE: BLOCKED`结论不变。该轮B2 implementation仍`CLOSED / ACCEPTED`，criteria仍`BLOCKED / NOT_FROZEN`；当时下一任务现已消费，不得覆盖顶部current disposition。
+
+## Previous follow-up disposition（historical / consumed，2026-07-13）
 
 后续criteria freeze仍为`CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT_BLOCKED`；本报告原始`BLOCKED`结论、38项correctness证据、两次native-memory OOM和原始hash保持不变。上一轮threshold evidence retry仍记录首个actual-wiring protected `200`、同一Context第二请求`500 / UNKNOWN_ERROR`、rate matrix为0轮以及cleanup/contention mandatory evidence不完整。本轮只关闭repeatable 2xx路径阻断：同一Context与packaged jar各自完成5次顺序、8次并发结构化2xx，完整1101项回归通过；这仍不等于capacity acceptance。下一任务为`DH-STAGE-QDR-7-B2-CAPACITY-THRESHOLD-EVIDENCE-RETRY-2`，不授权criteria freeze、harness work order/implementation、capacity execution或B3。
 
