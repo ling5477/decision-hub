@@ -1,6 +1,6 @@
 # Codex Project Instructions
 
-## Current authority — 2026-07-15 capacity criteria frozen
+## Current authority — 2026-07-15 capacity harness work order accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -11,7 +11,8 @@ Guard hard-ceiling contract: CLOSED / ACCEPTED
 Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: FROZEN / ACCEPTED
-Capacity harness: NOT_IMPLEMENTED / NEXT
+Capacity harness work order: CLOSED / ACCEPTED
+Capacity harness implementation: NOT_STARTED / NEXT
 Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
@@ -27,22 +28,23 @@ Restart reproducibility: PASS / SPRING_CONTEXT 3 OF 3 / POSTGRESQL_SAME_CONTAINE
 Capacity threshold evidence: CLOSED / SUFFICIENT
 Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
-Allow capacity harness work order: YES / NEXT_TASK_ONLY
+Allow capacity harness work order: NO / CONSUMED_ACCEPTED
+Allow capacity harness implementation: YES / NEXT_TASK_ONLY
 Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
 ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: NO / CONSUMED_BLOCKED
-ALLOW_CAPACITY_HARNESS_WORK_ORDER: YES / NEXT_TASK_ONLY
-ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
+ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO / CONSUMED_ACCEPTED
+ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: YES / NEXT_TASK_ONLY
 ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
-CURRENT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
+CURRENT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
 CURRENT_TASK_STATUS: CLOSED / ACCEPTED
-NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
 ```
 
-schema errata、persistent guards与B2 milestone保持`ACCEPTED`，历史失败轨迹继续保留。Criteria freeze retry已冻结工程验收阈值、环境baseline、mandatory scenario与formal harness合同；该标准不是production SLO或容量认证。当前任务`CLOSED / ACCEPTED`，下一任务只允许harness implementation work order；不授权harness implementation、capacity execution、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
+schema errata、persistent guards与B2 milestone保持`ACCEPTED`，历史失败轨迹继续保留。Criteria保持`FROZEN / ACCEPTED`；harness work order已冻结混合架构、profile、场景、artifact、semantic exit code、安全边界、自测和精确write allowlist。当前任务`CLOSED / ACCEPTED`，下一任务只允许harness implementation；不授权capacity execution、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
 
 > 项目: Decision Hub
 > 必需前置 skill: `nq-dh-workflow-router`
@@ -280,7 +282,7 @@ docs/gates/**
 docs/archive/** 仅当历史遗留目录存在时使用；QDR 当前归档标准不是 docs/archive
 ```
 
-只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让supporting docs升级为blocker。Stage-QDR-7 B1为`FROZEN`；B2、schema errata与persistent guards均已`ACCEPTED`。Calibration path blocker、PromptVersion atomic bootstrap、cold-start quota、tenant cleanup与Surefire sampling缺口已关闭；repeatable protected 2xx与15/15 rate rounds为`PASS`。Threshold evidence仅因same-pool recovery在60秒deadline内失败及其restart下游缺口而`BLOCKED / INSUFFICIENT`；下一formal task ID尚未分配。Criteria freeze、正式harness、capacity acceptance、B3、API、Provider、外部HTTP、Agent、LangGraph、NQ runtime integration与LIVE均未授权。
+只有 `FACTSOURCE_POLICY.md` 定义的硬错误可让supporting docs升级为blocker。Stage-QDR-7 B1为`FROZEN`；B2、schema errata与persistent guards均已`ACCEPTED`。Calibration path blocker、PromptVersion atomic bootstrap、cold-start quota、tenant cleanup、same-pool recovery与Surefire sampling缺口已关闭；candidate threshold evidence为`CLOSED / SUFFICIENT`，criteria为`FROZEN / ACCEPTED`。Harness work order已`CLOSED / ACCEPTED`，下一任务只允许formal harness implementation；capacity acceptance、B3、API、Provider、外部HTTP、Agent、LangGraph、NQ runtime integration与LIVE仍未授权。
 
 ## 4. 安全边界
 

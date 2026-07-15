@@ -2,13 +2,13 @@
 
 > task: `DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER`  
 > mode: `WORK_ORDER_ONLY`  
-> stage: `Stage-QDR-7 / CAPACITY_CRITERIA_FROZEN / HARNESS_WORK_ORDER_NEXT`
+> stage: `Stage-QDR-7 / CAPACITY_CRITERIA_FROZEN / HARNESS_IMPLEMENTATION_NEXT`
 > mainline: `Limited Dry Run Runtime Readiness`  
 > endpoint: `POST /api/ai/decision-dry-runs`（既有，不新增 endpoint）
 
-## Current capacity criteria disposition（2026-07-15）
+## Current capacity harness work order disposition（2026-07-15）
 
-本work order已被B2实施与最终验收消费，B2保持`CLOSED / ACCEPTED`，所有历史失败继续保留。Criteria freeze retry已选择有效证据并冻结工程验收阈值、环境baseline与harness合同；`PROJECT_ACCEPTANCE_BASELINE`现为`FROZEN`。只允许下一独立任务编写harness implementation work order；本文件不授权harness实现、capacity执行或B3。
+本work order已被B2实施与最终验收消费，B2保持`CLOSED / ACCEPTED`，所有历史失败继续保留。Criteria保持`FROZEN / ACCEPTED`；harness implementation work order已根据仓库现实冻结混合架构、Maven profile、scenario、artifact/schema、semantic exit code、安全边界、自测与精确write allowlist。只允许下一独立任务实施formal harness；本文件不授权capacity执行或B3。
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -19,7 +19,8 @@ Guard hard-ceiling contract: CLOSED / ACCEPTED
 Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: FROZEN / ACCEPTED
-Capacity harness: NOT_IMPLEMENTED / NEXT
+Capacity harness work order: CLOSED / ACCEPTED
+Capacity harness implementation: NOT_STARTED / NEXT
 Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
@@ -35,14 +36,15 @@ Restart reproducibility: PASS / SPRING_CONTEXT 3 OF 3 / POSTGRESQL_SAME_CONTAINE
 Capacity threshold evidence: CLOSED / SUFFICIENT
 Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
-Allow capacity harness work order: YES / NEXT_TASK_ONLY
+Allow capacity harness work order: NO / CONSUMED_ACCEPTED
+Allow capacity harness implementation: YES / NEXT_TASK_ONLY
 Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
 current task status: CLOSED / ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
 ```
 
 > Historical / Consumed：从下一节开始均为B2实施、blocker fix与previous review attempt的当时记录；其中旧`next action`、`BLOCKED`和`NOT_YET`不再表示current状态，也不得覆盖`STATUS.md`与`WORK_ORDER.md`。

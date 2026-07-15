@@ -1,6 +1,6 @@
 # Decision Hub Current Docs
 
-## Current authority — Stage-QDR-7 capacity criteria frozen
+## Current authority — Stage-QDR-7 capacity harness work order accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -11,7 +11,8 @@ Guard hard-ceiling contract: CLOSED / ACCEPTED
 Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: FROZEN / ACCEPTED
-Capacity harness: NOT_IMPLEMENTED / NEXT
+Capacity harness work order: CLOSED / ACCEPTED
+Capacity harness implementation: NOT_STARTED / NEXT
 Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
@@ -27,17 +28,18 @@ Restart reproducibility: PASS / SPRING_CONTEXT 3 OF 3 / POSTGRESQL_SAME_CONTAINE
 Capacity threshold evidence: CLOSED / SUFFICIENT
 Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
-Allow capacity harness work order: YES / NEXT_TASK_ONLY
+Allow capacity harness work order: NO / CONSUMED_ACCEPTED
+Allow capacity harness implementation: YES / NEXT_TASK_ONLY
 Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
 current task status: CLOSED / ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
 ```
 
-证据报告：`DH_STAGE_QDR_7_B2_CAPACITY_THRESHOLD_EVIDENCE.md`；accepted criteria：`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`；freeze review：`DH_STAGE_QDR_7_B2_CAPACITY_CRITERIA_FREEZE_REVIEW.md`；容量验收记录：`DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md`。Criteria已冻结工程阈值、环境baseline与harness合同，但harness仍未实现，capacity acceptance仍`BLOCKED / PENDING HARNESS AND EXECUTION`；下一任务仅为harness implementation work order。
+证据报告：`DH_STAGE_QDR_7_B2_CAPACITY_THRESHOLD_EVIDENCE.md`；accepted criteria：`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`；harness work order：`DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md`；容量验收记录：`DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md`。Work order已冻结实现架构与边界，但harness implementation仍未开始，capacity acceptance仍`BLOCKED / PENDING HARNESS AND EXECUTION`；下一任务仅为harness implementation。
 
 权威层级固定为：
 
@@ -184,10 +186,11 @@ docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/FACTSOURCE_POLICY.md
-docs/current/DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md Current criteria freeze blocker / threshold evidence required
+docs/current/DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md Accepted capacity criteria / FROZEN
+docs/current/DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md Current harness implementation work order / CLOSED / ACCEPTED
 docs/current/DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md Previous capacity acceptance / BLOCKED preserved
 docs/current/DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md B2 milestone close / includes previous BLOCKED review
-docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed work order with criteria blocker addendum
+docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed work order with current harness disposition addendum
 docs/current/TESTING.md
 docs/current/ARCHIVE_INDEX.md historical archive index / supporting only
 ```
@@ -209,10 +212,11 @@ docs/current/DB_SCHEMA.md
 ```text
 STATUS.md                  当前状态表
 DH_STAGE_QDR_7_PLAN.md     Historical / consumed Stage-QDR-7 planning baseline
-DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md Current criteria blocker；不是accepted标准
+DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md Accepted capacity criteria；FROZEN / ACCEPTED
+DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md Current harness implementation work order；CLOSED / ACCEPTED
 DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md Previous capacity acceptance / BLOCKED preserved
 DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md B2 milestone close；保留Previous review attempt / BLOCKED
-DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed；顶部含criteria blocker addendum
+DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed；顶部含current harness disposition addendum
 WORK_ORDER.md              下一步唯一入口
 CODEX_PROJECT_INSTRUCTIONS.md 当前执行纪律
 TESTING.md                 当前验证证据与工具风险

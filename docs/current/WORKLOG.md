@@ -1,6 +1,22 @@
 # Decision Hub Worklog
 
-## 2026-07-15 DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
+## Current work — 2026-07-15 capacity harness implementation work order
+
+`DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER`已`CLOSED / ACCEPTED`。本轮使用`nq-dh-workflow-router`与`dh-docs-writer`，基于POM、`dh-app` actual-wiring/Testcontainers tests、PowerShell脚本与CI现实冻结Java/Failsafe + PowerShell + Maven profile混合架构、场景、artifact/schema、semantic exit code、安全、自测、teardown与精确write allowlist；未实现或执行harness。
+
+```text
+current factsources: PASS / 8 OF 8 / 0 CONFLICTS
+quality: BUILD SUCCESS / 19 OF 19
+forbidden-scope diff: 0
+Capacity harness implementation: NOT_STARTED / NEXT
+Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
+```
+
+详细设计与记录见`DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md`及本文件同名worklog条目。
+
+## Historical / consumed — 2026-07-15 capacity criteria freeze retry
 
 - 预检确认repository `E:/Project/decision-hub`、branch `dev`、HEAD `9212047ab473a67f7bbdc8729e99495be6698946`且与`origin/dev`一致；task前worktree clean、staged empty，三个scope包含关系全部PASS。
 - 使用`nq-dh-workflow-router`分类为`DOCUMENTATION`，以`dh-docs-writer`执行docs-only freeze；未调用外部connector/plugin。
@@ -3845,6 +3861,62 @@ LIVE: DISABLED
 current workspace: F:/Project/decision-hub
 next action: DH-STAGE-QDR-3-B5-CLOSE-REVIEW
 ```
+
+## 2026-07-15 DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+
+### Task classification
+
+```text
+WORK_ORDER_ONLY
+CAPACITY_HARNESS_IMPLEMENTATION_DESIGN
+ACCEPTANCE_RUNNER_CONTRACT
+MAVEN_PROFILE_DESIGN
+SCENARIO_DRIVER_DESIGN
+EVIDENCE_ARTIFACT_SCHEMA
+SECURITY_BOUNDARY_DESIGN
+TEST_MATRIX_DESIGN
+CURRENT_FACTSOURCE_SYNC
+NO_CODE_CHANGE / NO_TEST_CHANGE / NO_MIGRATION_CHANGE
+NO_CAPACITY_EXECUTION / NO_B3 / NO_EXTERNAL_HTTP / NO_PROVIDER / NO_NQ / NO_AGENT / NO_LIVE
+```
+
+### Completed
+
+- 使用`nq-dh-workflow-router`完成DOCUMENTATION前置分类，并以`dh-docs-writer`执行docs-only治理。
+- 核验root/module POM、`dh-app` qdr7 actual-wiring/Testcontainers tests、`scripts/verify.ps1`、CI Docker能力与现有artifact惯例。
+- 选择Java/JUnit/Failsafe + PowerShell + Maven profile混合模式；没有新增production module或`src/main`容量组件。
+- 冻结`qdr7-capacity-acceptance`唯一命令、Maven lifecycle、semantic exit code、run-id隔离、environment preflight、14类mandatory driver、连续指标、artifact/schema/manifest/secret scan、teardown与14项harness自测。
+- 冻结下一implementation的三个POM、9个Java test infrastructure文件、1个PowerShell入口、4个config/schema文件和current docs精确write allowlist。
+- 新增`DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md`并同步8个current factsources、ROADMAP、criteria/evidence/acceptance supporting docs。
+
+### Validation
+
+```text
+scope containment: PASS
+current factsources: PASS / 8 OF 8 / 0 CONFLICTS
+mandatory contract markers: PASS / 40 OF 40
+unexpected files: 0
+forbidden-scope tracked diff: 0
+forbidden-scope untracked diff: 0
+git diff --check: PASS / EOL WARNINGS ONLY
+mvn -ntp -Pquality validate: BUILD SUCCESS / 19 OF 19
+full Maven regression: NOT RERUN / ACCEPTED 1114-TEST FACT REUSED
+capacity execution: NOT RUN
+```
+
+### Current state
+
+```text
+Stage-QDR-7 B2: CLOSED / ACCEPTED
+Capacity acceptance criteria: FROZEN / ACCEPTED
+Capacity harness work order: CLOSED / ACCEPTED
+Capacity harness implementation: NOT_STARTED / NEXT
+Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
+```
+
+本任务未实现或执行harness，未修改Java、测试、POM、脚本、application、migration/callback、API/contracts或NQ，未接外部HTTP/provider/Agent/LangGraph，未开启Paper/LIVE。Local commit仅在最终diff、scope与staged复核通过后创建；禁止push与tag。
 
 ## 2026-07-11 DH-STAGE-QDR-6-B1-EVIDENCE-CORRELATION-AGGREGATE-CONTRACTS
 

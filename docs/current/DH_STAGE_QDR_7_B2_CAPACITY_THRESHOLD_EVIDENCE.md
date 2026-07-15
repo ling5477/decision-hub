@@ -1,16 +1,17 @@
 # DH Stage-QDR-7 B2 Capacity Threshold Evidence
 
-## Current criteria freeze disposition（2026-07-15）
+## Current harness work order disposition（2026-07-15）
 
-`DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY`已完成evidence validity与commit compatibility审查。正式阈值只纳入run `20260714T210052`的修复后valid slice以及run `20260714T154500Z`的fixed-endpoint recovery/restart/full-regression slice；`20260713T213431`、`20260714T012507`、旧same-pool recovery、initial parser/driver错误与negative nonce summary parser均保持historical或superseded，不参与阈值统计。
+`DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY`已完成evidence validity与commit compatibility审查；其阈值保持`FROZEN / ACCEPTED`。后续harness work order已冻结正式实现架构与边界，但未实现或执行harness。正式阈值仍只纳入run `20260714T210052`的修复后valid slice以及run `20260714T154500Z`的fixed-endpoint recovery/restart/full-regression slice；其他历史或superseded证据不参与统计。
 
 ```text
 CANDIDATE_THRESHOLD_EVIDENCE: CLOSED / SUFFICIENT
 CAPACITY_ACCEPTANCE_CRITERIA: FROZEN / ACCEPTED
-FORMAL_CAPACITY_HARNESS: NOT_IMPLEMENTED / NEXT
+CAPACITY_HARNESS_WORK_ORDER: CLOSED / ACCEPTED
+FORMAL_CAPACITY_HARNESS_IMPLEMENTATION: NOT_STARTED / NEXT
 POST_B2_CAPACITY_ACCEPTANCE: BLOCKED / PENDING HARNESS AND EXECUTION
 Stage-QDR-7 B3: NOT_ALLOWED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
 ```
 
 Accepted阈值、公式、rounding、margin、环境baseline与harness合同以`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`为唯一标准；本文件继续作为evidence与历史失败记录，不是production SLO/SLA或容量认证。

@@ -1,6 +1,28 @@
 # Decision Hub Testing
 
-## 2026-07-15 DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY validation
+## Current validation — 2026-07-15 capacity harness implementation work order
+
+```text
+task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+baseline HEAD: fcedc486cc47b010210ae5b0017c0bb69c4e97c4
+scope containment: PASS
+current factsources: PASS / 8 OF 8 / 0 CONFLICTS
+mandatory contract markers: PASS / 40 OF 40
+forbidden-scope tracked/untracked diff: 0 / 0
+git diff --check: PASS / EOL WARNINGS ONLY
+quality: BUILD SUCCESS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+full Maven regression: NOT RERUN / ACCEPTED 1114-TEST FACT REUSED
+capacity harness/matrix/fault injection: NOT RUN
+Capacity harness work order: CLOSED / ACCEPTED
+Capacity harness implementation: NOT_STARTED / NEXT
+Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
+```
+
+详细命令、边界与未运行项见本文件同名validation记录；本轮没有把复用的1114-test事实写成重跑，也没有把work order完成写成capacity PASS。
+
+## Historical / consumed — 2026-07-15 capacity criteria freeze retry validation
 
 | Check | Result | Evidence |
 |---|---|---|
@@ -3822,4 +3844,50 @@ Boundary:
 未调用 Provider、HTTP 或 NQ
 未保存 raw prompt、raw provider response 或 credential
 未触碰交易执行链
+```
+
+## 2026-07-15 DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER validation
+
+```text
+Task type: WORK_ORDER_ONLY + CAPACITY_HARNESS_IMPLEMENTATION_DESIGN + CURRENT_FACTSOURCE_SYNC + NO_CODE_CHANGE + NO_TEST_CHANGE + NO_MIGRATION_CHANGE + NO_CAPACITY_EXECUTION + NO_B3
+branch: dev
+baseline HEAD: fcedc486cc47b010210ae5b0017c0bb69c4e97c4
+worktree before task: CLEAN
+staged before task: EMPTY
+capacity acceptance criteria: FROZEN / ACCEPTED
+capacity harness work order: CLOSED / ACCEPTED
+capacity harness implementation: NOT_STARTED / NEXT
+post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
+Stage-QDR-7 B3: NOT_ALLOWED
+```
+
+| 命令 / 证据 | 结果 | 说明 |
+|---|---|---|
+| `Get-Location` / `git branch --show-current` / `git rev-parse HEAD` | PASS | `E:/Project/decision-hub`、`dev`、`fcedc486cc47b010210ae5b0017c0bb69c4e97c4`。 |
+| `git status --short` / `git diff --cached --name-only`（开工前） | PASS / EMPTY | 起始无dirty或staged；`origin/dev`为较旧`9212047ab473a67f7bbdc8729e99495be6698946`，本轮未fetch/push。 |
+| Maven/POM reality scan | PASS | 无acceptance/integration-test module、Failsafe或Exec；root只有`quality` profile；actual-wiring/Testcontainers/Hikari/PostgreSQL证据集中在`dh-app` qdr7 tests。 |
+| current fact active-block scan | PASS / 8 OF 8 / 0 CONFLICTS | 8个factsources均写入work order `CLOSED / ACCEPTED`、implementation `NOT_STARTED / NEXT`与唯一next task。 |
+| mandatory contract marker scan | PASS / 40 OF 40 | profile、14类mandatory driver、全部必需artifact与B3禁止标记均存在；Markdown code fence为偶数。 |
+| `git diff --check` | PASS_WITH_EOL_WARNINGS | exit 0；仅Windows LF -> CRLF warning，无whitespace error。 |
+| allowlist status scan | PASS | dirty仅限本任务批准文档；无unexpected file。 |
+| forbidden-scope tracked/untracked scan | PASS / 0 + 0 | Java production/test、POM、scripts/config、application、migration/callback、API/contracts、CI均为0 diff。 |
+| `mvn -ntp -Pquality validate` | BUILD SUCCESS | 19/19 Reactor SUCCESS；Checkstyle 0 violations；Spotless `check`通过。 |
+| `mvn test` / full regression | NOT_RERUN / ACCEPTED FACT REUSED | 本轮按work-order-only边界不重跑；沿用已接受1114 tests / 0 failures / 0 errors / 0 skipped事实。 |
+| capacity harness / matrix / fault injection | NOT RUN | harness尚未实现；禁止把本轮写成capacity PASS。 |
+| push / tag | NOT RUN | 本轮禁止push与tag。 |
+
+Boundary：
+
+```text
+Java production diff = 0
+Java test diff = 0
+POM diff = 0
+script/config diff = 0
+application config diff = 0
+migration/callback diff = 0
+API/contracts diff = 0
+NQ diff = 0
+external HTTP/provider/Agent/LangGraph/Paper/LIVE = 0
+capacity execution = 0
+B3 entry = 0
 ```
