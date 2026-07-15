@@ -16,6 +16,9 @@ class Qdr7CapacityProfileIsolationTest {
     final String appPom = Files.readString(root.resolve("dh-app/pom.xml"));
 
     assertThat(rootPom).contains("<id>qdr7-capacity-acceptance</id>");
+    assertThat(rootPom)
+        .contains("<qdr7.powershell.executable>AUTO</qdr7.powershell.executable>")
+        .contains("<qdr7.seed>7</qdr7.seed>");
     assertThat(rootPom).doesNotContain("<activeByDefault>true</activeByDefault>");
     assertThat(appPom)
         .contains("<id>qdr7-capacity-acceptance</id>")
@@ -23,7 +26,9 @@ class Qdr7CapacityProfileIsolationTest {
         .contains("**/Qdr7CapacityAcceptanceIT.java")
         .contains("<goal>integration-test</goal>")
         .contains("<goal>verify</goal>")
-        .contains("Invoke-Qdr7CapacityAcceptance.ps1");
+        .contains("Invoke-Qdr7CapacityAcceptance.ps1")
+        .contains("<executable>powershell.exe</executable>")
+        .doesNotContain("<executable>${qdr7.powershell.executable}</executable>");
   }
 
   @Test
@@ -34,7 +39,14 @@ class Qdr7CapacityProfileIsolationTest {
         .contains("<phase>pre-integration-test</phase>")
         .contains("<phase>post-integration-test</phase>")
         .contains("<argument>${qdr7.runId}</argument>")
-        .contains("<argument>${qdr7.seed}</argument>");
+        .contains("<argument>${qdr7.seed}</argument>")
+        .contains("<argument>-PowerShellExecutable</argument>")
+        .contains("<argument>${qdr7.powershell.executable}</argument>");
+
+    assertThat(appPom.indexOf("<argument>-RunId</argument>"))
+        .isLessThan(appPom.indexOf("<argument>${qdr7.runId}</argument>"));
+    assertThat(appPom.indexOf("<argument>-Seed</argument>"))
+        .isLessThan(appPom.indexOf("<argument>${qdr7.seed}</argument>"));
   }
 
   private static Path repositoryRoot() {

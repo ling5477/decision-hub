@@ -132,7 +132,7 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>${qdr7.powershell.executable}</executable>
+                  <executable>powershell.exe</executable>
                   <arguments>
                     <argument>-NoProfile</argument>
                     <argument>-NonInteractive</argument>
@@ -148,6 +148,8 @@
                     <argument>${qdr7.seed}</argument>
                     <argument>-ProjectRoot</argument>
                     <argument>${maven.multiModuleProjectDirectory}</argument>
+                    <argument>-PowerShellExecutable</argument>
+                    <argument>${qdr7.powershell.executable}</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -158,7 +160,7 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>${qdr7.powershell.executable}</executable>
+                  <executable>powershell.exe</executable>
                   <arguments>
                     <argument>-NoProfile</argument>
                     <argument>-NonInteractive</argument>
@@ -174,6 +176,8 @@
                     <argument>${qdr7.seed}</argument>
                     <argument>-ProjectRoot</argument>
                     <argument>${maven.multiModuleProjectDirectory}</argument>
+                    <argument>-PowerShellExecutable</argument>
+                    <argument>${qdr7.powershell.executable}</argument>
                   </arguments>
                 </configuration>
               </execution>

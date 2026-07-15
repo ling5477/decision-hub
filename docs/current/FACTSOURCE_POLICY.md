@@ -125,8 +125,11 @@ Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempoten
 Capacity acceptance criteria: FROZEN / ACCEPTED
 Capacity harness work order: CLOSED / ACCEPTED
 Capacity harness implementation: CLOSED / ACCEPTED
+Harness runtime binding: CLOSED / ACCEPTED
 Formal profile: qdr7-capacity-acceptance
-Post-B2 capacity acceptance: BLOCKED / EXECUTION NEXT
+Historical formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T140521Z
+Latest binding validation: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260715T145836Z / EXPECTED CONTRACT
+Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED ON QUALIFIED ENVIRONMENT
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -144,13 +147,13 @@ Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
 Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
 Allow capacity acceptance execution: YES / NEXT_TASK_ONLY
-Full regression: PASS / 1133 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
+Full regression: PASS / 1134 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Previous full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS / HISTORICAL
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
-current task status: CLOSED / ACCEPTED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER
+current task status: CLOSED / ACCEPTED / LOCAL_VALIDATED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2
 real HTTP: NO
 real provider: NO
 Agent / LangGraph: NO
@@ -179,4 +182,4 @@ previous same-pool result: BLOCKED / RECOVERY_PROBE_INVALID
 
 `DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE`已在不修改callback、Java、测试、V1–V14、API、contracts、golden_cases或NQ的前提下完成8-file对齐，并保留初始`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`审计记录；其旧capacity acceptance路线已被后续任务消费，只作为historical record。
 
-B2已`CLOSED / ACCEPTED`，criteria保持`FROZEN / ACCEPTED`。Harness work order已根据代码现实冻结混合架构、Maven profile、mandatory scenario、artifact/schema、semantic exit code、安全边界、自测矩阵与精确write allowlist，当前任务登记为`DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER / CLOSED / ACCEPTED`。下一任务只允许`DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION`；harness仍未实现，Post-B2 capacity acceptance继续`BLOCKED / PENDING HARNESS AND EXECUTION`，B3继续`NOT_ALLOWED`，不得推导capacity PASS、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE授权。
+B2保持`CLOSED / ACCEPTED`，criteria保持`FROZEN / ACCEPTED`。formal run `20260715T140521Z`作为历史runtime defect保留；runtime binding已在run `20260715T145836Z`证明进入PowerShell preflight，并按dirty worktree与available memory低于16 GiB返回internal exit `10`、完整blocked artifact与0/15 scenarios。该binding validation不是formal retry；下一任务只允许`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2`。Post-B2 capacity acceptance继续`BLOCKED`，B3继续`NOT_ALLOWED`。

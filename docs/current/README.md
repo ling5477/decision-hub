@@ -1,6 +1,6 @@
 # Decision Hub Current Docs
 
-## Current authority — Stage-QDR-7 capacity harness implementation accepted
+## Current authority — Stage-QDR-7 harness runtime binding closed; formal retry required
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -13,8 +13,11 @@ Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempoten
 Capacity acceptance criteria: FROZEN / ACCEPTED
 Capacity harness work order: CLOSED / ACCEPTED
 Capacity harness implementation: CLOSED / ACCEPTED
+Harness runtime binding: CLOSED / ACCEPTED
 Formal profile: qdr7-capacity-acceptance
-Post-B2 capacity acceptance: BLOCKED / EXECUTION NEXT
+Historical formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T140521Z
+Latest binding validation: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260715T145836Z / EXPECTED CONTRACT
+Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED ON QUALIFIED ENVIRONMENT
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -32,16 +35,16 @@ Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
 Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
 Allow capacity acceptance execution: YES / NEXT_TASK_ONLY
-Full regression: PASS / 1133 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
+Full regression: PASS / 1134 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Previous full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS / HISTORICAL
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
-current task status: CLOSED / ACCEPTED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER
+current task status: CLOSED / ACCEPTED / LOCAL_VALIDATED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2
 ```
 
-证据报告：`DH_STAGE_QDR_7_B2_CAPACITY_THRESHOLD_EVIDENCE.md`；accepted criteria：`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`；harness work order：`DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md`；容量验收记录：`DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md`。Formal harness implementation已`CLOSED / ACCEPTED`，正式profile为`qdr7-capacity-acceptance`；capacity acceptance仍`BLOCKED / EXECUTION NEXT`，下一任务仅为独立acceptance retry。
+证据报告：`DH_STAGE_QDR_7_B2_CAPACITY_THRESHOLD_EVIDENCE.md`；accepted criteria：`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`；harness work order：`DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md`；历史容量验收记录：`DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md`；历史formal结果：`DH_STAGE_QDR_7_B2_FORMAL_CAPACITY_ACCEPTANCE_RESULT.md`。run `20260715T140521Z`保持历史runtime defect；binding validation `20260715T145836Z`已证明修复后preflight与blocked artifact合同，下一任务为合格环境上的独立formal retry-2。
 
 权威层级固定为：
 

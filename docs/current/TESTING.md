@@ -1,6 +1,41 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-15 capacity harness implementation
+## Current validation — 2026-07-15 capacity harness runtime binding blocker
+
+```text
+task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER
+baseline HEAD: 1d97e8549fb20d00d26a2890800c730071104c6b
+root cause: PLUGIN_CONFIGURATION_SCOPE / EXECUTABLE_PROPERTY_UNSET
+historical formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T140521Z
+direct binding run: 20260715T145753Z / MAVEN 1 / INTERNAL 10
+profile binding validation run: 20260715T145836Z / MAVEN 1 / INTERNAL 10
+binding validation status: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / EXPECTED CONTRACT
+binding validation blockers: git-worktree, available-memory
+available memory: BELOW 17179869184 BYTES
+PowerShell executable: pwsh.exe / PATH SHA-256 RECORDED / PATH NOT RECORDED
+mandatory scenarios: 0 OF 15 EXECUTED
+blocked artifacts: PASS / 26 FILES
+manifest: PASS / 0 MISMATCH
+secret scan: PASS / 0 FINDINGS
+teardown: PASS / NO RUN-ID CONTAINER OR VOLUME
+PowerShell 5.1 contract: PASS
+PowerShell 7 contract: PASS
+targeted harness tests: PASS / 19 TESTS / 0 FAILURES / 0 ERRORS / 4 EXPECTED PROFILE-DISABLED
+full Maven regression: PASS / 172 REPORTS / 1134 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+quality gate: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+formal capacity acceptance: NOT RUN
+post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED ON QUALIFIED ENVIRONMENT
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2
+```
+
+定向命令、PowerShell 5.1/7 contract、effective POM、direct Exec和完整profile均真实执行。完整profile耗时10:42，在普通Reactor测试后到达PowerShell preflight并以semantic exit `10`停止；0/15 mandatory scenarios、无专用PostgreSQL容器、无run-id volume。独立`mvn -ntp test`耗时11:57并由本轮时间窗172份Surefire XML聚合为1134/0/0/0；`mvn -ntp -Pquality validate`为19/19 Reactor SUCCESS。该profile run只验证runtime binding与blocked path，不计为formal acceptance retry。
+
+## Historical / consumed — 2026-07-15 formal capacity acceptance blocked
+
+formal run `20260715T140521Z`在PowerShell preflight前因Exec executable绑定缺失失败；没有生成formal summary、internal exit或artifact。其`BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT`结论保持历史原文，不被当前binding validation覆盖。
+
+## Historical / consumed — 2026-07-15 capacity harness implementation
 
 ```text
 task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION

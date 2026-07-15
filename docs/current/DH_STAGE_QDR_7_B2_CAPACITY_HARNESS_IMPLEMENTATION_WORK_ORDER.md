@@ -8,12 +8,13 @@
 > capacity acceptance criteria: `FROZEN / ACCEPTED`
 > capacity harness implementation: `CLOSED / ACCEPTED`
 > formal profile: `qdr7-capacity-acceptance`
-> post-B2 capacity acceptance: `BLOCKED / EXECUTION NEXT`
+> harness runtime binding: `CLOSED / ACCEPTED`
+> post-B2 capacity acceptance: `BLOCKED / FORMAL RETRY REQUIRED ON QUALIFIED ENVIRONMENT`
 > Stage-QDR-7 B3: `NOT_ALLOWED`
 
-## Current implementation disposition（2026-07-15）
+## Current runtime disposition（2026-07-15）
 
-本work order已由`DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION`消费。H1–H3已按冻结合同实现，并通过harness自测、PowerShell 5.1/7 contract tests、effective-POM、完整普通回归与质量门禁；本轮没有执行正式capacity acceptance。
+本work order已由harness implementation与runtime binding blocker消费。formal run `20260715T140521Z`暴露的Maven profile scope/executable缺陷保持历史记录；当前修复已由PowerShell 5.1/7 contract、effective POM、direct Exec及完整profile run `20260715T145836Z`验证。该run只验证binding与environment blocked path，不是formal acceptance retry。
 
 ```text
 CAPACITY_HARNESS_IMPLEMENTATION: CLOSED / ACCEPTED
@@ -22,9 +23,14 @@ DEFAULT_MAVEN_LIFECYCLE: PASS / FORMAL IT NOT ACTIVATED
 HARNESS_SELF_TESTS: PASS / 19 NON-SKIPPED + 4 EXPECTED PROFILE-DISABLED
 FULL_REGRESSION: PASS / 1133 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 QUALITY_GATE: PASS
-POST_B2_CAPACITY_ACCEPTANCE: BLOCKED / EXECUTION NEXT
+HISTORICAL_FORMAL_RUN: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T140521Z
+HARNESS_RUNTIME_BINDING: CLOSED / ACCEPTED
+LATEST_BINDING_VALIDATION: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260715T145836Z
+BLOCKED_ARTIFACT: PASS / 26 FILES / MANIFEST 0 MISMATCH / SECRET 0 / 0 OF 15 SCENARIOS
+CURRENT_FULL_REGRESSION: PASS / 1134 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED / FORMAL RETRY REQUIRED
 Stage-QDR-7 B3: NOT_ALLOWED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2
 ```
 
 以下§1起保留已接受的冻结实施合同，不因实施完成而改写历史授权边界。

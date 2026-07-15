@@ -2,13 +2,13 @@
 
 > task: `DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER`  
 > mode: `WORK_ORDER_ONLY`  
-> stage: `Stage-QDR-7 / CAPACITY_CRITERIA_FROZEN / CAPACITY_EXECUTION_NEXT`
+> stage: `Stage-QDR-7 / CAPACITY_CRITERIA_FROZEN / CAPACITY_HARNESS_RUNTIME_BINDING_CLOSED`
 > mainline: `Limited Dry Run Runtime Readiness`  
 > endpoint: `POST /api/ai/decision-dry-runs`（既有，不新增 endpoint）
 
-## Current capacity harness work order disposition（2026-07-15）
+## Current formal capacity acceptance disposition（2026-07-15）
 
-本work order已被B2实施、harness work order与harness implementation消费，B2保持`CLOSED / ACCEPTED`，所有历史失败继续保留。Criteria与formal harness implementation均已`CLOSED / ACCEPTED`；本轮未执行capacity acceptance。只允许下一独立任务执行formal capacity acceptance retry；本文件不授权B3。
+本work order已被B2实施、harness work order、harness implementation与runtime binding blocker消费，B2保持`CLOSED / ACCEPTED`，所有历史失败继续保留。Criteria保持`FROZEN / ACCEPTED`。formal run `20260715T140521Z`保留为历史runtime defect；binding validation `20260715T145836Z`已进入preflight并按冻结环境合同BLOCKED。下一任务只允许合格环境上的独立formal retry-2；本文件不授权B3。
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -21,8 +21,9 @@ Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempoten
 Capacity acceptance criteria: FROZEN / ACCEPTED
 Capacity harness work order: CLOSED / ACCEPTED
 Capacity harness implementation: CLOSED / ACCEPTED
+Harness runtime binding: CLOSED / ACCEPTED
 Formal profile: qdr7-capacity-acceptance
-Post-B2 capacity acceptance: BLOCKED / EXECUTION NEXT
+Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED ON QUALIFIED ENVIRONMENT
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -40,13 +41,13 @@ Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
 Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
 Allow capacity acceptance execution: YES / NEXT_TASK_ONLY
-Full regression: PASS / 1133 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
+Full regression: PASS / 1134 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Previous full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS / HISTORICAL
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
-current task status: CLOSED / ACCEPTED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER
+current task status: CLOSED / ACCEPTED / LOCAL_VALIDATED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2
 ```
 
 > Historical / Consumed：从下一节开始均为B2实施、blocker fix与previous review attempt的当时记录；其中旧`next action`、`BLOCKED`和`NOT_YET`不再表示current状态，也不得覆盖`STATUS.md`与`WORK_ORDER.md`。

@@ -11,7 +11,11 @@ param(
     [int]$Seed,
 
     [Parameter(Mandatory = $true)]
-    [string]$ProjectRoot
+    [string]$ProjectRoot,
+
+    [string]$PowerShellExecutable = 'AUTO',
+
+    [switch]$PowerShellResolved
 )
 
 Set-StrictMode -Version 2.0
@@ -27,6 +31,7 @@ $ConfigRoot = Join-Path $ProjectRoot 'config\qdr7-capacity'
 $RegistryPath = Join-Path $EvidenceRoot 'resource-registry.json'
 $StopMarker = Join-Path $EvidenceRoot 'sampler.stop'
 $Utf8NoBom = New-Object Text.UTF8Encoding($false)
+$ResolvedPowerShellIdentity = [ordered]@{ name = 'UNRESOLVED'; pathSha256 = $null }
 
 function Get-UtcTimestamp {
     return [DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffZ', [Globalization.CultureInfo]::InvariantCulture)
@@ -74,7 +79,15 @@ function New-Artifact {
 
 function Get-Sha256 {
     param([string]$Path)
-    return (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant()
+    $stream = [IO.File]::OpenRead($Path)
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try {
+        return (($sha.ComputeHash($stream) | ForEach-Object { $_.ToString('x2') }) -join '')
+    }
+    finally {
+        $sha.Dispose()
+        $stream.Dispose()
+    }
 }
 
 function Get-GitValue {
@@ -117,23 +130,83 @@ function Write-BlockedPreflight {
     $finished = Get-UtcTimestamp
     $environment = New-Artifact -Scenario 'environment' -Status 'BLOCKED' -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $finished
     $environment.safeSummary = 'environment preflight did not satisfy the frozen baseline'
-    $environment.criteriaSourceSha256 = $null
+    $criteriaPath = Join-Path $ConfigRoot 'qdr7-capacity-thresholds.json'
+    $criteria = Get-Content -Raw -LiteralPath $criteriaPath | ConvertFrom-Json
+    $criteriaSourcePath = Join-Path $ProjectRoot $criteria.sourceDocument
+    $environment.criteriaSourceSha256 = $(if (Test-Path -LiteralPath $criteriaSourcePath -PathType Leaf) { Get-Sha256 -Path $criteriaSourcePath } else { $null })
+    $environment.powerShellExecutable = $ResolvedPowerShellIdentity
     $environment.missingValues = @('environmentBaseline')
     Write-JsonFile -Path (Join-Path $EvidenceRoot 'environment.json') -Value $environment
     $preflight = New-Artifact -Scenario 'environment-preflight' -Status 'BLOCKED' -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $finished
     $preflight.checks = $Checks
     $preflight.blockerCode = 'ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED'
     $preflight.blockers = $Blockers
+    $preflight.powerShellExecutable = $ResolvedPowerShellIdentity
     Write-JsonFile -Path (Join-Path $EvidenceRoot 'preflight.json') -Value $preflight
+
+    $resourceRegistry = New-Artifact -Scenario 'resource-registry' -Status 'BLOCKED' -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $finished
+    $resourceRegistry.containerName = "dh-qdr7-capacity-$RunId"
+    $resourceRegistry.volumeName = "dh-qdr7-capacity-$RunId"
+    $resourceRegistry.samplerPid = $null
+    $resourceRegistry.resourcesCreated = $false
+    $resourceRegistry.teardown = [ordered]@{
+        sampler = 'NOT_STARTED'
+        container = 'REMOVED_OR_ABSENT'
+        volume = 'REMOVED_OR_ABSENT'
+        residual = 'NONE'
+    }
+    Write-JsonFile -Path $RegistryPath -Value $resourceRegistry
+
+    $scenarioRegistry = Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-scenario-registry.json') | ConvertFrom-Json
     $summary = New-Artifact -Scenario 'capacity-acceptance' -Status 'BLOCKED' -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $finished
     $summary.finalStatus = 'BLOCKED'
     $summary.exitCode = 10
     $summary.firstBlocker = 'ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED'
     $summary.findings = $Blockers
     $summary.capacityAcceptanceExecuted = $false
+    $summary.mandatoryScenariosExecuted = 0
+    $summary.mandatoryScenariosTotal = [int]$scenarioRegistry.mandatoryCount
+    $summary.scenarioStatuses = @($scenarioRegistry.fixedOrder | ForEach-Object { [ordered]@{ scenarioId = $_; status = 'NOT_RUN'; mandatory = $true } })
+    $summary.artifactValidationFindings = @()
+    $summary.secretFindingCount = 0
+    $summary.teardown = $resourceRegistry.teardown
     Write-JsonFile -Path (Join-Path $EvidenceRoot 'capacity-acceptance-summary.json') -Value $summary
     Write-Utf8File -Path (Join-Path $EvidenceRoot 'harness-exit-code.txt') -Content "10`n"
     Write-Utf8File -Path (Join-Path $EvidenceRoot 'commands.txt') -Content ("1 | $StartedAt | . | qdr7 capacity preflight | BLOCKED`n")
+
+    $artifactRegistry = Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-artifact-registry.json') | ConvertFrom-Json
+    foreach ($name in $artifactRegistry.mandatory) {
+        $path = Join-Path $EvidenceRoot $name
+        if (Test-Path -LiteralPath $path -PathType Leaf) {
+            continue
+        }
+        if ($name -in @('secret-scan.json', 'sha256-manifest.txt')) {
+            continue
+        }
+        if ($name.EndsWith('.json')) {
+            $placeholder = New-Artifact -Scenario ([IO.Path]::GetFileNameWithoutExtension($name)) -Status 'NOT_RUN' -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $finished
+            $placeholder.reason = 'ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED'
+            $placeholder.missingValues = @('scenarioExecution')
+            Write-JsonFile -Path $path -Value $placeholder
+        }
+        elseif ($name.EndsWith('.csv')) {
+            Write-Utf8File -Path $path -Content "schemaVersion,runId,commitSha,scenario,timestampUtc,elapsedMs,missingReason`n"
+        }
+        elseif ($name.EndsWith('.log')) {
+            Write-Utf8File -Path $path -Content "NOT_RUN / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED`n"
+        }
+    }
+
+    $secretFindings = Invoke-SecretScan -CommitSha $CommitSha
+    if ($secretFindings -gt 0) {
+        $summary.status = 'FAIL'
+        $summary.finalStatus = 'FAIL'
+        $summary.exitCode = 90
+        $summary.secretFindingCount = $secretFindings
+        Write-Utf8File -Path (Join-Path $EvidenceRoot 'harness-exit-code.txt') -Content "90`n"
+    }
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'capacity-acceptance-summary.json') -Value $summary
+    Write-Manifest
 }
 
 function Invoke-Preflight {
@@ -170,6 +243,7 @@ function Invoke-Preflight {
         }
         Add-Check 'run-id' 'UTC yyyyMMddTHHmmssZ' $RunId $runIdValid
         Add-Check 'seed' '7' ([string]$Seed) ($Seed -eq 7)
+        Add-Check 'powershell-executable' 'resolved command name and path hash' ("$($ResolvedPowerShellIdentity.name) / $($ResolvedPowerShellIdentity.pathSha256)") ($ResolvedPowerShellIdentity.name -ne 'UNRESOLVED' -and $ResolvedPowerShellIdentity.pathSha256 -match '^[a-f0-9]{64}$')
 
         $branch = Get-GitValue -Arguments @('branch', '--show-current')
         $commitSha = Get-GitValue -Arguments @('rev-parse', 'HEAD')
@@ -254,6 +328,7 @@ function Invoke-Preflight {
         $environment.postgresImage = 'postgres:17'
         $environment.testcontainersVersion = '1.20.4'
         $environment.criteriaSourceSha256 = $criteriaHash
+        $environment.powerShellExecutable = $ResolvedPowerShellIdentity
         Write-JsonFile -Path (Join-Path $EvidenceRoot 'environment.json') -Value $environment
 
         $preflight = New-Artifact -Scenario 'environment-preflight' -Status 'PASS' -CommitSha $commitSha -StartedAt $started -FinishedAt $finished
@@ -308,6 +383,84 @@ function Get-Sha256Text {
     }
     finally {
         $sha.Dispose()
+    }
+}
+
+function Resolve-Qdr7PowerShellExecutable {
+    param([string]$RequestedExecutable)
+
+    $candidates = New-Object Collections.Generic.List[string]
+    if (-not [string]::IsNullOrWhiteSpace($RequestedExecutable) -and $RequestedExecutable -ne 'AUTO') {
+        $candidates.Add($RequestedExecutable)
+    }
+    else {
+        $candidates.Add('pwsh.exe')
+        $candidates.Add('pwsh')
+        $candidates.Add('powershell.exe')
+    }
+
+    foreach ($candidate in $candidates) {
+        $command = Get-Command -Name $candidate -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($null -ne $command -and -not [string]::IsNullOrWhiteSpace($command.Path) -and (Test-Path -LiteralPath $command.Path -PathType Leaf)) {
+            return [ordered]@{
+                name = [IO.Path]::GetFileName($command.Path)
+                path = $command.Path
+                pathSha256 = Get-Sha256Text -Value ([IO.Path]::GetFullPath($command.Path).ToLowerInvariant())
+            }
+        }
+    }
+    return $null
+}
+
+function Enter-Qdr7ResolvedPowerShell {
+    $resolved = Resolve-Qdr7PowerShellExecutable -RequestedExecutable $PowerShellExecutable
+    if ($null -eq $resolved) {
+        if ($RunId -match '^[0-9]{8}T[0-9]{6}Z$' -and $EvidenceRoot.StartsWith($EvidenceBase, [StringComparison]::OrdinalIgnoreCase) -and -not (Test-Path -LiteralPath $EvidenceRoot)) {
+            $commitSha = '0000000000000000000000000000000000000000'
+            try {
+                $commitSha = Get-GitValue -Arguments @('rev-parse', 'HEAD')
+            }
+            catch {
+                # Keep the zero SHA so the blocked resolver artifact remains path-safe.
+            }
+            $started = Get-UtcTimestamp
+            $checks = @([ordered]@{
+                id = 'powershell-executable'
+                expected = 'explicit executable or AUTO resolver candidate'
+                actual = 'UNRESOLVED'
+                status = 'BLOCKED'
+            })
+            Write-BlockedPreflight -CommitSha $commitSha -StartedAt $started -Checks $checks -Blockers @('powershell-executable')
+        }
+        exit 10
+    }
+
+    $script:ResolvedPowerShellIdentity = [ordered]@{ name = $resolved.name; pathSha256 = $resolved.pathSha256 }
+    $currentExecutable = (Get-Process -Id $PID).Path
+    $sameExecutable = -not [string]::IsNullOrWhiteSpace($currentExecutable) -and ([IO.Path]::GetFullPath($currentExecutable) -eq [IO.Path]::GetFullPath($resolved.path))
+    if (-not $PowerShellResolved -and -not $sameExecutable) {
+        $forwardArguments = @(
+            '-NoProfile',
+            '-NonInteractive',
+            '-ExecutionPolicy',
+            'Bypass',
+            '-File',
+            $PSCommandPath,
+            '-Phase',
+            $Phase,
+            '-RunId',
+            $RunId,
+            '-Seed',
+            [string]$Seed,
+            '-ProjectRoot',
+            $ProjectRoot,
+            '-PowerShellExecutable',
+            $resolved.name,
+            '-PowerShellResolved'
+        )
+        $resolvedPath = [string]$resolved.path
+        & $resolvedPath @forwardArguments
+        exit $LASTEXITCODE
     }
 }
 
@@ -494,6 +647,8 @@ function Invoke-Finalize {
     }
     exit $finalExit
 }
+
+Enter-Qdr7ResolvedPowerShell
 
 if ($Phase -eq 'Preflight') {
     Invoke-Preflight

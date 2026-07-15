@@ -1,6 +1,6 @@
 # Decision Hub Status
 
-## Current authority — 2026-07-15 capacity harness implementation accepted
+## Current authority — 2026-07-15 harness runtime binding closed; formal retry required
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -13,8 +13,11 @@ Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempoten
 Capacity acceptance criteria: FROZEN / ACCEPTED
 Capacity harness work order: CLOSED / ACCEPTED
 Capacity harness implementation: CLOSED / ACCEPTED
+Harness runtime binding: CLOSED / ACCEPTED
 Formal profile: qdr7-capacity-acceptance
-Post-B2 capacity acceptance: BLOCKED / EXECUTION NEXT
+Historical formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T140521Z
+Latest binding validation: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260715T145836Z / EXPECTED CONTRACT
+Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED ON QUALIFIED ENVIRONMENT
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -32,13 +35,13 @@ Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
 Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
 Allow capacity acceptance execution: YES / NEXT_TASK_ONLY
-Full regression: PASS / 1133 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
+Full regression: PASS / 1134 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Previous full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS / HISTORICAL
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
-current task status: CLOSED / ACCEPTED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER
+current task status: CLOSED / ACCEPTED / LOCAL_VALIDATED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
 POSTGRESQL_TEST_EVIDENCE: CURRENT_PASS / POSTGRESQL_17_10 / ZERO_SKIPS
 HARD_CEILING_CONFLICT: CLOSED
@@ -52,7 +55,7 @@ ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: YES / NEXT_TASK_ONLY
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-历史calibration与same-pool失败轨迹保持不变，并明确按Previous attempt / consumed evidence解释。工程验收criteria继续`FROZEN / ACCEPTED`；formal harness已按冻结合同实现并完成自测、default lifecycle回归、完整普通回归与质量门禁。该结论不是production SLO、SLA或capacity acceptance PASS；post-B2 capacity acceptance保持`BLOCKED / EXECUTION NEXT`，B3仍`NOT_ALLOWED`。
+历史calibration、same-pool失败轨迹与formal run `20260715T140521Z`保持不变。runtime binding blocker已关闭；binding validation `20260715T145836Z`真实进入preflight，按冻结合同返回internal exit `10`、0/15 scenarios、manifest 0 mismatch、secret findings 0与无run-id资源残留。该run不是formal acceptance retry。Post-B2 capacity acceptance保持`BLOCKED / FORMAL RETRY REQUIRED`，B3仍`NOT_ALLOWED`。
 
 权威层级固定为：
 

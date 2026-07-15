@@ -1,6 +1,35 @@
 # Decision Hub Worklog
 
-## Current work — 2026-07-15 capacity harness implementation
+## Current work — 2026-07-15 capacity harness runtime binding blocker
+
+`DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER`在exact baseline HEAD `1d97e8549fb20d00d26a2890800c730071104c6b`执行。预检保留上一轮15个允许的文档dirty项，staged为空，8个current factsources全部位于read/validation/scan/write范围。最小复现`20260715T144344Z`确认`dh-app`同名profile没有获得root profile内属性，根因分类为`PLUGIN_CONFIGURATION_SCOPE / EXECUTABLE_PROPERTY_UNSET`。
+
+```text
+historical formal run: 20260715T140521Z / BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT
+binding validation run: 20260715T145836Z
+Maven exit: 1 / EXPECTED NON-ZERO
+internal exit: 10
+preflight: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED
+blockers: git-worktree, available-memory
+mandatory scenarios: 0 OF 15 EXECUTED
+blocked artifacts: PASS / 26 FILES / MANIFEST 0 / SECRET 0
+teardown: PASS / NO RUN-ID CONTAINER OR VOLUME
+PowerShell 5.1 + 7: PASS
+targeted tests: PASS / 19 / 0 / 0 / 4 EXPECTED PROFILE-DISABLED
+full regression: PASS / 172 REPORTS / 1134 / 0 / 0 / 0
+quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+formal capacity acceptance: NOT RUN
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2
+```
+
+修复将`qdr7.seed`和AUTO executable选择放入可继承顶层属性，Exec使用稳定的`powershell.exe`命令名bootstrap；主入口按显式property、`pwsh.exe`、`powershell.exe`顺序解析并仅记录名称与路径hash。blocked preflight在Maven停止前生成全部mandatory artifact的`NOT_RUN`占位、summary、secret scan、manifest与teardown状态。新增PowerShell双版本contract和Java profile/argument/artifact回归；未修改生产Java、criteria/config数值、application配置、migration/callback、API/contracts或NQ。
+
+## Historical / consumed — 2026-07-15 formal capacity acceptance retry blocked
+
+formal run `20260715T140521Z`的runtime defect、artifact缺失与0/15结论保持历史记录，不被当前binding validation改写。
+
+## Historical / consumed — 2026-07-15 capacity harness implementation
 
 `DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION`已`CLOSED / ACCEPTED`。本轮以`java-backend-regression-tests`为主skill，`dh-docs-writer`负责current docs同步，按冻结work order实现Java/Failsafe + PowerShell + Maven profile混合harness、15个mandatory scenario registry、actual-wiring/database/recovery drivers、连续采样、criteria hash、统计、threshold comparator、artifact/schema/manifest/secret scan、semantic exit code与安全teardown；未执行正式capacity acceptance。
 
