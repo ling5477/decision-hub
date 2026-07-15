@@ -122,9 +122,9 @@ Persistent guards implementation: ACCEPTED
 Guard hard-ceiling contract: CLOSED / ACCEPTED
 Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
-Capacity acceptance criteria: BLOCKED / NOT_FROZEN
-Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
-Post-B2 capacity acceptance: BLOCKED
+Capacity acceptance criteria: FROZEN / ACCEPTED
+Capacity harness: NOT_IMPLEMENTED / NEXT
+Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -138,14 +138,15 @@ PostgreSQL contention evidence: PASS / SAME_POOL_RECOVERY_AND_SERIES_COMPLETE
 Restart reproducibility: PASS / SPRING_CONTEXT 3 OF 3 / POSTGRESQL_SAME_CONTAINER 3 OF 3
 Capacity threshold evidence: CLOSED / SUFFICIENT
 Candidate threshold evidence: SUFFICIENT
-Allow capacity criteria freeze retry: YES / NEXT_TASK_ONLY
+Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
+Allow capacity harness work order: YES / NEXT_TASK_ONLY
 Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
 current task status: CLOSED / ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
 real HTTP: NO
 real provider: NO
 Agent / LangGraph: NO
@@ -174,4 +175,4 @@ previous same-pool result: BLOCKED / RECOVERY_PROBE_INVALID
 
 `DH-STAGE-QDR-7-B2-FACTSOURCE-ALIGNMENT-AND-FINAL-ACCEPTANCE`已在不修改callback、Java、测试、V1–V14、API、contracts、golden_cases或NQ的前提下完成8-file对齐，并保留初始`BLOCKED / CURRENT_FACTSOURCE_SCOPE_CONFLICT`审计记录；其旧capacity acceptance路线已被后续任务消费，只作为historical record。
 
-B2已`CLOSED / ACCEPTED`。Calibration path blocker、PromptVersion atomic bootstrap、cold-start quota、tenant-scoped cleanup、same-pool recovery、两类restart与Surefire资源采样缺口均已关闭，candidate threshold evidence为`SUFFICIENT`。当前任务仍登记为`DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER / CLOSED / ACCEPTED`，下一任务只允许`DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY`。Criteria尚未冻结，Post-B2 capacity acceptance继续`BLOCKED`，B3继续`NOT_ALLOWED`；不得推导正式harness、capacity acceptance、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE授权。
+B2已`CLOSED / ACCEPTED`。Criteria freeze retry已基于有效evidence slice冻结工程验收阈值、环境baseline、mandatory scenario与formal harness合同，状态为`FROZEN / ACCEPTED`。当前任务登记为`DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY / CLOSED / ACCEPTED`，下一任务只允许`DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER`。Harness仍未实现，Post-B2 capacity acceptance继续`BLOCKED / PENDING HARNESS AND EXECUTION`，B3继续`NOT_ALLOWED`；不得推导harness implementation、capacity PASS、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE授权。

@@ -1,6 +1,6 @@
 # Decision Hub Roadmap
 
-## Current route — 2026-07-14 capacity criteria freeze retry next
+## Current route — 2026-07-15 capacity harness work order next
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -10,9 +10,9 @@ Persistent guards implementation: ACCEPTED
 Guard hard-ceiling contract: CLOSED / ACCEPTED
 Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
-Capacity acceptance criteria: BLOCKED / NOT_FROZEN
-Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
-Post-B2 capacity acceptance: BLOCKED
+Capacity acceptance criteria: FROZEN / ACCEPTED
+Capacity harness: NOT_IMPLEMENTED / NEXT
+Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -26,17 +26,18 @@ PostgreSQL contention evidence: PASS / SAME_POOL_RECOVERY_AND_SERIES_COMPLETE
 Restart reproducibility: PASS / SPRING_CONTEXT 3 OF 3 / POSTGRESQL_SAME_CONTAINER 3 OF 3
 Capacity threshold evidence: CLOSED / SUFFICIENT
 Candidate threshold evidence: SUFFICIENT
-Allow capacity criteria freeze retry: YES / NEXT_TASK_ONLY
+Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
+Allow capacity harness work order: YES / NEXT_TASK_ONLY
 Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
 current task status: CLOSED / ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
 ```
 
-Hard-ceiling authority、command bypass与calibration path blocker保持关闭，历史0轮matrix、retry-2与无效same-pool probe轨迹不变。固定endpoint probe已关闭same-pool recovery与restart缺口，candidate evidence为`SUFFICIENT`。B2保持`CLOSED / ACCEPTED`；下一步仅允许criteria freeze retry，正式capacity harness、capacity acceptance与B3仍禁止。
+Hard-ceiling authority、command bypass与calibration path blocker保持关闭，历史0轮matrix、retry-2与无效same-pool probe轨迹不变。Criteria已基于有效证据冻结；B2保持`CLOSED / ACCEPTED`。下一步仅允许harness implementation work order，正式harness实现、capacity acceptance执行与B3仍禁止。
 
 ## Historical routes — 以下全部内容均为非当前路线
 

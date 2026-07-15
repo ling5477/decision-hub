@@ -1,5 +1,40 @@
 # Decision Hub Testing
 
+## 2026-07-15 DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY validation
+
+| Check | Result | Evidence |
+|---|---|---|
+| Git preflight | PASS | repository `E:/Project/decision-hub`、branch `dev`、HEAD `9212047ab473a67f7bbdc8729e99495be6698946`、`origin/dev`一致；task前worktree clean、staged empty |
+| task scope design | PASS | `VALIDATION_SCOPE ⊆ READ_SCOPE`、`FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST`、`CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST`全部成立 |
+| evidence compatibility | PASS | `20260713T213431`与`20260714T012507`排除；`20260714T210052`只纳入修复后valid slice；recovery只纳入`20260714T154500Z` |
+| rate threshold completeness | PASS | concurrency 1/2/4/8/16各3轮；每点冻结throughput floor与p50/p95/p99/max ceiling；所有阈值含source、n、min/median/max、公式、rounding、margin与限制 |
+| correctness criteria | PASS / FROZEN | cold-start quota 3轮精确10/30；tenant/environment/source、nonce 3轮1/23、idempotency lifecycle与所有zero-tolerance约束已冻结 |
+| cleanup criteria | PASS / FROZEN | 10/100/1000、2 workers、1 writer、batch 10；max duration 200/200/1100 ms；tenant-scoped与protected-row zero-tolerance已冻结 |
+| recovery/restart criteria | PASS / FROZEN | database ready 800 ms、Hikari recovery 5800 ms、protected request recovery 5800 ms；same-pool 3轮、restart 3+3 |
+| pressure/resource criteria | PASS / FROZEN | mandatory sequence、Hikari pending/acquire、PostgreSQL waiting/lock wait、sampling gap、Maven/Surefire/Docker/memory/duration阈值已冻结 |
+| environment baseline | PASS / FROZEN | Windows 11 x64、minimum 16 logical CPUs、16 GiB pre-run free memory、16 GiB Docker、Java 21、Maven 3.9.x、Docker 29.x、PostgreSQL 17、Testcontainers 1.20.4、localhost only |
+| harness contract | PASS / FROZEN / NOT_IMPLEMENTED | profile `qdr7-capacity-acceptance`、formal command、seed 7、run-id、artifact root、CSV/JSON、threshold comparison、manifest、secret scan与非0退出语义已冻结 |
+| evidence integrity | PASS | recovery manifest 14 entries / 0 mismatch；secret scan 11 files / 8 patterns / 0 findings |
+| placeholder scan | PASS | active criteria无`TBD`、`TODO threshold`、`suggested value`、`reasonable`、`temporary`、`approximately`、`production certified`或`B3 READY`；`capacity PASS`只出现在明确否定/判定规则中 |
+| current fact scan | PASS / 0 CONFLICTS | 8个current factsources active block统一为criteria frozen、harness next、post-B2 pending harness/execution、B3 not allowed与唯一next task |
+| forbidden-scope diff | PASS / 0 | Java production/test、application、POM、callback、V1–V14、API/contracts、golden_cases与NQ均无diff |
+| `git diff --check` | PASS | exit 0；只有Git line-ending提示，无whitespace error |
+| quality gate | PASS | `mvn -ntp -Pquality validate` exit 0；19/19 Reactor SUCCESS、`BUILD SUCCESS` |
+| Checkstyle / Spotless | PASS | root Checkstyle 0 violations；Spotless check通过 |
+| Maven tests | NOT_RUN | 本任务复用已接受1114/0/0/0 full regression证据；用户本轮只要求quality validate，且禁止新capacity execution |
+| capacity execution | NOT_RUN | 未执行matrix、fault injection或formal harness |
+
+```text
+CAPACITY_ACCEPTANCE_CRITERIA_FREEZE: DONE / ACCEPTED
+PROJECT_ACCEPTANCE_BASELINE: FROZEN
+HARNESS_CONTRACT: FROZEN / NOT_IMPLEMENTED
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED / PENDING HARNESS AND EXECUTION
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+```
+
+> Historical / consumed：从下一节开始保留same-pool recovery及更早验证；其旧criteria状态与next task不得覆盖本节current validation。
+
 ## 2026-07-14 DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER validation
 
 | Check | Result | Evidence |

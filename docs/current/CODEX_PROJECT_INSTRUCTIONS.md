@@ -1,6 +1,6 @@
 # Codex Project Instructions
 
-## Current authority — 2026-07-14 PostgreSQL same-pool recovery accepted
+## Current authority — 2026-07-15 capacity criteria frozen
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -10,9 +10,9 @@ Persistent guards implementation: ACCEPTED
 Guard hard-ceiling contract: CLOSED / ACCEPTED
 Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
-Capacity acceptance criteria: BLOCKED / NOT_FROZEN
-Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
-Post-B2 capacity acceptance: BLOCKED
+Capacity acceptance criteria: FROZEN / ACCEPTED
+Capacity harness: NOT_IMPLEMENTED / NEXT
+Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -26,22 +26,23 @@ PostgreSQL contention evidence: PASS / SAME_POOL_RECOVERY_AND_SERIES_COMPLETE
 Restart reproducibility: PASS / SPRING_CONTEXT 3 OF 3 / POSTGRESQL_SAME_CONTAINER 3 OF 3
 Capacity threshold evidence: CLOSED / SUFFICIENT
 Candidate threshold evidence: SUFFICIENT
-Allow capacity criteria freeze retry: YES / NEXT_TASK_ONLY
+Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
+Allow capacity harness work order: YES / NEXT_TASK_ONLY
 Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
 ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: NO / CONSUMED_BLOCKED
-ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO
+ALLOW_CAPACITY_HARNESS_WORK_ORDER: YES / NEXT_TASK_ONLY
 ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
 ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
-CURRENT_TASK: DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER
+CURRENT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
 CURRENT_TASK_STATUS: CLOSED / ACCEPTED
-NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
+NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
 ```
 
-schema errata、persistent guards与B2 milestone保持`ACCEPTED`，历史失败轨迹继续保留。run `20260714T154500Z`以固定loopback endpoint完成same-pool recovery 3/3、outage fail-closed、持久状态、连续Hikari/PostgreSQL序列、Spring Context restart 3/3、恢复后8并发/100请求、1114项完整回归、Surefire资源采样与质量门。Candidate threshold evidence为`SUFFICIENT`，当前任务`CLOSED / ACCEPTED`，下一任务只允许criteria freeze retry；不授权harness work order/implementation、capacity acceptance、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
+schema errata、persistent guards与B2 milestone保持`ACCEPTED`，历史失败轨迹继续保留。Criteria freeze retry已冻结工程验收阈值、环境baseline、mandatory scenario与formal harness合同；该标准不是production SLO或容量认证。当前任务`CLOSED / ACCEPTED`，下一任务只允许harness implementation work order；不授权harness implementation、capacity execution、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
 
 > 项目: Decision Hub
 > 必需前置 skill: `nq-dh-workflow-router`

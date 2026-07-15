@@ -1,5 +1,22 @@
 # DH Stage-QDR-7 B2 Post-Implementation Capacity Acceptance
 
+## Current disposition（2026-07-15）
+
+Capacity acceptance criteria现已`FROZEN / ACCEPTED`，但formal harness仍`NOT_IMPLEMENTED / NEXT`，且本轮未执行capacity acceptance。因此本报告的最终验收结论仍为：
+
+```text
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED / PENDING HARNESS AND EXECUTION
+CAPACITY_ACCEPTANCE_CRITERIA: FROZEN / ACCEPTED
+CAPACITY_HARNESS: NOT_IMPLEMENTED / NEXT
+B2_IMPLEMENTATION_STATUS: CLOSED / ACCEPTED
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+```
+
+该`BLOCKED`不是capacity FAIL，也不回退B2 acceptance；correctness/evidence PASS不能替代尚未发生的formal capacity execution。
+
+---
+
 > task: `DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE`
 > date: `2026-07-13`
 > repository: `F:/project/decision-hub`

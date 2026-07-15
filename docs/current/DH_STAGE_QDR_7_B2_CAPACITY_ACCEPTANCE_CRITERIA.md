@@ -1,5 +1,216 @@
 # DH Stage-QDR-7 B2 Capacity Acceptance Criteria
 
+> task: `DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY`
+> date: `2026-07-15`
+> authority status: `FROZEN / ACCEPTED`
+> B2 status: `CLOSED / ACCEPTED`
+> post-B2 capacity acceptance: `BLOCKED / PENDING HARNESS AND EXECUTION`
+> Stage-QDR-7 B3: `NOT_ALLOWED`
+
+## Current freeze decision
+
+```text
+CAPACITY_ACCEPTANCE_CRITERIA_FREEZE: DONE / ACCEPTED
+EVIDENCE_COMPATIBILITY: PASS
+PROJECT_ACCEPTANCE_BASELINE: FROZEN
+SCENARIO_MATRIX: PASS / FROZEN
+NUMERIC_THRESHOLDS: FROZEN
+THRESHOLD_JUSTIFICATION: PASS
+ENVIRONMENT_BASELINE: FROZEN
+HARNESS_CONTRACT: FROZEN / NOT_IMPLEMENTED
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED / PENDING HARNESS AND EXECUTION
+ALLOW_CAPACITY_HARNESS_WORK_ORDER: YES / NEXT_TASK_ONLY
+ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
+ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
+ALLOW_STAGE_QDR_7_B3_ENTRY: NO
+```
+
+本标准只用于Stage-QDR-7 B2本地工程验收。它不是production SLO、production SLA、生产容量认证或部署规格，也不授权formal harness实现、容量执行、B3、外部HTTP、Provider、NQ、Agent/LangGraph、Paper或LIVE。
+
+## 1. Scope governance
+
+```text
+VALIDATION_SCOPE ⊆ READ_SCOPE: PASS
+FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+TASK_SCOPE_DESIGN_INVALID: NO
+```
+
+本任务只冻结文档合同。Java生产代码、Java测试、application配置、POM、migration、callback、API/Controller/DTO/OpenAPI/contracts、NQ与`target`原始证据均未修改；未执行新capacity matrix或故障注入。
+
+## 2. Evidence validity ledger
+
+| Evidence | Commit compatibility | Run ID | Status / class | Purpose | Include in freeze |
+|---|---|---|---|---|---|
+| 首次threshold run | `962b348`祖先代码，但repeatability已被后续修复取代 | `20260713T213431` | `HISTORICAL_FAILED_EVIDENCE` | 保留首个2xx、第二请求500与0轮matrix历史 | NO |
+| retry-2完整目录 | `e2cb1ff`及当时受控dirty set，后续由`9212047`收口 | `20260714T012507` | `HISTORICAL_FAILED_EVIDENCE` | 保留cold-start、cleanup、recovery和Surefire sampler失败 | NO；不得用于阈值 |
+| scenario evidence有效slice | `e2cb1ff`加受控修复集合，内容已进入`9212047` | `20260714T210052` | `VALID_CURRENT_EVIDENCE` | actual wiring、15轮rate、quota、isolation、nonce raw、idempotency、tenant cleanup、outage前pressure slice、资源 | YES |
+| scenario evidence失败slice | 同上 | `20260714T210052` | `SUPERSEDED_PROBE_RESULT` | 旧same-pool recovery、初始HTTP parser、cleanup参数顺序失败、negative nonce summary parser | NO |
+| same-pool recovery | 最终代码与测试内容进入`9212047`；当前HEAD无后续技术diff | `20260714T154500Z` | `VALID_CURRENT_EVIDENCE` | 固定endpoint recovery、restart、1114回归、manifest、secret scan | YES |
+| correctness suites | current code/Testcontainers | 多轮 | `CORRECTNESS_ONLY_EVIDENCE` | quota、nonce、idempotency、cleanup、rollback、commit-unknown | 只用于正确性零容忍与精确计数 |
+
+完整15轮`rate-round-summary.json`是唯一rate性能来源；单次protected 2xx、拒绝路径latency、correctness fixture和失败probe均不参与吞吐或延迟阈值。Recovery只使用`20260714T154500Z`。Manifest mismatch与secret finding均为0。
+
+## 3. Derivation policy
+
+- 吞吐下限：`floor(observed minimum × 0.80, 0.1 req/s)`，保留20%下降余量并向下取0.1。
+- rate延迟上限：`ceil(observed maximum × 1.25, 10 ms)`，增加25%余量并向上取10 ms。
+- cleanup时限：`ceil(observed maximum × 1.50, 50 ms)`；每个规模仅1个有效样本，因此使用50%余量。
+- recovery时限：`ceil(observed maximum × 1.50, 100 ms)`；3轮样本，使用50%余量覆盖localhost restart抖动。
+- pressure资源上限：`ceil(observed maximum × 1.25)`；内存类另按表中粒度向上取整。
+- 所有正确性、跨scope污染、partial commit、unexpected 5xx、manifest mismatch、secret finding与测试失败/错误/跳过阈值固定为0。
+
+没有删除数值不利的有效样本。排除只允许`INVALID_PROBE`、`INVALID_ENVIRONMENT`、`SUPERSEDED_CODE`或`MEASUREMENT_CORRUPTION`，并必须在evidence ledger中登记。
+
+## 4. Environment acceptance baseline
+
+| Item | Source / samples | Observed min / median / max | Frozen requirement | Derivation / margin | Limitation |
+|---|---|---|---|---|---|
+| OS / architecture | scenario environment，n=1 | Windows 11 `10.0.26200` / `amd64` | Windows 11 x64 | exact family | 未验证Linux/macOS |
+| logical CPUs | scenario environment，n=1 | 32 / 32 / 32 | minimum 16 | observed × 0.50 | 不代表CPU型号等价 |
+| host free memory before run | scenario environment + full regression，n=2 | 17.90 / 18.42 / 18.93 GiB | minimum 16 GiB | 向下取整并保留至少1.90 GiB | 只约束本地验收启动时点 |
+| free-memory headroom during full regression | current resource baseline，n=188 | 17.52 / not aggregated / 18.93 GiB | minimum 13 GiB | observed min × 0.75，向下取1 GiB | sampler间隔2秒 |
+| Docker allocation | scenario environment，n=1 | 23 / 23 / 23 GiB | minimum 16 GiB | observed向下保留约30% | cached `postgres:17` only |
+| Java | environment，n=1 | `21.0.9` | Java 21 | major version exact | patch可更新但必须记录 |
+| Maven | environment，n=1 | `3.9.12` | Maven 3.9.x | minor line exact | Maven wrapper不作为入口 |
+| Docker | environment，n=1 | `29.6.1` | Docker Engine 29.x | major line exact | Docker Desktop localhost |
+| PostgreSQL | environment，n=1 | `17.10` | cached `postgres:17` / PostgreSQL 17.x | major exact | 不允许外部数据库 |
+| Testcontainers | POM/evidence，n=1 | `1.20.4` | `1.20.4` | exact | 版本变更需重新freeze |
+| Hikari normal pool | rate/recovery，n=15+3 | max/min `10 / 2` | maximum pool 10 / minimum idle 2 | exact measured baseline | 不是production pool建议 |
+| Hikari pressure fixture | contention slice，n=6 | max/min `4 / 2` | maximum pool 4 / minimum idle 2 | exact pressure baseline | 只用于pressure序列 |
+| `MAVEN_OPTS` | environment，n=1 | unset | unset | exact | 不允许临时heap掩盖失败 |
+| Surefire | POM/evidence，n=1 | 3.2.5；无显式fork/parallel | 3.2.5；repository default；parallel disabled | exact | 不推断framework default数值 |
+| parallelism | frozen scenario | 1/2/4/8/16 | HTTP maximum 16；单一Maven/harness进程 | matrix最大点 | 禁止并行启动多个acceptance run |
+| network | all valid runs | loopback only | `127.0.0.1` / localhost only | exact | 不代表生产网络 |
+
+任一执行前条件不满足时必须返回非0并报告`ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED`，不得先执行再把OOM归类为容量失败。
+
+## 5. Rate performance criteria
+
+固定protocol：concurrency `1 / 2 / 4 / 8 / 16`；每轮warm-up 20、measured 100；每点3轮，共15轮；percentile使用nearest-rank。每轮必须100个structured 2xx、unexpected rejection=0、unexpected 5xx=0。
+
+| C | n | throughput min/med/max req/s | Min throughput | p50 min/med/max ms | Max p50 | p95 min/med/max ms | Max p95 | p99 min/med/max ms | Max p99 | max latency min/med/max ms | Max latency |
+|---:|---:|---|---:|---|---:|---|---:|---|---:|---|---:|
+| 1 | 3 | 6.262 / 6.438 / 7.228 | 5.0 | 122.644 / 150.511 / 152.218 | 200 | 214.588 / 217.324 / 259.279 | 330 | 259.234 / 274.460 / 290.978 | 370 | 292.269 / 308.853 / 321.674 | 410 |
+| 2 | 3 | 12.655 / 14.327 / 16.534 | 10.1 | 120.210 / 136.703 / 151.768 | 190 | 156.891 / 198.878 / 230.576 | 290 | 183.209 / 277.245 / 323.218 | 410 | 185.794 / 290.312 / 324.082 | 410 |
+| 4 | 3 | 24.891 / 26.568 / 26.665 | 19.9 | 138.489 / 147.953 / 151.730 | 190 | 197.313 / 198.746 / 276.456 | 350 | 212.560 / 229.217 / 293.181 | 370 | 215.020 / 259.791 / 308.378 | 390 |
+| 8 | 3 | 47.323 / 48.834 / 56.396 | 37.8 | 136.994 / 151.722 / 152.172 | 200 | 168.524 / 222.430 / 262.149 | 330 | 176.538 / 282.643 / 293.091 | 370 | 177.915 / 284.652 / 322.084 | 410 |
+| 16 | 3 | 48.406 / 57.779 / 61.165 | 38.7 | 244.786 / 245.282 / 290.880 | 370 | 307.249 / 339.189 / 564.079 | 710 | 312.776 / 366.178 / 611.833 | 770 | 326.172 / 368.950 / 613.001 | 770 |
+
+Source为`20260714T210052/rate-round-summary.json`。每个阈值都使用本节统一公式；localhost、单机、deterministic mock gateway与单一PostgreSQL容器是已知限制。
+
+## 6. Correctness and isolation criteria
+
+### 6.1 Cold-start quota
+
+`windowSeconds=3600`、quota 10、concurrency 8、attempts 40、rounds 3；禁止warm-up或预建bucket。每轮必须accepted=10、`429 / RATE_LIMITED`=30、database winners=10、PromptVersion canonical rows=1、unexpected 4xx/5xx=0、transport errors=0、oversell=0。Source为`quota-atomicity-retry.csv`，n=3，各计数min/median/max均为冻结精确值，安全余量为0。
+
+### 6.2 Tenant/environment/source
+
+至少两个tenant/environment scope；A达到quota后B仍接受，cross-tenant rows=0、cross-environment rows=0。`CROSS_SOURCE_CAPACITY: NOT_APPLICABLE_UNDER_SINGLE_CANONICAL_SOURCE`；非canonical source必须`403 / SOURCE_DENIED`。不得伪造第二合法source。
+
+### 6.3 Nonce race
+
+threads=8、attempts=24、rounds=3；每轮accepted=1、`409 / NONCE_REPLAY`=23、database winner rows=1、unexpected errors=0。有效HTTP source为修复parser后的`nonce-race.csv`，n=3；negative `nonce-race-summary.json`属于`MEASUREMENT_CORRUPTION / SUPERSEDED_PROBE_RESULT`，不参与判定。数据库唯一winner同时由current PostgreSQL correctness suite约束。
+
+### 6.4 Idempotency lifecycle
+
+必须满足single winner、active lease not stolen、timeout/expiry transition follows contract、rollback leaves no success、commit-unknown not readmitted、terminal result stable；重复claim、错误接管、orphan、partial result、terminal overwrite与readmission容忍度均为0。Runtime lifecycle与Flyway callback必须分开报告。
+
+## 7. Cleanup criteria
+
+固定workers=2、concurrent writers=1、batch=10；scope为tenant/environment/endpoint/source。null、blank与`*` tenant必须fail-closed，不允许global maintenance语义。
+
+| Initial scale | n | duration min/med/max ms | Max duration | Formula / margin | Required outcome |
+|---:|---:|---|---:|---|---|
+| 10 | 1 | 115 / 115 / 115 | 200 ms | max ×1.50，向上50 ms | expected delete 6；protected rows保留 |
+| 100 | 1 | 110 / 110 / 110 | 200 ms | max ×1.50，向上50 ms | expected delete 64；protected rows保留 |
+| 1000 | 1 | 718 / 718 / 718 | 1100 ms | max ×1.50，向上50 ms | expected delete 649；protected rows保留 |
+
+Source为`cleanup-summary.json`。每个规模必须包含eligible、active、locked、not expired、other tenant、other environment与concurrent inserts。结束时未锁定eligible backlog=0；允许当时被锁定的1行暂留，但释放锁后必须在一个额外batch内收敛为0。duplicate、cross-tenant、cross-environment、active、locked与not-expired deletion阈值均为0。单scale只有1个有效样本，是本标准最主要的统计限制。
+
+## 8. PostgreSQL same-pool recovery criteria
+
+同一ApplicationContext、DataSource、Hikari pool、container endpoint、JDBC URL与persistent volume；rounds=3。
+
+| Metric | n | Observed min/med/max ms | Frozen maximum | Formula / margin | Limitation |
+|---|---:|---|---:|---|---|
+| database ready | 3 | 487 / 509 / 512 | 800 ms | max ×1.50，向上100 ms | localhost container restart |
+| Hikari recovery | 3 | 3720 / 3792 / 3830 | 5800 ms | max ×1.50，向上100 ms | 包含driver/pool重连抖动 |
+| protected request recovery | 3 | 3792 / 3829 / 3864 | 5800 ms | max ×1.50，向上100 ms | 不是production SLA |
+
+Outage false 2xx=0；每轮至少3个真实outage protected请求，3轮共9个；post-recovery concurrency=8、requests=100、expected 2xx=100、4xx=0、unexpected 5xx=0。已提交nonce/idempotency与PromptVersion canonical row必须保持，uncommitted transaction不得恢复为success。
+
+## 9. Restart criteria
+
+- Spring ApplicationContext restart：3/3 PASS。
+- PostgreSQL same-container persistent-volume restart：3/3 PASS。
+
+每轮必须验证committed nonce仍受保护、committed idempotency为terminal stable state、uncommitted transaction不是success、tenant isolation保持、PromptVersion canonical row保持、cleanup scope保持。
+
+## 10. Hikari/PostgreSQL mandatory sequence
+
+正式顺序固定为：normal load -> connection pressure -> lock contention -> statement timeout -> database outage -> database ready -> pool reconnect -> protected-request recovery -> post-recovery load。顺序缺失或时间序列断裂即FAIL。
+
+| Metric | Source / n | Observed min/med/max | Frozen maximum | Formula / margin |
+|---|---|---|---:|---|
+| Hikari pending | valid pressure slice，n=6 | 0 / 9 / 13 | 17 | ceil(max ×1.25) |
+| connection acquisition max | valid pressure slice，n=6 | 252.658 / 2012.633 / 3014.484 ms | 3800 ms | max ×1.25，向上100 ms |
+| PostgreSQL waiting sessions | valid pressure slice，n=6 | 4 / 5 / 5 | 7 | ceil(max ×1.25) |
+| PostgreSQL lock-wait sessions | valid pressure slice，n=6 | 0 / 3 / 3 | 4 | ceil(max ×1.25) |
+| outage sampling gap | same-pool outage intervals，n=24 | 18.136 / 1027.963 / 1048.542 ms | 1400 ms | max ×1.25后向上100 ms |
+
+unexpected HTTP 5xx=0、rollback anomalies=0、deadlocks=0、partial commits=0。Expected fail-closed 5xx during the explicit outage/pressure step must be classified separately and must never be counted as success; false 2xx remains0。Statement timeout必须产生受控rollback，不能成为unexpected error。
+
+## 11. Full regression and resources
+
+正式命令为`mvn -ntp test`；必须19/19 Reactor SUCCESS、0 failures/errors/skipped、真实PostgreSQL/Testcontainers执行、无native-memory OOM，并证明所有discovered Surefire forks被采样或明确no-fork。
+
+| Metric | Source / samples | Observed maximum or minimum | Frozen threshold | Formula / margin |
+|---|---|---|---|---|
+| execution duration | current 1114 run，n=1 | max 509.631 s | max 660 s | max ×1.25，向上30 s |
+| Maven working set | current resource baseline，n=186 | max 361,811,968 bytes | max 576 MiB | max ×1.50，向上64 MiB |
+| Surefire individual working set | 1110+1114 runs，185+380 rows/12 PIDs | max 1,278,676,992 bytes | max 2 GiB | max ×1.50，向上256 MiB |
+| Surefire aggregate working set | compatible sampled runs | max 1,278,676,992 bytes | max 2 GiB | max ×1.50，向上256 MiB |
+| Docker aggregate memory | current complete Docker sampling，n=530 | max 117,549,563 bytes | max 192 MiB | max ×1.50，向上64 MiB |
+| free-memory headroom | current host sampling，n=188 | min 18,808,967,168 bytes | min 13 GiB | min ×0.75，向下1 GiB |
+
+资源阈值只用于确保本地验收可复现，不是生产机器规格。
+
+## 12. Formal harness contract
+
+本轮只冻结合同，不实现harness。
+
+```text
+Maven profile: qdr7-capacity-acceptance
+Formal command: mvn -ntp -Pqdr7-capacity-acceptance -Dqdr7.runId=<UTC_yyyyMMddTHHmmssZ> -Dqdr7.seed=7 verify
+Evidence root: target/qdr7-capacity-acceptance/<run-id>/
+Primary summary: capacity-acceptance-summary.json
+Seed: integer 7, fixed
+Run ID: caller supplied, UTC format, unique and path-safe
+```
+
+Harness必须使用actual Spring wiring、localhost受保护HTTP、真实PostgreSQL/Testcontainers、canonical source/HMAC和deterministic mock gateway；覆盖全部mandatory scenario；输出raw CSV、JSON、p50/p95/p99、Hikari/PostgreSQL/JVM/Docker指标、threshold comparison、environment preflight、SHA-256 manifest与secret scan。
+
+以下任一条件必须非0退出：environment不满足、scenario/metric缺失、correctness invariant失败、threshold失败、Testcontainers skipped、manifest mismatch、secret finding、外部HTTP尝试或未完成full regression。不得输出credential material，不得连接Provider、NQ、Agent/LangGraph、Paper或LIVE。
+
+## 13. Verdict rules and next route
+
+PASS要求environment、actual wiring、rate、quota、isolation/source、nonce、idempotency、cleanup、recovery、restart、Hikari/PostgreSQL sequence、full regression、quality、manifest、secret scan与current factsources全部PASS。标准已冻结但执行违反阈值为FAIL；标准、harness、环境或mandatory evidence不能形成判断为BLOCKED。BLOCKED不得写成FAIL，correctness PASS不得写成capacity PASS。
+
+```text
+Capacity acceptance criteria: FROZEN / ACCEPTED
+Capacity harness: NOT_IMPLEMENTED / NEXT
+Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+```
+
+---
+
+## Historical preserved criteria record
+
 > task: `DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE`
 > date: `2026-07-13`
 > authority status: `BLOCKED / CAPACITY_THRESHOLD_JUSTIFICATION_INSUFFICIENT`

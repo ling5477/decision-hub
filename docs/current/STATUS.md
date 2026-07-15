@@ -1,6 +1,6 @@
 # Decision Hub Status
 
-## Current authority — 2026-07-14 PostgreSQL same-pool recovery accepted
+## Current authority — 2026-07-15 capacity criteria frozen
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -10,9 +10,9 @@ Persistent guards implementation: ACCEPTED
 Guard hard-ceiling contract: CLOSED / ACCEPTED
 Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
-Capacity acceptance criteria: BLOCKED / NOT_FROZEN
-Capacity harness: NOT_IMPLEMENTED / BLOCKED_BY_CRITERIA
-Post-B2 capacity acceptance: BLOCKED
+Capacity acceptance criteria: FROZEN / ACCEPTED
+Capacity harness: NOT_IMPLEMENTED / NEXT
+Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -26,28 +26,29 @@ PostgreSQL contention evidence: PASS / SAME_POOL_RECOVERY_AND_SERIES_COMPLETE
 Restart reproducibility: PASS / SPRING_CONTEXT 3 OF 3 / POSTGRESQL_SAME_CONTAINER 3 OF 3
 Capacity threshold evidence: CLOSED / SUFFICIENT
 Candidate threshold evidence: SUFFICIENT
-Allow capacity criteria freeze retry: YES / NEXT_TASK_ONLY
+Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
+Allow capacity harness work order: YES / NEXT_TASK_ONLY
 Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER
+current task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
 current task status: CLOSED / ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
 POSTGRESQL_TEST_EVIDENCE: CURRENT_PASS / POSTGRESQL_17_10 / ZERO_SKIPS
 HARD_CEILING_CONFLICT: CLOSED
-CAPACITY_CRITERIA_AUTHORITY: BLOCKED / NOT_FROZEN
-PROJECT_ACCEPTANCE_BASELINE: BLOCKED
+CAPACITY_CRITERIA_AUTHORITY: FROZEN / ACCEPTED
+PROJECT_ACCEPTANCE_BASELINE: FROZEN
 ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: NO / CONSUMED_BLOCKED
-ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: YES / NEXT_TASK_ONLY
-ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO
+ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO / CONSUMED_ACCEPTED
+ALLOW_CAPACITY_HARNESS_WORK_ORDER: YES / NEXT_TASK_ONLY
 ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
 ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-历史calibration与same-pool失败轨迹保持不变，并明确按Previous attempt / consumed evidence解释。run `20260714T154500Z`证明旧probe因随机宿主端口在容器stop/start后漂移而无效，根因分类为`PROBE_CONTAINER_ENDPOINT_CHANGED / RECOVERY_PROBE_INVALID`；production DataSource/Hikari配置和Java代码无需修改。修正后的固定loopback probe在同一ApplicationContext、DataSource、Hikari pool、PostgreSQL容器、mapped port、JDBC URL hash与persistent volume上完成3/3恢复，database ready为487–512 ms，protected 2xx恢复为3.792–3.864 s；outage 9个真实请求全部fail-closed，37条序列最大采样间隔1048 ms，恢复后8并发/100请求全部2xx。Spring Context restart与PostgreSQL same-container restart分别3/3；`mvn -ntp test`为1114/0/0/0，Surefire 380 rows/7 PIDs，质量门通过。Candidate evidence为`SUFFICIENT`，只开放criteria freeze retry；post-B2 capacity acceptance仍`BLOCKED`，B3仍`NOT_ALLOWED`。
+历史calibration与same-pool失败轨迹保持不变，并明确按Previous attempt / consumed evidence解释。有效证据slice已完成兼容性审查；rate按修复后15轮完整matrix推导，cleanup按tenant-scoped 10/100/1000推导，recovery只使用固定endpoint 3轮，pressure与资源只使用完整有效序列。工程验收阈值、环境baseline、mandatory scenario与formal harness输入/输出/退出语义现为`FROZEN / ACCEPTED`。该结论不是production SLO、SLA或容量认证；harness仍`NOT_IMPLEMENTED / NEXT`，post-B2 capacity acceptance仍`BLOCKED / PENDING HARNESS AND EXECUTION`，B3仍`NOT_ALLOWED`。
 
 权威层级固定为：
 

@@ -1,5 +1,22 @@
 # DH Stage-QDR-7 B2 Capacity Threshold Evidence
 
+## Current criteria freeze disposition（2026-07-15）
+
+`DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY`已完成evidence validity与commit compatibility审查。正式阈值只纳入run `20260714T210052`的修复后valid slice以及run `20260714T154500Z`的fixed-endpoint recovery/restart/full-regression slice；`20260713T213431`、`20260714T012507`、旧same-pool recovery、initial parser/driver错误与negative nonce summary parser均保持historical或superseded，不参与阈值统计。
+
+```text
+CANDIDATE_THRESHOLD_EVIDENCE: CLOSED / SUFFICIENT
+CAPACITY_ACCEPTANCE_CRITERIA: FROZEN / ACCEPTED
+FORMAL_CAPACITY_HARNESS: NOT_IMPLEMENTED / NEXT
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED / PENDING HARNESS AND EXECUTION
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+```
+
+Accepted阈值、公式、rounding、margin、环境baseline与harness合同以`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`为唯一标准；本文件继续作为evidence与历史失败记录，不是production SLO/SLA或容量认证。
+
+---
+
 > task: `DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER`
 > classification: `CODE_AND_EVIDENCE_FIX`
 > baseline: `e2cb1ff966eb611f05d3703893fab002ea6142b4`

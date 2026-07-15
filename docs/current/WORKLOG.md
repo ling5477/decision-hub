@@ -1,5 +1,35 @@
 # Decision Hub Worklog
 
+## 2026-07-15 DH-STAGE-QDR-7-B2-CAPACITY-CRITERIA-FREEZE-RETRY
+
+- 预检确认repository `E:/Project/decision-hub`、branch `dev`、HEAD `9212047ab473a67f7bbdc8729e99495be6698946`且与`origin/dev`一致；task前worktree clean、staged empty，三个scope包含关系全部PASS。
+- 使用`nq-dh-workflow-router`分类为`DOCUMENTATION`，以`dh-docs-writer`执行docs-only freeze；未调用外部connector/plugin。
+- 建立evidence ledger：排除`20260713T213431`与`20260714T012507`；`20260714T210052`只使用修复后rate/quota/isolation/nonce/idempotency/tenant cleanup/pressure/resource slice；recovery与restart只使用`20260714T154500Z`。
+- Rate按每并发点3轮观测冻结：throughput floor使用min×0.80向下0.1；p50/p95/p99/max ceiling使用max×1.25向上10 ms。未删除离群样本。
+- 冻结cold-start quota 3轮10/30、tenant/environment隔离、canonical source fail-closed、nonce 3轮1/23与idempotency lifecycle零容忍合同。
+- 冻结tenant-scoped cleanup 10/100/1000、2 workers、1 writer、batch 10，duration ceiling 200/200/1100 ms；跨scope、active/locked/not-expired与duplicate deletion均0容忍。
+- 冻结same-pool recovery 3轮：database ready 800 ms、Hikari recovery 5800 ms、protected request recovery 5800 ms；outage false 2xx=0，post-recovery 8并发/100个2xx。
+- 冻结normal/pressure/outage/recovery/post-load序列、Hikari/PostgreSQL阈值、restart 3+3、full regression/resources与本地environment baseline。所有数值说明source、sample count、min/median/max、公式、rounding、margin与限制。
+- 冻结formal harness合同：profile `qdr7-capacity-acceptance`、seed 7、唯一UTC run-id、`target/qdr7-capacity-acceptance/<run-id>/`、CSV/JSON/percentile/metrics/comparison/manifest/secret scan和fail-closed退出语义；本轮未实现或执行harness。
+- 新增`DH_STAGE_QDR_7_B2_CAPACITY_CRITERIA_FREEZE_REVIEW.md`，同步8个current factsources、ROADMAP、TESTING、WORKLOG、implementation work order、threshold evidence与post-implementation acceptance。
+- `mvn -ntp -Pquality validate`真实通过：19/19 Reactor SUCCESS、root Checkstyle 0 violations、Spotless PASS。Forbidden-scope diff为0，current fact conflict count=0。
+
+```text
+CAPACITY_ACCEPTANCE_CRITERIA_FREEZE: DONE / ACCEPTED
+EVIDENCE_COMPATIBILITY: PASS
+NUMERIC_THRESHOLDS: FROZEN
+ENVIRONMENT_BASELINE: FROZEN
+HARNESS_CONTRACT: FROZEN / NOT_IMPLEMENTED
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED / PENDING HARNESS AND EXECUTION
+ALLOW_CAPACITY_HARNESS_WORK_ORDER: YES / NEXT_TASK_ONLY
+ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO
+ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
+Stage-QDR-7 B3: NOT_ALLOWED
+next action: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+```
+
+> Historical / consumed：从下一节开始保留same-pool recovery及更早worklog；旧criteria状态与next action不得覆盖本节current disposition。
+
 ## 2026-07-14 DH-STAGE-QDR-7-B2-POSTGRESQL-SAME-POOL-RECOVERY-BLOCKER
 
 - 预检确认仓库`E:/Project/decision-hub`、分支`dev`、HEAD `e2cb1ff966eb611f05d3703893fab002ea6142b4`、staged empty；23个inherited dirty files全部保留，未执行reset/checkout/restore/clean。8个current factsources全部纳入read/validation/scan/write scope，`TASK_SCOPE_DESIGN: PASS`、初始`CURRENT_CONFLICT=0`。
