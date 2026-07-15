@@ -1,6 +1,6 @@
 # Decision Hub Status
 
-## Current authority — 2026-07-15 capacity harness work order accepted
+## Current authority — 2026-07-15 capacity harness implementation accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -12,8 +12,9 @@ Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: FROZEN / ACCEPTED
 Capacity harness work order: CLOSED / ACCEPTED
-Capacity harness implementation: NOT_STARTED / NEXT
-Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
+Capacity harness implementation: CLOSED / ACCEPTED
+Formal profile: qdr7-capacity-acceptance
+Post-B2 capacity acceptance: BLOCKED / EXECUTION NEXT
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -29,14 +30,15 @@ Capacity threshold evidence: CLOSED / SUFFICIENT
 Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
-Allow capacity harness implementation: YES / NEXT_TASK_ONLY
-Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
+Allow capacity acceptance execution: YES / NEXT_TASK_ONLY
+Full regression: PASS / 1133 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
 current task status: CLOSED / ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
 POSTGRESQL_TEST_EVIDENCE: CURRENT_PASS / POSTGRESQL_17_10 / ZERO_SKIPS
 HARD_CEILING_CONFLICT: CLOSED
@@ -45,12 +47,12 @@ PROJECT_ACCEPTANCE_BASELINE: FROZEN
 ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: NO / CONSUMED_BLOCKED
 ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO / CONSUMED_ACCEPTED
 ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO / CONSUMED_ACCEPTED
-ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: YES / NEXT_TASK_ONLY
-ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
+ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO / CONSUMED_ACCEPTED
+ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: YES / NEXT_TASK_ONLY
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-历史calibration与same-pool失败轨迹保持不变，并明确按Previous attempt / consumed evidence解释。工程验收criteria继续`FROZEN / ACCEPTED`；本轮已冻结Java/Failsafe + PowerShell + Maven profile混合架构、mandatory scenario、artifact/schema、semantic exit code、安全边界、自测矩阵与精确write allowlist。该结论不是harness已实现、production SLO、SLA或容量认证；harness implementation仍`NOT_STARTED / NEXT`，post-B2 capacity acceptance仍`BLOCKED / PENDING HARNESS AND EXECUTION`，B3仍`NOT_ALLOWED`。
+历史calibration与same-pool失败轨迹保持不变，并明确按Previous attempt / consumed evidence解释。工程验收criteria继续`FROZEN / ACCEPTED`；formal harness已按冻结合同实现并完成自测、default lifecycle回归、完整普通回归与质量门禁。该结论不是production SLO、SLA或capacity acceptance PASS；post-B2 capacity acceptance保持`BLOCKED / EXECUTION NEXT`，B3仍`NOT_ALLOWED`。
 
 权威层级固定为：
 

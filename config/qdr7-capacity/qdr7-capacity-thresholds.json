@@ -1,0 +1,75 @@
+{
+  "criteriaVersion": "qdr7-capacity-criteria-1",
+  "sourceDocument": "docs/current/DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md",
+  "sourceDocumentSha256": "d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab",
+  "artifactContractVersion": "qdr7-capacity-1",
+  "scenarioRegistry": [
+    "actual-wiring",
+    "rate-matrix",
+    "cold-start-quota",
+    "tenant-environment-isolation",
+    "canonical-source-fail-closed",
+    "nonce-race",
+    "idempotency-lifecycle",
+    "tenant-scoped-cleanup",
+    "postgres-hikari-contention",
+    "postgres-same-pool-recovery",
+    "spring-context-restart",
+    "postgres-persistent-volume-restart",
+    "post-recovery-concurrency",
+    "full-regression",
+    "quality-gate"
+  ],
+  "environmentBaseline": {
+    "osFamily": "Windows 11",
+    "architecture": "x64",
+    "minimumLogicalCpu": 16,
+    "minimumAvailableMemoryBytes": 17179869184,
+    "minimumDockerMemoryBytes": 17179869184,
+    "javaMajor": 21,
+    "mavenVersionPattern": "^3\\.9\\.",
+    "dockerVersionPattern": "^29\\.",
+    "postgresImage": "postgres:17",
+    "postgresMajor": 17,
+    "testcontainersVersion": "1.20.4",
+    "mavenOptsRequiredState": "UNSET",
+    "httpMaximumConcurrency": 16,
+    "normalPoolMaximum": 10,
+    "normalPoolMinimumIdle": 2,
+    "pressurePoolMaximum": 4,
+    "pressurePoolMinimumIdle": 2
+  },
+  "numericThresholds": {
+    "rate": {
+      "1": {"throughputMin": 5.0, "p50MaxMs": 200, "p95MaxMs": 330, "p99MaxMs": 370, "latencyMaxMs": 410},
+      "2": {"throughputMin": 10.1, "p50MaxMs": 190, "p95MaxMs": 290, "p99MaxMs": 410, "latencyMaxMs": 410},
+      "4": {"throughputMin": 19.9, "p50MaxMs": 190, "p95MaxMs": 350, "p99MaxMs": 370, "latencyMaxMs": 390},
+      "8": {"throughputMin": 37.8, "p50MaxMs": 200, "p95MaxMs": 330, "p99MaxMs": 370, "latencyMaxMs": 410},
+      "16": {"throughputMin": 38.7, "p50MaxMs": 370, "p95MaxMs": 710, "p99MaxMs": 770, "latencyMaxMs": 770}
+    },
+    "cleanupMaxMs": {"10": 200, "100": 200, "1000": 1100},
+    "recoveryMaxMs": {"database": 800, "hikari": 5800, "request": 5800, "samplingGap": 1400},
+    "contentionMax": {"hikariPending": 17, "acquireMs": 3800, "postgresWaiting": 7, "postgresLockWaiting": 4},
+    "regressionMax": {
+      "durationMs": 660000,
+      "mavenWorkingSetBytes": 603979776,
+      "surefireWorkingSetBytes": 2147483648,
+      "dockerMemoryBytes": 201326592,
+      "minimumFreeMemoryBytes": 13958643712
+    }
+  },
+  "correctnessInvariants": {
+    "unexpected4xx": 0,
+    "unexpected5xx": 0,
+    "transportErrors": 0,
+    "crossScopeRows": 0,
+    "quotaOversell": 0,
+    "partialCommit": 0,
+    "deadlocks": 0,
+    "manifestMismatch": 0,
+    "secretFindings": 0,
+    "testFailures": 0,
+    "testErrors": 0,
+    "testSkipped": 0
+  }
+}

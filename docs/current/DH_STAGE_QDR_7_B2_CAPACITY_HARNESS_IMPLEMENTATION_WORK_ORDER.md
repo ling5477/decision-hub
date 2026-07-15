@@ -6,9 +6,28 @@
 > authority status: `CLOSED / ACCEPTED`
 > B2 status: `CLOSED / ACCEPTED`
 > capacity acceptance criteria: `FROZEN / ACCEPTED`
-> capacity harness implementation: `NOT_STARTED / NEXT`
-> post-B2 capacity acceptance: `BLOCKED / PENDING HARNESS AND EXECUTION`
+> capacity harness implementation: `CLOSED / ACCEPTED`
+> formal profile: `qdr7-capacity-acceptance`
+> post-B2 capacity acceptance: `BLOCKED / EXECUTION NEXT`
 > Stage-QDR-7 B3: `NOT_ALLOWED`
+
+## Current implementation disposition（2026-07-15）
+
+本work order已由`DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION`消费。H1–H3已按冻结合同实现，并通过harness自测、PowerShell 5.1/7 contract tests、effective-POM、完整普通回归与质量门禁；本轮没有执行正式capacity acceptance。
+
+```text
+CAPACITY_HARNESS_IMPLEMENTATION: CLOSED / ACCEPTED
+FORMAL_PROFILE: qdr7-capacity-acceptance
+DEFAULT_MAVEN_LIFECYCLE: PASS / FORMAL IT NOT ACTIVATED
+HARNESS_SELF_TESTS: PASS / 19 NON-SKIPPED + 4 EXPECTED PROFILE-DISABLED
+FULL_REGRESSION: PASS / 1133 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+QUALITY_GATE: PASS
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED / EXECUTION NEXT
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY
+```
+
+以下§1起保留已接受的冻结实施合同，不因实施完成而改写历史授权边界。
 
 ## 1. 目标、边界与验收
 

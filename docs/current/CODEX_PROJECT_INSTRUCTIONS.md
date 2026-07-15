@@ -1,6 +1,6 @@
 # Codex Project Instructions
 
-## Current authority — 2026-07-15 capacity harness work order accepted
+## Current authority — 2026-07-15 capacity harness implementation accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -12,8 +12,9 @@ Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: FROZEN / ACCEPTED
 Capacity harness work order: CLOSED / ACCEPTED
-Capacity harness implementation: NOT_STARTED / NEXT
-Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
+Capacity harness implementation: CLOSED / ACCEPTED
+Formal profile: qdr7-capacity-acceptance
+Post-B2 capacity acceptance: BLOCKED / EXECUTION NEXT
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -29,22 +30,23 @@ Capacity threshold evidence: CLOSED / SUFFICIENT
 Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
-Allow capacity harness implementation: YES / NEXT_TASK_ONLY
-Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
+Allow capacity acceptance execution: YES / NEXT_TASK_ONLY
+Full regression: PASS / 1133 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
 ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: NO / CONSUMED_BLOCKED
 ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO / CONSUMED_ACCEPTED
-ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: YES / NEXT_TASK_ONLY
-ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO
+ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO / CONSUMED_ACCEPTED
+ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: YES / NEXT_TASK_ONLY
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
-CURRENT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+CURRENT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
 CURRENT_TASK_STATUS: CLOSED / ACCEPTED
-NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
+NEXT_TASK: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY
 ```
 
-schema errata、persistent guards与B2 milestone保持`ACCEPTED`，历史失败轨迹继续保留。Criteria保持`FROZEN / ACCEPTED`；harness work order已冻结混合架构、profile、场景、artifact、semantic exit code、安全边界、自测和精确write allowlist。当前任务`CLOSED / ACCEPTED`，下一任务只允许harness implementation；不授权capacity execution、B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
+schema errata、persistent guards与B2 milestone保持`ACCEPTED`，历史失败轨迹继续保留。Criteria保持`FROZEN / ACCEPTED`；formal harness implementation已完成并接受，profile固定为`qdr7-capacity-acceptance`。本任务未执行capacity acceptance；下一任务只允许独立acceptance retry，不授权B3、API、外部HTTP/provider、NQ、Agent/LangGraph或LIVE。
 
 > 项目: Decision Hub
 > 必需前置 skill: `nq-dh-workflow-router`

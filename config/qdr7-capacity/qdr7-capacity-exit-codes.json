@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "qdr7-capacity-1",
+  "priority": [90, 80, 70, 60, 40, 50, 30, 20, 10, 0],
+  "codes": {
+    "0": {"status": "PASS", "meaning": "all mandatory scenarios and thresholds passed"},
+    "10": {"status": "BLOCKED", "meaning": "environment preflight blocked"},
+    "20": {"status": "BLOCKED", "meaning": "actual wiring or startup blocked"},
+    "30": {"status": "BLOCKED", "meaning": "mandatory scenario missing"},
+    "40": {"status": "FAIL", "meaning": "correctness invariant failed"},
+    "50": {"status": "FAIL", "meaning": "numeric threshold failed"},
+    "60": {"status": "FAIL", "meaning": "full regression failed or skipped"},
+    "70": {"status": "FAIL", "meaning": "quality gate failed"},
+    "80": {"status": "BLOCKED", "meaning": "artifact manifest or schema failed"},
+    "90": {"status": "FAIL", "meaning": "secret scan failed"},
+    "100": {"status": "BLOCKED", "meaning": "unexpected harness failure"}
+  }
+}

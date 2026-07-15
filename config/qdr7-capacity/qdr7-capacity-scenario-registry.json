@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "qdr7-capacity-1",
+  "scenarioVersion": "qdr7-capacity-scenarios-1",
+  "fixedOrder": [
+    "actual-wiring",
+    "rate-matrix",
+    "cold-start-quota",
+    "tenant-environment-isolation",
+    "canonical-source-fail-closed",
+    "nonce-race",
+    "idempotency-lifecycle",
+    "tenant-scoped-cleanup",
+    "postgres-hikari-contention",
+    "postgres-same-pool-recovery",
+    "spring-context-restart",
+    "postgres-persistent-volume-restart",
+    "post-recovery-concurrency",
+    "full-regression",
+    "quality-gate"
+  ],
+  "mandatoryCount": 15,
+  "seed": 7,
+  "defaultScenarioTimeoutSeconds": 900,
+  "setupTimeoutSeconds": 120,
+  "teardownTimeoutSeconds": 120
+}

@@ -124,8 +124,9 @@ Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: FROZEN / ACCEPTED
 Capacity harness work order: CLOSED / ACCEPTED
-Capacity harness implementation: NOT_STARTED / NEXT
-Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
+Capacity harness implementation: CLOSED / ACCEPTED
+Formal profile: qdr7-capacity-acceptance
+Post-B2 capacity acceptance: BLOCKED / EXECUTION NEXT
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -141,14 +142,15 @@ Capacity threshold evidence: CLOSED / SUFFICIENT
 Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
-Allow capacity harness implementation: YES / NEXT_TASK_ONLY
-Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
+Allow capacity acceptance execution: YES / NEXT_TASK_ONLY
+Full regression: PASS / 1133 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
 current task status: CLOSED / ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY
 real HTTP: NO
 real provider: NO
 Agent / LangGraph: NO

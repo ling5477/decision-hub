@@ -1,26 +1,30 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-15 capacity harness implementation work order
+## Current validation — 2026-07-15 capacity harness implementation
 
 ```text
-task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
-baseline HEAD: fcedc486cc47b010210ae5b0017c0bb69c4e97c4
+task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
+baseline HEAD: 3b8c11ccf9dc9c8abc8e79bffb142f1d6cea302e
 scope containment: PASS
 current factsources: PASS / 8 OF 8 / 0 CONFLICTS
-mandatory contract markers: PASS / 40 OF 40
+targeted harness tests: PASS / 23 TESTS / 0 FAILURES / 0 ERRORS / 4 EXPECTED PROFILE-DISABLED
+PowerShell contract tests: PASS / WINDOWS POWERSHELL 5.1 + POWERSHELL 7
+effective POM: PASS / EXEC + FAILSAFE + FORMAL IT BINDINGS
+blocked preflight path: PASS / EXIT 10 / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED
 forbidden-scope tracked/untracked diff: 0 / 0
 git diff --check: PASS / EOL WARNINGS ONLY
-quality: BUILD SUCCESS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
-full Maven regression: NOT RERUN / ACCEPTED 1114-TEST FACT REUSED
-capacity harness/matrix/fault injection: NOT RUN
+quality: BUILD SUCCESS / 19 OF 19 / SCOPED HARNESS CHECKSTYLE 0 / SCOPED SPOTLESS PASS
+full Maven regression: PASS / 172 SUREFIRE SUITES / 1133 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+formal capacity acceptance: NOT RUN
 Capacity harness work order: CLOSED / ACCEPTED
-Capacity harness implementation: NOT_STARTED / NEXT
-Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
+Capacity harness implementation: CLOSED / ACCEPTED
+Formal profile: qdr7-capacity-acceptance
+Post-B2 capacity acceptance: BLOCKED / EXECUTION NEXT
 Stage-QDR-7 B3: NOT_ALLOWED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY
 ```
 
-详细命令、边界与未运行项见本文件同名validation记录；本轮没有把复用的1114-test事实写成重跑，也没有把work order完成写成capacity PASS。
+完整普通回归于`2026-07-15T21:27:53+08:00`启动，19/19 Reactor `SUCCESS`，Maven总时长10:23。Formal IT在default lifecycle中未激活；targeted suite中的4个skip来自预期的profile-disabled条件，不是Testcontainers skip。Root quality exact命令真实`BUILD SUCCESS`；仓库既有`skipExec`/report机制与任务外历史格式债务未在本任务内扩修。正式capacity acceptance、matrix与fault injection均未执行。
 
 ## Historical / consumed — 2026-07-15 capacity criteria freeze retry validation
 

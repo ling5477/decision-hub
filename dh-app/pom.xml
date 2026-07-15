@@ -100,10 +100,113 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/*IT.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>qdr7-capacity-acceptance</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.5.0</version>
+            <executions>
+              <execution>
+                <id>qdr7-capacity-preflight</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>${qdr7.powershell.executable}</executable>
+                  <arguments>
+                    <argument>-NoProfile</argument>
+                    <argument>-NonInteractive</argument>
+                    <argument>-ExecutionPolicy</argument>
+                    <argument>Bypass</argument>
+                    <argument>-File</argument>
+                    <argument>${maven.multiModuleProjectDirectory}/scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1</argument>
+                    <argument>-Phase</argument>
+                    <argument>Preflight</argument>
+                    <argument>-RunId</argument>
+                    <argument>${qdr7.runId}</argument>
+                    <argument>-Seed</argument>
+                    <argument>${qdr7.seed}</argument>
+                    <argument>-ProjectRoot</argument>
+                    <argument>${maven.multiModuleProjectDirectory}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+              <execution>
+                <id>qdr7-capacity-finalize</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>${qdr7.powershell.executable}</executable>
+                  <arguments>
+                    <argument>-NoProfile</argument>
+                    <argument>-NonInteractive</argument>
+                    <argument>-ExecutionPolicy</argument>
+                    <argument>Bypass</argument>
+                    <argument>-File</argument>
+                    <argument>${maven.multiModuleProjectDirectory}/scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1</argument>
+                    <argument>-Phase</argument>
+                    <argument>Finalize</argument>
+                    <argument>-RunId</argument>
+                    <argument>${qdr7.runId}</argument>
+                    <argument>-Seed</argument>
+                    <argument>${qdr7.seed}</argument>
+                    <argument>-ProjectRoot</argument>
+                    <argument>${maven.multiModuleProjectDirectory}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>3.2.5</version>
+            <configuration>
+              <includes>
+                <include>**/Qdr7CapacityAcceptanceIT.java</include>
+              </includes>
+              <systemPropertyVariables>
+                <qdr7.capacity.profile.active>true</qdr7.capacity.profile.active>
+                <qdr7.runId>${qdr7.runId}</qdr7.runId>
+                <qdr7.seed>${qdr7.seed}</qdr7.seed>
+                <qdr7.projectRoot>${maven.multiModuleProjectDirectory}</qdr7.projectRoot>
+              </systemPropertyVariables>
+            </configuration>
+            <executions>
+              <execution>
+                <id>qdr7-capacity-failsafe</id>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

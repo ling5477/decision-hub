@@ -1,6 +1,6 @@
 # Decision Hub Current Docs
 
-## Current authority — Stage-QDR-7 capacity harness work order accepted
+## Current authority — Stage-QDR-7 capacity harness implementation accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -12,8 +12,9 @@ Guard configuration bypass: CLOSED
 Normative hard ceilings: rate window <= 3600s / rate quota <= 100000 / idempotency lease <= 900s
 Capacity acceptance criteria: FROZEN / ACCEPTED
 Capacity harness work order: CLOSED / ACCEPTED
-Capacity harness implementation: NOT_STARTED / NEXT
-Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
+Capacity harness implementation: CLOSED / ACCEPTED
+Formal profile: qdr7-capacity-acceptance
+Post-B2 capacity acceptance: BLOCKED / EXECUTION NEXT
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -29,17 +30,18 @@ Capacity threshold evidence: CLOSED / SUFFICIENT
 Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
-Allow capacity harness implementation: YES / NEXT_TASK_ONLY
-Full regression: PASS / 1114 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
+Allow capacity acceptance execution: YES / NEXT_TASK_ONLY
+Full regression: PASS / 1133 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
 current task status: CLOSED / ACCEPTED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY
 ```
 
-证据报告：`DH_STAGE_QDR_7_B2_CAPACITY_THRESHOLD_EVIDENCE.md`；accepted criteria：`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`；harness work order：`DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md`；容量验收记录：`DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md`。Work order已冻结实现架构与边界，但harness implementation仍未开始，capacity acceptance仍`BLOCKED / PENDING HARNESS AND EXECUTION`；下一任务仅为harness implementation。
+证据报告：`DH_STAGE_QDR_7_B2_CAPACITY_THRESHOLD_EVIDENCE.md`；accepted criteria：`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`；harness work order：`DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md`；容量验收记录：`DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md`。Formal harness implementation已`CLOSED / ACCEPTED`，正式profile为`qdr7-capacity-acceptance`；capacity acceptance仍`BLOCKED / EXECUTION NEXT`，下一任务仅为独立acceptance retry。
 
 权威层级固定为：
 

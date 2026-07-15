@@ -1,20 +1,23 @@
 # Decision Hub Worklog
 
-## Current work — 2026-07-15 capacity harness implementation work order
+## Current work — 2026-07-15 capacity harness implementation
 
-`DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION-WORK-ORDER`已`CLOSED / ACCEPTED`。本轮使用`nq-dh-workflow-router`与`dh-docs-writer`，基于POM、`dh-app` actual-wiring/Testcontainers tests、PowerShell脚本与CI现实冻结Java/Failsafe + PowerShell + Maven profile混合架构、场景、artifact/schema、semantic exit code、安全、自测、teardown与精确write allowlist；未实现或执行harness。
+`DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION`已`CLOSED / ACCEPTED`。本轮以`java-backend-regression-tests`为主skill，`dh-docs-writer`负责current docs同步，按冻结work order实现Java/Failsafe + PowerShell + Maven profile混合harness、15个mandatory scenario registry、actual-wiring/database/recovery drivers、连续采样、criteria hash、统计、threshold comparator、artifact/schema/manifest/secret scan、semantic exit code与安全teardown；未执行正式capacity acceptance。
 
 ```text
 current factsources: PASS / 8 OF 8 / 0 CONFLICTS
-quality: BUILD SUCCESS / 19 OF 19
+targeted harness tests: PASS / 23 / 0 / 0 / 4 EXPECTED PROFILE-DISABLED
+full regression: PASS / 172 SUREFIRE SUITES / 1133 / 0 / 0 / 0
+quality: BUILD SUCCESS / 19 OF 19 / SCOPED HARNESS CHECKSTYLE 0 / SPOTLESS PASS
 forbidden-scope diff: 0
-Capacity harness implementation: NOT_STARTED / NEXT
-Post-B2 capacity acceptance: BLOCKED / PENDING HARNESS AND EXECUTION
+Capacity harness implementation: CLOSED / ACCEPTED
+Formal profile: qdr7-capacity-acceptance
+Post-B2 capacity acceptance: BLOCKED / EXECUTION NEXT
 Stage-QDR-7 B3: NOT_ALLOWED
-next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-IMPLEMENTATION
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY
 ```
 
-详细设计与记录见`DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md`及本文件同名worklog条目。
+实现新增root/`dh-app` profile、`config/qdr7-capacity/**`、`scripts/qdr7-capacity/**`与`dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/**`，没有修改production Java、application配置、migration/callback、API/contracts、NQ、Provider、Agent/LangGraph或LIVE。Windows PowerShell 5.1和PowerShell 7 contract tests均exit 0；dirty-worktree blocked preflight返回内部exit 10并产出最小blocked artifacts；effective POM包含Exec/Failsafe/formal IT绑定。完整普通回归19/19 Reactor `SUCCESS`，正式profile未激活。
 
 ## Historical / consumed — 2026-07-15 capacity criteria freeze retry
 
