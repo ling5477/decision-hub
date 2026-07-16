@@ -48,8 +48,8 @@ class Qdr7CapacityPowerShellContractTest {
         .contains("$candidates.Add('powershell.exe')")
         .contains("$ResolvedPowerShellIdentity")
         .contains("$Registry.containerName -ne $expected")
-        .contains("docker container rm --force $Registry.containerName")
-        .contains("docker volume rm $Registry.volumeName")
+        .contains("@('container', 'rm', '--force', [string]$Registry.containerName)")
+        .contains("@('volume', 'rm', [string]$Registry.volumeName)")
         .contains("finally")
         .doesNotContain("docker system prune", "docker volume prune", "git reset", "git clean");
   }
@@ -65,6 +65,57 @@ class Qdr7CapacityPowerShellContractTest {
     assertThat(formalIt)
         .contains("@Testcontainers")
         .doesNotContain("disabledWithoutDocker = true", "disabledWithoutDocker=true");
+  }
+
+  @Test
+  void staticContainerStartsBeforeSpringDynamicPropertyResolutionAndHasSingleOwner()
+      throws IOException {
+    final Path root = repositoryRoot();
+    final String formalIt =
+        Files.readString(
+            root.resolve(
+                "dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityAcceptanceIT.java"));
+    final String script =
+        Files.readString(root.resolve("scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1"));
+
+    final int containerDeclaration = formalIt.indexOf("@Container");
+    final int explicitStart = formalIt.indexOf("startPostgresBeforeSpringPropertyResolution();");
+    final int dynamicPropertySource = formalIt.indexOf("@DynamicPropertySource");
+    assertThat(containerDeclaration).isGreaterThanOrEqualTo(0);
+    assertThat(explicitStart).isGreaterThan(containerDeclaration).isLessThan(dynamicPropertySource);
+    assertThat(formalIt.substring(dynamicPropertySource, formalIt.indexOf("@LocalServerPort")))
+        .contains("FROZEN_JDBC_URL", "FROZEN_DATABASE_USERNAME", "FROZEN_DATABASE_PASSWORD")
+        .doesNotContain("POSTGRES::getJdbcUrl", "POSTGRES::getMappedPort");
+    assertThat(script)
+        .contains("containerOwnership = 'JUNIT_TESTCONTAINERS'")
+        .doesNotContain("docker run", "docker container create", "docker create");
+  }
+
+  @Test
+  void implementationValidationIsWiredAndCannotExecuteMandatoryScenarios() throws IOException {
+    final Path root = repositoryRoot();
+    final String rootPom = Files.readString(root.resolve("pom.xml"));
+    final String appPom = Files.readString(root.resolve("dh-app/pom.xml"));
+    final String formalIt =
+        Files.readString(
+            root.resolve(
+                "dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityAcceptanceIT.java"));
+
+    assertThat(rootPom)
+        .contains("<qdr7.implementationValidation>false</qdr7.implementationValidation>");
+    assertThat(appPom)
+        .contains(
+            "<qdr7.implementationValidation>",
+            "${qdr7.implementationValidation}",
+            "</qdr7.implementationValidation>")
+        .contains("<argument>-ImplementationValidation</argument>");
+    assertThat(formalIt)
+        .contains("IMPLEMENTATION_VALIDATION_ONLY")
+        .contains(
+            "@EnabledIfSystemProperty(named = \"qdr7.implementationValidation\", matches = \"true\")")
+        .contains(
+            "@DisabledIfSystemProperty(named = \"qdr7.implementationValidation\", matches = \"true\")")
+        .contains("artifact.put(\"executedScenarioCount\", 0)");
   }
 
   private static int invoke(
@@ -103,8 +154,7 @@ class Qdr7CapacityPowerShellContractTest {
     return process.exitValue();
   }
 
-  private static int invokeContract(
-      final String executable, final Path contract, final Path root)
+  private static int invokeContract(final String executable, final Path contract, final Path root)
       throws IOException, InterruptedException {
     final Process process =
         new ProcessBuilder(
@@ -122,7 +172,9 @@ class Qdr7CapacityPowerShellContractTest {
         process.waitFor(Duration.ofSeconds(60).toMillis(), TimeUnit.MILLISECONDS);
     final String output =
         new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-    assertThat(finished).withFailMessage("PowerShell binding contract timed out: %s", output).isTrue();
+    assertThat(finished)
+        .withFailMessage("PowerShell binding contract timed out: %s", output)
+        .isTrue();
     assertThat(output).contains("QDR7_CAPACITY_RUNTIME_BINDING_CONTRACT=PASS");
     return process.exitValue();
   }

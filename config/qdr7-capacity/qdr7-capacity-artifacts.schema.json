@@ -28,7 +28,43 @@
     "seed": {"const": 7},
     "unitSystem": {"const": "milliseconds-bytes-requestsPerSecond-percent-rfc3339-utc"},
     "missingValues": {"type": "array", "items": {"type": "string"}},
-    "criteriaVersion": {"const": "qdr7-capacity-criteria-1"}
+    "criteriaVersion": {"const": "qdr7-capacity-criteria-1"},
+    "startedAt": {"type": "string", "format": "date-time"},
+    "completedAt": {"type": "string", "format": "date-time"},
+    "internalExitCode": {"type": "integer"},
+    "mandatoryScenarioCount": {"const": 15},
+    "executedScenarioCount": {"type": "integer", "minimum": 0, "maximum": 15},
+    "correctnessVerdict": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN"]},
+    "thresholdVerdict": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN"]},
+    "regressionVerdict": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN"]},
+    "qualityVerdict": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN"]},
+    "artifactVerdict": {"enum": ["PASS", "BLOCKED", "PENDING"]},
+    "secretVerdict": {"enum": ["PASS", "FAIL", "PENDING"]},
+    "teardownVerdict": {"enum": ["PASS", "BLOCKED"]},
+    "reasonCode": {"type": "string", "minLength": 1}
   },
+  "allOf": [
+    {
+      "if": {"properties": {"scenario": {"const": "capacity-acceptance"}}},
+      "then": {
+        "required": [
+          "criteriaVersion",
+          "startedAt",
+          "completedAt",
+          "internalExitCode",
+          "mandatoryScenarioCount",
+          "executedScenarioCount",
+          "correctnessVerdict",
+          "thresholdVerdict",
+          "regressionVerdict",
+          "qualityVerdict",
+          "artifactVerdict",
+          "secretVerdict",
+          "teardownVerdict",
+          "reasonCode"
+        ]
+      }
+    }
+  ],
   "additionalProperties": true
 }

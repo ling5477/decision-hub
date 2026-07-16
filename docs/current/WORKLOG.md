@@ -1,6 +1,79 @@
 # Decision Hub Worklog
 
-## Current work — 2026-07-15 capacity harness runtime binding blocker
+## Current work — 2026-07-16 capacity harness runtime blocker-2
+
+`DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-2`在baseline HEAD `0112d493c38beeec25b3407aa504dbc129e1850c`上执行。任务前branch为`dev`、`HEAD == origin/dev`、staged为空；继承的13个current/acceptance文档修改全部位于附件允许范围，scope设计三项包含关系均为PASS。实现选择JUnit/Testcontainers单一ownership，未修改Java生产代码、application配置、migration/callback、API/contracts、冻结criteria、15个mandatory scenario或NQ。
+
+```text
+root cause: CONTAINER_START_AFTER_DYNAMIC_PROPERTY_RESOLUTION / STATIC_INITIALIZATION_ORDER
+container ownership: JUNIT / TESTCONTAINERS / SINGLE STATIC POSTGRESQL
+container startup order: PASS / BEFORE SPRING PROPERTY RESOLUTION
+DynamicPropertySource: FROZEN JDBC URL + USERNAME + PASSWORD + MAPPED PORT ONLY
+PowerShell PostgreSQL ownership: NONE
+startup failure mapping: PREFLIGHT 10 / CONTEXT OR CONTAINER 20 / ARTIFACT 80
+blocked summary required fields: PASS
+threshold-comparison blocked artifact: PASS
+manifest order / stability: PASS
+PowerShell 5.1 + 7 contracts: PASS
+targeted harness tests: PASS / 23 / 0 / 0 / 5 PROFILE-DISABLED SKIPPED
+effective POM: PASS / ROOT + DH-APP
+implementation validation run: 20260716T133710Z
+Maven exit: 0
+preflight: PASS / 26 OF 26
+PostgreSQL container / mapped port: STARTED / 3191
+ApplicationContext / Hikari / Flyway V1-V14 / dispatcher: PASS
+mandatory scenarios: 0 OF 15 / NOT_RUN
+capacity acceptance executed: false
+summary: NOT_RUN / INTERNAL EXIT 0 / IMPLEMENTATION_VALIDATION_ONLY
+artifact validation: PASS / 0 FINDINGS
+summary timestamps: PASS / RFC3339 UTC
+threshold comparison: NOT_RUN / FORMAL_SCENARIO_NOT_EXECUTED
+manifest: PASS / 27 ENTRIES / 0 MISMATCH
+secret scan: PASS / 25 FILES / 0 FINDINGS
+teardown: PASS / NO RUN-ID CONTAINER OR VOLUME
+full regression: PASS / 172 REPORTS / 1137 / 0 / 0 / 61 CONDITIONAL SKIPS
+quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+formal capacity acceptance: NOT RUN
+post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3
+```
+
+static container在类初始化阶段显式`start()`，ready后一次性冻结Spring datasource属性；supplier不再调用未启动container。统一finalizer补齐18个required summary fields、`threshold-comparison.json`、mandatory占位、secret scan、manifest与exact-name teardown。implementation-only run验证真实Spring Context/Hikari/Flyway/Tomcat wiring后在scenario dispatcher安全短路，`0/15`且`capacityAcceptanceExecuted=false`，不形成capacity PASS。
+
+PowerShell 5.1 native command处理同时修复Git CRLF stderr warning污染allowlist的问题；formal模式仍要求clean worktree，implementation-validation模式仅接受附件write allowlist。历史run `20260715T160710Z`的11文件、19 findings、summary缺字段与threshold文件缺失事实保持原样，只证明修复前formal runtime defect。普通full regression中的61项条件skip已披露，不能替代正式scenario；下一步只能独立执行formal retry-3。
+
+## Historical / consumed — 2026-07-15 formal capacity acceptance retry-2 harness blocked
+
+`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2`在exact baseline HEAD `0112d493c38beeec25b3407aa504dbc129e1850c`执行只读前置检查。branch为`dev`，`HEAD == origin/dev`，task前worktree clean且staged empty；8个current factsources全部位于read/validation/scan/write范围，scope设计三项包含关系均为PASS。
+
+```text
+criteria SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / PASS
+formal profile: qdr7-capacity-acceptance
+seed: 7
+host available memory at formal preflight: 17290297344 BYTES
+frozen minimum: 17179869184 BYTES
+environment preflight: PASS / 26 OF 26 CHECKS
+formal run id: 20260715T160710Z
+formal Maven command: EXECUTED ONCE
+Maven exit: 1
+internal exit: 80
+formal status: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT
+Failsafe: 1 / 0 FAILURES / 1 ERROR / 0 SKIPPED
+mandatory scenarios: 0 OF 15 / NOT_EXECUTED
+formal artifacts: BLOCKED / 11 FILES / 19 FINDINGS
+manifest: PASS / 10 ENTRIES / 0 MISMATCH
+secret scan: PASS / 6 FILES / 0 FINDINGS
+current-run teardown: PASS / CONTAINER AND VOLUME ABSENT
+pre-existing historical resources: 3 EXITED CONTAINERS + 3 VOLUMES / UNCHANGED
+post-B2 capacity acceptance: BLOCKED
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-2
+```
+
+用户释放内存并恢复Docker后，Java 21.0.9、Maven 3.9.12、Docker 29.6.1、Docker memory `24694083584` bytes、32 logical CPUs、cached `postgres:17`及实际PostgreSQL 17.10、Testcontainers 1.20.4、`MAVEN_OPTS` unset、loopback动态端口、criteria hash和formal内存`17290297344` bytes均通过。唯一formal run随后在ApplicationContext启动阶段因未启动container的mapped port被提前解析而BLOCKED；未执行scenario/regression/quality，不是capacity FAIL。Docker中预先存在3个历史run的exited container与3个volume，本轮未清理；current run container/volume已清除。没有修改Java、测试、POM、harness、criteria/config、application配置、migration/callback、API/contracts或NQ。
+
+## Historical / consumed — 2026-07-15 capacity harness runtime binding blocker
 
 `DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER`在exact baseline HEAD `1d97e8549fb20d00d26a2890800c730071104c6b`执行。预检保留上一轮15个允许的文档dirty项，staged为空，8个current factsources全部位于read/validation/scan/write范围。最小复现`20260715T144344Z`确认`dh-app`同名profile没有获得root profile内属性，根因分类为`PLUGIN_CONFIGURATION_SCOPE / EXECUTABLE_PROPERTY_UNSET`。
 

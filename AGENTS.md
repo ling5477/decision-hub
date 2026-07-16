@@ -139,10 +139,18 @@ Capacity acceptance criteria: FROZEN / ACCEPTED
 Capacity harness work order: CLOSED / ACCEPTED
 Capacity harness implementation: CLOSED / ACCEPTED
 Harness runtime binding: CLOSED / ACCEPTED
+Harness Testcontainers lifecycle: CLOSED / ACCEPTED
+Blocked artifact contract: CLOSED / ACCEPTED
 Formal profile: qdr7-capacity-acceptance
 Historical formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T140521Z
 Latest binding validation: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260715T145836Z / EXPECTED CONTRACT
-Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED ON QUALIFIED ENVIRONMENT
+Latest formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T160710Z / INTERNAL EXIT 80
+Latest implementation validation: PASS / IMPLEMENTATION_VALIDATION_ONLY / 20260716T133710Z / MAVEN EXIT 0 / 0 OF 15
+Latest implementation preflight: PASS / 26 OF 26
+Previous formal acceptance run: BLOCKED / MAVEN EXIT 1 / INTERNAL EXIT 80 / HISTORICAL
+Previous formal acceptance mandatory scenarios: BLOCKED / 0 OF 15 EXECUTED / APPLICATION_CONTEXT_STARTUP_DEFECT / HISTORICAL
+Previous formal acceptance artifacts: BLOCKED / 11 FILES / 19 FINDINGS / SUMMARY CONTRACT INCOMPLETE / HISTORICAL
+Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -159,14 +167,15 @@ Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
 Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
-Allow capacity acceptance execution: YES / NEXT_TASK_ONLY
-Full regression: PASS / 1134 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Allow capacity acceptance execution: NO / RETRY_3_SEPARATE_TASK_REQUIRED
+Allow post-B2 capacity acceptance retry-3: YES / NEXT_TASK_ONLY
+Latest completed full regression: PASS / 1137 TESTS / 0 FAILURES / 0 ERRORS / 61 SKIPPED / LOCAL
 Previous full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS / HISTORICAL
-Quality gate: PASS
+Latest completed quality gate: PASS / CHECKSTYLE 0 / SPOTLESS PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER
-current task status: CLOSED / ACCEPTED / LOCAL_VALIDATED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-2
+current task status: CLOSED / ACCEPTED / IMPLEMENTATION VALIDATION 20260716T133710Z
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3
 ```
 
 `AGENTS.md`是执行指导，不是primary current-state authority；权威当前状态仍以`STATUS.md`、`WORK_ORDER.md`和`FACTSOURCE_POLICY.md`指定的文件为准。

@@ -40,6 +40,7 @@
     <spotless.version>3.1.0</spotless.version>
     <qdr7.seed>7</qdr7.seed>
     <qdr7.powershell.executable>AUTO</qdr7.powershell.executable>
+    <qdr7.implementationValidation>false</qdr7.implementationValidation>
   </properties>
 
   <dependencyManagement>

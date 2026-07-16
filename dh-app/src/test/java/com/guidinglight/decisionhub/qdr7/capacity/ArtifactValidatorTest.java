@@ -2,6 +2,7 @@ package com.guidinglight.decisionhub.qdr7.capacity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -100,5 +101,63 @@ class ArtifactValidatorTest {
     assertThat(result.findings())
         .contains(
             "MANDATORY_ARTIFACT_MISSING:missing.json", "MANDATORY_PATH_INVALID:../outside.json");
+  }
+
+  @Test
+  void frozenBlockedSummaryAndThresholdContractsAreRegistered() throws IOException {
+    final ObjectMapper mapper = new ObjectMapper();
+    final Path root = repositoryRoot();
+    final JsonNode registry =
+        mapper.readTree(
+            root.resolve("config/qdr7-capacity/qdr7-capacity-artifact-registry.json").toFile());
+    final JsonNode schema =
+        mapper.readTree(
+            root.resolve("config/qdr7-capacity/qdr7-capacity-artifacts.schema.json").toFile());
+    final List<String> mandatory =
+        mapper.convertValue(
+            registry.path("mandatory"),
+            mapper.getTypeFactory().constructCollectionType(List.class, String.class));
+    final List<String> summaryRequired =
+        mapper.convertValue(
+            registry.path("summaryRequired"),
+            mapper.getTypeFactory().constructCollectionType(List.class, String.class));
+
+    assertThat(mandatory).contains("threshold-comparison.json", "capacity-acceptance-summary.json");
+    assertThat(summaryRequired)
+        .containsExactly(
+            "schemaVersion",
+            "runId",
+            "commitSha",
+            "criteriaVersion",
+            "startedAt",
+            "completedAt",
+            "status",
+            "internalExitCode",
+            "mandatoryScenarioCount",
+            "executedScenarioCount",
+            "correctnessVerdict",
+            "thresholdVerdict",
+            "regressionVerdict",
+            "qualityVerdict",
+            "artifactVerdict",
+            "secretVerdict",
+            "teardownVerdict",
+            "reasonCode");
+    assertThat(schema.path("properties").path("mandatoryScenarioCount").path("const").asInt())
+        .isEqualTo(15);
+    assertThat(schema.path("properties").has("executedScenarioCount")).isTrue();
+    assertThat(schema.path("properties").has("reasonCode")).isTrue();
+  }
+
+  private static Path repositoryRoot() {
+    Path current = Path.of("").toAbsolutePath().normalize();
+    while (current != null) {
+      if (Files.isRegularFile(current.resolve("pom.xml"))
+          && Files.isDirectory(current.resolve("dh-app"))) {
+        return current;
+      }
+      current = current.getParent();
+    }
+    throw new IllegalStateException("repository root not found");
   }
 }

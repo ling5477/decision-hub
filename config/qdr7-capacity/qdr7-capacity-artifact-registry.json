@@ -42,6 +42,26 @@
     "unitSystem",
     "missingValues"
   ],
+  "summaryRequired": [
+    "schemaVersion",
+    "runId",
+    "commitSha",
+    "criteriaVersion",
+    "startedAt",
+    "completedAt",
+    "status",
+    "internalExitCode",
+    "mandatoryScenarioCount",
+    "executedScenarioCount",
+    "correctnessVerdict",
+    "thresholdVerdict",
+    "regressionVerdict",
+    "qualityVerdict",
+    "artifactVerdict",
+    "secretVerdict",
+    "teardownVerdict",
+    "reasonCode"
+  ],
   "csvCommonHeader": ["schemaVersion", "runId", "commitSha", "scenario", "timestampUtc", "elapsedMs"],
   "manifestSelfExcluded": true
 }

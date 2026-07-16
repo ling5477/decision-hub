@@ -1,6 +1,99 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-15 capacity harness runtime binding blocker
+## Current validation — 2026-07-16 capacity harness runtime blocker-2 accepted
+
+```text
+task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-2
+baseline HEAD: 0112d493c38beeec25b3407aa504dbc129e1850c
+origin/dev before task: 0112d493c38beeec25b3407aa504dbc129e1850c
+branch: dev
+inherited worktree: 13 ALLOWED CURRENT/ACCEPTANCE DOC MODIFICATIONS
+staged before task: empty
+scope design: PASS / THREE CONTAINMENT RELATIONS
+root-cause classification: CONTAINER_START_AFTER_DYNAMIC_PROPERTY_RESOLUTION / STATIC_INITIALIZATION_ORDER
+container ownership: JUNIT / TESTCONTAINERS / SINGLE STATIC POSTGRESQL
+container startup before property resolution: PASS
+blocked artifact contract: PASS / REQUIRED SUMMARY FIELDS COMPLETE
+threshold-comparison blocked artifact contract: PASS
+PowerShell 5.1 contract: PASS
+PowerShell 7 contract: PASS
+targeted harness tests: PASS / 23 TESTS / 0 FAILURES / 0 ERRORS / 5 PROFILE-DISABLED SKIPPED
+effective POM: PASS / ROOT + DH-APP / IMPLEMENTATION VALIDATION PROPERTY BOUND
+implementation validation run id: 20260716T133710Z
+implementation validation Maven exit: 0
+implementation validation preflight: PASS / 26 OF 26 CHECKS
+implementation validation PostgreSQL mapped port: 3191 / FIXED BEFORE CONTEXT REFRESH
+ApplicationContext / Hikari / Flyway V1-V14 / dispatcher: PASS
+mandatory scenarios: 0 OF 15 / NOT_RUN
+capacity acceptance executed: false
+summary: NOT_RUN / INTERNAL EXIT 0 / IMPLEMENTATION_VALIDATION_ONLY
+artifact validation: PASS / 0 FINDINGS
+summary timestamps: PASS / RFC3339 UTC
+threshold comparison: NOT_RUN / 0 COMPARISONS / FORMAL_SCENARIO_NOT_EXECUTED
+manifest: PASS / 27 ENTRIES / 0 MISMATCH
+secret scan: PASS / 25 FILES / 0 FINDINGS
+teardown: PASS / CONTAINER AND VOLUME ABSENT / RESIDUAL NONE
+full Maven regression: PASS / 172 REPORTS / 1137 TESTS / 0 FAILURES / 0 ERRORS / 61 CONDITIONAL SKIPS
+quality gate: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+formal capacity acceptance: NOT RUN
+post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3
+```
+
+JUnit/Testcontainers现在唯一拥有本run的static PostgreSQL container，并在Spring属性解析前显式启动、冻结JDBC URL、username、password与mapped port；`@DynamicPropertySource`只返回这些已冻结值。PowerShell不创建第二个PostgreSQL，只做exact run-id finalization与teardown。`qdr7.implementationValidation=true`只验证container、ApplicationContext、Hikari、Flyway与scenario dispatcher，随后在任何mandatory scenario前短路，因此run `20260716T133710Z`不是formal capacity acceptance，不产生capacity threshold PASS。
+
+普通完整回归未使用`-DskipTests`或`-DskipITs`；61项skip来自default lifecycle中既有Docker条件开关，不能替代上述真实implementation Context证明。历史formal run `20260715T160710Z`及其`BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / internal exit 80 / 0 OF 15`证据未覆盖、未删除、未改写为通过。
+
+## Historical / consumed — 2026-07-15 formal capacity acceptance retry-2 harness blocked
+
+```text
+task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2
+baseline HEAD: 0112d493c38beeec25b3407aa504dbc129e1850c
+origin/dev: 0112d493c38beeec25b3407aa504dbc129e1850c
+branch: dev
+worktree before task: clean
+staged before task: empty
+scope design: PASS / THREE CONTAINMENT RELATIONS
+criteria SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / PASS
+formal profile: qdr7-capacity-acceptance
+seed: 7
+host available memory at formal preflight: 17290297344 BYTES / PASS
+required host available memory: 17179869184 BYTES
+environment preflight: PASS / 26 OF 26 CHECKS
+Java: 21.0.9 / PASS
+Maven: 3.9.12 / PASS
+Docker: 29.6.1 / PASS
+Docker memory: 24694095872 BYTES / PASS
+PostgreSQL image: CACHED postgres:17 / PostgreSQL 17.10 / PASS
+logical CPU: 32 / PASS
+MAVEN_OPTS: UNSET / PASS
+loopback port: AVAILABLE / PASS
+formal run id: 20260715T160710Z
+formal Maven command: EXECUTED ONCE
+formal startedAt: 2026-07-15T16:07:51.267Z
+formal artifact completedAt: 2026-07-15T16:18:31.058Z
+Maven exit: 1
+internal exit: 80
+formal status: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT
+Failsafe: 1 TEST / 0 FAILURES / 1 ERROR / 0 SKIPPED
+root cause: APPLICATION_CONTEXT_STARTUP / CONTAINER_NOT_STARTED_BEFORE_MAPPED_PORT_RESOLUTION
+mandatory scenarios: 0 OF 15 / NOT_EXECUTED
+formal full regression: BLOCKED / FORMAL_SCENARIO_NOT_EXECUTED
+formal quality gate: BLOCKED / FORMAL_SCENARIO_NOT_EXECUTED
+formal artifacts: BLOCKED / 11 FILES / 19 FINDINGS / 10 REQUIRED SUMMARY FIELDS MISSING
+manifest: PASS / 10 ENTRIES / 0 MISMATCH
+secret scan: PASS / 6 FILES / 0 FINDINGS
+current-run teardown: PASS / CONTAINER AND VOLUME ABSENT / RESIDUAL NONE
+pre-existing historical resources: 3 EXITED CONTAINERS + 3 VOLUMES / UNCHANGED
+post-B2 capacity acceptance: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-2
+```
+
+本轮先因内存不足停止，用户释放内存后恢复Docker daemon并重新完成独立preflight；正式run只执行一次。Maven内preflight真实PASS，随后Failsafe启动`Qdr7CapacityAcceptanceIT`时，`POSTGRES::getJdbcUrl`在container启动前被Spring条件解析，抛出`Mapped port can only be obtained after the container is started`。因此0/15 mandatory scenarios、threshold comparison与formal regression/quality均未形成有效结论；finalizer按artifact-invalid路径写出internal exit `80`。本轮不是capacity正确性或数值`FAIL`，不得重跑。
+
+## Historical / consumed — 2026-07-15 capacity harness runtime binding blocker
 
 ```text
 task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER

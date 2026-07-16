@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('Preflight', 'Finalize', 'ContractTest')]
+    [ValidateSet('Preflight', 'Finalize', 'ContractTest', 'RuntimeBlockedContractTest')]
     [string]$Phase,
 
     [Parameter(Mandatory = $true)]
@@ -14,6 +14,9 @@ param(
     [string]$ProjectRoot,
 
     [string]$PowerShellExecutable = 'AUTO',
+
+    [ValidateSet('true', 'false')]
+    [string]$ImplementationValidation = 'false',
 
     [switch]$PowerShellResolved
 )
@@ -32,9 +35,23 @@ $RegistryPath = Join-Path $EvidenceRoot 'resource-registry.json'
 $StopMarker = Join-Path $EvidenceRoot 'sampler.stop'
 $Utf8NoBom = New-Object Text.UTF8Encoding($false)
 $ResolvedPowerShellIdentity = [ordered]@{ name = 'UNRESOLVED'; pathSha256 = $null }
+$ImplementationValidationEnabled = $ImplementationValidation -eq 'true'
 
 function Get-UtcTimestamp {
     return [DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffZ', [Globalization.CultureInfo]::InvariantCulture)
+}
+
+function ConvertTo-UtcTimestamp {
+    param([object]$Value)
+    if ($null -eq $Value) {
+        return Get-UtcTimestamp
+    }
+    if ($Value -is [DateTime]) {
+        return ([DateTime]$Value).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ', [Globalization.CultureInfo]::InvariantCulture)
+    }
+    $styles = [Globalization.DateTimeStyles]::AssumeUniversal -bor [Globalization.DateTimeStyles]::AdjustToUniversal
+    $parsed = [DateTime]::Parse([string]$Value, [Globalization.CultureInfo]::InvariantCulture, $styles)
+    return $parsed.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ', [Globalization.CultureInfo]::InvariantCulture)
 }
 
 function Write-Utf8File {
@@ -77,6 +94,93 @@ function New-Artifact {
     }
 }
 
+function Set-ObjectProperty {
+    param([object]$Target, [string]$Name, [object]$Value)
+    if ($Target -is [Collections.IDictionary]) {
+        $Target[$Name] = $Value
+    }
+    else {
+        $Target | Add-Member -NotePropertyName $Name -NotePropertyValue $Value -Force
+    }
+}
+
+function Set-SummaryContract {
+    param(
+        [object]$Summary,
+        [string]$StartedAt,
+        [string]$CompletedAt,
+        [string]$Status,
+        [int]$InternalExitCode,
+        [int]$MandatoryScenarioCount,
+        [int]$ExecutedScenarioCount,
+        [string]$CorrectnessVerdict,
+        [string]$ThresholdVerdict,
+        [string]$RegressionVerdict,
+        [string]$QualityVerdict,
+        [string]$ArtifactVerdict,
+        [string]$SecretVerdict,
+        [string]$TeardownVerdict,
+        [string]$ReasonCode
+    )
+    Set-ObjectProperty -Target $Summary -Name 'startedAt' -Value $StartedAt
+    Set-ObjectProperty -Target $Summary -Name 'completedAt' -Value $CompletedAt
+    Set-ObjectProperty -Target $Summary -Name 'status' -Value $Status
+    Set-ObjectProperty -Target $Summary -Name 'internalExitCode' -Value $InternalExitCode
+    Set-ObjectProperty -Target $Summary -Name 'mandatoryScenarioCount' -Value $MandatoryScenarioCount
+    Set-ObjectProperty -Target $Summary -Name 'executedScenarioCount' -Value $ExecutedScenarioCount
+    Set-ObjectProperty -Target $Summary -Name 'correctnessVerdict' -Value $CorrectnessVerdict
+    Set-ObjectProperty -Target $Summary -Name 'thresholdVerdict' -Value $ThresholdVerdict
+    Set-ObjectProperty -Target $Summary -Name 'regressionVerdict' -Value $RegressionVerdict
+    Set-ObjectProperty -Target $Summary -Name 'qualityVerdict' -Value $QualityVerdict
+    Set-ObjectProperty -Target $Summary -Name 'artifactVerdict' -Value $ArtifactVerdict
+    Set-ObjectProperty -Target $Summary -Name 'secretVerdict' -Value $SecretVerdict
+    Set-ObjectProperty -Target $Summary -Name 'teardownVerdict' -Value $TeardownVerdict
+    Set-ObjectProperty -Target $Summary -Name 'reasonCode' -Value $ReasonCode
+    Set-ObjectProperty -Target $Summary -Name 'finalStatus' -Value $Status
+    Set-ObjectProperty -Target $Summary -Name 'exitCode' -Value $InternalExitCode
+    Set-ObjectProperty -Target $Summary -Name 'mandatoryScenariosTotal' -Value $MandatoryScenarioCount
+    Set-ObjectProperty -Target $Summary -Name 'mandatoryScenariosExecuted' -Value $ExecutedScenarioCount
+}
+
+function Write-MissingScenarioArtifacts {
+    param(
+        [string]$CommitSha,
+        [string]$StartedAt,
+        [string]$Status,
+        [string]$ReasonCode
+    )
+    $finished = Get-UtcTimestamp
+    $artifactRegistry = Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-artifact-registry.json') | ConvertFrom-Json
+    foreach ($name in $artifactRegistry.mandatory) {
+        $path = Join-Path $EvidenceRoot $name
+        if ((Test-Path -LiteralPath $path -PathType Leaf) -or $name -in @('capacity-acceptance-summary.json', 'harness-exit-code.txt', 'secret-scan.json', 'sha256-manifest.txt')) {
+            continue
+        }
+        if ($name -eq 'threshold-comparison.json') {
+            $threshold = New-Artifact -Scenario 'threshold-comparison' -Status $Status -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $finished
+            $threshold.comparisons = @()
+            $threshold.comparisonCount = 0
+            $threshold.failedCount = 0
+            $threshold.blockedCount = $(if ($Status -eq 'BLOCKED') { 15 } else { 0 })
+            $threshold.reason = 'FORMAL_SCENARIO_NOT_EXECUTED'
+            $threshold.missingValues = @('scenarioMeasurements')
+            Write-JsonFile -Path $path -Value $threshold
+        }
+        elseif ($name.EndsWith('.json')) {
+            $placeholder = New-Artifact -Scenario ([IO.Path]::GetFileNameWithoutExtension($name)) -Status $Status -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $finished
+            $placeholder.reason = $ReasonCode
+            $placeholder.missingValues = @('scenarioExecution')
+            Write-JsonFile -Path $path -Value $placeholder
+        }
+        elseif ($name.EndsWith('.csv')) {
+            Write-Utf8File -Path $path -Content "schemaVersion,runId,commitSha,scenario,timestampUtc,elapsedMs,missingReason`n"
+        }
+        elseif ($name.EndsWith('.log')) {
+            Write-Utf8File -Path $path -Content "$Status / $ReasonCode`n"
+        }
+    }
+}
+
 function Get-Sha256 {
     param([string]$Path)
     $stream = [IO.File]::OpenRead($Path)
@@ -99,6 +203,40 @@ function Get-GitValue {
     return (($output | Out-String).Trim())
 }
 
+function Get-GitPathList {
+    param([string[]]$Arguments)
+    $previousErrorAction = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        $output = @(& git -C $ProjectRoot @Arguments 2>$null)
+        $gitExitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorAction
+    }
+    if ($gitExitCode -ne 0) {
+        throw "git path command failed: $($Arguments -join ' ')"
+    }
+    return @($output | ForEach-Object { [string]$_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+}
+
+function Invoke-NativeCommand {
+    param([string]$Executable, [string[]]$Arguments)
+    $previousErrorAction = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        $output = @(& $Executable @Arguments 2>&1)
+        $nativeExitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorAction
+    }
+    return [ordered]@{
+        exitCode = $nativeExitCode
+        text = (($output | Out-String).Trim())
+    }
+}
+
 function Get-FreeLoopbackPort {
     $listener = New-Object Net.Sockets.TcpListener([Net.IPAddress]::Loopback, 0)
     try {
@@ -117,6 +255,26 @@ function Get-ProcessParentId {
         throw "cannot resolve parent process for PID $ProcessId"
     }
     return [int]$process.ParentProcessId
+}
+
+function Test-ImplementationValidationPath {
+    param([string]$Path)
+    $normalized = $Path.Replace('\', '/')
+    if ($normalized -in @('AGENTS.md', 'CLAUDE.md', 'README.md', 'pom.xml', 'dh-app/pom.xml')) {
+        return $true
+    }
+    foreach ($prefix in @(
+        'dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/',
+        'dh-app/src/test/resources/qdr7-capacity/',
+        'scripts/qdr7-capacity/',
+        'config/qdr7-capacity/',
+        'docs/current/'
+    )) {
+        if ($normalized.StartsWith($prefix, [StringComparison]::Ordinal)) {
+            return $true
+        }
+    }
+    return $false
 }
 
 function Write-BlockedPreflight {
@@ -170,38 +328,20 @@ function Write-BlockedPreflight {
     $summary.artifactValidationFindings = @()
     $summary.secretFindingCount = 0
     $summary.teardown = $resourceRegistry.teardown
+    Set-SummaryContract -Summary $summary -StartedAt $StartedAt -CompletedAt $finished -Status 'BLOCKED' -InternalExitCode 10 -MandatoryScenarioCount ([int]$scenarioRegistry.mandatoryCount) -ExecutedScenarioCount 0 -CorrectnessVerdict 'BLOCKED' -ThresholdVerdict 'BLOCKED' -RegressionVerdict 'BLOCKED' -QualityVerdict 'BLOCKED' -ArtifactVerdict 'PASS' -SecretVerdict 'PASS' -TeardownVerdict 'PASS' -ReasonCode 'ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED'
     Write-JsonFile -Path (Join-Path $EvidenceRoot 'capacity-acceptance-summary.json') -Value $summary
     Write-Utf8File -Path (Join-Path $EvidenceRoot 'harness-exit-code.txt') -Content "10`n"
     Write-Utf8File -Path (Join-Path $EvidenceRoot 'commands.txt') -Content ("1 | $StartedAt | . | qdr7 capacity preflight | BLOCKED`n")
 
-    $artifactRegistry = Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-artifact-registry.json') | ConvertFrom-Json
-    foreach ($name in $artifactRegistry.mandatory) {
-        $path = Join-Path $EvidenceRoot $name
-        if (Test-Path -LiteralPath $path -PathType Leaf) {
-            continue
-        }
-        if ($name -in @('secret-scan.json', 'sha256-manifest.txt')) {
-            continue
-        }
-        if ($name.EndsWith('.json')) {
-            $placeholder = New-Artifact -Scenario ([IO.Path]::GetFileNameWithoutExtension($name)) -Status 'NOT_RUN' -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $finished
-            $placeholder.reason = 'ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED'
-            $placeholder.missingValues = @('scenarioExecution')
-            Write-JsonFile -Path $path -Value $placeholder
-        }
-        elseif ($name.EndsWith('.csv')) {
-            Write-Utf8File -Path $path -Content "schemaVersion,runId,commitSha,scenario,timestampUtc,elapsedMs,missingReason`n"
-        }
-        elseif ($name.EndsWith('.log')) {
-            Write-Utf8File -Path $path -Content "NOT_RUN / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED`n"
-        }
-    }
+    Write-MissingScenarioArtifacts -CommitSha $CommitSha -StartedAt $StartedAt -Status 'BLOCKED' -ReasonCode 'ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED'
 
     $secretFindings = Invoke-SecretScan -CommitSha $CommitSha
     if ($secretFindings -gt 0) {
         $summary.status = 'FAIL'
         $summary.finalStatus = 'FAIL'
         $summary.exitCode = 90
+        $summary.internalExitCode = 90
+        $summary.secretVerdict = 'FAIL'
         $summary.secretFindingCount = $secretFindings
         Write-Utf8File -Path (Join-Path $EvidenceRoot 'harness-exit-code.txt') -Content "90`n"
     }
@@ -247,11 +387,19 @@ function Invoke-Preflight {
 
         $branch = Get-GitValue -Arguments @('branch', '--show-current')
         $commitSha = Get-GitValue -Arguments @('rev-parse', 'HEAD')
-        $status = Get-GitValue -Arguments @('status', '--porcelain=v1', '--untracked-files=all')
+        $trackedChanges = @(Get-GitPathList -Arguments @('diff', '--name-only'))
+        $untrackedChanges = @(Get-GitPathList -Arguments @('ls-files', '--others', '--exclude-standard'))
+        $statusPaths = @(
+            $trackedChanges
+            $untrackedChanges
+        ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique
+        $status = $statusPaths -join "`n"
         $staged = Get-GitValue -Arguments @('diff', '--cached', '--name-only')
         Add-Check 'git-branch' 'dev' $branch ($branch -eq 'dev')
         Add-Check 'git-head' '40-character SHA-1' $commitSha ($commitSha -match '^[a-f0-9]{40}$')
-        Add-Check 'git-worktree' 'clean' $(if ([string]::IsNullOrWhiteSpace($status)) { 'clean' } else { 'dirty' }) ([string]::IsNullOrWhiteSpace($status))
+        $implementationScopeValid = $ImplementationValidationEnabled -and @($statusPaths | Where-Object { -not (Test-ImplementationValidationPath -Path $_) }).Count -eq 0
+        $worktreeValid = [string]::IsNullOrWhiteSpace($status) -or $implementationScopeValid
+        Add-Check 'git-worktree' $(if ($ImplementationValidationEnabled) { 'clean or implementation-validation write allowlist only' } else { 'clean' }) $(if ([string]::IsNullOrWhiteSpace($status)) { 'clean' } elseif ($implementationScopeValid) { 'implementation-validation allowlist only' } else { 'dirty outside allowed scope' }) $worktreeValid
         Add-Check 'git-staged' 'empty' $(if ([string]::IsNullOrWhiteSpace($staged)) { 'empty' } else { 'non-empty' }) ([string]::IsNullOrWhiteSpace($staged))
 
         $criteriaPath = Join-Path $ConfigRoot 'qdr7-capacity-thresholds.json'
@@ -273,14 +421,16 @@ function Invoke-Preflight {
             Add-Check "contract-$contract" 'parseable JSON' $(if ($contractValid) { 'parseable' } else { 'invalid' }) $contractValid
         }
 
-        $javaVersionText = (& java -version 2>&1 | Out-String).Trim()
+        $javaResult = Invoke-NativeCommand -Executable 'java' -Arguments @('-version')
+        $javaVersionText = $javaResult.text
         $javaMatch = [regex]::Match($javaVersionText, 'version "(?<version>\d+(?:\.\d+)*)')
         $javaVersion = $(if ($javaMatch.Success) { $javaMatch.Groups['version'].Value } else { 'unknown' })
-        Add-Check 'java-version' '21.x' $javaVersion ($javaVersion -match '^21(?:\.|$)')
-        $mavenVersionText = (& mvn -version 2>&1 | Out-String).Trim()
+        Add-Check 'java-version' '21.x' $javaVersion ($javaResult.exitCode -eq 0 -and $javaVersion -match '^21(?:\.|$)')
+        $mavenResult = Invoke-NativeCommand -Executable 'mvn' -Arguments @('-version')
+        $mavenVersionText = $mavenResult.text
         $mavenMatch = [regex]::Match($mavenVersionText, 'Apache Maven (?<version>\d+\.\d+\.\d+)')
         $mavenVersion = $(if ($mavenMatch.Success) { $mavenMatch.Groups['version'].Value } else { 'unknown' })
-        Add-Check 'maven-version' '3.9.x' $mavenVersion ($mavenVersion -match '^3\.9\.')
+        Add-Check 'maven-version' '3.9.x' $mavenVersion ($mavenResult.exitCode -eq 0 -and $mavenVersion -match '^3\.9\.')
         Add-Check 'maven-opts' 'unset' $(if ([string]::IsNullOrEmpty($env:MAVEN_OPTS)) { 'unset' } else { 'set' }) ([string]::IsNullOrEmpty($env:MAVEN_OPTS))
 
         $os = Get-CimInstance Win32_OperatingSystem
@@ -292,21 +442,23 @@ function Invoke-Preflight {
         Add-Check 'logical-cpu' '>=16' ([string]$logicalCpu) ($logicalCpu -ge 16)
         Add-Check 'available-memory' '>=17179869184 bytes' ([string]$availableMemoryBytes) ($availableMemoryBytes -ge 17179869184L)
 
-        $dockerVersion = (& docker version --format '{{.Server.Version}}' 2>&1 | Out-String).Trim()
-        Add-Check 'docker-daemon' 'Docker Engine 29.x' $dockerVersion (($LASTEXITCODE -eq 0) -and ($dockerVersion -match '^29\.'))
-        $dockerMemoryText = (& docker info --format '{{.MemTotal}}' 2>&1 | Out-String).Trim()
+        $dockerVersionResult = Invoke-NativeCommand -Executable 'docker' -Arguments @('version', '--format', '{{.Server.Version}}')
+        $dockerVersion = $dockerVersionResult.text
+        Add-Check 'docker-daemon' 'Docker Engine 29.x' $dockerVersion (($dockerVersionResult.exitCode -eq 0) -and ($dockerVersion -match '^29\.'))
+        $dockerMemoryResult = Invoke-NativeCommand -Executable 'docker' -Arguments @('info', '--format', '{{.MemTotal}}')
+        $dockerMemoryText = $dockerMemoryResult.text
         $dockerMemory = 0L
         [long]::TryParse($dockerMemoryText, [ref]$dockerMemory) | Out-Null
-        Add-Check 'docker-memory' '>=17179869184 bytes' ([string]$dockerMemory) ($dockerMemory -ge 17179869184L)
-        & docker image inspect 'postgres:17' *> $null
-        Add-Check 'postgres-image' 'cached postgres:17' $(if ($LASTEXITCODE -eq 0) { 'cached' } else { 'missing' }) ($LASTEXITCODE -eq 0)
+        Add-Check 'docker-memory' '>=17179869184 bytes' ([string]$dockerMemory) ($dockerMemoryResult.exitCode -eq 0 -and $dockerMemory -ge 17179869184L)
+        $imageInspect = Invoke-NativeCommand -Executable 'docker' -Arguments @('image', 'inspect', 'postgres:17')
+        Add-Check 'postgres-image' 'cached postgres:17' $(if ($imageInspect.exitCode -eq 0) { 'cached' } else { 'missing' }) ($imageInspect.exitCode -eq 0)
 
         $containerName = "dh-qdr7-capacity-$RunId"
         $volumeName = "dh-qdr7-capacity-$RunId"
-        & docker container inspect $containerName *> $null
-        Add-Check 'container-isolation' 'absent before run' $(if ($LASTEXITCODE -eq 0) { 'exists' } else { 'absent' }) ($LASTEXITCODE -ne 0)
-        & docker volume inspect $volumeName *> $null
-        Add-Check 'volume-isolation' 'absent before run' $(if ($LASTEXITCODE -eq 0) { 'exists' } else { 'absent' }) ($LASTEXITCODE -ne 0)
+        $containerInspect = Invoke-NativeCommand -Executable 'docker' -Arguments @('container', 'inspect', $containerName)
+        Add-Check 'container-isolation' 'absent before run' $(if ($containerInspect.exitCode -eq 0) { 'exists' } else { 'absent' }) ($containerInspect.exitCode -ne 0)
+        $volumeInspect = Invoke-NativeCommand -Executable 'docker' -Arguments @('volume', 'inspect', $volumeName)
+        Add-Check 'volume-isolation' 'absent before run' $(if ($volumeInspect.exitCode -eq 0) { 'exists' } else { 'absent' }) ($volumeInspect.exitCode -ne 0)
         $port = Get-FreeLoopbackPort
         Add-Check 'loopback-port' 'available dynamic loopback port' ([string]$port) ($port -gt 0)
 
@@ -348,6 +500,8 @@ function Invoke-Preflight {
         $registry.mavenPid = $mavenPid
         $registry.samplerPid = $null
         $registry.samplerStartedAtUtc = $null
+        $registry.containerOwnership = 'JUNIT_TESTCONTAINERS'
+        $registry.implementationValidation = $ImplementationValidationEnabled
         $registry.teardown = [ordered]@{ sampler = 'PENDING'; container = 'PENDING'; volume = 'PENDING'; residual = 'PENDING' }
         Write-JsonFile -Path $RegistryPath -Value $registry
 
@@ -370,6 +524,12 @@ function Invoke-Preflight {
         if (-not ($blockers -contains 'unexpected-preflight-failure')) {
             $blockers.Add('unexpected-preflight-failure')
         }
+        $checks.Add([ordered]@{
+            id = 'unexpected-preflight-failure'
+            expected = 'no unexpected exception'
+            actual = "$($_.Exception.GetType().Name): $($_.Exception.Message)"
+            status = 'BLOCKED'
+        })
         Write-BlockedPreflight -CommitSha $commitSha -StartedAt $started -Checks $checks.ToArray() -Blockers $blockers.ToArray()
         exit 10
     }
@@ -456,6 +616,8 @@ function Enter-Qdr7ResolvedPowerShell {
             $ProjectRoot,
             '-PowerShellExecutable',
             $resolved.name,
+            '-ImplementationValidation',
+            $ImplementationValidation,
             '-PowerShellResolved'
         )
         $resolvedPath = [string]$resolved.path
@@ -497,31 +659,40 @@ function Stop-RegisteredResources {
     }
     $Registry.teardown.sampler = 'STOPPED'
 
+    if ($null -ne $Registry.PSObject.Properties['contractOnly'] -and $Registry.contractOnly) {
+        $Registry.teardown.container = 'REMOVED_OR_ABSENT'
+        $Registry.teardown.volume = 'REMOVED_OR_ABSENT'
+        $Registry.teardown.residual = 'NONE'
+        $Registry.finishedAtUtc = Get-UtcTimestamp
+        Write-JsonFile -Path $RegistryPath -Value $Registry
+        return @()
+    }
+
     $expected = "dh-qdr7-capacity-$RunId"
     if ($Registry.containerName -ne $expected -or $Registry.volumeName -ne $expected) {
         $findings.Add('RESOURCE_REGISTRY_NAME_MISMATCH')
         return $findings.ToArray()
     }
-    & docker container inspect $Registry.containerName *> $null
-    if ($LASTEXITCODE -eq 0) {
-        & docker container rm --force $Registry.containerName *> $null
-        if ($LASTEXITCODE -ne 0) {
+    $containerInspect = Invoke-NativeCommand -Executable 'docker' -Arguments @('container', 'inspect', [string]$Registry.containerName)
+    if ($containerInspect.exitCode -eq 0) {
+        $containerRemove = Invoke-NativeCommand -Executable 'docker' -Arguments @('container', 'rm', '--force', [string]$Registry.containerName)
+        if ($containerRemove.exitCode -ne 0) {
             $findings.Add('REGISTERED_CONTAINER_TEARDOWN_FAILED')
         }
     }
     $Registry.teardown.container = $(if ($findings -contains 'REGISTERED_CONTAINER_TEARDOWN_FAILED') { 'FAILED' } else { 'REMOVED_OR_ABSENT' })
-    & docker volume inspect $Registry.volumeName *> $null
-    if ($LASTEXITCODE -eq 0) {
-        & docker volume rm $Registry.volumeName *> $null
-        if ($LASTEXITCODE -ne 0) {
+    $volumeInspect = Invoke-NativeCommand -Executable 'docker' -Arguments @('volume', 'inspect', [string]$Registry.volumeName)
+    if ($volumeInspect.exitCode -eq 0) {
+        $volumeRemove = Invoke-NativeCommand -Executable 'docker' -Arguments @('volume', 'rm', [string]$Registry.volumeName)
+        if ($volumeRemove.exitCode -ne 0) {
             $findings.Add('REGISTERED_VOLUME_TEARDOWN_FAILED')
         }
     }
     $Registry.teardown.volume = $(if ($findings -contains 'REGISTERED_VOLUME_TEARDOWN_FAILED') { 'FAILED' } else { 'REMOVED_OR_ABSENT' })
-    & docker container inspect $Registry.containerName *> $null
-    $containerResidual = $LASTEXITCODE -eq 0
-    & docker volume inspect $Registry.volumeName *> $null
-    $volumeResidual = $LASTEXITCODE -eq 0
+    $containerResidualInspect = Invoke-NativeCommand -Executable 'docker' -Arguments @('container', 'inspect', [string]$Registry.containerName)
+    $containerResidual = $containerResidualInspect.exitCode -eq 0
+    $volumeResidualInspect = Invoke-NativeCommand -Executable 'docker' -Arguments @('volume', 'inspect', [string]$Registry.volumeName)
+    $volumeResidual = $volumeResidualInspect.exitCode -eq 0
     $Registry.teardown.residual = $(if ($containerResidual -or $volumeResidual) { 'FAILED' } else { 'NONE' })
     if ($containerResidual -or $volumeResidual) {
         $findings.Add('RUN_ID_RESOURCE_RESIDUAL')
@@ -536,7 +707,7 @@ function Invoke-SecretScan {
     $started = Get-UtcTimestamp
     $patternsConfig = Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-secret-patterns.json') | ConvertFrom-Json
     $findings = New-Object Collections.Generic.List[object]
-    $files = @(Get-ChildItem -LiteralPath $EvidenceRoot -File | Where-Object { $_.Name -ne 'secret-scan.json' -and $_.Extension -in @('.json', '.csv', '.txt', '.log') })
+    $files = @(Get-ChildItem -LiteralPath $EvidenceRoot -File | Where-Object { $_.Name -notin @('secret-scan.json', 'sha256-manifest.txt') -and $_.Extension -in @('.json', '.csv', '.txt', '.log') })
     foreach ($file in $files) {
         $lineNumber = 0
         foreach ($line in Get-Content -LiteralPath $file.FullName) {
@@ -572,22 +743,140 @@ function Write-Manifest {
     Write-Utf8File -Path $manifestPath -Content (($lines -join "`n") + "`n")
 }
 
+function Get-ManifestMismatchCount {
+    $manifestPath = Join-Path $EvidenceRoot 'sha256-manifest.txt'
+    if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
+        return 1
+    }
+    $mismatches = 0
+    foreach ($line in Get-Content -LiteralPath $manifestPath) {
+        $parts = $line -split '  ', 2
+        if ($parts.Count -ne 2) {
+            $mismatches++
+            continue
+        }
+        $target = [IO.Path]::GetFullPath((Join-Path $EvidenceRoot $parts[1]))
+        if (-not $target.StartsWith($EvidenceRoot, [StringComparison]::OrdinalIgnoreCase) -or -not (Test-Path -LiteralPath $target -PathType Leaf) -or (Get-Sha256 -Path $target) -ne $parts[0]) {
+            $mismatches++
+        }
+    }
+    return $mismatches
+}
+
+function Invoke-RuntimeBlockedContractTest {
+    [IO.Directory]::CreateDirectory($EvidenceRoot) | Out-Null
+    $commitSha = Get-GitValue -Arguments @('rev-parse', 'HEAD')
+    $started = Get-UtcTimestamp
+    $environment = New-Artifact -Scenario 'environment' -Status 'PASS' -CommitSha $commitSha -StartedAt $started -FinishedAt $started
+    $environment.contractTest = $true
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'environment.json') -Value $environment
+    $preflight = New-Artifact -Scenario 'environment-preflight' -Status 'PASS' -CommitSha $commitSha -StartedAt $started -FinishedAt $started
+    $preflight.checks = @()
+    $preflight.blockers = @()
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'preflight.json') -Value $preflight
+    $registry = New-Artifact -Scenario 'resource-registry' -Status 'PASS' -CommitSha $commitSha -StartedAt $started -FinishedAt $started
+    $registry.containerName = "dh-qdr7-capacity-$RunId"
+    $registry.volumeName = "dh-qdr7-capacity-$RunId"
+    $registry.samplerPid = $null
+    $registry.contractOnly = $true
+    $registry.containerOwnership = 'JUNIT_TESTCONTAINERS'
+    $registry.implementationValidation = $false
+    $registry.teardown = [ordered]@{ sampler = 'NOT_STARTED'; container = 'PENDING'; volume = 'PENDING'; residual = 'PENDING' }
+    Write-JsonFile -Path $RegistryPath -Value $registry
+    Write-Utf8File -Path (Join-Path $EvidenceRoot 'commands.txt') -Content "1 | $started | . | runtime blocked finalizer contract | STARTED`n"
+    Invoke-Finalize
+}
+
 function Invoke-Finalize {
     if (-not (Test-Path -LiteralPath $RegistryPath)) {
         exit 80
     }
     $registry = Get-Content -Raw -LiteralPath $RegistryPath | ConvertFrom-Json
     $commitSha = [string]$registry.commitSha
-    $teardownFindings = @(Stop-RegisteredResources -Registry $registry -CommitSha $commitSha)
+    $teardownFindings = New-Object Collections.Generic.List[string]
+    try {
+        foreach ($finding in @(Stop-RegisteredResources -Registry $registry -CommitSha $commitSha)) {
+            $teardownFindings.Add([string]$finding)
+        }
+    }
+    catch {
+        $teardownFindings.Add('REGISTERED_RESOURCE_TEARDOWN_UNEXPECTED_FAILURE')
+    }
     $registry = Get-Content -Raw -LiteralPath $RegistryPath | ConvertFrom-Json
     $artifactRegistry = Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-artifact-registry.json') | ConvertFrom-Json
+    $scenarioRegistry = Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-scenario-registry.json') | ConvertFrom-Json
+    $mandatoryCount = [int]$scenarioRegistry.mandatoryCount
+    $startedAt = ConvertTo-UtcTimestamp -Value $registry.startedAtUtc
+    if ([string]::IsNullOrWhiteSpace($startedAt)) {
+        $startedAt = Get-UtcTimestamp
+    }
+    $existingExit = 0
+    $hasRecordedExit = $false
+    $exitPath = Join-Path $EvidenceRoot 'harness-exit-code.txt'
+    if (Test-Path -LiteralPath $exitPath) {
+        $hasRecordedExit = [int]::TryParse((Get-Content -Raw -LiteralPath $exitPath).Trim(), [ref]$existingExit)
+    }
+
+    $implementationArtifact = Join-Path $EvidenceRoot 'implementation-validation.json'
+    $implementationValidationPassed = $ImplementationValidationEnabled -and (Test-Path -LiteralPath $implementationArtifact -PathType Leaf) -and $hasRecordedExit -and $existingExit -eq 0
+    if ($implementationValidationPassed) {
+        $baseExit = 0
+        $reasonCode = 'IMPLEMENTATION_VALIDATION_ONLY'
+        $placeholderStatus = 'NOT_RUN'
+        $capacityStatus = 'NOT_RUN'
+        $verdict = 'NOT_RUN'
+    }
+    elseif (-not $hasRecordedExit) {
+        $baseExit = 20
+        $reasonCode = 'APPLICATION_CONTEXT_STARTUP_BLOCKED'
+        $placeholderStatus = 'BLOCKED'
+        $capacityStatus = 'BLOCKED'
+        $verdict = 'BLOCKED'
+    }
+    else {
+        $baseExit = $existingExit
+        $reasonCode = $(if ($baseExit -eq 0) { 'FORMAL_CAPACITY_ACCEPTANCE_COMPLETED' } elseif ($baseExit -eq 20) { 'APPLICATION_CONTEXT_STARTUP_BLOCKED' } else { 'FORMAL_CAPACITY_ACCEPTANCE_BLOCKED_OR_FAILED' })
+        $placeholderStatus = $(if ($baseExit -eq 0) { 'NOT_RUN' } else { 'BLOCKED' })
+        $capacityStatus = $(if ($baseExit -eq 0) { 'PASS' } elseif ($baseExit -in @(40, 50, 60, 70, 90)) { 'FAIL' } else { 'BLOCKED' })
+        $verdict = $capacityStatus
+    }
+
+    if ($baseExit -ne 0 -or $implementationValidationPassed) {
+        Write-MissingScenarioArtifacts -CommitSha $commitSha -StartedAt $startedAt -Status $placeholderStatus -ReasonCode $reasonCode
+    }
+
+    $executedScenarioCount = 0
+    if ($capacityStatus -eq 'PASS') {
+        $executedScenarioCount = $mandatoryCount
+    }
+    $summaryPath = Join-Path $EvidenceRoot 'capacity-acceptance-summary.json'
+    if (Test-Path -LiteralPath $summaryPath) {
+        $summary = Get-Content -Raw -LiteralPath $summaryPath | ConvertFrom-Json
+    }
+    else {
+        $now = Get-UtcTimestamp
+        $summary = New-Artifact -Scenario 'capacity-acceptance' -Status 'BLOCKED' -CommitSha $commitSha -StartedAt $now -FinishedAt $now
+    }
+    $completedAt = Get-UtcTimestamp
+    $teardownVerdict = $(if ($teardownFindings.Count -eq 0 -and $registry.teardown.residual -eq 'NONE') { 'PASS' } else { 'BLOCKED' })
+    Set-SummaryContract -Summary $summary -StartedAt $startedAt -CompletedAt $completedAt -Status $capacityStatus -InternalExitCode $baseExit -MandatoryScenarioCount $mandatoryCount -ExecutedScenarioCount $executedScenarioCount -CorrectnessVerdict $verdict -ThresholdVerdict $verdict -RegressionVerdict $verdict -QualityVerdict $verdict -ArtifactVerdict 'PENDING' -SecretVerdict 'PENDING' -TeardownVerdict $teardownVerdict -ReasonCode $reasonCode
+    Set-ObjectProperty -Target $summary -Name 'firstBlocker' -Value $(if ($capacityStatus -eq 'PASS' -or $implementationValidationPassed) { $null } else { 'CAPACITY_HARNESS_RUNTIME_DEFECT' })
+    Set-ObjectProperty -Target $summary -Name 'capacityAcceptanceExecuted' -Value ($capacityStatus -eq 'PASS')
+    Set-ObjectProperty -Target $summary -Name 'artifactValidationFindings' -Value @()
+    Set-ObjectProperty -Target $summary -Name 'secretFindingCount' -Value 0
+    Set-ObjectProperty -Target $summary -Name 'teardown' -Value $registry.teardown
+    Set-ObjectProperty -Target $summary -Name 'scenarioStatuses' -Value @($scenarioRegistry.fixedOrder | ForEach-Object { [ordered]@{ scenarioId = $_; status = $(if ($capacityStatus -eq 'PASS') { 'PASS' } else { 'NOT_RUN' }); mandatory = $true } })
+    $summary.finishedAtUtc = $completedAt
+    Write-JsonFile -Path $summaryPath -Value $summary
+    Write-Utf8File -Path $exitPath -Content "$baseExit`n"
+
+    $secretFindings = Invoke-SecretScan -CommitSha $commitSha
     $findings = New-Object Collections.Generic.List[string]
     foreach ($finding in $teardownFindings) {
         $findings.Add([string]$finding)
     }
-
     foreach ($name in $artifactRegistry.mandatory) {
-        if ($name -in @('secret-scan.json', 'sha256-manifest.txt')) {
+        if ($name -eq 'sha256-manifest.txt') {
             continue
         }
         $path = Join-Path $EvidenceRoot $name
@@ -604,47 +893,53 @@ function Invoke-Finalize {
             }
         }
     }
-
-    $secretFindings = Invoke-SecretScan -CommitSha $commitSha
-
-    $existingExit = 0
-    $exitPath = Join-Path $EvidenceRoot 'harness-exit-code.txt'
-    if (Test-Path -LiteralPath $exitPath) {
-        [int]::TryParse((Get-Content -Raw -LiteralPath $exitPath).Trim(), [ref]$existingExit) | Out-Null
+    $summary = Get-Content -Raw -LiteralPath $summaryPath | ConvertFrom-Json
+    foreach ($field in $artifactRegistry.summaryRequired) {
+        if ($null -eq $summary.PSObject.Properties[$field]) {
+            $findings.Add("SUMMARY_REQUIRED_FIELD_MISSING:$field")
+        }
     }
-    else {
-        $findings.Add('HARNESS_EXIT_CODE_MISSING')
+    $thresholdPath = Join-Path $EvidenceRoot 'threshold-comparison.json'
+    if ($baseExit -ne 0 -and (Test-Path -LiteralPath $thresholdPath -PathType Leaf)) {
+        $threshold = Get-Content -Raw -LiteralPath $thresholdPath | ConvertFrom-Json
+        if ($threshold.status -ne 'BLOCKED' -or $threshold.reason -ne 'FORMAL_SCENARIO_NOT_EXECUTED' -or @($threshold.comparisons).Count -ne 0) {
+            $findings.Add('THRESHOLD_COMPARISON_BLOCKED_CONTRACT_INVALID')
+        }
     }
-    $finalExit = $existingExit
+
+    $finalExit = $baseExit
     if ($findings.Count -gt 0) {
         $finalExit = 80
     }
     if ($secretFindings -gt 0) {
         $finalExit = 90
     }
-
-    $summaryPath = Join-Path $EvidenceRoot 'capacity-acceptance-summary.json'
-    if (Test-Path -LiteralPath $summaryPath) {
-        $summary = Get-Content -Raw -LiteralPath $summaryPath | ConvertFrom-Json
-    }
-    else {
-        $now = Get-UtcTimestamp
-        $summary = New-Artifact -Scenario 'capacity-acceptance' -Status 'BLOCKED' -CommitSha $commitSha -StartedAt $now -FinishedAt $now
-    }
-    $summary.status = $(if ($finalExit -eq 0) { 'PASS' } elseif ($finalExit -in @(40, 50, 60, 70, 90)) { 'FAIL' } else { 'BLOCKED' })
-    $summary | Add-Member -NotePropertyName finalStatus -NotePropertyValue $summary.status -Force
-    $summary | Add-Member -NotePropertyName exitCode -NotePropertyValue $finalExit -Force
-    $summary | Add-Member -NotePropertyName artifactValidationFindings -NotePropertyValue $findings.ToArray() -Force
-    $summary | Add-Member -NotePropertyName secretFindingCount -NotePropertyValue $secretFindings -Force
-    $summary | Add-Member -NotePropertyName teardown -NotePropertyValue $registry.teardown -Force
-    $summary | Add-Member -NotePropertyName capacityAcceptanceExecuted -NotePropertyValue $true -Force
-    $summary.finishedAtUtc = Get-UtcTimestamp
+    $finalStatus = $(if ($implementationValidationPassed -and $finalExit -eq 0) { 'NOT_RUN' } elseif ($finalExit -eq 0) { 'PASS' } elseif ($finalExit -in @(40, 50, 60, 70, 90)) { 'FAIL' } else { 'BLOCKED' })
+    Set-SummaryContract -Summary $summary -StartedAt $startedAt -CompletedAt (Get-UtcTimestamp) -Status $finalStatus -InternalExitCode $finalExit -MandatoryScenarioCount $mandatoryCount -ExecutedScenarioCount $executedScenarioCount -CorrectnessVerdict $(if ($implementationValidationPassed) { 'NOT_RUN' } else { $verdict }) -ThresholdVerdict $(if ($implementationValidationPassed) { 'NOT_RUN' } else { $verdict }) -RegressionVerdict $(if ($implementationValidationPassed) { 'NOT_RUN' } else { $verdict }) -QualityVerdict $(if ($implementationValidationPassed) { 'NOT_RUN' } else { $verdict }) -ArtifactVerdict $(if ($findings.Count -eq 0) { 'PASS' } else { 'BLOCKED' }) -SecretVerdict $(if ($secretFindings -eq 0) { 'PASS' } else { 'FAIL' }) -TeardownVerdict $teardownVerdict -ReasonCode $reasonCode
+    Set-ObjectProperty -Target $summary -Name 'artifactValidationFindings' -Value $findings.ToArray()
+    Set-ObjectProperty -Target $summary -Name 'secretFindingCount' -Value $secretFindings
+    $summary.finishedAtUtc = $summary.completedAt
     Write-JsonFile -Path $summaryPath -Value $summary
     Write-Utf8File -Path $exitPath -Content "$finalExit`n"
     Write-Manifest
-    if (-not (Test-Path -LiteralPath (Join-Path $EvidenceRoot 'sha256-manifest.txt'))) {
-        exit 80
+
+    $manifestMismatches = Get-ManifestMismatchCount
+    if ($manifestMismatches -gt 0) {
+        $finalExit = 80
+        $summary.artifactVerdict = 'BLOCKED'
+        $summary.internalExitCode = 80
+        $summary.exitCode = 80
+        $summary.status = 'BLOCKED'
+        $summary.finalStatus = 'BLOCKED'
+        $summary.artifactValidationFindings = @($summary.artifactValidationFindings) + @("MANIFEST_MISMATCH_COUNT:$manifestMismatches")
+        $summary.completedAt = Get-UtcTimestamp
+        $summary.finishedAtUtc = $summary.completedAt
+        Write-JsonFile -Path $summaryPath -Value $summary
+        Write-Utf8File -Path $exitPath -Content "80`n"
+        Write-Manifest
+        $manifestMismatches = Get-ManifestMismatchCount
     }
+    if ($manifestMismatches -gt 0) { exit 80 }
     exit $finalExit
 }
 
@@ -655,6 +950,9 @@ if ($Phase -eq 'Preflight') {
 }
 elseif ($Phase -eq 'Finalize') {
     Invoke-Finalize
+}
+elseif ($Phase -eq 'RuntimeBlockedContractTest') {
+    Invoke-RuntimeBlockedContractTest
 }
 else {
     if ($RunId -notmatch '^[0-9]{8}T[0-9]{6}Z$' -or $Seed -ne 7 -or -not $EvidenceRoot.StartsWith($EvidenceBase, [StringComparison]::OrdinalIgnoreCase)) {

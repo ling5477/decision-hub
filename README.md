@@ -1,6 +1,6 @@
 # Decision Hub
 
-## Current authority — Stage-QDR-7 harness runtime binding closed; formal retry required
+## Current authority — Stage-QDR-7 capacity harness runtime blocker-2 closed
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -14,10 +14,18 @@ Capacity acceptance criteria: FROZEN / ACCEPTED
 Capacity harness work order: CLOSED / ACCEPTED
 Capacity harness implementation: CLOSED / ACCEPTED
 Harness runtime binding: CLOSED / ACCEPTED
+Harness Testcontainers lifecycle: CLOSED / ACCEPTED
+Blocked artifact contract: CLOSED / ACCEPTED
 Formal profile: qdr7-capacity-acceptance
 Historical formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T140521Z
 Latest binding validation: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260715T145836Z / EXPECTED CONTRACT
-Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED ON QUALIFIED ENVIRONMENT
+Latest formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T160710Z / INTERNAL EXIT 80
+Latest implementation validation: PASS / IMPLEMENTATION_VALIDATION_ONLY / 20260716T133710Z / MAVEN EXIT 0 / 0 OF 15
+Latest implementation preflight: PASS / 26 OF 26
+Previous formal acceptance run: BLOCKED / MAVEN EXIT 1 / INTERNAL EXIT 80 / HISTORICAL
+Previous formal acceptance mandatory scenarios: BLOCKED / 0 OF 15 EXECUTED / APPLICATION_CONTEXT_STARTUP_DEFECT / HISTORICAL
+Previous formal acceptance artifacts: BLOCKED / 11 FILES / 19 FINDINGS / SUMMARY CONTRACT INCOMPLETE / HISTORICAL
+Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -34,17 +42,18 @@ Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
 Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
-Allow capacity acceptance execution: YES / NEXT_TASK_ONLY
-Full regression: PASS / 1134 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Allow capacity acceptance execution: NO / RETRY_3_SEPARATE_TASK_REQUIRED
+Allow post-B2 capacity acceptance retry-3: YES / NEXT_TASK_ONLY
+Latest completed full regression: PASS / 1137 TESTS / 0 FAILURES / 0 ERRORS / 61 SKIPPED / LOCAL
 Previous full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS / HISTORICAL
-Quality gate: PASS
+Latest completed quality gate: PASS / CHECKSTYLE 0 / SPOTLESS PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER
-current task status: CLOSED / ACCEPTED / LOCAL_VALIDATED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-2
+current task status: CLOSED / ACCEPTED / IMPLEMENTATION VALIDATION 20260716T133710Z
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3
 ```
 
-历史formal run `20260715T140521Z`仍保留为`BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT`。本任务已关闭Maven profile scope与PowerShell executable绑定缺陷；binding validation run `20260715T145836Z`真实进入preflight，并因dirty worktree与可用内存低于16 GiB按预期返回internal exit `10`、0/15 scenarios、完整artifact。该run不是formal acceptance retry；下一任务仅允许在合格环境独立执行`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2`，B3及其余安全边界不变。
+历史formal run `20260715T140521Z`与retry-2 formal run `20260715T160710Z`继续保留为`BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT`。本任务在test-only范围内关闭container启动顺序与blocked artifact合同；implementation-validation run `20260716T133710Z`为26/26 preflight、ApplicationContext/DataSource/Flyway/dispatcher PASS、0/15 mandatory scenarios、27 manifest entries、0 mismatch、0 secret findings且teardown无残留。该run不是formal capacity acceptance；下一任务仅允许`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3`，B3及其余安全边界不变。
 
 权威层级固定为：
 

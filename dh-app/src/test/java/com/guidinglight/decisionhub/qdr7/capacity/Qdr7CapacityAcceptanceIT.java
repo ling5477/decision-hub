@@ -65,6 +65,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -139,6 +140,8 @@ class Qdr7CapacityAcceptanceIT {
   private static final String TEST_SIGNING_KEY = "qdr7-capacity-hmac-" + RUN_ID;
   private static final String DATABASE_PASSWORD = "qdr7-capacity-db-" + RUN_ID;
   private static final String COMMIT_SHA = RESOURCE_REGISTRY.path("commitSha").asText();
+  private static final boolean IMPLEMENTATION_VALIDATION =
+      Boolean.parseBoolean(System.getProperty("qdr7.implementationValidation", "false"));
   private static final Instant HARNESS_STARTED = Instant.now();
   private static final List<Map<String, Object>> THRESHOLD_RESULTS =
       Collections.synchronizedList(new ArrayList<>());
@@ -163,11 +166,23 @@ class Qdr7CapacityAcceptanceIT {
                     .withBinds(new Bind(VOLUME_NAME, new Volume("/var/lib/postgresql/data")));
               });
 
+  private static final String FROZEN_JDBC_URL;
+  private static final String FROZEN_DATABASE_USERNAME;
+  private static final String FROZEN_DATABASE_PASSWORD;
+
+  static {
+    startPostgresBeforeSpringPropertyResolution();
+    FROZEN_JDBC_URL = POSTGRES.getJdbcUrl();
+    FROZEN_DATABASE_USERNAME = POSTGRES.getUsername();
+    FROZEN_DATABASE_PASSWORD = POSTGRES.getPassword();
+  }
+
   @DynamicPropertySource
   static void runtimeProperties(final DynamicPropertyRegistry registry) {
-    registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
-    registry.add("spring.datasource.username", POSTGRES::getUsername);
-    registry.add("spring.datasource.password", POSTGRES::getPassword);
+    ensurePostgresReadyForPropertyResolution();
+    registry.add("spring.datasource.url", () -> FROZEN_JDBC_URL);
+    registry.add("spring.datasource.username", () -> FROZEN_DATABASE_USERNAME);
+    registry.add("spring.datasource.password", () -> FROZEN_DATABASE_PASSWORD);
     registry.add(
         "decisionhub.security.api.token-sha256", () -> StaticTokenVerifier.sha256Hex(TEST_TOKEN));
     registry.add("decisionhub.security.api.tenant-id", () -> TENANT);
@@ -200,8 +215,54 @@ class Qdr7CapacityAcceptanceIT {
   private Qdr7CapacityContracts.RunContext runContext;
   private Qdr7CapacityContracts.CriteriaSnapshot criteria;
 
+  /**
+   * 只验证正式 run 的 container、Spring Context、DataSource/Flyway 和 dispatcher 装配。
+   *
+   * <p>该模式在任何 mandatory scenario 开始前短路；它不是 formal capacity acceptance，也不产生阈值 PASS。
+   */
+  @Test
+  @Order(0)
+  @EnabledIfSystemProperty(named = "qdr7.implementationValidation", matches = "true")
+  void validatesLifecycleBeforeMandatoryScenarioDispatch() throws IOException, SQLException {
+    runContext =
+        Qdr7CapacityContracts.parseRunContext(
+            RUN_ID, String.valueOf(SEED), PROJECT_ROOT, COMMIT_SHA);
+    criteria = Qdr7CapacityContracts.loadCriteria(PROJECT_ROOT, objectMapper);
+    Files.createDirectories(EVIDENCE_ROOT);
+
+    assertThat(IMPLEMENTATION_VALIDATION).isTrue();
+    assertThat(POSTGRES.isRunning()).isTrue();
+    assertThat(POSTGRES.getMappedPort(PostgreSQLContainer.POSTGRESQL_PORT))
+        .isEqualTo(DATABASE_PORT);
+    assertThat(dataSource).isInstanceOf(HikariDataSource.class);
+    try (Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement()) {
+      assertThat(statement.execute("SELECT 1")).isTrue();
+    }
+    final List<HarnessDriver> dispatchers = drivers();
+    assertThat(Qdr7CapacityContracts.ScenarioRegistry.validate(dispatchers)).isEmpty();
+    assertThat(dispatchers).hasSize(15);
+    assertThat(SCENARIO_STATUSES).isEmpty();
+
+    final Map<String, Object> artifact =
+        artifact("implementation-validation", HARNESS_STARTED, Instant.now());
+    artifact.put("validationMode", "IMPLEMENTATION_VALIDATION_ONLY");
+    artifact.put("containerStartedBeforePropertyResolution", true);
+    artifact.put("mappedPort", DATABASE_PORT);
+    artifact.put("jdbcEndpointSha256", Qdr7CapacityContracts.sha256(FROZEN_JDBC_URL));
+    artifact.put("applicationContextStarted", applicationContext.getBeanDefinitionCount() > 0);
+    artifact.put("dispatcherReached", true);
+    artifact.put("mandatoryScenarioCount", 15);
+    artifact.put("executedScenarioCount", 0);
+    artifact.put("capacityAcceptanceExecuted", false);
+    writeJson("implementation-validation.json", artifact);
+    Files.writeString(
+        EVIDENCE_ROOT.resolve("harness-exit-code.txt"), "0\n", StandardCharsets.UTF_8);
+  }
+
   @Test
   @Order(1)
+  @DisabledIfSystemProperty(named = "qdr7.implementationValidation", matches = "true")
   @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
   void executesMandatoryActualWiringDatabaseAndRecoveryDrivers()
       throws IOException, InterruptedException, SQLException, ExecutionException {
@@ -226,6 +287,7 @@ class Qdr7CapacityAcceptanceIT {
 
   @Test
   @Order(2)
+  @DisabledIfSystemProperty(named = "qdr7.implementationValidation", matches = "true")
   @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
   void springContextRestartRoundOnePreservesCommittedState()
       throws IOException, InterruptedException, SQLException, ExecutionException {
@@ -234,6 +296,7 @@ class Qdr7CapacityAcceptanceIT {
 
   @Test
   @Order(3)
+  @DisabledIfSystemProperty(named = "qdr7.implementationValidation", matches = "true")
   @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
   void springContextRestartRoundTwoPreservesCommittedState()
       throws IOException, InterruptedException, SQLException, ExecutionException {
@@ -242,6 +305,7 @@ class Qdr7CapacityAcceptanceIT {
 
   @Test
   @Order(4)
+  @DisabledIfSystemProperty(named = "qdr7.implementationValidation", matches = "true")
   void springContextRestartRoundThreePreservesCommittedStateAndFinalizesJavaArtifacts()
       throws IOException, InterruptedException, SQLException, ExecutionException {
     verifyContextRestart(3);
@@ -262,6 +326,31 @@ class Qdr7CapacityAcceptanceIT {
   static void ensureContainerIsStoppedByTestcontainers() {
     // Testcontainers owns the container; PowerShell finalizer independently removes only the exact
     // registry names.
+  }
+
+  /** 在 Spring 解析 datasource 属性前启动本 run 唯一的 static PostgreSQL container。 */
+  private static void startPostgresBeforeSpringPropertyResolution() {
+    try {
+      POSTGRES.start();
+      ensurePostgresReadyForPropertyResolution();
+    } catch (final RuntimeException startupFailure) {
+      throw new IllegalStateException(
+          "QDR7_CAPACITY_POSTGRES_STARTUP_BLOCKED: container was not ready before property resolution",
+          startupFailure);
+    }
+  }
+
+  /** 禁止 DynamicPropertySource 从未启动的 container 读取 mapped port 或 JDBC URL。 */
+  private static void ensurePostgresReadyForPropertyResolution() {
+    if (!POSTGRES.isRunning()) {
+      throw new IllegalStateException(
+          "QDR7_CAPACITY_POSTGRES_NOT_STARTED_BEFORE_PROPERTY_RESOLUTION");
+    }
+    final int mappedPort = POSTGRES.getMappedPort(PostgreSQLContainer.POSTGRESQL_PORT);
+    if (mappedPort != DATABASE_PORT) {
+      throw new IllegalStateException(
+          "QDR7_CAPACITY_POSTGRES_ENDPOINT_MISMATCH: expected fixed run endpoint");
+    }
   }
 
   private List<HarnessDriver> drivers() {

@@ -11,6 +11,10 @@
   </parent>
 
   <artifactId>dh-app</artifactId>
+  <properties>
+    <qdr7.powershell.executable>AUTO</qdr7.powershell.executable>
+    <qdr7.implementationValidation>false</qdr7.implementationValidation>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -150,6 +154,8 @@
                     <argument>${maven.multiModuleProjectDirectory}</argument>
                     <argument>-PowerShellExecutable</argument>
                     <argument>${qdr7.powershell.executable}</argument>
+                    <argument>-ImplementationValidation</argument>
+                    <argument>${qdr7.implementationValidation}</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -178,6 +184,8 @@
                     <argument>${maven.multiModuleProjectDirectory}</argument>
                     <argument>-PowerShellExecutable</argument>
                     <argument>${qdr7.powershell.executable}</argument>
+                    <argument>-ImplementationValidation</argument>
+                    <argument>${qdr7.implementationValidation}</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -196,6 +204,7 @@
                 <qdr7.runId>${qdr7.runId}</qdr7.runId>
                 <qdr7.seed>${qdr7.seed}</qdr7.seed>
                 <qdr7.projectRoot>${maven.multiModuleProjectDirectory}</qdr7.projectRoot>
+                <qdr7.implementationValidation>${qdr7.implementationValidation}</qdr7.implementationValidation>
               </systemPropertyVariables>
             </configuration>
             <executions>

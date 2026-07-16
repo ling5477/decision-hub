@@ -1,6 +1,6 @@
 # Decision Hub 当前工单
 
-## Current authority — 2026-07-15 harness runtime binding closed; formal retry required
+## Current authority — 2026-07-16 capacity harness runtime blocker-2 closed
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -14,10 +14,18 @@ Capacity acceptance criteria: FROZEN / ACCEPTED
 Capacity harness work order: CLOSED / ACCEPTED
 Capacity harness implementation: CLOSED / ACCEPTED
 Harness runtime binding: CLOSED / ACCEPTED
+Harness Testcontainers lifecycle: CLOSED / ACCEPTED
+Blocked artifact contract: CLOSED / ACCEPTED
 Formal profile: qdr7-capacity-acceptance
 Historical formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T140521Z
 Latest binding validation: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260715T145836Z / EXPECTED CONTRACT
-Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED ON QUALIFIED ENVIRONMENT
+Latest formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T160710Z / INTERNAL EXIT 80
+Latest implementation validation: PASS / IMPLEMENTATION_VALIDATION_ONLY / 20260716T133710Z / MAVEN EXIT 0 / 0 OF 15
+Latest implementation preflight: PASS / 26 OF 26
+Previous formal acceptance run: BLOCKED / MAVEN EXIT 1 / INTERNAL EXIT 80 / HISTORICAL
+Previous formal acceptance mandatory scenarios: BLOCKED / 0 OF 15 EXECUTED / APPLICATION_CONTEXT_STARTUP_DEFECT / HISTORICAL
+Previous formal acceptance artifacts: BLOCKED / 11 FILES / 19 FINDINGS / SUMMARY CONTRACT INCOMPLETE / HISTORICAL
+Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -34,14 +42,15 @@ Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
 Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
-Allow capacity acceptance execution: YES / NEXT_TASK_ONLY
-Full regression: PASS / 1134 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Allow capacity acceptance execution: NO / RETRY_3_SEPARATE_TASK_REQUIRED
+Allow post-B2 capacity acceptance retry-3: YES / NEXT_TASK_ONLY
+Latest completed full regression: PASS / 1137 TESTS / 0 FAILURES / 0 ERRORS / 61 SKIPPED / LOCAL
 Previous full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS / HISTORICAL
-Quality gate: PASS
+Latest completed quality gate: PASS / CHECKSTYLE 0 / SPOTLESS PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER
-current task status: CLOSED / ACCEPTED / LOCAL_VALIDATED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-2
+current task status: CLOSED / ACCEPTED / IMPLEMENTATION VALIDATION 20260716T133710Z
+next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
 HARD_CEILING_CONFLICT: CLOSED
 CAPACITY_CRITERIA_AUTHORITY: FROZEN / ACCEPTED
@@ -50,11 +59,12 @@ ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: NO / CONSUMED_BLOCKED
 ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO / CONSUMED_ACCEPTED
 ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO / CONSUMED_ACCEPTED
 ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO / CONSUMED_ACCEPTED
-ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: YES / NEXT_TASK_ONLY
+ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO / RETRY_3_SEPARATE_TASK_REQUIRED
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_RETRY_3: YES / NEXT_TASK_ONLY
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-历史threshold evidence、无效same-pool probe与formal run `20260715T140521Z`继续保留为Previous attempt / consumed evidence。Criteria保持`FROZEN / ACCEPTED`，B2 acceptance不回退。PowerShell executable binding已关闭并完成预期environment BLOCKED合同验证；下一任务只允许在合格环境执行`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2`，不得进入B3。
+历史threshold evidence、无效same-pool probe、formal runs `20260715T140521Z`与`20260715T160710Z`继续保留为Previous attempt / consumed evidence。Criteria保持`FROZEN / ACCEPTED`，B2 acceptance不回退。implementation-validation run `20260716T133710Z`只关闭container lifecycle与blocked artifact合同；下一任务只允许`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3`，不得进入B3。
 
 权威层级固定为：
 

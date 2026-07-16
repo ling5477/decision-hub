@@ -19,6 +19,12 @@ function Invoke-Contract {
     return $LASTEXITCODE
 }
 
+function Invoke-RuntimeBlockedContract {
+    param([string]$RunId)
+    & $CurrentExecutable -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $EntryPoint -Phase RuntimeBlockedContractTest -RunId $RunId -Seed 7 -ProjectRoot $ProjectRoot -PowerShellExecutable $CurrentExecutableName -ImplementationValidation false
+    return $LASTEXITCODE
+}
+
 function Get-UniqueRunId {
     $candidate = [DateTime]::UtcNow
     if ($CurrentExecutableName -like 'pwsh*') {
@@ -39,6 +45,14 @@ function Assert-Equal {
     }
 }
 
+function Assert-Rfc3339UtcJsonField {
+    param([string]$Json, [string]$Field, [string]$Contract)
+    $pattern = '"' + [Regex]::Escape($Field) + '"\s*:\s*"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z"'
+    if ($Json -notmatch $pattern) {
+        throw "$Contract field=$Field must be serialized as RFC3339 UTC"
+    }
+}
+
 function Get-Sha256File {
     param([string]$Path)
     $stream = [IO.File]::OpenRead($Path)
@@ -52,6 +66,71 @@ function Get-Sha256File {
     }
 }
 
+function Assert-BlockedArtifactContract {
+    param([string]$BlockedRoot, [string]$ExpectedRunId, [int]$ExpectedExit, [string]$ExpectedReason)
+    $artifactRegistry = Get-Content -Raw -LiteralPath (Join-Path $ProjectRoot 'config\qdr7-capacity\qdr7-capacity-artifact-registry.json') | ConvertFrom-Json
+    foreach ($name in $artifactRegistry.mandatory) {
+        if (-not (Test-Path -LiteralPath (Join-Path $BlockedRoot $name) -PathType Leaf)) {
+            throw "blocked artifact missing: $name"
+        }
+    }
+
+    $summaryRaw = Get-Content -Raw -LiteralPath (Join-Path $BlockedRoot 'capacity-acceptance-summary.json')
+    $summary = $summaryRaw | ConvertFrom-Json
+    foreach ($field in $artifactRegistry.summaryRequired) {
+        if ($null -eq $summary.PSObject.Properties[$field]) {
+            throw "blocked summary field missing: $field"
+        }
+    }
+    Assert-Equal 'BLOCKED' $summary.status 'blocked status'
+    Assert-Equal $ExpectedExit ([int]$summary.internalExitCode) 'blocked internal exit'
+    Assert-Equal 0 ([int]$summary.executedScenarioCount) 'mandatory scenario non-execution'
+    Assert-Equal 15 ([int]$summary.mandatoryScenarioCount) 'mandatory scenario count'
+    Assert-Equal 'BLOCKED' $summary.correctnessVerdict 'blocked correctness verdict'
+    Assert-Equal 'BLOCKED' $summary.thresholdVerdict 'blocked threshold verdict'
+    Assert-Equal 'BLOCKED' $summary.regressionVerdict 'blocked regression verdict'
+    Assert-Equal 'BLOCKED' $summary.qualityVerdict 'blocked quality verdict'
+    Assert-Equal 'PASS' $summary.artifactVerdict 'blocked artifact verdict'
+    Assert-Equal 'PASS' $summary.secretVerdict 'blocked secret verdict'
+    Assert-Equal 'PASS' $summary.teardownVerdict 'blocked teardown verdict'
+    Assert-Equal $ExpectedReason $summary.reasonCode 'blocked reason code'
+    Assert-Equal $ExpectedRunId $summary.runId 'blocked runId transmission'
+    foreach ($field in @('startedAtUtc', 'finishedAtUtc', 'startedAt', 'completedAt')) {
+        Assert-Rfc3339UtcJsonField -Json $summaryRaw -Field $field -Contract 'blocked summary timestamp'
+    }
+
+    $thresholdRaw = Get-Content -Raw -LiteralPath (Join-Path $BlockedRoot 'threshold-comparison.json')
+    $threshold = $thresholdRaw | ConvertFrom-Json
+    Assert-Equal 'BLOCKED' $threshold.status 'blocked threshold status'
+    Assert-Equal 'FORMAL_SCENARIO_NOT_EXECUTED' $threshold.reason 'blocked threshold reason'
+    Assert-Equal 0 @($threshold.comparisons).Count 'blocked threshold comparison count'
+    foreach ($field in @('startedAtUtc', 'finishedAtUtc')) {
+        Assert-Rfc3339UtcJsonField -Json $thresholdRaw -Field $field -Contract 'blocked threshold timestamp'
+    }
+
+    $secretScan = Get-Content -Raw -LiteralPath (Join-Path $BlockedRoot 'secret-scan.json') | ConvertFrom-Json
+    Assert-Equal 0 ([int]$secretScan.findingCount) 'blocked secret scan'
+
+    $manifestEntries = 0
+    $manifestMismatch = 0
+    foreach ($line in Get-Content -LiteralPath (Join-Path $BlockedRoot 'sha256-manifest.txt')) {
+        $manifestEntries++
+        $parts = $line -split '  ', 2
+        if ($parts.Count -ne 2) {
+            $manifestMismatch++
+            continue
+        }
+        $target = Join-Path $BlockedRoot $parts[1]
+        if (-not (Test-Path -LiteralPath $target -PathType Leaf) -or (Get-Sha256File -Path $target) -ne $parts[0]) {
+            $manifestMismatch++
+        }
+    }
+    if ($manifestEntries -le 0) {
+        throw 'blocked manifest must contain entries'
+    }
+    Assert-Equal 0 $manifestMismatch 'blocked manifest integrity'
+}
+
 $validRunId = '20260715T150000Z'
 Assert-Equal 0 (Invoke-Contract -RunId $validRunId -Seed '7' -RequestedExecutable $CurrentExecutableName) 'explicit executable binding'
 Assert-Equal 0 (Invoke-Contract -RunId $validRunId -Seed '7' -RequestedExecutable 'AUTO') 'AUTO executable binding'
@@ -61,38 +140,14 @@ Assert-Equal 10 (Invoke-Contract -RunId $validRunId -Seed '8' -RequestedExecutab
 $blockedRunId = Get-UniqueRunId
 Assert-Equal 10 (Invoke-Contract -RunId $blockedRunId -Seed '7' -RequestedExecutable '__qdr7_missing_executable__') 'missing executable rejection'
 $blockedRoot = Join-Path $ProjectRoot "target\qdr7-capacity-acceptance\$blockedRunId"
-$artifactRegistry = Get-Content -Raw -LiteralPath (Join-Path $ProjectRoot 'config\qdr7-capacity\qdr7-capacity-artifact-registry.json') | ConvertFrom-Json
-foreach ($name in $artifactRegistry.mandatory) {
-    if (-not (Test-Path -LiteralPath (Join-Path $blockedRoot $name) -PathType Leaf)) {
-        throw "blocked artifact missing: $name"
-    }
-}
+Assert-BlockedArtifactContract -BlockedRoot $blockedRoot -ExpectedRunId $blockedRunId -ExpectedExit 10 -ExpectedReason 'ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED'
 
-$summary = Get-Content -Raw -LiteralPath (Join-Path $blockedRoot 'capacity-acceptance-summary.json') | ConvertFrom-Json
-Assert-Equal 'BLOCKED' $summary.finalStatus 'blocked final status'
-Assert-Equal 10 ([int]$summary.exitCode) 'blocked internal exit'
-Assert-Equal 0 ([int]$summary.mandatoryScenariosExecuted) 'mandatory scenario non-execution'
-Assert-Equal 15 ([int]$summary.mandatoryScenariosTotal) 'mandatory scenario count'
-Assert-Equal $blockedRunId $summary.runId 'blocked runId transmission'
-Assert-Equal 7 ([int]$summary.seed) 'blocked seed transmission'
-
-$secretScan = Get-Content -Raw -LiteralPath (Join-Path $blockedRoot 'secret-scan.json') | ConvertFrom-Json
-Assert-Equal 0 ([int]$secretScan.findingCount) 'blocked secret scan'
-
-$manifestMismatch = 0
-foreach ($line in Get-Content -LiteralPath (Join-Path $blockedRoot 'sha256-manifest.txt')) {
-    $parts = $line -split '  ', 2
-    if ($parts.Count -ne 2) {
-        $manifestMismatch++
-        continue
-    }
-    $target = Join-Path $blockedRoot $parts[1]
-    if (-not (Test-Path -LiteralPath $target -PathType Leaf) -or (Get-Sha256File -Path $target) -ne $parts[0]) {
-        $manifestMismatch++
-    }
-}
-Assert-Equal 0 $manifestMismatch 'blocked manifest integrity'
+$runtimeBlockedRunId = Get-UniqueRunId
+Assert-Equal 20 (Invoke-RuntimeBlockedContract -RunId $runtimeBlockedRunId) 'runtime startup blocked classification'
+$runtimeBlockedRoot = Join-Path $ProjectRoot "target\qdr7-capacity-acceptance\$runtimeBlockedRunId"
+Assert-BlockedArtifactContract -BlockedRoot $runtimeBlockedRoot -ExpectedRunId $runtimeBlockedRunId -ExpectedExit 20 -ExpectedReason 'APPLICATION_CONTEXT_STARTUP_BLOCKED'
 
 Write-Output 'QDR7_CAPACITY_RUNTIME_BINDING_CONTRACT=PASS'
 Write-Output "POWERSHELL_EXECUTABLE_NAME=$CurrentExecutableName"
 Write-Output "BLOCKED_CONTRACT_RUN_ID=$blockedRunId"
+Write-Output "RUNTIME_BLOCKED_CONTRACT_RUN_ID=$runtimeBlockedRunId"
