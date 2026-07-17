@@ -6,9 +6,9 @@
 > mainline: `Limited Dry Run Runtime Readiness`  
 > endpoint: `POST /api/ai/decision-dry-runs`（既有，不新增 endpoint）
 
-## Current formal capacity acceptance disposition（2026-07-15）
+## Current capacity harness disposition（2026-07-17）
 
-本work order已被B2实施、harness work order、harness implementation与runtime binding blocker消费，B2保持`CLOSED / ACCEPTED`，所有历史失败继续保留。Criteria保持`FROZEN / ACCEPTED`。formal run `20260715T140521Z`保留为历史runtime defect；binding validation `20260715T145836Z`已进入preflight并按冻结环境合同BLOCKED。下一任务只允许合格环境上的独立formal retry-2；本文件不授权B3。
+本work order已被B2实施、harness work order、harness implementation、runtime binding blocker、formal Retry-3与runtime blocker-3消费，B2保持`CLOSED / ACCEPTED`，所有formal失败继续保留为历史证据。Criteria保持`FROZEN / ACCEPTED`且语义、阈值和machine-readable配置未变。Run `20260717T122621Z`仅执行implementation validation并关闭tenant、Context restart、nonce与本地跨平台合同问题；下一任务只允许CI verification，本文件不授权formal Retry-4或B3。
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -22,8 +22,15 @@ Capacity acceptance criteria: FROZEN / ACCEPTED
 Capacity harness work order: CLOSED / ACCEPTED
 Capacity harness implementation: CLOSED / ACCEPTED
 Harness runtime binding: CLOSED / ACCEPTED
+Capacity harness runtime blocker-3: CLOSED / ACCEPTED
+Harness tenant isolation: CLOSED / ACCEPTED / 3 OF 3
+Harness Context restart: CLOSED / ACCEPTED / 3 OF 3
+Harness nonce driver: CLOSED / ACCEPTED / V4 REPLAY_KEY
+Cross-platform CI fix: LOCAL VALIDATION PASS / REMOTE CI PENDING
 Formal profile: qdr7-capacity-acceptance
-Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED ON QUALIFIED ENVIRONMENT
+Historical Retry-3: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260716T144346Z / 0 OF 15
+Latest implementation validation: PASS / 20260717T122621Z / 0 OF 15 / CAPACITY_ACCEPTANCE_EXECUTED FALSE
+Post-B2 capacity acceptance: BLOCKED / REMOTE_CI_AND_FORMAL_RETRY_REQUIRED
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -40,14 +47,16 @@ Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
 Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
-Allow capacity acceptance execution: YES / NEXT_TASK_ONLY
-Full regression: PASS / 1134 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Allow capacity acceptance execution: NO / REMOTE_CI_AND_FORMAL_RETRY_REQUIRED
+Allow capacity harness CI verification: YES / NEXT_TASK_ONLY
+Allow formal retry-4: NO / REMOTE_CI_PENDING
+Full regression: PASS / 1141 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Previous full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS / HISTORICAL
 Quality gate: PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER
-current task status: CLOSED / ACCEPTED / LOCAL_VALIDATED
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-2
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
+current task status: CLOSED / ACCEPTED / LOCAL_VALIDATION_PASS
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-CI-VERIFICATION
 ```
 
 > Historical / Consumed：从下一节开始均为B2实施、blocker fix与previous review attempt的当时记录；其中旧`next action`、`BLOCKED`和`NOT_YET`不再表示current状态，也不得覆盖`STATUS.md`与`WORK_ORDER.md`。

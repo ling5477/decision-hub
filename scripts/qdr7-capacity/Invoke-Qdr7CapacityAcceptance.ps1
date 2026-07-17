@@ -68,6 +68,12 @@ function Write-JsonFile {
     Write-Utf8File -Path $Path -Content (($Value | ConvertTo-Json -Depth 30) + "`n")
 }
 
+function Read-JsonFile {
+    param([string]$Path)
+    # Windows PowerShell 5.1 treats UTF-8 without a BOM as ANSI, which can invalidate JSON.
+    return ([IO.File]::ReadAllText($Path, $Utf8NoBom) | ConvertFrom-Json)
+}
+
 function New-Artifact {
     param(
         [string]$Scenario,
@@ -122,6 +128,9 @@ function Set-SummaryContract {
         [string]$TeardownVerdict,
         [string]$ReasonCode
     )
+    # PowerShell 7 converts ISO JSON strings to DateTime; restore the frozen .fffZ form.
+    Set-ObjectProperty -Target $Summary -Name 'startedAtUtc' -Value (ConvertTo-UtcTimestamp -Value $StartedAt)
+    Set-ObjectProperty -Target $Summary -Name 'finishedAtUtc' -Value (ConvertTo-UtcTimestamp -Value $CompletedAt)
     Set-ObjectProperty -Target $Summary -Name 'startedAt' -Value $StartedAt
     Set-ObjectProperty -Target $Summary -Name 'completedAt' -Value $CompletedAt
     Set-ObjectProperty -Target $Summary -Name 'status' -Value $Status
@@ -150,7 +159,7 @@ function Write-MissingScenarioArtifacts {
         [string]$ReasonCode
     )
     $finished = Get-UtcTimestamp
-    $artifactRegistry = Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-artifact-registry.json') | ConvertFrom-Json
+    $artifactRegistry = Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-artifact-registry.json')
     foreach ($name in $artifactRegistry.mandatory) {
         $path = Join-Path $EvidenceRoot $name
         if ((Test-Path -LiteralPath $path -PathType Leaf) -or $name -in @('capacity-acceptance-summary.json', 'harness-exit-code.txt', 'secret-scan.json', 'sha256-manifest.txt')) {
@@ -260,7 +269,7 @@ function Get-ProcessParentId {
 function Test-ImplementationValidationPath {
     param([string]$Path)
     $normalized = $Path.Replace('\', '/')
-    if ($normalized -in @('AGENTS.md', 'CLAUDE.md', 'README.md', 'pom.xml', 'dh-app/pom.xml')) {
+    if ($normalized -in @('.gitattributes', 'AGENTS.md', 'CLAUDE.md', 'README.md', 'pom.xml', 'dh-app/pom.xml')) {
         return $true
     }
     foreach ($prefix in @(
@@ -289,7 +298,7 @@ function Write-BlockedPreflight {
     $environment = New-Artifact -Scenario 'environment' -Status 'BLOCKED' -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $finished
     $environment.safeSummary = 'environment preflight did not satisfy the frozen baseline'
     $criteriaPath = Join-Path $ConfigRoot 'qdr7-capacity-thresholds.json'
-    $criteria = Get-Content -Raw -LiteralPath $criteriaPath | ConvertFrom-Json
+    $criteria = Read-JsonFile -Path $criteriaPath
     $criteriaSourcePath = Join-Path $ProjectRoot $criteria.sourceDocument
     $environment.criteriaSourceSha256 = $(if (Test-Path -LiteralPath $criteriaSourcePath -PathType Leaf) { Get-Sha256 -Path $criteriaSourcePath } else { $null })
     $environment.powerShellExecutable = $ResolvedPowerShellIdentity
@@ -315,7 +324,7 @@ function Write-BlockedPreflight {
     }
     Write-JsonFile -Path $RegistryPath -Value $resourceRegistry
 
-    $scenarioRegistry = Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-scenario-registry.json') | ConvertFrom-Json
+    $scenarioRegistry = Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-scenario-registry.json')
     $summary = New-Artifact -Scenario 'capacity-acceptance' -Status 'BLOCKED' -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $finished
     $summary.finalStatus = 'BLOCKED'
     $summary.exitCode = 10
@@ -394,16 +403,19 @@ function Invoke-Preflight {
             $untrackedChanges
         ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique
         $status = $statusPaths -join "`n"
-        $staged = Get-GitValue -Arguments @('diff', '--cached', '--name-only')
+        $stagedPaths = @(Get-GitPathList -Arguments @('diff', '--cached', '--name-only'))
+        $staged = $stagedPaths -join "`n"
         Add-Check 'git-branch' 'dev' $branch ($branch -eq 'dev')
         Add-Check 'git-head' '40-character SHA-1' $commitSha ($commitSha -match '^[a-f0-9]{40}$')
         $implementationScopeValid = $ImplementationValidationEnabled -and @($statusPaths | Where-Object { -not (Test-ImplementationValidationPath -Path $_) }).Count -eq 0
         $worktreeValid = [string]::IsNullOrWhiteSpace($status) -or $implementationScopeValid
+        $implementationStagedScopeValid = $ImplementationValidationEnabled -and @($stagedPaths | Where-Object { -not (Test-ImplementationValidationPath -Path $_) }).Count -eq 0
+        $stagedValid = [string]::IsNullOrWhiteSpace($staged) -or $implementationStagedScopeValid
         Add-Check 'git-worktree' $(if ($ImplementationValidationEnabled) { 'clean or implementation-validation write allowlist only' } else { 'clean' }) $(if ([string]::IsNullOrWhiteSpace($status)) { 'clean' } elseif ($implementationScopeValid) { 'implementation-validation allowlist only' } else { 'dirty outside allowed scope' }) $worktreeValid
-        Add-Check 'git-staged' 'empty' $(if ([string]::IsNullOrWhiteSpace($staged)) { 'empty' } else { 'non-empty' }) ([string]::IsNullOrWhiteSpace($staged))
+        Add-Check 'git-staged' $(if ($ImplementationValidationEnabled) { 'empty or implementation-validation write allowlist only' } else { 'empty' }) $(if ([string]::IsNullOrWhiteSpace($staged)) { 'empty' } elseif ($implementationStagedScopeValid) { 'implementation-validation allowlist only' } else { 'staged outside allowed scope' }) $stagedValid
 
         $criteriaPath = Join-Path $ConfigRoot 'qdr7-capacity-thresholds.json'
-        $criteria = Get-Content -Raw -LiteralPath $criteriaPath | ConvertFrom-Json
+        $criteria = Read-JsonFile -Path $criteriaPath
         $sourcePath = Join-Path $ProjectRoot $criteria.sourceDocument
         $criteriaHash = Get-Sha256 -Path $sourcePath
         Add-Check 'criteria-version' $CriteriaVersion ([string]$criteria.criteriaVersion) ($criteria.criteriaVersion -eq $CriteriaVersion)
@@ -412,7 +424,7 @@ function Invoke-Preflight {
             $contractPath = Join-Path $ConfigRoot $contract
             $contractValid = $false
             try {
-                Get-Content -Raw -LiteralPath $contractPath | ConvertFrom-Json | Out-Null
+                Read-JsonFile -Path $contractPath | Out-Null
                 $contractValid = $true
             }
             catch {
@@ -629,7 +641,7 @@ function Enter-Qdr7ResolvedPowerShell {
 function Test-CommonJsonArtifact {
     param([string]$Path, [string]$CommitSha)
     try {
-        $artifact = Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json
+        $artifact = Read-JsonFile -Path $Path
         foreach ($field in @('schemaVersion', 'runId', 'commitSha', 'scenario', 'status', 'startedAtUtc', 'finishedAtUtc', 'durationMs', 'seed', 'unitSystem', 'missingValues', 'criteriaVersion')) {
             if ($null -eq $artifact.PSObject.Properties[$field]) {
                 return $false
@@ -644,6 +656,11 @@ function Test-CommonJsonArtifact {
 
 function Stop-RegisteredResources {
     param([object]$Registry, [string]$CommitSha)
+    # ConvertFrom-Json may return DateTime; persist registry timestamps in frozen .fffZ form.
+    $Registry.startedAtUtc = ConvertTo-UtcTimestamp -Value $Registry.startedAtUtc
+    if ($null -ne $Registry.PSObject.Properties['samplerStartedAtUtc'] -and $null -ne $Registry.samplerStartedAtUtc) {
+        $Registry.samplerStartedAtUtc = ConvertTo-UtcTimestamp -Value $Registry.samplerStartedAtUtc
+    }
     $findings = New-Object Collections.Generic.List[string]
     Write-Utf8File -Path $StopMarker -Content "stop`n"
     if ($null -ne $Registry.samplerPid) {
@@ -705,7 +722,7 @@ function Stop-RegisteredResources {
 function Invoke-SecretScan {
     param([string]$CommitSha)
     $started = Get-UtcTimestamp
-    $patternsConfig = Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-secret-patterns.json') | ConvertFrom-Json
+    $patternsConfig = Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-secret-patterns.json')
     $findings = New-Object Collections.Generic.List[object]
     $files = @(Get-ChildItem -LiteralPath $EvidenceRoot -File | Where-Object { $_.Name -notin @('secret-scan.json', 'sha256-manifest.txt') -and $_.Extension -in @('.json', '.csv', '.txt', '.log') })
     foreach ($file in $files) {
@@ -791,7 +808,7 @@ function Invoke-Finalize {
     if (-not (Test-Path -LiteralPath $RegistryPath)) {
         exit 80
     }
-    $registry = Get-Content -Raw -LiteralPath $RegistryPath | ConvertFrom-Json
+    $registry = Read-JsonFile -Path $RegistryPath
     $commitSha = [string]$registry.commitSha
     $teardownFindings = New-Object Collections.Generic.List[string]
     try {
@@ -802,9 +819,9 @@ function Invoke-Finalize {
     catch {
         $teardownFindings.Add('REGISTERED_RESOURCE_TEARDOWN_UNEXPECTED_FAILURE')
     }
-    $registry = Get-Content -Raw -LiteralPath $RegistryPath | ConvertFrom-Json
-    $artifactRegistry = Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-artifact-registry.json') | ConvertFrom-Json
-    $scenarioRegistry = Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-scenario-registry.json') | ConvertFrom-Json
+    $registry = Read-JsonFile -Path $RegistryPath
+    $artifactRegistry = Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-artifact-registry.json')
+    $scenarioRegistry = Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-scenario-registry.json')
     $mandatoryCount = [int]$scenarioRegistry.mandatoryCount
     $startedAt = ConvertTo-UtcTimestamp -Value $registry.startedAtUtc
     if ([string]::IsNullOrWhiteSpace($startedAt)) {
@@ -851,7 +868,7 @@ function Invoke-Finalize {
     }
     $summaryPath = Join-Path $EvidenceRoot 'capacity-acceptance-summary.json'
     if (Test-Path -LiteralPath $summaryPath) {
-        $summary = Get-Content -Raw -LiteralPath $summaryPath | ConvertFrom-Json
+        $summary = Read-JsonFile -Path $summaryPath
     }
     else {
         $now = Get-UtcTimestamp
@@ -893,7 +910,7 @@ function Invoke-Finalize {
             }
         }
     }
-    $summary = Get-Content -Raw -LiteralPath $summaryPath | ConvertFrom-Json
+    $summary = Read-JsonFile -Path $summaryPath
     foreach ($field in $artifactRegistry.summaryRequired) {
         if ($null -eq $summary.PSObject.Properties[$field]) {
             $findings.Add("SUMMARY_REQUIRED_FIELD_MISSING:$field")
@@ -901,7 +918,7 @@ function Invoke-Finalize {
     }
     $thresholdPath = Join-Path $EvidenceRoot 'threshold-comparison.json'
     if ($baseExit -ne 0 -and (Test-Path -LiteralPath $thresholdPath -PathType Leaf)) {
-        $threshold = Get-Content -Raw -LiteralPath $thresholdPath | ConvertFrom-Json
+        $threshold = Read-JsonFile -Path $thresholdPath
         if ($threshold.status -ne 'BLOCKED' -or $threshold.reason -ne 'FORMAL_SCENARIO_NOT_EXECUTED' -or @($threshold.comparisons).Count -ne 0) {
             $findings.Add('THRESHOLD_COMPARISON_BLOCKED_CONTRACT_INVALID')
         }
@@ -958,7 +975,7 @@ else {
     if ($RunId -notmatch '^[0-9]{8}T[0-9]{6}Z$' -or $Seed -ne 7 -or -not $EvidenceRoot.StartsWith($EvidenceBase, [StringComparison]::OrdinalIgnoreCase)) {
         exit 10
     }
-    Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-thresholds.json') | ConvertFrom-Json | Out-Null
-    Get-Content -Raw -LiteralPath (Join-Path $ConfigRoot 'qdr7-capacity-artifact-registry.json') | ConvertFrom-Json | Out-Null
+    Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-thresholds.json') | Out-Null
+    Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-artifact-registry.json') | Out-Null
     exit 0
 }

@@ -1,6 +1,73 @@
 # DH Stage-QDR-7 B2 Formal Capacity Acceptance Result
 
-## Current follow-up — harness runtime blocker-2 accepted（非formal，2026-07-16）
+## Current harness closure — blocker-3 accepted locally（非formal，2026-07-17）
+
+> task: `DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3`
+> implementation-validation run ID: `20260717T122621Z`
+> task verdict: `CLOSED / ACCEPTED / LOCAL_VALIDATION_PASS`
+
+```text
+CAPACITY_HARNESS_RUNTIME_BLOCKER_3: CLOSED / ACCEPTED
+TENANT_ISOLATION: PASS / 3 OF 3 / QUERY_MISSING_TENANT_FILTER CLOSED
+CONTEXT_RESTART: PASS / 3 OF 3 / TEST_LIFECYCLE_FIXTURE_DEPENDENCY CLOSED
+NONCE_DRIVER: PASS / V4 REPLAY_KEY
+WINDOWS_POWERSHELL_5_1: PASS
+POWERSHELL_7: PASS
+NON_WINDOWS_PWSH_CONTRACT: PASS
+IMPLEMENTATION_VALIDATION: PASS / MAVEN EXIT 0
+ENVIRONMENT_PREFLIGHT: PASS / 26 OF 26
+MANDATORY_SCENARIOS: NOT_RUN / 0 OF 15 EXECUTED
+CAPACITY_ACCEPTANCE_EXECUTED: false
+ARTIFACT_INTEGRITY: PASS / 28 FILES / 27 MANIFEST ENTRIES / 0 MISMATCH
+SECRET_SCAN: PASS / 0 FINDINGS
+TEARDOWN: PASS / RESIDUAL NONE
+FULL_REGRESSION: PASS / 1141 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+QUALITY_GATE: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+REMOTE_CI: PENDING
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED / REMOTE_CI_AND_FORMAL_RETRY_REQUIRED
+ALLOW_FORMAL_RETRY_4: NO
+Stage-QDR-7 B3: NOT_ALLOWED
+NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-CI-VERIFICATION
+```
+
+该run只执行implementation validation，未执行15个mandatory scenarios，也未改写任何历史formal artifact。Criteria仅发生line-ending preservation所需的raw-byte/index重建，语义、数值阈值、scenario参数、环境baseline与machine-readable配置均未变化。
+
+## Historical formal result — retry-3 harness runtime blocked（2026-07-16）
+
+> task: `DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3`
+> repository: `E:/Project/decision-hub`
+> branch: `dev`
+> baseline SHA: `cf31de46bc4594c0ad4c529d5857b88eab26561f`
+> formal run ID: `20260716T144346Z`
+> final verdict: `BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT`
+
+```text
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED
+FORMAL_HARNESS: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT
+ENVIRONMENT_PREFLIGHT: PASS / 26 OF 26
+MAVEN_EXIT_CODE: 1
+INTERNAL_EXIT_CODE: 20
+REASON_CODE: APPLICATION_CONTEXT_STARTUP_BLOCKED
+CAPACITY_ACCEPTANCE_EXECUTED: false
+MANDATORY_SCENARIOS: BLOCKED / 0 OF 15 EXECUTED
+CORRECTNESS_INVARIANTS: BLOCKED / NOT_EVALUATED
+NUMERIC_THRESHOLDS: BLOCKED / 0 COMPARISONS / 15 BLOCKED
+POSTGRESQL_RECOVERY: BLOCKED / NOT_EXECUTED
+FULL_REGRESSION: BLOCKED / FORMAL_SCENARIO_NOT_EXECUTED
+QUALITY_GATE: BLOCKED / FORMAL_SCENARIO_NOT_EXECUTED
+ARTIFACT_INTEGRITY: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH
+SECRET_SCAN: PASS / 24 SCANNED FILES / 0 FINDINGS
+TEARDOWN: PASS / RESIDUAL NONE
+B2_IMPLEMENTATION_STATUS: ACCEPTED
+Stage-QDR-7 B3: NOT_ALLOWED
+NEXT_TASK: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
+```
+
+Formal command在clean exact HEAD上仅执行一次。Failsafe共5项：tenant-isolation驱动断言`expected 0 but was 2`，随后三轮Spring Context restart因前置持久状态缺失而失败，另有1项lifecycle测试skipped。`actual-wiring.json`虽记录13个structured 2xx，但formal summary明确`capacityAcceptanceExecuted=false`与`executedScenarioCount=0`，因此该partial artifact不得提升为scenario PASS。
+
+Artifact finalizer完整生成27个文件；26项manifest重新计算为0 mismatch，secret scan为0 findings，sampler/container/volume teardown无残留。标准与环境有效，但mandatory执行不足，结论是`BLOCKED`而不是capacity `FAIL`。历史run `20260715T160710Z`继续保持`BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / HISTORICAL`。
+
+## Historical follow-up — harness runtime blocker-2 accepted（非formal，2026-07-16）
 
 > task: `DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-2`
 > repository: `E:/Project/decision-hub`
@@ -35,7 +102,7 @@ NEXT_TASK: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3
 
 JUnit/Testcontainers现在唯一拥有static PostgreSQL container，并在Spring属性解析前启动、冻结JDBC URL、username、password与mapped port；`@DynamicPropertySource`只返回已冻结值。PowerShell不创建第二个PostgreSQL，只负责exact run-id finalization/teardown。`qdr7.implementationValidation=true`到达ApplicationContext、Hikari、Flyway V1–V14与scenario dispatcher后，在任何mandatory scenario前短路。
 
-run `20260716T133710Z`的summary为`status=NOT_RUN`、`reasonCode=IMPLEMENTATION_VALIDATION_ONLY`，`threshold-comparison.json`为`NOT_RUN / comparisons=[] / FORMAL_SCENARIO_NOT_EXECUTED`。因此该run不产生correctness、threshold、regression、quality或capacity PASS；下一任务必须是独立formal retry-3。
+run `20260716T133710Z`的implementation validation结论为`PASS / IMPLEMENTATION_VALIDATION_ONLY / Maven exit 0 / 0 of 15 / capacity acceptance executed false`，`threshold-comparison.json`没有formal comparisons。因此该run不产生correctness、threshold、regression、quality或capacity PASS；其后formal retry-3已执行并按顶部current result阻断。
 
 ## Historical formal result — retry-2 harness runtime blocked（2026-07-15）
 

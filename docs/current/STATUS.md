@@ -1,6 +1,6 @@
 # Decision Hub Status
 
-## Current authority — 2026-07-16 capacity harness runtime blocker-2 closed
+## Current authority — 2026-07-17 capacity harness runtime blocker-3 closed locally
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -16,16 +16,26 @@ Capacity harness implementation: CLOSED / ACCEPTED
 Harness runtime binding: CLOSED / ACCEPTED
 Harness Testcontainers lifecycle: CLOSED / ACCEPTED
 Blocked artifact contract: CLOSED / ACCEPTED
+Capacity harness runtime blocker-3: CLOSED / ACCEPTED
+Harness tenant isolation: CLOSED / ACCEPTED / 3 OF 3 / QUERY_MISSING_TENANT_FILTER
+Harness Context restart: CLOSED / ACCEPTED / 3 OF 3 / TEST_LIFECYCLE_FIXTURE_DEPENDENCY
+Harness nonce driver: CLOSED / ACCEPTED / V4 REPLAY_KEY
+Cross-platform CI fix: LOCAL VALIDATION PASS / REMOTE CI PENDING
 Formal profile: qdr7-capacity-acceptance
 Historical formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T140521Z
 Latest binding validation: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260715T145836Z / EXPECTED CONTRACT
-Latest formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T160710Z / INTERNAL EXIT 80
-Latest implementation validation: PASS / IMPLEMENTATION_VALIDATION_ONLY / 20260716T133710Z / MAVEN EXIT 0 / 0 OF 15
+Previous formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T160710Z / INTERNAL EXIT 80 / HISTORICAL
+Latest formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260716T144346Z / MAVEN EXIT 1 / INTERNAL EXIT 20 / HISTORICAL
+Latest formal reason: APPLICATION_CONTEXT_STARTUP_BLOCKED / CAPACITY_ACCEPTANCE_EXECUTED FALSE
+Latest formal preflight: PASS / 26 OF 26
+Latest formal mandatory scenarios: BLOCKED / 0 OF 15 EXECUTED
+Latest formal artifacts: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
+Latest implementation validation: PASS / IMPLEMENTATION_VALIDATION_ONLY / 20260717T122621Z / MAVEN EXIT 0 / 0 OF 15
 Latest implementation preflight: PASS / 26 OF 26
-Previous formal acceptance run: BLOCKED / MAVEN EXIT 1 / INTERNAL EXIT 80 / HISTORICAL
-Previous formal acceptance mandatory scenarios: BLOCKED / 0 OF 15 EXECUTED / APPLICATION_CONTEXT_STARTUP_DEFECT / HISTORICAL
-Previous formal acceptance artifacts: BLOCKED / 11 FILES / 19 FINDINGS / SUMMARY CONTRACT INCOMPLETE / HISTORICAL
-Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED
+Latest implementation probes: PASS / TENANT 3 OF 3 / CONTEXT RESTART 3 OF 3 / NONCE DRIVER PASS
+Latest implementation artifacts: PASS / 28 FILES / 27 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
+Criteria raw-byte alignment: PASS / SHA-256 d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / SEMANTIC 0 / THRESHOLD 0
+Post-B2 capacity acceptance: BLOCKED / REMOTE_CI_AND_FORMAL_RETRY_REQUIRED
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -42,15 +52,17 @@ Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
 Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
-Allow capacity acceptance execution: NO / RETRY_3_SEPARATE_TASK_REQUIRED
-Allow post-B2 capacity acceptance retry-3: YES / NEXT_TASK_ONLY
-Latest completed full regression: PASS / 1137 TESTS / 0 FAILURES / 0 ERRORS / 61 SKIPPED / LOCAL
+Allow capacity acceptance execution: NO / REMOTE_CI_AND_FORMAL_RETRY_REQUIRED
+Allow post-B2 capacity acceptance retry-3: NO / CONSUMED_BLOCKED
+Allow capacity harness CI verification: YES / NEXT_TASK_ONLY
+Allow formal retry-4: NO / REMOTE_CI_PENDING
+Latest completed full regression: PASS / 1141 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED / LOCAL CI-EQUIVALENT
 Previous full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS / HISTORICAL
 Latest completed quality gate: PASS / CHECKSTYLE 0 / SPOTLESS PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-2
-current task status: CLOSED / ACCEPTED / IMPLEMENTATION VALIDATION 20260716T133710Z
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
+current task status: CLOSED / ACCEPTED / LOCAL_VALIDATION_PASS
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-CI-VERIFICATION
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
 POSTGRESQL_TEST_EVIDENCE: CURRENT_PASS / POSTGRESQL_17_10 / ZERO_SKIPS
 HARD_CEILING_CONFLICT: CLOSED
@@ -60,12 +72,14 @@ ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: NO / CONSUMED_BLOCKED
 ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO / CONSUMED_ACCEPTED
 ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO / CONSUMED_ACCEPTED
 ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO / CONSUMED_ACCEPTED
-ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO / RETRY_3_SEPARATE_TASK_REQUIRED
-ALLOW_POST_B2_CAPACITY_ACCEPTANCE_RETRY_3: YES / NEXT_TASK_ONLY
+ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO / REMOTE_CI_AND_FORMAL_RETRY_REQUIRED
+ALLOW_POST_B2_CAPACITY_ACCEPTANCE_RETRY_3: NO / CONSUMED_BLOCKED
+ALLOW_CAPACITY_HARNESS_CI_VERIFICATION: YES / NEXT_TASK_ONLY
+ALLOW_FORMAL_RETRY_4: NO / REMOTE_CI_PENDING
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-历史calibration、same-pool失败轨迹与formal runs `20260715T140521Z`、`20260715T160710Z`保持不变。本任务以JUnit/Testcontainers单一ownership在Spring属性解析前启动static container，并统一修复blocked artifact finalizer。implementation-validation run `20260716T133710Z`完成26/26 preflight、ApplicationContext/DataSource/Flyway/dispatcher启动、0/15 mandatory scenarios、27 manifest entries、0 mismatch、0 secret findings与无残留teardown；该run不是formal capacity acceptance。Post-B2 capacity acceptance保持`BLOCKED / FORMAL RETRY REQUIRED`，B3仍`NOT_ALLOWED`。
+历史formal runs保持原分类。Retry-3 run `20260716T144346Z`仍为`BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / internal exit 20 / 0 of 15`。Blocker-3已通过run `20260717T122621Z`关闭tenant、Context restart和nonce driver问题，并完成Windows PowerShell 5.1、PowerShell 7及non-Windows `pwsh`本地合同验证；该implementation run未执行任何mandatory scenario。B2保持`CLOSED / ACCEPTED`，B3继续`NOT_ALLOWED`，下一任务只允许CI verification。
 
 权威层级固定为：
 

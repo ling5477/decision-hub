@@ -1,6 +1,137 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-16 capacity harness runtime blocker-2 accepted
+## Current validation — 2026-07-17 capacity harness runtime blocker-3
+
+```text
+task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
+baseline HEAD: cf31de46bc4594c0ad4c529d5857b88eab26561f
+branch: dev
+inherited worktree: 17 ALLOWLIST MODIFICATIONS
+scope design: PASS / THREE CONTAINMENT RELATIONS
+criteria included in read/validation/fixable/write/scan scope: PASS
+tenant-isolation root cause: QUERY_MISSING_TENANT_FILTER
+tenant-isolation probe: PASS / 3 OF 3 / CROSS-TENANT 0 / CROSS-ENVIRONMENT 0 / UNEXPECTED 0
+context-restart root cause: TEST_LIFECYCLE_FIXTURE_DEPENDENCY
+context-restart probe: PASS / 3 OF 3 / REQUIRED STATE NON-NULL
+committed nonce and idempotency: PASS / PRESERVED
+uncommitted state: PASS / NOT PROMOTED
+nonce driver: PASS / dh_nq_replay_nonce.replay_key / V4 SCHEMA
+Windows effective POM: PASS / powershell.exe
+PowerShell 5.1 standalone contract: PASS
+PowerShell 7 standalone contract: PASS
+non-Windows effective POM and contract: PASS / pwsh ONLY / powershell.exe COUNT 0
+UTC JSON contract: PASS / 37 VALUES / 0 INVALID / yyyy-MM-ddTHH:mm:ss.fffZ
+implementation-validation run: 20260717T122621Z
+implementation-validation result: PASS / MAVEN EXIT 0 / INTERNAL EXIT 0
+environment preflight: PASS / 26 OF 26
+ApplicationContext + Hikari + Flyway V1-V14 + dispatcher: PASS
+mandatory scenarios: NOT_RUN / 0 OF 15
+capacity acceptance executed: false
+artifacts: PASS / 28 FILES / 27 MANIFEST ENTRIES / 0 MISMATCH
+secret scan: PASS / 0 FINDINGS
+teardown: PASS / RESIDUAL NONE
+criteria semantic/textual diff: 0
+criteria numeric threshold diff: 0
+criteria scenario parameter diff: 0
+criteria environment baseline diff: 0
+criteria machine-readable config diff: 0
+criteria raw-byte reindex: PASS
+criteria worktree SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab
+criteria index blob SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab
+full regression: PASS / 19 OF 19 REACTOR SUCCESS / 1141 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+required PostgreSQL tests: PASS / JdbcNonceReplayGuardPersistenceTest 3 OF 3 / PostgresContainerSmokeTest 1 OF 1 / ZERO SKIPS
+quality gate: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+formal Retry-3 rerun: NO
+formal Retry-3 result: UNCHANGED / BLOCKED / 20260716T144346Z / INTERNAL EXIT 20 / 0 OF 15 / HISTORICAL
+remote CI: PENDING
+post-B2 capacity acceptance: BLOCKED / REMOTE_CI_AND_FORMAL_RETRY_REQUIRED
+ALLOW_FORMAL_RETRY_4: NO
+ALLOW_STAGE_QDR_7_B3_ENTRY: NO
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-CI-VERIFICATION
+```
+
+Tenant断言原查询只绑定run/round范围，未同时绑定当前tenant与environment，导致第二轮计入第一轮scope记录；修复只收紧测试driver查询，生产SQL已完整tenant-bound，未修改生产代码。Context restart anchor原先依赖前置tenant scenario初始化；修复后每轮独立seed并提交required state，再关闭并重建ApplicationContext，验证同一PostgreSQL endpoint/volume上的持久状态与rollback边界。Criteria只做line-ending preservation所需的raw-byte/index对齐，不含文字、阈值、scenario、baseline或machine-readable配置变化。
+
+首次implementation-validation run `20260717T121357Z`的测试主体通过，但Windows PowerShell 5.1以默认ANSI读取UTF-8 no-BOM JSON，finalizer返回internal exit 80；改为显式UTF-8 no-BOM读取后，run `20260717T122621Z`通过。一次定向PowerShell 5.1合同测试还暴露新增中文脚本注释会影响旧runtime解析，注释改为ASCII后Windows PowerShell 5.1与PowerShell 7均重跑通过。
+
+## Current validation — 2026-07-16 retry-3 supplemental CI repair
+
+```text
+task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3
+supplemental scope: GITHUB ACTIONS CI PORTABILITY + SUMMARY TIMESTAMP SERIALIZATION
+failed GitHub Actions run: 29506336031 / job 87647948280 / PUSH DEV
+failed GitHub HEAD: cf31de46bc4594c0ad4c529d5857b88eab26561f
+GitHub criteria hash: ERROR / EXPECTED d015a48e... / ACTUAL 42bb2195... / LF CHECKOUT
+GitHub PowerShell binding: ERROR / powershell.exe ABSENT ON UBUNTU
+pre-fix local full regression: FAIL / dh-app 182 TESTS / 1 FAILURE
+pre-fix local failure: PWSH SUMMARY startedAtUtc 2026-07-16T15:17:21.85Z / REQUIRED THREE-DIGIT MILLISECONDS
+root cause: POWERSHELL 7 ConvertFrom-Json DATETIME AUTO-CONVERSION + ConvertTo-Json TRAILING-ZERO LOSS
+criteria checkout fix: .gitattributes -text / PRESERVE FROZEN RAW BYTES
+simulated staged checkout SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / PASS
+PowerShell executable matrix: WINDOWS powershell.exe + pwsh.exe / NON-WINDOWS pwsh
+artifact serialization fix: SUMMARY + RESOURCE REGISTRY UTC FIELDS NORMALIZED BEFORE WRITE
+first targeted invocation: NOT_EXECUTED / POWERSHELL ARGUMENT QUOTING ERROR BEFORE MAVEN TEST PHASE
+targeted tests: PASS / 13 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+pwsh trailing-zero regression artifact: 20260716T153725Z / startedAtUtc 2026-07-16T15:36:26.550Z / PASS
+latest cross-artifact timestamp scan: 20260716T160111Z / 0 INVALID UTC FIELDS / PASS
+CI-equivalent command: mvn -B -ntp test
+CI-equivalent result: PASS / MAVEN EXIT 0 / 19 OF 19 REACTOR SUCCESS / 10:21
+current-run Surefire reports: 172 / 1139 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+required Testcontainers reports: PASS / JdbcNonceReplayGuardPersistenceTest 3 OF 3 / PostgresContainerSmokeTest 1 OF 1 / ZERO SKIPS
+quality gate: PASS / MAVEN EXIT 0 / CHECKSTYLE 0 / SPOTLESS PASS
+criteria working-tree SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / PASS
+remote CI rerun: NOT PERFORMED
+formal Retry-3 rerun: NO
+formal Retry-3 result: UNCHANGED / BLOCKED / 20260716T144346Z / INTERNAL EXIT 20 / 0 OF 15
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
+```
+
+该补充修复只处理已失败CI暴露的跨平台checkout、PowerShell executable选择与summary时间序列化问题。它不把普通`mvn test`计为formal capacity run，不覆盖Retry-3 summary，也不修复tenant isolation/context restart blocker-3。远端workflow未重跑，因为本轮禁止commit、push和workflow rerun；当前只能确认local CI-equivalent validation通过。
+
+## Current validation — 2026-07-16 formal capacity acceptance retry-3 blocked
+
+```text
+task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3
+baseline HEAD: cf31de46bc4594c0ad4c529d5857b88eab26561f
+origin/dev before task: cf31de46bc4594c0ad4c529d5857b88eab26561f
+branch: dev
+worktree before task: clean
+staged before task: empty
+scope design: PASS / THREE CONTAINMENT RELATIONS
+criteria SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / PASS
+formal profile: qdr7-capacity-acceptance
+seed: 7
+formal run id: 20260716T144346Z
+formal Maven command: EXECUTED ONCE
+Maven exit: 1
+internal exit: 20
+formal status: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT
+reason: APPLICATION_CONTEXT_STARTUP_BLOCKED
+environment preflight: PASS / 26 OF 26
+available host memory: 17763131392 BYTES / PASS
+Docker memory: 24694091776 BYTES / PASS
+actual-wiring artifact: PASS / 13 STRUCTURED 2XX / PARTIAL ARTIFACT ONLY
+mandatory scenarios: 0 OF 15 / FORMAL SUMMARY
+capacity acceptance executed: false
+failsafe: 5 TESTS / 4 FAILURES / 0 ERRORS / 1 SKIPPED
+primary driver failure: TENANT ISOLATION EXPECTED 0 BUT WAS 2
+context restart rounds: 3 FAILURES / REQUIRED STATE ABSENT
+correctness verdict: BLOCKED
+threshold verdict: BLOCKED / 0 COMPARISONS / 15 BLOCKED
+full regression scenario: BLOCKED / NOT_EXECUTED
+quality scenario: BLOCKED / NOT_EXECUTED
+artifact validation: PASS / 0 FINDINGS
+manifest: PASS / 26 ENTRIES / 0 MISMATCH
+secret scan: PASS / 24 SCANNED FILES / 0 FINDINGS
+teardown: PASS / CONTAINER AND VOLUME ABSENT / RESIDUAL NONE
+post-B2 capacity acceptance: BLOCKED / CAPACITY_HARNESS_RUNTIME_BLOCKER_3_REQUIRED
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
+```
+
+Formal summary是本轮结论权威。虽然`actual-wiring.json`记录13个structured 2xx，但driver随后失败，summary明确`capacityAcceptanceExecuted=false`且15个mandatory scenario均未计为executed，因此不能形成correctness、threshold、regression或quality PASS。正式命令失败后未重跑。
+
+## Historical / consumed — 2026-07-16 capacity harness runtime blocker-2 accepted
 
 ```text
 task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-2
@@ -26,7 +157,7 @@ implementation validation PostgreSQL mapped port: 3191 / FIXED BEFORE CONTEXT RE
 ApplicationContext / Hikari / Flyway V1-V14 / dispatcher: PASS
 mandatory scenarios: 0 OF 15 / NOT_RUN
 capacity acceptance executed: false
-summary: NOT_RUN / INTERNAL EXIT 0 / IMPLEMENTATION_VALIDATION_ONLY
+summary: PASS / IMPLEMENTATION_VALIDATION_ONLY / MAVEN EXIT 0
 artifact validation: PASS / 0 FINDINGS
 summary timestamps: PASS / RFC3339 UTC
 threshold comparison: NOT_RUN / 0 COMPARISONS / FORMAL_SCENARIO_NOT_EXECUTED

@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,7 @@ class Qdr7CapacityPowerShellContractTest {
     final Path root = repositoryRoot();
     final Path script = root.resolve("scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1");
 
-    for (final String executable : List.of("powershell.exe", "pwsh.exe")) {
+    for (final String executable : requiredPowerShellExecutables()) {
       assertThat(invoke(executable, script, root, "20260715T120000Z", "7")).isZero();
       assertThat(invoke(executable, script, root, "../unsafe", "7")).isEqualTo(10);
       assertThat(invoke(executable, script, root, "20260715T120000Z", "8")).isEqualTo(10);
@@ -32,9 +33,37 @@ class Qdr7CapacityPowerShellContractTest {
     final Path root = repositoryRoot();
     final Path contract = root.resolve("scripts/qdr7-capacity/Test-Qdr7CapacityRuntimeBinding.ps1");
 
-    for (final String executable : List.of("powershell.exe", "pwsh.exe")) {
+    for (final String executable : requiredPowerShellExecutables()) {
       assertThat(invokeContract(executable, contract, root)).isZero();
     }
+  }
+
+  @Test
+  void selectsRequiredPowerShellExecutablesByOperatingSystem() {
+    assertThat(requiredPowerShellExecutables("Windows 11"))
+        .containsExactly("powershell.exe", "pwsh.exe");
+    assertThat(requiredPowerShellExecutables("Linux")).containsExactly("pwsh");
+  }
+
+  @Test
+  void mavenExecUsesPwshByDefaultAndWindowsPowerShellOnlyThroughOsActivation() throws IOException {
+    final Path root = repositoryRoot();
+    final String rootPom = Files.readString(root.resolve("pom.xml"));
+    final String appPom = Files.readString(root.resolve("dh-app/pom.xml"));
+
+    assertThat(rootPom)
+        .contains("<qdr7.powershell.executable>pwsh</qdr7.powershell.executable>")
+        .contains("<id>qdr7-capacity-windows-powershell</id>")
+        .contains("<family>Windows</family>")
+        .contains("<qdr7.powershell.executable>powershell.exe</qdr7.powershell.executable>");
+    assertThat(appPom)
+        .contains("<qdr7.powershell.executable>pwsh</qdr7.powershell.executable>")
+        .contains("<id>qdr7-capacity-windows-powershell</id>")
+        .contains("<family>Windows</family>")
+        .contains("<qdr7.powershell.executable>powershell.exe</qdr7.powershell.executable>")
+        .doesNotContain("<executable>powershell.exe</executable>");
+    assertThat(occurrences(appPom, "<executable>${qdr7.powershell.executable}</executable>"))
+        .isEqualTo(2);
   }
 
   @Test
@@ -96,6 +125,8 @@ class Qdr7CapacityPowerShellContractTest {
     final Path root = repositoryRoot();
     final String rootPom = Files.readString(root.resolve("pom.xml"));
     final String appPom = Files.readString(root.resolve("dh-app/pom.xml"));
+    final String harnessScript =
+        Files.readString(root.resolve("scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1"));
     final String formalIt =
         Files.readString(
             root.resolve(
@@ -109,13 +140,40 @@ class Qdr7CapacityPowerShellContractTest {
             "${qdr7.implementationValidation}",
             "</qdr7.implementationValidation>")
         .contains("<argument>-ImplementationValidation</argument>");
+    assertThat(harnessScript)
+        .contains("'.gitattributes'")
+        .contains("$implementationStagedScopeValid")
+        .contains("empty or implementation-validation write allowlist only");
     assertThat(formalIt)
         .contains("IMPLEMENTATION_VALIDATION_ONLY")
+        .contains("tenantIsolationStartupProbe", "contextRestartStartupProbe")
+        .contains("nonceDriverStartupProbe")
         .contains(
             "@EnabledIfSystemProperty(named = \"qdr7.implementationValidation\", matches = \"true\")")
         .contains(
             "@DisabledIfSystemProperty(named = \"qdr7.implementationValidation\", matches = \"true\")")
         .contains("artifact.put(\"executedScenarioCount\", 0)");
+  }
+
+  @Test
+  void artifactContractsRestoreFixedMillisecondUtcStringsAfterPowerShellJsonParsing()
+      throws IOException {
+    final String script =
+        Files.readString(
+            repositoryRoot().resolve("scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1"));
+
+    assertThat(script)
+        .contains("[IO.File]::ReadAllText($Path, $Utf8NoBom)")
+        .contains(
+            "Set-ObjectProperty -Target $Summary -Name 'startedAtUtc' -Value"
+                + " (ConvertTo-UtcTimestamp -Value $StartedAt)")
+        .contains(
+            "Set-ObjectProperty -Target $Summary -Name 'finishedAtUtc' -Value"
+                + " (ConvertTo-UtcTimestamp -Value $CompletedAt)")
+        .contains("$Registry.startedAtUtc = ConvertTo-UtcTimestamp -Value $Registry.startedAtUtc")
+        .contains(
+            "$Registry.samplerStartedAtUtc = ConvertTo-UtcTimestamp"
+                + " -Value $Registry.samplerStartedAtUtc");
   }
 
   private static int invoke(
@@ -154,6 +212,17 @@ class Qdr7CapacityPowerShellContractTest {
     return process.exitValue();
   }
 
+  /** Windows同时覆盖5.1与7；Linux CI只具备跨平台pwsh，不虚构Windows PowerShell。 */
+  private static List<String> requiredPowerShellExecutables() {
+    return requiredPowerShellExecutables(System.getProperty("os.name", ""));
+  }
+
+  private static List<String> requiredPowerShellExecutables(final String operatingSystem) {
+    return operatingSystem.toLowerCase(Locale.ROOT).contains("win")
+        ? List.of("powershell.exe", "pwsh.exe")
+        : List.of("pwsh");
+  }
+
   private static int invokeContract(final String executable, final Path contract, final Path root)
       throws IOException, InterruptedException {
     final Process process =
@@ -177,6 +246,16 @@ class Qdr7CapacityPowerShellContractTest {
         .isTrue();
     assertThat(output).contains("QDR7_CAPACITY_RUNTIME_BINDING_CONTRACT=PASS");
     return process.exitValue();
+  }
+
+  private static int occurrences(final String value, final String token) {
+    int count = 0;
+    int offset = 0;
+    while ((offset = value.indexOf(token, offset)) >= 0) {
+      count++;
+      offset += token.length();
+    }
+    return count;
   }
 
   private static Path repositoryRoot() {

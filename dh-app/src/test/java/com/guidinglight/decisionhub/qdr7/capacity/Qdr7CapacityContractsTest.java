@@ -71,6 +71,26 @@ class Qdr7CapacityContractsTest {
   }
 
   @Test
+  void nonceDriverUsesTheReplayKeyColumnFromTheFrozenSchema() throws IOException {
+    final Path root = repositoryRoot();
+    final String formalHarness =
+        Files.readString(
+            root.resolve(
+                "dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityAcceptanceIT.java"));
+    final String nonceMigration =
+        Files.readString(
+            root.resolve(
+                "dh-app/src/main/resources/db/migration/V4__nq_feedback_replay_nonce.sql"));
+
+    assertThat(nonceMigration)
+        .contains("replay_key varchar(512) primary key")
+        .doesNotContain(" nonce varchar", "nonce varchar");
+    assertThat(formalHarness)
+        .contains("select count(*) from dh_nq_replay_nonce where replay_key=?")
+        .doesNotContain("select count(*) from dh_nq_replay_nonce where nonce=?");
+  }
+
+  @Test
   void nearestRankStatisticsAreDeterministicAndVarianceUsesSampleDenominator() {
     final Qdr7CapacityContracts.Statistics statistics =
         Qdr7CapacityContracts.statistics(List.of(4L, 1L, 3L, 2L), 1000L);

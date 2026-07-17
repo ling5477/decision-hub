@@ -1,0 +1,2 @@
+# 冻结criteria的SHA-256按既有原始字节定义；禁止Git改写混合行尾，并把CR视为合法EOL。
+docs/current/DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md -text whitespace=cr-at-eol

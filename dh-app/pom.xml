@@ -12,7 +12,7 @@
 
   <artifactId>dh-app</artifactId>
   <properties>
-    <qdr7.powershell.executable>AUTO</qdr7.powershell.executable>
+    <qdr7.powershell.executable>pwsh</qdr7.powershell.executable>
     <qdr7.implementationValidation>false</qdr7.implementationValidation>
   </properties>
   <dependencies>
@@ -121,6 +121,17 @@
 
   <profiles>
     <profile>
+      <id>qdr7-capacity-windows-powershell</id>
+      <activation>
+        <os>
+          <family>Windows</family>
+        </os>
+      </activation>
+      <properties>
+        <qdr7.powershell.executable>powershell.exe</qdr7.powershell.executable>
+      </properties>
+    </profile>
+    <profile>
       <id>qdr7-capacity-acceptance</id>
       <build>
         <plugins>
@@ -136,7 +147,7 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>powershell.exe</executable>
+                  <executable>${qdr7.powershell.executable}</executable>
                   <arguments>
                     <argument>-NoProfile</argument>
                     <argument>-NonInteractive</argument>
@@ -166,7 +177,7 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>powershell.exe</executable>
+                  <executable>${qdr7.powershell.executable}</executable>
                   <arguments>
                     <argument>-NoProfile</argument>
                     <argument>-NonInteractive</argument>

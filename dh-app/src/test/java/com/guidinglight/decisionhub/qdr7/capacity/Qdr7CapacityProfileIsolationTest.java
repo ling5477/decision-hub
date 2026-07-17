@@ -17,7 +17,9 @@ class Qdr7CapacityProfileIsolationTest {
 
     assertThat(rootPom).contains("<id>qdr7-capacity-acceptance</id>");
     assertThat(rootPom)
-        .contains("<qdr7.powershell.executable>AUTO</qdr7.powershell.executable>")
+        .contains("<qdr7.powershell.executable>pwsh</qdr7.powershell.executable>")
+        .contains("<id>qdr7-capacity-windows-powershell</id>")
+        .contains("<family>Windows</family>")
         .contains("<qdr7.seed>7</qdr7.seed>");
     assertThat(rootPom).doesNotContain("<activeByDefault>true</activeByDefault>");
     assertThat(appPom)
@@ -27,8 +29,8 @@ class Qdr7CapacityProfileIsolationTest {
         .contains("<goal>integration-test</goal>")
         .contains("<goal>verify</goal>")
         .contains("Invoke-Qdr7CapacityAcceptance.ps1")
-        .contains("<executable>powershell.exe</executable>")
-        .doesNotContain("<executable>${qdr7.powershell.executable}</executable>");
+        .contains("<executable>${qdr7.powershell.executable}</executable>")
+        .doesNotContain("<executable>powershell.exe</executable>");
   }
 
   @Test

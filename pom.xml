@@ -39,7 +39,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <spotless.version>3.1.0</spotless.version>
     <qdr7.seed>7</qdr7.seed>
-    <qdr7.powershell.executable>AUTO</qdr7.powershell.executable>
+    <qdr7.powershell.executable>pwsh</qdr7.powershell.executable>
     <qdr7.implementationValidation>false</qdr7.implementationValidation>
   </properties>
 
@@ -92,6 +92,17 @@
   </build>
 
   <profiles>
+    <profile>
+      <id>qdr7-capacity-windows-powershell</id>
+      <activation>
+        <os>
+          <family>Windows</family>
+        </os>
+      </activation>
+      <properties>
+        <qdr7.powershell.executable>powershell.exe</qdr7.powershell.executable>
+      </properties>
+    </profile>
     <profile>
       <id>qdr7-capacity-acceptance</id>
       <build>

@@ -147,10 +147,11 @@ class Qdr7CapacityAcceptanceIT {
       Collections.synchronizedList(new ArrayList<>());
   private static final List<Map<String, Object>> RESTART_RESULTS =
       Collections.synchronizedList(new ArrayList<>());
+  private static final List<Map<String, Object>> IMPLEMENTATION_TENANT_ISOLATION_RESULTS =
+      Collections.synchronizedList(new ArrayList<>());
   private static final List<Map<String, Object>> SCENARIO_STATUSES =
       Collections.synchronizedList(new ArrayList<>());
-  private static PreparedRequest restartAnchor;
-  private static String promptChecksum;
+  private static RestartProbeState restartProbeState;
   private static int postRecoveryStructured2xx;
 
   @Container
@@ -223,7 +224,9 @@ class Qdr7CapacityAcceptanceIT {
   @Test
   @Order(0)
   @EnabledIfSystemProperty(named = "qdr7.implementationValidation", matches = "true")
-  void validatesLifecycleBeforeMandatoryScenarioDispatch() throws IOException, SQLException {
+  @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+  void validatesLifecycleBeforeMandatoryScenarioDispatch()
+      throws IOException, SQLException, InterruptedException {
     runContext =
         Qdr7CapacityContracts.parseRunContext(
             RUN_ID, String.valueOf(SEED), PROJECT_ROOT, COMMIT_SHA);
@@ -243,21 +246,10 @@ class Qdr7CapacityAcceptanceIT {
     assertThat(Qdr7CapacityContracts.ScenarioRegistry.validate(dispatchers)).isEmpty();
     assertThat(dispatchers).hasSize(15);
     assertThat(SCENARIO_STATUSES).isEmpty();
-
-    final Map<String, Object> artifact =
-        artifact("implementation-validation", HARNESS_STARTED, Instant.now());
-    artifact.put("validationMode", "IMPLEMENTATION_VALIDATION_ONLY");
-    artifact.put("containerStartedBeforePropertyResolution", true);
-    artifact.put("mappedPort", DATABASE_PORT);
-    artifact.put("jdbcEndpointSha256", Qdr7CapacityContracts.sha256(FROZEN_JDBC_URL));
-    artifact.put("applicationContextStarted", applicationContext.getBeanDefinitionCount() > 0);
-    artifact.put("dispatcherReached", true);
-    artifact.put("mandatoryScenarioCount", 15);
-    artifact.put("executedScenarioCount", 0);
-    artifact.put("capacityAcceptanceExecuted", false);
-    writeJson("implementation-validation.json", artifact);
-    Files.writeString(
-        EVIDENCE_ROOT.resolve("harness-exit-code.txt"), "0\n", StandardCharsets.UTF_8);
+    IMPLEMENTATION_TENANT_ISOLATION_RESULTS.clear();
+    IMPLEMENTATION_TENANT_ISOLATION_RESULTS.addAll(
+        verifyTenantEnvironmentIsolation("qdr7-implementation-isolation"));
+    seedRestartProbe(1);
   }
 
   @Test
@@ -275,19 +267,17 @@ class Qdr7CapacityAcceptanceIT {
 
     final List<HarnessDriver> drivers = drivers();
     assertThat(Qdr7CapacityContracts.ScenarioRegistry.validate(drivers)).isEmpty();
+    // restart fixture必须在任何mandatory driver之前提交，避免前序场景失败派生出null状态。
+    seedRestartProbe(1);
     for (final HarnessDriver driver : drivers.subList(0, 10)) {
       runDriver(driver);
     }
     runDriver(driver(drivers, "postgres-persistent-volume-restart"));
     runDriver(driver(drivers, "post-recovery-concurrency"));
-    restartAnchor = prepare("restart-anchor", null, SOURCE);
-    assertStructuredSuccess(send(restartAnchor));
-    promptChecksum = canonicalPromptChecksum();
   }
 
   @Test
   @Order(2)
-  @DisabledIfSystemProperty(named = "qdr7.implementationValidation", matches = "true")
   @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
   void springContextRestartRoundOnePreservesCommittedState()
       throws IOException, InterruptedException, SQLException, ExecutionException {
@@ -296,7 +286,6 @@ class Qdr7CapacityAcceptanceIT {
 
   @Test
   @Order(3)
-  @DisabledIfSystemProperty(named = "qdr7.implementationValidation", matches = "true")
   @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
   void springContextRestartRoundTwoPreservesCommittedState()
       throws IOException, InterruptedException, SQLException, ExecutionException {
@@ -305,10 +294,13 @@ class Qdr7CapacityAcceptanceIT {
 
   @Test
   @Order(4)
-  @DisabledIfSystemProperty(named = "qdr7.implementationValidation", matches = "true")
   void springContextRestartRoundThreePreservesCommittedStateAndFinalizesJavaArtifacts()
       throws IOException, InterruptedException, SQLException, ExecutionException {
     verifyContextRestart(3);
+    if (IMPLEMENTATION_VALIDATION) {
+      writeImplementationValidationArtifact();
+      return;
+    }
     runContext =
         Qdr7CapacityContracts.parseRunContext(
             RUN_ID, String.valueOf(SEED), PROJECT_ROOT, COMMIT_SHA);
@@ -600,35 +592,7 @@ class Qdr7CapacityAcceptanceIT {
   private void tenantIsolation(final Qdr7CapacityContracts.ScenarioExecution execution)
       throws IOException, InterruptedException, SQLException, ExecutionException {
     final Instant started = Instant.now();
-    final List<Map<String, Object>> rounds = new ArrayList<>();
-    for (int round = 1; round <= 3; round++) {
-      final String tenantA = "qdr7-isolation-a-" + round + "-" + RUN_ID;
-      final String tenantB = "qdr7-isolation-b-" + round + "-" + RUN_ID;
-      final PersistentGuardIdentity identityA = identity(tenantA);
-      final PersistentGuardIdentity identityB = identity(tenantB);
-      for (int attempt = 0; attempt < 10; attempt++) {
-        assertThat(acquire(identityA, 10).status()).isEqualTo(RateLimitAdmissionStatus.ACCEPTED);
-      }
-      assertThat(acquire(identityA, 10).status()).isEqualTo(RateLimitAdmissionStatus.RATE_LIMITED);
-      assertThat(acquire(identityB, 10).status()).isEqualTo(RateLimitAdmissionStatus.ACCEPTED);
-      final int crossRows =
-          jdbc.queryForObject(
-              "select count(*) from dh_qdr7_rate_limit_bucket where tenant_id not in (?,?) and tenant_id like 'qdr7-isolation-%'",
-              Integer.class, tenantA, tenantB);
-      assertThat(crossRows).isZero();
-      rounds.add(
-          Map.of(
-              "round",
-              round,
-              "scopeAExhausted",
-              true,
-              "scopeBAccepted",
-              true,
-              "crossTenantRows",
-              0,
-              "crossEnvironmentRows",
-              0));
-    }
+    final List<Map<String, Object>> rounds = verifyTenantEnvironmentIsolation("qdr7-isolation");
     execution.values().put("isolationRounds", rounds);
     final Map<String, Object> artifact =
         artifact("tenant-environment-isolation", started, Instant.now());
@@ -640,6 +604,100 @@ class Qdr7CapacityAcceptanceIT {
     artifact.put("rounds", rounds);
     artifact.put("noncanonicalSource", Map.of("status", "PENDING_DRIVER", "httpStatus", 0));
     writeJson("tenant-isolation.json", artifact);
+  }
+
+  /**
+   * 使用每轮唯一tenant和合法environment组合验证完整identity隔离。
+   *
+   * <p>查询只统计当前run/current round，禁止把前一轮fixture计为cross-scope数据，也禁止清空共享数据库换取PASS。
+   */
+  private List<Map<String, Object>> verifyTenantEnvironmentIsolation(final String tenantPrefix) {
+    final List<Map<String, Object>> rounds = new ArrayList<>();
+    final List<String> primaryEnvironments = List.of("dev", "test", "staging");
+    final List<String> alternateEnvironments = List.of("test", "staging", "prod");
+    for (int round = 1; round <= 3; round++) {
+      final String primaryEnvironment = primaryEnvironments.get(round - 1);
+      final String alternateEnvironment = alternateEnvironments.get(round - 1);
+      final String tenantA = tenantPrefix + "-a-r" + round + "-" + RUN_ID;
+      final String tenantB = tenantPrefix + "-b-r" + round + "-" + RUN_ID;
+      final String currentRoundPattern = tenantPrefix + "-%-r" + round + "-" + RUN_ID;
+      final PersistentGuardIdentity identityA = identity(primaryEnvironment, tenantA);
+      final PersistentGuardIdentity identityB = identity(primaryEnvironment, tenantB);
+      final PersistentGuardIdentity alternateIdentityA = identity(alternateEnvironment, tenantA);
+      for (int attempt = 0; attempt < 10; attempt++) {
+        assertThat(acquire(identityA, 10).status()).isEqualTo(RateLimitAdmissionStatus.ACCEPTED);
+      }
+      assertThat(acquire(identityA, 10).status()).isEqualTo(RateLimitAdmissionStatus.RATE_LIMITED);
+      assertThat(acquire(identityB, 10).status()).isEqualTo(RateLimitAdmissionStatus.ACCEPTED);
+      assertThat(acquire(alternateIdentityA, 10).status())
+          .isEqualTo(RateLimitAdmissionStatus.ACCEPTED);
+
+      final long scopeARequests = rateRequestCount(identityA);
+      final long scopeBRequests = rateRequestCount(identityB);
+      final long alternateEnvironmentRequests = rateRequestCount(alternateIdentityA);
+      final int crossTenantRows =
+          jdbc.queryForObject(
+              "select count(*) from dh_qdr7_rate_limit_bucket"
+                  + " where endpoint=? and source=? and environment=? and tenant_id like ?"
+                  + " and tenant_id not in (?,?)",
+              Integer.class,
+              ENDPOINT,
+              SOURCE,
+              primaryEnvironment,
+              currentRoundPattern,
+              tenantA,
+              tenantB);
+      final int crossEnvironmentRows =
+          jdbc.queryForObject(
+              "select count(*) from dh_qdr7_rate_limit_bucket"
+                  + " where endpoint=? and source=? and tenant_id in (?,?)"
+                  + " and environment not in (?,?)",
+              Integer.class,
+              ENDPOINT,
+              SOURCE,
+              tenantA,
+              tenantB,
+              primaryEnvironment,
+              alternateEnvironment);
+      final int unexpectedRecords =
+          jdbc.queryForObject(
+              "select count(*) from dh_qdr7_rate_limit_bucket"
+                  + " where endpoint=? and source=? and tenant_id like ?"
+                  + " and not ((environment=? and tenant_id in (?,?))"
+                  + " or (environment=? and tenant_id=?))",
+              Integer.class,
+              ENDPOINT,
+              SOURCE,
+              currentRoundPattern,
+              primaryEnvironment,
+              tenantA,
+              tenantB,
+              alternateEnvironment,
+              tenantA);
+      assertThat(scopeARequests).isEqualTo(10L);
+      assertThat(scopeBRequests).isEqualTo(1L);
+      assertThat(alternateEnvironmentRequests).isEqualTo(1L);
+      assertThat(crossTenantRows).isZero();
+      assertThat(crossEnvironmentRows).isZero();
+      assertThat(unexpectedRecords).isZero();
+
+      final Map<String, Object> result = new LinkedHashMap<>();
+      result.put("round", round);
+      result.put("primaryEnvironment", primaryEnvironment);
+      result.put("alternateEnvironment", alternateEnvironment);
+      result.put("tenantAHash", Qdr7CapacityContracts.sha256(tenantA));
+      result.put("tenantBHash", Qdr7CapacityContracts.sha256(tenantB));
+      result.put("scopeARequestCount", scopeARequests);
+      result.put("scopeBRequestCount", scopeBRequests);
+      result.put("alternateEnvironmentRequestCount", alternateEnvironmentRequests);
+      result.put("scopeAExhausted", true);
+      result.put("scopeBAccepted", true);
+      result.put("crossTenantRows", crossTenantRows);
+      result.put("crossEnvironmentRows", crossEnvironmentRows);
+      result.put("unexpectedRecords", unexpectedRecords);
+      rounds.add(result);
+    }
+    return List.copyOf(rounds);
   }
 
   private void canonicalSourceFailClosed(final Qdr7CapacityContracts.ScenarioExecution execution)
@@ -674,9 +732,9 @@ class Qdr7CapacityAcceptanceIT {
               .count();
       final int winnerRows =
           jdbc.queryForObject(
-              "select count(*) from dh_nq_replay_nonce where nonce=?",
+              "select count(*) from dh_nq_replay_nonce where replay_key=?",
               Integer.class,
-              request.nonce());
+              replayKey(request));
       assertThat(accepted).isEqualTo(1);
       assertThat(replay).isEqualTo(23);
       assertThat(winnerRows).isEqualTo(1);
@@ -1115,29 +1173,150 @@ class Qdr7CapacityAcceptanceIT {
 
   private void verifyContextRestart(final int round)
       throws IOException, InterruptedException, SQLException, ExecutionException {
-    assertThat(restartAnchor).isNotNull();
-    assertThat(canonicalPromptChecksum()).isEqualTo(promptChecksum);
-    assertThat(idempotencyState(restartAnchor.requestId())).isEqualTo("COMPLETED");
-    final RequestOutcome next = send(prepare("context-restart-round-" + round, null, SOURCE));
-    assertStructuredSuccess(next);
-    RESTART_RESULTS.add(
-        Map.of(
-            "type",
-            "SPRING_CONTEXT",
-            "round",
+    final RestartProbeState seeded = restartProbeState;
+    assertThat(seeded).as("restart round %s required state", round).isNotNull();
+    assertThat(seeded.round()).isEqualTo(round);
+    assertThat(applicationContext).isNotSameAs(seeded.applicationContext());
+    assertThat(dataSource).isNotSameAs(seeded.dataSource());
+    assertThat(POSTGRES.isRunning()).isTrue();
+    assertThat(POSTGRES.getMappedPort(PostgreSQLContainer.POSTGRESQL_PORT))
+        .isEqualTo(DATABASE_PORT);
+    assertThat(Qdr7CapacityContracts.sha256(FROZEN_JDBC_URL))
+        .isEqualTo(seeded.jdbcEndpointSha256());
+
+    final RestartRequiredState recovered =
+        requiredRestartState(seeded.committedRequest().requestId());
+    assertThat(recovered).isNotNull();
+    assertThat(recovered.recordId()).isEqualTo(seeded.requiredState().recordId());
+    assertThat(recovered.requestHash()).isEqualTo(seeded.requiredState().requestHash());
+    assertThat(recovered.state()).isEqualTo("COMPLETED");
+    assertThat(canonicalPromptChecksum()).isEqualTo(seeded.promptChecksum());
+    assertThat(nonceReplayRowCount(seeded.committedRequest())).isEqualTo(1);
+    assertThat(idempotencyRowCount(seeded.uncommittedRequestId())).isZero();
+
+    final RequestOutcome replay = send(seeded.committedRequest());
+    assertThat(replay.statusCode()).isEqualTo(409);
+    assertThat(replay.errorCode(objectMapper)).isEqualTo("NONCE_REPLAY");
+    assertThat(idempotencyState(seeded.committedRequest().requestId())).isEqualTo("COMPLETED");
+
+    final int crossTenantVisibility =
+        jdbc.queryForObject(
+            "select count(*) from dh_qdr7_idempotency_guard"
+                + " where guard_id::text=? and tenant_id=?",
+            Integer.class,
+            recovered.recordId(),
+            TENANT + "-other");
+    final int crossEnvironmentVisibility =
+        jdbc.queryForObject(
+            "select count(*) from dh_qdr7_idempotency_guard"
+                + " where guard_id::text=? and environment<>?",
+            Integer.class,
+            recovered.recordId(),
+            "test");
+    assertThat(crossTenantVisibility).isZero();
+    assertThat(crossEnvironmentVisibility).isZero();
+
+    final Map<String, Object> result = new LinkedHashMap<>();
+    result.put("type", "SPRING_CONTEXT");
+    result.put("round", round);
+    result.put("status", "PASS");
+    result.put("applicationContextIdentityHash", identityHash(applicationContext));
+    result.put("dataSourceIdentityHash", identityHash(dataSource));
+    result.put("environment", "test");
+    result.put("tenant", TENANT);
+    result.put("recordId", recovered.recordId());
+    result.put("requestHash", recovered.requestHash());
+    result.put("requiredStateNonNull", true);
+    result.put("committedNoncePreserved", true);
+    result.put("committedIdempotencyState", recovered.state());
+    result.put("uncommittedStatePromoted", false);
+    result.put("canonicalPromptPreserved", true);
+    result.put("crossTenantVisibility", crossTenantVisibility);
+    result.put("crossEnvironmentVisibility", crossEnvironmentVisibility);
+    result.put("samePostgresEndpoint", true);
+    result.put("samePersistentVolume", true);
+    RESTART_RESULTS.add(result);
+
+    if (round < 3) {
+      // 每轮在即将关闭的当前Context内独立提交下一轮state，下一方法只负责重启后验证。
+      seedRestartProbe(round + 1);
+    }
+  }
+
+  /** 在当前事务边界内提交本轮required state，并单独制造一个必回滚记录。 */
+  private void seedRestartProbe(final int round) throws IOException, InterruptedException {
+    final PreparedRequest committed =
+        prepare("context-restart-anchor-r" + round + "-" + RUN_ID, null, SOURCE);
+    assertStructuredSuccess(send(committed));
+    final RestartRequiredState requiredState = requiredRestartState(committed.requestId());
+    assertThat(requiredState.state()).isEqualTo("COMPLETED");
+    assertThat(nonceReplayRowCount(committed)).isEqualTo(1);
+
+    final String uncommittedRequestId = seedRolledBackRestartState(round);
+    assertThat(idempotencyRowCount(uncommittedRequestId)).isZero();
+    restartProbeState =
+        new RestartProbeState(
             round,
-            "status",
-            "PASS",
-            "applicationContextIdentityHash",
-            identityHash(applicationContext),
-            "committedStatePreserved",
-            true,
-            "canonicalPromptPreserved",
-            true,
-            "tenantIsolationPreserved",
-            true,
-            "cleanupScopePreserved",
-            true));
+            committed,
+            requiredState,
+            uncommittedRequestId,
+            canonicalPromptChecksum(),
+            Qdr7CapacityContracts.sha256(FROZEN_JDBC_URL),
+            applicationContext,
+            dataSource);
+  }
+
+  /** 通过真实GuardTransactionBoundary证明异常事务不会在重启后晋升为成功。 */
+  private String seedRolledBackRestartState(final int round) {
+    final String requestId = "qdr7-context-restart-uncommitted-r" + round + "-" + RUN_ID;
+    final IdempotencyAdmissionCommand admission =
+        new IdempotencyAdmissionCommand(
+            identity(TENANT),
+            requestId,
+            Qdr7CapacityContracts.sha256("context-restart-rollback-r" + round + "-" + RUN_ID),
+            IdempotencyAdmissionCommand.HASH_VERSION,
+            Duration.ofMinutes(10),
+            Duration.ofHours(1));
+    try {
+      transactions.required(
+          () -> {
+            assertThat(idempotencyGuard.admit(admission).status())
+                .isEqualTo(IdempotencyAdmissionStatus.ADMITTED);
+            throw new IllegalStateException("deterministic context restart rollback fixture");
+          });
+    } catch (final IllegalStateException expected) {
+      assertThat(expected).hasMessage("deterministic context restart rollback fixture");
+    }
+    return requestId;
+  }
+
+  /** implementation-validation只写probe证据，不登记任何mandatory scenario。 */
+  private void writeImplementationValidationArtifact() throws IOException {
+    final List<Map<String, Object>> springRestartResults =
+        RESTART_RESULTS.stream().filter(row -> "SPRING_CONTEXT".equals(row.get("type"))).toList();
+    assertThat(IMPLEMENTATION_TENANT_ISOLATION_RESULTS).hasSize(3);
+    assertThat(springRestartResults).hasSize(3);
+    assertThat(SCENARIO_STATUSES).isEmpty();
+
+    final Map<String, Object> artifact =
+        artifact("implementation-validation", HARNESS_STARTED, Instant.now());
+    artifact.put("validationMode", "IMPLEMENTATION_VALIDATION_ONLY");
+    artifact.put("containerStartedBeforePropertyResolution", true);
+    artifact.put("mappedPort", DATABASE_PORT);
+    artifact.put("jdbcEndpointSha256", Qdr7CapacityContracts.sha256(FROZEN_JDBC_URL));
+    artifact.put("applicationContextStarted", applicationContext.getBeanDefinitionCount() > 0);
+    artifact.put("dispatcherReached", true);
+    artifact.put("tenantIsolationStartupProbe", "PASS");
+    artifact.put("tenantIsolationRounds", IMPLEMENTATION_TENANT_ISOLATION_RESULTS);
+    artifact.put("contextRestartStartupProbe", "PASS");
+    artifact.put("contextRestartRounds", springRestartResults);
+    artifact.put("nonceDriverStartupProbe", "PASS");
+    artifact.put("mandatoryScenarioCount", 15);
+    artifact.put("executedScenarioCount", 0);
+    artifact.put("capacityAcceptanceExecuted", false);
+    writeJson("implementation-validation.json", artifact);
+    Files.writeString(
+        EVIDENCE_ROOT.resolve("harness-exit-code.txt"), "0\n", StandardCharsets.UTF_8);
   }
 
   private void fullRegression(final Qdr7CapacityContracts.ScenarioExecution execution)
@@ -1246,8 +1425,24 @@ class Qdr7CapacityAcceptanceIT {
         () -> rateLimitAdmission.tryAcquire(new RateLimitAdmissionCommand(identity, 3600, quota)));
   }
 
+  /** 按完整identity读取当前window累计值，禁止tenant-only断言掩盖environment串扰。 */
+  private long rateRequestCount(final PersistentGuardIdentity identity) {
+    return jdbc.queryForObject(
+        "select coalesce(sum(request_count),0) from dh_qdr7_rate_limit_bucket"
+            + " where environment=? and endpoint=? and source=? and tenant_id=?",
+        Long.class,
+        identity.environment(),
+        identity.endpoint(),
+        identity.source(),
+        identity.tenantId());
+  }
+
   private PersistentGuardIdentity identity(final String tenant) {
-    return new PersistentGuardIdentity("test", ENDPOINT, SOURCE, tenant);
+    return identity("test", tenant);
+  }
+
+  private PersistentGuardIdentity identity(final String environment, final String tenant) {
+    return new PersistentGuardIdentity(environment, ENDPOINT, SOURCE, tenant);
   }
 
   private IdempotencyTransitionCommand transition(
@@ -1587,10 +1782,67 @@ class Qdr7CapacityAcceptanceIT {
         TENANT);
   }
 
+  /** 读取restart required state时绑定完整guard identity，零行或重复行都必须失败。 */
+  private RestartRequiredState requiredRestartState(final String requestId) {
+    final List<RestartRequiredState> rows =
+        jdbc.query(
+            "select guard_id::text,request_hash,state from dh_qdr7_idempotency_guard"
+                + " where environment=? and endpoint=? and source=? and tenant_id=?"
+                + " and request_id=?",
+            (resultSet, rowNumber) ->
+                new RestartRequiredState(
+                    resultSet.getString("guard_id"),
+                    resultSet.getString("request_hash"),
+                    resultSet.getString("state")),
+            "test",
+            ENDPOINT,
+            SOURCE,
+            TENANT,
+            requestId);
+    assertThat(rows).as("restart required state for %s", requestId).hasSize(1);
+    return rows.get(0);
+  }
+
+  private int nonceReplayRowCount(final PreparedRequest request) {
+    return jdbc.queryForObject(
+        "select count(*) from dh_nq_replay_nonce where replay_key=?",
+        Integer.class,
+        replayKey(request));
+  }
+
+  /** 与HmacNqDryRunAuthenticator保持同一稳定key顺序，不读取或输出签名材料。 */
+  private static String replayKey(final PreparedRequest request) {
+    return TENANT
+        + "::"
+        + request.source()
+        + "::"
+        + ENDPOINT
+        + "::"
+        + request.nonce()
+        + "::"
+        + request.requestId();
+  }
+
+  private int idempotencyRowCount(final String requestId) {
+    return jdbc.queryForObject(
+        "select count(*) from dh_qdr7_idempotency_guard"
+            + " where environment=? and endpoint=? and source=? and tenant_id=? and request_id=?",
+        Integer.class,
+        "test",
+        ENDPOINT,
+        SOURCE,
+        TENANT,
+        requestId);
+  }
+
   private String idempotencyState(final String requestId) {
     return jdbc.queryForObject(
-        "select state from dh_qdr7_idempotency_guard where tenant_id=? and request_id=?",
+        "select state from dh_qdr7_idempotency_guard"
+            + " where environment=? and endpoint=? and source=? and tenant_id=? and request_id=?",
         String.class,
+        "test",
+        ENDPOINT,
+        SOURCE,
         TENANT,
         requestId);
   }
@@ -1783,6 +2035,19 @@ class Qdr7CapacityAcceptanceIT {
       String source,
       String body,
       String signature) {}
+
+  private record RestartRequiredState(String recordId, String requestHash, String state) {}
+
+  /** 跨ApplicationContext保存的只含合成fixture与安全hash的restart验证状态。 */
+  private record RestartProbeState(
+      int round,
+      PreparedRequest committedRequest,
+      RestartRequiredState requiredState,
+      String uncommittedRequestId,
+      String promptChecksum,
+      String jdbcEndpointSha256,
+      ApplicationContext applicationContext,
+      DataSource dataSource) {}
 
   private record RequestOutcome(
       String requestId,

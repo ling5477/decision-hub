@@ -1,6 +1,6 @@
 # Decision Hub Roadmap
 
-## Current route — 2026-07-16 formal capacity acceptance retry-3 next
+## Current route — 2026-07-17 capacity harness CI verification next
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -16,16 +16,26 @@ Capacity harness implementation: CLOSED / ACCEPTED
 Harness runtime binding: CLOSED / ACCEPTED
 Harness Testcontainers lifecycle: CLOSED / ACCEPTED
 Blocked artifact contract: CLOSED / ACCEPTED
+Capacity harness runtime blocker-3: CLOSED / ACCEPTED
+Harness tenant isolation: CLOSED / ACCEPTED / 3 OF 3 / QUERY_MISSING_TENANT_FILTER
+Harness Context restart: CLOSED / ACCEPTED / 3 OF 3 / TEST_LIFECYCLE_FIXTURE_DEPENDENCY
+Harness nonce driver: CLOSED / ACCEPTED / V4 REPLAY_KEY
+Cross-platform CI fix: LOCAL VALIDATION PASS / REMOTE CI PENDING
 Formal profile: qdr7-capacity-acceptance
 Historical formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T140521Z
 Latest binding validation: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260715T145836Z / EXPECTED CONTRACT
-Latest formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T160710Z / INTERNAL EXIT 80
-Latest implementation validation: PASS / IMPLEMENTATION_VALIDATION_ONLY / 20260716T133710Z / MAVEN EXIT 0 / 0 OF 15
+Previous formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T160710Z / INTERNAL EXIT 80 / HISTORICAL
+Latest formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260716T144346Z / MAVEN EXIT 1 / INTERNAL EXIT 20 / HISTORICAL
+Latest formal reason: APPLICATION_CONTEXT_STARTUP_BLOCKED / CAPACITY_ACCEPTANCE_EXECUTED FALSE
+Latest formal preflight: PASS / 26 OF 26
+Latest formal mandatory scenarios: BLOCKED / 0 OF 15 EXECUTED
+Latest formal artifacts: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
+Latest implementation validation: PASS / IMPLEMENTATION_VALIDATION_ONLY / 20260717T122621Z / MAVEN EXIT 0 / 0 OF 15
 Latest implementation preflight: PASS / 26 OF 26
-Previous formal acceptance run: BLOCKED / MAVEN EXIT 1 / INTERNAL EXIT 80 / HISTORICAL
-Previous formal acceptance mandatory scenarios: BLOCKED / 0 OF 15 EXECUTED / APPLICATION_CONTEXT_STARTUP_DEFECT / HISTORICAL
-Previous formal acceptance artifacts: BLOCKED / 11 FILES / 19 FINDINGS / SUMMARY CONTRACT INCOMPLETE / HISTORICAL
-Post-B2 capacity acceptance: BLOCKED / FORMAL RETRY REQUIRED
+Latest implementation probes: PASS / TENANT 3 OF 3 / CONTEXT RESTART 3 OF 3 / NONCE DRIVER PASS
+Latest implementation artifacts: PASS / 28 FILES / 27 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
+Criteria raw-byte alignment: PASS / SHA-256 d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / SEMANTIC 0 / THRESHOLD 0
+Post-B2 capacity acceptance: BLOCKED / REMOTE_CI_AND_FORMAL_RETRY_REQUIRED
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -42,18 +52,20 @@ Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
 Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
-Allow capacity acceptance execution: NO / RETRY_3_SEPARATE_TASK_REQUIRED
-Allow post-B2 capacity acceptance retry-3: YES / NEXT_TASK_ONLY
-Latest completed full regression: PASS / 1137 TESTS / 0 FAILURES / 0 ERRORS / 61 SKIPPED / LOCAL
+Allow capacity acceptance execution: NO / REMOTE_CI_AND_FORMAL_RETRY_REQUIRED
+Allow post-B2 capacity acceptance retry-3: NO / CONSUMED_BLOCKED
+Allow capacity harness CI verification: YES / NEXT_TASK_ONLY
+Allow formal retry-4: NO / REMOTE_CI_PENDING
+Latest completed full regression: PASS / 1141 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED / LOCAL CI-EQUIVALENT
 Previous full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS / HISTORICAL
 Latest completed quality gate: PASS / CHECKSTYLE 0 / SPOTLESS PASS
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-2
-current task status: CLOSED / ACCEPTED / IMPLEMENTATION VALIDATION 20260716T133710Z
-next task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3
+current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
+current task status: CLOSED / ACCEPTED / LOCAL_VALIDATION_PASS
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-CI-VERIFICATION
 ```
 
-Hard-ceiling authority、command bypass与calibration path blocker保持关闭，历史0轮matrix、threshold retry-2、无效same-pool probe与formal runtime defect轨迹不变。Criteria保持`FROZEN / ACCEPTED`，B2不回退。runtime blocker-2已以implementation-validation run `20260716T133710Z`关闭container启动顺序与blocked artifact合同；下一步仅允许formal retry-3，不得进入B3。
+Hard-ceiling authority、command bypass与calibration path blocker保持关闭，历史0轮matrix、threshold retry-2、无效same-pool probe与formal runtime defect轨迹不变。Criteria保持`FROZEN / ACCEPTED`，B2不回退。Blocker-3本地关闭后，下一步仅允许remote CI verification；CI green前不得执行formal Retry-4或进入B3。
 
 ## Historical routes — 以下全部内容均为非当前路线
 

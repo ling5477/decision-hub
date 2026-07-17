@@ -1,6 +1,92 @@
 # Decision Hub Worklog
 
-## Current work — 2026-07-16 capacity harness runtime blocker-2
+## Current work — 2026-07-17 capacity harness runtime blocker-3
+
+`DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3`在baseline HEAD `cf31de46bc4594c0ad4c529d5857b88eab26561f`与17个allowlist内继承修改上执行。修正后的scope把`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`同时纳入read、validation、fixable blocker、write与current fact scan集合，三项包含关系均为PASS。Criteria在统一CRLF/LF后与HEAD完全相同；只通过`.gitattributes`与Git index保留冻结原始字节，不修改任何文字、阈值、scenario参数、环境baseline、criteriaVersion、sourceDocument或安全边界。
+
+Tenant isolation根因为`QUERY_MISSING_TENANT_FILTER`：测试driver的统计查询未同时绑定当前run/round、tenant和environment，第二轮因此计入第一轮自身scope数据。生产Repository SQL已完整tenant-bound，未改生产代码。修复后的3轮均使用独立tenant/environment，cross-tenant、cross-environment和unexpected records全部为0。Context restart根因为`TEST_LIFECYCLE_FIXTURE_DEPENDENCY`：restart anchor依赖前置tenant scenario成功后才初始化。每轮现独立seed并提交required state，再重建ApplicationContext；3/3 required state非null，committed nonce/idempotency保持，uncommitted状态未晋升，PromptVersion与隔离边界保持。Nonce driver对不存在的`nonce`列查询已改为V4真实schema的`replay_key`。
+
+```text
+implementation validation: PASS / 20260717T122621Z / MAVEN EXIT 0 / INTERNAL EXIT 0
+preflight: PASS / 26 OF 26
+tenant isolation: PASS / 3 OF 3 / ALL ISOLATION COUNTS 0
+context restart: PASS / 3 OF 3 / REQUIRED STATE NON-NULL
+nonce driver: PASS / replay_key
+mandatory scenarios: NOT_RUN / 0 OF 15
+capacity acceptance executed: false
+artifacts: PASS / 28 FILES / 27 MANIFEST ENTRIES / 0 MISMATCH
+secret scan: PASS / 0 FINDINGS
+teardown: PASS / NO RESIDUAL
+PowerShell 5.1: PASS
+PowerShell 7: PASS
+non-Windows contract: PASS / pwsh ONLY
+UTC timestamps: PASS / 37 OF 37 / THREE-DIGIT MILLISECONDS
+full regression: PASS / 19 OF 19 REACTOR SUCCESS / 1141 / 0 / 0 / 0
+required PostgreSQL tests: PASS / 3 + 1 / ZERO SKIPS
+quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+formal Retry-3 rerun: NO
+remote CI: PENDING
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-CI-VERIFICATION
+```
+
+执行中记录并关闭了四个非最终失败：首次implementation run `20260717T121357Z`因Windows PowerShell 5.1默认ANSI解码UTF-8 no-BOM JSON而在finalizer返回80；一次定向合同测试因新增中文`.ps1`注释影响PowerShell 5.1解析；`mvn -ntp -pl dh-app spotless:apply`因plugin prefix/Aliyun metadata checksum失败且未改源码；随后使用完整Spotless坐标时意外格式化29个范围外Java文件，这些文件已逐一恢复到任务前HEAD并确认不再dirty。所有相关验证在最小修复后重跑通过。
+
+Retry-3目录`target/qdr7-capacity-acceptance/20260716T144346Z/**`保持27个文件、26项manifest与原`BLOCKED / internal exit 20 / 0 of 15`证据，未覆盖或改写。本任务没有执行formal acceptance；远端CI green前`ALLOW_FORMAL_RETRY_4`与`ALLOW_STAGE_QDR_7_B3_ENTRY`均为`NO`。
+
+## Current work — 2026-07-16 retry-3 supplemental CI repair
+
+用户在Retry-3正式命令完成后追加“修复失败CI”。GitHub Actions run `29506336031`（job `87647948280`）在同一HEAD `cf31de46bc4594c0ad4c529d5857b88eab26561f`上失败：Ubuntu checkout把冻结criteria转为LF，实际SHA-256变成`42bb2195...`；Java contract test同时无条件调用Windows专用`powershell.exe`。冻结criteria当前原始字节包含既有混合行尾，不能用全CRLF替代；本轮新增`.gitattributes -text`保留原始字节，并让Java测试按OS选择Windows双runtime或非Windows `pwsh`。
+
+CI等价全量测试首次本地执行又暴露独立的PowerShell 7序列化缺陷：`ConvertFrom-Json`把ISO时间字符串自动转换为`DateTime`，随后`ConvertTo-Json`把`.850Z`写成`.85Z`，导致冻结的三位毫秒合同偶发失败。最小修复在summary与resource registry写出前重新格式化UTC时间字段，并新增确定性源码回归断言；未修改scenario、threshold、seed、formal正确性断言、生产Java、POM、migration、API/contracts或NQ。
+
+```text
+GitHub failed run: 29506336031 / FAILURE / REMOTE RERUN NOT PERFORMED
+targeted regression: PASS / 13 / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+trailing-zero artifact: 20260716T153725Z / 2026-07-16T15:36:26.550Z / PASS
+latest artifact timestamp scan: 20260716T160111Z / 0 INVALID UTC FIELDS / PASS
+CI-equivalent full regression: PASS / 172 REPORTS / 1139 / 0 / 0 / 0
+required Testcontainers: PASS / 3 + 1 TESTS / ZERO SKIPS
+quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+criteria SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab
+simulated staged checkout: PASS / RAW-BYTE SHA-256 d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab
+formal Retry-3 rerun: NO
+formal result: UNCHANGED / BLOCKED / 20260716T144346Z / INTERNAL EXIT 20 / 0 OF 15
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
+```
+
+目标测试第一次命令因PowerShell未给`-Dsurefire.failIfNoSpecifiedTests=false`加引号，在Maven测试阶段前以unknown lifecycle phase退出；修正命令行引用后真实执行并通过。`mvn -B -ntp test`按本轮时间窗聚合172份Surefire XML，排除了未在普通lifecycle执行的stale formal IT report；远端CI仍需后续commit/push触发后才能确认green，本轮按用户边界未执行这些操作。
+
+## Current work — 2026-07-16 formal capacity acceptance retry-3
+
+`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3`在clean exact HEAD `cf31de46bc4594c0ad4c529d5857b88eab26561f`上执行。branch为`dev`、`HEAD == origin/dev`、staged为空，criteria原始字节SHA-256为冻结值`d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab`。26项environment preflight全部通过，formal命令仅执行一次。
+
+```text
+formal run: 20260716T144346Z
+Maven exit: 1
+internal exit: 20
+formal status: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT
+reason: APPLICATION_CONTEXT_STARTUP_BLOCKED
+capacity acceptance executed: false
+mandatory scenarios: 0 OF 15 / FORMAL SUMMARY
+actual-wiring partial artifact: PASS / 13 STRUCTURED 2XX
+failsafe: 5 / 4 FAILURES / 0 ERRORS / 1 SKIPPED
+tenant-isolation driver: FAILURE / EXPECTED 0 BUT WAS 2
+context restart: 3 FAILURES / REQUIRED STATE ABSENT
+threshold comparison: BLOCKED / 0 COMPARISONS / 15 BLOCKED
+full regression scenario: BLOCKED / NOT_EXECUTED
+quality scenario: BLOCKED / NOT_EXECUTED
+artifacts: PASS / 27 FILES / 0 FINDINGS
+manifest: PASS / 26 ENTRIES / 0 MISMATCH
+secret scan: PASS / 24 FILES / 0 FINDINGS
+teardown: PASS / NO RESIDUAL
+post-B2 capacity acceptance: BLOCKED
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
+```
+
+正式验收执行与结果同步阶段没有修改Java、测试、POM、harness、criteria/config、application配置、migration/callback、API/contracts或NQ，也没有重跑formal命令。随后用户追加授权的CI修复范围与验证单独记录在上一节；`actual-wiring.json`的partial PASS不覆盖formal summary，tenant isolation/context restart runtime defect仍必须在独立blocker-3任务中修复。
+
+## Historical / consumed — 2026-07-16 capacity harness runtime blocker-2
 
 `DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-2`在baseline HEAD `0112d493c38beeec25b3407aa504dbc129e1850c`上执行。任务前branch为`dev`、`HEAD == origin/dev`、staged为空；继承的13个current/acceptance文档修改全部位于附件允许范围，scope设计三项包含关系均为PASS。实现选择JUnit/Testcontainers单一ownership，未修改Java生产代码、application配置、migration/callback、API/contracts、冻结criteria、15个mandatory scenario或NQ。
 
@@ -24,7 +110,7 @@ PostgreSQL container / mapped port: STARTED / 3191
 ApplicationContext / Hikari / Flyway V1-V14 / dispatcher: PASS
 mandatory scenarios: 0 OF 15 / NOT_RUN
 capacity acceptance executed: false
-summary: NOT_RUN / INTERNAL EXIT 0 / IMPLEMENTATION_VALIDATION_ONLY
+summary: PASS / IMPLEMENTATION_VALIDATION_ONLY / MAVEN EXIT 0
 artifact validation: PASS / 0 FINDINGS
 summary timestamps: PASS / RFC3339 UTC
 threshold comparison: NOT_RUN / FORMAL_SCENARIO_NOT_EXECUTED
