@@ -20,14 +20,18 @@ class Qdr7CapacityProfileIsolationTest {
         .contains("<qdr7.powershell.executable>pwsh</qdr7.powershell.executable>")
         .contains("<id>qdr7-capacity-windows-powershell</id>")
         .contains("<family>Windows</family>")
-        .contains("<qdr7.seed>7</qdr7.seed>");
+        .contains("<qdr7.seed>7</qdr7.seed>")
+        .contains("<qdr7.qualificationOnly>false</qdr7.qualificationOnly>");
     assertThat(rootPom).doesNotContain("<activeByDefault>true</activeByDefault>");
     assertThat(appPom)
         .contains("<id>qdr7-capacity-acceptance</id>")
         .contains("<exclude>**/*IT.java</exclude>")
+        .contains("full regression由mandatory scenario独立执行并写入durable ledger")
+        .contains("<skipTests>true</skipTests>")
         .contains("**/Qdr7CapacityAcceptanceIT.java")
         .contains("<goal>integration-test</goal>")
         .contains("<goal>verify</goal>")
+        .contains("<qdr7.qualificationOnly>${qdr7.qualificationOnly}</qdr7.qualificationOnly>")
         .contains("Invoke-Qdr7CapacityAcceptance.ps1")
         .contains("<executable>${qdr7.powershell.executable}</executable>")
         .doesNotContain("<executable>powershell.exe</executable>");
@@ -43,7 +47,9 @@ class Qdr7CapacityProfileIsolationTest {
         .contains("<argument>${qdr7.runId}</argument>")
         .contains("<argument>${qdr7.seed}</argument>")
         .contains("<argument>-PowerShellExecutable</argument>")
-        .contains("<argument>${qdr7.powershell.executable}</argument>");
+        .contains("<argument>${qdr7.powershell.executable}</argument>")
+        .contains("<argument>-QualificationOnly</argument>")
+        .contains("<argument>${qdr7.qualificationOnly}</argument>");
 
     assertThat(appPom.indexOf("<argument>-RunId</argument>"))
         .isLessThan(appPom.indexOf("<argument>${qdr7.runId}</argument>"));

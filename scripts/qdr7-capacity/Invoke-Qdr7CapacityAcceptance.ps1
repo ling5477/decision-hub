@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('Preflight', 'Finalize', 'ContractTest', 'RuntimeBlockedContractTest')]
+    [ValidateSet('Preflight', 'Finalize', 'ContractTest', 'RuntimeBlockedContractTest', 'PartialFinalizerContractTest')]
     [string]$Phase,
 
     [Parameter(Mandatory = $true)]
@@ -18,6 +18,9 @@ param(
     [ValidateSet('true', 'false')]
     [string]$ImplementationValidation = 'false',
 
+    [ValidateSet('true', 'false')]
+    [string]$QualificationOnly = 'false',
+
     [switch]$PowerShellResolved
 )
 
@@ -28,7 +31,9 @@ $SchemaVersion = 'qdr7-capacity-1'
 $CriteriaVersion = 'qdr7-capacity-criteria-1'
 $UnitSystem = 'milliseconds-bytes-requestsPerSecond-percent-rfc3339-utc'
 $ProjectRoot = [IO.Path]::GetFullPath($ProjectRoot)
-$EvidenceBase = [IO.Path]::GetFullPath((Join-Path $ProjectRoot 'target\qdr7-capacity-acceptance'))
+$QualificationOnlyEnabled = $QualificationOnly -eq 'true'
+$EvidenceDirectoryName = $(if ($QualificationOnlyEnabled) { 'qdr7-capacity-qualification' } else { 'qdr7-capacity-acceptance' })
+$EvidenceBase = [IO.Path]::GetFullPath((Join-Path $ProjectRoot "target\$EvidenceDirectoryName"))
 $EvidenceRoot = [IO.Path]::GetFullPath((Join-Path $EvidenceBase $RunId))
 $ConfigRoot = Join-Path $ProjectRoot 'config\qdr7-capacity'
 $RegistryPath = Join-Path $EvidenceRoot 'resource-registry.json'
@@ -136,6 +141,14 @@ function Set-SummaryContract {
     Set-ObjectProperty -Target $Summary -Name 'status' -Value $Status
     Set-ObjectProperty -Target $Summary -Name 'internalExitCode' -Value $InternalExitCode
     Set-ObjectProperty -Target $Summary -Name 'mandatoryScenarioCount' -Value $MandatoryScenarioCount
+    foreach ($field in @('startedScenarioCount', 'partialScenarioCount', 'completedScenarioCount', 'passedScenarioCount', 'failedScenarioCount', 'blockedScenarioCount')) {
+        if ($null -eq $Summary.PSObject.Properties[$field] -and -not ($Summary -is [Collections.IDictionary] -and $Summary.Contains($field))) {
+            Set-ObjectProperty -Target $Summary -Name $field -Value 0
+        }
+    }
+    if ($null -eq $Summary.PSObject.Properties['notStartedScenarioCount'] -and -not ($Summary -is [Collections.IDictionary] -and $Summary.Contains('notStartedScenarioCount'))) {
+        Set-ObjectProperty -Target $Summary -Name 'notStartedScenarioCount' -Value $MandatoryScenarioCount
+    }
     Set-ObjectProperty -Target $Summary -Name 'executedScenarioCount' -Value $ExecutedScenarioCount
     Set-ObjectProperty -Target $Summary -Name 'correctnessVerdict' -Value $CorrectnessVerdict
     Set-ObjectProperty -Target $Summary -Name 'thresholdVerdict' -Value $ThresholdVerdict
@@ -145,10 +158,145 @@ function Set-SummaryContract {
     Set-ObjectProperty -Target $Summary -Name 'secretVerdict' -Value $SecretVerdict
     Set-ObjectProperty -Target $Summary -Name 'teardownVerdict' -Value $TeardownVerdict
     Set-ObjectProperty -Target $Summary -Name 'reasonCode' -Value $ReasonCode
+    if ($null -eq $Summary.PSObject.Properties['capacityAcceptanceExecuted'] -and -not ($Summary -is [Collections.IDictionary] -and $Summary.Contains('capacityAcceptanceExecuted'))) {
+        Set-ObjectProperty -Target $Summary -Name 'capacityAcceptanceExecuted' -Value $false
+    }
+    if ($null -eq $Summary.PSObject.Properties['formalAcceptanceVerdict'] -and -not ($Summary -is [Collections.IDictionary] -and $Summary.Contains('formalAcceptanceVerdict'))) {
+        Set-ObjectProperty -Target $Summary -Name 'formalAcceptanceVerdict' -Value 'NOT_EVALUATED'
+    }
+    if ($null -eq $Summary.PSObject.Properties['qualificationVerdict'] -and -not ($Summary -is [Collections.IDictionary] -and $Summary.Contains('qualificationVerdict'))) {
+        Set-ObjectProperty -Target $Summary -Name 'qualificationVerdict' -Value 'NOT_EVALUATED'
+    }
     Set-ObjectProperty -Target $Summary -Name 'finalStatus' -Value $Status
     Set-ObjectProperty -Target $Summary -Name 'exitCode' -Value $InternalExitCode
     Set-ObjectProperty -Target $Summary -Name 'mandatoryScenariosTotal' -Value $MandatoryScenarioCount
     Set-ObjectProperty -Target $Summary -Name 'mandatoryScenariosExecuted' -Value $ExecutedScenarioCount
+}
+
+function Get-ScenarioRoundsRequired {
+    param([string]$ScenarioId)
+    if ($ScenarioId -eq 'rate-matrix') {
+        return 15
+    }
+    if ($ScenarioId -in @('cold-start-quota', 'tenant-environment-isolation', 'nonce-race', 'tenant-scoped-cleanup', 'postgres-same-pool-recovery', 'spring-context-restart', 'postgres-persistent-volume-restart')) {
+        return 3
+    }
+    return 1
+}
+
+function Get-ScenarioArtifactRefs {
+    param([string]$ScenarioId)
+    switch ($ScenarioId) {
+        'actual-wiring' { return @('actual-wiring.json') }
+        'rate-matrix' { return @('rate-matrix.csv', 'rate-summary.json') }
+        'cold-start-quota' { return @('quota-atomicity.json') }
+        'tenant-environment-isolation' { return @('tenant-isolation.json') }
+        'canonical-source-fail-closed' { return @('tenant-isolation.json') }
+        'nonce-race' { return @('nonce-race.json') }
+        'idempotency-lifecycle' { return @('idempotency-lifecycle.json') }
+        'tenant-scoped-cleanup' { return @('cleanup-timeline.csv', 'cleanup-summary.json') }
+        'postgres-hikari-contention' { return @('postgres-hikari-series.csv', 'postgres-hikari-summary.json') }
+        'postgres-same-pool-recovery' { return @('recovery-timeline.csv', 'recovery-summary.json', 'restart-results.json') }
+        'spring-context-restart' { return @('restart-results.json') }
+        'postgres-persistent-volume-restart' { return @('restart-results.json') }
+        'post-recovery-concurrency' { return @('recovery-timeline.csv', 'post-recovery-summary.json') }
+        'full-regression' { return @('full-regression.log', 'full-regression-summary.json') }
+        'quality-gate' { return @('quality.log', 'quality-summary.json') }
+        default { return @() }
+    }
+}
+
+function New-ScenarioLedgerRow {
+    param([string]$ScenarioId)
+    return [ordered]@{
+        scenarioId = $ScenarioId
+        mandatory = $true
+        executionState = 'NOT_STARTED'
+        verdict = 'NOT_EVALUATED'
+        startedAt = $null
+        completedAt = $null
+        roundsRequired = Get-ScenarioRoundsRequired -ScenarioId $ScenarioId
+        roundsStarted = 0
+        roundsCompleted = 0
+        measurementsCaptured = 0
+        comparisonsExecuted = 0
+        reasonCode = 'NOT_STARTED'
+        artifactRefs = @(Get-ScenarioArtifactRefs -ScenarioId $ScenarioId)
+    }
+}
+
+function Get-NormalizedScenarioLedger {
+    param([string]$CommitSha, [string]$StartedAt)
+    $scenarioRegistry = Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-scenario-registry.json')
+    $ledgerPath = Join-Path $EvidenceRoot 'scenario-ledger.json'
+    if (Test-Path -LiteralPath $ledgerPath -PathType Leaf) {
+        $artifact = Read-JsonFile -Path $ledgerPath
+    }
+    else {
+        $artifact = New-Artifact -Scenario 'scenario-ledger' -Status 'BLOCKED' -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt (Get-UtcTimestamp)
+        Set-ObjectProperty -Target $artifact -Name 'scenarios' -Value @()
+    }
+
+    $existingRows = @($artifact.scenarios)
+    $normalizedRows = New-Object Collections.Generic.List[object]
+    foreach ($scenarioId in $scenarioRegistry.fixedOrder) {
+        $row = @($existingRows | Where-Object { $_.scenarioId -eq $scenarioId } | Select-Object -First 1)
+        if ($row.Count -eq 0) {
+            $current = New-ScenarioLedgerRow -ScenarioId ([string]$scenarioId)
+        }
+        else {
+            $current = $row[0]
+            foreach ($field in @('mandatory', 'executionState', 'verdict', 'startedAt', 'completedAt', 'roundsRequired', 'roundsStarted', 'roundsCompleted', 'measurementsCaptured', 'comparisonsExecuted', 'reasonCode', 'artifactRefs')) {
+                if ($null -eq $current.PSObject.Properties[$field]) {
+                    $defaults = New-ScenarioLedgerRow -ScenarioId ([string]$scenarioId)
+                    Set-ObjectProperty -Target $current -Name $field -Value $defaults[$field]
+                }
+            }
+        }
+        if ($current.executionState -eq 'STARTED') {
+            $current.executionState = 'PARTIAL'
+            if ($current.verdict -eq 'NOT_EVALUATED') {
+                $current.verdict = 'BLOCKED'
+            }
+            if ([string]::IsNullOrWhiteSpace([string]$current.reasonCode) -or $current.reasonCode -eq 'SCENARIO_STARTED') {
+                $current.reasonCode = 'HARNESS_INTERRUPTED_AFTER_SCENARIO_START'
+            }
+            $current.completedAt = Get-UtcTimestamp
+        }
+        $normalizedRows.Add($current)
+    }
+
+    Set-ObjectProperty -Target $artifact -Name 'scenarios' -Value $normalizedRows.ToArray()
+    Set-ObjectProperty -Target $artifact -Name 'finishedAtUtc' -Value (Get-UtcTimestamp)
+    $partialCount = @($normalizedRows | Where-Object { $_.executionState -eq 'PARTIAL' }).Count
+    $completedCount = @($normalizedRows | Where-Object { $_.executionState -eq 'COMPLETED' }).Count
+    $passedCount = @($normalizedRows | Where-Object { $_.verdict -eq 'PASS' }).Count
+    $failedCount = @($normalizedRows | Where-Object { $_.verdict -eq 'FAIL' }).Count
+    $blockedCount = @($normalizedRows | Where-Object { $_.verdict -eq 'BLOCKED' }).Count
+    $notStartedCount = @($normalizedRows | Where-Object { $_.executionState -eq 'NOT_STARTED' }).Count
+    $ledgerStatus = $(if ($failedCount -gt 0) { 'FAIL' } elseif ($passedCount -eq [int]$scenarioRegistry.mandatoryCount) { 'PASS' } else { 'BLOCKED' })
+    Set-ObjectProperty -Target $artifact -Name 'status' -Value $ledgerStatus
+    Write-JsonFile -Path $ledgerPath -Value $artifact
+
+    return [ordered]@{
+        artifact = $artifact
+        scenarios = $normalizedRows.ToArray()
+        startedScenarioCount = $partialCount + $completedCount
+        partialScenarioCount = $partialCount
+        completedScenarioCount = $completedCount
+        passedScenarioCount = $passedCount
+        failedScenarioCount = $failedCount
+        blockedScenarioCount = $blockedCount
+        notStartedScenarioCount = $notStartedCount
+        executedScenarioCount = $partialCount + $completedCount
+    }
+}
+
+function Set-SummaryScenarioCounts {
+    param([object]$Summary, [object]$Ledger)
+    foreach ($field in @('startedScenarioCount', 'partialScenarioCount', 'completedScenarioCount', 'passedScenarioCount', 'failedScenarioCount', 'blockedScenarioCount', 'notStartedScenarioCount', 'executedScenarioCount')) {
+        Set-ObjectProperty -Target $Summary -Name $field -Value ([int]$Ledger[$field])
+    }
 }
 
 function Write-MissingScenarioArtifacts {
@@ -169,9 +317,13 @@ function Write-MissingScenarioArtifacts {
             $threshold = New-Artifact -Scenario 'threshold-comparison' -Status $Status -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $finished
             $threshold.comparisons = @()
             $threshold.comparisonCount = 0
+            $threshold.comparisonsExecuted = 0
+            $threshold.passedCount = 0
             $threshold.failedCount = 0
-            $threshold.blockedCount = $(if ($Status -eq 'BLOCKED') { 15 } else { 0 })
-            $threshold.reason = 'FORMAL_SCENARIO_NOT_EXECUTED'
+            $threshold.blockedCount = 0
+            $threshold.notEvaluatedCount = 94
+            $threshold.notEvaluatedThresholds = 94
+            $threshold.reason = $(if ($QualificationOnlyEnabled) { 'QUALIFICATION_SCENARIO_NOT_EXECUTED' } else { 'FORMAL_SCENARIO_NOT_EXECUTED' })
             $threshold.missingValues = @('scenarioMeasurements')
             Write-JsonFile -Path $path -Value $threshold
         }
@@ -325,6 +477,7 @@ function Write-BlockedPreflight {
     Write-JsonFile -Path $RegistryPath -Value $resourceRegistry
 
     $scenarioRegistry = Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-scenario-registry.json')
+    $ledger = Get-NormalizedScenarioLedger -CommitSha $CommitSha -StartedAt $StartedAt
     $summary = New-Artifact -Scenario 'capacity-acceptance' -Status 'BLOCKED' -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $finished
     $summary.finalStatus = 'BLOCKED'
     $summary.exitCode = 10
@@ -338,6 +491,10 @@ function Write-BlockedPreflight {
     $summary.secretFindingCount = 0
     $summary.teardown = $resourceRegistry.teardown
     Set-SummaryContract -Summary $summary -StartedAt $StartedAt -CompletedAt $finished -Status 'BLOCKED' -InternalExitCode 10 -MandatoryScenarioCount ([int]$scenarioRegistry.mandatoryCount) -ExecutedScenarioCount 0 -CorrectnessVerdict 'BLOCKED' -ThresholdVerdict 'BLOCKED' -RegressionVerdict 'BLOCKED' -QualityVerdict 'BLOCKED' -ArtifactVerdict 'PASS' -SecretVerdict 'PASS' -TeardownVerdict 'PASS' -ReasonCode 'ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED'
+    Set-SummaryScenarioCounts -Summary $summary -Ledger $ledger
+    Set-ObjectProperty -Target $summary -Name 'capacityAcceptanceExecuted' -Value $false
+    Set-ObjectProperty -Target $summary -Name 'formalAcceptanceVerdict' -Value $(if ($QualificationOnlyEnabled) { 'NOT_EVALUATED' } else { 'BLOCKED' })
+    Set-ObjectProperty -Target $summary -Name 'qualificationVerdict' -Value $(if ($QualificationOnlyEnabled) { 'BLOCKED' } else { 'NOT_EVALUATED' })
     Write-JsonFile -Path (Join-Path $EvidenceRoot 'capacity-acceptance-summary.json') -Value $summary
     Write-Utf8File -Path (Join-Path $EvidenceRoot 'harness-exit-code.txt') -Content "10`n"
     Write-Utf8File -Path (Join-Path $EvidenceRoot 'commands.txt') -Content ("1 | $StartedAt | . | qdr7 capacity preflight | BLOCKED`n")
@@ -407,12 +564,14 @@ function Invoke-Preflight {
         $staged = $stagedPaths -join "`n"
         Add-Check 'git-branch' 'dev' $branch ($branch -eq 'dev')
         Add-Check 'git-head' '40-character SHA-1' $commitSha ($commitSha -match '^[a-f0-9]{40}$')
-        $implementationScopeValid = $ImplementationValidationEnabled -and @($statusPaths | Where-Object { -not (Test-ImplementationValidationPath -Path $_) }).Count -eq 0
-        $worktreeValid = [string]::IsNullOrWhiteSpace($status) -or $implementationScopeValid
-        $implementationStagedScopeValid = $ImplementationValidationEnabled -and @($stagedPaths | Where-Object { -not (Test-ImplementationValidationPath -Path $_) }).Count -eq 0
-        $stagedValid = [string]::IsNullOrWhiteSpace($staged) -or $implementationStagedScopeValid
-        Add-Check 'git-worktree' $(if ($ImplementationValidationEnabled) { 'clean or implementation-validation write allowlist only' } else { 'clean' }) $(if ([string]::IsNullOrWhiteSpace($status)) { 'clean' } elseif ($implementationScopeValid) { 'implementation-validation allowlist only' } else { 'dirty outside allowed scope' }) $worktreeValid
-        Add-Check 'git-staged' $(if ($ImplementationValidationEnabled) { 'empty or implementation-validation write allowlist only' } else { 'empty' }) $(if ([string]::IsNullOrWhiteSpace($staged)) { 'empty' } elseif ($implementationStagedScopeValid) { 'implementation-validation allowlist only' } else { 'staged outside allowed scope' }) $stagedValid
+        $writeScopeEnabled = $ImplementationValidationEnabled -or $QualificationOnlyEnabled
+        $writeScopeValid = $writeScopeEnabled -and @($statusPaths | Where-Object { -not (Test-ImplementationValidationPath -Path $_) }).Count -eq 0
+        $worktreeValid = [string]::IsNullOrWhiteSpace($status) -or $writeScopeValid
+        $stagedWriteScopeValid = $writeScopeEnabled -and @($stagedPaths | Where-Object { -not (Test-ImplementationValidationPath -Path $_) }).Count -eq 0
+        $stagedValid = [string]::IsNullOrWhiteSpace($staged) -or $stagedWriteScopeValid
+        $scopeLabel = $(if ($QualificationOnlyEnabled) { 'qualification write allowlist only' } else { 'implementation-validation write allowlist only' })
+        Add-Check 'git-worktree' $(if ($writeScopeEnabled) { 'clean or harness write allowlist only' } else { 'clean' }) $(if ([string]::IsNullOrWhiteSpace($status)) { 'clean' } elseif ($writeScopeValid) { $scopeLabel } else { 'dirty outside allowed scope' }) $worktreeValid
+        Add-Check 'git-staged' $(if ($writeScopeEnabled) { 'empty or harness write allowlist only' } else { 'empty' }) $(if ([string]::IsNullOrWhiteSpace($staged)) { 'empty' } elseif ($stagedWriteScopeValid) { $scopeLabel } else { 'staged outside allowed scope' }) $stagedValid
 
         $criteriaPath = Join-Path $ConfigRoot 'qdr7-capacity-thresholds.json'
         $criteria = Read-JsonFile -Path $criteriaPath
@@ -514,11 +673,12 @@ function Invoke-Preflight {
         $registry.samplerStartedAtUtc = $null
         $registry.containerOwnership = 'JUNIT_TESTCONTAINERS'
         $registry.implementationValidation = $ImplementationValidationEnabled
+        $registry.qualificationOnly = $QualificationOnlyEnabled
         $registry.teardown = [ordered]@{ sampler = 'PENDING'; container = 'PENDING'; volume = 'PENDING'; residual = 'PENDING' }
         Write-JsonFile -Path $RegistryPath -Value $registry
 
         $commands = @(
-            '1 | ' + $started + ' | . | mvn -ntp -Pqdr7-capacity-acceptance -Dqdr7.runId=<UTC_RUN_ID> -Dqdr7.seed=7 verify | STARTED',
+            '1 | ' + $started + ' | . | mvn -ntp -Pqdr7-capacity-acceptance -Dqdr7.runId=<UTC_RUN_ID> -Dqdr7.seed=7' + $(if ($QualificationOnlyEnabled) { ' -Dqdr7.qualificationOnly=true' } else { '' }) + ' verify | STARTED',
             '2 | ' + $finished + ' | dh-app | pre-integration-test PowerShell preflight | PASS'
         )
         Write-Utf8File -Path (Join-Path $EvidenceRoot 'commands.txt') -Content (($commands -join "`n") + "`n")
@@ -630,6 +790,8 @@ function Enter-Qdr7ResolvedPowerShell {
             $resolved.name,
             '-ImplementationValidation',
             $ImplementationValidation,
+            '-QualificationOnly',
+            $QualificationOnly,
             '-PowerShellResolved'
         )
         $resolvedPath = [string]$resolved.path
@@ -647,7 +809,7 @@ function Test-CommonJsonArtifact {
                 return $false
             }
         }
-        return ($artifact.schemaVersion -eq $SchemaVersion -and $artifact.runId -eq $RunId -and $artifact.commitSha -eq $CommitSha -and $artifact.criteriaVersion -eq $CriteriaVersion -and $artifact.seed -eq 7 -and @('PASS', 'FAIL', 'BLOCKED', 'NOT_RUN') -contains $artifact.status)
+        return ($artifact.schemaVersion -eq $SchemaVersion -and $artifact.runId -eq $RunId -and $artifact.commitSha -eq $CommitSha -and $artifact.criteriaVersion -eq $CriteriaVersion -and $artifact.seed -eq 7 -and @('PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'NOT_FORMAL') -contains $artifact.status)
     }
     catch {
         return $false
@@ -780,6 +942,56 @@ function Get-ManifestMismatchCount {
     return $mismatches
 }
 
+function Get-ObjectPropertyValue {
+    param([object]$Target, [string]$Name, [object]$DefaultValue)
+    if ($Target -is [Collections.IDictionary] -and $Target.Contains($Name)) {
+        return $Target[$Name]
+    }
+    $property = $Target.PSObject.Properties[$Name]
+    if ($null -ne $property) {
+        return $property.Value
+    }
+    return $DefaultValue
+}
+
+function Get-ScenarioVerdictFromLedger {
+    param([object]$Ledger, [string]$ScenarioId)
+    $rows = @($Ledger['scenarios'] | Where-Object { $_.scenarioId -eq $ScenarioId })
+    if ($rows.Count -ne 1 -or $rows[0].verdict -eq 'NOT_EVALUATED') {
+        return 'BLOCKED'
+    }
+    return [string]$rows[0].verdict
+}
+
+function Get-StatusForExitCode {
+    param([int]$ExitCode)
+    if ($ExitCode -eq 0) {
+        return 'PASS'
+    }
+    if ($ExitCode -in @(40, 50, 60, 70, 90)) {
+        return 'FAIL'
+    }
+    return 'BLOCKED'
+}
+
+function Get-ReasonForExitCode {
+    param([int]$ExitCode)
+    switch ($ExitCode) {
+        0 { return 'FORMAL_CAPACITY_ACCEPTANCE_COMPLETED' }
+        10 { return 'ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED' }
+        20 { return 'APPLICATION_CONTEXT_STARTUP_BLOCKED' }
+        30 { return 'MANDATORY_SCENARIO_INCOMPLETE' }
+        40 { return 'CORRECTNESS_INVARIANT_FAILED' }
+        50 { return 'NUMERIC_THRESHOLD_FAILED' }
+        60 { return 'FULL_REGRESSION_FAILED' }
+        70 { return 'QUALITY_GATE_FAILED' }
+        80 { return 'ARTIFACT_VALIDATION_BLOCKED' }
+        90 { return 'SECRET_SCAN_FAILED' }
+        100 { return 'UNEXPECTED_HARNESS_FAILURE' }
+        default { return 'UNEXPECTED_HARNESS_FAILURE' }
+    }
+}
+
 function Invoke-RuntimeBlockedContractTest {
     [IO.Directory]::CreateDirectory($EvidenceRoot) | Out-Null
     $commitSha = Get-GitValue -Arguments @('rev-parse', 'HEAD')
@@ -801,6 +1013,66 @@ function Invoke-RuntimeBlockedContractTest {
     $registry.teardown = [ordered]@{ sampler = 'NOT_STARTED'; container = 'PENDING'; volume = 'PENDING'; residual = 'PENDING' }
     Write-JsonFile -Path $RegistryPath -Value $registry
     Write-Utf8File -Path (Join-Path $EvidenceRoot 'commands.txt') -Content "1 | $started | . | runtime blocked finalizer contract | STARTED`n"
+    Invoke-Finalize
+}
+
+function Invoke-PartialFinalizerContractTest {
+    [IO.Directory]::CreateDirectory($EvidenceRoot) | Out-Null
+    $commitSha = Get-GitValue -Arguments @('rev-parse', 'HEAD')
+    $started = Get-UtcTimestamp
+    $environment = New-Artifact -Scenario 'environment' -Status 'PASS' -CommitSha $commitSha -StartedAt $started -FinishedAt $started
+    $environment.contractTest = $true
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'environment.json') -Value $environment
+    $preflight = New-Artifact -Scenario 'environment-preflight' -Status 'PASS' -CommitSha $commitSha -StartedAt $started -FinishedAt $started
+    $preflight.checks = @()
+    $preflight.blockers = @()
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'preflight.json') -Value $preflight
+    $registry = New-Artifact -Scenario 'resource-registry' -Status 'PASS' -CommitSha $commitSha -StartedAt $started -FinishedAt $started
+    $registry.containerName = "dh-qdr7-capacity-$RunId"
+    $registry.volumeName = "dh-qdr7-capacity-$RunId"
+    $registry.samplerPid = $null
+    $registry.contractOnly = $true
+    $registry.containerOwnership = 'JUNIT_TESTCONTAINERS'
+    $registry.implementationValidation = $false
+    $registry.qualificationOnly = $false
+    $registry.teardown = [ordered]@{ sampler = 'NOT_STARTED'; container = 'PENDING'; volume = 'PENDING'; residual = 'PENDING' }
+    Write-JsonFile -Path $RegistryPath -Value $registry
+
+    $ledgerSnapshot = Get-NormalizedScenarioLedger -CommitSha $commitSha -StartedAt $started
+    $ledgerArtifact = $ledgerSnapshot['artifact']
+    $rows = @($ledgerArtifact.scenarios)
+    $rows[0].executionState = 'COMPLETED'
+    $rows[0].verdict = 'PASS'
+    $rows[0].startedAt = $started
+    $rows[0].completedAt = Get-UtcTimestamp
+    $rows[0].roundsStarted = 1
+    $rows[0].roundsCompleted = 1
+    $rows[0].measurementsCaptured = 13
+    $rows[0].reasonCode = 'PASS'
+    $rows[1].executionState = 'STARTED'
+    $rows[1].verdict = 'NOT_EVALUATED'
+    $rows[1].startedAt = $started
+    $rows[1].roundsStarted = 2
+    $rows[1].roundsCompleted = 1
+    $rows[1].measurementsCaptured = 100
+    $rows[1].comparisonsExecuted = 5
+    $rows[1].reasonCode = 'SCENARIO_STARTED'
+    $ledgerArtifact.scenarios = $rows
+    $ledgerArtifact.status = 'BLOCKED'
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'scenario-ledger.json') -Value $ledgerArtifact
+
+    $threshold = New-Artifact -Scenario 'threshold-comparison' -Status 'BLOCKED' -CommitSha $commitSha -StartedAt $started -FinishedAt (Get-UtcTimestamp)
+    $threshold.comparisons = @(1..5 | ForEach-Object { [ordered]@{ criterionId = "partial.$_"; status = 'PASS' } })
+    $threshold.comparisonCount = 5
+    $threshold.comparisonsExecuted = 5
+    $threshold.passedCount = 5
+    $threshold.failedCount = 0
+    $threshold.blockedCount = 0
+    $threshold.notEvaluatedCount = 89
+    $threshold.notEvaluatedThresholds = 89
+    $threshold.reason = 'PARTIAL_THRESHOLD_EVIDENCE'
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'threshold-comparison.json') -Value $threshold
+    Write-Utf8File -Path (Join-Path $EvidenceRoot 'commands.txt') -Content "1 | $started | . | partial finalizer contract | STARTED`n"
     Invoke-Finalize
 }
 
@@ -834,38 +1106,7 @@ function Invoke-Finalize {
         $hasRecordedExit = [int]::TryParse((Get-Content -Raw -LiteralPath $exitPath).Trim(), [ref]$existingExit)
     }
 
-    $implementationArtifact = Join-Path $EvidenceRoot 'implementation-validation.json'
-    $implementationValidationPassed = $ImplementationValidationEnabled -and (Test-Path -LiteralPath $implementationArtifact -PathType Leaf) -and $hasRecordedExit -and $existingExit -eq 0
-    if ($implementationValidationPassed) {
-        $baseExit = 0
-        $reasonCode = 'IMPLEMENTATION_VALIDATION_ONLY'
-        $placeholderStatus = 'NOT_RUN'
-        $capacityStatus = 'NOT_RUN'
-        $verdict = 'NOT_RUN'
-    }
-    elseif (-not $hasRecordedExit) {
-        $baseExit = 20
-        $reasonCode = 'APPLICATION_CONTEXT_STARTUP_BLOCKED'
-        $placeholderStatus = 'BLOCKED'
-        $capacityStatus = 'BLOCKED'
-        $verdict = 'BLOCKED'
-    }
-    else {
-        $baseExit = $existingExit
-        $reasonCode = $(if ($baseExit -eq 0) { 'FORMAL_CAPACITY_ACCEPTANCE_COMPLETED' } elseif ($baseExit -eq 20) { 'APPLICATION_CONTEXT_STARTUP_BLOCKED' } else { 'FORMAL_CAPACITY_ACCEPTANCE_BLOCKED_OR_FAILED' })
-        $placeholderStatus = $(if ($baseExit -eq 0) { 'NOT_RUN' } else { 'BLOCKED' })
-        $capacityStatus = $(if ($baseExit -eq 0) { 'PASS' } elseif ($baseExit -in @(40, 50, 60, 70, 90)) { 'FAIL' } else { 'BLOCKED' })
-        $verdict = $capacityStatus
-    }
-
-    if ($baseExit -ne 0 -or $implementationValidationPassed) {
-        Write-MissingScenarioArtifacts -CommitSha $commitSha -StartedAt $startedAt -Status $placeholderStatus -ReasonCode $reasonCode
-    }
-
-    $executedScenarioCount = 0
-    if ($capacityStatus -eq 'PASS') {
-        $executedScenarioCount = $mandatoryCount
-    }
+    $ledger = Get-NormalizedScenarioLedger -CommitSha $commitSha -StartedAt $startedAt
     $summaryPath = Join-Path $EvidenceRoot 'capacity-acceptance-summary.json'
     if (Test-Path -LiteralPath $summaryPath) {
         $summary = Read-JsonFile -Path $summaryPath
@@ -874,15 +1115,79 @@ function Invoke-Finalize {
         $now = Get-UtcTimestamp
         $summary = New-Artifact -Scenario 'capacity-acceptance' -Status 'BLOCKED' -CommitSha $commitSha -StartedAt $now -FinishedAt $now
     }
+
+    $implementationArtifact = Join-Path $EvidenceRoot 'implementation-validation.json'
+    $implementationValidationPassed = $ImplementationValidationEnabled -and (Test-Path -LiteralPath $implementationArtifact -PathType Leaf) -and $hasRecordedExit -and $existingExit -eq 0
+    $allScenariosPassed = [int]$ledger['completedScenarioCount'] -eq $mandatoryCount -and [int]$ledger['passedScenarioCount'] -eq $mandatoryCount
+    if ($implementationValidationPassed) {
+        $baseExit = 0
+    }
+    elseif (-not $hasRecordedExit) {
+        $baseExit = $(if ([int]$ledger['executedScenarioCount'] -gt 0) { 100 } else { 20 })
+    }
+    else {
+        $baseExit = $existingExit
+    }
+    if (-not $implementationValidationPassed -and $baseExit -eq 0 -and -not $allScenariosPassed) {
+        $baseExit = 30
+    }
+
+    $reasonCode = [string](Get-ObjectPropertyValue -Target $summary -Name 'reasonCode' -DefaultValue '')
+    if ([string]::IsNullOrWhiteSpace($reasonCode) -or $reasonCode -in @('FORMAL_CAPACITY_ACCEPTANCE_BLOCKED_OR_FAILED', 'HARNESS_RUNNING')) {
+        $reasonCode = Get-ReasonForExitCode -ExitCode $baseExit
+    }
+    if ($implementationValidationPassed) {
+        $reasonCode = 'IMPLEMENTATION_VALIDATION_ONLY'
+    }
+    elseif ($QualificationOnlyEnabled -and $baseExit -eq 0 -and $allScenariosPassed) {
+        $reasonCode = 'QUALIFICATION_ONLY'
+    }
+    $placeholderStatus = $(if ($implementationValidationPassed) { 'NOT_RUN' } else { 'BLOCKED' })
+    if ($baseExit -ne 0 -or $implementationValidationPassed) {
+        Write-MissingScenarioArtifacts -CommitSha $commitSha -StartedAt $startedAt -Status $placeholderStatus -ReasonCode $reasonCode
+    }
+
+    $correctnessVerdict = $(if ($implementationValidationPassed) { 'NOT_RUN' } elseif ([int]$ledger['failedScenarioCount'] -gt 0) { 'FAIL' } elseif ($allScenariosPassed) { 'PASS' } else { 'BLOCKED' })
+    $thresholdVerdict = 'BLOCKED'
+    $thresholdPath = Join-Path $EvidenceRoot 'threshold-comparison.json'
+    if ($implementationValidationPassed) {
+        $thresholdVerdict = 'NOT_RUN'
+    }
+    elseif (Test-Path -LiteralPath $thresholdPath -PathType Leaf) {
+        $thresholdArtifact = Read-JsonFile -Path $thresholdPath
+        if ($thresholdArtifact.status -in @('PASS', 'FAIL', 'BLOCKED', 'NOT_RUN')) {
+            $thresholdVerdict = [string]$thresholdArtifact.status
+        }
+    }
+    $regressionVerdict = $(if ($implementationValidationPassed) { 'NOT_RUN' } else { Get-ScenarioVerdictFromLedger -Ledger $ledger -ScenarioId 'full-regression' })
+    $qualityVerdict = $(if ($implementationValidationPassed) { 'NOT_RUN' } else { Get-ScenarioVerdictFromLedger -Ledger $ledger -ScenarioId 'quality-gate' })
+    if (-not $implementationValidationPassed -and $baseExit -eq 0 -and $thresholdVerdict -ne 'PASS') {
+        $baseExit = 50
+        $reasonCode = 'NUMERIC_THRESHOLD_FAILED'
+    }
+    if (-not $implementationValidationPassed -and $baseExit -eq 0 -and $regressionVerdict -ne 'PASS') {
+        $baseExit = 60
+        $reasonCode = 'FULL_REGRESSION_FAILED'
+    }
+    if (-not $implementationValidationPassed -and $baseExit -eq 0 -and $qualityVerdict -ne 'PASS') {
+        $baseExit = 70
+        $reasonCode = 'QUALITY_GATE_FAILED'
+    }
+
+    $capacityStatus = $(if ($implementationValidationPassed) { 'NOT_RUN' } elseif ($QualificationOnlyEnabled -and $baseExit -eq 0) { 'NOT_FORMAL' } else { Get-StatusForExitCode -ExitCode $baseExit })
     $completedAt = Get-UtcTimestamp
     $teardownVerdict = $(if ($teardownFindings.Count -eq 0 -and $registry.teardown.residual -eq 'NONE') { 'PASS' } else { 'BLOCKED' })
-    Set-SummaryContract -Summary $summary -StartedAt $startedAt -CompletedAt $completedAt -Status $capacityStatus -InternalExitCode $baseExit -MandatoryScenarioCount $mandatoryCount -ExecutedScenarioCount $executedScenarioCount -CorrectnessVerdict $verdict -ThresholdVerdict $verdict -RegressionVerdict $verdict -QualityVerdict $verdict -ArtifactVerdict 'PENDING' -SecretVerdict 'PENDING' -TeardownVerdict $teardownVerdict -ReasonCode $reasonCode
-    Set-ObjectProperty -Target $summary -Name 'firstBlocker' -Value $(if ($capacityStatus -eq 'PASS' -or $implementationValidationPassed) { $null } else { 'CAPACITY_HARNESS_RUNTIME_DEFECT' })
-    Set-ObjectProperty -Target $summary -Name 'capacityAcceptanceExecuted' -Value ($capacityStatus -eq 'PASS')
+    Set-SummaryContract -Summary $summary -StartedAt $startedAt -CompletedAt $completedAt -Status $capacityStatus -InternalExitCode $baseExit -MandatoryScenarioCount $mandatoryCount -ExecutedScenarioCount ([int]$ledger['executedScenarioCount']) -CorrectnessVerdict $correctnessVerdict -ThresholdVerdict $thresholdVerdict -RegressionVerdict $regressionVerdict -QualityVerdict $qualityVerdict -ArtifactVerdict 'PENDING' -SecretVerdict 'PENDING' -TeardownVerdict $teardownVerdict -ReasonCode $reasonCode
+    Set-SummaryScenarioCounts -Summary $summary -Ledger $ledger
+    $firstBlocker = @($ledger['scenarios'] | Where-Object { $_.verdict -ne 'PASS' } | ForEach-Object { "$($_.scenarioId):$($_.reasonCode)" } | Select-Object -First 1)
+    Set-ObjectProperty -Target $summary -Name 'firstBlocker' -Value $(if ($firstBlocker.Count -eq 0) { $null } else { $firstBlocker[0] })
+    Set-ObjectProperty -Target $summary -Name 'capacityAcceptanceExecuted' -Value (-not $ImplementationValidationEnabled -and -not $QualificationOnlyEnabled -and $baseExit -eq 0 -and $allScenariosPassed)
+    Set-ObjectProperty -Target $summary -Name 'formalAcceptanceVerdict' -Value $(if ($ImplementationValidationEnabled -or $QualificationOnlyEnabled) { 'NOT_EVALUATED' } elseif ($baseExit -eq 0) { 'PASS' } else { Get-StatusForExitCode -ExitCode $baseExit })
+    Set-ObjectProperty -Target $summary -Name 'qualificationVerdict' -Value $(if (-not $QualificationOnlyEnabled) { 'NOT_EVALUATED' } elseif ($baseExit -eq 0) { 'PASS' } else { Get-StatusForExitCode -ExitCode $baseExit })
     Set-ObjectProperty -Target $summary -Name 'artifactValidationFindings' -Value @()
     Set-ObjectProperty -Target $summary -Name 'secretFindingCount' -Value 0
     Set-ObjectProperty -Target $summary -Name 'teardown' -Value $registry.teardown
-    Set-ObjectProperty -Target $summary -Name 'scenarioStatuses' -Value @($scenarioRegistry.fixedOrder | ForEach-Object { [ordered]@{ scenarioId = $_; status = $(if ($capacityStatus -eq 'PASS') { 'PASS' } else { 'NOT_RUN' }); mandatory = $true } })
+    Set-ObjectProperty -Target $summary -Name 'scenarioStatuses' -Value $ledger['scenarios']
     $summary.finishedAtUtc = $completedAt
     Write-JsonFile -Path $summaryPath -Value $summary
     Write-Utf8File -Path $exitPath -Content "$baseExit`n"
@@ -916,11 +1221,24 @@ function Invoke-Finalize {
             $findings.Add("SUMMARY_REQUIRED_FIELD_MISSING:$field")
         }
     }
-    $thresholdPath = Join-Path $EvidenceRoot 'threshold-comparison.json'
-    if ($baseExit -ne 0 -and (Test-Path -LiteralPath $thresholdPath -PathType Leaf)) {
+    if (Test-Path -LiteralPath $thresholdPath -PathType Leaf) {
         $threshold = Read-JsonFile -Path $thresholdPath
-        if ($threshold.status -ne 'BLOCKED' -or $threshold.reason -ne 'FORMAL_SCENARIO_NOT_EXECUTED' -or @($threshold.comparisons).Count -ne 0) {
-            $findings.Add('THRESHOLD_COMPARISON_BLOCKED_CONTRACT_INVALID')
+        foreach ($field in @('comparisons', 'comparisonCount', 'comparisonsExecuted', 'passedCount', 'failedCount', 'blockedCount', 'notEvaluatedCount', 'reason')) {
+            if ($null -eq $threshold.PSObject.Properties[$field]) {
+                $findings.Add("THRESHOLD_REQUIRED_FIELD_MISSING:$field")
+            }
+        }
+        if ($null -ne $threshold.PSObject.Properties['comparisons'] -and ([int]$threshold.comparisonCount -ne @($threshold.comparisons).Count -or [int]$threshold.comparisonsExecuted -ne @($threshold.comparisons).Count)) {
+            $findings.Add('THRESHOLD_COMPARISON_COUNT_MISMATCH')
+        }
+        if ($baseExit -eq 0 -and -not $implementationValidationPassed -and ($threshold.status -ne 'PASS' -or [int]$threshold.comparisonCount -ne 94 -or [int]$threshold.notEvaluatedCount -ne 0)) {
+            $findings.Add('THRESHOLD_COMPLETE_CONTRACT_INVALID')
+        }
+    }
+
+    if ($QualificationOnlyEnabled -and $baseExit -eq 0) {
+        if ($summary.status -ne 'NOT_FORMAL' -or $summary.reasonCode -ne 'QUALIFICATION_ONLY' -or $summary.capacityAcceptanceExecuted -ne $false -or $summary.formalAcceptanceVerdict -ne 'NOT_EVALUATED' -or $summary.qualificationVerdict -ne 'PASS') {
+            $findings.Add('QUALIFICATION_SUMMARY_CONTRACT_INVALID')
         }
     }
 
@@ -931,8 +1249,15 @@ function Invoke-Finalize {
     if ($secretFindings -gt 0) {
         $finalExit = 90
     }
-    $finalStatus = $(if ($implementationValidationPassed -and $finalExit -eq 0) { 'NOT_RUN' } elseif ($finalExit -eq 0) { 'PASS' } elseif ($finalExit -in @(40, 50, 60, 70, 90)) { 'FAIL' } else { 'BLOCKED' })
-    Set-SummaryContract -Summary $summary -StartedAt $startedAt -CompletedAt (Get-UtcTimestamp) -Status $finalStatus -InternalExitCode $finalExit -MandatoryScenarioCount $mandatoryCount -ExecutedScenarioCount $executedScenarioCount -CorrectnessVerdict $(if ($implementationValidationPassed) { 'NOT_RUN' } else { $verdict }) -ThresholdVerdict $(if ($implementationValidationPassed) { 'NOT_RUN' } else { $verdict }) -RegressionVerdict $(if ($implementationValidationPassed) { 'NOT_RUN' } else { $verdict }) -QualityVerdict $(if ($implementationValidationPassed) { 'NOT_RUN' } else { $verdict }) -ArtifactVerdict $(if ($findings.Count -eq 0) { 'PASS' } else { 'BLOCKED' }) -SecretVerdict $(if ($secretFindings -eq 0) { 'PASS' } else { 'FAIL' }) -TeardownVerdict $teardownVerdict -ReasonCode $reasonCode
+    $finalStatus = $(if ($implementationValidationPassed -and $finalExit -eq 0) { 'NOT_RUN' } elseif ($QualificationOnlyEnabled -and $finalExit -eq 0) { 'NOT_FORMAL' } else { Get-StatusForExitCode -ExitCode $finalExit })
+    if ($finalExit -ne $baseExit) {
+        $reasonCode = Get-ReasonForExitCode -ExitCode $finalExit
+    }
+    Set-SummaryContract -Summary $summary -StartedAt $startedAt -CompletedAt (Get-UtcTimestamp) -Status $finalStatus -InternalExitCode $finalExit -MandatoryScenarioCount $mandatoryCount -ExecutedScenarioCount ([int]$ledger['executedScenarioCount']) -CorrectnessVerdict $correctnessVerdict -ThresholdVerdict $thresholdVerdict -RegressionVerdict $regressionVerdict -QualityVerdict $qualityVerdict -ArtifactVerdict $(if ($findings.Count -eq 0) { 'PASS' } else { 'BLOCKED' }) -SecretVerdict $(if ($secretFindings -eq 0) { 'PASS' } else { 'FAIL' }) -TeardownVerdict $teardownVerdict -ReasonCode $reasonCode
+    Set-SummaryScenarioCounts -Summary $summary -Ledger $ledger
+    Set-ObjectProperty -Target $summary -Name 'capacityAcceptanceExecuted' -Value (-not $ImplementationValidationEnabled -and -not $QualificationOnlyEnabled -and $finalExit -eq 0 -and $allScenariosPassed)
+    Set-ObjectProperty -Target $summary -Name 'formalAcceptanceVerdict' -Value $(if ($ImplementationValidationEnabled -or $QualificationOnlyEnabled) { 'NOT_EVALUATED' } elseif ($finalExit -eq 0) { 'PASS' } else { Get-StatusForExitCode -ExitCode $finalExit })
+    Set-ObjectProperty -Target $summary -Name 'qualificationVerdict' -Value $(if (-not $QualificationOnlyEnabled) { 'NOT_EVALUATED' } elseif ($finalExit -eq 0) { 'PASS' } else { Get-StatusForExitCode -ExitCode $finalExit })
     Set-ObjectProperty -Target $summary -Name 'artifactValidationFindings' -Value $findings.ToArray()
     Set-ObjectProperty -Target $summary -Name 'secretFindingCount' -Value $secretFindings
     $summary.finishedAtUtc = $summary.completedAt
@@ -948,6 +1273,10 @@ function Invoke-Finalize {
         $summary.exitCode = 80
         $summary.status = 'BLOCKED'
         $summary.finalStatus = 'BLOCKED'
+        $summary.reasonCode = 'ARTIFACT_VALIDATION_BLOCKED'
+        if ($QualificationOnlyEnabled) {
+            $summary.qualificationVerdict = 'BLOCKED'
+        }
         $summary.artifactValidationFindings = @($summary.artifactValidationFindings) + @("MANIFEST_MISMATCH_COUNT:$manifestMismatches")
         $summary.completedAt = Get-UtcTimestamp
         $summary.finishedAtUtc = $summary.completedAt
@@ -970,6 +1299,9 @@ elseif ($Phase -eq 'Finalize') {
 }
 elseif ($Phase -eq 'RuntimeBlockedContractTest') {
     Invoke-RuntimeBlockedContractTest
+}
+elseif ($Phase -eq 'PartialFinalizerContractTest') {
+    Invoke-PartialFinalizerContractTest
 }
 else {
     if ($RunId -notmatch '^[0-9]{8}T[0-9]{6}Z$' -or $Seed -ne 7 -or -not $EvidenceRoot.StartsWith($EvidenceBase, [StringComparison]::OrdinalIgnoreCase)) {

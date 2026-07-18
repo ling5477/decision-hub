@@ -1,11 +1,12 @@
 {
   "schemaVersion": "qdr7-capacity-1",
-  "registryVersion": "qdr7-capacity-artifacts-1",
+  "registryVersion": "qdr7-capacity-artifacts-2",
   "mandatory": [
     "environment.json",
     "preflight.json",
     "commands.txt",
     "resource-registry.json",
+    "scenario-ledger.json",
     "actual-wiring.json",
     "rate-matrix.csv",
     "rate-summary.json",
@@ -52,6 +53,13 @@
     "status",
     "internalExitCode",
     "mandatoryScenarioCount",
+    "startedScenarioCount",
+    "partialScenarioCount",
+    "completedScenarioCount",
+    "passedScenarioCount",
+    "failedScenarioCount",
+    "blockedScenarioCount",
+    "notStartedScenarioCount",
     "executedScenarioCount",
     "correctnessVerdict",
     "thresholdVerdict",
@@ -60,7 +68,10 @@
     "artifactVerdict",
     "secretVerdict",
     "teardownVerdict",
-    "reasonCode"
+    "reasonCode",
+    "capacityAcceptanceExecuted",
+    "formalAcceptanceVerdict",
+    "qualificationVerdict"
   ],
   "csvCommonHeader": ["schemaVersion", "runId", "commitSha", "scenario", "timestampUtc", "elapsedMs"],
   "manifestSelfExcluded": true

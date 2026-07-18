@@ -67,6 +67,42 @@ class ArtifactValidatorTest {
   }
 
   @Test
+  void readsMavenLogMarkersWithoutAssumingUtf8() throws IOException {
+    final Path log = temporaryDirectory.resolve("maven.log");
+    Files.write(
+        log,
+        new byte[] {
+          (byte) 0xC4,
+          (byte) 0xE3,
+          (byte) '\n',
+          (byte) '[',
+          (byte) 'I',
+          (byte) 'N',
+          (byte) 'F',
+          (byte) 'O',
+          (byte) ']',
+          (byte) ' ',
+          (byte) 'B',
+          (byte) 'U',
+          (byte) 'I',
+          (byte) 'L',
+          (byte) 'D',
+          (byte) ' ',
+          (byte) 'S',
+          (byte) 'U',
+          (byte) 'C',
+          (byte) 'C',
+          (byte) 'E',
+          (byte) 'S',
+          (byte) 'S',
+          (byte) '\n'
+        });
+
+    assertThat(Qdr7CapacityArtifactSupport.readAsciiCompatibleLog(log))
+        .contains("[INFO] BUILD SUCCESS");
+  }
+
+  @Test
   void manifestIsStableSelfExcludingAndDetectsMutationOrTraversal() throws IOException {
     Files.writeString(temporaryDirectory.resolve("b.txt"), "b", StandardCharsets.UTF_8);
     Files.writeString(temporaryDirectory.resolve("a.txt"), "a", StandardCharsets.UTF_8);
@@ -122,7 +158,11 @@ class ArtifactValidatorTest {
             registry.path("summaryRequired"),
             mapper.getTypeFactory().constructCollectionType(List.class, String.class));
 
-    assertThat(mandatory).contains("threshold-comparison.json", "capacity-acceptance-summary.json");
+    assertThat(mandatory)
+        .contains(
+            "scenario-ledger.json",
+            "threshold-comparison.json",
+            "capacity-acceptance-summary.json");
     assertThat(summaryRequired)
         .containsExactly(
             "schemaVersion",
@@ -134,6 +174,13 @@ class ArtifactValidatorTest {
             "status",
             "internalExitCode",
             "mandatoryScenarioCount",
+            "startedScenarioCount",
+            "partialScenarioCount",
+            "completedScenarioCount",
+            "passedScenarioCount",
+            "failedScenarioCount",
+            "blockedScenarioCount",
+            "notStartedScenarioCount",
             "executedScenarioCount",
             "correctnessVerdict",
             "thresholdVerdict",
@@ -142,11 +189,20 @@ class ArtifactValidatorTest {
             "artifactVerdict",
             "secretVerdict",
             "teardownVerdict",
-            "reasonCode");
+            "reasonCode",
+            "capacityAcceptanceExecuted",
+            "formalAcceptanceVerdict",
+            "qualificationVerdict");
     assertThat(schema.path("properties").path("mandatoryScenarioCount").path("const").asInt())
         .isEqualTo(15);
     assertThat(schema.path("properties").has("executedScenarioCount")).isTrue();
     assertThat(schema.path("properties").has("reasonCode")).isTrue();
+    assertThat(schema.path("properties").path("executionState").path("enum"))
+        .extracting(JsonNode::asText)
+        .containsExactly("NOT_STARTED", "STARTED", "PARTIAL", "COMPLETED");
+    assertThat(schema.path("properties").path("verdict").path("enum"))
+        .extracting(JsonNode::asText)
+        .containsExactly("NOT_EVALUATED", "PASS", "FAIL", "BLOCKED");
   }
 
   private static Path repositoryRoot() {

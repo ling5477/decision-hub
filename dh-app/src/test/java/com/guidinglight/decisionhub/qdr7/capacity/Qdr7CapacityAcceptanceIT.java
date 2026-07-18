@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Volume;
+import com.guidinglight.decisionhub.DecisionHubApplication;
 import com.guidinglight.decisionhub.security.StaticTokenVerifier;
 import com.guidinglight.decisionhub.security.nq.HmacNqDryRunAuthenticator;
 import com.guidinglight.decisionhub.security.nq.NqDryRunAuthRequest;
@@ -46,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -58,7 +60,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.DataSource;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
@@ -70,9 +71,11 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -121,16 +124,17 @@ import org.testcontainers.utility.DockerImageName;
     })
 class Qdr7CapacityAcceptanceIT {
 
+  private static final String RUN_ID = requiredProperty("qdr7.runId");
   private static final String ENDPOINT = "/api/ai/decision-dry-runs";
   private static final String SOURCE = "NQ_DRYRUN";
-  private static final String TENANT = "qdr7-capacity";
+  private static final String TENANT = "qdr7-capacity-" + RUN_ID.toLowerCase(Locale.ROOT);
   private static final String SCHEMA = "1.0.0";
-  private static final String RUN_ID = requiredProperty("qdr7.runId");
   private static final int SEED = Integer.parseInt(requiredProperty("qdr7.seed"));
   private static final Path PROJECT_ROOT =
       Path.of(requiredProperty("qdr7.projectRoot")).toAbsolutePath().normalize();
-  private static final Path EVIDENCE_ROOT =
-      PROJECT_ROOT.resolve("target/qdr7-capacity-acceptance").resolve(RUN_ID);
+  private static final boolean QUALIFICATION_ONLY =
+      Boolean.parseBoolean(System.getProperty("qdr7.qualificationOnly", "false"));
+  private static final Path EVIDENCE_ROOT = evidenceRoot();
   private static final JsonNode RESOURCE_REGISTRY = readResourceRegistry();
   private static final int DATABASE_PORT = RESOURCE_REGISTRY.path("loopbackPort").asInt();
   private static final String CONTAINER_NAME = RESOURCE_REGISTRY.path("containerName").asText();
@@ -142,6 +146,7 @@ class Qdr7CapacityAcceptanceIT {
   private static final String COMMIT_SHA = RESOURCE_REGISTRY.path("commitSha").asText();
   private static final boolean IMPLEMENTATION_VALIDATION =
       Boolean.parseBoolean(System.getProperty("qdr7.implementationValidation", "false"));
+  private static final int EXPECTED_THRESHOLD_COMPARISONS = 94;
   private static final Instant HARNESS_STARTED = Instant.now();
   private static final List<Map<String, Object>> THRESHOLD_RESULTS =
       Collections.synchronizedList(new ArrayList<>());
@@ -149,9 +154,8 @@ class Qdr7CapacityAcceptanceIT {
       Collections.synchronizedList(new ArrayList<>());
   private static final List<Map<String, Object>> IMPLEMENTATION_TENANT_ISOLATION_RESULTS =
       Collections.synchronizedList(new ArrayList<>());
-  private static final List<Map<String, Object>> SCENARIO_STATUSES =
+  private static final List<Map<String, Object>> SCENARIO_LEDGER =
       Collections.synchronizedList(new ArrayList<>());
-  private static RestartProbeState restartProbeState;
   private static int postRecoveryStructured2xx;
 
   @Container
@@ -188,6 +192,9 @@ class Qdr7CapacityAcceptanceIT {
         "decisionhub.security.api.token-sha256", () -> StaticTokenVerifier.sha256Hex(TEST_TOKEN));
     registry.add("decisionhub.security.api.tenant-id", () -> TENANT);
     registry.add("decisionhub.integration1.runtime.hmac-secret", () -> TEST_SIGNING_KEY);
+    registry.add(
+        "decisionhub.integration1.runtime.allowed-tenant-source-pairs",
+        () -> TENANT + ":" + SOURCE);
   }
 
   @LocalServerPort private int applicationPort;
@@ -215,6 +222,7 @@ class Qdr7CapacityAcceptanceIT {
 
   private Qdr7CapacityContracts.RunContext runContext;
   private Qdr7CapacityContracts.CriteriaSnapshot criteria;
+  private Qdr7CapacityContracts.ScenarioExecution activeExecution;
 
   /**
    * 只验证正式 run 的 container、Spring Context、DataSource/Flyway 和 dispatcher 装配。
@@ -224,12 +232,11 @@ class Qdr7CapacityAcceptanceIT {
   @Test
   @Order(0)
   @EnabledIfSystemProperty(named = "qdr7.implementationValidation", matches = "true")
-  @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
   void validatesLifecycleBeforeMandatoryScenarioDispatch()
       throws IOException, SQLException, InterruptedException {
     runContext =
         Qdr7CapacityContracts.parseRunContext(
-            RUN_ID, String.valueOf(SEED), PROJECT_ROOT, COMMIT_SHA);
+            RUN_ID, String.valueOf(SEED), PROJECT_ROOT, COMMIT_SHA, false);
     criteria = Qdr7CapacityContracts.loadCriteria(PROJECT_ROOT, objectMapper);
     Files.createDirectories(EVIDENCE_ROOT);
 
@@ -245,79 +252,48 @@ class Qdr7CapacityAcceptanceIT {
     final List<HarnessDriver> dispatchers = drivers();
     assertThat(Qdr7CapacityContracts.ScenarioRegistry.validate(dispatchers)).isEmpty();
     assertThat(dispatchers).hasSize(15);
-    assertThat(SCENARIO_STATUSES).isEmpty();
+    assertThat(SCENARIO_LEDGER).isEmpty();
     IMPLEMENTATION_TENANT_ISOLATION_RESULTS.clear();
     IMPLEMENTATION_TENANT_ISOLATION_RESULTS.addAll(
-        verifyTenantEnvironmentIsolation("qdr7-implementation-isolation"));
-    seedRestartProbe(1);
+        verifyTenantEnvironmentIsolation("qdr7-implementation-isolation", null));
+    final Qdr7CapacityContracts.ScenarioExecution restartProbe =
+        new Qdr7CapacityContracts.ScenarioExecution(runContext, criteria);
+    restartProbe.values().put("roundsRequired", 3);
+    restartProbe.values().put("roundsStarted", 0);
+    restartProbe.values().put("roundsCompleted", 0);
+    restartProbe.values().put("measurementsCaptured", 0);
+    restartProbe.values().put("comparisonsExecuted", 0);
+    springContextRestart(restartProbe);
+    writeImplementationValidationArtifact();
   }
 
   @Test
   @Order(1)
   @DisabledIfSystemProperty(named = "qdr7.implementationValidation", matches = "true")
-  @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-  void executesMandatoryActualWiringDatabaseAndRecoveryDrivers()
-      throws IOException, InterruptedException, SQLException, ExecutionException {
+  void executesAllMandatoryScenariosAndPreservesPartialEvidence() throws IOException {
     runContext =
         Qdr7CapacityContracts.parseRunContext(
-            RUN_ID, String.valueOf(SEED), PROJECT_ROOT, COMMIT_SHA);
+            RUN_ID, String.valueOf(SEED), PROJECT_ROOT, COMMIT_SHA, QUALIFICATION_ONLY);
     criteria = Qdr7CapacityContracts.loadCriteria(PROJECT_ROOT, objectMapper);
     Files.createDirectories(EVIDENCE_ROOT);
     assertThat(modelProvider).isExactlyInstanceOf(MockModelProvider.class);
 
     final List<HarnessDriver> drivers = drivers();
     assertThat(Qdr7CapacityContracts.ScenarioRegistry.validate(drivers)).isEmpty();
-    // restart fixture必须在任何mandatory driver之前提交，避免前序场景失败派生出null状态。
-    seedRestartProbe(1);
-    for (final HarnessDriver driver : drivers.subList(0, 10)) {
+    initializeScenarioLedger();
+    for (final HarnessDriver driver : drivers) {
       runDriver(driver);
     }
-    runDriver(driver(drivers, "postgres-persistent-volume-restart"));
-    runDriver(driver(drivers, "post-recovery-concurrency"));
-  }
-
-  @Test
-  @Order(2)
-  @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-  void springContextRestartRoundOnePreservesCommittedState()
-      throws IOException, InterruptedException, SQLException, ExecutionException {
-    verifyContextRestart(1);
-  }
-
-  @Test
-  @Order(3)
-  @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-  void springContextRestartRoundTwoPreservesCommittedState()
-      throws IOException, InterruptedException, SQLException, ExecutionException {
-    verifyContextRestart(2);
-  }
-
-  @Test
-  @Order(4)
-  void springContextRestartRoundThreePreservesCommittedStateAndFinalizesJavaArtifacts()
-      throws IOException, InterruptedException, SQLException, ExecutionException {
-    verifyContextRestart(3);
-    if (IMPLEMENTATION_VALIDATION) {
-      writeImplementationValidationArtifact();
-      return;
-    }
-    runContext =
-        Qdr7CapacityContracts.parseRunContext(
-            RUN_ID, String.valueOf(SEED), PROJECT_ROOT, COMMIT_SHA);
-    criteria = Qdr7CapacityContracts.loadCriteria(PROJECT_ROOT, objectMapper);
     writeRestartArtifact();
-    final List<HarnessDriver> drivers = drivers();
-    runDriver(driver(drivers, "spring-context-restart"));
-    runDriver(driver(drivers, "full-regression"));
-    runDriver(driver(drivers, "quality-gate"));
     writeThresholdComparison();
     writeSummary();
-  }
-
-  @AfterAll
-  static void ensureContainerIsStoppedByTestcontainers() {
-    // Testcontainers owns the container; PowerShell finalizer independently removes only the exact
-    // registry names.
+    assertThat(
+            SCENARIO_LEDGER.stream()
+                .filter(row -> !"PASS".equals(row.get("verdict")))
+                .map(row -> row.get("scenarioId") + ":" + row.get("reasonCode"))
+                .toList())
+        .as("all mandatory scenarios must pass after complete ledger persistence")
+        .isEmpty();
   }
 
   /** 在 Spring 解析 datasource 属性前启动本 run 唯一的 static PostgreSQL container。 */
@@ -357,18 +333,9 @@ class Qdr7CapacityAcceptanceIT {
         new HarnessDriver("tenant-scoped-cleanup", this::tenantScopedCleanup),
         new HarnessDriver("postgres-hikari-contention", this::postgresHikariContention),
         new HarnessDriver("postgres-same-pool-recovery", this::samePoolRecovery),
-        new HarnessDriver(
-            "spring-context-restart", execution -> assertThat(RESTART_RESULTS).hasSize(6)),
-        new HarnessDriver(
-            "postgres-persistent-volume-restart",
-            execution ->
-                assertThat(
-                        RESTART_RESULTS.stream()
-                            .filter(row -> "POSTGRES_PERSISTENT_VOLUME".equals(row.get("type"))))
-                    .hasSize(3)),
-        new HarnessDriver(
-            "post-recovery-concurrency",
-            execution -> assertThat(postRecoveryStructured2xx).isEqualTo(300)),
+        new HarnessDriver("spring-context-restart", this::springContextRestart),
+        new HarnessDriver("postgres-persistent-volume-restart", this::persistentVolumeRestart),
+        new HarnessDriver("post-recovery-concurrency", this::postRecoveryConcurrency),
         new HarnessDriver("full-regression", this::fullRegression),
         new HarnessDriver("quality-gate", this::qualityGate));
   }
@@ -380,29 +347,267 @@ class Qdr7CapacityAcceptanceIT {
         .orElseThrow();
   }
 
-  private void runDriver(final HarnessDriver driver)
-      throws IOException, InterruptedException, SQLException, ExecutionException {
+  private void runDriver(final HarnessDriver driver) {
+    final Map<String, Object> ledger = scenarioLedger(driver.scenarioId());
     final Qdr7CapacityContracts.ScenarioExecution execution =
         new Qdr7CapacityContracts.ScenarioExecution(runContext, criteria);
+    execution.values().put("scenarioId", driver.scenarioId());
+    execution.values().put("roundsRequired", ledger.get("roundsRequired"));
+    execution.values().put("roundsStarted", 0);
+    execution.values().put("roundsCompleted", 0);
+    execution.values().put("measurementsCaptured", 0);
+    execution.values().put("comparisonsExecuted", 0);
     final Instant started = Instant.now();
+    ledger.put("executionState", Qdr7CapacityContracts.ExecutionState.STARTED.name());
+    ledger.put("startedAt", Qdr7CapacityContracts.timestamp(started));
+    ledger.put("reasonCode", "SCENARIO_STARTED");
+    writeScenarioLedger();
+    activeExecution = execution;
     try {
       driver.setup(execution);
       driver.execute(execution);
+      execution.values().put("actionCompleted", true);
       driver.sample(execution);
       driver.assertCorrectness(execution);
       driver.compareThreshold(execution);
       driver.writeArtifacts(execution);
-      SCENARIO_STATUSES.add(
-          Map.of("scenarioId", driver.scenarioId(), "status", "PASS", "mandatory", true));
+      completeUntrackedRounds(execution);
+      ledger.put("executionState", Qdr7CapacityContracts.ExecutionState.COMPLETED.name());
+      ledger.put("verdict", Qdr7CapacityContracts.ScenarioVerdict.PASS.name());
+      ledger.put("reasonCode", "PASS");
+    } catch (final AssertionError failure) {
+      ledger.put(
+          "executionState",
+          Boolean.TRUE.equals(execution.values().get("actionCompleted"))
+              ? Qdr7CapacityContracts.ExecutionState.COMPLETED.name()
+              : Qdr7CapacityContracts.ExecutionState.PARTIAL.name());
+      ledger.put("verdict", Qdr7CapacityContracts.ScenarioVerdict.FAIL.name());
+      ledger.put("reasonCode", scenarioFailureReason(execution, failure));
+    } catch (final Exception failure) {
+      ledger.put("executionState", Qdr7CapacityContracts.ExecutionState.PARTIAL.name());
+      ledger.put("verdict", Qdr7CapacityContracts.ScenarioVerdict.BLOCKED.name());
+      ledger.put("reasonCode", scenarioFailureReason(execution, failure));
     } finally {
-      driver.teardown(execution);
+      try {
+        driver.teardown(execution);
+      } catch (final Exception teardownFailure) {
+        ledger.put("executionState", Qdr7CapacityContracts.ExecutionState.PARTIAL.name());
+        ledger.put("verdict", Qdr7CapacityContracts.ScenarioVerdict.BLOCKED.name());
+        ledger.put("reasonCode", "SCENARIO_TEARDOWN_FAILED");
+      }
+      copyExecutionCounters(execution, ledger);
+      ledger.put("completedAt", Qdr7CapacityContracts.timestamp(Instant.now()));
+      activeExecution = null;
+      writeScenarioLedger();
     }
-    assertThat(Duration.between(started, Instant.now())).isLessThan(Duration.ofMinutes(15));
+  }
+
+  /** 在首个mandatory scenario前持久化15条NOT_STARTED记录，后续只做原位状态推进。 */
+  private void initializeScenarioLedger() {
+    THRESHOLD_RESULTS.clear();
+    RESTART_RESULTS.clear();
+    SCENARIO_LEDGER.clear();
+    postRecoveryStructured2xx = 0;
+    for (final String scenarioId : Qdr7CapacityContracts.ScenarioRegistry.mandatory()) {
+      final Map<String, Object> row = new LinkedHashMap<>();
+      row.put("scenarioId", scenarioId);
+      row.put("mandatory", true);
+      row.put("executionState", Qdr7CapacityContracts.ExecutionState.NOT_STARTED.name());
+      row.put("verdict", Qdr7CapacityContracts.ScenarioVerdict.NOT_EVALUATED.name());
+      row.put("startedAt", null);
+      row.put("completedAt", null);
+      row.put("roundsRequired", roundsRequired(scenarioId));
+      row.put("roundsStarted", 0);
+      row.put("roundsCompleted", 0);
+      row.put("measurementsCaptured", 0);
+      row.put("comparisonsExecuted", 0);
+      row.put("reasonCode", "NOT_STARTED");
+      row.put("artifactRefs", artifactRefs(scenarioId));
+      SCENARIO_LEDGER.add(row);
+    }
+    writeScenarioLedger();
+  }
+
+  /** ledger写入本身是系统级合同；不可写时允许立即中止，不能伪装为scenario-local失败。 */
+  private void writeScenarioLedger() {
+    final int failed = scenarioVerdictCount(Qdr7CapacityContracts.ScenarioVerdict.FAIL);
+    final int blocked = scenarioVerdictCount(Qdr7CapacityContracts.ScenarioVerdict.BLOCKED);
+    final int passed = scenarioVerdictCount(Qdr7CapacityContracts.ScenarioVerdict.PASS);
+    final Map<String, Object> artifact =
+        artifact("scenario-ledger", HARNESS_STARTED, Instant.now());
+    artifact.put(
+        "status",
+        failed > 0 ? "FAIL" : blocked > 0 || passed < 15 ? "BLOCKED" : "PASS");
+    artifact.put("scenarios", List.copyOf(SCENARIO_LEDGER));
+    writeJson("scenario-ledger.json", artifact);
+  }
+
+  private Map<String, Object> scenarioLedger(final String scenarioId) {
+    return SCENARIO_LEDGER.stream()
+        .filter(row -> scenarioId.equals(row.get("scenarioId")))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("scenario ledger entry missing"));
+  }
+
+  private void beginRound(final Qdr7CapacityContracts.ScenarioExecution execution) {
+    execution.values().put("roundsStarted", counter(execution, "roundsStarted") + 1);
+    persistExecutionProgress(execution);
+  }
+
+  private void completeRound(
+      final Qdr7CapacityContracts.ScenarioExecution execution, final int measurements) {
+    execution.values().put("roundsCompleted", counter(execution, "roundsCompleted") + 1);
+    execution.values().put(
+        "measurementsCaptured",
+        counter(execution, "measurementsCaptured") + Math.max(0, measurements));
+    persistExecutionProgress(execution);
+  }
+
+  private void persistExecutionProgress(final Qdr7CapacityContracts.ScenarioExecution execution) {
+    final Object scenarioId = execution.values().get("scenarioId");
+    if (scenarioId == null || SCENARIO_LEDGER.isEmpty()) {
+      return;
+    }
+    copyExecutionCounters(execution, scenarioLedger(String.valueOf(scenarioId)));
+    writeScenarioLedger();
+  }
+
+  private static void copyExecutionCounters(
+      final Qdr7CapacityContracts.ScenarioExecution execution,
+      final Map<String, Object> ledger) {
+    for (final String field :
+        List.of(
+            "roundsRequired",
+            "roundsStarted",
+            "roundsCompleted",
+            "measurementsCaptured",
+            "comparisonsExecuted")) {
+      ledger.put(field, counter(execution, field));
+    }
+  }
+
+  private static void completeUntrackedRounds(
+      final Qdr7CapacityContracts.ScenarioExecution execution) {
+    if (counter(execution, "roundsStarted") == 0) {
+      execution.values().put("roundsStarted", counter(execution, "roundsRequired"));
+      execution.values().put("roundsCompleted", counter(execution, "roundsRequired"));
+    }
+  }
+
+  private static int counter(
+      final Qdr7CapacityContracts.ScenarioExecution execution, final String field) {
+    final Object value = execution.values().get(field);
+    return value instanceof Number number ? number.intValue() : 0;
+  }
+
+  private int scenarioCounter(final String scenarioId, final String field) {
+    final Object value = scenarioLedger(scenarioId).get(field);
+    return value instanceof Number number ? number.intValue() : 0;
+  }
+
+  private int scenarioStateCount(final Qdr7CapacityContracts.ExecutionState state) {
+    return Math.toIntExact(
+        SCENARIO_LEDGER.stream()
+            .filter(row -> state.name().equals(row.get("executionState")))
+            .count());
+  }
+
+  private int scenarioVerdictCount(final Qdr7CapacityContracts.ScenarioVerdict verdict) {
+    return Math.toIntExact(
+        SCENARIO_LEDGER.stream().filter(row -> verdict.name().equals(row.get("verdict"))).count());
+  }
+
+  private String scenarioVerdict(final String scenarioId) {
+    final String verdict = String.valueOf(scenarioLedger(scenarioId).get("verdict"));
+    return "NOT_EVALUATED".equals(verdict) ? "BLOCKED" : verdict;
+  }
+
+  private long restartCount(final String type) {
+    return RESTART_RESULTS.stream()
+        .filter(row -> type.equals(row.get("type")))
+        .filter(row -> "PASS".equals(row.get("status")))
+        .count();
+  }
+
+  private static String scenarioFailureReason(
+      final Qdr7CapacityContracts.ScenarioExecution execution, final Throwable failure) {
+    if (execution
+        .findings()
+        .contains(Qdr7CapacityContracts.SemanticExit.NUMERIC_THRESHOLD_FAILED)) {
+      return "NUMERIC_THRESHOLD_FAILED";
+    }
+    if (failure instanceof SQLException
+        || failure.getClass().getSimpleName().contains("Store")) {
+      return "SCENARIO_LOCAL_DATABASE_FAILURE";
+    }
+    return failure instanceof AssertionError
+        ? "CORRECTNESS_INVARIANT_FAILED"
+        : "SCENARIO_LOCAL_FIXTURE_FAILURE";
+  }
+
+  private int selectScenarioExitCode(final boolean allPassed) {
+    if (allPassed) {
+      return 0;
+    }
+    if ("FAIL".equals(scenarioVerdict("quality-gate"))) {
+      return 70;
+    }
+    if ("FAIL".equals(scenarioVerdict("full-regression"))) {
+      return 60;
+    }
+    if (THRESHOLD_RESULTS.stream().anyMatch(row -> "FAIL".equals(row.get("status")))) {
+      return 50;
+    }
+    if (scenarioVerdictCount(Qdr7CapacityContracts.ScenarioVerdict.FAIL) > 0) {
+      return 40;
+    }
+    return 30;
+  }
+
+  private static int roundsRequired(final String scenarioId) {
+    return switch (scenarioId) {
+      case "rate-matrix" -> 15;
+      case "cold-start-quota",
+          "tenant-environment-isolation",
+          "nonce-race",
+          "tenant-scoped-cleanup",
+          "postgres-same-pool-recovery",
+          "spring-context-restart",
+          "postgres-persistent-volume-restart" -> 3;
+      default -> 1;
+    };
+  }
+
+  private static List<String> artifactRefs(final String scenarioId) {
+    return switch (scenarioId) {
+      case "actual-wiring" -> List.of("actual-wiring.json");
+      case "rate-matrix" -> List.of("rate-matrix.csv", "rate-summary.json");
+      case "cold-start-quota" -> List.of("quota-atomicity.json");
+      case "tenant-environment-isolation", "canonical-source-fail-closed" ->
+          List.of("tenant-isolation.json");
+      case "nonce-race" -> List.of("nonce-race.json");
+      case "idempotency-lifecycle" -> List.of("idempotency-lifecycle.json");
+      case "tenant-scoped-cleanup" ->
+          List.of("cleanup-timeline.csv", "cleanup-summary.json");
+      case "postgres-hikari-contention" ->
+          List.of("postgres-hikari-series.csv", "postgres-hikari-summary.json");
+      case "postgres-same-pool-recovery" ->
+          List.of("recovery-timeline.csv", "recovery-summary.json", "restart-results.json");
+      case "spring-context-restart", "postgres-persistent-volume-restart" ->
+          List.of("restart-results.json");
+      case "post-recovery-concurrency" ->
+          List.of("recovery-timeline.csv", "post-recovery-summary.json");
+      case "full-regression" ->
+          List.of("full-regression.log", "full-regression-summary.json");
+      case "quality-gate" -> List.of("quality.log", "quality-summary.json");
+      default -> List.of();
+    };
   }
 
   private void actualWiring(final Qdr7CapacityContracts.ScenarioExecution execution)
       throws IOException, InterruptedException, SQLException, ExecutionException {
     final Instant started = Instant.now();
+    beginRound(execution);
     final List<RequestOutcome> outcomes = new ArrayList<>();
     for (int ordinal = 1; ordinal <= 5; ordinal++) {
       outcomes.add(send(prepare("actual-sequential-" + ordinal, null, SOURCE)));
@@ -418,6 +623,7 @@ class Qdr7CapacityAcceptanceIT {
     artifact.put("localhostOnly", true);
     artifact.put("mockProvider", true);
     writeJson("actual-wiring.json", artifact);
+    completeRound(execution, 13);
   }
 
   private void rateMatrix(final Qdr7CapacityContracts.ScenarioExecution execution)
@@ -437,6 +643,7 @@ class Qdr7CapacityAcceptanceIT {
     final List<Map<String, Object>> summaries = new ArrayList<>();
     for (final int concurrency : List.of(1, 2, 4, 8, 16)) {
       for (int round = 1; round <= 3; round++) {
+        beginRound(execution);
         runConcurrentRequests(concurrency, 20, "rate-warm-c" + concurrency + "-r" + round);
         final long roundStarted = System.nanoTime();
         final List<RequestOutcome> outcomes =
@@ -477,6 +684,7 @@ class Qdr7CapacityAcceptanceIT {
         summary.put("maxMs", statistics.max());
         summaries.add(summary);
         compareRateThresholds(concurrency, statistics);
+        completeRound(execution, 100);
       }
     }
     final Map<String, Object> artifact = artifact("rate-matrix", started, Instant.now());
@@ -538,6 +746,7 @@ class Qdr7CapacityAcceptanceIT {
     final Instant started = Instant.now();
     final List<Map<String, Object>> rounds = new ArrayList<>();
     for (int round = 1; round <= 3; round++) {
+      beginRound(execution);
       final String tenant = "qdr7-capacity-quota-" + round + "-" + RUN_ID;
       final PersistentGuardIdentity identity = identity(tenant);
       final List<RateLimitAdmissionResult> results =
@@ -580,6 +789,7 @@ class Qdr7CapacityAcceptanceIT {
               "databaseWinners", winners,
               "canonicalRows", 1,
               "oversell", 0));
+      completeRound(execution, 40);
     }
     final Map<String, Object> artifact = artifact("cold-start-quota", started, Instant.now());
     artifact.put("windowSeconds", 3600);
@@ -592,7 +802,8 @@ class Qdr7CapacityAcceptanceIT {
   private void tenantIsolation(final Qdr7CapacityContracts.ScenarioExecution execution)
       throws IOException, InterruptedException, SQLException, ExecutionException {
     final Instant started = Instant.now();
-    final List<Map<String, Object>> rounds = verifyTenantEnvironmentIsolation("qdr7-isolation");
+    final List<Map<String, Object>> rounds =
+        verifyTenantEnvironmentIsolation("qdr7-isolation", execution);
     execution.values().put("isolationRounds", rounds);
     final Map<String, Object> artifact =
         artifact("tenant-environment-isolation", started, Instant.now());
@@ -611,11 +822,15 @@ class Qdr7CapacityAcceptanceIT {
    *
    * <p>查询只统计当前run/current round，禁止把前一轮fixture计为cross-scope数据，也禁止清空共享数据库换取PASS。
    */
-  private List<Map<String, Object>> verifyTenantEnvironmentIsolation(final String tenantPrefix) {
+  private List<Map<String, Object>> verifyTenantEnvironmentIsolation(
+      final String tenantPrefix, final Qdr7CapacityContracts.ScenarioExecution execution) {
     final List<Map<String, Object>> rounds = new ArrayList<>();
     final List<String> primaryEnvironments = List.of("dev", "test", "staging");
     final List<String> alternateEnvironments = List.of("test", "staging", "prod");
     for (int round = 1; round <= 3; round++) {
+      if (execution != null) {
+        beginRound(execution);
+      }
       final String primaryEnvironment = primaryEnvironments.get(round - 1);
       final String alternateEnvironment = alternateEnvironments.get(round - 1);
       final String tenantA = tenantPrefix + "-a-r" + round + "-" + RUN_ID;
@@ -696,6 +911,9 @@ class Qdr7CapacityAcceptanceIT {
       result.put("crossEnvironmentRows", crossEnvironmentRows);
       result.put("unexpectedRecords", unexpectedRecords);
       rounds.add(result);
+      if (execution != null) {
+        completeRound(execution, 3);
+      }
     }
     return List.copyOf(rounds);
   }
@@ -703,6 +921,7 @@ class Qdr7CapacityAcceptanceIT {
   private void canonicalSourceFailClosed(final Qdr7CapacityContracts.ScenarioExecution execution)
       throws IOException, InterruptedException, SQLException, ExecutionException {
     final Instant started = Instant.now();
+    beginRound(execution);
     final RequestOutcome denied = send(prepare("noncanonical-source", null, "OTHER_SOURCE"));
     assertThat(denied.statusCode()).isEqualTo(403);
     assertThat(denied.errorCode(objectMapper)).isEqualTo("SOURCE_DENIED");
@@ -714,6 +933,7 @@ class Qdr7CapacityAcceptanceIT {
     artifact.put("finishedAtUtc", Qdr7CapacityContracts.timestamp(Instant.now()));
     writeJson("tenant-isolation.json", artifact);
     execution.values().put("sourceDenied", true);
+    completeRound(execution, 1);
     assertThat(Duration.between(started, Instant.now())).isLessThan(Duration.ofMinutes(2));
   }
 
@@ -722,6 +942,7 @@ class Qdr7CapacityAcceptanceIT {
     final Instant started = Instant.now();
     final List<Map<String, Object>> rounds = new ArrayList<>();
     for (int round = 1; round <= 3; round++) {
+      beginRound(execution);
       final PreparedRequest request = prepare("nonce-race-" + round, null, SOURCE);
       final List<RequestOutcome> outcomes = invokeConcurrent(8, 24, ordinal -> send(request));
       final long accepted = outcomes.stream().filter(RequestOutcome::structured2xx).count();
@@ -746,6 +967,7 @@ class Qdr7CapacityAcceptanceIT {
               "nonceReplay", replay,
               "databaseWinners", winnerRows,
               "unexpected", 0));
+      completeRound(execution, 24);
     }
     final Map<String, Object> artifact = artifact("nonce-race", started, Instant.now());
     artifact.put("threads", 8);
@@ -755,9 +977,17 @@ class Qdr7CapacityAcceptanceIT {
 
   private void idempotencyLifecycle(final Qdr7CapacityContracts.ScenarioExecution execution) {
     final Instant started = Instant.now();
-    final PersistentGuardIdentity identity = identity("qdr7-idempotency-" + RUN_ID);
+    beginRound(execution);
+    final String fixtureTenant = scenarioTenant("idempotency-lifecycle", 1);
+    final PersistentGuardIdentity identity = identity(fixtureTenant);
     final String requestId = "qdr7-idempotency-lifecycle-" + RUN_ID;
+    final String resultId = "result-idempotency-lifecycle-" + RUN_ID;
     final String hash = Qdr7CapacityContracts.sha256("idempotency-lifecycle-" + RUN_ID);
+    transactions.required(
+        () -> {
+          seedDecisionOutput(jdbc, fixtureTenant, resultId, requestId);
+          return Boolean.TRUE;
+        });
     final IdempotencyAdmissionCommand admission =
         new IdempotencyAdmissionCommand(
             identity,
@@ -792,9 +1022,9 @@ class Qdr7CapacityAcceptanceIT {
                                 inProgress,
                                 IdempotencyState.COMPLETED,
                                 "DH_DECISION_OUTPUT",
-                                "result-wrong-token",
+                                "missing-result-" + RUN_ID,
                                 "capacity-worker",
-                                UUID.randomUUID(),
+                                leaseToken,
                                 null))))
         .isInstanceOf(RuntimeException.class);
     final IdempotencyRecordView completed =
@@ -805,7 +1035,7 @@ class Qdr7CapacityAcceptanceIT {
                         inProgress,
                         IdempotencyState.COMPLETED,
                         "DH_DECISION_OUTPUT",
-                        "result-" + RUN_ID,
+                        resultId,
                         "capacity-worker",
                         leaseToken,
                         null)));
@@ -813,7 +1043,51 @@ class Qdr7CapacityAcceptanceIT {
         transactions.required(() -> idempotencyGuard.admit(admission));
     assertThat(completed.state()).isEqualTo(IdempotencyState.COMPLETED);
     assertThat(duplicate.status()).isEqualTo(IdempotencyAdmissionStatus.COMPLETED);
-    assertThat(duplicate.record().resultId()).isEqualTo("result-" + RUN_ID);
+    assertThat(duplicate.record().resultId()).isEqualTo(resultId);
+
+    final PersistentGuardIdentity crossTenantIdentity =
+        identity(scenarioTenant("idempotency-cross-tenant", 1));
+    final IdempotencyRecordView crossTenantInProgress =
+        admitAndStart(
+            crossTenantIdentity,
+            requestId + "-cross-tenant",
+            Qdr7CapacityContracts.sha256("cross-tenant-" + RUN_ID));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                transactions.required(
+                    () ->
+                        idempotencyGuard.transition(
+                            transition(
+                                crossTenantInProgress,
+                                IdempotencyState.COMPLETED,
+                                "DH_DECISION_OUTPUT",
+                                resultId,
+                                "capacity-worker",
+                                crossTenantInProgress.leaseToken(),
+                                null))))
+        .isInstanceOf(RuntimeException.class);
+
+    final PersistentGuardIdentity crossEnvironmentIdentity =
+        identity("staging", fixtureTenant);
+    final IdempotencyRecordView crossEnvironmentInProgress =
+        admitAndStart(
+            crossEnvironmentIdentity,
+            requestId + "-cross-environment",
+            Qdr7CapacityContracts.sha256("cross-environment-" + RUN_ID));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                transactions.required(
+                    () ->
+                        idempotencyGuard.transition(
+                            transition(
+                                crossEnvironmentInProgress,
+                                IdempotencyState.COMPLETED,
+                                "DH_DECISION_OUTPUT",
+                                "result-staging-" + RUN_ID,
+                                "capacity-worker",
+                                crossEnvironmentInProgress.leaseToken(),
+                                null))))
+        .isInstanceOf(RuntimeException.class);
 
     final String rollbackRequest = requestId + "-rollback";
     final IdempotencyAdmissionCommand rollbackAdmission =
@@ -847,12 +1121,17 @@ class Qdr7CapacityAcceptanceIT {
         List.of(
             Map.of("case", "single-winner", "status", "PASS"),
             Map.of("case", "active-lease-not-stolen", "status", "PASS"),
+            Map.of("case", "legal-result-reference", "status", "PASS"),
+            Map.of("case", "missing-result-reference", "status", "PASS"),
+            Map.of("case", "cross-tenant-result-reference", "status", "PASS"),
+            Map.of("case", "cross-environment-result-reference", "status", "PASS"),
             Map.of("case", "rollback-no-success", "status", "PASS"),
             Map.of("case", "terminal-stable", "status", "PASS"),
             Map.of("case", "commit-unknown-not-readmitted", "status", "REGRESSION_REPORT_REQUIRED"),
             Map.of("case", "expiry-transition", "status", "REGRESSION_REPORT_REQUIRED")));
     artifact.put("partialOrphanOverwriteReadmission", 0);
     writeJson("idempotency-lifecycle.json", artifact);
+    completeRound(execution, 6);
   }
 
   private void tenantScopedCleanup(final Qdr7CapacityContracts.ScenarioExecution execution)
@@ -874,6 +1153,7 @@ class Qdr7CapacityAcceptanceIT {
     final Map<Integer, Integer> expectedByScale = Map.of(10, 6, 100, 64, 1000, 649);
     for (final Map.Entry<Integer, Integer> entry :
         expectedByScale.entrySet().stream().sorted(Map.Entry.comparingByKey()).toList()) {
+      beginRound(execution);
       final int scale = entry.getKey();
       final int expected = entry.getValue();
       final String tenant = "qdr7-cleanup-" + scale + "-" + RUN_ID;
@@ -961,6 +1241,7 @@ class Qdr7CapacityAcceptanceIT {
               .path(String.valueOf(scale))
               .asDouble(),
           "milliseconds");
+      completeRound(execution, scale);
     }
     final Map<String, Object> artifact = artifact("tenant-scoped-cleanup", started, Instant.now());
     artifact.put("workers", 2);
@@ -973,6 +1254,7 @@ class Qdr7CapacityAcceptanceIT {
   private void postgresHikariContention(final Qdr7CapacityContracts.ScenarioExecution execution)
       throws IOException, InterruptedException, SQLException, ExecutionException {
     final Instant started = Instant.now();
+    beginRound(execution);
     final Path series = EVIDENCE_ROOT.resolve("postgres-hikari-series.csv");
     Qdr7CapacityArtifactSupport.writeCsvHeader(
         series,
@@ -995,7 +1277,9 @@ class Qdr7CapacityAcceptanceIT {
     config.setMaximumPoolSize(4);
     config.setMinimumIdle(2);
     config.setConnectionTimeout(3800);
-    config.setPoolName("qdr7-pressure-" + RUN_ID);
+    final String pressureApplicationName = "qdr7-pressure-" + RUN_ID;
+    config.setPoolName(pressureApplicationName);
+    config.addDataSourceProperty("ApplicationName", pressureApplicationName);
     int maximumPending = 0;
     long maximumAcquireMs = 0L;
     int maximumWaiting = 0;
@@ -1024,7 +1308,7 @@ class Qdr7CapacityAcceptanceIT {
         for (int sample = 0; sample < 6; sample++) {
           Thread.sleep(100L);
           maximumPending = Math.max(maximumPending, pool.getThreadsAwaitingConnection());
-          final PgSessions sessions = postgreSqlSessions();
+          final PgSessions sessions = postgreSqlSessions(pressureApplicationName);
           maximumWaiting = Math.max(maximumWaiting, sessions.waiting());
           maximumLockWaiting = Math.max(maximumLockWaiting, sessions.lockWaiting());
           appendPgSample(series, "connection-pressure", pool, 0L, sessions, postgreSqlDeadlocks());
@@ -1042,7 +1326,7 @@ class Qdr7CapacityAcceptanceIT {
           "statement-timeout-rollback",
           pool,
           maximumAcquireMs,
-          postgreSqlSessions(),
+          postgreSqlSessions(pressureApplicationName),
           postgreSqlDeadlocks());
     }
     assertThat(maximumPending).isLessThanOrEqualTo(17);
@@ -1064,6 +1348,7 @@ class Qdr7CapacityAcceptanceIT {
     artifact.put("deadlocks", 0);
     artifact.put("controlledRollback", true);
     writeJson("postgres-hikari-summary.json", artifact);
+    completeRound(execution, 6);
   }
 
   private void samePoolRecovery(final Qdr7CapacityContracts.ScenarioExecution execution)
@@ -1085,13 +1370,20 @@ class Qdr7CapacityAcceptanceIT {
             "unexpected5xx"));
     final PreparedRequest anchor = prepare("recovery-state-anchor", null, SOURCE);
     assertStructuredSuccess(send(anchor));
+    final String rollbackRequestId =
+        seedRolledBackState(
+            transactions,
+            idempotencyGuard,
+            identity(TENANT),
+            "qdr7-same-pool-rollback-" + RUN_ID);
     final String checksumBefore = canonicalPromptChecksum();
     final int dataSourceIdentity = System.identityHashCode(dataSource);
     final int poolIdentity = System.identityHashCode(hikariPool());
-    int postRecoverySuccesses = 0;
     for (int round = 1; round <= 3; round++) {
+      beginRound(execution);
+      final String containerIdBefore = POSTGRES.getContainerId();
       final Instant outageStarted = Instant.now();
-      POSTGRES.stop();
+      POSTGRES.stopWithoutRemoval();
       int false2xx = 0;
       for (int request = 1; request <= 3; request++) {
         final RequestOutcome outage =
@@ -1102,7 +1394,7 @@ class Qdr7CapacityAcceptanceIT {
       }
       assertThat(false2xx).isZero();
       final Instant restartStarted = Instant.now();
-      POSTGRES.start();
+      POSTGRES.startExistingContainer();
       final long databaseReadyMs = awaitDatabaseReady(restartStarted);
       final long hikariReadyMs = awaitHikariReady(restartStarted);
       final RequestOutcome recovered = awaitProtectedRequest(restartStarted, round);
@@ -1115,9 +1407,7 @@ class Qdr7CapacityAcceptanceIT {
       assertThat(System.identityHashCode(hikariPool())).isEqualTo(poolIdentity);
       assertThat(canonicalPromptChecksum()).isEqualTo(checksumBefore);
       assertThat(idempotencyState(anchor.requestId())).isEqualTo("COMPLETED");
-      final List<RequestOutcome> load = runConcurrentRequests(8, 100, "post-recovery-r" + round);
-      assertThat(load).hasSize(100).allSatisfy(this::assertStructuredSuccess);
-      postRecoverySuccesses += 100;
+      assertThat(idempotencyRowCount(rollbackRequestId)).isZero();
       final long samplingGap = 100L;
       Qdr7CapacityArtifactSupport.appendCsv(
           timeline,
@@ -1129,23 +1419,27 @@ class Qdr7CapacityAcceptanceIT {
               Qdr7CapacityContracts.timestamp(Instant.now()),
               Duration.between(outageStarted, Instant.now()).toMillis(),
               round,
-              "post-recovery-load",
+              "protected-request-recovery",
               "2xx",
               databaseReadyMs,
               hikariReadyMs,
               requestReadyMs,
               samplingGap,
-              100,
+              1,
               0,
               0));
       RESTART_RESULTS.add(
           Map.of(
               "type",
-              "POSTGRES_PERSISTENT_VOLUME",
+              "POSTGRES_SAME_POOL",
               "round",
               round,
               "status",
               "PASS",
+              "containerIdBeforeHash",
+              Qdr7CapacityContracts.sha256(containerIdBefore),
+              "containerIdAfterHash",
+              Qdr7CapacityContracts.sha256(POSTGRES.getContainerId()),
               "containerNameHash",
               Qdr7CapacityContracts.sha256(CONTAINER_NAME),
               "volumeNameHash",
@@ -1154,15 +1448,13 @@ class Qdr7CapacityAcceptanceIT {
       addThreshold("recovery.hikari.r" + round, hikariReadyMs, "<=", 5800, "milliseconds");
       addThreshold("recovery.request.r" + round, requestReadyMs, "<=", 5800, "milliseconds");
       addThreshold("recovery.samplingGap.r" + round, samplingGap, "<=", 1400, "milliseconds");
+      completeRound(execution, 4);
     }
-    postRecoveryStructured2xx = postRecoverySuccesses;
-    execution.values().put("postRecoveryStructured2xx", postRecoverySuccesses);
     final Map<String, Object> artifact =
         artifact("postgres-same-pool-recovery", started, Instant.now());
-    artifact.put("rounds", 3);
+    artifact.put("rounds", counter(execution, "roundsCompleted"));
     artifact.put("outageProtectedRequests", 9);
     artifact.put("outageFalse2xx", 0);
-    artifact.put("postRecoveryStructured2xx", postRecoverySuccesses);
     artifact.put("sameApplicationContext", true);
     artifact.put("sameDataSource", true);
     artifact.put("sameHikariPool", true);
@@ -1171,123 +1463,264 @@ class Qdr7CapacityAcceptanceIT {
     writeJson("recovery-summary.json", artifact);
   }
 
-  private void verifyContextRestart(final int round)
+  /** 每轮显式创建并关闭Context A，再创建Context B验证同一PostgreSQL中的提交/回滚状态。 */
+  private void springContextRestart(final Qdr7CapacityContracts.ScenarioExecution execution) {
+    for (int round = 1; round <= 3; round++) {
+      beginRound(execution);
+      final String tenant = scenarioTenant("spring-context-restart", round);
+      final ContextRestartSeed seeded;
+      try (ConfigurableApplicationContext contextA = startRestartContext(tenant, round, "a")) {
+        seeded = seedContextRestartState(contextA, tenant, round);
+      }
+
+      try (ConfigurableApplicationContext contextB = startRestartContext(tenant, round, "b")) {
+        final JdbcTemplate restartedJdbc = contextB.getBean(JdbcTemplate.class);
+        final DataSource restartedDataSource = contextB.getBean(DataSource.class);
+        final RestartRequiredState recovered =
+            requiredRestartState(restartedJdbc, seeded.identity(), seeded.requestId());
+        assertThat(recovered.recordId()).isEqualTo(seeded.requiredState().recordId());
+        assertThat(recovered.requestHash()).isEqualTo(seeded.requiredState().requestHash());
+        assertThat(recovered.state()).isEqualTo("COMPLETED");
+        assertThat(canonicalPromptChecksum(restartedJdbc, tenant)).isEqualTo(seeded.promptChecksum());
+        assertThat(
+                restartedJdbc.queryForObject(
+                    "select count(*) from dh_nq_replay_nonce where replay_key=?",
+                    Integer.class,
+                    seeded.replayKey()))
+            .isEqualTo(1);
+        assertThat(idempotencyRowCount(restartedJdbc, seeded.identity(), seeded.rollbackRequestId()))
+            .isZero();
+        assertThat(identityHash(contextB)).isNotEqualTo(seeded.contextIdentityHash());
+        assertThat(identityHash(restartedDataSource)).isNotEqualTo(seeded.dataSourceIdentityHash());
+        assertThat(Qdr7CapacityContracts.sha256(FROZEN_JDBC_URL))
+            .isEqualTo(seeded.jdbcEndpointSha256());
+
+        final int crossTenantVisibility =
+            restartedJdbc.queryForObject(
+                "select count(*) from dh_qdr7_idempotency_guard"
+                    + " where guard_id::text=? and tenant_id=?",
+                Integer.class,
+                recovered.recordId(),
+                tenant + "-other");
+        final int crossEnvironmentVisibility =
+            restartedJdbc.queryForObject(
+                "select count(*) from dh_qdr7_idempotency_guard"
+                    + " where guard_id::text=? and environment<>?",
+                Integer.class,
+                recovered.recordId(),
+                "test");
+        assertThat(crossTenantVisibility).isZero();
+        assertThat(crossEnvironmentVisibility).isZero();
+
+        final Map<String, Object> result = new LinkedHashMap<>();
+        result.put("type", "SPRING_CONTEXT");
+        result.put("round", round);
+        result.put("status", "PASS");
+        result.put("applicationContextAIdentityHash", seeded.contextIdentityHash());
+        result.put("applicationContextBIdentityHash", identityHash(contextB));
+        result.put("dataSourceAIdentityHash", seeded.dataSourceIdentityHash());
+        result.put("dataSourceBIdentityHash", identityHash(restartedDataSource));
+        result.put("environment", "test");
+        result.put("tenantHash", Qdr7CapacityContracts.sha256(tenant));
+        result.put("recordId", recovered.recordId());
+        result.put("requestHash", recovered.requestHash());
+        result.put("requiredStateNonNull", true);
+        result.put("committedNoncePreserved", true);
+        result.put("committedIdempotencyState", recovered.state());
+        result.put("uncommittedStatePromoted", false);
+        result.put("canonicalPromptPreserved", true);
+        result.put("crossTenantVisibility", crossTenantVisibility);
+        result.put("crossEnvironmentVisibility", crossEnvironmentVisibility);
+        result.put("samePostgresEndpoint", true);
+        result.put("samePersistentVolume", true);
+        RESTART_RESULTS.add(result);
+      }
+      completeRound(execution, 5);
+    }
+  }
+
+  /** 独立执行三轮same-container persistent-volume restart，不借用same-pool结果凑轮数。 */
+  private void persistentVolumeRestart(final Qdr7CapacityContracts.ScenarioExecution execution)
+      throws IOException, InterruptedException {
+    for (int round = 1; round <= 3; round++) {
+      beginRound(execution);
+      final PreparedRequest committed =
+          prepare("persistent-volume-anchor-r" + round + "-" + RUN_ID, null, SOURCE);
+      assertStructuredSuccess(send(committed));
+      final RestartRequiredState requiredBefore = requiredRestartState(committed.requestId());
+      final String rollbackRequestId =
+          seedRolledBackState(
+              transactions,
+              idempotencyGuard,
+              identity(TENANT),
+              "qdr7-persistent-volume-rollback-r" + round + "-" + RUN_ID);
+      final String promptChecksum = canonicalPromptChecksum();
+      final String containerIdBefore = POSTGRES.getContainerId();
+      final Instant restartStarted = Instant.now();
+      POSTGRES.stopWithoutRemoval();
+      POSTGRES.startExistingContainer();
+      final long databaseReadyMs = awaitDatabaseReady(restartStarted);
+      final long stateRecoveryMs = awaitHikariReady(restartStarted);
+      final RestartRequiredState recovered = requiredRestartState(committed.requestId());
+      assertThat(recovered).isEqualTo(requiredBefore);
+      assertThat(nonceReplayRowCount(committed)).isEqualTo(1);
+      assertThat(idempotencyRowCount(rollbackRequestId)).isZero();
+      assertThat(canonicalPromptChecksum()).isEqualTo(promptChecksum);
+
+      final Map<String, Object> result = new LinkedHashMap<>();
+      result.put("type", "POSTGRES_PERSISTENT_VOLUME");
+      result.put("round", round);
+      result.put("status", "PASS");
+      result.put("containerIdBeforeHash", Qdr7CapacityContracts.sha256(containerIdBefore));
+      result.put("containerIdAfterHash", Qdr7CapacityContracts.sha256(POSTGRES.getContainerId()));
+      result.put("containerNameHash", Qdr7CapacityContracts.sha256(CONTAINER_NAME));
+      result.put("volumeNameHash", Qdr7CapacityContracts.sha256(VOLUME_NAME));
+      result.put("jdbcEndpointSha256", Qdr7CapacityContracts.sha256(FROZEN_JDBC_URL));
+      result.put("databaseReadyMs", databaseReadyMs);
+      result.put("stateRecoveryMs", stateRecoveryMs);
+      result.put("committedNoncePreserved", true);
+      result.put("committedIdempotencyState", recovered.state());
+      result.put("uncommittedStatePromoted", false);
+      result.put("canonicalPromptPreserved", true);
+      RESTART_RESULTS.add(result);
+      completeRound(execution, 5);
+    }
+  }
+
+  /** 冻结protocol只允许一次8并发/100请求的post-recovery load。 */
+  private void postRecoveryConcurrency(final Qdr7CapacityContracts.ScenarioExecution execution)
       throws IOException, InterruptedException, SQLException, ExecutionException {
-    final RestartProbeState seeded = restartProbeState;
-    assertThat(seeded).as("restart round %s required state", round).isNotNull();
-    assertThat(seeded.round()).isEqualTo(round);
-    assertThat(applicationContext).isNotSameAs(seeded.applicationContext());
-    assertThat(dataSource).isNotSameAs(seeded.dataSource());
-    assertThat(POSTGRES.isRunning()).isTrue();
-    assertThat(POSTGRES.getMappedPort(PostgreSQLContainer.POSTGRESQL_PORT))
-        .isEqualTo(DATABASE_PORT);
-    assertThat(Qdr7CapacityContracts.sha256(FROZEN_JDBC_URL))
-        .isEqualTo(seeded.jdbcEndpointSha256());
-
-    final RestartRequiredState recovered =
-        requiredRestartState(seeded.committedRequest().requestId());
-    assertThat(recovered).isNotNull();
-    assertThat(recovered.recordId()).isEqualTo(seeded.requiredState().recordId());
-    assertThat(recovered.requestHash()).isEqualTo(seeded.requiredState().requestHash());
-    assertThat(recovered.state()).isEqualTo("COMPLETED");
-    assertThat(canonicalPromptChecksum()).isEqualTo(seeded.promptChecksum());
-    assertThat(nonceReplayRowCount(seeded.committedRequest())).isEqualTo(1);
-    assertThat(idempotencyRowCount(seeded.uncommittedRequestId())).isZero();
-
-    final RequestOutcome replay = send(seeded.committedRequest());
-    assertThat(replay.statusCode()).isEqualTo(409);
-    assertThat(replay.errorCode(objectMapper)).isEqualTo("NONCE_REPLAY");
-    assertThat(idempotencyState(seeded.committedRequest().requestId())).isEqualTo("COMPLETED");
-
-    final int crossTenantVisibility =
-        jdbc.queryForObject(
-            "select count(*) from dh_qdr7_idempotency_guard"
-                + " where guard_id::text=? and tenant_id=?",
-            Integer.class,
-            recovered.recordId(),
-            TENANT + "-other");
-    final int crossEnvironmentVisibility =
-        jdbc.queryForObject(
-            "select count(*) from dh_qdr7_idempotency_guard"
-                + " where guard_id::text=? and environment<>?",
-            Integer.class,
-            recovered.recordId(),
-            "test");
-    assertThat(crossTenantVisibility).isZero();
-    assertThat(crossEnvironmentVisibility).isZero();
-
-    final Map<String, Object> result = new LinkedHashMap<>();
-    result.put("type", "SPRING_CONTEXT");
-    result.put("round", round);
-    result.put("status", "PASS");
-    result.put("applicationContextIdentityHash", identityHash(applicationContext));
-    result.put("dataSourceIdentityHash", identityHash(dataSource));
-    result.put("environment", "test");
-    result.put("tenant", TENANT);
-    result.put("recordId", recovered.recordId());
-    result.put("requestHash", recovered.requestHash());
-    result.put("requiredStateNonNull", true);
-    result.put("committedNoncePreserved", true);
-    result.put("committedIdempotencyState", recovered.state());
-    result.put("uncommittedStatePromoted", false);
-    result.put("canonicalPromptPreserved", true);
-    result.put("crossTenantVisibility", crossTenantVisibility);
-    result.put("crossEnvironmentVisibility", crossEnvironmentVisibility);
-    result.put("samePostgresEndpoint", true);
-    result.put("samePersistentVolume", true);
-    RESTART_RESULTS.add(result);
-
-    if (round < 3) {
-      // 每轮在即将关闭的当前Context内独立提交下一轮state，下一方法只负责重启后验证。
-      seedRestartProbe(round + 1);
-    }
+    beginRound(execution);
+    final Instant started = Instant.now();
+    final List<RequestOutcome> load = runConcurrentRequests(8, 100, "post-recovery");
+    assertThat(load).hasSize(100).allSatisfy(this::assertStructuredSuccess);
+    postRecoveryStructured2xx = 100;
+    Qdr7CapacityArtifactSupport.appendCsv(
+        EVIDENCE_ROOT.resolve("recovery-timeline.csv"),
+        List.of(
+            Qdr7CapacityContracts.SCHEMA_VERSION,
+            RUN_ID,
+            COMMIT_SHA,
+            "post-recovery-concurrency",
+            Qdr7CapacityContracts.timestamp(Instant.now()),
+            Duration.between(started, Instant.now()).toMillis(),
+            1,
+            "post-recovery-load",
+            "2xx",
+            "",
+            "",
+            "",
+            0,
+            100,
+            0,
+            0));
+    final Map<String, Object> artifact =
+        artifact("post-recovery-concurrency", started, Instant.now());
+    artifact.put("concurrency", 8);
+    artifact.put("requests", 100);
+    artifact.put("structured2xx", postRecoveryStructured2xx);
+    artifact.put("unexpected4xx", 0);
+    artifact.put("unexpected5xx", 0);
+    writeJson("post-recovery-summary.json", artifact);
+    completeRound(execution, 100);
   }
 
-  /** 在当前事务边界内提交本轮required state，并单独制造一个必回滚记录。 */
-  private void seedRestartProbe(final int round) throws IOException, InterruptedException {
-    final PreparedRequest committed =
-        prepare("context-restart-anchor-r" + round + "-" + RUN_ID, null, SOURCE);
-    assertStructuredSuccess(send(committed));
-    final RestartRequiredState requiredState = requiredRestartState(committed.requestId());
-    assertThat(requiredState.state()).isEqualTo("COMPLETED");
-    assertThat(nonceReplayRowCount(committed)).isEqualTo(1);
-
-    final String uncommittedRequestId = seedRolledBackRestartState(round);
-    assertThat(idempotencyRowCount(uncommittedRequestId)).isZero();
-    restartProbeState =
-        new RestartProbeState(
-            round,
-            committed,
-            requiredState,
-            uncommittedRequestId,
-            canonicalPromptChecksum(),
-            Qdr7CapacityContracts.sha256(FROZEN_JDBC_URL),
-            applicationContext,
-            dataSource);
+  /** 为单轮Context restart创建独立Spring Context，所有配置仅指向本地Testcontainers。 */
+  private ConfigurableApplicationContext startRestartContext(
+      final String tenant, final int round, final String contextName) {
+    final Map<String, Object> properties = new LinkedHashMap<>();
+    properties.put("spring.main.web-application-type", "none");
+    properties.put("spring.main.banner-mode", "off");
+    properties.put("spring.jmx.enabled", "false");
+    properties.put(
+        "spring.autoconfigure.exclude",
+        "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,"
+            + "org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration");
+    properties.put("management.health.redis.enabled", "false");
+    properties.put("spring.datasource.url", FROZEN_JDBC_URL);
+    properties.put("spring.datasource.username", FROZEN_DATABASE_USERNAME);
+    properties.put("spring.datasource.password", FROZEN_DATABASE_PASSWORD);
+    properties.put("spring.datasource.hikari.maximum-pool-size", 4);
+    properties.put("spring.datasource.hikari.minimum-idle", 1);
+    properties.put(
+        "spring.datasource.hikari.pool-name",
+        "qdr7-context-r" + round + "-" + contextName + "-" + RUN_ID);
+    properties.put("decisionhub.security.api.token-sha256", StaticTokenVerifier.sha256Hex(TEST_TOKEN));
+    properties.put("decisionhub.security.api.tenant-id", tenant);
+    properties.put("decisionhub.integration1.runtime.enabled", true);
+    properties.put("decisionhub.integration1.runtime.production-enabled", false);
+    properties.put("decisionhub.integration1.runtime.kill-switch-enabled", false);
+    properties.put("decisionhub.integration1.runtime.allowed-sources", SOURCE);
+    properties.put("decisionhub.integration1.runtime.allowed-tenant-source-pairs", tenant + ":" + SOURCE);
+    properties.put("decisionhub.integration1.runtime.guard.environment", "test");
+    properties.put("decisionhub.integration1.runtime.guard.rate-window-seconds", 3600);
+    properties.put("decisionhub.integration1.runtime.guard.rate-limit-value", 100000);
+    properties.put("decisionhub.integration1.runtime.guard.lease-seconds", 30);
+    properties.put("decisionhub.integration1.runtime.guard.idempotency-ttl-seconds", 600);
+    properties.put("decisionhub.integration1.runtime.guard.retention-seconds", 3600);
+    properties.put("decisionhub.security.nq-feedback.replay.guard-type", "jdbc");
+    properties.put("decisionhub.integration1.runtime.hmac-secret", TEST_SIGNING_KEY);
+    return new SpringApplicationBuilder(DecisionHubApplication.class)
+        .web(WebApplicationType.NONE)
+        .run(commandLineProperties(properties));
   }
 
-  /** 通过真实GuardTransactionBoundary证明异常事务不会在重启后晋升为成功。 */
-  private String seedRolledBackRestartState(final int round) {
-    final String requestId = "qdr7-context-restart-uncommitted-r" + round + "-" + RUN_ID;
-    final IdempotencyAdmissionCommand admission =
-        new IdempotencyAdmissionCommand(
-            identity(TENANT),
+  /** restart Context必须使用高优先级命令行属性，防止application配置覆盖冻结数据库端点。 */
+  private static String[] commandLineProperties(final Map<String, Object> properties) {
+    return properties.entrySet().stream()
+        .map(entry -> "--" + entry.getKey() + "=" + entry.getValue())
+        .toArray(String[]::new);
+  }
+
+  /** 在Context A内提交合法result、terminal idempotency和nonce，并制造一条必回滚状态。 */
+  private ContextRestartSeed seedContextRestartState(
+      final ConfigurableApplicationContext context, final String tenant, final int round) {
+    final JdbcTemplate contextJdbc = context.getBean(JdbcTemplate.class);
+    final GuardTransactionBoundary boundary = context.getBean(GuardTransactionBoundary.class);
+    final IdempotencyGuardPort guards = context.getBean(IdempotencyGuardPort.class);
+    final PersistentGuardIdentity identity = identity("test", tenant);
+    final String requestId = "qdr7-context-restart-r" + round + "-" + RUN_ID;
+    final String resultId = "result-context-restart-r" + round + "-" + RUN_ID;
+    final String promptChecksum =
+        boundary.required(
+            () -> {
+              seedDecisionOutput(contextJdbc, tenant, resultId, requestId);
+              return seedCanonicalPromptVersion(contextJdbc, tenant, round);
+            });
+    final IdempotencyRecordView completed =
+        completeGuardFixture(
+            boundary,
+            guards,
+            identity,
             requestId,
-            Qdr7CapacityContracts.sha256("context-restart-rollback-r" + round + "-" + RUN_ID),
-            IdempotencyAdmissionCommand.HASH_VERSION,
-            Duration.ofMinutes(10),
-            Duration.ofHours(1));
-    try {
-      transactions.required(
-          () -> {
-            assertThat(idempotencyGuard.admit(admission).status())
-                .isEqualTo(IdempotencyAdmissionStatus.ADMITTED);
-            throw new IllegalStateException("deterministic context restart rollback fixture");
-          });
-    } catch (final IllegalStateException expected) {
-      assertThat(expected).hasMessage("deterministic context restart rollback fixture");
-    }
-    return requestId;
+            Qdr7CapacityContracts.sha256("context-restart-r" + round + "-" + RUN_ID),
+            resultId);
+    final String replayKey =
+        tenant + "::" + SOURCE + "::" + ENDPOINT + "::nonce-" + requestId + "::" + requestId;
+    boundary.required(
+        () -> {
+          contextJdbc.update(
+              "insert into dh_nq_replay_nonce(replay_key,expires_at)"
+                  + " values (?,transaction_timestamp()+interval '10 minute')",
+              replayKey);
+          return Boolean.TRUE;
+        });
+    final String rollbackRequestId =
+        seedRolledBackState(
+            boundary, guards, identity, "qdr7-context-restart-rollback-r" + round + "-" + RUN_ID);
+    final RestartRequiredState required =
+        requiredRestartState(contextJdbc, identity, completed.requestId());
+    assertThat(canonicalPromptChecksum(contextJdbc, tenant)).isEqualTo(promptChecksum);
+    return new ContextRestartSeed(
+        identity,
+        requestId,
+        required,
+        rollbackRequestId,
+        replayKey,
+        promptChecksum,
+        Qdr7CapacityContracts.sha256(FROZEN_JDBC_URL),
+        identityHash(context),
+        identityHash(context.getBean(DataSource.class)));
   }
 
   /** implementation-validation只写probe证据，不登记任何mandatory scenario。 */
@@ -1296,7 +1729,7 @@ class Qdr7CapacityAcceptanceIT {
         RESTART_RESULTS.stream().filter(row -> "SPRING_CONTEXT".equals(row.get("type"))).toList();
     assertThat(IMPLEMENTATION_TENANT_ISOLATION_RESULTS).hasSize(3);
     assertThat(springRestartResults).hasSize(3);
-    assertThat(SCENARIO_STATUSES).isEmpty();
+    assertThat(SCENARIO_LEDGER).isEmpty();
 
     final Map<String, Object> artifact =
         artifact("implementation-validation", HARNESS_STARTED, Instant.now());
@@ -1322,6 +1755,22 @@ class Qdr7CapacityAcceptanceIT {
   private void fullRegression(final Qdr7CapacityContracts.ScenarioExecution execution)
       throws IOException, InterruptedException, SQLException, ExecutionException {
     final Instant started = Instant.now();
+    beginRound(execution);
+    final Instant regressionStarted = Instant.now();
+    final Path log = EVIDENCE_ROOT.resolve("full-regression.log");
+    final Process process =
+        new ProcessBuilder(fullRegressionCommand())
+            .directory(PROJECT_ROOT.toFile())
+            .redirectErrorStream(true)
+            .redirectOutput(log.toFile())
+            .start();
+    final boolean finished = process.waitFor(30, TimeUnit.MINUTES);
+    if (!finished) {
+      process.destroyForcibly();
+      process.waitFor(30, TimeUnit.SECONDS);
+    }
+    final int exitCode = finished ? process.exitValue() : 60;
+    final String regressionLog = Qdr7CapacityArtifactSupport.readAsciiCompatibleLog(log);
     final List<Path> reports = new ArrayList<>();
     try (var paths = Files.walk(PROJECT_ROOT)) {
       paths
@@ -1329,6 +1778,16 @@ class Qdr7CapacityAcceptanceIT {
           .filter(path -> path.getFileName().toString().endsWith(".xml"))
           .filter(path -> path.toString().contains("surefire-reports"))
           .filter(path -> !path.getFileName().toString().contains("Qdr7CapacityAcceptanceIT"))
+          .filter(
+              path -> {
+                try {
+                  return !Files.getLastModifiedTime(path)
+                      .toInstant()
+                      .isBefore(regressionStarted.minusSeconds(1));
+                } catch (final IOException unreadable) {
+                  return false;
+                }
+              })
           .forEach(reports::add);
     }
     long tests = 0L;
@@ -1342,81 +1801,218 @@ class Qdr7CapacityAcceptanceIT {
       errors += xmlAttribute(xml, "errors");
       skipped += xmlAttribute(xml, "skipped");
     }
-    assertThat(reports).isNotEmpty();
-    assertThat(failures).isZero();
-    assertThat(errors).isZero();
-    assertThat(skipped).isZero();
+    final long reactorSuccess =
+        regressionLog.lines()
+            .filter(line -> line.startsWith("[INFO] "))
+            .filter(line -> line.contains(" SUCCESS ["))
+            .count();
+    final long testcontainersReports =
+        reports.stream()
+            .map(path -> path.getFileName().toString())
+            .filter(
+                name ->
+                    name.contains("JdbcNonceReplayGuardPersistenceTest")
+                        || name.contains("PostgresContainerSmokeTest"))
+            .count();
     final Map<String, Object> artifact = artifact("full-regression", started, Instant.now());
     artifact.put("reactorModulesExpected", 19);
+    artifact.put("reactorModulesSucceeded", reactorSuccess);
+    artifact.put("mavenExitCode", exitCode);
     artifact.put("surefireReportFiles", reports.size());
     artifact.put("tests", tests);
     artifact.put("failures", failures);
     artifact.put("errors", errors);
     artifact.put("skipped", skipped);
-    artifact.put("testcontainersExecuted", true);
+    artifact.put("testcontainersMandatoryReports", testcontainersReports);
+    artifact.put("testcontainersExecuted", testcontainersReports == 2 && skipped == 0);
     writeJson("full-regression-summary.json", artifact);
-    Files.writeString(
-        EVIDENCE_ROOT.resolve("full-regression.log"),
-        "Reactor report scan: tests="
-            + tests
-            + ", failures="
-            + failures
-            + ", errors="
-            + errors
-            + ", skipped="
-            + skipped
-            + System.lineSeparator(),
-        StandardCharsets.UTF_8);
     execution.values().put("tests", tests);
+    completeRound(execution, Math.toIntExact(Math.min(Integer.MAX_VALUE, tests)));
+    assertThat(exitCode).as("independent mvn test exit").isZero();
+    assertThat(regressionLog).contains("BUILD SUCCESS");
+    assertThat(reactorSuccess).isEqualTo(19L);
+    assertThat(reports).isNotEmpty();
+    assertThat(tests).isPositive();
+    assertThat(failures).isZero();
+    assertThat(errors).isZero();
+    assertThat(skipped).isZero();
+    assertThat(testcontainersReports).isEqualTo(2L);
   }
 
   private void qualityGate(final Qdr7CapacityContracts.ScenarioExecution execution)
-      throws IOException {
+      throws IOException, InterruptedException {
     final Instant started = Instant.now();
+    beginRound(execution);
+    final Path log = EVIDENCE_ROOT.resolve("quality.log");
+    final Process process =
+        new ProcessBuilder(qualityCommand())
+            .directory(PROJECT_ROOT.toFile())
+            .redirectErrorStream(true)
+            .redirectOutput(log.toFile())
+            .start();
+    final boolean finished = process.waitFor(15, TimeUnit.MINUTES);
+    if (!finished) {
+      process.destroyForcibly();
+      process.waitFor(30, TimeUnit.SECONDS);
+    }
+    final int exitCode = finished ? process.exitValue() : 70;
+    final String qualityLog = Qdr7CapacityArtifactSupport.readAsciiCompatibleLog(log);
     final Map<String, Object> artifact = artifact("quality-gate", started, Instant.now());
-    artifact.put("checkstyle", Map.of("status", "PASS", "findings", 0));
-    artifact.put("spotless", Map.of("status", "PASS", "findings", 0));
-    artifact.put("evidence", "qdr7 profile validate phase completed before Failsafe");
+    artifact.put(
+        "checkstyle",
+        Map.of(
+            "status", exitCode == 0 ? "PASS" : "FAIL",
+            "findings", exitCode == 0 ? 0 : 1));
+    artifact.put(
+        "spotless",
+        Map.of(
+            "status", exitCode == 0 ? "PASS" : "FAIL",
+            "findings", exitCode == 0 ? 0 : 1));
+    artifact.put("mavenExitCode", exitCode);
+    artifact.put("reactorSuccess", qualityLog.contains("BUILD SUCCESS"));
+    artifact.put("reactorModulesExpected", 19);
     writeJson("quality-summary.json", artifact);
-    execution.values().put("qualityFindings", 0);
+    execution.values().put("qualityFindings", exitCode == 0 ? 0 : 1);
+    completeRound(execution, 2);
+    assertThat(exitCode).as("mvn -Pquality validate exit").isZero();
+    assertThat(qualityLog).contains("BUILD SUCCESS");
   }
 
   private void writeRestartArtifact() throws IOException {
     final Map<String, Object> artifact =
         artifact("restart-results", HARNESS_STARTED, Instant.now());
+    final long springCompleted = restartCount("SPRING_CONTEXT");
+    final long samePoolCompleted = restartCount("POSTGRES_SAME_POOL");
+    final long persistentCompleted = restartCount("POSTGRES_PERSISTENT_VOLUME");
+    if (springCompleted != 3 || samePoolCompleted != 3 || persistentCompleted != 3) {
+      artifact.put("status", "BLOCKED");
+      artifact.put("missingValues", List.of("incompleteRestartRounds"));
+    }
     artifact.put("results", RESTART_RESULTS);
-    artifact.put("springContextRounds", 3);
-    artifact.put("postgresPersistentVolumeRounds", 3);
+    artifact.put("springContextRoundsRequired", 3);
+    artifact.put("springContextRoundsStarted", scenarioCounter("spring-context-restart", "roundsStarted"));
+    artifact.put("springContextRoundsCompleted", springCompleted);
+    artifact.put("samePoolRoundsRequired", 3);
+    artifact.put("samePoolRoundsStarted", scenarioCounter("postgres-same-pool-recovery", "roundsStarted"));
+    artifact.put("samePoolRoundsCompleted", samePoolCompleted);
+    artifact.put("postgresPersistentVolumeRoundsRequired", 3);
+    artifact.put(
+        "postgresPersistentVolumeRoundsStarted",
+        scenarioCounter("postgres-persistent-volume-restart", "roundsStarted"));
+    artifact.put("postgresPersistentVolumeRoundsCompleted", persistentCompleted);
     writeJson("restart-results.json", artifact);
   }
 
   private void writeThresholdComparison() throws IOException {
-    final List<Map<String, Object>> failed =
-        THRESHOLD_RESULTS.stream().filter(row -> !"PASS".equals(row.get("status"))).toList();
-    assertThat(failed).isEmpty();
+    writeThresholdComparisonSnapshot();
+  }
+
+  /** 每次新增measurement后重写durable comparison快照，后续场景失败不得清零既有比较。 */
+  private void writeThresholdComparisonSnapshot() {
+    final long passed =
+        THRESHOLD_RESULTS.stream().filter(row -> "PASS".equals(row.get("status"))).count();
+    final long failed =
+        THRESHOLD_RESULTS.stream().filter(row -> "FAIL".equals(row.get("status"))).count();
+    final long blocked =
+        THRESHOLD_RESULTS.stream().filter(row -> "BLOCKED".equals(row.get("status"))).count();
+    final int notEvaluated =
+        Math.max(0, EXPECTED_THRESHOLD_COMPARISONS - THRESHOLD_RESULTS.size());
     final Map<String, Object> artifact =
         artifact("threshold-comparison", HARNESS_STARTED, Instant.now());
+    artifact.put(
+        "status",
+        failed > 0
+            ? "FAIL"
+            : blocked > 0 || notEvaluated > 0 ? "BLOCKED" : "PASS");
     artifact.put("comparisonCount", THRESHOLD_RESULTS.size());
+    artifact.put("comparisonsExecuted", THRESHOLD_RESULTS.size());
     artifact.put("comparisons", THRESHOLD_RESULTS);
-    artifact.put("failedCount", 0);
-    artifact.put("blockedCount", 0);
+    artifact.put("passedCount", passed);
+    artifact.put("failedCount", failed);
+    artifact.put("blockedCount", blocked);
+    artifact.put("notEvaluatedCount", notEvaluated);
+    artifact.put("notEvaluatedThresholds", notEvaluated);
+    artifact.put(
+        "reason",
+        notEvaluated == 0 ? "THRESHOLD_COMPARISON_COMPLETE" : "PARTIAL_THRESHOLD_EVIDENCE");
     writeJson("threshold-comparison.json", artifact);
   }
 
   private void writeSummary() throws IOException {
-    assertThat(SCENARIO_STATUSES.stream().map(row -> row.get("scenarioId")).toList())
-        .containsAll(Qdr7CapacityContracts.ScenarioRegistry.mandatory());
+    final int started = scenarioStateCount(Qdr7CapacityContracts.ExecutionState.STARTED);
+    final int partial = scenarioStateCount(Qdr7CapacityContracts.ExecutionState.PARTIAL);
+    final int completed = scenarioStateCount(Qdr7CapacityContracts.ExecutionState.COMPLETED);
+    final int notStarted = scenarioStateCount(Qdr7CapacityContracts.ExecutionState.NOT_STARTED);
+    final int passed = scenarioVerdictCount(Qdr7CapacityContracts.ScenarioVerdict.PASS);
+    final int failed = scenarioVerdictCount(Qdr7CapacityContracts.ScenarioVerdict.FAIL);
+    final int blocked = scenarioVerdictCount(Qdr7CapacityContracts.ScenarioVerdict.BLOCKED);
+    final int executed = partial + completed;
+    final boolean allPassed = completed == 15 && passed == 15;
+    final int exitCode = selectScenarioExitCode(allPassed);
+    final String resultStatus =
+        allPassed
+            ? (QUALIFICATION_ONLY ? "NOT_FORMAL" : "PASS")
+            : failed > 0 ? "FAIL" : "BLOCKED";
     final Map<String, Object> artifact =
         artifact("capacity-acceptance", HARNESS_STARTED, Instant.now());
-    artifact.put("finalStatus", "PASS");
-    artifact.put("exitCode", 0);
-    artifact.put("scenarioStatuses", SCENARIO_STATUSES);
-    artifact.put("firstBlocker", null);
-    artifact.put("findings", List.of());
-    artifact.put("capacityAcceptanceExecuted", true);
+    artifact.put("status", resultStatus);
+    artifact.put("finalStatus", resultStatus);
+    artifact.put("exitCode", exitCode);
+    artifact.put("internalExitCode", exitCode);
+    artifact.put("startedAt", artifact.get("startedAtUtc"));
+    artifact.put("completedAt", artifact.get("finishedAtUtc"));
+    artifact.put("mandatoryScenarioCount", 15);
+    artifact.put("startedScenarioCount", started + partial + completed);
+    artifact.put("partialScenarioCount", partial);
+    artifact.put("completedScenarioCount", completed);
+    artifact.put("passedScenarioCount", passed);
+    artifact.put("failedScenarioCount", failed);
+    artifact.put("blockedScenarioCount", blocked);
+    artifact.put("notStartedScenarioCount", notStarted);
+    artifact.put("executedScenarioCount", executed);
+    artifact.put("scenarioStatuses", SCENARIO_LEDGER);
+    artifact.put(
+        "firstBlocker",
+        SCENARIO_LEDGER.stream()
+            .filter(row -> !"PASS".equals(row.get("verdict")))
+            .map(row -> row.get("scenarioId") + ":" + row.get("reasonCode"))
+            .findFirst()
+            .orElse(null));
+    artifact.put(
+        "findings",
+        SCENARIO_LEDGER.stream()
+            .filter(row -> !"PASS".equals(row.get("verdict")))
+            .map(row -> row.get("scenarioId") + ":" + row.get("reasonCode"))
+            .toList());
+    artifact.put("correctnessVerdict", allPassed ? "PASS" : failed > 0 ? "FAIL" : "BLOCKED");
+    artifact.put(
+        "thresholdVerdict",
+        THRESHOLD_RESULTS.size() == EXPECTED_THRESHOLD_COMPARISONS
+                && THRESHOLD_RESULTS.stream().allMatch(row -> "PASS".equals(row.get("status")))
+            ? "PASS"
+            : THRESHOLD_RESULTS.stream().anyMatch(row -> "FAIL".equals(row.get("status")))
+                ? "FAIL"
+                : "BLOCKED");
+    artifact.put("regressionVerdict", scenarioVerdict("full-regression"));
+    artifact.put("qualityVerdict", scenarioVerdict("quality-gate"));
+    artifact.put("artifactVerdict", "PENDING");
+    artifact.put("secretVerdict", "PENDING");
+    artifact.put("teardownVerdict", "BLOCKED");
+    artifact.put(
+        "reasonCode",
+        allPassed
+            ? (QUALIFICATION_ONLY ? "QUALIFICATION_ONLY" : "FORMAL_CAPACITY_ACCEPTANCE_COMPLETED")
+            : "MANDATORY_SCENARIO_INCOMPLETE");
+    artifact.put("capacityAcceptanceExecuted", allPassed && !QUALIFICATION_ONLY);
+    artifact.put(
+        "formalAcceptanceVerdict",
+        QUALIFICATION_ONLY ? "NOT_EVALUATED" : allPassed ? "PASS" : resultStatus);
+    artifact.put(
+        "qualificationVerdict",
+        QUALIFICATION_ONLY ? (allPassed ? "PASS" : resultStatus) : "NOT_EVALUATED");
     writeJson("capacity-acceptance-summary.json", artifact);
     Files.writeString(
-        EVIDENCE_ROOT.resolve("harness-exit-code.txt"), "0\n", StandardCharsets.UTF_8);
+        EVIDENCE_ROOT.resolve("harness-exit-code.txt"), exitCode + "\n", StandardCharsets.UTF_8);
   }
 
   private RateLimitAdmissionResult acquire(
@@ -1443,6 +2039,173 @@ class Qdr7CapacityAcceptanceIT {
 
   private PersistentGuardIdentity identity(final String environment, final String tenant) {
     return new PersistentGuardIdentity(environment, ENDPOINT, SOURCE, tenant);
+  }
+
+  /** 创建RECEIVED并取得有效lease；用于FK负向fixture，所有identity均保持独立。 */
+  private IdempotencyRecordView admitAndStart(
+      final PersistentGuardIdentity identity, final String requestId, final String requestHash) {
+    final IdempotencyAdmissionResult admitted =
+        transactions.required(
+            () ->
+                idempotencyGuard.admit(
+                    new IdempotencyAdmissionCommand(
+                        identity,
+                        requestId,
+                        requestHash,
+                        IdempotencyAdmissionCommand.HASH_VERSION,
+                        Duration.ofMinutes(10),
+                        Duration.ofHours(1))));
+    assertThat(admitted.status()).isEqualTo(IdempotencyAdmissionStatus.ADMITTED);
+    final UUID leaseToken = UUID.randomUUID();
+    return transactions.required(
+        () ->
+            idempotencyGuard.transition(
+                transition(
+                    admitted.record(),
+                    IdempotencyState.IN_PROGRESS,
+                    null,
+                    null,
+                    "capacity-worker",
+                    leaseToken,
+                    Duration.ofSeconds(30))));
+  }
+
+  /** 在给定真实事务边界内完成一条引用已提交decision output的terminal guard。 */
+  private IdempotencyRecordView completeGuardFixture(
+      final GuardTransactionBoundary boundary,
+      final IdempotencyGuardPort guards,
+      final PersistentGuardIdentity identity,
+      final String requestId,
+      final String requestHash,
+      final String resultId) {
+    final IdempotencyRecordView received =
+        boundary.required(
+            () ->
+                guards
+                    .admit(
+                        new IdempotencyAdmissionCommand(
+                            identity,
+                            requestId,
+                            requestHash,
+                            IdempotencyAdmissionCommand.HASH_VERSION,
+                            Duration.ofMinutes(10),
+                            Duration.ofHours(1)))
+                    .record());
+    final UUID leaseToken = UUID.randomUUID();
+    final IdempotencyRecordView inProgress =
+        boundary.required(
+            () ->
+                guards.transition(
+                    transition(
+                        received,
+                        IdempotencyState.IN_PROGRESS,
+                        null,
+                        null,
+                        "context-restart-worker",
+                        leaseToken,
+                        Duration.ofSeconds(30))));
+    return boundary.required(
+        () ->
+            guards.transition(
+                transition(
+                    inProgress,
+                    IdempotencyState.COMPLETED,
+                    "DH_DECISION_OUTPUT",
+                    resultId,
+                    "context-restart-worker",
+                    leaseToken,
+                    null)));
+  }
+
+  /** 事务异常后的fixture必须完全不可见，不能在restart后晋升。 */
+  private String seedRolledBackState(
+      final GuardTransactionBoundary boundary,
+      final IdempotencyGuardPort guards,
+      final PersistentGuardIdentity identity,
+      final String requestId) {
+    final IdempotencyAdmissionCommand admission =
+        new IdempotencyAdmissionCommand(
+            identity,
+            requestId,
+            Qdr7CapacityContracts.sha256("rollback-" + requestId),
+            IdempotencyAdmissionCommand.HASH_VERSION,
+            Duration.ofMinutes(10),
+            Duration.ofHours(1));
+    try {
+      boundary.required(
+          () -> {
+            assertThat(guards.admit(admission).status())
+                .isEqualTo(IdempotencyAdmissionStatus.ADMITTED);
+            throw new IllegalStateException("deterministic restart rollback fixture");
+          });
+    } catch (final IllegalStateException expected) {
+      assertThat(expected).hasMessage("deterministic restart rollback fixture");
+    }
+    return requestId;
+  }
+
+  /** 先提交真实V5/V12 tenant-bound decision output，随后guard FK才允许terminal引用。 */
+  private static void seedDecisionOutput(
+      final JdbcTemplate targetJdbc,
+      final String tenant,
+      final String resultId,
+      final String requestId) {
+    final int inserted =
+        targetJdbc.update(
+            "insert into dh_decision_output"
+                + " (decision_id,tenant_id,trace_id,request_id,decision_type,action,risk_level,"
+                + "policy_status,confidence,output_json)"
+                + " values (?,?,?,?,'READ_ONLY_RECOMMENDATION','NO_TRADE','LOW','ALLOW',0.5,"
+                + "jsonb_build_object('dryRun',true,'environment','test'))",
+            resultId,
+            tenant,
+            "trace-" + Qdr7CapacityContracts.sha256(resultId).substring(0, 24),
+            requestId);
+    assertThat(inserted).isEqualTo(1);
+  }
+
+  /** 为独立restart tenant提交最小合法PromptVersion；只保存hash/ref等安全fixture字段。 */
+  private static String seedCanonicalPromptVersion(
+      final JdbcTemplate targetJdbc, final String tenant, final int round) {
+    final UUID templateId =
+        UUID.nameUUIDFromBytes(("qdr7-context-template-" + tenant).getBytes(StandardCharsets.UTF_8));
+    final UUID versionId =
+        UUID.nameUUIDFromBytes(("qdr7-context-version-" + tenant).getBytes(StandardCharsets.UTF_8));
+    final String templateHash =
+        Qdr7CapacityContracts.sha256("qdr7-context-template-hash-" + tenant);
+    final String checksum = Qdr7CapacityContracts.sha256("qdr7-context-checksum-" + tenant);
+    final int templateInserted =
+        targetJdbc.update(
+            "insert into qdr_prompt_template"
+                + " (id,tenant_id,template_key,display_name,current_version_id,status,created_at,updated_at)"
+                + " values (?,?,?,?,null,'ACTIVE',transaction_timestamp(),transaction_timestamp())",
+            templateId,
+            tenant,
+            "qdr7-context-r" + round,
+            "QDR7 context restart fixture");
+    final int versionInserted =
+        targetJdbc.update(
+            "insert into qdr_prompt_version"
+                + " (id,tenant_id,prompt_template_id,version,render_policy_key,template_ref,"
+                + "template_hash,redacted_summary,status,checksum,created_at,created_by)"
+                + " values (?,?,?,'1','deterministic-render','qdr7-context-ref',?,"
+                + "'safe context restart metadata','ACTIVE',?,transaction_timestamp(),'capacity-harness')",
+            versionId,
+            tenant,
+            templateId,
+            templateHash,
+            checksum);
+    final int templateUpdated =
+        targetJdbc.update(
+            "update qdr_prompt_template set current_version_id=?,updated_at=transaction_timestamp()"
+                + " where id=? and tenant_id=?",
+            versionId,
+            templateId,
+            tenant);
+    assertThat(templateInserted).isEqualTo(1);
+    assertThat(versionInserted).isEqualTo(1);
+    assertThat(templateUpdated).isEqualTo(1);
+    return checksum;
   }
 
   private IdempotencyTransitionCommand transition(
@@ -1511,9 +2274,13 @@ class Qdr7CapacityAcceptanceIT {
     }
   }
 
-  private PgSessions postgreSqlSessions() {
+  /** 仅统计本场景pressure pool会话，排除前序场景留在主pool中的idle连接。 */
+  private PgSessions postgreSqlSessions(final String applicationName) {
     return jdbc.query(
-        "select count(*)::int, count(*) filter (where wait_event_type is not null)::int, count(*) filter (where wait_event_type='Lock')::int from pg_stat_activity where datname=current_database()",
+        "select count(*)::int, count(*) filter (where wait_event_type is not null)::int,"
+            + " count(*) filter (where wait_event_type='Lock')::int from pg_stat_activity"
+            + " where datname=current_database() and application_name=?",
+        preparedStatement -> preparedStatement.setString(1, applicationName),
         result -> {
           result.next();
           return new PgSessions(result.getInt(1), result.getInt(2), result.getInt(3));
@@ -1642,7 +2409,12 @@ class Qdr7CapacityAcceptanceIT {
   private PreparedRequest prepare(
       final String suffix, final String fixedNonce, final String requestedSource) {
     try {
-      final String requestId = "qdr7-capacity-" + suffix;
+      final String activeScenario =
+          activeExecution == null
+              ? "lifecycle"
+              : String.valueOf(activeExecution.values().get("scenarioId"));
+      final String requestId =
+          "qdr7-" + RUN_ID + "-" + activeScenario + "-" + suffix;
       final String traceId = "trace-" + Qdr7CapacityContracts.sha256(requestId).substring(0, 24);
       final String nonce = fixedNonce == null ? "nonce-" + requestId : fixedNonce;
       final Instant now = Instant.now();
@@ -1776,16 +2548,28 @@ class Qdr7CapacityAcceptanceIT {
   }
 
   private String canonicalPromptChecksum() {
-    return jdbc.queryForObject(
+    return canonicalPromptChecksum(jdbc, TENANT);
+  }
+
+  private static String canonicalPromptChecksum(
+      final JdbcTemplate targetJdbc, final String tenant) {
+    return targetJdbc.queryForObject(
         "select checksum from qdr_prompt_version where tenant_id=? order by created_at limit 1",
         String.class,
-        TENANT);
+        tenant);
   }
 
   /** 读取restart required state时绑定完整guard identity，零行或重复行都必须失败。 */
   private RestartRequiredState requiredRestartState(final String requestId) {
+    return requiredRestartState(jdbc, identity(TENANT), requestId);
+  }
+
+  private static RestartRequiredState requiredRestartState(
+      final JdbcTemplate targetJdbc,
+      final PersistentGuardIdentity identity,
+      final String requestId) {
     final List<RestartRequiredState> rows =
-        jdbc.query(
+        targetJdbc.query(
             "select guard_id::text,request_hash,state from dh_qdr7_idempotency_guard"
                 + " where environment=? and endpoint=? and source=? and tenant_id=?"
                 + " and request_id=?",
@@ -1794,10 +2578,10 @@ class Qdr7CapacityAcceptanceIT {
                     resultSet.getString("guard_id"),
                     resultSet.getString("request_hash"),
                     resultSet.getString("state")),
-            "test",
-            ENDPOINT,
-            SOURCE,
-            TENANT,
+            identity.environment(),
+            identity.endpoint(),
+            identity.source(),
+            identity.tenantId(),
             requestId);
     assertThat(rows).as("restart required state for %s", requestId).hasSize(1);
     return rows.get(0);
@@ -1824,14 +2608,21 @@ class Qdr7CapacityAcceptanceIT {
   }
 
   private int idempotencyRowCount(final String requestId) {
-    return jdbc.queryForObject(
+    return idempotencyRowCount(jdbc, identity(TENANT), requestId);
+  }
+
+  private static int idempotencyRowCount(
+      final JdbcTemplate targetJdbc,
+      final PersistentGuardIdentity identity,
+      final String requestId) {
+    return targetJdbc.queryForObject(
         "select count(*) from dh_qdr7_idempotency_guard"
             + " where environment=? and endpoint=? and source=? and tenant_id=? and request_id=?",
         Integer.class,
-        "test",
-        ENDPOINT,
-        SOURCE,
-        TENANT,
+        identity.environment(),
+        identity.endpoint(),
+        identity.source(),
+        identity.tenantId(),
         requestId);
   }
 
@@ -1885,7 +2676,20 @@ class Qdr7CapacityAcceptanceIT {
     row.put("status", result.status().name());
     row.put("reason", result.reason());
     THRESHOLD_RESULTS.add(row);
-    assertThat(result.status()).isEqualTo(Qdr7CapacityContracts.HarnessStatus.PASS);
+    if (activeExecution != null) {
+      activeExecution.values().put(
+          "comparisonsExecuted", counter(activeExecution, "comparisonsExecuted") + 1);
+      if (result.status() == Qdr7CapacityContracts.HarnessStatus.FAIL) {
+        activeExecution
+            .findings()
+            .add(Qdr7CapacityContracts.SemanticExit.NUMERIC_THRESHOLD_FAILED);
+      } else if (result.status() == Qdr7CapacityContracts.HarnessStatus.BLOCKED) {
+        activeExecution
+            .findings()
+            .add(Qdr7CapacityContracts.SemanticExit.MANDATORY_SCENARIO_MISSING);
+      }
+    }
+    writeThresholdComparisonSnapshot();
   }
 
   /** 在冻结时限内等待并将超时统一映射为可传播的并发执行失败。 */
@@ -1931,14 +2735,80 @@ class Qdr7CapacityAcceptanceIT {
     return value;
   }
 
+  private static Path evidenceRoot() {
+    return PROJECT_ROOT
+        .resolve(
+            QUALIFICATION_ONLY
+                ? "target/qdr7-capacity-qualification"
+                : "target/qdr7-capacity-acceptance")
+        .resolve(RUN_ID);
+  }
+
+  private static String scenarioTenant(final String scenarioId, final int round) {
+    return ("qdr7-" + scenarioId + "-r" + round + "-" + RUN_ID).toLowerCase(Locale.ROOT);
+  }
+
+  /** 使用当前Maven runtime执行独立quality gate；Windows批处理必须经cmd.exe。 */
+  private static List<String> qualityCommand() {
+    return mavenCommand(List.of("-B", "-ntp", "-Pquality", "-DskipTests", "validate"));
+  }
+
+  /** full-regression在scenario内独立执行，失败由ledger记录后仍继续quality与finalizer。 */
+  private static List<String> fullRegressionCommand() {
+    return mavenCommand(List.of("-B", "-ntp", "test"));
+  }
+
+  private static List<String> mavenCommand(final List<String> arguments) {
+    final boolean windows = System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
+    final Path executable = mavenExecutable(windows);
+    if (windows) {
+      final String executableToken =
+          executable.isAbsolute()
+              ? "\"" + executable.toAbsolutePath().normalize() + "\""
+              : executable.toString();
+      final String command =
+          "\"" + executableToken + " " + String.join(" ", arguments) + "\"";
+      return List.of("cmd.exe", "/d", "/s", "/c", command);
+    }
+    final List<String> command = new ArrayList<>();
+    command.add(executable.toString());
+    command.addAll(arguments);
+    return List.copyOf(command);
+  }
+
+  /** 优先复用当前Maven安装，缺失时退到仓库wrapper，最后才依赖PATH。 */
+  private static Path mavenExecutable(final boolean windows) {
+    final String executableName = windows ? "mvn.cmd" : "mvn";
+    String mavenHome = System.getProperty("maven.home", "");
+    if (mavenHome.isBlank()) {
+      mavenHome = System.getenv("MAVEN_HOME");
+    }
+    if (mavenHome == null || mavenHome.isBlank()) {
+      mavenHome = System.getenv("M2_HOME");
+    }
+    if (mavenHome != null && !mavenHome.isBlank()) {
+      final Path installed = Path.of(mavenHome, "bin", executableName).toAbsolutePath().normalize();
+      if (Files.isRegularFile(installed)) {
+        return installed;
+      }
+    }
+    final Path wrapper = PROJECT_ROOT.resolve(windows ? "mvnw.cmd" : "mvnw").normalize();
+    return Files.isRegularFile(wrapper) ? wrapper : Path.of(executableName);
+  }
+
   private static JsonNode readResourceRegistry() {
     try {
       final String projectRoot = requiredProperty("qdr7.projectRoot");
       final String runId = requiredProperty("qdr7.runId");
+      final boolean qualificationOnly =
+          Boolean.parseBoolean(System.getProperty("qdr7.qualificationOnly", "false"));
       return new ObjectMapper()
           .readTree(
               Path.of(projectRoot)
-                  .resolve("target/qdr7-capacity-acceptance")
+                  .resolve(
+                      qualificationOnly
+                          ? "target/qdr7-capacity-qualification"
+                          : "target/qdr7-capacity-acceptance")
                   .resolve(runId)
                   .resolve("resource-registry.json")
                   .toFile());
@@ -2025,6 +2895,21 @@ class Qdr7CapacityAcceptanceIT {
       super(DockerImageName.parse("postgres:17"));
       addFixedExposedPort(hostPort, PostgreSQLContainer.POSTGRESQL_PORT);
     }
+
+    /** 保留container与volume，仅制造数据库不可用窗口，避免GenericContainer二次start状态污染。 */
+    private void stopWithoutRemoval() {
+      getDockerClient()
+          .stopContainerCmd(Objects.requireNonNull(getContainerId(), "container id"))
+          .withTimeout(10)
+          .exec();
+    }
+
+    /** 启动同一Docker container；数据库与Hikari就绪由场景自己的有界探针判断。 */
+    private void startExistingContainer() {
+      getDockerClient()
+          .startContainerCmd(Objects.requireNonNull(getContainerId(), "container id"))
+          .exec();
+    }
   }
 
   private record PreparedRequest(
@@ -2038,16 +2923,17 @@ class Qdr7CapacityAcceptanceIT {
 
   private record RestartRequiredState(String recordId, String requestHash, String state) {}
 
-  /** 跨ApplicationContext保存的只含合成fixture与安全hash的restart验证状态。 */
-  private record RestartProbeState(
-      int round,
-      PreparedRequest committedRequest,
+  /** Context A关闭后只保留合成ID、hash与不可变状态，不持有Context/DataSource引用。 */
+  private record ContextRestartSeed(
+      PersistentGuardIdentity identity,
+      String requestId,
       RestartRequiredState requiredState,
-      String uncommittedRequestId,
+      String rollbackRequestId,
+      String replayKey,
       String promptChecksum,
       String jdbcEndpointSha256,
-      ApplicationContext applicationContext,
-      DataSource dataSource) {}
+      String contextIdentityHash,
+      String dataSourceIdentityHash) {}
 
   private record RequestOutcome(
       String requestId,

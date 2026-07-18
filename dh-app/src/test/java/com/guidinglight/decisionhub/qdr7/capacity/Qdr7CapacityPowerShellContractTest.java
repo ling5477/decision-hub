@@ -142,17 +142,69 @@ class Qdr7CapacityPowerShellContractTest {
         .contains("<argument>-ImplementationValidation</argument>");
     assertThat(harnessScript)
         .contains("'.gitattributes'")
-        .contains("$implementationStagedScopeValid")
-        .contains("empty or implementation-validation write allowlist only");
+        .contains("$stagedWriteScopeValid")
+        .contains("qualification write allowlist only")
+        .contains("empty or harness write allowlist only");
     assertThat(formalIt)
         .contains("IMPLEMENTATION_VALIDATION_ONLY")
         .contains("tenantIsolationStartupProbe", "contextRestartStartupProbe")
         .contains("nonceDriverStartupProbe")
+        .contains("new ProcessBuilder(fullRegressionCommand())")
+        .contains("mavenCommand(List.of(\"-B\", \"-ntp\", \"test\"))")
         .contains(
             "@EnabledIfSystemProperty(named = \"qdr7.implementationValidation\", matches = \"true\")")
         .contains(
             "@DisabledIfSystemProperty(named = \"qdr7.implementationValidation\", matches = \"true\")")
         .contains("artifact.put(\"executedScenarioCount\", 0)");
+  }
+
+  @Test
+  void qualificationAndPartialFinalizerContractsAreDurableAndNonFormal() throws IOException {
+    final Path root = repositoryRoot();
+    final String rootPom = Files.readString(root.resolve("pom.xml"));
+    final String appPom = Files.readString(root.resolve("dh-app/pom.xml"));
+    final String script =
+        Files.readString(root.resolve("scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1"));
+    final String binding =
+        Files.readString(root.resolve("scripts/qdr7-capacity/Test-Qdr7CapacityRuntimeBinding.ps1"));
+
+    assertThat(rootPom).contains("<qdr7.qualificationOnly>false</qdr7.qualificationOnly>");
+    assertThat(appPom)
+        .contains("<argument>-QualificationOnly</argument>")
+        .contains("<argument>${qdr7.qualificationOnly}</argument>")
+        .contains("<qdr7.qualificationOnly>${qdr7.qualificationOnly}</qdr7.qualificationOnly>");
+    assertThat(script)
+        .contains("qdr7-capacity-qualification")
+        .contains("QUALIFICATION_ONLY")
+        .contains("HARNESS_INTERRUPTED_AFTER_SCENARIO_START")
+        .contains("Get-NormalizedScenarioLedger")
+        .contains("Set-SummaryScenarioCounts")
+        .contains("PARTIAL_THRESHOLD_EVIDENCE")
+        .contains("capacityAcceptanceExecuted");
+    assertThat(binding)
+        .contains("QualificationOnly 'true'")
+        .contains("partial comparisons preserved")
+        .contains("started to partial normalization")
+            .contains("qualification formal verdict isolation");
+  }
+
+  @Test
+  void qualificationDriversUseIsolatedSessionsStableRestartAndRepositoryMaven() throws IOException {
+    final String formalIt =
+        Files.readString(
+            repositoryRoot()
+                .resolve(
+                    "dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityAcceptanceIT.java"));
+
+    assertThat(formalIt)
+        .contains("config.addDataSourceProperty(\"ApplicationName\", pressureApplicationName)")
+        .contains("and application_name=?")
+        .contains("POSTGRES.stopWithoutRemoval()")
+        .contains("POSTGRES.startExistingContainer()")
+        .contains(".run(commandLineProperties(properties))")
+        .contains("seedCanonicalPromptVersion(contextJdbc, tenant, round)")
+        .contains("System.getenv(\"MAVEN_HOME\")")
+        .contains("PROJECT_ROOT.resolve(windows ? \"mvnw.cmd\" : \"mvnw\")");
   }
 
   @Test

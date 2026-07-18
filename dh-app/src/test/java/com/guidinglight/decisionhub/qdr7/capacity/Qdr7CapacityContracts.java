@@ -41,6 +41,20 @@ final class Qdr7CapacityContracts {
 
   static RunContext parseRunContext(
       final String runId, final String seedValue, final Path projectRoot, final String commitSha) {
+    return parseRunContext(runId, seedValue, projectRoot, commitSha, false);
+  }
+
+  /**
+   * 解析formal或qualification运行上下文，并把两类证据写入互不覆盖的根目录。
+   *
+   * @param qualificationOnly {@code true}时只产生qualification证据，不形成formal acceptance。
+   */
+  static RunContext parseRunContext(
+      final String runId,
+      final String seedValue,
+      final Path projectRoot,
+      final String commitSha,
+      final boolean qualificationOnly) {
     if (runId == null || !RUN_ID_PATTERN.matcher(runId).matches()) {
       throw new IllegalArgumentException("runId must use UTC yyyyMMddTHHmmssZ format");
     }
@@ -69,12 +83,17 @@ final class Qdr7CapacityContracts {
     }
     final Path normalizedRoot =
         Objects.requireNonNull(projectRoot, "projectRoot").toAbsolutePath().normalize();
-    final Path evidenceRoot =
-        normalizedRoot.resolve("target/qdr7-capacity-acceptance").resolve(runId).normalize();
-    if (!evidenceRoot.startsWith(normalizedRoot.resolve("target/qdr7-capacity-acceptance"))) {
+    final Path evidenceBase =
+        normalizedRoot.resolve(
+            qualificationOnly
+                ? "target/qdr7-capacity-qualification"
+                : "target/qdr7-capacity-acceptance");
+    final Path evidenceRoot = evidenceBase.resolve(runId).normalize();
+    if (!evidenceRoot.startsWith(evidenceBase)) {
       throw new IllegalArgumentException("runId resolved outside the evidence root");
     }
-    return new RunContext(runId, seed, parsed, commitSha, normalizedRoot, evidenceRoot);
+    return new RunContext(
+        runId, seed, parsed, commitSha, normalizedRoot, evidenceRoot, qualificationOnly);
   }
 
   static CriteriaSnapshot loadCriteria(final Path projectRoot, final ObjectMapper mapper)
@@ -165,7 +184,8 @@ final class Qdr7CapacityContracts {
       Instant runTimestamp,
       String commitSha,
       Path projectRoot,
-      Path evidenceRoot) {}
+      Path evidenceRoot,
+      boolean qualificationOnly) {}
 
   record CriteriaSnapshot(
       String criteriaVersion, Path sourceDocument, String sourceDocumentSha256, JsonNode root) {}
@@ -174,7 +194,22 @@ final class Qdr7CapacityContracts {
     PASS,
     FAIL,
     BLOCKED,
-    NOT_RUN
+    NOT_RUN,
+    NOT_FORMAL
+  }
+
+  enum ExecutionState {
+    NOT_STARTED,
+    STARTED,
+    PARTIAL,
+    COMPLETED
+  }
+
+  enum ScenarioVerdict {
+    NOT_EVALUATED,
+    PASS,
+    FAIL,
+    BLOCKED
   }
 
   enum SemanticExit {

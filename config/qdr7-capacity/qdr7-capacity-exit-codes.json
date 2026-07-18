@@ -1,5 +1,12 @@
 {
   "schemaVersion": "qdr7-capacity-1",
+  "qualification": {
+    "successExitCode": 0,
+    "status": "NOT_FORMAL",
+    "reasonCode": "QUALIFICATION_ONLY",
+    "capacityAcceptanceExecuted": false,
+    "formalAcceptanceVerdict": "NOT_EVALUATED"
+  },
   "priority": [90, 80, 70, 60, 40, 50, 30, 20, 10, 0],
   "codes": {
     "0": {"status": "PASS", "meaning": "all mandatory scenarios and thresholds passed"},

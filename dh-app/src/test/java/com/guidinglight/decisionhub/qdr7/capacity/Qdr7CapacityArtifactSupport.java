@@ -32,9 +32,20 @@ final class Qdr7CapacityArtifactSupport {
           "seed",
           "unitSystem",
           "missingValues");
-  private static final List<String> VALID_STATUSES = List.of("PASS", "FAIL", "BLOCKED", "NOT_RUN");
+  private static final List<String> VALID_STATUSES =
+      List.of("PASS", "FAIL", "BLOCKED", "NOT_RUN", "NOT_FORMAL");
 
   private Qdr7CapacityArtifactSupport() {}
+
+  /**
+   * 读取 Maven 子进程日志并保留 ASCII 合同标记。
+   *
+   * <p>Windows Maven 输出可能混入当前控制台代码页字节，不能假设整份日志都是 UTF-8。这里使用单字节映射，避免本地化日志导致
+   * {@code BUILD SUCCESS} 等 ASCII 标记解析失败；原始日志文件不会被改写。
+   */
+  static String readAsciiCompatibleLog(final Path path) throws IOException {
+    return Files.readString(path, StandardCharsets.ISO_8859_1);
+  }
 
   static void writeJson(final Path path, final Map<String, ?> value, final ObjectMapper mapper)
       throws IOException {

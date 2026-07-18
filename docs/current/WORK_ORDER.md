@@ -1,6 +1,6 @@
 # Decision Hub 当前工单
 
-## Current authority — 2026-07-17 capacity harness runtime blocker-3 closed locally
+## Current authority — 2026-07-18 harness stabilization closeout accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -20,22 +20,43 @@ Capacity harness runtime blocker-3: CLOSED / ACCEPTED
 Harness tenant isolation: CLOSED / ACCEPTED / 3 OF 3 / QUERY_MISSING_TENANT_FILTER
 Harness Context restart: CLOSED / ACCEPTED / 3 OF 3 / TEST_LIFECYCLE_FIXTURE_DEPENDENCY
 Harness nonce driver: CLOSED / ACCEPTED / V4 REPLAY_KEY
-Cross-platform CI fix: LOCAL VALIDATION PASS / REMOTE CI PENDING
+Harness stabilization: CLOSED / ACCEPTED
+Qualification mode: CLOSED / ACCEPTED
+Qualification run: PASS / NOT_FORMAL / QUALIFICATION_ONLY / 20260718T130056Z / MAVEN EXIT 0 / INTERNAL EXIT 0
+Qualification preflight: PASS / 26 OF 26
+Qualification mandatory scenarios: PASS / STARTED 15 / COMPLETED 15 / PASSED 15 / PARTIAL 0 / FAILED 0 / BLOCKED 0 / NOT_STARTED 0
+Qualification correctness: PASS
+Qualification thresholds: PASS / 94 OF 94 COMPARISONS
+Qualification cleanup: PASS / 10 + 100 + 1000
+Qualification PostgreSQL/Hikari contention: PASS
+Qualification same-pool recovery: PASS / 3 OF 3
+Qualification Context restart: PASS / 3 OF 3
+Qualification persistent-volume restart: PASS / 3 OF 3
+Qualification post-recovery concurrency: PASS / CONCURRENCY 8 / 100 OF 100 STRUCTURED 2XX
+Qualification full regression: PASS / 19 OF 19 REACTOR SUCCESS / 1144 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Qualification quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS / 19 OF 19 REACTOR SUCCESS
+Qualification artifacts: PASS / 32 FILES / 31 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
+Qualification capacity acceptance executed: false
+Qualification formal acceptance verdict: NOT_EVALUATED
+Historical remote CI baseline: PASS / RUN 29588823663 / HEAD f2f07ad3f14875165263e66428e3fe472bbe3cef
+Remote CI: PENDING NEW COMMIT / EXACT-SHA REQUIRED
 Formal profile: qdr7-capacity-acceptance
 Historical formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T140521Z
 Latest binding validation: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260715T145836Z / EXPECTED CONTRACT
-Previous formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T160710Z / INTERNAL EXIT 80 / HISTORICAL
-Latest formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260716T144346Z / MAVEN EXIT 1 / INTERNAL EXIT 20 / HISTORICAL
-Latest formal reason: APPLICATION_CONTEXT_STARTUP_BLOCKED / CAPACITY_ACCEPTANCE_EXECUTED FALSE
+Historical Retry-2 formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260715T160710Z / INTERNAL EXIT 80
+Historical Retry-3 formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260716T144346Z / INTERNAL EXIT 20
+Historical Retry-4 environment run: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260717T151351Z / MAVEN EXIT 1 / INTERNAL EXIT 10
+Capacity environment blocker: CLOSED / ACCEPTED / 20260718T062033Z / PREFLIGHT 26 OF 26 / MINIMUM MEMORY 32249491456 BYTES
+Latest formal run: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT / 20260718T065630Z / MAVEN EXIT 1 / INTERNAL EXIT 20
+Latest formal reason: APPLICATION_CONTEXT_STARTUP_BLOCKED / IDEMPOTENCY_RESULT_FIXTURE_FK_VIOLATION
 Latest formal preflight: PASS / 26 OF 26
-Latest formal mandatory scenarios: BLOCKED / 0 OF 15 EXECUTED
-Latest formal artifacts: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
-Latest implementation validation: PASS / IMPLEMENTATION_VALIDATION_ONLY / 20260717T122621Z / MAVEN EXIT 0 / 0 OF 15
+Latest formal mandatory scenarios: BLOCKED / SUMMARY 0 OF 15 / PARTIAL EXECUTION EVIDENCE PRESENT
+Latest formal evidence ledger: BLOCKED / PARTIAL EXECUTION COLLAPSED TO 0 OF 15 + RESTART ROUND COUNT DRIFT
+Latest implementation validation: PASS / IMPLEMENTATION_VALIDATION_ONLY / 20260718T125939Z / MAVEN EXIT 0 / 0 OF 15
 Latest implementation preflight: PASS / 26 OF 26
-Latest implementation probes: PASS / TENANT 3 OF 3 / CONTEXT RESTART 3 OF 3 / NONCE DRIVER PASS
-Latest implementation artifacts: PASS / 28 FILES / 27 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
+Latest implementation artifacts: PASS / 29 FILES / 28 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
 Criteria raw-byte alignment: PASS / SHA-256 d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / SEMANTIC 0 / THRESHOLD 0
-Post-B2 capacity acceptance: BLOCKED / REMOTE_CI_AND_FORMAL_RETRY_REQUIRED
+Post-B2 capacity acceptance: BLOCKED / FINAL FORMAL ACCEPTANCE PENDING
 Capacity calibration path blocker: CLOSED
 Repeatable protected 2xx: PASS
 PromptVersion atomic bootstrap: CLOSED / ACCEPTED
@@ -52,17 +73,19 @@ Candidate threshold evidence: SUFFICIENT
 Allow capacity criteria freeze retry: NO / CONSUMED_ACCEPTED
 Allow capacity harness work order: NO / CONSUMED_ACCEPTED
 Allow capacity harness implementation: NO / CONSUMED_ACCEPTED
-Allow capacity acceptance execution: NO / REMOTE_CI_AND_FORMAL_RETRY_REQUIRED
+Allow capacity acceptance execution: NO / EXACT-SHA CI AND FORMAL RETRY PENDING
 Allow post-B2 capacity acceptance retry-3: NO / CONSUMED_BLOCKED
-Allow capacity harness CI verification: YES / NEXT_TASK_ONLY
-Allow formal retry-4: NO / REMOTE_CI_PENDING
-Latest completed full regression: PASS / 1141 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED / LOCAL CI-EQUIVALENT
+Allow capacity harness CI verification: NO / CONSUMED_ACCEPTED
+Allow formal retry-4: NO
+Allow capacity environment blocker: NO / CONSUMED_ACCEPTED
+Allow capacity harness defect correction: NO / CONSUMED_ACCEPTED
+Formal-run full regression scenario: HISTORICAL BLOCKED / NOT_EXECUTED
 Previous full regression resource baseline: PASS / 380 SUREFIRE ROWS / 7 PIDS / HISTORICAL
-Latest completed quality gate: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+Formal-run quality scenario: HISTORICAL BLOCKED / NOT_EXECUTED
 Stage-QDR-7 B3: NOT_ALLOWED
-current task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
-current task status: CLOSED / ACCEPTED / LOCAL_VALIDATION_PASS
-next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-CI-VERIFICATION
+current task: DH-STAGE-QDR-7-B2-HARNESS-STABILIZATION-CLOSEOUT
+current task status: CLOSED / ACCEPTED
+next action: OBTAIN PUSH AUTHORIZATION AND RUN EXACT-SHA CI; THEN RESUME DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 0 CONFLICTS
 HARD_CEILING_CONFLICT: CLOSED
 CAPACITY_CRITERIA_AUTHORITY: FROZEN / ACCEPTED
@@ -71,14 +94,17 @@ ALLOW_CAPACITY_THRESHOLD_EVIDENCE_RETRY_2: NO / CONSUMED_BLOCKED
 ALLOW_CAPACITY_CRITERIA_FREEZE_RETRY: NO / CONSUMED_ACCEPTED
 ALLOW_CAPACITY_HARNESS_WORK_ORDER: NO / CONSUMED_ACCEPTED
 ALLOW_CAPACITY_HARNESS_IMPLEMENTATION_NOW: NO / CONSUMED_ACCEPTED
-ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO / REMOTE_CI_AND_FORMAL_RETRY_REQUIRED
+ALLOW_CAPACITY_ACCEPTANCE_EXECUTION_NOW: NO / EXACT-SHA CI AND FORMAL RETRY PENDING
 ALLOW_POST_B2_CAPACITY_ACCEPTANCE_RETRY_3: NO / CONSUMED_BLOCKED
-ALLOW_CAPACITY_HARNESS_CI_VERIFICATION: YES / NEXT_TASK_ONLY
-ALLOW_FORMAL_RETRY_4: NO / REMOTE_CI_PENDING
+ALLOW_CAPACITY_HARNESS_CI_VERIFICATION: NO / CONSUMED_ACCEPTED
+ALLOW_FORMAL_RETRY_4: NO
+ALLOW_CAPACITY_ENVIRONMENT_BLOCKER: NO / CONSUMED_ACCEPTED
+ALLOW_CAPACITY_HARNESS_DEFECT_CORRECTION: NO / CONSUMED_ACCEPTED
+ALLOW_EXACT_SHA_CI: YES
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 ```
 
-历史threshold evidence、无效same-pool probe与全部formal runtime defect继续保留为Previous attempt / consumed evidence。Criteria保持`FROZEN / ACCEPTED`，B2 acceptance不回退。Blocker-3已在本地关闭；下一任务只允许`DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-CI-VERIFICATION`，不得现场重跑formal acceptance或进入B3。
+历史threshold evidence、无效same-pool probe与全部formal结果继续保留为Previous attempt / consumed evidence。Criteria保持`FROZEN / ACCEPTED`，B2 acceptance不回退。harness stabilization已由非正式qualification完整验证并关闭，但qualification不产生capacity PASS。当前工单仅允许获得push授权并执行新commit的exact-SHA CI；CI green后恢复原Retry-4，不创建Retry-5，不进入B3。
 
 权威层级固定为：
 
@@ -121,7 +147,7 @@ Review收口规则：技术验收已通过且唯一阻断为current docs漂移�
 
 从下一个authority/日期段落起，旧`current task`与`next task/action`均为historical/consumed快照，不得覆盖上方唯一当前工单。
 
-## Current authority — 2026-07-13 schema errata implementation review retry blocked
+## Historical authority — 2026-07-13 schema errata implementation review retry blocked
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -142,7 +168,7 @@ ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
 
 本review retry确认`479dbc`已关闭callback timeout scope、rollback、retry、completed no-op与session isolation技术缺口；但current factsources仍含未标historical的旧Stage-QDR-7/Stage-QDR-4入口，整体必须`BLOCKED`。下一任务只允许受控factsources blocker fix retry；不得修改callback、测试、migration或进入milestone retry-3、capacity、B3。
 
-## Current authority — 2026-07-13 schema errata implementation blocker fix
+## Historical authority — 2026-07-13 schema errata implementation blocker fix
 
 ```text
 Stage-QDR-7 B1: FROZEN

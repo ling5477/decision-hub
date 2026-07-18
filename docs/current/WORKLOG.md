@@ -1,6 +1,144 @@
 # Decision Hub Worklog
 
-## Current work — 2026-07-17 capacity harness runtime blocker-3
+## Current work — 2026-07-18 harness stabilization closeout
+
+`DH-STAGE-QDR-7-B2-HARNESS-STABILIZATION-CLOSEOUT`在canonical implementation workspace `E:/CapacityRuns/decision-hub-qdr7-retry4`执行；主仓库`E:/Project/decision-hub`保持只读。开工基线为`dev`、`HEAD == origin/dev == f2f07ad3f14875165263e66428e3fe472bbe3cef`、staged为空，三项scope包含关系全部PASS。修改严格限制在POM、QDR7 capacity test infrastructure、PowerShell harness、machine-readable harness合同和14份current/result文档；未修改production Java、application配置、V1–V14 migration/callback、API/contracts、冻结criteria、workflow或NQ。
+
+本任务连续关闭了fixture、scenario lifecycle、restart/recovery、partial evidence ledger、threshold comparison、finalizer与qualification lifecycle缺陷：
+
+- idempotency lifecycle先建立并提交合法`dh_decision_output`，再建立同scope result引用；不存在、跨tenant和跨environment引用保持fail-closed。
+- 15个mandatory scenarios使用独立setup与run/scenario/round scope；场景局部失败写入ledger后继续调度，只有系统级错误允许中止。
+- scenario ledger采用`NOT_STARTED/STARTED/PARTIAL/COMPLETED`与`NOT_EVALUATED/PASS/FAIL/BLOCKED`，summary与restart round count全部来自真实结果。
+- Spring Context、same-pool recovery与persistent-volume restart均真实完成3/3；cleanup、contention与post-recovery也纳入完整qualification。
+- finalizer在JUnit、fixture、scenario、full regression或quality失败后仍保留partial结果、生成summary/comparison、执行secret scan、manifest与teardown。
+- 新增`-Dqdr7.qualificationOnly=true`；artifact写入`target/qdr7-capacity-qualification/<run-id>/`并固定输出`NOT_FORMAL / QUALIFICATION_ONLY / capacityAcceptanceExecuted=false / formalAcceptanceVerdict=NOT_EVALUATED`。
+- Windows Maven日志可能包含非UTF-8本地代码页字节，full regression/quality合同标记改为ASCII-compatible单字节读取并补回归测试。
+- qualification profile仅跳过外层`dh-app`重复Surefire；完整回归仍作为第14 mandatory scenario执行，默认`mvn test`与`mvn -Pquality validate`不受影响。
+
+```text
+implementation validation run: 20260718T125939Z
+Stage-QDR-7 B2: CLOSED / ACCEPTED
+implementation validation: PASS / MAVEN EXIT 0 / PREFLIGHT 26 OF 26 / 0 OF 15 / ARTIFACT SECRET TEARDOWN PASS
+qualification run: 20260718T130056Z
+qualification status: NOT_FORMAL / QUALIFICATION_ONLY
+qualification Maven/internal exit: 0 / 0
+mandatory scenarios: 15 STARTED / 15 COMPLETED / 15 PASS / 0 PARTIAL / 0 FAIL / 0 BLOCKED / 0 NOT_STARTED
+threshold comparisons: 94 EXECUTED / 94 PASS / 0 FAIL / 0 BLOCKED / 0 NOT_EVALUATED
+Context restart: 3 OF 3 PASS
+same-pool recovery: 3 OF 3 PASS
+persistent-volume restart: 3 OF 3 PASS
+cleanup: PASS / 10 + 100 + 1000
+contention: PASS / DEADLOCKS 0 / CONTROLLED ROLLBACK TRUE
+post-recovery: PASS / CONCURRENCY 8 / 100 OF 100 STRUCTURED 2XX
+full regression: PASS / 19 OF 19 REACTOR SUCCESS / 1144 / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS / 19 OF 19 REACTOR SUCCESS
+artifacts: PASS / 32 FILES / 31 MANIFEST ENTRIES / 0 MISMATCH
+secret scan: PASS / 29 FILES / 0 FINDINGS
+teardown: PASS / RESIDUAL NONE
+capacity acceptance executed: false
+formal acceptance verdict: NOT_EVALUATED
+independent full regression: PASS / 19 OF 19 / 1144 / 0 / 0 / 0
+independent quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS / 19 OF 19
+criteria SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab
+historical remote CI: PASS / 29588823663 / BASELINE HEAD f2f07ad3f14875165263e66428e3fe472bbe3cef
+remote CI: PENDING NEW COMMIT / EXACT-SHA REQUIRED
+post-B2 capacity acceptance: BLOCKED / FINAL FORMAL ACCEPTANCE PENDING
+current task: DH-STAGE-QDR-7-B2-HARNESS-STABILIZATION-CLOSEOUT
+current task status: CLOSED / ACCEPTED
+ALLOW_EXACT_SHA_CI: YES
+ALLOW_FORMAL_RETRY_4: NO
+Stage-QDR-7 B3: NOT_ALLOWED
+```
+
+Qualification中间失败全部保留：`20260718T121057Z`暴露Maven日志解码误判；`20260718T123041Z`为14项PASS、full regression Docker瞬时EOF、quality PASS；`20260718T125050Z`在外层Surefire阶段遭Docker瞬时EOF且未进入harness/finalizer。一次隔离V13测试首次同样因Docker瞬时EOF失败，原命令重跑12/12通过。以上均未通过修改migration、production test或业务约束规避。
+
+最终run `20260718T130056Z`只关闭harness stabilization，不改写任何historical formal blocked result。下一动作不是新review或Retry-5，而是获得push授权、push本地exact commit、执行exact-SHA test + quality CI；CI green后恢复原`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4`。
+
+## Historical work — 2026-07-18 formal capacity acceptance Retry-4
+
+`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4`在独立clean clone `E:/CapacityRuns/decision-hub-qdr7-retry4`与exact HEAD `f2f07ad3f14875165263e66428e3fe472bbe3cef`上执行。branch为`dev`、`HEAD == origin/dev`、staged为空，三项scope包含关系全部PASS；主仓库14份历史文档按保护清单重新核验为extra/missing/hash/status mismatch均0且staged empty。criteria原始字节SHA-256保持冻结值。环境恢复run `20260718T062033Z`为26/26 PASS；GitHub Actions run `29588823663`继续在同一HEAD通过。
+
+```text
+formal run: 20260718T065630Z
+formal command: mvn -ntp -Pqdr7-capacity-acceptance -Dqdr7.runId=<RUN_ID> -Dqdr7.seed=7 verify
+formal invocation count: 1
+Maven exit: 1
+internal exit: 20
+formal status: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT
+preflight: PASS / 26 OF 26
+available memory: 27181027328 BYTES
+frozen minimum: 17179869184 BYTES
+capacity acceptance executed: false
+mandatory scenarios: SUMMARY 0 OF 15 / PARTIAL EXECUTION EVIDENCE PRESENT
+partial scenario evidence: PASS / ACTUAL WIRING + RATE + QUOTA + ISOLATION + CANONICAL SOURCE + NONCE
+first blocker: IDEMPOTENCY_RESULT_FIXTURE_FK
+second blocker: RESTART_AGGREGATE_MISSING_PERSISTENT_VOLUME
+semantic evidence ledger: BLOCKED / PARTIAL EXECUTION COLLAPSED TO 0 OF 15 + RESTART ROUND COUNT DRIFT
+formal full regression scenario: NOT_EXECUTED
+formal quality scenario: NOT_EXECUTED
+Maven pre-integration regression: PASS / 172 REPORTS / 1141 / 0 / 0 / 0
+Failsafe: 5 COMPLETED / 1 FAILURE / 1 ERROR / 1 SKIPPED
+artifacts: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH
+secret scan: PASS / 24 FILES / 0 FINDINGS
+teardown: PASS / NO RUN-ID RESOURCE RESIDUAL
+formal rerun: NO
+remote CI: PASS / 29588823663
+post-B2 capacity acceptance: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT
+current factsources: PASS / 8 OF 8 / 0 CONFLICTS
+write scope: PASS / 14 DOCS / 0 UNEXPECTED / FORBIDDEN DIFF 0
+Markdown structure and links: PASS / 0 PROBLEMS
+added-diff secret scan: PASS / 0 FINDINGS
+git diff --check: PASS
+main protection after sync: PASS / 14 OF 14 / 0 MISMATCH
+criteria hash after sync: PASS
+staged files: 0 / target staged 0
+local commit: NOT_CREATED / NO IMMUTABLE BLOCKED-EVIDENCE POLICY FOUND
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: NOT_FROZEN / CAPACITY_HARNESS_RUNTIME_DEFECT_WORK_ORDER_REQUIRED
+```
+
+RCA确认production外键按冻结合同正确工作：formal driver以合成`result-<runId>`完成idempotency transition，却没有先建立对应`dh_decision_output` fixture，触发`fk_dh_qdr7_idempotency_result`。其后persistent-volume driver未执行，restart aggregate仅得到3个Spring Context结果；finalizer又将全部非PASS run统一写成0/15 `NOT_RUN`并写死两个restart round count。以上均属于harness fixture/evidence ledger缺陷，本任务按禁止范围没有修改Java、测试、POM、workflow、harness、criteria/config、migration、API/contracts或NQ，也没有执行第二次formal run。
+
+正式结论形成后，主仓库14份受保护文档差异先导出到系统临时patch，再在formal clone中通过`git apply --check`并应用；没有覆盖复制，也没有写回主仓库。现有implementation work order没有冻结本次新缺陷的后续任务名，因此current facts明确记录`NOT_FROZEN`，不自造Retry-5或新的runtime blocker编号。BLOCKED结果默认不commit，不push、不tag。
+
+## Historical work — 2026-07-17 formal capacity acceptance Retry-4 environment preflight
+
+`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4`在clean exact HEAD `f2f07ad3f14875165263e66428e3fe472bbe3cef`上执行。branch为`dev`、`HEAD == origin/dev`、staged为空，三项scope包含关系全部PASS；criteria原始字节SHA-256为冻结值`d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab`。GitHub Actions run `29588823663`的test与Quality jobs均在同一HEAD成功，远端1141项测试零失败/错误/跳过，PostgreSQL mandatory tests零skip，跨平台合同、Checkstyle与Spotless均通过。
+
+```text
+formal run: 20260717T151351Z
+formal command: mvn -ntp -Pqdr7-capacity-acceptance -Dqdr7.runId=<RUN_ID> -Dqdr7.seed=7 verify
+formal invocation count: 1
+Maven exit: 1
+internal exit: 10
+formal status: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED
+preflight: BLOCKED / 25 OF 26 PASS / AVAILABLE_MEMORY
+available memory: 16762941440 BYTES
+frozen minimum: 17179869184 BYTES
+deficit: 416927744 BYTES
+capacity acceptance executed: false
+mandatory scenarios: 0 OF 15
+formal full regression scenario: NOT_EXECUTED
+formal quality scenario: NOT_EXECUTED
+artifacts: PASS / 26 FILES / 25 MANIFEST ENTRIES / 0 MISMATCH
+secret scan: PASS / 24 FILES / 0 FINDINGS
+teardown: PASS / NO RUN-ID RESOURCE RESIDUAL
+formal rerun: NO
+remote CI: PASS / 29588823663
+post-B2 capacity acceptance: BLOCKED
+current factsources: PASS / 8 OF 8 / 0 CONFLICTS
+write scope: PASS / 14 DOCS / 0 UNEXPECTED / FORBIDDEN DIFF 0
+Markdown and IDE checks: PASS / 0 STRUCTURE ERRORS / 0 IDE ERRORS
+added-diff secret scan: PASS / 0 FINDINGS
+staged files: 0 / target staged 0
+local commit: NOT_CREATED / BLOCKED POLICY
+Stage-QDR-7 B3: NOT_ALLOWED
+next task: DH-STAGE-QDR-7-B2-CAPACITY-ENVIRONMENT-BLOCKER
+```
+
+formal前独立样本显示可用内存`20390670336` bytes，但冻结合同以profile preflight实际采样为准。Maven退出后没有本轮遗留Java进程、container或volume可清理，内存仅比冻结下限高`67096576` bytes；关闭用户IDE/浏览器等进程超出授权，因此没有可审计的安全环境修复条件，未重跑。Retry-4只同步allowlist内current factsources与正式结果，不修改Java、测试、POM、workflow、harness、criteria/config、application、migration、callback、API/contracts或NQ；`target/**`不stage。BLOCKED结果按附件规则不创建本地commit，不push、不tag。
+
+## Historical work — 2026-07-17 capacity harness runtime blocker-3
 
 `DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3`在baseline HEAD `cf31de46bc4594c0ad4c529d5857b88eab26561f`与17个allowlist内继承修改上执行。修正后的scope把`DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md`同时纳入read、validation、fixable blocker、write与current fact scan集合，三项包含关系均为PASS。Criteria在统一CRLF/LF后与HEAD完全相同；只通过`.gitattributes`与Git index保留冻结原始字节，不修改任何文字、阈值、scenario参数、环境baseline、criteriaVersion、sourceDocument或安全边界。
 
@@ -33,7 +171,7 @@ next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-CI-VERIFICATION
 
 Retry-3目录`target/qdr7-capacity-acceptance/20260716T144346Z/**`保持27个文件、26项manifest与原`BLOCKED / internal exit 20 / 0 of 15`证据，未覆盖或改写。本任务没有执行formal acceptance；远端CI green前`ALLOW_FORMAL_RETRY_4`与`ALLOW_STAGE_QDR_7_B3_ENTRY`均为`NO`。
 
-## Current work — 2026-07-16 retry-3 supplemental CI repair
+## Historical work — 2026-07-16 retry-3 supplemental CI repair
 
 用户在Retry-3正式命令完成后追加“修复失败CI”。GitHub Actions run `29506336031`（job `87647948280`）在同一HEAD `cf31de46bc4594c0ad4c529d5857b88eab26561f`上失败：Ubuntu checkout把冻结criteria转为LF，实际SHA-256变成`42bb2195...`；Java contract test同时无条件调用Windows专用`powershell.exe`。冻结criteria当前原始字节包含既有混合行尾，不能用全CRLF替代；本轮新增`.gitattributes -text`保留原始字节，并让Java测试按OS选择Windows双runtime或非Windows `pwsh`。
 
@@ -56,7 +194,7 @@ next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
 
 目标测试第一次命令因PowerShell未给`-Dsurefire.failIfNoSpecifiedTests=false`加引号，在Maven测试阶段前以unknown lifecycle phase退出；修正命令行引用后真实执行并通过。`mvn -B -ntp test`按本轮时间窗聚合172份Surefire XML，排除了未在普通lifecycle执行的stale formal IT report；远端CI仍需后续commit/push触发后才能确认green，本轮按用户边界未执行这些操作。
 
-## Current work — 2026-07-16 formal capacity acceptance retry-3
+## Historical work — 2026-07-16 formal capacity acceptance retry-3
 
 `DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3`在clean exact HEAD `cf31de46bc4594c0ad4c529d5857b88eab26561f`上执行。branch为`dev`、`HEAD == origin/dev`、staged为空，criteria原始字节SHA-256为冻结值`d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab`。26项environment preflight全部通过，formal命令仅执行一次。
 

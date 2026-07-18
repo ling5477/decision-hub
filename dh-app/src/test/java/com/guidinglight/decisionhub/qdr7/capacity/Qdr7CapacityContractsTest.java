@@ -40,6 +40,17 @@ class Qdr7CapacityContractsTest {
                 Qdr7CapacityContracts.parseRunContext(
                     "20260715T120000Z", "8", temporaryDirectory, COMMIT))
         .isInstanceOf(IllegalArgumentException.class);
+
+    final Qdr7CapacityContracts.RunContext qualification =
+        Qdr7CapacityContracts.parseRunContext(
+            "20260715T120001Z", "7", temporaryDirectory, COMMIT, true);
+    assertThat(qualification.qualificationOnly()).isTrue();
+    assertThat(qualification.evidenceRoot())
+        .isEqualTo(
+            temporaryDirectory
+                .toAbsolutePath()
+                .normalize()
+                .resolve("target/qdr7-capacity-qualification/20260715T120001Z"));
   }
 
   @Test

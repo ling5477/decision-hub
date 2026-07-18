@@ -21,7 +21,7 @@
     "runId": {"type": "string", "pattern": "^[0-9]{8}T[0-9]{6}Z$"},
     "commitSha": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
     "scenario": {"type": "string", "minLength": 1},
-    "status": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN"]},
+    "status": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN", "NOT_FORMAL"]},
     "startedAtUtc": {"type": "string", "format": "date-time"},
     "finishedAtUtc": {"type": "string", "format": "date-time"},
     "durationMs": {"type": "integer", "minimum": 0},
@@ -33,6 +33,13 @@
     "completedAt": {"type": "string", "format": "date-time"},
     "internalExitCode": {"type": "integer"},
     "mandatoryScenarioCount": {"const": 15},
+    "startedScenarioCount": {"type": "integer", "minimum": 0, "maximum": 15},
+    "partialScenarioCount": {"type": "integer", "minimum": 0, "maximum": 15},
+    "completedScenarioCount": {"type": "integer", "minimum": 0, "maximum": 15},
+    "passedScenarioCount": {"type": "integer", "minimum": 0, "maximum": 15},
+    "failedScenarioCount": {"type": "integer", "minimum": 0, "maximum": 15},
+    "blockedScenarioCount": {"type": "integer", "minimum": 0, "maximum": 15},
+    "notStartedScenarioCount": {"type": "integer", "minimum": 0, "maximum": 15},
     "executedScenarioCount": {"type": "integer", "minimum": 0, "maximum": 15},
     "correctnessVerdict": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN"]},
     "thresholdVerdict": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN"]},
@@ -41,7 +48,18 @@
     "artifactVerdict": {"enum": ["PASS", "BLOCKED", "PENDING"]},
     "secretVerdict": {"enum": ["PASS", "FAIL", "PENDING"]},
     "teardownVerdict": {"enum": ["PASS", "BLOCKED"]},
-    "reasonCode": {"type": "string", "minLength": 1}
+    "reasonCode": {"type": "string", "minLength": 1},
+    "capacityAcceptanceExecuted": {"type": "boolean"},
+    "formalAcceptanceVerdict": {"enum": ["NOT_EVALUATED", "PASS", "FAIL", "BLOCKED"]},
+    "qualificationVerdict": {"enum": ["NOT_EVALUATED", "PASS", "FAIL", "BLOCKED"]},
+    "executionState": {"enum": ["NOT_STARTED", "STARTED", "PARTIAL", "COMPLETED"]},
+    "verdict": {"enum": ["NOT_EVALUATED", "PASS", "FAIL", "BLOCKED"]},
+    "roundsRequired": {"type": "integer", "minimum": 0},
+    "roundsStarted": {"type": "integer", "minimum": 0},
+    "roundsCompleted": {"type": "integer", "minimum": 0},
+    "measurementsCaptured": {"type": "integer", "minimum": 0},
+    "comparisonsExecuted": {"type": "integer", "minimum": 0},
+    "artifactRefs": {"type": "array", "items": {"type": "string"}}
   },
   "allOf": [
     {
@@ -53,6 +71,13 @@
           "completedAt",
           "internalExitCode",
           "mandatoryScenarioCount",
+          "startedScenarioCount",
+          "partialScenarioCount",
+          "completedScenarioCount",
+          "passedScenarioCount",
+          "failedScenarioCount",
+          "blockedScenarioCount",
+          "notStartedScenarioCount",
           "executedScenarioCount",
           "correctnessVerdict",
           "thresholdVerdict",
@@ -61,8 +86,42 @@
           "artifactVerdict",
           "secretVerdict",
           "teardownVerdict",
-          "reasonCode"
+          "reasonCode",
+          "capacityAcceptanceExecuted",
+          "formalAcceptanceVerdict",
+          "qualificationVerdict"
         ]
+      }
+    },
+    {
+      "if": {"properties": {"scenario": {"const": "scenario-ledger"}}},
+      "then": {
+        "required": ["scenarios"],
+        "properties": {
+          "scenarios": {
+            "type": "array",
+            "minItems": 15,
+            "maxItems": 15,
+            "items": {
+              "type": "object",
+              "required": [
+                "scenarioId",
+                "mandatory",
+                "executionState",
+                "verdict",
+                "startedAt",
+                "completedAt",
+                "roundsRequired",
+                "roundsStarted",
+                "roundsCompleted",
+                "measurementsCaptured",
+                "comparisonsExecuted",
+                "reasonCode",
+                "artifactRefs"
+              ]
+            }
+          }
+        }
       }
     }
   ],

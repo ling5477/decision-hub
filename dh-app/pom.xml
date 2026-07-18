@@ -14,6 +14,7 @@
   <properties>
     <qdr7.powershell.executable>pwsh</qdr7.powershell.executable>
     <qdr7.implementationValidation>false</qdr7.implementationValidation>
+    <qdr7.qualificationOnly>false</qdr7.qualificationOnly>
   </properties>
   <dependencies>
     <dependency>
@@ -136,6 +137,18 @@
       <build>
         <plugins>
           <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <!--
+                full regression由mandatory scenario独立执行并写入durable ledger；profile外层
+                Surefire不得在pre-integration-test之前重复回归并绕过统一finalizer。
+                默认mvn test不激活本profile，测试语义不受影响。
+              -->
+              <skipTests>true</skipTests>
+            </configuration>
+          </plugin>
+          <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
             <version>3.5.0</version>
@@ -167,6 +180,8 @@
                     <argument>${qdr7.powershell.executable}</argument>
                     <argument>-ImplementationValidation</argument>
                     <argument>${qdr7.implementationValidation}</argument>
+                    <argument>-QualificationOnly</argument>
+                    <argument>${qdr7.qualificationOnly}</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -197,6 +212,8 @@
                     <argument>${qdr7.powershell.executable}</argument>
                     <argument>-ImplementationValidation</argument>
                     <argument>${qdr7.implementationValidation}</argument>
+                    <argument>-QualificationOnly</argument>
+                    <argument>${qdr7.qualificationOnly}</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -207,6 +224,11 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <version>3.2.5</version>
             <configuration>
+              <!--
+                integration-test阶段只记录场景失败；post-integration-test finalizer必须总能运行并
+                基于durable ledger返回最终退出码。默认mvn test不激活本profile。
+              -->
+              <testFailureIgnore>true</testFailureIgnore>
               <includes>
                 <include>**/Qdr7CapacityAcceptanceIT.java</include>
               </includes>
@@ -216,6 +238,7 @@
                 <qdr7.seed>${qdr7.seed}</qdr7.seed>
                 <qdr7.projectRoot>${maven.multiModuleProjectDirectory}</qdr7.projectRoot>
                 <qdr7.implementationValidation>${qdr7.implementationValidation}</qdr7.implementationValidation>
+                <qdr7.qualificationOnly>${qdr7.qualificationOnly}</qdr7.qualificationOnly>
               </systemPropertyVariables>
             </configuration>
             <executions>

@@ -1,6 +1,226 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-17 capacity harness runtime blocker-3
+## Current validation — 2026-07-18 harness stabilization closeout
+
+```text
+task: DH-STAGE-QDR-7-B2-HARNESS-STABILIZATION-CLOSEOUT
+Stage-QDR-7 B2: CLOSED / ACCEPTED
+implementation repository: E:/CapacityRuns/decision-hub-qdr7-retry4
+protected main repository: E:/Project/decision-hub / READ_ONLY
+branch: dev
+baseline HEAD: f2f07ad3f14875165263e66428e3fe472bbe3cef
+baseline origin/dev: f2f07ad3f14875165263e66428e3fe472bbe3cef
+staged before closeout: empty
+scope design: PASS / THREE CONTAINMENT RELATIONS
+targeted harness regression: PASS
+implementation validation run: 20260718T125939Z
+implementation validation: PASS / IMPLEMENTATION_VALIDATION_ONLY / MAVEN EXIT 0 / INTERNAL EXIT 0
+implementation validation preflight: PASS / 26 OF 26
+implementation validation mandatory scenarios: 0 OF 15 / NOT_RUN
+implementation validation capacity acceptance executed: false
+implementation validation artifacts: PASS / 29 FILES / 28 MANIFEST ENTRIES / 0 MISMATCH / SECRET PASS / TEARDOWN PASS
+qualification run id: 20260718T130056Z
+qualification Maven exit: 0
+qualification internal exit: 0
+qualification status: NOT_FORMAL / QUALIFICATION_ONLY
+qualification verdict: PASS
+qualification preflight: PASS / 26 OF 26
+qualification mandatory scenarios: STARTED 15 / COMPLETED 15 / PASSED 15 / PARTIAL 0 / FAILED 0 / BLOCKED 0 / NOT_STARTED 0
+qualification correctness: PASS
+qualification threshold comparisons: PASS / 94 EXECUTED / 94 PASSED / 0 FAILED / 0 BLOCKED / 0 NOT_EVALUATED
+qualification cleanup: PASS / 10 + 100 + 1000
+qualification PostgreSQL/Hikari contention: PASS / DEADLOCKS 0 / CONTROLLED ROLLBACK TRUE
+qualification same-pool recovery: PASS / 3 OF 3
+qualification Context restart: PASS / 3 OF 3
+qualification persistent-volume restart: PASS / 3 OF 3
+qualification post-recovery concurrency: PASS / CONCURRENCY 8 / 100 REQUESTS / 100 STRUCTURED 2XX / 0 UNEXPECTED 4XX OR 5XX
+qualification full regression: PASS / 19 OF 19 REACTOR SUCCESS / 172 REPORTS / 1144 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED / TESTCONTAINERS TRUE
+qualification quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS / 19 OF 19 REACTOR SUCCESS
+qualification artifacts: PASS / 32 FILES / 31 MANIFEST ENTRIES / 0 MISMATCH
+qualification secret scan: PASS / 29 SCANNED FILES / 0 FINDINGS
+qualification teardown: PASS / SAMPLER STOPPED / CONTAINER AND VOLUME ABSENT / RESIDUAL NONE
+qualification capacity acceptance executed: false
+qualification formal acceptance verdict: NOT_EVALUATED
+independent mvn -B -ntp test: PASS / 19 OF 19 REACTOR SUCCESS / 1144 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+independent mvn -B -ntp -Pquality validate: PASS / 19 OF 19 REACTOR SUCCESS / CHECKSTYLE 0 / SPOTLESS PASS
+criteria SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / PASS
+production Java diff: 0
+application config diff: 0
+migration/callback diff: 0
+API/contracts diff: 0
+criteria diff: 0
+workflow diff: 0
+historical remote CI: PASS / RUN 29588823663 / BASELINE HEAD f2f07ad3f14875165263e66428e3fe472bbe3cef
+remote CI: PENDING NEW COMMIT / EXACT-SHA REQUIRED
+post-B2 capacity acceptance: BLOCKED / FINAL FORMAL ACCEPTANCE PENDING
+Stage-QDR-7 B3: NOT_ALLOWED
+ALLOW_EXACT_SHA_CI: YES
+ALLOW_FORMAL_RETRY_4: NO
+```
+
+最终qualification满足附件冻结的全部closeout条件。`status=NOT_FORMAL`、`reasonCode=QUALIFICATION_ONLY`、`capacityAcceptanceExecuted=false`与`formalAcceptanceVerdict=NOT_EVALUATED`共同保证其只验证harness准入，不形成formal capacity PASS。独立full regression和quality在qualification之外再次通过，默认Maven生命周期未被qualification profile隔离修改影响。
+
+### Qualification失败迭代与RCA（保留）
+
+| Run / invocation | 真实结果 | RCA与处理 |
+|---|---|---|
+| `20260718T121057Z` | BLOCKED / 13 PASS / 2 BLOCKED | Windows Maven log包含非UTF-8本地代码页字节；真实`BUILD SUCCESS`后按UTF-8读取抛异常。改为ASCII-compatible单字节读取并补非法UTF-8回归。 |
+| `20260718T123041Z` | FAIL / 14 PASS / 1 FAIL / full regression exit 1 / quality PASS | full regression发生Docker/Testcontainers瞬时端口转发EOF；证据保留，未修改migration或生产测试。 |
+| `20260718T125050Z` | Maven在harness/finalizer前失败 / 无qualification artifact | qualification profile外层`dh-app` Surefire重复执行完整回归并可能绕过ledger/finalizer；仅在该profile跳过外层`dh-app` Surefire，完整回归继续由第14 mandatory scenario执行。 |
+| `20260718T130056Z` | PASS / 15 OF 15 | 最终qualification满足全部准入条件。 |
+
+一次隔离V13测试因Docker/Testcontainers瞬时EOF失败，原命令重跑后12/12通过；该环境波动没有触发production Java、migration、callback或业务合同变更。
+
+## Historical validation — 2026-07-18 formal capacity acceptance Retry-4
+
+```text
+task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4
+formal repository: E:/CapacityRuns/decision-hub-qdr7-retry4
+protected main repository: E:/Project/decision-hub / READ_ONLY
+branch: dev
+baseline HEAD: f2f07ad3f14875165263e66428e3fe472bbe3cef
+origin/dev: f2f07ad3f14875165263e66428e3fe472bbe3cef
+formal worktree before task: clean
+formal staged before task: empty
+main protection before import: PASS / 14 OF 14 / EXTRA 0 / MISSING 0 / HASH MISMATCH 0 / STATUS MISMATCH 0 / STAGED 0
+scope design: PASS / THREE CONTAINMENT RELATIONS
+criteria SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / PASS
+environment recovery run: 20260718T062033Z / CLOSED / ACCEPTED
+environment recovery preflight: PASS / 26 OF 26
+environment recovery minimum memory: 32249491456 BYTES
+remote CI run: 29588823663 / COMPLETED / SUCCESS / EXACT HEAD
+remote full regression: PASS / 19 OF 19 REACTOR SUCCESS / 1141 / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+remote PostgreSQL mandatory tests: PASS / 4 OF 4 / ZERO SKIPS
+remote cross-platform contracts: PASS / QDR7 6 OF 6 / POWERSHELL 9 OF 9
+remote quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+formal profile: qdr7-capacity-acceptance
+formal seed: 7
+formal run id: 20260718T065630Z
+formal command: EXECUTED ONCE
+Maven exit: 1
+internal exit: 20
+formal status: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT
+formal reason: APPLICATION_CONTEXT_STARTUP_BLOCKED
+formal first blocker: CAPACITY_HARNESS_RUNTIME_DEFECT
+formal preflight: PASS / 26 OF 26
+formal available memory: 27181027328 BYTES
+formal required memory: 17179869184 BYTES
+capacity acceptance executed: false
+mandatory scenarios: BLOCKED / SUMMARY 0 OF 15 / PARTIAL EXECUTION EVIDENCE PRESENT
+actual wiring: PASS / 13 STRUCTURED 2XX
+rate matrix: PASS / 15 OF 15 MEASURED ROUNDS
+cold-start quota: PASS / 3 OF 3 / OVERSELL 0
+tenant/environment isolation: PASS / 3 OF 3 / ALL CROSS-SCOPE COUNTS 0
+canonical source: PASS / 403 / SOURCE_DENIED
+nonce race: PASS / 3 OF 3 / ONE DATABASE WINNER PER ROUND
+idempotency lifecycle: BLOCKED / RESULT FIXTURE FOREIGN KEY
+Spring Context restart results: PASS / 3 OF 3 INDIVIDUAL
+restart aggregate: BLOCKED / EXPECTED 6 / ACTUAL 3
+persistent-volume restart: NOT_EXECUTED
+cleanup/contention/same-pool/post-recovery: NOT_EXECUTED
+formal full regression scenario: BLOCKED / NOT_EXECUTED
+formal quality scenario: BLOCKED / NOT_EXECUTED
+Maven pre-integration regression: PASS / 172 REPORTS / 1141 / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Failsafe: 5 COMPLETED / 1 FAILURE / 1 ERROR / 1 SKIPPED
+threshold comparator: BLOCKED / 0 COMPARISONS / 0 FAILED / 15 BLOCKED
+artifact root: target/qdr7-capacity-acceptance/20260718T065630Z
+artifacts: PASS / 27 FILES / 26 MANDATORY PRESENT / 26 MANIFEST ENTRIES / 0 MISMATCH
+JSON contracts: PASS / 0 PROBLEMS
+semantic evidence ledger: BLOCKED / PARTIAL EXECUTION COLLAPSED TO 0 OF 15 + RESTART ROUND COUNT DRIFT
+secret scan: PASS / 24 SCANNED FILES / 0 FINDINGS
+teardown: PASS / SAMPLER STOPPED / CONTAINER AND VOLUME ABSENT / RESIDUAL NONE
+formal rerun: NO
+post-B2 capacity acceptance: BLOCKED / CAPACITY_HARNESS_RUNTIME_DEFECT
+Stage-QDR-7 B3: NOT_ALLOWED
+ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
+ALLOW_CAPACITY_ENVIRONMENT_BLOCKER: NO / CONSUMED_ACCEPTED
+ALLOW_CAPACITY_HARNESS_DEFECT_CORRECTION: NO / WORK_ORDER_NOT_FROZEN
+next task: NOT_FROZEN / CAPACITY_HARNESS_RUNTIME_DEFECT_WORK_ORDER_REQUIRED
+current fact scan: PASS / 8 OF 8 FACTSOURCES / 0 CONFLICTS
+write allowlist: PASS / 14 CHANGED DOCS / 0 UNEXPECTED FILES
+forbidden-scope diff: PASS / JAVA 0 / TEST 0 / POM 0 / WORKFLOW 0 / HARNESS 0 / CRITERIA 0 / CONFIG 0 / MIGRATION 0 / API-CONTRACTS 0 / NQ 0
+Markdown structure: PASS / 14 H1 / 0 UNBALANCED FENCES / 0 MISSING LOCAL LINKS
+IDE document problems: NOT_AVAILABLE / IDEA PROJECT BOUND TO PROTECTED MAIN REPOSITORY
+added-diff secret scan: PASS / 0 FINDINGS
+git diff --check: PASS
+main document hashes after sync: PASS / 14 OF 14 / 0 MISMATCH
+formal exact HEAD and origin/dev: PASS
+criteria hash after sync: PASS
+target staged: 0
+staged files: 0
+local commit: NOT_CREATED / NO IMMUTABLE BLOCKED-EVIDENCE POLICY FOUND
+push: NO
+tag: NO
+documentation close validation: PASS
+```
+
+正式profile通过全部环境preflight后进入真实ApplicationContext、Hikari、Flyway与PostgreSQL路径。首个阻断是idempotency driver没有为合成result ID建立被外键引用的decision output fixture；随后restart aggregate因persistent-volume driver未执行而只有3/6结果。finalizer把已有partial执行统一写成0/15 `NOT_RUN`，且restart artifact声明persistent-volume rounds为3但没有对应result，因此结构artifact为PASS、semantic evidence ledger为BLOCKED。按单次执行纪律未修harness、未调参、未重跑。
+
+## Historical validation — 2026-07-17 formal capacity acceptance Retry-4 environment preflight
+
+```text
+task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4
+branch: dev
+baseline HEAD: f2f07ad3f14875165263e66428e3fe472bbe3cef
+origin/dev: f2f07ad3f14875165263e66428e3fe472bbe3cef
+worktree before task: clean
+staged before task: empty
+scope design: PASS / THREE CONTAINMENT RELATIONS
+criteria SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / PASS
+remote CI run: 29588823663 / COMPLETED / SUCCESS / EXACT HEAD
+remote test job: 87912477956 / SUCCESS
+remote quality job: 87912477968 / SUCCESS
+remote full regression: PASS / 19 OF 19 REACTOR SUCCESS / 1141 / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+remote PostgreSQL mandatory tests: PASS / 3 + 1 / ZERO SKIPS
+remote cross-platform contracts: PASS / QDR7 6 OF 6 / POWERSHELL 9 OF 9
+remote quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+manual pre-run available memory: 20390670336 BYTES / PASS
+manual Docker: 29.6.1 / 24694091776 BYTES / PASS
+manual Java and Maven: 21.0.9 + 3.9.12 / PASS
+manual postgres image: postgres:17 CACHED / PASS
+formal profile: qdr7-capacity-acceptance
+formal seed: 7
+formal run id: 20260717T151351Z
+formal command: EXECUTED ONCE
+Maven exit: 1
+internal exit: 10
+formal status: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED
+formal preflight: BLOCKED / 25 OF 26 PASS / AVAILABLE_MEMORY
+formal available memory: 16762941440 BYTES
+formal required memory: 17179869184 BYTES
+formal memory deficit: 416927744 BYTES
+capacity acceptance executed: false
+mandatory scenarios: BLOCKED / 0 OF 15 EXECUTED
+correctness: BLOCKED / NOT_EVALUATED
+thresholds: BLOCKED / NOT_EVALUATED
+PostgreSQL recovery: BLOCKED / NOT_EXECUTED
+formal full regression scenario: BLOCKED / NOT_EXECUTED
+formal quality scenario: BLOCKED / NOT_EXECUTED
+artifact root: target/qdr7-capacity-acceptance/20260717T151351Z
+artifacts: PASS / 26 FILES / 25 MANIFEST ENTRIES / 0 MISMATCH
+secret scan: PASS / 24 SCANNED FILES / 0 FINDINGS
+teardown: PASS / SAMPLER NOT STARTED / CONTAINER AND VOLUME ABSENT / RESIDUAL NONE
+formal rerun: NO
+post-B2 capacity acceptance: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED
+current fact scan: PASS / 8 OF 8 FACTSOURCES / 0 CONFLICTS
+write allowlist: PASS / 14 CHANGED DOCS / 0 UNEXPECTED FILES
+forbidden-scope diff: PASS / JAVA 0 / POM 0 / WORKFLOW 0 / HARNESS 0 / CRITERIA 0 / CONFIG 0 / MIGRATION 0 / API-CONTRACTS 0 / NQ 0
+Markdown structure: PASS / 14 H1 / 0 UNBALANCED FENCES / 0 MISSING REFERENCES
+IDE document problems: PASS / 0 ERRORS IN PRIMARY AUTHORITY AND EVIDENCE DOCS
+added-diff secret scan: PASS / 0 FINDINGS
+git diff --check: PASS
+staged files: 0 / target staged 0
+local commit: NOT_CREATED / BLOCKED POLICY
+ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
+ALLOW_STAGE_QDR_7_B3_ENTRY: NO
+next task: DH-STAGE-QDR-7-B2-CAPACITY-ENVIRONMENT-BLOCKER
+```
+
+唯一formal命令在exact HEAD上执行。冻结preflight的26项检查中仅`available-memory`失败；其余run ID、seed、PowerShell、Git、criteria、JSON合同、Java/Maven、`MAVEN_OPTS`、OS/CPU、Docker、cached PostgreSQL image、resource isolation与loopback均PASS。profile在任何mandatory scenario前以internal exit `10` fail-closed，因此远端CI结果和Maven前置生命周期不得替代formal full regression或quality scenario。
+
+Maven退出后未发现本轮遗留Java进程、run-id container或volume；可用内存仅比冻结下限高`67096576` bytes，不能提供可重复执行余量。主要占用来自用户正在使用的IDE/浏览器，终止这些进程未获授权，故未把再次执行当作环境修复，也未碰运气重跑。
+
+## Historical validation — 2026-07-17 capacity harness runtime blocker-3
 
 ```text
 task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
@@ -54,7 +274,7 @@ Tenant断言原查询只绑定run/round范围，未同时绑定当前tenant与en
 
 首次implementation-validation run `20260717T121357Z`的测试主体通过，但Windows PowerShell 5.1以默认ANSI读取UTF-8 no-BOM JSON，finalizer返回internal exit 80；改为显式UTF-8 no-BOM读取后，run `20260717T122621Z`通过。一次定向PowerShell 5.1合同测试还暴露新增中文脚本注释会影响旧runtime解析，注释改为ASCII后Windows PowerShell 5.1与PowerShell 7均重跑通过。
 
-## Current validation — 2026-07-16 retry-3 supplemental CI repair
+## Historical validation — 2026-07-16 retry-3 supplemental CI repair
 
 ```text
 task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3
@@ -88,7 +308,7 @@ next task: DH-STAGE-QDR-7-B2-CAPACITY-HARNESS-RUNTIME-BLOCKER-3
 
 该补充修复只处理已失败CI暴露的跨平台checkout、PowerShell executable选择与summary时间序列化问题。它不把普通`mvn test`计为formal capacity run，不覆盖Retry-3 summary，也不修复tenant isolation/context restart blocker-3。远端workflow未重跑，因为本轮禁止commit、push和workflow rerun；当前只能确认local CI-equivalent validation通过。
 
-## Current validation — 2026-07-16 formal capacity acceptance retry-3 blocked
+## Historical validation — 2026-07-16 formal capacity acceptance retry-3 blocked
 
 ```text
 task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-3
