@@ -142,6 +142,7 @@ class Qdr7CapacityPowerShellContractTest {
         .contains("<argument>-ImplementationValidation</argument>");
     assertThat(harnessScript)
         .contains("'.gitattributes'")
+        .contains("'dh-bom/pom.xml'")
         .contains("$stagedWriteScopeValid")
         .contains("qualification write allowlist only")
         .contains("empty or harness write allowlist only");

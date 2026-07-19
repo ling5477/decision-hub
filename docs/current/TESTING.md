@@ -1,6 +1,113 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-18 harness stabilization closeout
+## Current validation — 2026-07-19 Surefire fork startup stabilization accepted
+
+任务`DH-STAGE-QDR-7-B2-SUREFIRE-FORK-STARTUP-STABILIZATION`在`dev`与baseline HEAD `20c665c7506c9f96da341944635918eec5275b7f`上执行。三项scope包含关系全部PASS；production Java、migration、API、contracts与冻结criteria均不在写范围。默认Surefire classloader、manifest-only JAR与全局fork模式未修改。
+
+```text
+dh-domain consecutive run 1: PASS / 151 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+dh-domain consecutive run 2: PASS / 151 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+dh-domain consecutive run 3: PASS / 151 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+implementation validation run: 20260719T071924Z
+implementation validation: PASS / MAVEN EXIT 0 / INTERNAL EXIT 0 / PREFLIGHT 26 OF 26
+implementation validation scenarios: 0 OF 15 / CAPACITY_ACCEPTANCE_EXECUTED FALSE
+implementation validation artifacts: PASS / 29 FILES / 28 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
+qualification run: 20260719T072450Z
+qualification: PASS / NOT_FORMAL / QUALIFICATION_ONLY / MAVEN EXIT 0 / INTERNAL EXIT 0
+qualification preflight: PASS / 26 OF 26
+qualification scenarios: 15 STARTED / 15 COMPLETED / 15 PASSED / 0 PARTIAL / 0 FAILED / 0 BLOCKED / 0 NOT_STARTED
+qualification comparisons: 94 PASSED / 0 FAILED / 0 BLOCKED / 0 NOT_EVALUATED
+qualification capacity acceptance executed: false
+qualification artifacts: PASS / 32 FILES / 31 MANIFEST ENTRIES / 0 MISSING / 0 MISMATCH
+qualification secret scan: PASS / 29 FILES / 0 FINDINGS
+qualification teardown: PASS / RESIDUAL NONE / POST-RUN CONTAINERS 0 / VOLUMES 0
+qualification full regression: PASS / 19 OF 19 / 172 REPORTS / 1145 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+qualification quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+independent default regression: PASS / 19 OF 19 / 172 REPORTS / 1145 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+independent quality: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+criteria SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab
+criteria diff: 0
+production Java diff: 0
+migration diff: 0
+API/contracts diff: 0
+default Surefire classloader/fork marker diff: 0
+current conflict count: 0
+forbidden generated tracked diff: 0
+git diff --check: PASS
+remote exact-SHA CI: PENDING STABILIZATION COMMIT
+formal Retry-4: NOT_EXECUTED IN THIS TASK
+Post-B2 capacity acceptance: BLOCKED / EXACT_SHA_REMOTE_CI_AND_FINAL_FORMAL_PENDING
+Stage-QDR-7 B3: NOT_ALLOWED
+```
+
+首次implementation validation `20260719T071604Z`因非formal dirty allowlist未包含`dh-bom/pom.xml`而按预期阻断；将该POM加入implementation/qualification白名单并补合同断言后，`20260719T071924Z`原命令通过。formal clean-worktree规则没有放宽。
+
+最终成功验证集合产生19个310-byte dumpstream：3个来自`dh-domain`连续回归，1个来自成功implementation validation，8个来自qualification外层Failsafe与内部full regression，7个来自独立默认回归。逐文件检查均仅含Boot Manifest-JAR与different-root跨盘提示；对应Maven/Surefire exit均为`0`且测试全绿，无异常堆栈、fork termination、`hs_err_pid`、JVM crash、`.dump`、failure/error或unexpected skip，故分类为`BENIGN_SUREFIRE_CROSS_DRIVE_WARNING`。这些文件只记录、不提交、不作为默认Maven lifecycle失败依据。
+
+## Historical validation — 2026-07-19 formal Retry-4 environment blocked
+
+```text
+task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4
+traceId: qdr7-capacity-acceptance-20260719T035205Z
+formal repository: E:/CapacityRuns/decision-hub-qdr7-retry4
+branch: dev
+baseline HEAD: 20c665c7506c9f96da341944635918eec5275b7f
+baseline origin/dev: 20c665c7506c9f96da341944635918eec5275b7f
+worktree before formal: clean
+staged before formal: empty
+scope design: PASS / THREE CONTAINMENT RELATIONS
+criteria SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / PASS
+criteria machine-readable source hash: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab / PASS
+formal profile: qdr7-capacity-acceptance
+formal seed: 7
+remote CI: PASS / RUN 29646937611 / EXACT HEAD
+remote test job: 88086652785 / PASS
+remote quality job: 88086652797 / PASS
+remote full regression: PASS / 19 OF 19 REACTOR SUCCESS / 1144 / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+remote PostgreSQL mandatory tests: PASS / 3 + 1 / ZERO SKIPS
+remote quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+formal run ID: 20260719T035205Z
+formal invocation count: 1
+formal command: mvn -ntp -Pqdr7-capacity-acceptance -Dqdr7.runId=<RUN_ID> -Dqdr7.seed=7 verify
+Maven exit: 1
+internal exit: NOT_EMITTED
+formal status: BLOCKED / ENVIRONMENT_SUREFIRE_FORK_STARTUP_BLOCKED
+capacity acceptance executed: false
+blocking module: dh-domain
+blocking phase: Surefire test fork startup / BEFORE HARNESS
+key error: The forked VM terminated without properly saying goodbye / Error occurred in starting fork / Process Exit Code 1
+environment preflight: NOT_EXECUTED
+mandatory scenarios: STARTED 0 / COMPLETED 0 / PARTIAL 0 / NOT_STARTED 15
+correctness: BLOCKED / NOT_EVALUATED
+thresholds: BLOCKED / NOT_EVALUATED
+PostgreSQL recovery: BLOCKED / NOT_EXECUTED
+formal full regression scenario: BLOCKED / NOT_EXECUTED
+formal quality scenario: BLOCKED / NOT_EXECUTED
+artifact root: target/qdr7-capacity-acceptance/20260719T035205Z / NOT_CREATED
+scenario ledger: NOT_GENERATED
+threshold comparison: NOT_GENERATED
+manifest: NOT_GENERATED
+secret scan artifact: NOT_GENERATED
+teardown artifact: NOT_GENERATED
+runtime residual scan: PASS / RUN-ID CONTAINER 0 / VOLUME 0 / NETWORK 0
+Surefire report: NOT_GENERATED FOR THIS RUN
+Surefire dump: NOT_GENERATED
+formal rerun: NO
+local commit: NOT_CREATED / BLOCKED POLICY
+push: NO
+tag: NO
+documentation validation: PASS / 14 FILES / 14 H1 / BALANCED FENCES / 0 MISSING LOCAL LINKS / 0 CURRENT CONFLICTS
+scope validation: PASS / 14 CHANGED / 0 UNEXPECTED / FORBIDDEN DIFF 0
+added-diff credential scan: PASS / 0 FINDINGS
+git diff --check: PASS
+criteria hash after sync: PASS / d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab
+target staged: 0
+staged files: 0
+```
+
+本轮没有执行第二次formal命令，也没有使用`-rf`、qualification、implementation-validation、skip、threshold覆盖或scenario排除参数。远端CI与qualification均不得替代本次未执行的mandatory scenarios。Windows Application log同一时间段只记录`UserAccountBroker.exe`异常，没有`java.exe` crash记录；该线索不足以证明Surefire fork退出根因。
+
+## Historical validation — 2026-07-18 harness stabilization closeout
 
 ```text
 task: DH-STAGE-QDR-7-B2-HARNESS-STABILIZATION-CLOSEOUT

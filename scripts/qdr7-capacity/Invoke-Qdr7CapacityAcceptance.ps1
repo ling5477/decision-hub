@@ -421,7 +421,7 @@ function Get-ProcessParentId {
 function Test-ImplementationValidationPath {
     param([string]$Path)
     $normalized = $Path.Replace('\', '/')
-    if ($normalized -in @('.gitattributes', 'AGENTS.md', 'CLAUDE.md', 'README.md', 'pom.xml', 'dh-app/pom.xml')) {
+    if ($normalized -in @('.gitattributes', 'AGENTS.md', 'CLAUDE.md', 'README.md', 'pom.xml', 'dh-bom/pom.xml', 'dh-app/pom.xml')) {
         return $true
     }
     foreach ($prefix in @(

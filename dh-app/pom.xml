@@ -136,18 +136,7 @@
       <id>qdr7-capacity-acceptance</id>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <!--
-                full regression由mandatory scenario独立执行并写入durable ledger；profile外层
-                Surefire不得在pre-integration-test之前重复回归并绕过统一finalizer。
-                默认mvn test不激活本profile，测试语义不受影响。
-              -->
-              <skipTests>true</skipTests>
-            </configuration>
-          </plugin>
+          <!-- 外层普通Surefire隔离由dh-bom同名profile统一应用到全部子模块。 -->
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>

@@ -1,6 +1,129 @@
 # DH Stage-QDR-7 B2 Formal Capacity Acceptance Result
 
-## Current harness stabilization closeout（non-formal，2026-07-18）
+## Current pre-final-formal disposition — Surefire fork startup stabilization accepted（2026-07-19）
+
+> task: `DH-STAGE-QDR-7-B2-SUREFIRE-FORK-STARTUP-STABILIZATION`
+> repository: `E:/CapacityRuns/decision-hub-qdr7-retry4`
+> branch / baseline HEAD: `dev / 20c665c7506c9f96da341944635918eec5275b7f`
+> implementation validation run ID: `20260719T071924Z`
+> qualification run ID: `20260719T072450Z`
+> local verdict: `CLOSED / ACCEPTED`
+> formal capacity verdict: `NOT_EVALUATED`
+
+```text
+SUREFIRE_FORK_STARTUP_STABILIZATION: CLOSED / ACCEPTED
+DEFAULT_SUREFIRE_CLASSLOADER_CHANGE: NOT_AUTHORIZED / NOT_CHANGED
+OUTER_SUREFIRE_PROFILE_ISOLATION: PASS
+DEFAULT_SUREFIRE_LIFECYCLE: PASS / EXECUTED
+DH_APP_FAILSAFE: PASS / Qdr7CapacityAcceptanceIT EXECUTED
+DH_DOMAIN_CONSECUTIVE: PASS / 3 OF 3 / 151 TESTS EACH / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+IMPLEMENTATION_VALIDATION: PASS / INTERNAL EXIT 0 / PREFLIGHT 26 OF 26 / 0 OF 15
+QUALIFICATION: PASS / NOT_FORMAL / 15 OF 15 / 94 OF 94 / CAPACITY_ACCEPTANCE_EXECUTED FALSE
+QUALIFICATION_ARTIFACTS: PASS / 32 FILES / 31 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
+QUALIFICATION_FULL_REGRESSION: PASS / 19 OF 19 / 1145 / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+QUALIFICATION_QUALITY: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+INDEPENDENT_DEFAULT_REGRESSION: PASS / 19 OF 19 / 172 REPORTS / 1145 / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+INDEPENDENT_QUALITY: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+BENIGN_CROSS_DRIVE_DUMPSTREAM_EXCLUSION: AUTHORIZED / WARNING-ONLY / NOT STAGED / NON-BLOCKING
+CRITERIA_DIFF: 0 / SHA-256 d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED / EXACT_SHA_REMOTE_CI_AND_FINAL_FORMAL_PENDING
+REMOTE_CI: PENDING / EXACT-SHA STABILIZATION COMMIT REQUIRED
+ALLOW_FORMAL_RETRY_4: CONDITIONAL / EXACT-SHA CI PASS REQUIRED / FINAL ATTEMPT ONLY
+RETRY_5: NOT_ALLOWED
+POST_FINAL_FORMAL_HARNESS_FIX_CHAIN: NOT_ALLOWED
+Stage-QDR-7 B3: NOT_ALLOWED
+```
+
+本任务只把capacity profile的外层普通Surefire隔离统一到`dh-bom`；默认生命周期仍执行普通Surefire，`dh-app` Failsafe仍执行`Qdr7CapacityAcceptanceIT`，harness内部full regression与quality继续启用。没有修改默认Surefire classloader、manifest-only JAR或全局fork模式。
+
+本轮新增dumpstream均为310 bytes，仅含Boot Manifest-JAR跨盘different-root提示；相关Maven/Surefire全部exit `0`且测试全绿，无新增`hs_err_pid`、JVM crash、fork abnormal termination、failure/error或unexpected skip，因此按用户授权分类为`BENIGN_SUREFIRE_CROSS_DRIVE_WARNING`，只记录、不提交、不阻断默认Maven生命周期。
+
+最后一次原Retry-4 formal是B2终止点：PASS映射为`PASSED / ACCEPTED`；真实容量FAIL映射为`FAILED / EVIDENCE_COMPLETE`并关闭B2；再次环境或harness BLOCKED映射为`DEFERRED / KNOWN_LIMITATION`与`CLOSED WITH CAPACITY GATE DEFERRED`。无论结果如何，均不得创建Retry-5或继续harness微型修复链；只允许B3 planning，禁止B3 implementation。
+
+## Historical formal result — Retry-4 environment blocked（2026-07-19）
+
+> task: `DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4`
+> traceId: `qdr7-capacity-acceptance-20260719T035205Z`
+> formal repository: `E:/CapacityRuns/decision-hub-qdr7-retry4`
+> branch / exact HEAD: `dev / 20c665c7506c9f96da341944635918eec5275b7f`
+> formal run ID: `20260719T035205Z`
+> final verdict: `BLOCKED / ENVIRONMENT_SUREFIRE_FORK_STARTUP_BLOCKED`
+
+```text
+POST_B2_CAPACITY_ACCEPTANCE: BLOCKED
+FORMAL_HARNESS: BLOCKED / NOT_REACHED
+REMOTE_CI: PASS / RUN 29646937611 / EXACT HEAD / TEST + QUALITY
+MAVEN_EXIT_CODE: 1
+INTERNAL_EXIT_CODE: NOT_EMITTED
+REASON_CODE: ENVIRONMENT_SUREFIRE_FORK_STARTUP_BLOCKED
+CAPACITY_ACCEPTANCE_EXECUTED: false
+ENVIRONMENT_PREFLIGHT: NOT_EXECUTED / HARNESS NOT_REACHED
+MANDATORY_SCENARIOS: BLOCKED / STARTED 0 / COMPLETED 0 / PARTIAL 0 / NOT_STARTED 15
+CORRECTNESS_INVARIANTS: BLOCKED / NOT_EVALUATED
+NUMERIC_THRESHOLDS: BLOCKED / NOT_EVALUATED
+POSTGRESQL_RECOVERY: BLOCKED / NOT_EXECUTED
+FULL_REGRESSION_SCENARIO: BLOCKED / NOT_EXECUTED
+QUALITY_GATE_SCENARIO: BLOCKED / NOT_EXECUTED
+ARTIFACT_INTEGRITY: BLOCKED / RUN ROOT NOT_CREATED
+SECRET_SCAN: BLOCKED / NOT_GENERATED
+TEARDOWN: BLOCKED / ARTIFACT NOT_GENERATED / RUNTIME RESIDUAL SCAN NONE
+B2_IMPLEMENTATION_STATUS: CLOSED / ACCEPTED
+Stage-QDR-7 B3: NOT_ALLOWED
+ALLOW_STAGE_QDR_7_B3_ENTRY: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+```
+
+### Exact HEAD、冻结criteria与远端CI
+
+执行前`branch=dev`、`HEAD=origin/dev=20c665c7506c9f96da341944635918eec5275b7f`、worktree clean、staged empty，三项scope包含关系全部PASS。冻结criteria原始字节SHA-256为`d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab`，与machine-readable `sourceDocumentSha256`完全一致；profile为`qdr7-capacity-acceptance`，seed为`7`。
+
+GitHub Actions run `29646937611`在同一HEAD完成且结论为success。test job `88086652785`与Quality job `88086652797`均通过：19/19 Reactor SUCCESS，1144 tests / 0 failures / 0 errors / 0 skipped；`JdbcNonceReplayGuardPersistenceTest` 3/3与`PostgresContainerSmokeTest` 1/1实际执行且零skip；Checkstyle 0，Spotless PASS。远端CI只满足formal前置，不替代本地mandatory scenarios。
+
+### 唯一formal执行与阻断
+
+正式命令仅执行一次：
+
+```powershell
+mvn -ntp `
+  -Pqdr7-capacity-acceptance `
+  "-Dqdr7.runId=20260719T035205Z" `
+  "-Dqdr7.seed=7" `
+  verify
+```
+
+Maven在`dh-domain`的Surefire test阶段以exit `1`结束。关键错误为`The forked VM terminated without properly saying goodbye`、`Error occurred in starting fork`与`Process Exit Code: 1`；其余reactor模块全部skipped。失败发生在`dh-app` formal profile编排与capacity harness启动之前，因此没有harness internal exit，也没有environment preflight、scenario ledger、threshold comparator、formal full regression或quality scenario。
+
+本轮`dh-domain/target/surefire-reports`没有新增report、`.dump`或`.dumpstream`，Surefire临时目录已不存在。Windows Application log同一时间段记录了`UserAccountBroker.exe`异常，但没有`java.exe` crash记录；该事件只作为并发环境异常线索，不能证明其导致Surefire fork退出。当前证据足以判定环境/基础设施`BLOCKED`，不足以给出更具体根因，也不构成代码、正确性或数值阈值`FAIL`。
+
+### Scenario与threshold结果
+
+| Mandatory scenario | 本轮状态 |
+|---|---|
+| actual-wiring preflight | NOT_STARTED |
+| rate matrix | NOT_STARTED |
+| cold-start quota | NOT_STARTED |
+| tenant/environment isolation | NOT_STARTED |
+| canonical source fail-closed | NOT_STARTED |
+| same-nonce race | NOT_STARTED |
+| idempotency lifecycle | NOT_STARTED |
+| tenant-scoped cleanup | NOT_STARTED |
+| PostgreSQL/Hikari contention | NOT_STARTED |
+| PostgreSQL same-pool recovery | NOT_STARTED |
+| Spring Context restart | NOT_STARTED |
+| PostgreSQL persistent-volume restart | NOT_STARTED |
+| post-recovery concurrency | NOT_STARTED |
+| full Maven regression | NOT_STARTED |
+| quality gate | NOT_STARTED |
+
+throughput、p50、p95、p99、max latency、cleanup、Hikari、PostgreSQL、recovery、JVM/Maven/Surefire、Docker与environment headroom comparisons全部`NOT_EVALUATED`。不得以qualification、远端CI或历史partial evidence代替本次formal比较。
+
+### Artifact、teardown与边界
+
+`target/qdr7-capacity-acceptance/20260719T035205Z/`不存在；`capacity-acceptance-summary.json`、`scenario-ledger.json`、`threshold-comparison.json`、`restart-results.json`、`full-regression-summary.json`、`quality-summary.json`、`secret-scan.json`与`sha256-manifest.txt`均未生成。因此artifact integrity、formal secret scan与artifact teardown只能记为`BLOCKED / NOT_GENERATED`，不能写成PASS。只读运行态扫描未发现包含该run ID的Docker container、volume或network。
+
+本任务没有修改Java、测试、POM、workflow、harness、config、criteria、migration、API、contracts或NQ；没有接外部业务HTTP、Provider、Agent或LangGraph，没有开启Paper或LIVE，没有进入B3 implementation，没有执行第二次formal run，没有push或创建tag。Retry-4已`CONSUMED_BLOCKED`；现有work order没有冻结新的环境blocker任务名，下一步只能先另行冻结独立环境blocker工单，不得自行创建Retry-5。
+
+## Historical harness stabilization closeout（non-formal，2026-07-18）
 
 > task: `DH-STAGE-QDR-7-B2-HARNESS-STABILIZATION-CLOSEOUT`
 > implementation repository: `E:/CapacityRuns/decision-hub-qdr7-retry4`
