@@ -1,6 +1,6 @@
 # Decision Hub 当前工单
 
-## Terminal current authority — 2026-07-19 final Retry-4 deferred
+## Terminal current authority — 2026-07-19 Stage-QDR-7 B3 plan frozen
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -24,15 +24,21 @@ Final formal secret scan: PASS / 25 FILES / 0 FINDINGS
 Final formal teardown: PASS / RESIDUAL NONE
 Final formal capacity acceptance executed: false
 Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
-Stage-QDR-7 B3: READY FOR PLANNING / CAPACITY GATE DEFERRED / NOT_STARTED
-current task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4
-current task status: CLOSED / DEFERRED / KNOWN_LIMITATION
-next action: B3 PLANNING/WORK-ORDER TASK NAME NOT FROZEN / EXPLICIT FREEZE REQUIRED
+Stage-QDR-7 B3: LIMITED DRY-RUN RUNTIME READINESS
+Stage-QDR-7 B3 plan: CLOSED / ACCEPTED
+Stage-QDR-7 B3 implementation work order: FROZEN
+Stage-QDR-7 B3 implementation: NOT_STARTED / NEXT
+current task: DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE
+current task status: CLOSED / ACCEPTED / PLAN_ONLY
+next action: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
 ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
 RETRY_5: NOT_ALLOWED
 POST_FINAL_FORMAL_HARNESS_FIX_CHAIN: NOT_ALLOWED
-ALLOW_STAGE_QDR_7_B3_ENTRY: YES / PLANNING_ONLY
-ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / PLANNING_TASK_BOUNDARY
+ALLOW_API_CHANGE_NOW: NO
+ALLOW_MIGRATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_NQ_RUNTIME_INTEGRATION: NO
@@ -42,7 +48,7 @@ ALLOW_LIVE: NO
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
 ```
 
-最后一次formal已消费且不得重跑。B2终局是capacity gate deferred，不再允许Retry-5、harness修复链或新的B2任务。B3只允许planning/work-order；本work order没有冻结具体B3任务名，必须由后续显式freeze任务确定，当前不得自行命名。
+B3 plan 与 work order 已冻结。下一任务只能是 `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION`；只实施既有 endpoint 内部的 dev/test-only、default-disabled、mock-only runtime boundary。若需要 Controller/API、migration、Repository、HMAC/tenant/nonce/source 语义或真实外部连接，必须停止并进入独立 review。
 
 ## Historical pre-final authority — consumed by final Retry-4
 

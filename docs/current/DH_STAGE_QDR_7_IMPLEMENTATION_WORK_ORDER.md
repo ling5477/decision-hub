@@ -1,5 +1,23 @@
 # DH Stage-QDR-7 Implementation Work Order
 
+## Terminal B3 planning freeze addendum（2026-07-19）
+
+```text
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
+Stage-QDR-7 B3: LIMITED DRY-RUN RUNTIME READINESS
+Stage-QDR-7 B3 plan: CLOSED / ACCEPTED
+Stage-QDR-7 B3 implementation work order: FROZEN
+Stage-QDR-7 B3 implementation: NOT_STARTED / NEXT
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_API_CHANGE_NOW: NO
+ALLOW_MIGRATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
+next action: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
+```
+
+本 addendum 由 `DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE` 显式冻结，取代下方历史段落中“B3 任务名未冻结”的旧 current 口径。规范计划与实施边界见 `DH_STAGE_QDR_7_B3_PLAN.md` 和 `DH_STAGE_QDR_7_B3_IMPLEMENTATION_WORK_ORDER.md`。B2 capacity gate 继续 deferred；B3 不允许 API、migration、Repository、真实 HTTP、Provider、NQ、Agent、LangGraph、Paper 或 LIVE，也不重新打开 B2。
+
 > task: `DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER`  
 > mode: `WORK_ORDER_ONLY`  
 > stage: `Stage-QDR-7 / B2_CLOSED_WITH_CAPACITY_GATE_DEFERRED / B3_PLANNING_NOT_STARTED`

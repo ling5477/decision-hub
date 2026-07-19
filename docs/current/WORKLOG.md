@@ -1,6 +1,14 @@
 # Decision Hub Worklog
 
-## Current work — 2026-07-19 final Retry-4 terminal closeout
+## Current work — 2026-07-19 Stage-QDR-7 B3 plan/work-order freeze
+
+`DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE` 在 `E:/CapacityRuns/decision-hub-qdr7-retry4`、`dev` 执行。执行前 HEAD 为 `6193df72d1ac489f40f63cf665ca984f273b5344`，`origin/dev` 为其直接父提交 `1fb49fc1b77d874dc82a010a6bcf0a202920e52a`，ahead/behind `1/0`，worktree/staged 为空，三项 scope 包含关系均通过。
+
+只读代码现实确认现有 dry-run 入口、HMAC/timestamp/nonce/tenant/source、persistent rate/idempotency、mock provider、snapshot/audit/trace 和 no-side-effect 基线已经存在；主链路没有真实 HTTP 或 NQ runtime client。B3 唯一方向冻结为 `LIMITED DRY-RUN RUNTIME READINESS`，精确实施任务 ID 为 `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION`。B3 只允许既有入口内部的 dev/test-only runtime policy、bounded deadline/concurrency/queue、kill/environment fail-closed 和 readiness tests；API、migration、Repository、真实 Provider/NQ、Agent/LangGraph、Paper/LIVE 继续禁止。
+
+B2 保持 `CLOSED WITH CAPACITY GATE DEFERRED`；本任务未执行 formal、未创建 Retry-5、未修改 harness/criteria、未执行 B3 implementation。最终验证为 allowlist 14/14、unexpected 0、mandatory current factsources 8/8、current conflict 0、禁止范围 diff 0；`mvn -ntp -Pquality validate`退出码 0，19/19 reactor success、Checkstyle 0、Spotless PASS。未执行 full tests 或 PostgreSQL acceptance。
+
+## Historical work — 2026-07-19 final Retry-4 terminal closeout
 
 `DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4`在exact HEAD `1fb49fc1b77d874dc82a010a6bcf0a202920e52a`上执行一次。执行前已验证branch、clean/staged、origin/dev、remote advertised SHA、CI run `29679227229`、criteria raw SHA、Docker daemon、CPU与内存门槛；三项scope包含关系全部`PASS`。
 

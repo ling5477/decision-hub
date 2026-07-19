@@ -1,6 +1,6 @@
 # Decision Hub Status
 
-## Terminal current authority — 2026-07-19 final Retry-4 deferred
+## Terminal current authority — 2026-07-19 Stage-QDR-7 B3 plan frozen
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -25,15 +25,21 @@ Final formal secret scan: PASS / 25 FILES / 0 FINDINGS
 Final formal teardown: PASS / CONTAINER REMOVED_OR_ABSENT / VOLUME REMOVED_OR_ABSENT / RESIDUAL NONE
 Final formal capacity acceptance executed: false
 Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
-Stage-QDR-7 B3: READY FOR PLANNING / CAPACITY GATE DEFERRED / NOT_STARTED
-current task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4
-current task status: CLOSED / DEFERRED / KNOWN_LIMITATION
-next action: B3 PLANNING/WORK-ORDER TASK NAME NOT FROZEN / EXPLICIT FREEZE REQUIRED
+Stage-QDR-7 B3: LIMITED DRY-RUN RUNTIME READINESS
+Stage-QDR-7 B3 plan: CLOSED / ACCEPTED
+Stage-QDR-7 B3 implementation work order: FROZEN
+Stage-QDR-7 B3 implementation: NOT_STARTED / NEXT
+current task: DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE
+current task status: CLOSED / ACCEPTED / PLAN_ONLY
+next action: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
 ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
 RETRY_5: NOT_ALLOWED
 POST_FINAL_FORMAL_HARNESS_FIX_CHAIN: NOT_ALLOWED
-ALLOW_STAGE_QDR_7_B3_ENTRY: YES / PLANNING_ONLY
-ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / PLANNING_TASK_BOUNDARY
+ALLOW_API_CHANGE_NOW: NO
+ALLOW_MIGRATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_NQ_RUNTIME_INTEGRATION: NO
@@ -43,7 +49,7 @@ ALLOW_LIVE: NO
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
 ```
 
-最后一次原Retry-4在exact HEAD与已通过的远端CI之后按唯一命令执行，因冻结preflight要求的`postgres:17`镜像未缓存而在任何mandatory scenario启动前阻断。该结果不是容量FAIL；按终局规则，Post-B2 capacity acceptance映射为`DEFERRED / KNOWN_LIMITATION`，B2以`CLOSED WITH CAPACITY GATE DEFERRED`关闭。不得拉取镜像重跑、创建Retry-5或继续harness微型修复链。B3仅允许planning；冻结work order没有提供可读取的B3任务名，本任务未自行命名。
+B3 已基于现有 protected dry-run、persistent guards、mock provider、snapshot/audit/trace 与 no-side-effect 代码现实冻结为 limited runtime readiness。下一任务仅实施 runtime policy、bounded deadline/concurrency/queue、kill/environment fail-closed 和 readiness tests；API、migration、Repository 与外部连接均不在范围。B2 capacity deferred 继续作为 known limitation，不因 B3 推进而变成 PASS 或重新打开。
 
 ## Historical pre-final authority — consumed by final Retry-4
 

@@ -1,6 +1,27 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-19 final Retry-4 deferred
+## Current validation — 2026-07-19 Stage-QDR-7 B3 plan/work-order freeze
+
+本任务是 docs-only planning，不执行 B3 implementation、formal capacity 或 full regression。只读代码现实确认现有 protected dry-run 已具备 HMAC、timestamp、nonce、tenant/source、payload cap、persistent rate/idempotency、mock-only provider、snapshot/audit/trace 和 no-side-effect 基线；限定主链路扫描未发现真实 HTTP 或 NQ runtime client。真实缺口为独立 runtime policy、统一 deadline、bounded concurrency/queue/backpressure 与 kill/environment fail-closed readiness 证据。
+
+```text
+planning baseline: 6193df72d1ac489f40f63cf665ca984f273b5344
+origin/dev parent: 1fb49fc1b77d874dc82a010a6bcf0a202920e52a
+baseline topology: PASS / AHEAD 1 / BEHIND 0
+scope design: PASS / THREE CONTAINMENT RELATIONS
+formal capacity: NOT_RUN / B2 REMAINS DEFERRED
+full tests: NOT_RUN / NOT_REQUIRED FOR DOCS-ONLY FREEZE
+quality: PASS / mvn -ntp -Pquality validate / MAVEN EXIT 0 / 19 OF 19 REACTOR SUCCESS
+Checkstyle / Spotless: 0 VIOLATIONS / PASS
+current conflict scan: PASS / 8 OF 8 MANDATORY FACTSOURCES / 0 CONFLICTS
+allowlist diff: PASS / 14 FILES / 0 UNEXPECTED
+Java/test/POM/workflow/harness/criteria/migration/API/contracts diff: 0
+staged: EMPTY
+```
+
+`git diff --check`通过；两份新增文档已由`docs/current/README.md`索引。Quality只验证文档与仓库质量门禁，不代表 full tests、formal capacity 或 PostgreSQL acceptance 已执行；历史 CI 与 qualification 未被用来替代这些未执行项。
+
+## Historical validation — 2026-07-19 final Retry-4 deferred
 
 任务`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4`在`E:/CapacityRuns/decision-hub-qdr7-retry4`、`dev`与exact HEAD `1fb49fc1b77d874dc82a010a6bcf0a202920e52a`上执行一次且仅一次。执行前worktree/staged为空，origin/dev与GitHub advertised SHA精确对齐；run `29679227229`的远端test和quality均为`PASS`；criteria raw SHA保持冻结值。
 

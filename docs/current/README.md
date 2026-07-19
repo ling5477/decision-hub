@@ -1,6 +1,6 @@
 # Decision Hub Current Docs
 
-## Terminal current authority — Stage-QDR-7 B2 capacity gate deferred
+## Terminal current authority — Stage-QDR-7 B3 plan and work order frozen
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -24,14 +24,20 @@ Final formal secret scan: PASS / 25 FILES / 0 FINDINGS
 Final formal teardown: PASS / RESIDUAL NONE
 Final formal capacity acceptance executed: false
 Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
-Stage-QDR-7 B3: READY FOR PLANNING / CAPACITY GATE DEFERRED / NOT_STARTED
-current task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4
-current task status: CLOSED / DEFERRED / KNOWN_LIMITATION
-next action: B3 PLANNING/WORK-ORDER TASK NAME NOT FROZEN / EXPLICIT FREEZE REQUIRED
+Stage-QDR-7 B3: LIMITED DRY-RUN RUNTIME READINESS
+Stage-QDR-7 B3 plan: CLOSED / ACCEPTED
+Stage-QDR-7 B3 implementation work order: FROZEN
+Stage-QDR-7 B3 implementation: NOT_STARTED / NEXT
+current task: DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE
+current task status: CLOSED / ACCEPTED / PLAN_ONLY
+next action: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
 ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
 RETRY_5: NOT_ALLOWED
-ALLOW_STAGE_QDR_7_B3_ENTRY: YES / PLANNING_ONLY
-ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / PLANNING_TASK_BOUNDARY
+ALLOW_API_CHANGE_NOW: NO
+ALLOW_MIGRATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
 ALLOW_REAL_HTTP: NO
 ALLOW_REAL_PROVIDER: NO
 ALLOW_NQ_RUNTIME_INTEGRATION: NO
@@ -41,7 +47,7 @@ ALLOW_LIVE: NO
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
 ```
 
-最后一次原Retry-4已按单次执行纪律终局收口为`DEFERRED / KNOWN_LIMITATION`。未拉取缺失镜像、未重跑formal、未修改harness/criteria。B3仅允许planning；冻结work order中没有可读取的B3 planning/work-order任务名，因此当前要求显式冻结名称，不能由本任务自行命名。
+B3 planning 与 implementation work order 已冻结；入口为 [B3 plan](DH_STAGE_QDR_7_B3_PLAN.md) 与 [B3 implementation work order](DH_STAGE_QDR_7_B3_IMPLEMENTATION_WORK_ORDER.md)。B2 capacity gate 保持 deferred；B3 只允许 dev/test-only、default-disabled、mock-only 内部 runtime hardening，不开放生产、真实 HTTP、Provider、NQ、Agent、LangGraph、Paper 或 LIVE。
 
 ## Historical pre-final authority — consumed by final Retry-4
 

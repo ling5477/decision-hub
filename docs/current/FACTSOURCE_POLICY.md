@@ -112,7 +112,7 @@ credential storage allowed
 NQ mutation allowed
 ```
 
-## 5. Terminal current state — final Retry-4 deferred
+## 5. Terminal current state — Stage-QDR-7 B3 plan frozen
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -129,15 +129,21 @@ Final Retry-4 scenarios: STARTED 0 / COMPLETED 0 / NOT_STARTED 15
 Final Retry-4 thresholds: EXECUTED 0 / NOT_EVALUATED 94
 Final Retry-4 artifacts: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
 Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
-Stage-QDR-7 B3: READY FOR PLANNING / CAPACITY GATE DEFERRED / NOT_STARTED
-current task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4
-current task status: CLOSED / DEFERRED / KNOWN_LIMITATION
-next action: B3 PLANNING/WORK-ORDER TASK NAME NOT FROZEN / EXPLICIT FREEZE REQUIRED
+Stage-QDR-7 B3: LIMITED DRY-RUN RUNTIME READINESS
+Stage-QDR-7 B3 plan: CLOSED / ACCEPTED
+Stage-QDR-7 B3 implementation work order: FROZEN
+Stage-QDR-7 B3 implementation: NOT_STARTED / NEXT
+current task: DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE
+current task status: CLOSED / ACCEPTED / PLAN_ONLY
+next action: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
 ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
 RETRY_5: NOT_ALLOWED
 POST_FINAL_FORMAL_HARNESS_FIX_CHAIN: NOT_ALLOWED
-ALLOW_STAGE_QDR_7_B3_ENTRY: YES / PLANNING_ONLY
-ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / PLANNING_TASK_BOUNDARY
+ALLOW_API_CHANGE_NOW: NO
+ALLOW_MIGRATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
 real HTTP: NO
 real provider: NO
 NQ runtime integration: NO
@@ -146,7 +152,7 @@ LIVE: DISABLED
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
 ```
 
-本节以上述terminal block为唯一active current state。最后一次formal不得重跑；旧B2与pre-final状态只保留为历史证据。冻结work order未提供B3 planning/work-order任务名，current docs不得自行生成名称。
+本节以上述 terminal block 为唯一 active current state。最后一次 formal 不得重跑；旧 B2 与 pre-final 状态只保留为历史证据。B3 plan/work order 已冻结，后续只能使用冻结的 implementation task ID；不得把 B3 描述成已实施、production ready、Integration-1 runtime accepted 或 capacity accepted。
 
 ### Historical pre-final snapshot — consumed by final Retry-4
 
