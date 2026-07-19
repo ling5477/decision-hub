@@ -2,11 +2,36 @@
 
 > task: `DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER`  
 > mode: `WORK_ORDER_ONLY`  
-> stage: `Stage-QDR-7 / CAPACITY_CRITERIA_FROZEN / CAPACITY_HARNESS_RUNTIME_BINDING_CLOSED`
+> stage: `Stage-QDR-7 / B2_CLOSED_WITH_CAPACITY_GATE_DEFERRED / B3_PLANNING_NOT_STARTED`
 > mainline: `Limited Dry Run Runtime Readiness`  
 > endpoint: `POST /api/ai/decision-dry-runs`（既有，不新增 endpoint）
 
-## Current capacity harness disposition（2026-07-19）
+## Terminal B2 disposition（2026-07-19）
+
+最后一次原Retry-4已在exact HEAD `1fb49fc1b77d874dc82a010a6bcf0a202920e52a`执行。远端CI run `29679227229`已通过，但formal preflight要求本地已缓存`postgres:17`，实际镜像缺失，因此run `20260719T082658Z`以Maven exit `1`、internal exit `10`在场景启动前阻断。
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+POST_B2_CAPACITY_ACCEPTANCE: DEFERRED / KNOWN_LIMITATION
+FINAL_FORMAL_RUN: 20260719T082658Z / BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED
+FINAL_FORMAL_PREFLIGHT: 25 OF 26 PASS / POSTGRES IMAGE MISSING
+FINAL_FORMAL_SCENARIOS: 0 OF 15 STARTED / 15 NOT_STARTED
+FINAL_FORMAL_THRESHOLDS: 0 OF 94 EXECUTED
+FINAL_FORMAL_ARTIFACTS: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
+ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
+RETRY_5: NOT_ALLOWED
+POST_FINAL_FORMAL_HARNESS_FIX_CHAIN: NOT_ALLOWED
+Stage-QDR-7 B3: READY FOR PLANNING / CAPACITY GATE DEFERRED / NOT_STARTED
+ALLOW_STAGE_QDR_7_B3_ENTRY: YES / PLANNING_ONLY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+next action: B3 PLANNING/WORK-ORDER TASK NAME NOT FROZEN / EXPLICIT FREEZE REQUIRED
+```
+
+本work order的B3范围标题为`Operational Safety / Resilience`，但没有冻结具体`DH-STAGE-QDR-7-B3-*` planning/work-order任务名。当前任务不得自行命名；后续必须先显式冻结名称与planning/work-order边界。不得以缺失镜像为由拉取后重跑formal，也不得创建新的B2 task。
+
+## Historical pre-final capacity harness disposition（2026-07-19）
 
 本work order已被B2实施、harness stabilization、历史exact-SHA CI与formal Retry-4阻断执行消费。B2保持`CLOSED / ACCEPTED`，criteria保持`FROZEN / ACCEPTED`且语义、阈值和machine-readable配置未变。`DH-STAGE-QDR-7-B2-SUREFIRE-FORK-STARTUP-STABILIZATION`已完成本地验收；Post-B2 capacity acceptance当前为`BLOCKED / EXACT_SHA_REMOTE_CI_AND_FINAL_FORMAL_PENDING`。下一步只允许新提交的exact-SHA远端test + quality CI，随后执行最后一次原Retry-4 formal；不创建Retry-5、不继续harness微型修复链、不进入B3 implementation。
 

@@ -1,6 +1,45 @@
 # Codex Project Instructions
 
-## Current authority — 2026-07-19 Surefire fork startup stabilization accepted
+## Terminal current authority — 2026-07-19 final Retry-4 deferred
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+Capacity acceptance criteria: FROZEN / ACCEPTED
+Harness stabilization: CLOSED / ACCEPTED
+Exact HEAD: 1fb49fc1b77d874dc82a010a6bcf0a202920e52a
+Remote CI: PASS / RUN 29679227229 / TEST AND QUALITY PASS
+Final Retry-4 formal run: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260719T082658Z
+Final formal disposition: DEFERRED / KNOWN_LIMITATION
+Final formal reason: POSTGRES IMAGE CHECK / EXPECTED CACHED postgres:17 / ACTUAL MISSING
+Final formal Maven/internal exit: 1 / 10
+Final formal preflight: BLOCKED / 25 OF 26 PASS
+Final formal scenarios: STARTED 0 / COMPLETED 0 / NOT_STARTED 15
+Final formal thresholds: EXECUTED 0 / NOT_EVALUATED 94
+Final formal artifacts: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
+Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
+Stage-QDR-7 B3: READY FOR PLANNING / CAPACITY GATE DEFERRED / NOT_STARTED
+current task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4
+current task status: CLOSED / DEFERRED / KNOWN_LIMITATION
+next action: B3 PLANNING/WORK-ORDER TASK NAME NOT FROZEN / EXPLICIT FREEZE REQUIRED
+ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
+RETRY_5: NOT_ALLOWED
+POST_FINAL_FORMAL_HARNESS_FIX_CHAIN: NOT_ALLOWED
+ALLOW_STAGE_QDR_7_B3_ENTRY: YES / PLANNING_ONLY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_NQ_RUNTIME_INTEGRATION: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
+```
+
+此终局不授权拉取镜像后重跑formal，也不授权新B2 blocker、Retry-5或B3 implementation。冻结work order未提供B3 planning/work-order任务名，Codex不得自行命名。
+
+## Historical pre-final authority — consumed by final Retry-4
 
 ```text
 Stage-QDR-7 B1: FROZEN

@@ -112,7 +112,43 @@ credential storage allowed
 NQ mutation allowed
 ```
 
-## 5. 当前状态
+## 5. Terminal current state — final Retry-4 deferred
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+Capacity acceptance criteria: FROZEN / ACCEPTED
+Remote CI: PASS / RUN 29679227229 / EXACT HEAD 1fb49fc1b77d874dc82a010a6bcf0a202920e52a
+Final Retry-4 formal execution: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260719T082658Z
+Final Retry-4 terminal disposition: DEFERRED / KNOWN_LIMITATION
+Final Retry-4 blocker: POSTGRES IMAGE CHECK / EXPECTED CACHED postgres:17 / ACTUAL MISSING
+Final Retry-4 Maven/internal exit: 1 / 10
+Final Retry-4 preflight: 25 OF 26 PASS
+Final Retry-4 scenarios: STARTED 0 / COMPLETED 0 / NOT_STARTED 15
+Final Retry-4 thresholds: EXECUTED 0 / NOT_EVALUATED 94
+Final Retry-4 artifacts: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH / 0 SECRET FINDINGS / TEARDOWN PASS
+Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
+Stage-QDR-7 B3: READY FOR PLANNING / CAPACITY GATE DEFERRED / NOT_STARTED
+current task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4
+current task status: CLOSED / DEFERRED / KNOWN_LIMITATION
+next action: B3 PLANNING/WORK-ORDER TASK NAME NOT FROZEN / EXPLICIT FREEZE REQUIRED
+ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
+RETRY_5: NOT_ALLOWED
+POST_FINAL_FORMAL_HARNESS_FIX_CHAIN: NOT_ALLOWED
+ALLOW_STAGE_QDR_7_B3_ENTRY: YES / PLANNING_ONLY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+real HTTP: NO
+real provider: NO
+NQ runtime integration: NO
+Agent / LangGraph: NO
+LIVE: DISABLED
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
+```
+
+本节以上述terminal block为唯一active current state。最后一次formal不得重跑；旧B2与pre-final状态只保留为历史证据。冻结work order未提供B3 planning/work-order任务名，current docs不得自行生成名称。
+
+### Historical pre-final snapshot — consumed by final Retry-4
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -211,7 +247,7 @@ Agent / LangGraph: NO
 LIVE: DISABLED
 ```
 
-## 5.1 Previous attempt / Superseded current state / Consumed evidence
+## 5.2 Previous attempt / Superseded current state / Consumed evidence
 
 以下状态只记录上一轮任务当时的真实结果，属于`Historical / Previous attempt / Superseded current state / Consumed evidence`，不得覆盖第5节active current state：
 

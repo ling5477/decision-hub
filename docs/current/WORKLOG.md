@@ -1,6 +1,31 @@
 # Decision Hub Worklog
 
-## Current work — 2026-07-19 Surefire fork startup stabilization
+## Current work — 2026-07-19 final Retry-4 terminal closeout
+
+`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4`在exact HEAD `1fb49fc1b77d874dc82a010a6bcf0a202920e52a`上执行一次。执行前已验证branch、clean/staged、origin/dev、remote advertised SHA、CI run `29679227229`、criteria raw SHA、Docker daemon、CPU与内存门槛；三项scope包含关系全部`PASS`。
+
+唯一formal命令生成run `20260719T082658Z`，Maven exit `1`、harness internal exit `10`。正式preflight共26项，25项通过；唯一blocker是`postgres-image`：冻结期望`cached postgres:17`，实际为`missing`。15个mandatory scenario均未启动，94个冻结comparison均未执行；formal内部full regression与quality也未执行。按单次执行纪律未拉取镜像、未重跑、未调参、未修改harness或criteria。
+
+```text
+formal result: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED
+terminal disposition: DEFERRED / KNOWN_LIMITATION
+capacityAcceptanceExecuted: false
+scenario ledger: 0 STARTED / 0 COMPLETED / 0 PARTIAL / 15 NOT_STARTED
+threshold comparison: 0 EXECUTED / 94 NOT_EVALUATED
+artifact integrity: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH
+secret scan: PASS / 25 FILES / 0 FINDINGS
+teardown: PASS / RESIDUAL NONE
+Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+Stage-QDR-7 B3: READY FOR PLANNING / CAPACITY GATE DEFERRED / NOT_STARTED
+ALLOW_STAGE_QDR_7_B3_ENTRY: YES / PLANNING_ONLY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+Retry-5: NOT_ALLOWED
+```
+
+本轮仅同步允许的current/result文档并准备本地commit，不修改代码、测试、POM、workflow、harness、config、criteria、migration、API、contracts或NQ，不push、不创建tag。冻结implementation work order没有出现`DH-STAGE-QDR-7-B3-*`任务名；按用户禁止自行命名的要求，下一步记录为显式冻结B3 planning/work-order任务名。
+
+## Historical pre-final work — Surefire fork startup stabilization
 
 `DH-STAGE-QDR-7-B2-SUREFIRE-FORK-STARTUP-STABILIZATION`继续在`E:/CapacityRuns/decision-hub-qdr7-retry4`与`dev`分支执行，baseline HEAD与`origin/dev`均为`20c665c7506c9f96da341944635918eec5275b7f`。本任务保留既有Retry-4 current/result文档改动，只对capacity profile外层普通Surefire隔离做最小修复；不改production Java、migration、API、contracts、criteria、默认Surefire classloader、manifest-only JAR或全局fork模式。
 

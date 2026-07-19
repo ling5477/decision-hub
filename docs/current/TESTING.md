@@ -1,6 +1,61 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-19 Surefire fork startup stabilization accepted
+## Current validation — 2026-07-19 final Retry-4 deferred
+
+任务`DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4`在`E:/CapacityRuns/decision-hub-qdr7-retry4`、`dev`与exact HEAD `1fb49fc1b77d874dc82a010a6bcf0a202920e52a`上执行一次且仅一次。执行前worktree/staged为空，origin/dev与GitHub advertised SHA精确对齐；run `29679227229`的远端test和quality均为`PASS`；criteria raw SHA保持冻结值。
+
+```text
+task scope design: PASS / THREE CONTAINMENT RELATIONS
+formal run ID: 20260719T082658Z
+formal command: mvn -ntp -Pqdr7-capacity-acceptance -Dqdr7.runId=20260719T082658Z -Dqdr7.seed=7 verify
+Maven exit: 1
+internal exit: 10
+formal status: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED
+terminal disposition: DEFERRED / KNOWN_LIMITATION
+capacityAcceptanceExecuted: false
+preflight: BLOCKED / 25 OF 26 PASS
+preflight blocker: postgres-image / EXPECTED cached postgres:17 / ACTUAL missing
+mandatory scenarios: 15 TOTAL / 0 STARTED / 0 COMPLETED / 0 PARTIAL / 15 NOT_STARTED
+correctness: BLOCKED / NOT_EVALUATED
+threshold comparisons: 0 EXECUTED / 0 PASSED / 0 FAILED / 0 BLOCKED / 94 NOT_EVALUATED
+full regression: BLOCKED / NOT_EXECUTED IN FORMAL
+quality gate: BLOCKED / NOT_EXECUTED IN FORMAL
+artifact root: target/qdr7-capacity-acceptance/20260719T082658Z
+artifacts: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISSING / 0 MISMATCH
+secret scan: PASS / 25 FILES / 0 FINDINGS
+teardown: PASS / CONTAINER REMOVED_OR_ABSENT / VOLUME REMOVED_OR_ABSENT / RESIDUAL NONE
+criteria SHA-256: d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab
+remote exact-SHA CI: PASS / RUN 29679227229 / 1145 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED / QUALITY PASS
+Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+Stage-QDR-7 B3: READY FOR PLANNING / CAPACITY GATE DEFERRED / NOT_STARTED
+Retry-5: NOT_ALLOWED
+current conflict count: 0 / 14 OF 14 ACTIVE TERMINAL BLOCKS ALIGNED
+```
+
+formal在任何mandatory scenario启动前因缺少已缓存的`postgres:17`镜像而停止。外部CI和qualification不能替代formal内部full regression/quality，因此本次formal的正确性、性能、恢复、回归和质量全部保持`BLOCKED / NOT_EVALUATED`或`NOT_EXECUTED`，不得写成容量FAIL或PASS。未拉取镜像、未修改harness/criteria、未重跑。按终局规则，B2以capacity gate deferred关闭，只开放B3 planning。
+
+15个mandatory scenario的正式状态均为：
+
+```text
+actual-wiring: NOT_STARTED / NOT_EVALUATED
+rate-matrix: NOT_STARTED / NOT_EVALUATED
+cold-start-quota: NOT_STARTED / NOT_EVALUATED
+tenant-environment-isolation: NOT_STARTED / NOT_EVALUATED
+canonical-source-fail-closed: NOT_STARTED / NOT_EVALUATED
+nonce-race: NOT_STARTED / NOT_EVALUATED
+idempotency-lifecycle: NOT_STARTED / NOT_EVALUATED
+tenant-scoped-cleanup: NOT_STARTED / NOT_EVALUATED
+postgres-hikari-contention: NOT_STARTED / NOT_EVALUATED
+postgres-same-pool-recovery: NOT_STARTED / NOT_EVALUATED
+spring-context-restart: NOT_STARTED / NOT_EVALUATED
+postgres-persistent-volume-restart: NOT_STARTED / NOT_EVALUATED
+post-recovery-concurrency: NOT_STARTED / NOT_EVALUATED
+full-regression: NOT_STARTED / NOT_EVALUATED
+quality-gate: NOT_STARTED / NOT_EVALUATED
+```
+
+## Historical pre-final validation — Surefire fork startup stabilization accepted
 
 任务`DH-STAGE-QDR-7-B2-SUREFIRE-FORK-STARTUP-STABILIZATION`在`dev`与baseline HEAD `20c665c7506c9f96da341944635918eec5275b7f`上执行。三项scope包含关系全部PASS；production Java、migration、API、contracts与冻结criteria均不在写范围。默认Surefire classloader、manifest-only JAR与全局fork模式未修改。
 

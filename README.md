@@ -1,6 +1,49 @@
 # Decision Hub
 
-## Current authority — Stage-QDR-7 Surefire fork startup stabilization accepted
+## Terminal current authority — Stage-QDR-7 B2 capacity gate deferred
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+Capacity acceptance criteria: FROZEN / ACCEPTED
+Harness stabilization: CLOSED / ACCEPTED
+Exact HEAD: 1fb49fc1b77d874dc82a010a6bcf0a202920e52a
+Remote CI: PASS / RUN 29679227229 / TEST 1145 / 0 FAILURES / 0 ERRORS / 0 SKIPPED / QUALITY PASS
+Final Retry-4 formal run: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260719T082658Z
+Final formal disposition: DEFERRED / KNOWN_LIMITATION
+Final formal reason: POSTGRES IMAGE CHECK / EXPECTED CACHED postgres:17 / ACTUAL MISSING
+Final formal Maven/internal exit: 1 / 10
+Final formal preflight: BLOCKED / 25 OF 26 PASS / POSTGRES-IMAGE 1 BLOCKED
+Final formal mandatory scenarios: STARTED 0 / COMPLETED 0 / PARTIAL 0 / NOT_STARTED 15
+Final formal threshold comparisons: EXECUTED 0 / NOT_EVALUATED 94
+Final formal regression: BLOCKED / NOT_EXECUTED
+Final formal quality: BLOCKED / NOT_EXECUTED
+Final formal artifacts: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH
+Final formal secret scan: PASS / 25 FILES / 0 FINDINGS
+Final formal teardown: PASS / RESIDUAL NONE
+Final formal capacity acceptance executed: false
+Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
+Stage-QDR-7 B3: READY FOR PLANNING / CAPACITY GATE DEFERRED / NOT_STARTED
+current task: DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4
+current task status: CLOSED / DEFERRED / KNOWN_LIMITATION
+next action: B3 PLANNING/WORK-ORDER TASK NAME NOT FROZEN / EXPLICIT FREEZE REQUIRED
+ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
+RETRY_5: NOT_ALLOWED
+ALLOW_STAGE_QDR_7_B3_ENTRY: YES / PLANNING_ONLY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_NQ_RUNTIME_INTEGRATION: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
+```
+
+最后一次原Retry-4因冻结的`postgres:17`镜像未缓存，在正式preflight以internal exit `10`阻断。按终局规则，B2 capacity gate以`DEFERRED / KNOWN_LIMITATION`关闭；不拉取镜像重跑、不创建Retry-5、不继续harness修复链。B3只开放planning，不开放implementation；冻结work order中没有可读取的B3任务名，本任务未自行命名。
+
+## Historical pre-final authority — consumed by final Retry-4
 
 ```text
 Stage-QDR-7 B1: FROZEN

@@ -1,6 +1,33 @@
 # Decision Hub Roadmap
 
-## Current route — 2026-07-19 Surefire fork startup stabilization accepted
+## Terminal current route — 2026-07-19 B2 capacity gate deferred
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
+Final Retry-4: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260719T082658Z / POSTGRES:17 IMAGE NOT CACHED
+Remote CI: PASS / RUN 29679227229 / EXACT HEAD 1fb49fc1b77d874dc82a010a6bcf0a202920e52a
+Criteria: FROZEN / ACCEPTED / SHA-256 d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab
+Retry-5: NOT_ALLOWED
+Post-final harness fix chain: NOT_ALLOWED
+Stage-QDR-7 B3: READY FOR PLANNING / CAPACITY GATE DEFERRED / NOT_STARTED
+ALLOW_STAGE_QDR_7_B3_ENTRY: YES / PLANNING_ONLY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+next action: B3 PLANNING/WORK-ORDER TASK NAME NOT FROZEN / EXPLICIT FREEZE REQUIRED
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_NQ_RUNTIME_INTEGRATION: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_LIVE: NO
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
+```
+
+最后一次formal在场景启动前因冻结镜像缓存门禁阻断，按终局规则关闭B2重试链。容量能力未被正式评估，缺口作为known limitation保留；B3仅允许planning。冻结work order未提供B3任务名，下一步名称必须显式freeze。
+
+## Historical pre-final route — consumed by final Retry-4
 
 ```text
 Stage-QDR-7 B1: FROZEN

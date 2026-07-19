@@ -1,6 +1,77 @@
 # DH Stage-QDR-7 B2 Formal Capacity Acceptance Result
 
-## Current pre-final-formal disposition — Surefire fork startup stabilization accepted（2026-07-19）
+## Terminal formal result — Retry-4 deferred（2026-07-19）
+
+> task: `DH-STAGE-QDR-7-B2-POST-IMPLEMENTATION-CAPACITY-ACCEPTANCE-RETRY-4`
+> repository: `E:/CapacityRuns/decision-hub-qdr7-retry4`
+> branch / exact HEAD: `dev / 1fb49fc1b77d874dc82a010a6bcf0a202920e52a`
+> remote CI: `PASS / 29679227229 / EXACT HEAD`
+> formal run ID: `20260719T082658Z`
+> formal execution verdict: `BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED`
+> terminal disposition: `DEFERRED / KNOWN_LIMITATION`
+
+唯一formal命令真实执行一次：
+
+```powershell
+mvn -ntp `
+  -Pqdr7-capacity-acceptance `
+  "-Dqdr7.runId=20260719T082658Z" `
+  "-Dqdr7.seed=7" `
+  verify
+```
+
+结果：
+
+```text
+MAVEN_EXIT: 1
+INTERNAL_EXIT: 10
+FORMAL_STATUS: BLOCKED
+REASON_CODE: ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED
+PREFLIGHT: 25 OF 26 PASS
+BLOCKER: postgres-image / EXPECTED cached postgres:17 / ACTUAL missing
+CAPACITY_ACCEPTANCE_EXECUTED: false
+MANDATORY_SCENARIOS: 15 TOTAL / 0 STARTED / 0 COMPLETED / 0 PARTIAL / 15 NOT_STARTED
+CORRECTNESS: BLOCKED / NOT_EVALUATED
+THRESHOLD_COMPARISONS: 0 EXECUTED / 94 NOT_EVALUATED
+FULL_REGRESSION: BLOCKED / NOT_EXECUTED
+QUALITY_GATE: BLOCKED / NOT_EXECUTED
+ARTIFACT_ROOT: target/qdr7-capacity-acceptance/20260719T082658Z
+ARTIFACTS: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH
+SECRET_SCAN: PASS / 25 FILES / 0 FINDINGS
+TEARDOWN: PASS / CONTAINER REMOVED_OR_ABSENT / VOLUME REMOVED_OR_ABSENT / RESIDUAL NONE
+POST_B2_CAPACITY_ACCEPTANCE: DEFERRED / KNOWN_LIMITATION
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+Stage-QDR-7 B3: READY FOR PLANNING / CAPACITY GATE DEFERRED / NOT_STARTED
+ALLOW_STAGE_QDR_7_B3_ENTRY: YES / PLANNING_ONLY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO
+ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
+RETRY_5: NOT_ALLOWED
+POST_FINAL_FORMAL_HARNESS_FIX_CHAIN: NOT_ALLOWED
+```
+
+场景ledger：
+
+```text
+actual-wiring: NOT_STARTED / NOT_EVALUATED
+rate-matrix: NOT_STARTED / NOT_EVALUATED
+cold-start-quota: NOT_STARTED / NOT_EVALUATED
+tenant-environment-isolation: NOT_STARTED / NOT_EVALUATED
+canonical-source-fail-closed: NOT_STARTED / NOT_EVALUATED
+nonce-race: NOT_STARTED / NOT_EVALUATED
+idempotency-lifecycle: NOT_STARTED / NOT_EVALUATED
+tenant-scoped-cleanup: NOT_STARTED / NOT_EVALUATED
+postgres-hikari-contention: NOT_STARTED / NOT_EVALUATED
+postgres-same-pool-recovery: NOT_STARTED / NOT_EVALUATED
+spring-context-restart: NOT_STARTED / NOT_EVALUATED
+postgres-persistent-volume-restart: NOT_STARTED / NOT_EVALUATED
+post-recovery-concurrency: NOT_STARTED / NOT_EVALUATED
+full-regression: NOT_STARTED / NOT_EVALUATED
+quality-gate: NOT_STARTED / NOT_EVALUATED
+```
+
+该blocker发生在场景启动前，因此吞吐、延迟、cleanup、Hikari/PostgreSQL、恢复与资源comparison均未形成formal数值结论。远端CI与qualification继续保留为准入证据，但不能替代formal内部场景。按最后一次Retry-4终局规则，不拉取镜像重跑、不修改harness/criteria、不创建Retry-5或新B2 blocker。B3只允许planning；`DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md`没有冻结具体`DH-STAGE-QDR-7-B3-*`任务名，本任务未自行命名。
+
+## Historical pre-final-formal disposition — Surefire fork startup stabilization accepted（2026-07-19）
 
 > task: `DH-STAGE-QDR-7-B2-SUREFIRE-FORK-STARTUP-STABILIZATION`
 > repository: `E:/CapacityRuns/decision-hub-qdr7-retry4`
