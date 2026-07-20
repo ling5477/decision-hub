@@ -13,6 +13,7 @@ decisionhub:
       # dev profile 可显式开启；默认仍关闭，避免误把 dry-run endpoint 当作 runtime integration。
       enabled: false
       production-enabled: false
+      kill-switch-enabled: true
       allowed-sources: NQ_DRYRUN
       allowed-tenant-source-pairs: ""
   security:

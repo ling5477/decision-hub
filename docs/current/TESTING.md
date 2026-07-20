@@ -1,6 +1,35 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-20 Stage-QDR-7 B3 scope contract errata freeze
+## Current validation — 2026-07-20 Stage-QDR-7 B3 implementation local accepted
+
+`DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION` 已在 canonical repository、`dev` 与 baseline `1eea7b2b0e1f160c4a1c90ac17911e74230eaedc` 上完成本地验证。初次 `dh-app` 回归因 Docker daemon 未启动产生 61 个 Testcontainers skip，未计为通过；恢复 Docker Desktop 后，同一模块与完整 reactor 均取得真实 PostgreSQL 17、0 skipped 结果。
+
+RCA 过程中曾将 wiring 的缺失属性默认值试验性改为 kill deny；该版本的完整回归退出码为 1，既有 `PersistentGuardProductionWiringPostgresTest` 有 3 个断言在 persistent guard 前收到 403。冻结 fixture 的轻量 context 不加载 application YAML，且该测试不在 B3 write allowlist；试验改动已撤销，实际应用 YAML 默认 kill deny 与独立 `UNKNOWN / STALE / READ_FAILED` 合同继续保留。最终代码随后重新取得 19/19、1160/0/0/0 全绿结果。
+
+```text
+scope invariants: PASS / 3 OF 3
+Stage-QDR-7 B3 implementation: IMPLEMENTED / LOCAL_ACCEPTED
+targeted runtime unit: PASS / 11 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+targeted wiring + architecture: PASS / 9 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+dh-usecase regression: PASS / 9 OF 9 REACTOR SUCCESS / MODULE 565 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+dh-api regression: PASS / 11 OF 11 REACTOR SUCCESS / MODULE 80 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+dh-app PostgreSQL regression: PASS / 15 OF 15 REACTOR SUCCESS / MODULE 193 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+full regression: PASS / mvn -B -ntp test / MAVEN EXIT 0 / 19 OF 19 REACTOR SUCCESS
+full regression totals: 1160 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL/Testcontainers: EXECUTED / postgres:17 / 0 SKIPPED
+quality: PASS / mvn -B -ntp -Pquality validate / MAVEN EXIT 0 / 19 OF 19 REACTOR SUCCESS
+Checkstyle: PASS / 0 VIOLATIONS
+Spotless: PASS
+static boundary: PASS / NO NEW HTTP CLIENT / NQ RUNTIME / REAL PROVIDER / UNBOUNDED EXECUTOR OR QUEUE / CALLER-RUNS
+API / Controller / migration / Repository / contracts / POM / workflow diff: 0
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Remote CI: PENDING NEW COMMIT
+B3 final close: PENDING EXACT_SHA_CI
+```
+
+本地通过只表示 dev/test-only limited dry-run runtime readiness 已实现；不代表 production readiness、formal capacity acceptance、真实 Provider/NQ、Agent/LangGraph、Paper 或 LIVE 已获准。
+
+## Historical validation — 2026-07-20 Stage-QDR-7 B3 scope contract errata freeze
 
 本任务仅修正文档 scope 合同，不执行 B3 implementation 或 full tests。B3 implementation work order 已冻结 `READ_SCOPE`、`WRITE_ALLOWLIST`、`VALIDATION_SCOPE`、`FIXABLE_BLOCKER_SCOPE` 与 `CURRENT_FACTSOURCE_SCAN_SCOPE`，并逐项列出 14 个 current factsources。
 
@@ -27,7 +56,7 @@ staged: EMPTY
 
 Quality 验证不代表 full regression、PostgreSQL/Testcontainers 或 B3 runtime readiness 已执行。B2 capacity gate 保持 `DEFERRED / KNOWN_LIMITATION`；B3 implementation 保持 `NOT_STARTED / NEXT`。原 implementation 开工前必须成功执行 `git fetch origin` 并验证 `HEAD == origin/dev`、worktree clean、staged empty，否则输出 `REMOTE_BASELINE_UNVERIFIED_BLOCKED`。
 
-## Current validation — 2026-07-19 Stage-QDR-7 B3 plan/work-order freeze
+## Historical validation — 2026-07-19 Stage-QDR-7 B3 plan/work-order freeze
 
 本任务是 docs-only planning，不执行 B3 implementation、formal capacity 或 full regression。只读代码现实确认现有 protected dry-run 已具备 HMAC、timestamp、nonce、tenant/source、payload cap、persistent rate/idempotency、mock-only provider、snapshot/audit/trace 和 no-side-effect 基线；限定主链路扫描未发现真实 HTTP 或 NQ runtime client。真实缺口为独立 runtime policy、统一 deadline、bounded concurrency/queue/backpressure 与 kill/environment fail-closed readiness 证据。
 

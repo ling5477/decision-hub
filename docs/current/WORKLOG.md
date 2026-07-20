@@ -1,6 +1,31 @@
 # Decision Hub Worklog
 
-## Current work — 2026-07-20 Stage-QDR-7 B3 scope contract errata freeze
+## Current work — 2026-07-20 Stage-QDR-7 B3 implementation local accepted
+
+`DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION` 在 `E:/Project/decision-hub`、`dev` 与 baseline `1eea7b2b0e1f160c4a1c90ac17911e74230eaedc` 上实施。开工时 `HEAD == origin/dev`、ahead/behind `0/0`、worktree clean、staged empty，scope invariants `3/3 PASS`。
+
+B3.1 新增独立 runtime feature/environment/kill/deadline/concurrency/failure/no-side-effect 合同；B3.2 在既有 persistent-guarded dry-run service 前装配固定线程池、bounded queue、deadline cancellation 与 fail-closed backpressure，provider 固定 deterministic `MOCK`、retry 固定 `0`；B3.3 补齐 policy、deadline、concurrency、queue saturation、resource close、mock-only 与 architecture tests。默认配置保持 runtime disabled、kill deny；prod 继续 disabled/production denied/kill deny。
+
+安全入口、HMAC/timestamp/nonce/tenant/source、persistent rate/idempotency、snapshot/audit/trace/replay 均由既有入口和真实 PostgreSQL 回归验证。未修改 API、Controller、DTO、OpenAPI、migration、Repository/persistence model、contracts、POM、workflow、capacity harness 或 criteria；未引入真实 HTTP、Provider、NQ、Agent、LangGraph、Paper、LIVE 或交易/资金副作用。
+
+实施收口时曾试验把 `@Value` 的 kill 缺失默认直接改为 deny；完整回归中 3 个既有 PostgreSQL wiring 断言被提前 403 阻断。由于这些 fixture 不加载 application YAML 且不在本轮 write allowlist，试验改动按 RCA 撤销；最终状态继续由 YAML 默认 kill deny 与独立 kill 状态合同 fail-closed，并重新取得完整全绿回归。
+
+```text
+targeted runtime tests: PASS / 20 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+module regressions: PASS / dh-usecase + dh-api + dh-app
+full regression: PASS / 19 OF 19 / 1160 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL/Testcontainers: PASS / postgres:17 / REAL EXECUTION / 0 SKIPPED
+quality: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+static boundary scan: PASS / NEW FORBIDDEN REACHABLE CALLS 0
+Stage-QDR-7 B3 implementation: IMPLEMENTED / LOCAL_ACCEPTED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Remote CI: PENDING NEW COMMIT
+B3 final close: PENDING EXACT_SHA_CI
+```
+
+本任务只允许创建本地提交，不 push、不创建 tag。下一步是在取得 push 授权后推送 exact commit，并执行 exact-SHA 远端 test + quality CI。
+
+## Historical work — 2026-07-20 Stage-QDR-7 B3 scope contract errata freeze
 
 `DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE` 在 canonical repository、`dev` 与 baseline HEAD `03185cbd946b58a795bef400cb12b8f69242a22f` 上执行，任务状态为 `CLOSED / ACCEPTED / DOCUMENTATION_ONLY`；cached `origin/dev` 同 SHA，worktree/staged 开工时为空。本任务不要求联网，未重试已知 GitHub 代理故障。
 
@@ -10,7 +35,7 @@ B3 implementation work order 已补齐并冻结五个 scope：`READ_SCOPE` 为�
 
 B2 capacity gate 保持 `DEFERRED / KNOWN_LIMITATION`；B3 plan 保持 `CLOSED / ACCEPTED`，implementation work order 为 `FROZEN / SCOPE CONTRACT COMPLETE`，implementation 为 `NOT_STARTED / NEXT`。下一任务恢复 `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION`；不创建新 planning、review、B2 或 capacity 任务。
 
-## Current work — 2026-07-19 Stage-QDR-7 B3 plan/work-order freeze
+## Historical work — 2026-07-19 Stage-QDR-7 B3 plan/work-order freeze
 
 `DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE` 在 `E:/CapacityRuns/decision-hub-qdr7-retry4`、`dev` 执行。执行前 HEAD 为 `6193df72d1ac489f40f63cf665ca984f273b5344`，`origin/dev` 为其直接父提交 `1fb49fc1b77d874dc82a010a6bcf0a202920e52a`，ahead/behind `1/0`，worktree/staged 为空，三项 scope 包含关系均通过。
 

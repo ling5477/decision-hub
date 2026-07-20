@@ -112,14 +112,17 @@ credential storage allowed
 NQ mutation allowed
 ```
 
-## 5. Terminal current state — 2026-07-20 Stage-QDR-7 B3 scope contracts frozen
+## 5. Terminal current state — 2026-07-20 Stage-QDR-7 B3 implementation local accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
 Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
 Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
 Capacity acceptance criteria: FROZEN / ACCEPTED
-Remote CI: PASS / RUN 29679227229 / EXACT HEAD 1fb49fc1b77d874dc82a010a6bcf0a202920e52a
+Implementation baseline HEAD: 1eea7b2b0e1f160c4a1c90ac17911e74230eaedc
+Remote baseline CI: PASS / RUN 29744016753 / TEST 1145 / QUALITY PASS
+B3 local validation: PASS / TEST 1160 / 0 FAILURES / 0 ERRORS / 0 SKIPPED / QUALITY PASS / POSTGRESQL TESTCONTAINERS EXECUTED
+Remote CI: PENDING NEW COMMIT
 Final Retry-4 formal execution: BLOCKED / ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED / 20260719T082658Z
 Final Retry-4 terminal disposition: DEFERRED / KNOWN_LIMITATION
 Final Retry-4 blocker: POSTGRES IMAGE CHECK / EXPECTED CACHED postgres:17 / ACTUAL MISSING
@@ -132,17 +135,20 @@ Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
 Stage-QDR-7 B3: LIMITED DRY-RUN RUNTIME READINESS
 Stage-QDR-7 B3 plan: CLOSED / ACCEPTED
 Stage-QDR-7 B3 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
-Stage-QDR-7 B3 implementation: NOT_STARTED / NEXT
-current task: DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE
-current task status: CLOSED / ACCEPTED / DOCUMENTATION_ONLY
-next action: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
+Stage-QDR-7 B3 implementation: IMPLEMENTED / LOCAL_ACCEPTED
+Limited dry-run runtime: DEV_TEST_ONLY / DEFAULT_DISABLED / MOCK_PROVIDER_ONLY / BOUNDED / FAIL_CLOSED / NO_SIDE_EFFECT
+current task: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
+current task status: DONE / LOCAL_ACCEPTED
+next action: OBTAIN PUSH AUTHORIZATION; PUSH EXACT COMMIT; RUN EXACT-SHA REMOTE TEST + QUALITY CI
 Scope contracts: READ_SCOPE / WRITE_ALLOWLIST / VALIDATION_SCOPE / FIXABLE_BLOCKER_SCOPE / CURRENT_FACTSOURCE_SCAN_SCOPE = FROZEN
 Scope invariants: PASS / 3 OF 3
 ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
 RETRY_5: NOT_ALLOWED
 POST_FINAL_FORMAL_HARNESS_FIX_CHAIN: NOT_ALLOWED
-ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
-ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / SCOPE_ERRATA_TASK_BOUNDARY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: NO / CONSUMED_LOCAL_ACCEPTED
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / CONSUMED_LOCAL_ACCEPTED
+ALLOW_EXACT_SHA_CI: YES / AFTER PUSH AUTHORIZATION
+ALLOW_B3_FINAL_CLOSE: NO / EXACT_SHA_CI_PENDING
 ALLOW_API_CHANGE_NOW: NO
 ALLOW_MIGRATION_NOW: NO
 ALLOW_REPOSITORY_EXPANSION_NOW: NO
@@ -155,7 +161,7 @@ LIVE: DISABLED
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
 ```
 
-本节以上述 terminal block 为唯一 active current state。最后一次 formal 不得重跑；旧 B2 与 pre-final 状态只保留为历史证据。B3 plan/work order scope contracts 已冻结且 3/3 invariant 通过；implementation 开工前必须成功 fetch 并核验 exact remote baseline。不得把 B3 描述成已实施、production ready、Integration-1 runtime accepted 或 capacity accepted。
+本节以上述 terminal block 为唯一 active current state。最后一次 formal 不得重跑；旧 B2 与 pre-final 状态只保留为历史证据。B3 implementation 已在冻结 scope 内完成并本地接受，但不得描述为 production ready、Integration-1 runtime accepted 或 capacity accepted。B3 final close 只能在 exact commit 推送并通过 exact-SHA 远端 test + quality CI 后执行。
 
 ### Historical pre-final snapshot — consumed by final Retry-4
 

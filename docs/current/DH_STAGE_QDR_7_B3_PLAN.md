@@ -5,7 +5,7 @@
 > planning baseline: `6193df72d1ac489f40f63cf665ca984f273b5344`
 > stage name: `Stage-QDR-7 B3 / LIMITED DRY-RUN RUNTIME READINESS`
 > implementation task: `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION`
-> implementation state: `NOT_STARTED / NEXT`
+> implementation state: `IMPLEMENTED / LOCAL_ACCEPTED`
 > implementation work order: `FROZEN / SCOPE CONTRACT COMPLETE`
 > scope invariants: `PASS / 3 OF 3`
 > scope errata: `DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE / CLOSED / ACCEPTED / DOCUMENTATION_ONLY`
@@ -18,10 +18,16 @@ Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
 Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
 Stage-QDR-7 B3 plan: CLOSED / ACCEPTED
 Stage-QDR-7 B3 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
-Stage-QDR-7 B3 implementation: NOT_STARTED / NEXT
+Stage-QDR-7 B3 implementation: IMPLEMENTED / LOCAL_ACCEPTED
+Limited dry-run runtime: DEV_TEST_ONLY / DEFAULT_DISABLED / MOCK_PROVIDER_ONLY / BOUNDED / FAIL_CLOSED / NO_SIDE_EFFECT
+Local validation: PASS / 19 OF 19 REACTOR / 1160 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED / QUALITY PASS
+Remote CI: PENDING NEW COMMIT
+B3 final close: PENDING EXACT_SHA_CI
 Scope contracts: READ_SCOPE / WRITE_ALLOWLIST / VALIDATION_SCOPE / FIXABLE_BLOCKER_SCOPE / CURRENT_FACTSOURCE_SCAN_SCOPE = FROZEN
 Scope invariants: PASS / 3 OF 3
-ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: NO / CONSUMED_LOCAL_ACCEPTED
+ALLOW_EXACT_SHA_CI: YES / AFTER PUSH AUTHORIZATION
+ALLOW_B3_FINAL_CLOSE: NO / EXACT_SHA_CI_PENDING
 ALLOW_API_CHANGE_NOW: NO
 ALLOW_MIGRATION_NOW: NO
 ALLOW_REPOSITORY_EXPANSION_NOW: NO
@@ -33,7 +39,7 @@ ALLOW_LANGGRAPH_RUNTIME: NO
 ALLOW_LIVE: NO
 ```
 
-本计划只冻结 B3 名称、目标、实施范围、批次、验收与停止条件，不实施任何业务代码、测试、配置、API、migration、runtime wiring 或外部连接。B2 不重新打开，不创建 Retry-5、capacity blocker 或 harness 修复任务。
+本计划已被 B3 implementation 消费：B3.1-B3.3 在冻结范围内实现并通过本地验收，API、migration、Repository 与外部连接保持不变。B2 不重新打开，不创建 Retry-5、capacity blocker 或 harness 修复任务；B3 final close 等待 exact-SHA 远端 CI。
 
 ## 2. 代码现实
 

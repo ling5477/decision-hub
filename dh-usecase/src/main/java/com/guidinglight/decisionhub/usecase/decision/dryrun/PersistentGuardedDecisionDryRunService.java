@@ -26,7 +26,8 @@ import java.util.UUID;
  * safe output/audit writes、guard completion/failure和guard audit。任何store/commit/result不确定都fail-closed，绝不
  * fallback到generic in-memory idempotency。
  */
-public final class PersistentGuardedDecisionDryRunService implements DecisionDryRunService {
+public final class PersistentGuardedDecisionDryRunService
+    implements DecisionDryRunService, AutoCloseable {
 
   private static final String RESULT_TYPE_DECISION_OUTPUT = "DH_DECISION_OUTPUT";
 
@@ -37,6 +38,8 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
   private final DecisionDryRunRequestFingerprint fingerprint;
   private final DecisionDryRunSafeResultProjector resultProjector;
   private final DecisionDryRunGuardProperties guardProperties;
+  private final NoSideEffectDecisionContract noSideEffectContract;
+  private final LimitedDryRunRuntimeService runtimeService;
   private final Clock clock;
   private final String leaseOwner;
 
@@ -50,6 +53,41 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
       final DecisionDryRunSafeResultProjector resultProjector,
       final DecisionDryRunGuardProperties guardProperties,
       final Clock clock) {
+    this(
+        delegate,
+        idempotencyPort,
+        transactions,
+        auditRepository,
+        fingerprint,
+        resultProjector,
+        guardProperties,
+        clock,
+        null);
+  }
+
+  /**
+   * 创建带 B3 limited runtime policy 的 persistent idempotency orchestration。
+   *
+   * @param delegate 既有 mock-only dry-run service。
+   * @param idempotencyPort persistent idempotency port。
+   * @param transactions required transaction boundary。
+   * @param auditRepository audit repository。
+   * @param fingerprint request fingerprint service。
+   * @param resultProjector safe result projector。
+   * @param guardProperties persistent guard 配置。
+   * @param clock UTC clock。
+   * @param runtimePolicy B3 runtime policy；必须先于 persistent admission 判定。
+   */
+  public PersistentGuardedDecisionDryRunService(
+      final DecisionDryRunService delegate,
+      final IdempotencyGuardPort idempotencyPort,
+      final GuardTransactionBoundary transactions,
+      final DecisionAuditRepository auditRepository,
+      final DecisionDryRunRequestFingerprint fingerprint,
+      final DecisionDryRunSafeResultProjector resultProjector,
+      final DecisionDryRunGuardProperties guardProperties,
+      final Clock clock,
+      final LimitedDryRunRuntimePolicy runtimePolicy) {
     this.delegate = Objects.requireNonNull(delegate, "delegate");
     this.idempotencyPort = Objects.requireNonNull(idempotencyPort, "idempotencyPort");
     this.transactions = Objects.requireNonNull(transactions, "transactions");
@@ -57,12 +95,24 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
     this.fingerprint = Objects.requireNonNull(fingerprint, "fingerprint");
     this.resultProjector = Objects.requireNonNull(resultProjector, "resultProjector");
     this.guardProperties = Objects.requireNonNull(guardProperties, "guardProperties");
+    this.noSideEffectContract =
+        runtimePolicy == null
+            ? new NoSideEffectDecisionContract()
+            : runtimePolicy.noSideEffectContract();
     this.clock = Objects.requireNonNull(clock, "clock");
     this.leaseOwner = "qdr7-" + UUID.randomUUID();
+    this.runtimeService =
+        runtimePolicy == null
+            ? null
+            : new LimitedDryRunRuntimeService(new PersistentExecutionDelegate(), runtimePolicy);
   }
 
   @Override
   public DecisionDryRunResult execute(final DecisionDryRunCommand command) {
+    return runtimeService == null ? executePersistent(command) : runtimeService.execute(command);
+  }
+
+  private DecisionDryRunResult executePersistent(final DecisionDryRunCommand command) {
     if (!guardProperties.runtimeEnabled()) {
       return delegate.execute(command);
     }
@@ -178,6 +228,32 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
                   "FAILED",
                   delegated.errorCode() == null ? "UNKNOWN_ERROR" : delegated.errorCode().name());
               return delegated;
+            }
+            final java.util.Optional<RuntimeFailureClassification> noSideEffectViolation =
+                noSideEffectContract.validate(delegated);
+            if (noSideEffectViolation.isPresent()) {
+              final DecisionDryRunResult rejected =
+                  delegate.reject(
+                      command,
+                      403,
+                      DecisionDryRunErrorCode.POLICY_DENIED,
+                      "limited dry-run runtime rejected: "
+                          + noSideEffectViolation.orElseThrow().name());
+              idempotencyPort.transition(
+                  terminal(
+                      inProgress,
+                      requestHash,
+                      leaseToken,
+                      IdempotencyState.FAILED,
+                      null,
+                      null,
+                      DecisionDryRunErrorCode.POLICY_DENIED.name()));
+              writeAudit(
+                  command,
+                  DecisionAuditEventType.QDR7_IDEMPOTENCY_FAILED,
+                  "FAILED",
+                  DecisionDryRunErrorCode.POLICY_DENIED.name());
+              return rejected;
             }
             final DecisionDryRunSnapshot normalized =
                 resultProjector.project(command.tenantId(), delegated.snapshot().decisionId());
@@ -309,5 +385,30 @@ public final class PersistentGuardedDecisionDryRunService implements DecisionDry
         command == null ? null : command.requestId(),
         command == null ? null : command.traceId(),
         null);
+  }
+
+  /** 关闭 B3 bounded executor；旧无 runtime-policy 构造路径无资源可关闭。 */
+  @Override
+  public void close() {
+    if (runtimeService != null) {
+      runtimeService.close();
+    }
+  }
+
+  private final class PersistentExecutionDelegate implements DecisionDryRunService {
+
+    @Override
+    public DecisionDryRunResult execute(final DecisionDryRunCommand command) {
+      return executePersistent(command);
+    }
+
+    @Override
+    public DecisionDryRunResult reject(
+        final DecisionDryRunCommand command,
+        final int status,
+        final DecisionDryRunErrorCode errorCode,
+        final String message) {
+      return delegate.reject(command, status, errorCode, message);
+    }
   }
 }

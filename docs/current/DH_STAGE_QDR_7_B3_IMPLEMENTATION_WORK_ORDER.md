@@ -2,10 +2,33 @@
 
 > work order: `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION`
 > status: `FROZEN / SCOPE CONTRACT COMPLETE`
-> implementation: `NOT_STARTED / NEXT`
+> implementation: `IMPLEMENTED / LOCAL_ACCEPTED`
 > plan: `DH_STAGE_QDR_7_B3_PLAN.md / CLOSED / ACCEPTED`
 > B2 capacity gate: `DEFERRED / KNOWN_LIMITATION`
 > scope errata: `DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE / CLOSED / ACCEPTED / DOCUMENTATION_ONLY`
+
+## 0. 本地实施验收（2026-07-20）
+
+```text
+Implementation baseline HEAD: 1eea7b2b0e1f160c4a1c90ac17911e74230eaedc
+Stage-QDR-7 B3 implementation: IMPLEMENTED / LOCAL_ACCEPTED
+Limited dry-run runtime: DEV_TEST_ONLY / DEFAULT_DISABLED / MOCK_PROVIDER_ONLY / BOUNDED / FAIL_CLOSED / NO_SIDE_EFFECT
+B3.1 runtime contracts: PASS
+B3.2 protected mock-only wiring: PASS
+B3.3 runtime readiness tests: PASS
+Full regression: PASS / 19 OF 19 REACTOR / 1160 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL/Testcontainers: PASS / postgres:17 / REAL EXECUTION / 0 SKIPPED
+Quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+Scope invariants: PASS / 3 OF 3
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Remote CI: PENDING NEW COMMIT
+B3 final close: PENDING EXACT_SHA_CI
+ALLOW_IMPLEMENTATION: NO / CONSUMED_LOCAL_ACCEPTED
+ALLOW_EXACT_SHA_CI: YES / AFTER PUSH AUTHORIZATION
+ALLOW_B3_FINAL_CLOSE: NO / EXACT_SHA_CI_PENDING
+```
+
+本地验收不代表 production readiness、formal capacity acceptance、Integration-1 runtime accepted、真实 Provider/NQ、Agent/LangGraph、Paper 或 LIVE。下一步仅允许取得 push 授权、推送 exact commit 并执行 exact-SHA 远端 test + quality CI。
 
 ## 1. 目标与边界
 

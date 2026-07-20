@@ -3,9 +3,12 @@ package com.guidinglight.decisionhub.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunGuardProperties;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunRuntimeProperties;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.LimitedDryRunRuntimePolicy;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.RuntimeFailureClassification;
 import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardHardCeilings;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
@@ -19,8 +22,7 @@ import org.springframework.mock.env.MockEnvironment;
 class DecisionDryRunRuntimeWiringConfigTest {
 
   private final DecisionDryRunRuntimeWiringConfig config = new DecisionDryRunRuntimeWiringConfig();
-  private final MockEnvironment testEnvironment =
-      new MockEnvironment().withProperty("spring.profiles.active", "test");
+  private final MockEnvironment testEnvironment = testEnvironment();
 
   @Test
   void canonicalCsvConfigurationBindsAfterOuterWhitespaceIsRemoved() {
@@ -106,6 +108,36 @@ class DecisionDryRunRuntimeWiringConfigTest {
     assertEquals(0, properties.rateLimitValue());
   }
 
+  @Test
+  void limitedRuntimePolicyBindsOnlyExplicitTestMockConfiguration() {
+    final LimitedDryRunRuntimePolicy policy =
+        config.limitedDryRunRuntimePolicy(
+            testEnvironment, true, false, false, 5000, 4, 8, 100);
+
+    assertTrue(policy.evaluate().allowed());
+    assertEquals("MOCK", policy.providerKind());
+    assertEquals(0, policy.retryCount());
+    assertEquals(4, policy.concurrencyPolicy().maxConcurrency());
+    assertEquals(8, policy.concurrencyPolicy().queueCapacity());
+  }
+
+  @Test
+  void limitedRuntimePolicyRejectsKillAndInvalidLimits() {
+    final LimitedDryRunRuntimePolicy killed =
+        config.limitedDryRunRuntimePolicy(
+            testEnvironment, true, false, true, 5000, 4, 8, 100);
+    final LimitedDryRunRuntimePolicy invalid =
+        config.limitedDryRunRuntimePolicy(
+            testEnvironment, true, false, false, 0, 0, 65, 1001);
+
+    assertEquals(
+        RuntimeFailureClassification.KILL_SWITCH_DENIED,
+        killed.evaluate().failureClassification());
+    assertEquals(
+        RuntimeFailureClassification.RUNTIME_CONFIGURATION_INVALID,
+        invalid.evaluate().failureClassification());
+  }
+
   private DecisionDryRunGuardProperties guardProperties(
       final int rateWindowSeconds, final int rateQuota, final int leaseSeconds) {
     return config.decisionDryRunGuardProperties(
@@ -122,5 +154,11 @@ class DecisionDryRunRuntimeWiringConfigTest {
       final String allowedSources, final String allowedTenantSourcePairs) {
     return config.decisionDryRunRuntimeProperties(
         testEnvironment, false, false, false, allowedSources, allowedTenantSourcePairs, 32768);
+  }
+
+  private static MockEnvironment testEnvironment() {
+    final MockEnvironment environment = new MockEnvironment();
+    environment.setActiveProfiles("test");
+    return environment;
   }
 }

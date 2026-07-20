@@ -4,6 +4,7 @@ decisionhub:
       # test profile 可由测试显式 override enabled=true；默认关闭并保持 fail-closed。
       enabled: false
       production-enabled: false
+      kill-switch-enabled: true
       allowed-sources: NQ_DRYRUN
       allowed-tenant-source-pairs: ""
   security:

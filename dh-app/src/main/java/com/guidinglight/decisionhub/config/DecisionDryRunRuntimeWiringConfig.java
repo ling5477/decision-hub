@@ -17,7 +17,14 @@ import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunRuntim
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunSafeResultProjector;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunService;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DefaultDecisionDryRunService;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.LimitedDryRunRuntimePolicy;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.NoSideEffectDecisionContract;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.PersistentGuardedDecisionDryRunService;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.RuntimeConcurrencyPolicy;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.RuntimeDeadlinePolicy;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.RuntimeEnvironmentPolicy;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.RuntimeFeatureFlag;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.RuntimeKillSwitch;
 import com.guidinglight.decisionhub.usecase.qdr.DecisionRequestRepository;
 import com.guidinglight.decisionhub.usecase.qdr.DecisionRunRepository;
 import com.guidinglight.decisionhub.usecase.qdr.QuantDecisionRepository;
@@ -191,6 +198,46 @@ public class DecisionDryRunRuntimeWiringConfig {
     }
 
     /**
+     * 装配 Stage-QDR-7 B3 limited runtime policy 启动期快照。
+     *
+     * <p>Provider kind 与 retry count 不开放外部配置：B3 固定为 deterministic MOCK、retry 0。Runtime 启用时
+     * deadline/concurrency/queue 非法会在入口 fail-closed，且不会创建无界 executor。
+     *
+     * @param environment Spring active profiles。
+     * @param enabled runtime feature flag。
+     * @param productionEnabled production gate；B3 必须保持 false。
+     * @param killSwitchEnabled emergency kill switch。
+     * @param deadlineMillis 总 deadline 毫秒。
+     * @param maxConcurrency 最大并发数。
+     * @param queueCapacity bounded queue 容量。
+     * @param maxQueueWaitMillis 最大排队等待毫秒。
+     * @return immutable limited runtime policy。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public LimitedDryRunRuntimePolicy limitedDryRunRuntimePolicy(
+            final Environment environment,
+            @Value("${decisionhub.integration1.runtime.enabled:false}") final boolean enabled,
+            @Value("${decisionhub.integration1.runtime.production-enabled:false}") final boolean productionEnabled,
+            @Value("${decisionhub.integration1.runtime.kill-switch-enabled:false}") final boolean killSwitchEnabled,
+            @Value("${decisionhub.integration1.runtime.deadline-ms:5000}") final long deadlineMillis,
+            @Value("${decisionhub.integration1.runtime.max-concurrency:4}") final int maxConcurrency,
+            @Value("${decisionhub.integration1.runtime.queue-capacity:8}") final int queueCapacity,
+            @Value("${decisionhub.integration1.runtime.max-queue-wait-ms:100}") final long maxQueueWaitMillis) {
+        return new LimitedDryRunRuntimePolicy(
+                new RuntimeFeatureFlag(enabled),
+                new RuntimeEnvironmentPolicy(
+                        Set.copyOf(Arrays.asList(environment.getActiveProfiles())), productionEnabled),
+                RuntimeKillSwitch.fromEmergencyFlag(killSwitchEnabled),
+                new RuntimeDeadlinePolicy(
+                        Duration.ofMillis(deadlineMillis), Duration.ofMillis(maxQueueWaitMillis)),
+                new RuntimeConcurrencyPolicy(maxConcurrency, queueCapacity),
+                LimitedDryRunRuntimePolicy.MOCK_PROVIDER_KIND,
+                0,
+                new NoSideEffectDecisionContract());
+    }
+
+    /**
      * 装配 dry-run HMAC authenticator。
      *
      * @param properties          dry-run runtime 配置。
@@ -235,7 +282,7 @@ public class DecisionDryRunRuntimeWiringConfig {
      * @param properties                dry-run runtime 配置。
      * @return 由 persistent idempotency wrapper 封闭的 dry-run usecase service。
      */
-    @Bean
+    @Bean(destroyMethod = "close")
     @ConditionalOnMissingBean
     public DecisionDryRunService decisionDryRunService(
             final DecisionOrchestrator orchestrator,
@@ -250,7 +297,8 @@ public class DecisionDryRunRuntimeWiringConfig {
             final IdempotencyGuardPort idempotencyGuardPort,
             final GuardTransactionBoundary transactions,
             final DecisionDryRunGuardProperties guardProperties,
-            final DecisionDryRunRuntimeProperties properties) {
+            final DecisionDryRunRuntimeProperties properties,
+            final LimitedDryRunRuntimePolicy runtimePolicy) {
         final DecisionDryRunService delegate = new DefaultDecisionDryRunService(
                 orchestrator,
                 auditRepository,
@@ -269,7 +317,8 @@ public class DecisionDryRunRuntimeWiringConfig {
                 fingerprint,
                 resultProjector,
                 guardProperties,
-                Clock.systemUTC());
+                Clock.systemUTC(),
+                runtimePolicy);
     }
 
     /**
