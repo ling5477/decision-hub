@@ -1,6 +1,36 @@
 # Decision Hub Worklog
 
-## Current work — 2026-07-20 Stage-QDR-7 B3 implementation local accepted
+## Current work — 2026-07-20 Stage-QDR-7 B3 final close
+
+执行 `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-FINAL-CLOSE`。开工时 `dev`、HEAD/origin/dev 均为 `e42d430d6f8d18e32d8a9f02d2197aa68a595d63`，ahead/behind `0/0`，worktree/staged 为空；冻结 scope 复核为 14 个 current factsources，三项包含关系 `3/3 PASS`。
+
+只读核验 GitHub Actions run `29750432646`：head SHA 精确匹配 implementation commit，test 与 Quality job 均 success；远端证据为 19/19 Reactor、1160/0/0/0、PostgreSQL/Testcontainers 真实执行且 mandatory skips 为 0、Checkstyle 0、Spotless PASS。代码与测试证据复核 default-disabled、dev/test-only、production/unknown deny、kill fail-closed、deadline、bounded concurrency/queue/backpressure、deterministic mock-only、retry 0、security/no-side-effect 与 audit/trace/snapshot/replay 合同均成立。
+
+14 个冻结 factsources 已同步为 `Stage-QDR-7 B3: CLOSED / ACCEPTED`，并保留 `B2 capacity gate: DEFERRED / KNOWN_LIMITATION` 与 `Production capacity: NOT_PROVEN`。旧 local-accepted terminal block 已明确标为 historical。现有路线未冻结一个在 deferred capacity 下可直接执行的精确后续任务名，因此按任务 fallback 冻结 `DH-STAGE-QDR-7-NEXT-PHASE-PLAN-AND-WORK-ORDER-FREEZE`，仅允许 planning/work-order，不允许 implementation。
+
+```text
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+Limited dry-run runtime readiness: ACCEPTED
+files changed: 14 CURRENT FACTSOURCES ONLY
+unexpected files: 0
+Java/test/POM diff: 0
+workflow/config/harness diff: 0
+API/migration/Repository/contracts diff: 0
+current factsources: PASS / 14 OF 14
+current conflict count: 0
+scope invariants: PASS / 3 OF 3
+quality: PASS / MAVEN EXIT 0 / 19 OF 19 REACTOR SUCCESS / CHECKSTYLE 0 / SPOTLESS PASS
+target staged: 0
+local commit: THIS DOCUMENT COMMIT / docs(qdr): close stage-qdr-7 b3 runtime readiness
+push: NOT_RUN / FORBIDDEN
+tag: NOT_RUN / FORBIDDEN
+formal capacity acceptance: NOT_RUN / FORBIDDEN
+next action: DH-STAGE-QDR-7-NEXT-PHASE-PLAN-AND-WORK-ORDER-FREEZE
+```
+
+本任务未修改代码、测试、POM、workflow、config、harness、API、migration、Repository 或 contracts；未重开 B2，未接入真实 HTTP、Provider、NQ、Agent、LangGraph、Paper 或 LIVE。
+
+## Historical work — 2026-07-20 Stage-QDR-7 B3 implementation local accepted
 
 `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION` 在 `E:/Project/decision-hub`、`dev` 与 baseline `1eea7b2b0e1f160c4a1c90ac17911e74230eaedc` 上实施。开工时 `HEAD == origin/dev`、ahead/behind `0/0`、worktree clean、staged empty，scope invariants `3/3 PASS`。
 

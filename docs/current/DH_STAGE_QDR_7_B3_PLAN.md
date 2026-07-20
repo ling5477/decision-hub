@@ -5,12 +5,52 @@
 > planning baseline: `6193df72d1ac489f40f63cf665ca984f273b5344`
 > stage name: `Stage-QDR-7 B3 / LIMITED DRY-RUN RUNTIME READINESS`
 > implementation task: `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION`
-> implementation state: `IMPLEMENTED / LOCAL_ACCEPTED`
+> implementation state: `CLOSED / ACCEPTED / EXACT_SHA_CI_ACCEPTED`
 > implementation work order: `FROZEN / SCOPE CONTRACT COMPLETE`
 > scope invariants: `PASS / 3 OF 3`
 > scope errata: `DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE / CLOSED / ACCEPTED / DOCUMENTATION_ONLY`
 
-## 1. 当前事实与规划边界
+## 1. B3 milestone final close（2026-07-20）
+
+```text
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+Limited dry-run runtime readiness: ACCEPTED
+B3.1 runtime boundary contracts: CLOSED / ACCEPTED
+B3.2 protected mock-only runtime wiring: CLOSED / ACCEPTED
+B3.3 runtime readiness and no-side-effect tests: CLOSED / ACCEPTED
+Implementation commit: e42d430d6f8d18e32d8a9f02d2197aa68a595d63
+Exact-SHA CI: PASSED / ACCEPTED / RUN 29750432646
+Remote regression: PASS / 19 OF 19 REACTOR / 1160 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / ZERO MANDATORY SKIPS
+Remote quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+Runtime availability: DEV_TEST_ONLY
+Runtime default: DISABLED
+Provider: DETERMINISTIC_MOCK_ONLY
+Runtime controls: BOUNDED / FAIL_CLOSED / NO_SIDE_EFFECT
+Kill switch: STARTUP_CONFIGURATION_SNAPSHOT / FAIL_CLOSED / NOT_MULTI_INSTANCE_DYNAMIC_SHARED
+Retry: 0
+External HTTP / real Provider / NQ runtime: 0 / 0 / 0
+Order/risk/ledger/Paper/LIVE mutations: 0
+Audit/trace/snapshot/replay: PASS
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+current task: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-FINAL-CLOSE
+current task status: CLOSED / ACCEPTED
+next action: DH-STAGE-QDR-7-NEXT-PHASE-PLAN-AND-WORK-ORDER-FREEZE
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
+ALLOW_B3_FINAL_CLOSE: NO / CONSUMED_ACCEPTED
+ALLOW_NEXT_PHASE_PLANNING: YES
+ALLOW_NEXT_PHASE_IMPLEMENTATION_NOW: NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME_INTEGRATION: NO / NO / NO
+ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+本计划已被 implementation 与 milestone final close 消费。B3 只接受 dev/test、默认关闭、deterministic mock-only、有界、fail-closed、无副作用的 limited runtime readiness；B2 formal capacity 保持 deferred，production capacity 未证明。后续只允许冻结下一阶段 plan/work order，不直接实施。
+
+以下历史 planning baseline 及第 2-10 节均是 plan-time 冻结记录；其中的旧 `PENDING`、缺口和 next task 已被本 final close 覆盖，不再表示 current state。
+
+## Historical planning baseline — consumed by B3 implementation and final close
 
 ```text
 Stage-QDR-7 B1: FROZEN

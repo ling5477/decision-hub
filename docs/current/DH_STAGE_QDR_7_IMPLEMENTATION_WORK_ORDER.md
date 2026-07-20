@@ -1,6 +1,50 @@
 # DH Stage-QDR-7 Implementation Work Order
 
-## Terminal B3 implementation local acceptance addendum（2026-07-20）
+## Terminal B3 final close addendum（2026-07-20）
+
+```text
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+Limited dry-run runtime readiness: ACCEPTED
+B3.1 runtime boundary contracts: CLOSED / ACCEPTED
+B3.2 protected mock-only runtime wiring: CLOSED / ACCEPTED
+B3.3 runtime readiness and no-side-effect tests: CLOSED / ACCEPTED
+Implementation commit: e42d430d6f8d18e32d8a9f02d2197aa68a595d63
+Exact-SHA CI: PASSED / ACCEPTED / RUN 29750432646
+Remote regression: PASS / 19 OF 19 REACTOR / 1160 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / ZERO MANDATORY SKIPS
+Remote quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+Runtime availability: DEV_TEST_ONLY
+Runtime default: DISABLED
+Provider: DETERMINISTIC_MOCK_ONLY
+Runtime controls: BOUNDED / FAIL_CLOSED / NO_SIDE_EFFECT
+Kill switch: STARTUP_CONFIGURATION_SNAPSHOT / FAIL_CLOSED / NOT_MULTI_INSTANCE_DYNAMIC_SHARED
+current task: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-FINAL-CLOSE
+current task status: CLOSED / ACCEPTED
+next action: DH-STAGE-QDR-7-NEXT-PHASE-PLAN-AND-WORK-ORDER-FREEZE
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
+ALLOW_EXACT_SHA_CI: NO / CONSUMED_ACCEPTED
+ALLOW_B3_FINAL_CLOSE: NO / CONSUMED_ACCEPTED
+ALLOW_NEXT_PHASE_PLANNING: YES
+ALLOW_NEXT_PHASE_IMPLEMENTATION_NOW: NO
+ALLOW_API_CHANGE_NOW: NO
+ALLOW_MIGRATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_NQ_RUNTIME_INTEGRATION: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_PAPER: NO
+ALLOW_LIVE: NO
+```
+
+B3 close 只接受 dev/test limited runtime readiness，不改变 B2 capacity deferred，也不授权 B4、production、真实外部 runtime 或 Stage-QDR-7 final close/tag。下一步仅冻结新的 planning/work-order。
+
+## Historical B3 implementation local acceptance addendum — consumed by final close
 
 ```text
 Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED

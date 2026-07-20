@@ -1,6 +1,51 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-20 Stage-QDR-7 B3 implementation local accepted
+## Current validation — 2026-07-20 Stage-QDR-7 B3 final close
+
+`DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-FINAL-CLOSE` 在 `E:/Project/decision-hub` 与 `dev` 上执行。开工门禁确认 `HEAD == origin/dev == e42d430d6f8d18e32d8a9f02d2197aa68a595d63`、ahead/behind `0/0`、worktree clean、staged empty；scope invariants 原文复核为 `3/3 PASS`。
+
+GitHub Actions run [29750432646](https://github.com/ling5477/decision-hub/actions/runs/29750432646) 的 head SHA 与 implementation commit 精确一致。`build & test (Testcontainers / Docker)` 与 `Quality` job 均为 success；日志聚合确认 19/19 Reactor、1160 tests、0 failures、0 errors、0 skipped，PostgreSQL/Testcontainers mandatory execution assertion 成功，Checkstyle 0、Spotless PASS。
+
+```text
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+Limited dry-run runtime readiness: ACCEPTED
+implementation commit: e42d430d6f8d18e32d8a9f02d2197aa68a595d63
+exact-SHA CI: PASS / ACCEPTED / RUN 29750432646
+test job: PASS / JOB 88379189327
+quality job: PASS / JOB 88379189497
+remote regression: PASS / 19 OF 19 REACTOR / 1160 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL/Testcontainers: REAL EXECUTION / ZERO MANDATORY SKIPS
+remote quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+runtime contracts: PASS
+feature flag default disabled: PASS
+environment dev/test only: PASS
+production/unknown denied: PASS
+kill switch fail-closed: PASS / STARTUP CONFIGURATION SNAPSHOT
+deadline: PASS
+bounded concurrency: PASS
+bounded queue/backpressure: PASS
+mock provider only: PASS / DETERMINISTIC MOCK
+retry: 0
+security guards: PASS
+external HTTP / real Provider / NQ runtime: 0 / 0 / 0
+order/risk/ledger/Paper/LIVE mutations: 0
+audit/trace/snapshot/replay: PASS
+scope invariants: PASS / 3 OF 3
+current factsources: PASS / 14 OF 14 / 0 UNEXPECTED
+current conflict count: 0
+git diff --check: PASS
+quality: PASS / mvn -ntp -Pquality validate / MAVEN EXIT 0 / 19 OF 19 REACTOR SUCCESS / CHECKSTYLE 0 / SPOTLESS PASS
+target staged: 0
+formal capacity acceptance: NOT_RUN / FORBIDDEN BY TASK
+full regression rerun: NOT_RUN / EXACT-SHA CI IS IMPLEMENTATION TEST EVIDENCE
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+next action: DH-STAGE-QDR-7-NEXT-PHASE-PLAN-AND-WORK-ORDER-FREEZE
+```
+
+本 final close 不重新运行 formal capacity acceptance，也不重复完整测试。B3 只接受 dev/test limited runtime readiness；不支持 production 流量、共享动态 kill switch、真实 Provider/NQ、Agent/LangGraph、Paper 或 LIVE。
+
+## Historical validation — 2026-07-20 Stage-QDR-7 B3 implementation local accepted
 
 `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION` 已在 canonical repository、`dev` 与 baseline `1eea7b2b0e1f160c4a1c90ac17911e74230eaedc` 上完成本地验证。初次 `dh-app` 回归因 Docker daemon 未启动产生 61 个 Testcontainers skip，未计为通过；恢复 Docker Desktop 后，同一模块与完整 reactor 均取得真实 PostgreSQL 17、0 skipped 结果。
 

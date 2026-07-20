@@ -127,7 +127,59 @@ docs/current/TESTING.md
 
 ## 4. 当前阶段
 
-### Terminal current authority — 2026-07-20 Stage-QDR-7 B3 implementation local accepted
+### Terminal current authority — 2026-07-20 Stage-QDR-7 B3 final close accepted
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+Limited dry-run runtime readiness: ACCEPTED
+B3.1 runtime boundary contracts: CLOSED / ACCEPTED
+B3.2 protected mock-only runtime wiring: CLOSED / ACCEPTED
+B3.3 runtime readiness and no-side-effect tests: CLOSED / ACCEPTED
+Implementation commit: e42d430d6f8d18e32d8a9f02d2197aa68a595d63
+Exact-SHA CI: PASSED / ACCEPTED / RUN 29750432646
+Remote regression: PASS / 19 OF 19 REACTOR / 1160 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / ZERO MANDATORY SKIPS
+Remote quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+Runtime availability: DEV_TEST_ONLY
+Runtime default: DISABLED
+Provider: DETERMINISTIC_MOCK_ONLY
+Runtime controls: BOUNDED / FAIL_CLOSED / NO_SIDE_EFFECT
+Kill switch: STARTUP_CONFIGURATION_SNAPSHOT / FAIL_CLOSED / NOT_MULTI_INSTANCE_DYNAMIC_SHARED
+Retry: 0
+External HTTP: 0
+Real Provider: 0
+NQ runtime: 0
+Order/risk/ledger/Paper/LIVE mutations: 0
+Audit/trace/snapshot/replay: PASS
+current task: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-FINAL-CLOSE
+current task status: CLOSED / ACCEPTED
+next action: DH-STAGE-QDR-7-NEXT-PHASE-PLAN-AND-WORK-ORDER-FREEZE
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
+ALLOW_EXACT_SHA_CI: NO / CONSUMED_ACCEPTED
+ALLOW_B3_FINAL_CLOSE: NO / CONSUMED_ACCEPTED
+ALLOW_NEXT_PHASE_PLANNING: YES
+ALLOW_NEXT_PHASE_IMPLEMENTATION_NOW: NO
+ALLOW_API_CHANGE_NOW: NO
+ALLOW_MIGRATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_NQ_RUNTIME_INTEGRATION: NO
+ALLOW_AGENT_PHASE: NO
+ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_PAPER: NO
+ALLOW_LIVE: NO
+```
+
+B3 仅关闭 dev/test limited runtime readiness milestone；B2 formal capacity 仍未证明，且不得重新打开、重试或转写为已接受。后续只允许冻结下一阶段 plan/work order，不得直接实施，不得接入真实 HTTP、Provider、NQ、Agent、LangGraph、Paper 或 LIVE。
+
+### Historical B3 implementation local acceptance — consumed by final close
 
 ```text
 Stage-QDR-7 B1: FROZEN
