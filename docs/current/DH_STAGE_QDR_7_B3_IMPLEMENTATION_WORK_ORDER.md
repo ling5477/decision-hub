@@ -1,10 +1,11 @@
 # DH Stage-QDR-7 B3 Limited Dry-Run Runtime Readiness Implementation Work Order
 
 > work order: `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION`
-> status: `FROZEN / WORK_ORDER_ONLY`
+> status: `FROZEN / SCOPE CONTRACT COMPLETE`
 > implementation: `NOT_STARTED / NEXT`
 > plan: `DH_STAGE_QDR_7_B3_PLAN.md / CLOSED / ACCEPTED`
 > B2 capacity gate: `DEFERRED / KNOWN_LIMITATION`
+> scope errata: `DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE / CLOSED / ACCEPTED / DOCUMENTATION_ONLY`
 
 ## 1. 目标与边界
 
@@ -29,16 +30,42 @@ Capacity gate deferred 继续是 known limitation。实施与测试不得写成 
 
 ## 2. 实施前置条件
 
-- branch 与 worktree 由实施任务重新核验；不得假定 planning commit 已 push。
+- 实施任务开工时必须成功执行 `git fetch origin`；`HEAD` 必须等于 `origin/dev`，worktree 必须 clean，staged 必须 empty。
+- 若 `git fetch origin` 失败，输出 `REMOTE_BASELINE_UNVERIFIED_BLOCKED` 并停止代码修改；代理恢复不另起工程阶段任务。
 - 本 plan/work order 已在 current factsources 中标记为 `CLOSED / ACCEPTED` 和 `FROZEN`。
 - B2 保持 `CLOSED WITH CAPACITY GATE DEFERRED`。
 - exact implementation task ID 必须与本文件标题一致。
 - 当前 endpoint、Controller、OpenAPI、migration、Repository 与 HMAC/tenant/nonce/source 合同必须保持不变。
 - 若实现前 factsources、远端分支或允许范围发生冲突，停止并重新规划；不得 pull/merge/rebase 掩盖分叉。
 
-## 3. Future write allowlist
+## 3. 冻结 Scope 合同
 
-### 3.1 生产实现
+### 3.1 `READ_SCOPE`
+
+```text
+所有 Git tracked repository files
+```
+
+明确排除：
+
+```text
+.git/**
+target/**
+未跟踪临时文件
+CapacityRuns/**
+Recovery/**
+外部仓库
+凭据目录
+IDE 缓存
+```
+
+Maven reactor、B3 定向测试、静态边界扫描和 current-fact 扫描可能读取多个模块，因此 `READ_SCOPE` 使用全部 tracked repository files。`READ_SCOPE` 只授权读取，不授权修改；凭证保护规则始终优先。
+
+### 3.2 `WRITE_ALLOWLIST`
+
+以下是 B3 implementation 的完整 write allowlist。除本节列出的路径外，不得修改其他文件。
+
+#### 3.2.1 生产实现
 
 ```text
 dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/**
@@ -51,7 +78,7 @@ dh-app/src/main/resources/application-prod.yml
 
 `decision/dryrun/**` 只允许 B3 runtime policy、bounded admission、failure classification 与 no-side-effect contract；不得扩展为 provider、NQ client、Agent 或交易执行能力。
 
-### 3.2 测试
+#### 3.2.2 测试
 
 ```text
 dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/dryrun/**
@@ -63,21 +90,123 @@ dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
 
 Controller WebMvc 测试只能验证现有 wire contract，不授权修改 `dh-api/src/main/**`。`qdr7/capacity/**` 不在写范围。
 
-### 3.3 文档
+#### 3.2.3 Current factsources
 
 ```text
+AGENTS.md
+CLAUDE.md
 README.md
 docs/current/README.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/FACTSOURCE_POLICY.md
 docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/ROADMAP.md
 docs/current/TESTING.md
 docs/current/WORKLOG.md
+docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md
 docs/current/DH_STAGE_QDR_7_B3_PLAN.md
 docs/current/DH_STAGE_QDR_7_B3_IMPLEMENTATION_WORK_ORDER.md
 ```
 
-仅做与实施证据直接相关的最小同步；AGENTS/CLAUDE/FACTSOURCE_POLICY/CODEX_PROJECT_INSTRUCTIONS 只有真实 current conflict 且同一任务 write allowlist 明确包含时才能修改。
+仅允许与 B3 implementation 证据和 current-fact 一致性直接相关的最小同步；不得借此增加新的业务代码目录或扩大 API、migration、Repository、POM、workflow、criteria 或 harness 范围。
+
+### 3.3 `VALIDATION_SCOPE`
+
+```text
+完整 Maven reactor 参与编译、测试和 quality 的全部 tracked 文件
+B3 定向测试读取的全部 tracked 文件
+静态边界扫描读取的全部 tracked 源代码、测试、脚本和配置
+本工单 3.5 节列出的 14 个 current factsources
+```
+
+由于上述对象均为 Git tracked repository files：
+
+```text
+VALIDATION_SCOPE ⊆ READ_SCOPE: PASS
+```
+
+### 3.4 `FIXABLE_BLOCKER_SCOPE`
+
+只包含 B3 implementation 可以直接修复的内容：
+
+```text
+本工单 3.2.1 节的生产实现 write allowlist
+本工单 3.2.2 节的测试 write allowlist
+本工单 3.2.1 节的既有内部 runtime wiring write allowlist
+本工单 3.2.3 节的 14 个 current factsources
+```
+
+明确不包含：
+
+```text
+API / Controller / DTO / OpenAPI
+migration / schema
+Repository / persistence expansion
+POM / workflow
+criteria / capacity harness
+真实 HTTP / 真实 Provider / NQ runtime
+Agent / LangGraph / Paper / LIVE
+其他模块的既有无关测试缺陷
+```
+
+因此：
+
+```text
+FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+```
+
+### 3.5 `CURRENT_FACTSOURCE_SCAN_SCOPE`
+
+Current-fact 扫描范围精确冻结为：
+
+```text
+AGENTS.md
+CLAUDE.md
+README.md
+docs/current/README.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/FACTSOURCE_POLICY.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md
+docs/current/DH_STAGE_QDR_7_B3_PLAN.md
+docs/current/DH_STAGE_QDR_7_B3_IMPLEMENTATION_WORK_ORDER.md
+```
+
+以上 14 个路径全部位于 3.2 节：
+
+```text
+CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+```
+
+### 3.6 Scope invariant 冻结结果
+
+```text
+READ_SCOPE: FROZEN
+WRITE_ALLOWLIST: FROZEN
+VALIDATION_SCOPE: FROZEN
+FIXABLE_BLOCKER_SCOPE: FROZEN
+CURRENT_FACTSOURCE_SCAN_SCOPE: FROZEN
+VALIDATION_SCOPE ⊆ READ_SCOPE: PASS
+FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+SCOPE_INVARIANTS: PASS / 3 OF 3
+TASK_SCOPE_DESIGN: PASS
+```
+
+### 3.7 外部 blocker 处理合同
+
+若 validation 发现的问题位于 `FIXABLE_BLOCKER_SCOPE` 之外：
+
+- 不扩大 `WRITE_ALLOWLIST`，不修改越界文件。
+- 记录最小失败证据并输出 `B3_EXTERNAL_VALIDATION_BLOCKED`。
+- 不创建微型修复任务；只有新的真实 P0/P1 安全问题允许进入独立 review。
+
+已知 V12 固定窗口 flake 不属于 B3 `FIXABLE_BLOCKER_SCOPE`，不得在 B3 implementation 中修改。允许一次最小定向重跑判断是否为已知边界 flake，但最终提交前仍必须取得一次完整回归全绿。
 
 ## 4. Future forbidden scope
 
@@ -265,8 +394,10 @@ kill = deny
 
 ```text
 STAGE_QDR_7_B3_PLAN: CLOSED / ACCEPTED
-STAGE_QDR_7_B3_IMPLEMENTATION_WORK_ORDER: FROZEN
+STAGE_QDR_7_B3_IMPLEMENTATION_WORK_ORDER: FROZEN / SCOPE CONTRACT COMPLETE
 STAGE_QDR_7_B3_IMPLEMENTATION: NOT_STARTED / NEXT
+SCOPE_CONTRACTS: FROZEN / 5 OF 5
+SCOPE_INVARIANTS: PASS / 3 OF 3
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
 NEXT_TASK: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
 ```

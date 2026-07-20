@@ -112,7 +112,7 @@ credential storage allowed
 NQ mutation allowed
 ```
 
-## 5. Terminal current state — Stage-QDR-7 B3 plan frozen
+## 5. Terminal current state — 2026-07-20 Stage-QDR-7 B3 scope contracts frozen
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -131,16 +131,18 @@ Final Retry-4 artifacts: PASS / 27 FILES / 26 MANIFEST ENTRIES / 0 MISMATCH / 0 
 Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
 Stage-QDR-7 B3: LIMITED DRY-RUN RUNTIME READINESS
 Stage-QDR-7 B3 plan: CLOSED / ACCEPTED
-Stage-QDR-7 B3 implementation work order: FROZEN
+Stage-QDR-7 B3 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
 Stage-QDR-7 B3 implementation: NOT_STARTED / NEXT
-current task: DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE
-current task status: CLOSED / ACCEPTED / PLAN_ONLY
+current task: DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE
+current task status: CLOSED / ACCEPTED / DOCUMENTATION_ONLY
 next action: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
+Scope contracts: READ_SCOPE / WRITE_ALLOWLIST / VALIDATION_SCOPE / FIXABLE_BLOCKER_SCOPE / CURRENT_FACTSOURCE_SCAN_SCOPE = FROZEN
+Scope invariants: PASS / 3 OF 3
 ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
 RETRY_5: NOT_ALLOWED
 POST_FINAL_FORMAL_HARNESS_FIX_CHAIN: NOT_ALLOWED
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
-ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / PLANNING_TASK_BOUNDARY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / SCOPE_ERRATA_TASK_BOUNDARY
 ALLOW_API_CHANGE_NOW: NO
 ALLOW_MIGRATION_NOW: NO
 ALLOW_REPOSITORY_EXPANSION_NOW: NO
@@ -148,11 +150,12 @@ real HTTP: NO
 real provider: NO
 NQ runtime integration: NO
 Agent / LangGraph: NO
+Paper: NO
 LIVE: DISABLED
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
 ```
 
-本节以上述 terminal block 为唯一 active current state。最后一次 formal 不得重跑；旧 B2 与 pre-final 状态只保留为历史证据。B3 plan/work order 已冻结，后续只能使用冻结的 implementation task ID；不得把 B3 描述成已实施、production ready、Integration-1 runtime accepted 或 capacity accepted。
+本节以上述 terminal block 为唯一 active current state。最后一次 formal 不得重跑；旧 B2 与 pre-final 状态只保留为历史证据。B3 plan/work order scope contracts 已冻结且 3/3 invariant 通过；implementation 开工前必须成功 fetch 并核验 exact remote baseline。不得把 B3 描述成已实施、production ready、Integration-1 runtime accepted 或 capacity accepted。
 
 ### Historical pre-final snapshot — consumed by final Retry-4
 

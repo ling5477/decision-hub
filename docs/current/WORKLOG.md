@@ -1,5 +1,15 @@
 # Decision Hub Worklog
 
+## Current work — 2026-07-20 Stage-QDR-7 B3 scope contract errata freeze
+
+`DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE` 在 canonical repository、`dev` 与 baseline HEAD `03185cbd946b58a795bef400cb12b8f69242a22f` 上执行，任务状态为 `CLOSED / ACCEPTED / DOCUMENTATION_ONLY`；cached `origin/dev` 同 SHA，worktree/staged 开工时为空。本任务不要求联网，未重试已知 GitHub 代理故障。
+
+B3 implementation work order 已补齐并冻结五个 scope：`READ_SCOPE` 为全部 Git tracked repository files；`WRITE_ALLOWLIST` 保留原 B3 production/test/wiring 范围并加入精确 14 个 current factsources；`VALIDATION_SCOPE`、`FIXABLE_BLOCKER_SCOPE` 与 `CURRENT_FACTSOURCE_SCAN_SCOPE` 均有明确集合。三项包含关系全部 `PASS`，越界 validation blocker 固定输出 `B3_EXTERNAL_VALIDATION_BLOCKED`，远端基线无法验证时固定输出 `REMOTE_BASELINE_UNVERIFIED_BLOCKED`。
+
+最终文档范围为 14/14、unexpected 0，Java/test/POM/workflow/harness/criteria/API/migration/contracts/Repository diff 为 0；current facts 14/14、0 conflicts。`mvn -ntp -Pquality validate`退出码 0，19/19 reactor success、Checkstyle 0、Spotless PASS。未执行 full tests 或 B3 implementation。
+
+B2 capacity gate 保持 `DEFERRED / KNOWN_LIMITATION`；B3 plan 保持 `CLOSED / ACCEPTED`，implementation work order 为 `FROZEN / SCOPE CONTRACT COMPLETE`，implementation 为 `NOT_STARTED / NEXT`。下一任务恢复 `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION`；不创建新 planning、review、B2 或 capacity 任务。
+
 ## Current work — 2026-07-19 Stage-QDR-7 B3 plan/work-order freeze
 
 `DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE` 在 `E:/CapacityRuns/decision-hub-qdr7-retry4`、`dev` 执行。执行前 HEAD 为 `6193df72d1ac489f40f63cf665ca984f273b5344`，`origin/dev` 为其直接父提交 `1fb49fc1b77d874dc82a010a6bcf0a202920e52a`，ahead/behind `1/0`，worktree/staged 为空，三项 scope 包含关系均通过。

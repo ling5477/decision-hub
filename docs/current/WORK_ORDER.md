@@ -1,6 +1,6 @@
 # Decision Hub 当前工单
 
-## Terminal current authority — 2026-07-19 Stage-QDR-7 B3 plan frozen
+## Terminal current authority — 2026-07-20 Stage-QDR-7 B3 scope contracts frozen
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -26,16 +26,18 @@ Final formal capacity acceptance executed: false
 Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
 Stage-QDR-7 B3: LIMITED DRY-RUN RUNTIME READINESS
 Stage-QDR-7 B3 plan: CLOSED / ACCEPTED
-Stage-QDR-7 B3 implementation work order: FROZEN
+Stage-QDR-7 B3 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
 Stage-QDR-7 B3 implementation: NOT_STARTED / NEXT
-current task: DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE
-current task status: CLOSED / ACCEPTED / PLAN_ONLY
+current task: DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE
+current task status: CLOSED / ACCEPTED / DOCUMENTATION_ONLY
 next action: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
+Scope contracts: READ_SCOPE / WRITE_ALLOWLIST / VALIDATION_SCOPE / FIXABLE_BLOCKER_SCOPE / CURRENT_FACTSOURCE_SCAN_SCOPE = FROZEN
+Scope invariants: PASS / 3 OF 3
 ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
 RETRY_5: NOT_ALLOWED
 POST_FINAL_FORMAL_HARNESS_FIX_CHAIN: NOT_ALLOWED
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
-ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / PLANNING_TASK_BOUNDARY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / SCOPE_ERRATA_TASK_BOUNDARY
 ALLOW_API_CHANGE_NOW: NO
 ALLOW_MIGRATION_NOW: NO
 ALLOW_REPOSITORY_EXPANSION_NOW: NO
@@ -44,11 +46,12 @@ ALLOW_REAL_PROVIDER: NO
 ALLOW_NQ_RUNTIME_INTEGRATION: NO
 ALLOW_AGENT_PHASE: NO
 ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_PAPER: NO
 ALLOW_LIVE: NO
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
 ```
 
-B3 plan 与 work order 已冻结。下一任务只能是 `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION`；只实施既有 endpoint 内部的 dev/test-only、default-disabled、mock-only runtime boundary。若需要 Controller/API、migration、Repository、HMAC/tenant/nonce/source 语义或真实外部连接，必须停止并进入独立 review。
+B3 plan 与 work order scope contracts 已冻结，3/3 包含关系通过。下一任务只能是 `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION`；开工前必须成功 fetch 并核验 exact remote baseline。若需要 Controller/API、migration、Repository、HMAC/tenant/nonce/source 语义或真实外部连接，必须停止并进入独立 review。
 
 ## Historical pre-final authority — consumed by final Retry-4
 

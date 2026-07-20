@@ -1,6 +1,6 @@
 # Decision Hub Roadmap
 
-## Terminal current route — 2026-07-19 Stage-QDR-7 B3 plan frozen
+## Terminal current route — 2026-07-20 Stage-QDR-7 B3 scope contracts frozen
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -14,10 +14,14 @@ Retry-5: NOT_ALLOWED
 Post-final harness fix chain: NOT_ALLOWED
 Stage-QDR-7 B3: LIMITED DRY-RUN RUNTIME READINESS
 Stage-QDR-7 B3 plan: CLOSED / ACCEPTED
-Stage-QDR-7 B3 implementation work order: FROZEN
+Stage-QDR-7 B3 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
 Stage-QDR-7 B3 implementation: NOT_STARTED / NEXT
+current task: DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE
+current task status: CLOSED / ACCEPTED / DOCUMENTATION_ONLY
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
-ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / PLANNING_TASK_BOUNDARY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / SCOPE_ERRATA_TASK_BOUNDARY
+Scope contracts: READ_SCOPE / WRITE_ALLOWLIST / VALIDATION_SCOPE / FIXABLE_BLOCKER_SCOPE / CURRENT_FACTSOURCE_SCAN_SCOPE = FROZEN
+Scope invariants: PASS / 3 OF 3
 ALLOW_API_CHANGE_NOW: NO
 ALLOW_MIGRATION_NOW: NO
 ALLOW_REPOSITORY_EXPANSION_NOW: NO
@@ -27,11 +31,12 @@ ALLOW_REAL_PROVIDER: NO
 ALLOW_NQ_RUNTIME_INTEGRATION: NO
 ALLOW_AGENT_PHASE: NO
 ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_PAPER: NO
 ALLOW_LIVE: NO
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
 ```
 
-最后一次 formal 在场景启动前因冻结镜像缓存门禁阻断，B2 重试链保持关闭。B3 已冻结为 limited runtime readiness，只允许三批 implementation 加一次 milestone close；capacity deferred 继续限制 production 与真实外部连接。B3 close 不创建 Stage-QDR-7 tag，完整 archive/tag 仍由后续 B5 处理。
+最后一次 formal 在场景启动前因冻结镜像缓存门禁阻断，B2 重试链保持关闭。B3 scope contracts 已补齐并冻结，3/3 invariant 通过；下一任务恢复原 implementation，开工前必须成功 fetch 并核验 exact remote baseline。Capacity deferred 继续限制 production 与真实外部连接；B3 close 不创建 Stage-QDR-7 tag。
 
 ## Historical pre-final route — consumed by final Retry-4
 

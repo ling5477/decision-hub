@@ -1,6 +1,6 @@
 # Decision Hub
 
-## Terminal current authority — Stage-QDR-7 B3 plan and work order frozen
+## Terminal current authority — 2026-07-20 Stage-QDR-7 B3 scope contracts frozen
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -26,15 +26,17 @@ Final formal capacity acceptance executed: false
 Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
 Stage-QDR-7 B3: LIMITED DRY-RUN RUNTIME READINESS
 Stage-QDR-7 B3 plan: CLOSED / ACCEPTED
-Stage-QDR-7 B3 implementation work order: FROZEN
+Stage-QDR-7 B3 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
 Stage-QDR-7 B3 implementation: NOT_STARTED / NEXT
-current task: DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE
-current task status: CLOSED / ACCEPTED / PLAN_ONLY
+current task: DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE
+current task status: CLOSED / ACCEPTED / DOCUMENTATION_ONLY
 next action: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
+Scope contracts: READ_SCOPE / WRITE_ALLOWLIST / VALIDATION_SCOPE / FIXABLE_BLOCKER_SCOPE / CURRENT_FACTSOURCE_SCAN_SCOPE = FROZEN
+Scope invariants: PASS / 3 OF 3
 ALLOW_FORMAL_RETRY_4: NO / CONSUMED_BLOCKED
 RETRY_5: NOT_ALLOWED
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
-ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / PLANNING_TASK_BOUNDARY
+ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION_NOW: NO / SCOPE_ERRATA_TASK_BOUNDARY
 ALLOW_API_CHANGE_NOW: NO
 ALLOW_MIGRATION_NOW: NO
 ALLOW_REPOSITORY_EXPANSION_NOW: NO
@@ -43,11 +45,12 @@ ALLOW_REAL_PROVIDER: NO
 ALLOW_NQ_RUNTIME_INTEGRATION: NO
 ALLOW_AGENT_PHASE: NO
 ALLOW_LANGGRAPH_RUNTIME: NO
+ALLOW_PAPER: NO
 ALLOW_LIVE: NO
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
 ```
 
-B3 已基于当前受保护 dry-run 代码现实冻结为 `LIMITED DRY-RUN RUNTIME READINESS`。下一任务只允许执行冻结的 implementation work order；B2 capacity gate 继续 `DEFERRED / KNOWN_LIMITATION`，不得重跑 formal 或创建 Retry-5。B3 不允许 API、migration、Repository 扩张，只允许既有入口内部的 dev/test-only、default-disabled、mock-only runtime hardening。
+B3 implementation work order 的五个 scope 合同已补齐并冻结，3/3 包含关系通过。下一任务只允许执行原 implementation work order；开工前必须成功 fetch 并验证 `HEAD == origin/dev`、worktree clean、staged empty。B2 capacity gate 继续 `DEFERRED / KNOWN_LIMITATION`；B3 不允许 API、migration、Repository 扩张或任何真实外部连接。
 
 ## Historical pre-final authority — consumed by final Retry-4
 

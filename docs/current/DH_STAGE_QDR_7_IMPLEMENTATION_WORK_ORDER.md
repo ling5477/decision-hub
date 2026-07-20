@@ -1,14 +1,18 @@
 # DH Stage-QDR-7 Implementation Work Order
 
-## Terminal B3 planning freeze addendum（2026-07-19）
+## Terminal B3 scope contract freeze addendum（2026-07-20）
 
 ```text
 Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
 Post-B2 capacity acceptance: DEFERRED / KNOWN_LIMITATION
 Stage-QDR-7 B3: LIMITED DRY-RUN RUNTIME READINESS
 Stage-QDR-7 B3 plan: CLOSED / ACCEPTED
-Stage-QDR-7 B3 implementation work order: FROZEN
+Stage-QDR-7 B3 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
 Stage-QDR-7 B3 implementation: NOT_STARTED / NEXT
+current task: DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE
+current task status: CLOSED / ACCEPTED / DOCUMENTATION_ONLY
+Scope contracts: READ_SCOPE / WRITE_ALLOWLIST / VALIDATION_SCOPE / FIXABLE_BLOCKER_SCOPE / CURRENT_FACTSOURCE_SCAN_SCOPE = FROZEN
+Scope invariants: PASS / 3 OF 3
 ALLOW_STAGE_QDR_7_B3_IMPLEMENTATION: YES / NEXT_TASK_ONLY
 ALLOW_API_CHANGE_NOW: NO
 ALLOW_MIGRATION_NOW: NO
@@ -16,7 +20,7 @@ ALLOW_REPOSITORY_EXPANSION_NOW: NO
 next action: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
 ```
 
-本 addendum 由 `DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE` 显式冻结，取代下方历史段落中“B3 任务名未冻结”的旧 current 口径。规范计划与实施边界见 `DH_STAGE_QDR_7_B3_PLAN.md` 和 `DH_STAGE_QDR_7_B3_IMPLEMENTATION_WORK_ORDER.md`。B2 capacity gate 继续 deferred；B3 不允许 API、migration、Repository、真实 HTTP、Provider、NQ、Agent、LangGraph、Paper 或 LIVE，也不重新打开 B2。
+本 addendum 由 `DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE` 补齐并冻结五个 scope 合同，取代下方历史段落中“B3 任务名未冻结”及 scope 未明确的旧 current 口径。规范计划与实施边界见 `DH_STAGE_QDR_7_B3_PLAN.md` 和 `DH_STAGE_QDR_7_B3_IMPLEMENTATION_WORK_ORDER.md`。Implementation 开工前必须成功 fetch 并核验 exact remote baseline；B2 capacity gate 继续 deferred，API、migration、Repository 和真实外部连接继续禁止。
 
 > task: `DH-STAGE-QDR-7-IMPLEMENTATION-WORK-ORDER`  
 > mode: `WORK_ORDER_ONLY`  

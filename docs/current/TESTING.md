@@ -1,5 +1,32 @@
 # Decision Hub Testing
 
+## Current validation — 2026-07-20 Stage-QDR-7 B3 scope contract errata freeze
+
+本任务仅修正文档 scope 合同，不执行 B3 implementation 或 full tests。B3 implementation work order 已冻结 `READ_SCOPE`、`WRITE_ALLOWLIST`、`VALIDATION_SCOPE`、`FIXABLE_BLOCKER_SCOPE` 与 `CURRENT_FACTSOURCE_SCAN_SCOPE`，并逐项列出 14 个 current factsources。
+
+```text
+baseline HEAD: 03185cbd946b58a795bef400cb12b8f69242a22f
+cached origin/dev: 03185cbd946b58a795bef400cb12b8f69242a22f
+git fetch: NOT_RUN / ERRATA TASK DOES NOT REQUIRE NETWORK
+current task: DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE
+current task status: CLOSED / ACCEPTED / DOCUMENTATION_ONLY
+next action: DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION
+scope contracts: FROZEN / 5 OF 5
+scope invariants: PASS / 3 OF 3
+B3 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
+B3 implementation: NOT_STARTED / NEXT
+current conflict scan: PASS / 14 OF 14 / 0 CONFLICTS
+allowlist diff: PASS / 14 FILES / 0 UNEXPECTED
+Java/test/POM/workflow/harness/criteria/migration/API/contracts/Repository diff: 0
+full tests: NOT_RUN / DOCS-ONLY ERRATA
+quality: PASS / mvn -ntp -Pquality validate / MAVEN EXIT 0 / 19 OF 19 REACTOR SUCCESS
+Checkstyle: PASS / 0 VIOLATIONS
+Spotless: PASS
+staged: EMPTY
+```
+
+Quality 验证不代表 full regression、PostgreSQL/Testcontainers 或 B3 runtime readiness 已执行。B2 capacity gate 保持 `DEFERRED / KNOWN_LIMITATION`；B3 implementation 保持 `NOT_STARTED / NEXT`。原 implementation 开工前必须成功执行 `git fetch origin` 并验证 `HEAD == origin/dev`、worktree clean、staged empty，否则输出 `REMOTE_BASELINE_UNVERIFIED_BLOCKED`。
+
 ## Current validation — 2026-07-19 Stage-QDR-7 B3 plan/work-order freeze
 
 本任务是 docs-only planning，不执行 B3 implementation、formal capacity 或 full regression。只读代码现实确认现有 protected dry-run 已具备 HMAC、timestamp、nonce、tenant/source、payload cap、persistent rate/idempotency、mock-only provider、snapshot/audit/trace 和 no-side-effect 基线；限定主链路扫描未发现真实 HTTP 或 NQ runtime client。真实缺口为独立 runtime policy、统一 deadline、bounded concurrency/queue/backpressure 与 kill/environment fail-closed readiness 证据。
