@@ -1,6 +1,52 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-20 Stage-QDR-7 B3 final close
+## Current validation — 2026-07-21 same-pool recovery test concurrency fix
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+B3 final documentation: PUBLISHED
+Historical CI run 29757352202: FAILED / TEST_ONLY_UNSAFE_SHARED_COLLECTION / ConcurrentModificationException
+Same-pool recovery test concurrency: FIXED / LOCAL_ACCEPTED
+Collector concurrency contract: PASS / 10 ROUNDS / 16 WRITERS / 1000 SAMPLES EACH / EXACT COUNT / 0 DUPLICATES
+PostgreSQL recovery stability: PASS / 5 OF 5 / 3 RESTARTS EACH / PERSISTENT STATE PRESERVED
+Full regression: PASS / 19 OF 19 REACTOR / 1161 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Production Java / POM / workflow / API / migration / Repository / contracts diff: 0
+current task: DH-CI-RED-SAME-POOL-RECOVERY-CONCURRENT-MODIFICATION-FIX
+current task status: DONE / LOCAL_ACCEPTED
+next action: OBTAIN PUSH AUTHORIZATION; FAST-FORWARD PUSH; RUN EXACT-SHA TEST + QUALITY CI
+Remote CI: PENDING NEW COMMIT
+Stage-QDR-8: NOT_PLANNED / BLOCKED UNTIL EXACT_SHA CI PASS
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
+ALLOW_B3_FINAL_CLOSE: NO / CONSUMED_ACCEPTED
+ALLOW_EXACT_SHA_CI: YES / AFTER PUSH AUTHORIZATION
+ALLOW_STAGE_QDR_8_PLANNING: NO / EXACT_SHA_CI_PASS_REQUIRED
+ALLOW_STAGE_QDR_8_IMPLEMENTATION: NO
+ALLOW_API_CHANGE_NOW / ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME_INTEGRATION: NO / NO / NO
+ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+CI run `29757352202` 的 test job `88403023724` 为 historical failure；GitHub job log、Surefire TXT/XML 和源码三方均定位到 `recordSample` 对 Logback `ListAppender.list` 的并发 stream。Hikari `connection-adder` / `housekeeper` / HTTP worker 写入 live `ArrayList`，JUnit main 线程同时遍历，根因为 test-only collector，不是生产恢复实现。
+
+| 验证 | 结果 |
+|---|---|
+| `ConcurrentSnapshotAppenderTest` | PASS；10 轮，每轮 16 writer × 1000 sample，精确计数、0 duplicate、并发 immutable snapshot，worker join 后 executor terminated |
+| 新增 collector + 原恢复类定向 suite | PASS；5 tests / 0 failures / 0 errors / 0 skipped；真实 PostgreSQL 17.10 |
+| 原失败方法连续 5 轮 | PASS / 5 OF 5；每轮 3 次 PostgreSQL restart、3 份 round evidence、persistent state preserved、CME 0 |
+| `mvn -B -ntp test` | PASS；19/19 reactor；1161 tests / 0 failures / 0 errors / 0 skipped；9 个 PostgreSQL suites / 0 skipped |
+| `mvn -B -ntp -Pquality validate` | PASS；19/19 reactor；Checkstyle 0；Spotless PASS |
+| scope / boundary scan | PASS；production Java、POM/workflow、API/migration/Repository/contracts diff 均为 0；无新增 retry、`Thread.sleep` 或 swallowed CME |
+
+完整回归首次 XML 汇总误包含 2026-07-17 遗留的 `Qdr7CapacityAcceptanceIT` 报告（5 skipped）；按本轮报告时间窗口复核为 176 个新报告、1161/0/0/0。Maven 本身始终 exit 0、19/19。Quality 包装器曾把文本 `0 Checkstyle violations` 误匹配为 failure；原始 quality 命令随后再次 exit 0。两处均为本地统计器误判，不是测试或 quality 失败。
+
+## Historical validation — 2026-07-20 Stage-QDR-7 B3 final close
 
 `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-FINAL-CLOSE` 在 `E:/Project/decision-hub` 与 `dev` 上执行。开工门禁确认 `HEAD == origin/dev == e42d430d6f8d18e32d8a9f02d2197aa68a595d63`、ahead/behind `0/0`、worktree clean、staged empty；scope invariants 原文复核为 `3/3 PASS`。
 

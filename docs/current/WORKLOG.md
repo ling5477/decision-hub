@@ -1,6 +1,45 @@
 # Decision Hub Worklog
 
-## Current work — 2026-07-20 Stage-QDR-7 B3 final close
+## Current work — 2026-07-21 same-pool recovery test concurrency fix
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+B3 final documentation: PUBLISHED
+Historical CI run 29757352202: FAILED / TEST_ONLY_UNSAFE_SHARED_COLLECTION / ConcurrentModificationException
+Same-pool recovery test concurrency: FIXED / LOCAL_ACCEPTED
+Collector concurrency contract: PASS / 10 ROUNDS / 16 WRITERS / 1000 SAMPLES EACH / EXACT COUNT / 0 DUPLICATES
+PostgreSQL recovery stability: PASS / 5 OF 5 / 3 RESTARTS EACH / PERSISTENT STATE PRESERVED
+Full regression: PASS / 19 OF 19 REACTOR / 1161 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Production Java / POM / workflow / API / migration / Repository / contracts diff: 0
+current task: DH-CI-RED-SAME-POOL-RECOVERY-CONCURRENT-MODIFICATION-FIX
+current task status: DONE / LOCAL_ACCEPTED
+next action: OBTAIN PUSH AUTHORIZATION; FAST-FORWARD PUSH; RUN EXACT-SHA TEST + QUALITY CI
+Remote CI: PENDING NEW COMMIT
+Stage-QDR-8: NOT_PLANNED / BLOCKED UNTIL EXACT_SHA CI PASS
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
+ALLOW_B3_FINAL_CLOSE: NO / CONSUMED_ACCEPTED
+ALLOW_EXACT_SHA_CI: YES / AFTER PUSH AUTHORIZATION
+ALLOW_STAGE_QDR_8_PLANNING: NO / EXACT_SHA_CI_PASS_REQUIRED
+ALLOW_STAGE_QDR_8_IMPLEMENTATION: NO
+ALLOW_API_CHANGE_NOW / ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME_INTEGRATION: NO / NO / NO
+ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+`recordSample` 原先直接遍历 Logback `ListAppender.list`。该集合底层为 test-only live `ArrayList`，在 PostgreSQL outage 期间由 Hikari 与 HTTP 后台线程持续写入，JUnit main 线程同时执行 stream/count，触发 CI 的 `ConcurrentModificationException`。
+
+最小修复新增 `ConcurrentSnapshotAppender`：使用 `ConcurrentLinkedQueue` 接收并发事件，读取统一返回 `List.copyOf` 不可变快照；原恢复测试仅替换 appender 类型与两处读取，没有改变业务并发、PostgreSQL restart、断言、并发数或生产代码。新增 `ConcurrentSnapshotAppenderTest` 以 latch 确定性协调 16 个 writer 和并发 snapshot，10 轮累计验证 160000 个样本、0 duplicate、round 隔离、future join 与 executor termination。
+
+本地验证已通过 collector、定向 suite、PostgreSQL 5/5、完整 1161 测试和 quality。14 个 current factsources 同步为本任务 `DONE / LOCAL_ACCEPTED`；run `29757352202` 保留为 historical failed，Remote CI 等待新提交。未重开 B2/B3，未进入 Stage-QDR-8 planning/implementation。
+
+## Historical work — 2026-07-20 Stage-QDR-7 B3 final close
 
 执行 `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-FINAL-CLOSE`。开工时 `dev`、HEAD/origin/dev 均为 `e42d430d6f8d18e32d8a9f02d2197aa68a595d63`，ahead/behind `0/0`，worktree/staged 为空；冻结 scope 复核为 14 个 current factsources，三项包含关系 `3/3 PASS`。
 

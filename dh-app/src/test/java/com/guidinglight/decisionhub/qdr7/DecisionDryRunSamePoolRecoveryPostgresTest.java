@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.DockerClient;
@@ -193,7 +192,8 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
         final Logger hikariLogger =
                 (Logger) LoggerFactory.getLogger("com.zaxxer.hikari.pool.HikariPool");
         final Level originalLevel = hikariLogger.getLevel();
-        final ListAppender<ILoggingEvent> hikariEvents = new ListAppender<>();
+        final ConcurrentSnapshotAppender<ILoggingEvent> hikariEvents =
+                new ConcurrentSnapshotAppender<>();
         hikariEvents.start();
         hikariLogger.addAppender(hikariEvents);
         hikariLogger.setLevel(Level.DEBUG);
@@ -256,7 +256,7 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
             final int round,
             final IdentitySnapshot identity,
             final HikariPoolMXBean pool,
-            final ListAppender<ILoggingEvent> hikariEvents)
+            final ConcurrentSnapshotAppender<ILoggingEvent> hikariEvents)
             throws Exception {
         final PreparedRequest committed = prepare("round-" + round + "-committed");
         final RequestOutcome committedOutcome = send(committed);
@@ -594,7 +594,7 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
             final RequestOutcome outcome,
             final boolean directJdbc,
             final HikariPoolMXBean pool,
-            final ListAppender<ILoggingEvent> hikariEvents)
+            final ConcurrentSnapshotAppender<ILoggingEvent> hikariEvents)
             throws InterruptedException {
         final boolean pgIsReady = postgreSqlReady();
         final PostgreSqlSessions sessions =
@@ -605,7 +605,7 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
                         ? 0.0
                         : meterRegistry.find("hikaricp.connections.timeout").counter().count();
         final long creationFailureCount =
-                hikariEvents.list.stream()
+                hikariEvents.snapshot().stream()
                         .map(ILoggingEvent::getFormattedMessage)
                         .filter(
                                 message ->
@@ -919,7 +919,7 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
             final IdentitySnapshot identity,
             final String promptChecksum,
             final List<RequestOutcome> load,
-            final ListAppender<ILoggingEvent> hikariEvents)
+            final ConcurrentSnapshotAppender<ILoggingEvent> hikariEvents)
             throws IOException {
         final Map<String, Object> summary = new LinkedHashMap<>();
         summary.put("runId", RUN_ID);
@@ -962,7 +962,7 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
                 load.stream().filter(outcome -> outcome.statusCode() >= 500).count());
         summary.put(
                 "hikariFailureEvents",
-                hikariEvents.list.stream()
+                hikariEvents.snapshot().stream()
                         .map(ILoggingEvent::getFormattedMessage)
                         .filter(
                                 message ->

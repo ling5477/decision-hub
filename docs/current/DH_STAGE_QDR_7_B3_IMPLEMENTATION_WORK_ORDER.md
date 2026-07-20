@@ -7,7 +7,40 @@
 > B2 capacity gate: `DEFERRED / KNOWN_LIMITATION`
 > scope errata: `DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE / CLOSED / ACCEPTED / DOCUMENTATION_ONLY`
 
-## 0. B3 milestone final close（2026-07-20）
+## 0. Terminal current addendum — 2026-07-21 same-pool recovery test concurrency fix local accepted
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+B3 final documentation: PUBLISHED
+Historical CI run 29757352202: FAILED / TEST_ONLY_UNSAFE_SHARED_COLLECTION / ConcurrentModificationException
+Same-pool recovery test concurrency: FIXED / LOCAL_ACCEPTED
+Collector concurrency contract: PASS / 10 ROUNDS / 16 WRITERS / 1000 SAMPLES EACH / EXACT COUNT / 0 DUPLICATES
+PostgreSQL recovery stability: PASS / 5 OF 5 / 3 RESTARTS EACH / PERSISTENT STATE PRESERVED
+Full regression: PASS / 19 OF 19 REACTOR / 1161 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Production Java / POM / workflow / API / migration / Repository / contracts diff: 0
+current task: DH-CI-RED-SAME-POOL-RECOVERY-CONCURRENT-MODIFICATION-FIX
+current task status: DONE / LOCAL_ACCEPTED
+next action: OBTAIN PUSH AUTHORIZATION; FAST-FORWARD PUSH; RUN EXACT-SHA TEST + QUALITY CI
+Remote CI: PENDING NEW COMMIT
+Stage-QDR-8: NOT_PLANNED / BLOCKED UNTIL EXACT_SHA CI PASS
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
+ALLOW_B3_FINAL_CLOSE: NO / CONSUMED_ACCEPTED
+ALLOW_EXACT_SHA_CI: YES / AFTER PUSH AUTHORIZATION
+ALLOW_STAGE_QDR_8_PLANNING: NO / EXACT_SHA_CI_PASS_REQUIRED
+ALLOW_STAGE_QDR_8_IMPLEMENTATION: NO
+ALLOW_API_CHANGE_NOW / ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME_INTEGRATION: NO / NO / NO
+ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+## 0.1 Historical B3 milestone final close（2026-07-20）
 
 ```text
 Stage-QDR-7 B3: CLOSED / ACCEPTED
@@ -47,7 +80,7 @@ ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER_OR_LIVE: NO / NO / NO
 
 B3 已由 exact-SHA CI 接受，只达到 dev/test limited runtime readiness。B2 formal capacity 保持 deferred；不支持 production 流量、共享动态 kill switch、真实 Provider/NQ、Agent/LangGraph、Paper 或 LIVE。
 
-## 0.1 Historical local implementation acceptance — consumed by final close
+## 0.2 Historical local implementation acceptance — consumed by final close
 
 ```text
 Implementation baseline HEAD: 1eea7b2b0e1f160c4a1c90ac17911e74230eaedc
