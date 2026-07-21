@@ -1,6 +1,41 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-21 same-pool recovery test concurrency fix
+## Current validation — 2026-07-21 exact-SHA CI and Stage-QDR-8 plan freeze
+
+```text
+CI-red remediation: CLOSED / ACCEPTED
+Exact-SHA CI: PASSED / ACCEPTED / RUN 29823413542
+planning baseline: 8906389352d9d92099acdb857fce97aece3e6a20
+origin/dev at planning: 8906389352d9d92099acdb857fce97aece3e6a20
+GitHub Actions run: 29823413542 / success
+test job: 88611097617 / success
+quality job: 88611097671 / success
+remote regression: PASS / 19 OF 19 REACTOR / 1161 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL/Testcontainers: REAL EXECUTION / ZERO MANDATORY SKIPS
+JdbcNonceReplayGuardPersistenceTest: PASS / 3 / 0 / 0 / 0
+PostgresContainerSmokeTest: PASS / 1 / 0 / 0 / 0
+DecisionDryRunSamePoolRecoveryPostgresTest: PASS / 4 / 0 / 0 / 0
+ConcurrentSnapshotAppenderTest: PASS / 1 / 0 / 0 / 0
+collector stress contract: PASS / 10 ROUNDS / 16 WRITERS / 1000 SAMPLES EACH / EXACT COUNT / 0 DUPLICATES / 0 CROSS-ROUND POLLUTION / 0 WORKER LEAKAGE
+ConcurrentModificationException: 0
+remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Stage-QDR-8 direction: STRUCTURED_FEEDBACK_ATTRIBUTION_FOUNDATION
+Stage-QDR-8 plan: CLOSED / ACCEPTED
+Stage-QDR-8 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
+Stage-QDR-8 implementation: NOT_STARTED / NEXT
+scope invariants: PASS / 3 OF 3
+current factsources: PASS / 16 OF 16 / 0 CONFLICTS
+full tests after docs: NOT_RUN / DOCS_ONLY PLAN FREEZE
+local quality after docs: PASS / MAVEN EXIT 0 / 19 OF 19 REACTOR SUCCESS / CHECKSTYLE 0 / SPOTLESS PASS
+planning commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+planning commit pushed: NO / FORBIDDEN
+tag: NO / FORBIDDEN
+next action: DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION
+```
+
+本轮远端完整回归已经提供 implementation baseline 的 full-test 证据；docs-only 规划变更按任务要求只执行本地 `mvn -ntp -Pquality validate`，不重复 full tests。该命令真实执行并以 exit 0 完成，19/19 Reactor SUCCESS、Checkstyle 0、Spotless PASS；未据此宣称重新运行 full tests。
+
+## Historical pre-publication validation — 2026-07-21 same-pool recovery test concurrency fix
 
 ```text
 Stage-QDR-7 B1: FROZEN

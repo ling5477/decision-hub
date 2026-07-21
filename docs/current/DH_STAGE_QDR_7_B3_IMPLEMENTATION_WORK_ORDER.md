@@ -1,5 +1,28 @@
 # DH Stage-QDR-7 B3 Limited Dry-Run Runtime Readiness Implementation Work Order
 
+## Terminal current addendum — 2026-07-21 exact-SHA CI accepted and Stage-QDR-8 plan frozen
+
+```text
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+CI-red remediation: CLOSED / ACCEPTED
+Exact-SHA CI: PASSED / ACCEPTED / RUN 29823413542 / HEAD 8906389352d9d92099acdb857fce97aece3e6a20
+Stage-QDR-8 plan: CLOSED / ACCEPTED
+Stage-QDR-8 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
+Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_FOUNDATION
+Stage-QDR-8 implementation: NOT_STARTED / NEXT
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 16 OF 16 / 0 CONFLICTS
+next action: DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION
+ALLOW_STAGE_QDR_8_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_API_CHANGE_NOW / ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME_INTEGRATION: NO / NO / NO
+ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+B3 implementation work order 已消费；Stage-QDR-8 使用新的独立 scope，不允许借本文件继续修改 B3。
+
 > work order: `DH-STAGE-QDR-7-B3-LIMITED-DRYRUN-RUNTIME-READINESS-IMPLEMENTATION`
 > status: `FROZEN / SCOPE CONTRACT COMPLETE`
 > implementation: `CLOSED / ACCEPTED / EXACT_SHA_CI_ACCEPTED`
@@ -7,7 +30,7 @@
 > B2 capacity gate: `DEFERRED / KNOWN_LIMITATION`
 > scope errata: `DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE / CLOSED / ACCEPTED / DOCUMENTATION_ONLY`
 
-## 0. Terminal current addendum — 2026-07-21 same-pool recovery test concurrency fix local accepted
+## 0. Historical pre-publication addendum — 2026-07-21 same-pool recovery test concurrency fix local accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN

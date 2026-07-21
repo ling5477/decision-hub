@@ -1,5 +1,39 @@
 # Decision Hub Factsource Policy
 
+## Terminal current authority — 2026-07-21 exact-SHA CI accepted and Stage-QDR-8 plan frozen
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+CI-red remediation: CLOSED / ACCEPTED
+Same-pool recovery fix commit: 8906389352d9d92099acdb857fce97aece3e6a20
+Exact-SHA CI: PASSED / ACCEPTED / RUN 29823413542
+Remote regression: PASS / 19 OF 19 REACTOR / 1161 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / ZERO MANDATORY SKIPS
+Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Stage-QDR-8 plan: CLOSED / ACCEPTED
+Stage-QDR-8 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
+Stage-QDR-8 implementation: NOT_STARTED / NEXT
+Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_FOUNDATION
+Planning docs commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+current task: DH-SAME-POOL-RECOVERY-FIX-EXACT-SHA-CI-AND-STAGE-QDR-8-PLAN-FREEZE
+current task status: CLOSED / ACCEPTED
+next action: DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 16 OF 16 / 0 CONFLICTS
+ALLOW_STAGE_QDR_8_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_8_IMPLEMENTATION_NOW: NO / CURRENT_TASK_IS_PLANNING_ONLY
+ALLOW_API_CHANGE_NOW / ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME_INTEGRATION: NO / NO / NO
+ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+Stage-QDR-8 当前 factsources 为既有 14 个路径加 `DH_STAGE_QDR_8_PLAN.md` 与 `DH_STAGE_QDR_8_IMPLEMENTATION_WORK_ORDER.md`，共 16 个。新的计划与工单不得覆盖 `STATUS.md` / `WORK_ORDER.md` 主权威；implementation 尚未开始。
+
 ## 1. 目的
 
 本文件定义Decision Hub current factsource权威层级、blocker规则和历史文档边界。目标是防止旧阶段文档、过期work order、历史review记录和阶段中间产物继续覆盖当前状态。
@@ -112,7 +146,7 @@ credential storage allowed
 NQ mutation allowed
 ```
 
-## 5. Terminal current state — 2026-07-21 same-pool recovery test concurrency fix local accepted
+## 5. Historical pre-publication state — 2026-07-21 same-pool recovery test concurrency fix local accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN

@@ -1,6 +1,36 @@
 # Decision Hub Worklog
 
-## Current work — 2026-07-21 same-pool recovery test concurrency fix
+## Current work — 2026-07-21 exact-SHA CI and Stage-QDR-8 plan freeze
+
+```text
+CI-red remediation: CLOSED / ACCEPTED
+Exact-SHA CI: PASSED / ACCEPTED / RUN 29823413542
+```
+
+`DH-SAME-POOL-RECOVERY-FIX-EXACT-SHA-CI-AND-STAGE-QDR-8-PLAN-FREEZE` 在 `dev` 执行。开工预检命中授权状态 A：本地 HEAD `8906389352d9d92099acdb857fce97aece3e6a20` 比 `origin/dev` ahead 1、behind 0，远端为其直接父提交，worktree/staged 均为空。仅执行 `git push origin dev`，随后 local/origin/advertised SHA 三方一致，ahead/behind 为 0/0；未 force push、未推 tag 或其他分支。
+
+GitHub Actions run `29823413542` 精确匹配修复 SHA。test job `88611097617` 与 quality job `88611097671` 均成功：19/19 Reactor、1161 tests、0 failures/errors/skipped；`postgres:17` 实际启动，mandatory Testcontainers assertion 成功；`JdbcNonceReplayGuardPersistenceTest`、`PostgresContainerSmokeTest`、`DecisionDryRunSamePoolRecoveryPostgresTest` 与 `ConcurrentSnapshotAppenderTest` 均执行通过；quality 为 19/19、Checkstyle 0、Spotless PASS。历史红色 run `29757352202` 保留为 historical failure，不作为本次结果。
+
+代码现实审计确认：现有 feedback ingest、raw payload、trace 关联和 Experience/Pheromone 自动强化存在，但没有 decision-bound outcome observation、attribution、confidence/policy/status/audit-reference 合同；候选生成/评审/Judge 已有 Stage1 轻量基础；evidence aggregate、canonical snapshot 与 deterministic replay 已存在；Provider 仅 deterministic mock，LangGraph runtime 不存在。因此选择 `STRUCTURED_FEEDBACK_ATTRIBUTION_FOUNDATION`。
+
+本轮新增 `DH_STAGE_QDR_8_PLAN.md` 与 `DH_STAGE_QDR_8_IMPLEMENTATION_WORK_ORDER.md`，冻结 domain/usecase-only 实施范围、3/3 scope invariant、安全合同、幂等/audit/replay、批次、测试、review 与回滚。Batch 3 persistence/API 默认未授权；当前不实施 Java，不修改 API/migration/Repository/contracts/runtime wiring，不连接真实 HTTP、Provider、NQ、Agent、LangGraph、Paper 或 LIVE。
+
+本地 docs-only 验证执行 `mvn -ntp -Pquality validate`，结果为 exit 0、19/19 Reactor SUCCESS、Checkstyle 0、Spotless PASS。未重复运行 full tests 或 Docker/Testcontainers；完整回归与 PostgreSQL 证据来自精确匹配 `8906389352d9d92099acdb857fce97aece3e6a20` 的远端 run `29823413542`。
+
+```text
+Stage-QDR-8 plan: CLOSED / ACCEPTED
+Stage-QDR-8 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
+Stage-QDR-8 implementation: NOT_STARTED / NEXT
+selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_FOUNDATION
+scope invariants: PASS / 3 OF 3
+current factsources: 16 OF 16
+planning commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+push planning commit: NOT_RUN / FORBIDDEN
+tag: NOT_RUN / FORBIDDEN
+next action: DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION
+```
+
+## Historical pre-publication work — 2026-07-21 same-pool recovery test concurrency fix
 
 ```text
 Stage-QDR-7 B1: FROZEN

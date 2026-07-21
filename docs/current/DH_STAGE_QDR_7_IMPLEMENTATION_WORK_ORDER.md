@@ -1,6 +1,31 @@
 # DH Stage-QDR-7 Implementation Work Order
 
-## Terminal current addendum — 2026-07-21 same-pool recovery test concurrency fix local accepted
+## Terminal current addendum — 2026-07-21 exact-SHA CI accepted and Stage-QDR-8 plan frozen
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2: CLOSED / ACCEPTED / CAPACITY GATE DEFERRED
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+CI-red remediation: CLOSED / ACCEPTED
+Exact-SHA CI: PASSED / ACCEPTED / RUN 29823413542 / HEAD 8906389352d9d92099acdb857fce97aece3e6a20
+Remote regression: PASS / 19 OF 19 / 1161 / 0 / 0 / 0
+Remote quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+Stage-QDR-8 plan: CLOSED / ACCEPTED
+Stage-QDR-8 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
+Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_FOUNDATION
+Stage-QDR-8 implementation: NOT_STARTED / NEXT
+next action: DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 16 OF 16 / 0 CONFLICTS
+ALLOW_STAGE_QDR_8_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_API_CHANGE_NOW / ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME_INTEGRATION: NO / NO / NO
+ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+本 addendum 只记录 Stage-QDR-7 后继规划已冻结，不重开或修改 Stage-QDR-7 的历史 work order。
+
+## Historical pre-publication addendum — 2026-07-21 same-pool recovery test concurrency fix local accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN

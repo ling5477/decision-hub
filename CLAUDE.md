@@ -1,5 +1,42 @@
 # CLAUDE（Claude 开发指引 - Decision Hub）
 
+## Terminal current authority — 2026-07-21 exact-SHA CI accepted and Stage-QDR-8 plan frozen
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+CI-red remediation: CLOSED / ACCEPTED
+Same-pool recovery fix commit: 8906389352d9d92099acdb857fce97aece3e6a20
+Exact-SHA CI: PASSED / ACCEPTED / RUN 29823413542
+Remote regression: PASS / 19 OF 19 REACTOR / 1161 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / ZERO MANDATORY SKIPS
+Collector concurrency contract: PASS / 10 ROUNDS / 16 WRITERS / 1000 SAMPLES EACH / EXACT COUNT / 0 DUPLICATES
+Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Stage-QDR-8 plan: CLOSED / ACCEPTED
+Stage-QDR-8 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
+Stage-QDR-8 implementation: NOT_STARTED / NEXT
+Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_FOUNDATION
+Planning docs commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+current task: DH-SAME-POOL-RECOVERY-FIX-EXACT-SHA-CI-AND-STAGE-QDR-8-PLAN-FREEZE
+current task status: CLOSED / ACCEPTED
+next action: DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 16 OF 16 / 0 CONFLICTS
+ALLOW_EXACT_SHA_CI: NO / CONSUMED_ACCEPTED
+ALLOW_STAGE_QDR_8_PLANNING: NO / CONSUMED_ACCEPTED
+ALLOW_STAGE_QDR_8_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_8_IMPLEMENTATION_NOW: NO / CURRENT_TASK_IS_PLANNING_ONLY
+ALLOW_API_CHANGE_NOW / ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME_INTEGRATION: NO / NO / NO
+ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+Stage-QDR-8 只允许下一独立任务实施冻结的 domain/usecase foundation；当前 planning task 不实施代码，不开放 persistence/API/runtime wiring 或任何真实外部能力。
+
 > 目的：让 Claude / 开发者在本仓库内严格遵循当前阶段、模块边界、文档事实源、验证纪律和禁止范围。
 > 本文件与 `AGENTS.md` 同源，内容一致；`AGENTS.md` 面向 Codex，本文件面向 Claude。
 > 当冲突时，按以下优先级执行：安全/合规/凭证保护 > 用户本轮明确指令 > 当前 Gate / Freeze / Work Order 边界 > 本文件与 `AGENTS.md` > 通用工程最佳实践。
@@ -107,7 +144,7 @@ docs/current/TESTING.md
 
 ## 4. 当前阶段
 
-### Terminal current authority — 2026-07-21 same-pool recovery test concurrency fix local accepted
+### Historical pre-publication authority — 2026-07-21 same-pool recovery test concurrency fix local accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN

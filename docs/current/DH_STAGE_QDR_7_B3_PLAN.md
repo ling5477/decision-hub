@@ -1,5 +1,26 @@
 # DH Stage-QDR-7 B3 Limited Dry-Run Runtime Readiness Plan
 
+## Terminal current addendum — 2026-07-21 exact-SHA CI accepted and Stage-QDR-8 plan frozen
+
+```text
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+CI-red remediation: CLOSED / ACCEPTED
+Exact-SHA CI: PASSED / ACCEPTED / RUN 29823413542 / HEAD 8906389352d9d92099acdb857fce97aece3e6a20
+Stage-QDR-8 plan: CLOSED / ACCEPTED
+Stage-QDR-8 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
+Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_FOUNDATION
+Stage-QDR-8 implementation: NOT_STARTED / NEXT
+next action: DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 16 OF 16 / 0 CONFLICTS
+ALLOW_STAGE_QDR_8_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME_INTEGRATION: NO / NO / NO
+ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+B3 plan 已被关闭并保持 historical/consumed；本 addendum 只记录后继 Stage-QDR-8 planning freeze，不改变 B3 runtime 语义。
+
 > task: `DH-STAGE-QDR-7-B3-PLAN-AND-WORK-ORDER-FREEZE`
 > status: `CLOSED / ACCEPTED / PLAN_ONLY`
 > planning baseline: `6193df72d1ac489f40f63cf665ca984f273b5344`
@@ -10,7 +31,7 @@
 > scope invariants: `PASS / 3 OF 3`
 > scope errata: `DH-STAGE-QDR-7-B3-IMPLEMENTATION-WORK-ORDER-SCOPE-ERRATA-FREEZE / CLOSED / ACCEPTED / DOCUMENTATION_ONLY`
 
-## 1. Terminal current addendum — 2026-07-21 same-pool recovery test concurrency fix local accepted
+## 1. Historical pre-publication addendum — 2026-07-21 same-pool recovery test concurrency fix local accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN

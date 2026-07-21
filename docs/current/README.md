@@ -1,6 +1,43 @@
 # Decision Hub Current Docs
 
-## Terminal current authority — 2026-07-21 same-pool recovery test concurrency fix local accepted
+## Terminal current authority — 2026-07-21 exact-SHA CI accepted and Stage-QDR-8 plan frozen
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+CI-red remediation: CLOSED / ACCEPTED
+Same-pool recovery fix commit: 8906389352d9d92099acdb857fce97aece3e6a20
+Exact-SHA CI: PASSED / ACCEPTED / RUN 29823413542
+Remote regression: PASS / 19 OF 19 REACTOR / 1161 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / ZERO MANDATORY SKIPS
+Collector concurrency contract: PASS / 10 ROUNDS / 16 WRITERS / 1000 SAMPLES EACH / EXACT COUNT / 0 DUPLICATES
+Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Stage-QDR-8 plan: CLOSED / ACCEPTED
+Stage-QDR-8 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
+Stage-QDR-8 implementation: NOT_STARTED / NEXT
+Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_FOUNDATION
+Planning docs commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+current task: DH-SAME-POOL-RECOVERY-FIX-EXACT-SHA-CI-AND-STAGE-QDR-8-PLAN-FREEZE
+current task status: CLOSED / ACCEPTED
+next action: DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 16 OF 16 / 0 CONFLICTS
+ALLOW_EXACT_SHA_CI: NO / CONSUMED_ACCEPTED
+ALLOW_STAGE_QDR_8_PLANNING: NO / CONSUMED_ACCEPTED
+ALLOW_STAGE_QDR_8_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_8_IMPLEMENTATION_NOW: NO / CURRENT_TASK_IS_PLANNING_ONLY
+ALLOW_API_CHANGE_NOW / ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME_INTEGRATION: NO / NO / NO
+ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+当前计划入口为 [Stage-QDR-8 plan](DH_STAGE_QDR_8_PLAN.md)，下一实施入口为 [Stage-QDR-8 implementation work order](DH_STAGE_QDR_8_IMPLEMENTATION_WORK_ORDER.md)。规划只冻结结构化 feedback attribution foundation，不实施代码或外部连接。
+
+## Historical pre-publication authority — 2026-07-21 same-pool recovery test concurrency fix local accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -386,6 +423,8 @@ docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/FACTSOURCE_POLICY.md
+docs/current/DH_STAGE_QDR_8_PLAN.md Current Stage-QDR-8 plan / CLOSED / ACCEPTED
+docs/current/DH_STAGE_QDR_8_IMPLEMENTATION_WORK_ORDER.md Next implementation work order / FROZEN
 docs/current/DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md Accepted capacity criteria / FROZEN
 docs/current/DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md Current harness implementation work order / CLOSED / ACCEPTED
 docs/current/DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md Previous capacity acceptance / BLOCKED preserved
@@ -411,6 +450,8 @@ docs/current/DB_SCHEMA.md
 
 ```text
 STATUS.md                  当前状态表
+DH_STAGE_QDR_8_PLAN.md     当前 Stage-QDR-8 Structured Feedback Attribution Foundation plan
+DH_STAGE_QDR_8_IMPLEMENTATION_WORK_ORDER.md 下一 implementation work order；FROZEN / SCOPE CONTRACT COMPLETE
 DH_STAGE_QDR_7_PLAN.md     Historical / consumed Stage-QDR-7 planning baseline
 DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md Accepted capacity criteria；FROZEN / ACCEPTED
 DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md Current harness implementation work order；CLOSED / ACCEPTED

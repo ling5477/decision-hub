@@ -1,5 +1,44 @@
 # Decision Hub Agent Guidelines
 
+## Terminal current authority — 2026-07-21 exact-SHA CI accepted and Stage-QDR-8 plan frozen
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2 implementation: CLOSED / ACCEPTED
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+B3 final documentation: PUBLISHED
+CI-red remediation: CLOSED / ACCEPTED
+Same-pool recovery fix commit: 8906389352d9d92099acdb857fce97aece3e6a20
+Exact-SHA CI: PASSED / ACCEPTED / RUN 29823413542
+Remote regression: PASS / 19 OF 19 REACTOR / 1161 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / ZERO MANDATORY SKIPS
+Collector concurrency contract: PASS / 10 ROUNDS / 16 WRITERS / 1000 SAMPLES EACH / EXACT COUNT / 0 DUPLICATES / 0 CROSS-ROUND POLLUTION / 0 WORKER LEAKAGE
+Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Stage-QDR-8 plan: CLOSED / ACCEPTED
+Stage-QDR-8 implementation work order: FROZEN / SCOPE CONTRACT COMPLETE
+Stage-QDR-8 implementation: NOT_STARTED / NEXT
+Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_FOUNDATION
+Planning baseline: 8906389352d9d92099acdb857fce97aece3e6a20
+Planning docs commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+current task: DH-SAME-POOL-RECOVERY-FIX-EXACT-SHA-CI-AND-STAGE-QDR-8-PLAN-FREEZE
+current task status: CLOSED / ACCEPTED
+next action: DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 16 OF 16 / 0 CONFLICTS
+ALLOW_EXACT_SHA_CI: NO / CONSUMED_ACCEPTED
+ALLOW_STAGE_QDR_8_PLANNING: NO / CONSUMED_ACCEPTED
+ALLOW_STAGE_QDR_8_IMPLEMENTATION: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_8_IMPLEMENTATION_NOW: NO / CURRENT_TASK_IS_PLANNING_ONLY
+ALLOW_API_CHANGE_NOW / ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME_INTEGRATION: NO / NO / NO
+ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+Stage-QDR-8 只冻结结构化 feedback attribution 的领域与用例基础；默认不允许 persistence/API/runtime wiring，不自动更新模型、Prompt、策略、候选或历史状态，也不调用真实外部系统。B2 capacity gate 保持 deferred，Stage-QDR-7 B3 不重新打开。
+
 本仓库是 Decision Hub。任何 Agent、Codex、人工改动都必须按本文件执行。
 
 ## 1. 项目定位
@@ -127,7 +166,7 @@ docs/current/TESTING.md
 
 ## 4. 当前阶段
 
-### Terminal current authority — 2026-07-21 same-pool recovery test concurrency fix local accepted
+### Historical pre-publication authority — 2026-07-21 same-pool recovery test concurrency fix local accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
