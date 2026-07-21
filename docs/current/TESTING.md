@@ -1,6 +1,66 @@
 # Decision Hub Testing
 
-## Current validation — 2026-07-21 exact-SHA CI and Stage-QDR-8 plan freeze
+## Terminal current authority — 2026-07-21 Stage-QDR-8 implementation local accepted
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+Stage-QDR-8 plan commit: PUBLISHED / 0fae8b3ee3da197c32ac8bc2d13ce9e3ba0e86a3
+Stage-QDR-8 planning exact-SHA CI: PASSED / ACCEPTED / RUN 29830659396
+Planning remote regression: PASS / 19 OF 19 REACTOR / 1161 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Stage-QDR-8 implementation: IMPLEMENTED / LOCAL_ACCEPTED
+Structured feedback attribution: DETERMINISTIC / DECISION_BOUND / TENANT_BOUND / ENVIRONMENT_BOUND
+Attribution safety: AUDITABLE / REPLAY_REFERENCE_SAFE / IDEMPOTENT / NO_SIDE_EFFECT
+Persistence / API / runtime wiring: NOT_ADDED
+Implementation baseline: 0fae8b3ee3da197c32ac8bc2d13ce9e3ba0e86a3
+Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+Local regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local PostgreSQL/Testcontainers: REAL EXECUTION / ZERO MANDATORY SKIPS
+Local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Remote CI: PENDING NEW IMPLEMENTATION COMMIT
+Stage-QDR-8 final close: PENDING EXACT_SHA CI
+current task: DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION
+current task status: DONE / LOCAL_ACCEPTED
+next action: OBTAIN IMPLEMENTATION PUSH AUTHORIZATION; FAST-FORWARD PUSH; RUN EXACT-SHA TEST + QUALITY CI
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 16 OF 16 / 0 CONFLICTS
+ALLOW_STAGE_QDR_8_IMPLEMENTATION: NO / CONSUMED_LOCAL_ACCEPTED
+ALLOW_STAGE_QDR_8_IMPLEMENTATION_NOW: NO / CONSUMED_LOCAL_ACCEPTED
+ALLOW_EXACT_SHA_CI: YES / AFTER PUSH AUTHORIZATION
+ALLOW_STAGE_QDR_8_FINAL_CLOSE: NO / EXACT_SHA_CI_REQUIRED
+ALLOW_API_CHANGE / ALLOW_MIGRATION / ALLOW_REPOSITORY_EXPANSION: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+### 本轮实施验证实证
+
+```text
+新增定向测试: PASS / 28 TESTS / DOMAIN 10 / USECASE 17 / ARCHITECTURE 1 / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+domain module regression: PASS / 161 TESTS
+usecase module regression: PASS / 582 TESTS
+dh-app reactor regression: PASS / 15 OF 15 REACTOR / POSTGRESQL TESTCONTAINERS REAL EXECUTION
+full regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+```
+
+实际执行并通过的主要命令：
+
+```powershell
+mvn -B -ntp -pl dh-domain -am test
+mvn -B -ntp -pl dh-usecase -am test
+mvn -B -ntp -pl dh-app -am test
+mvn -B -ntp test
+mvn -B -ntp -Pquality validate
+mvn -B -ntp -N -Pquality com.diffplug.spotless:spotless-maven-plugin:3.1.0:apply
+```
+
+Spotless 调整过程中有两次真实失败，均未修改文件：`mvn spotless:apply` 因插件前缀未注册失败；对 reactor 使用完整插件坐标时因 `dh-bom` 无 Spotless 配置失败。随后改为在根项目使用 `-N -Pquality` 与完整插件坐标，命令成功；之后完整 quality 门禁通过。
+
+## Historical validation — 2026-07-21 exact-SHA CI and Stage-QDR-8 plan freeze
 
 ```text
 CI-red remediation: CLOSED / ACCEPTED

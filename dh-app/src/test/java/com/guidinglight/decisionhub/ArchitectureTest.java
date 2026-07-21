@@ -1366,6 +1366,89 @@ public class ArchitectureTest {
         }
     }
 
+    /**
+     * Stage-QDR-8：feedback attribution foundation 必须保持纯确定性、无 runtime wiring 与无副作用。
+     *
+     * <p>该规则只扫描冻结的两个 production 新包，拒绝 HTTP/Provider/NQ/Agent/LangGraph、Spring
+     * wiring、Repository/JDBC、系统时钟/随机数/线程池，以及 Experience/Pheromone/Prompt/Judge mutation。
+     */
+    @Test
+    void stageQdr8_rule40_feedbackAttributionFoundationHasNoExternalOrMutationPath() {
+        final List<Path> roots =
+                List.of(
+                        Path.of(
+                                        "..",
+                                        "dh-domain",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "domain",
+                                        "qdr",
+                                        "feedback")
+                                .toAbsolutePath()
+                                .normalize(),
+                        Path.of(
+                                        "..",
+                                        "dh-usecase",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "usecase",
+                                        "qdr",
+                                        "feedback")
+                                .toAbsolutePath()
+                                .normalize());
+        final List<String> violations = new ArrayList<>();
+        for (Path root : roots) {
+            if (!Files.isDirectory(root)) {
+                violations.add("missing Stage-QDR-8 feedback source root: " + root);
+                continue;
+            }
+            collectPatternViolations(
+                    root,
+                    Pattern.compile(
+                            "import\\s+.*(springframework|WebClient|RestTemplate|OkHttp|HttpClient|"
+                                    + "connector\\.nq|providers|usecase\\.agent|langgraph|autogen|crewai|"
+                                    + "memory|infra\\.jdbc)",
+                            Pattern.CASE_INSENSITIVE),
+                    "Stage-QDR-8 feedback source imports forbidden runtime dependency",
+                    violations);
+            collectPatternViolations(
+                    root,
+                    Pattern.compile(
+                            "@(Component|Service|Repository|Configuration|Bean)\\b|"
+                                    + "\\b(class|interface)\\s+\\w*(Repository|Jdbc|Controller)\\b",
+                            Pattern.CASE_INSENSITIVE),
+                    "Stage-QDR-8 feedback source declares runtime wiring, Repository, JDBC, or Controller",
+                    violations);
+            collectPatternViolations(
+                    root,
+                    Pattern.compile(
+                            "System\\.(currentTimeMillis|nanoTime)|Instant\\.now\\(|Clock\\.system|"
+                                    + "UUID\\.randomUUID|ThreadLocalRandom|new\\s+Random|"
+                                    + "Executors\\.new|ExecutorService"),
+                    "Stage-QDR-8 feedback source uses nondeterministic time, random, or executor",
+                    violations);
+            collectPatternViolations(
+                    root,
+                    Pattern.compile(
+                            "ExperienceFeedbackService|Pheromone(Store|Edge)?|PromptVersion|JudgeDecision|"
+                                    + "\\.(reinforce|penalize|decay|apply)\\s*\\("),
+                    "Stage-QDR-8 feedback source reaches forbidden learning or state mutation",
+                    violations);
+        }
+        if (!violations.isEmpty()) {
+            fail("Stage-QDR-8 feedback attribution boundary violations:\n"
+                    + String.join("\n", violations));
+        }
+    }
+
     private static void collectForbiddenTokenViolations(
             final Path rootOrFile, final List<String> tokens, final List<String> violations) {
         if (!Files.exists(rootOrFile)) {

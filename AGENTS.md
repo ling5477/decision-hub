@@ -1,6 +1,44 @@
 # Decision Hub Agent Guidelines
 
-## Terminal current authority — 2026-07-21 exact-SHA CI accepted and Stage-QDR-8 plan frozen
+## Terminal current authority — 2026-07-21 Stage-QDR-8 implementation local accepted
+
+```text
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+Stage-QDR-8 plan commit: PUBLISHED / 0fae8b3ee3da197c32ac8bc2d13ce9e3ba0e86a3
+Stage-QDR-8 planning exact-SHA CI: PASSED / ACCEPTED / RUN 29830659396
+Planning remote regression: PASS / 19 OF 19 REACTOR / 1161 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Stage-QDR-8 implementation: IMPLEMENTED / LOCAL_ACCEPTED
+Structured feedback attribution: DETERMINISTIC / DECISION_BOUND / TENANT_BOUND / ENVIRONMENT_BOUND
+Attribution safety: AUDITABLE / REPLAY_REFERENCE_SAFE / IDEMPOTENT / NO_SIDE_EFFECT
+Persistence / API / runtime wiring: NOT_ADDED
+Implementation baseline: 0fae8b3ee3da197c32ac8bc2d13ce9e3ba0e86a3
+Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+Local regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local PostgreSQL/Testcontainers: REAL EXECUTION / ZERO MANDATORY SKIPS
+Local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Remote CI: PENDING NEW IMPLEMENTATION COMMIT
+Stage-QDR-8 final close: PENDING EXACT_SHA CI
+current task: DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION
+current task status: DONE / LOCAL_ACCEPTED
+next action: OBTAIN IMPLEMENTATION PUSH AUTHORIZATION; FAST-FORWARD PUSH; RUN EXACT-SHA TEST + QUALITY CI
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 16 OF 16 / 0 CONFLICTS
+ALLOW_STAGE_QDR_8_IMPLEMENTATION: NO / CONSUMED_LOCAL_ACCEPTED
+ALLOW_STAGE_QDR_8_IMPLEMENTATION_NOW: NO / CONSUMED_LOCAL_ACCEPTED
+ALLOW_EXACT_SHA_CI: YES / AFTER PUSH AUTHORIZATION
+ALLOW_STAGE_QDR_8_FINAL_CLOSE: NO / EXACT_SHA_CI_REQUIRED
+ALLOW_API_CHANGE / ALLOW_MIGRATION / ALLOW_REPOSITORY_EXPANSION: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+Stage-QDR-8 仅完成结构化 feedback attribution 的 domain/usecase foundation 与测试，不形成在线学习闭环，不自动修改 Experience、Pheromone、Prompt、模型、策略、候选或 JudgeDecision，也不调用真实外部系统。B2 capacity gate 保持 deferred，Stage-QDR-7 B3 不重新打开。
+
+## Historical planning authority — 2026-07-21 exact-SHA CI accepted and Stage-QDR-8 plan frozen
 
 ```text
 Stage-QDR-7 B1: FROZEN
