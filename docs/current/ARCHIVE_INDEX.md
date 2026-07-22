@@ -1,5 +1,28 @@
 # Decision Hub Archive Index
 
+## Stage-QDR-7 retrospective archive recovery（2026-07-22）
+
+```text
+STAGE_QDR_7: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
+STAGE_QDR_7_B1: FROZEN
+STAGE_QDR_7_B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+STAGE_QDR_7_B3: CLOSED / ACCEPTED
+B3 implementation commit: e42d430d6f8d18e32d8a9f02d2197aa68a595d63
+B3 exact-SHA CI: 29750432646 / PASS
+final stabilization commit: 8906389352d9d92099acdb857fce97aece3e6a20
+final stabilization exact-SHA CI: 29823413542 / PASS
+archive recovery: RETROSPECTIVE / GOVERNANCE_SEQUENCE_REPAIR
+archive path: docs/gates/stage-qdr-7/
+archive packet: COMPLETE
+archive commit: THIS_ARCHIVE_COMMIT
+tag: NOT_CREATED / PENDING_EXACT_SHA_CI
+next action: replay unpublished Stage-QDR-8 close after QDR-7 archive commit
+```
+
+Stage-QDR-8 planning 与 implementation 已在 Stage-QDR-7 stage-level archive/tag 之前发布。本恢复只修正治理时间顺序，不重写已发布历史，不改变 B1/B2/B3 技术证据，不重开 capacity gate。QDR-7 tag 必须等待新 QDR-8 close HEAD 发布并通过 exact-SHA test + quality CI；post-tag current pruning 不在本任务执行。
+
 ## Stage-QDR-6 archive readiness（2026-07-11）
 
 ```text
