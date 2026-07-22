@@ -1,6 +1,75 @@
 # Decision Hub Worklog
 
-## Terminal current authority — 2026-07-21 Stage-QDR-8 implementation local accepted
+## Terminal current authority — 2026-07-22 Stage-QDR-7/QDR-8 sequence repair local ready
+
+```text
+Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+Stage-QDR-7 archive recovery: RETROSPECTIVE / GOVERNANCE_SEQUENCE_REPAIR
+Stage-QDR-7 archive commit: 6acf9c332434cafb45495d58f063a0f3faeaf475
+Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
+Structured feedback attribution: IMPLEMENTED / DETERMINISTIC / DECISION_BOUND / TENANT_BOUND / ENVIRONMENT_BOUND
+Attribution safety: AUDITABLE / REPLAY_REFERENCE_SAFE / IDEMPOTENT / NO_SIDE_EFFECT
+Persistence / API / runtime expansion: NONE
+Implementation parent: 0fae8b3ee3da197c32ac8bc2d13ce9e3ba0e86a3
+Implementation commit: 1279f1a0a246807e019bd2223c0f7254d50b74d5
+Implementation publication: PASS
+Implementation exact-SHA CI: 29836489131 / PASS
+Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
+Remote ArchitectureTest: PASS / 40 OF 40
+Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+QDR-7 archive recovery quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+QDR-8 replay local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+QDR-8 replay commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+QDR-8 replay exact-SHA CI: PENDING_PUBLICATION
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 16 OF 16 / 0 CONFLICTS
+QDR-7 archive: COMPLETED / docs/gates/stage-qdr-7/
+QDR-8 archive: COMPLETED / docs/gates/stage-qdr-8/
+QDR-7 tag: NOT_CREATED / PENDING_NEW_HEAD_EXACT_SHA_CI
+QDR-8 tag: NOT_CREATED / PENDING_QDR_7_TAG
+current task: DH-STAGE-QDR-7-RETROSPECTIVE-ARCHIVE-TAG-AND-QDR8-SEQUENCE-REPAIR
+current task status: LOCAL_SEQUENCE_REPAIRED / PENDING_PUBLICATION_CI_AND_TAGS
+next action: FAST_FORWARD_PUBLISH; RUN_NEW_HEAD_EXACT_SHA_CI; CREATE_QDR7_THEN_QDR8_TAGS
+ALLOW_CLOSE_COMMIT_PUBLICATION: YES / EXPLICITLY_AUTHORIZED
+ALLOW_STAGE_QDR_7_TAG_AFTER_EXACT_SHA_CI: YES / EXPLICITLY_AUTHORIZED
+ALLOW_STAGE_QDR_8_TAG_AFTER_QDR_7_TAG: YES / EXPLICITLY_AUTHORIZED
+ALLOW_POST_TAG_CURRENT_PRUNING: NO / SEPARATE_TASK_ONLY
+ALLOW_STAGE_QDR_9_PLAN_NOW: NO / TAG_CLOSE_AND_CURRENT_PRUNING_REQUIRED
+ALLOW_API_CHANGE / ALLOW_MIGRATION / ALLOW_REPOSITORY_EXPANSION: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+Stage-QDR-7 retrospective final close/archive 已由 `6acf9c332434cafb45495d58f063a0f3faeaf475` 恢复，未重写已发布历史，B2 capacity 继续 `DEFERRED / KNOWN_LIMITATION`；Stage-QDR-8 final close 内容已在其后重放为当前文档提交。两阶段 archive 均完成但 tag 尚未创建，必须等待新 QDR-8 HEAD fast-forward 发布与 exact-SHA CI 全绿后按 QDR-7 → QDR-8 顺序创建。结构化 feedback attribution 仍仅为 domain/usecase foundation，不形成在线学习闭环或真实外部副作用。
+
+## 2026-07-22 Stage-QDR-7 retrospective archive and QDR-8 sequence repair
+
+- 预检确认 `dev`、HEAD `bdba8138f0fd99c73cb5db577bbdc936ab54765d`、`origin/dev` `1279f1a0a246807e019bd2223c0f7254d50b74d5`、ahead/behind `1/0`、worktree/staged clean，两个目标 tag 均不存在。
+- 创建安全分支 `backup/qdr8-close-bdba8138` 并核对精确指向原未发布 QDR-8 close commit；只把本地 `dev` 回到已发布父提交，没有改写远端历史。
+- 新增 Stage-QDR-7 retrospective final close 与 10 文件 self-contained archive packet；commit 为 `6acf9c332434cafb45495d58f063a0f3faeaf475`，父提交精确为 `1279f1a0...74d5`。
+- 从安全提交重放 QDR-8 close 内容；唯一冲突为 `docs/current/ARCHIVE_INDEX.md`，已同时保留 QDR-8 与 QDR-7 archive 记录。原 `bdba8138...` 只保留为备份证据，不再作为待发布 SHA。
+- 两次本地 `mvn -B -ntp -Pquality validate` 均为 19/19 Reactor SUCCESS、Checkstyle 0、Spotless PASS；两阶段 archive canonical LF hashes 均 0 mismatch，16 个 current factsources 为 1 个统一 block hash、0 conflicts。
+- Java production/test、migration、API/Controller、Repository/persistence、contracts/golden_cases、POM/workflow diff 均为 0；没有 real HTTP、Provider、NQ、Agent、LangGraph、Paper 或 LIVE 变更。
+- 当前仍未 push、未触发新 HEAD exact-SHA CI、未创建 tag；这些动作只在当前本地 commit 完成并再次确认 fast-forward 后继续。
+
+## 2026-07-22 Stage-QDR-8 final-close blocker fix and acceptance
+
+- 上一轮以 `TASK_SCOPE_DESIGN_INVALID` 在写操作前阻断；没有技术回归、文件修改或提交。
+- 本轮将遗漏的 3 个 Stage-QDR-7 current factsources 纳入 write allowlist，没有缩减冻结 16 文件扫描范围；scope invariants 3/3 PASS。
+- 复核 implementation range 49 files：14 domain production、13 use-case production、6 test files（含 ArchitectureTest）、16 current factsources、0 unexpected。
+- 复核 deterministic、tenant/environment/decision/trace-bound、idempotency、audit/replay reference 和 no-side-effect 合同；禁止路径 diff 与 production 新包禁止模式命中均为 0。
+- 复用 exact-SHA CI run `29836489131`：19/19 Reactor、1189 tests、PostgreSQL 17.10、mandatory skips 0、ArchitectureTest 40/40、quality PASS。
+- 本地执行 `mvn -B -ntp -Pquality validate`，19/19 Reactor SUCCESS、Checkstyle 0、Spotless PASS。
+- 新增 final-close review 和 `docs/gates/stage-qdr-8/` 自包含 archive packet；16 个 factsources 同步为 `CLOSED / ACCEPTED`，0 conflicts。
+- 本轮不 push、不创建 tag；下一独立任务为 `DH-STAGE-QDR-8-CLOSE-COMMIT-PUBLICATION-AND-TAG`。
+
+## Previous state — 2026-07-21 Stage-QDR-8 implementation local accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN

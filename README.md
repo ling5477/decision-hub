@@ -1,6 +1,54 @@
 # Decision Hub
 
-## Terminal current authority — 2026-07-21 Stage-QDR-8 implementation local accepted
+## Terminal current authority — 2026-07-22 Stage-QDR-7/QDR-8 sequence repair local ready
+
+```text
+Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+Stage-QDR-7 archive recovery: RETROSPECTIVE / GOVERNANCE_SEQUENCE_REPAIR
+Stage-QDR-7 archive commit: 6acf9c332434cafb45495d58f063a0f3faeaf475
+Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
+Structured feedback attribution: IMPLEMENTED / DETERMINISTIC / DECISION_BOUND / TENANT_BOUND / ENVIRONMENT_BOUND
+Attribution safety: AUDITABLE / REPLAY_REFERENCE_SAFE / IDEMPOTENT / NO_SIDE_EFFECT
+Persistence / API / runtime expansion: NONE
+Implementation parent: 0fae8b3ee3da197c32ac8bc2d13ce9e3ba0e86a3
+Implementation commit: 1279f1a0a246807e019bd2223c0f7254d50b74d5
+Implementation publication: PASS
+Implementation exact-SHA CI: 29836489131 / PASS
+Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
+Remote ArchitectureTest: PASS / 40 OF 40
+Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+QDR-7 archive recovery quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+QDR-8 replay local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+QDR-8 replay commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+QDR-8 replay exact-SHA CI: PENDING_PUBLICATION
+Scope invariants: PASS / 3 OF 3
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 16 OF 16 / 0 CONFLICTS
+QDR-7 archive: COMPLETED / docs/gates/stage-qdr-7/
+QDR-8 archive: COMPLETED / docs/gates/stage-qdr-8/
+QDR-7 tag: NOT_CREATED / PENDING_NEW_HEAD_EXACT_SHA_CI
+QDR-8 tag: NOT_CREATED / PENDING_QDR_7_TAG
+current task: DH-STAGE-QDR-7-RETROSPECTIVE-ARCHIVE-TAG-AND-QDR8-SEQUENCE-REPAIR
+current task status: LOCAL_SEQUENCE_REPAIRED / PENDING_PUBLICATION_CI_AND_TAGS
+next action: FAST_FORWARD_PUBLISH; RUN_NEW_HEAD_EXACT_SHA_CI; CREATE_QDR7_THEN_QDR8_TAGS
+ALLOW_CLOSE_COMMIT_PUBLICATION: YES / EXPLICITLY_AUTHORIZED
+ALLOW_STAGE_QDR_7_TAG_AFTER_EXACT_SHA_CI: YES / EXPLICITLY_AUTHORIZED
+ALLOW_STAGE_QDR_8_TAG_AFTER_QDR_7_TAG: YES / EXPLICITLY_AUTHORIZED
+ALLOW_POST_TAG_CURRENT_PRUNING: NO / SEPARATE_TASK_ONLY
+ALLOW_STAGE_QDR_9_PLAN_NOW: NO / TAG_CLOSE_AND_CURRENT_PRUNING_REQUIRED
+ALLOW_API_CHANGE / ALLOW_MIGRATION / ALLOW_REPOSITORY_EXPANSION: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+Stage-QDR-7 retrospective final close/archive 已由 `6acf9c332434cafb45495d58f063a0f3faeaf475` 恢复，未重写已发布历史，B2 capacity 继续 `DEFERRED / KNOWN_LIMITATION`；Stage-QDR-8 final close 内容已在其后重放为当前文档提交。两阶段 archive 均完成但 tag 尚未创建，必须等待新 QDR-8 HEAD fast-forward 发布与 exact-SHA CI 全绿后按 QDR-7 → QDR-8 顺序创建。结构化 feedback attribution 仍仅为 domain/usecase foundation，不形成在线学习闭环或真实外部副作用。
+
+## Previous state — 2026-07-21 Stage-QDR-8 implementation local accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
@@ -449,7 +497,7 @@ Stage-QDR-4、Stage-QDR-5 与 Stage-QDR-6 均已 `CLOSED / ACCEPTED / ARCHIVED /
 
 ## 当前事实源
 
-Stage-QDR-5 已归档并完成 tag close。当前事实源只保留全局状态、下一步入口、验证证据和归档索引；Stage-QDR-5 过程源文件已迁入 `docs/gates/stage-qdr-5/`。
+Stage-QDR-8 已完成本地 final close 与 archive，close commit 尚未发布且 tag 尚未创建。当前过程源文件保留到 tag close 后的独立 pruning；下一步唯一入口是 close commit publication and tag。
 
 ```text
 README.md
@@ -458,17 +506,19 @@ docs/current/STATUS.md
 docs/current/WORK_ORDER.md
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 docs/current/FACTSOURCE_POLICY.md
-docs/current/DH_STAGE_QDR_8_PLAN.md Stage-QDR-8 Structured Feedback Attribution Foundation / CLOSED / ACCEPTED
-docs/current/DH_STAGE_QDR_8_IMPLEMENTATION_WORK_ORDER.md Next implementation work order / FROZEN
+docs/current/DH_STAGE_QDR_8_PLAN.md Historical / consumed plan；pending post-tag pruning
+docs/current/DH_STAGE_QDR_8_IMPLEMENTATION_WORK_ORDER.md Historical / consumed work order；pending post-tag pruning
+docs/current/DH_STAGE_QDR_8_FINAL_CLOSE_REVIEW.md Current final-close acceptance
 docs/current/DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md B2 milestone close / includes previous BLOCKED review
 docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed work order with B2 close addendum
 docs/current/TESTING.md
 docs/current/WORKLOG.md
 docs/current/ROADMAP.md
-docs/current/ARCHIVE_INDEX.md historical archive index / supporting only
+docs/current/ARCHIVE_INDEX.md current archive index / supporting authority
 docs/gates/stage-qdr-4/                 Stage-QDR-4 归档目录与阶段文档
 docs/gates/stage-qdr-5/                 Stage-QDR-5 归档目录与阶段文档
 docs/gates/stage-qdr-6/                 Stage-QDR-6 self-contained archive packet
+docs/gates/stage-qdr-8/                 Stage-QDR-8 complete archive packet / TAG_PENDING
 ```
 
 Stage-QDR-5 historical source docs 已归档到 `docs/gates/stage-qdr-5/SOURCE_DH_STAGE_QDR_5_*.md`；这些文件只作为 historical archive evidence，不是 current factsource。
@@ -480,14 +530,16 @@ docs/current/README.md                  当前文档索引
 docs/current/DH_STAGE_QDR_7_PLAN.md     Historical / consumed Stage-QDR-7 planning baseline
 docs/current/DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md B2 milestone close；保留Previous review attempt / BLOCKED
 docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md Historical / consumed；顶部含B2 close addendum
-docs/current/DH_STAGE_QDR_8_PLAN.md     当前 Stage-QDR-8 plan / CLOSED / ACCEPTED
-docs/current/DH_STAGE_QDR_8_IMPLEMENTATION_WORK_ORDER.md 下一 implementation work order / FROZEN
+docs/current/DH_STAGE_QDR_8_PLAN.md     Historical / consumed；pending post-tag pruning
+docs/current/DH_STAGE_QDR_8_IMPLEMENTATION_WORK_ORDER.md Historical / consumed；pending post-tag pruning
+docs/current/DH_STAGE_QDR_8_FINAL_CLOSE_REVIEW.md Stage-QDR-8 final-close acceptance
 docs/current/STATUS.md                  唯一当前状态表
 docs/current/WORK_ORDER.md              唯一下一步入口
 docs/current/CODEX_PROJECT_INSTRUCTIONS.md 当前 Codex / Claude 执行纪律
 docs/current/TESTING.md                 当前验证证据与工具风险
 docs/current/FACTSOURCE_POLICY.md       当前事实源与 blocker 规则
 docs/current/ARCHIVE_INDEX.md           QDR 历史归档索引
+docs/gates/stage-qdr-8/                 Stage-QDR-8 complete archive packet / TAG_PENDING
 docs/gates/stage-qdr-4/                 Stage-QDR-4 归档目录与阶段文档
 docs/gates/stage-qdr-5/                 Stage-QDR-5 归档目录与阶段文档
 docs/gates/stage-qdr-6/                 Stage-QDR-6 self-contained archive packet

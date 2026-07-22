@@ -1,5 +1,24 @@
 # Decision Hub Archive Index
 
+## Stage-QDR-8 archive completed（2026-07-22）
+
+```text
+STAGE_QDR_8_FINAL_CLOSE_PREVIOUS_ATTEMPT: BLOCKED / TASK_SCOPE_DESIGN_INVALID / NO WRITES
+STAGE_QDR_8_SCOPE_GOVERNANCE_FIX: CLOSED / ACCEPTED
+STAGE_QDR_8: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
+implementation commit: 1279f1a0a246807e019bd2223c0f7254d50b74d5
+exact-SHA CI: 29836489131 / PASS
+archive path: docs/gates/stage-qdr-8/
+archive packet: COMPLETED
+archive commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+tag: NOT_CREATED / EXPLICITLY_AUTHORIZED_AFTER_NEW_HEAD_EXACT_SHA_CI
+B2 capacity: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+next action: publish new QDR-8 close HEAD; run exact-SHA CI; create QDR-7 then QDR-8 tags
+```
+
+归档 packet 包含完整 plan、implementation work order、batch summary、validation evidence、final close review、security boundary review、status snapshot、archive close 与 manifest。上一轮 scope blocker 保留在 final close review 中；本轮把遗漏的 3 个 factsources 纳入 write allowlist，没有缩减 16 文件扫描范围。Current pruning 必须等待 tag close 后作为独立 cleanup 执行。
+
 ## Stage-QDR-7 retrospective archive recovery（2026-07-22）
 
 ```text
@@ -16,9 +35,9 @@ final stabilization exact-SHA CI: 29823413542 / PASS
 archive recovery: RETROSPECTIVE / GOVERNANCE_SEQUENCE_REPAIR
 archive path: docs/gates/stage-qdr-7/
 archive packet: COMPLETE
-archive commit: THIS_ARCHIVE_COMMIT
+archive commit: 6acf9c332434cafb45495d58f063a0f3faeaf475
 tag: NOT_CREATED / PENDING_EXACT_SHA_CI
-next action: replay unpublished Stage-QDR-8 close after QDR-7 archive commit
+next action: publish new QDR-8 close HEAD; run exact-SHA CI; create ordered tags
 ```
 
 Stage-QDR-8 planning 与 implementation 已在 Stage-QDR-7 stage-level archive/tag 之前发布。本恢复只修正治理时间顺序，不重写已发布历史，不改变 B1/B2/B3 技术证据，不重开 capacity gate。QDR-7 tag 必须等待新 QDR-8 close HEAD 发布并通过 exact-SHA test + quality CI；post-tag current pruning 不在本任务执行。

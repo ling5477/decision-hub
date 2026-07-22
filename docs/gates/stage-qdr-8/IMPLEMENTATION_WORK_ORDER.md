@@ -1,54 +1,6 @@
 # DH Stage-QDR-8 Structured Feedback Attribution Foundation Implementation Work Order
 
-## Terminal current authority — 2026-07-22 Stage-QDR-7/QDR-8 sequence repair local ready
-
-```text
-Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
-Stage-QDR-7 B1: FROZEN
-Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
-B2 capacity gate: DEFERRED / KNOWN_LIMITATION
-Production capacity: NOT_PROVEN
-Stage-QDR-7 B3: CLOSED / ACCEPTED
-Stage-QDR-7 archive recovery: RETROSPECTIVE / GOVERNANCE_SEQUENCE_REPAIR
-Stage-QDR-7 archive commit: 6acf9c332434cafb45495d58f063a0f3faeaf475
-Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
-Structured feedback attribution: IMPLEMENTED / DETERMINISTIC / DECISION_BOUND / TENANT_BOUND / ENVIRONMENT_BOUND
-Attribution safety: AUDITABLE / REPLAY_REFERENCE_SAFE / IDEMPOTENT / NO_SIDE_EFFECT
-Persistence / API / runtime expansion: NONE
-Implementation parent: 0fae8b3ee3da197c32ac8bc2d13ce9e3ba0e86a3
-Implementation commit: 1279f1a0a246807e019bd2223c0f7254d50b74d5
-Implementation publication: PASS
-Implementation exact-SHA CI: 29836489131 / PASS
-Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
-Remote ArchitectureTest: PASS / 40 OF 40
-Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
-QDR-7 archive recovery quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
-QDR-8 replay local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
-QDR-8 replay commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
-QDR-8 replay exact-SHA CI: PENDING_PUBLICATION
-Scope invariants: PASS / 3 OF 3
-CURRENT_FACTSOURCE_CONSISTENCY: PASS / 16 OF 16 / 0 CONFLICTS
-QDR-7 archive: COMPLETED / docs/gates/stage-qdr-7/
-QDR-8 archive: COMPLETED / docs/gates/stage-qdr-8/
-QDR-7 tag: NOT_CREATED / PENDING_NEW_HEAD_EXACT_SHA_CI
-QDR-8 tag: NOT_CREATED / PENDING_QDR_7_TAG
-current task: DH-STAGE-QDR-7-RETROSPECTIVE-ARCHIVE-TAG-AND-QDR8-SEQUENCE-REPAIR
-current task status: LOCAL_SEQUENCE_REPAIRED / PENDING_PUBLICATION_CI_AND_TAGS
-next action: FAST_FORWARD_PUBLISH; RUN_NEW_HEAD_EXACT_SHA_CI; CREATE_QDR7_THEN_QDR8_TAGS
-ALLOW_CLOSE_COMMIT_PUBLICATION: YES / EXPLICITLY_AUTHORIZED
-ALLOW_STAGE_QDR_7_TAG_AFTER_EXACT_SHA_CI: YES / EXPLICITLY_AUTHORIZED
-ALLOW_STAGE_QDR_8_TAG_AFTER_QDR_7_TAG: YES / EXPLICITLY_AUTHORIZED
-ALLOW_POST_TAG_CURRENT_PRUNING: NO / SEPARATE_TASK_ONLY
-ALLOW_STAGE_QDR_9_PLAN_NOW: NO / TAG_CLOSE_AND_CURRENT_PRUNING_REQUIRED
-ALLOW_API_CHANGE / ALLOW_MIGRATION / ALLOW_REPOSITORY_EXPANSION: NO / NO / NO
-ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
-ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
-```
-
-Stage-QDR-7 retrospective final close/archive 已由 `6acf9c332434cafb45495d58f063a0f3faeaf475` 恢复，未重写已发布历史，B2 capacity 继续 `DEFERRED / KNOWN_LIMITATION`；Stage-QDR-8 final close 内容已在其后重放为当前文档提交。两阶段 archive 均完成但 tag 尚未创建，必须等待新 QDR-8 HEAD fast-forward 发布与 exact-SHA CI 全绿后按 QDR-7 → QDR-8 顺序创建。结构化 feedback attribution 仍仅为 domain/usecase foundation，不形成在线学习闭环或真实外部副作用。
-
-## Previous state — 2026-07-21 Stage-QDR-8 implementation local accepted
+## Terminal current authority — 2026-07-21 Stage-QDR-8 implementation local accepted
 
 ```text
 Stage-QDR-7 B1: FROZEN
