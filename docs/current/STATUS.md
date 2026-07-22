@@ -1,6 +1,70 @@
 # Decision Hub Status
+## Terminal current authority — 2026-07-22 Stage-QDR-7/QDR-8 post-tag current pruning
 
-## Terminal current authority — 2026-07-22 Stage-QDR-7/QDR-8 sequence repair local ready
+```text
+Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+Stage-QDR-7 archive: docs/gates/stage-qdr-7/
+Stage-QDR-7 archive commit: 6acf9c332434cafb45495d58f063a0f3faeaf475
+Stage-QDR-7 tag: dh-stage-qdr-7-close
+Stage-QDR-7 tag target: 6acf9c332434cafb45495d58f063a0f3faeaf475
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+Stage-QDR-8 archive: docs/gates/stage-qdr-8/
+Stage-QDR-8 close commit: 7b6066d1062fe49d16d1f093c8b3170354854376
+Stage-QDR-8 tag: dh-stage-qdr-8-close
+Stage-QDR-8 tag target: 7b6066d1062fe49d16d1f093c8b3170354854376
+Structured feedback attribution: IMPLEMENTED / DETERMINISTIC / DECISION_BOUND / TENANT_BOUND / ENVIRONMENT_BOUND
+Attribution safety: AUDITABLE / REPLAY_REFERENCE_SAFE / IDEMPOTENT / NO_SIDE_EFFECT
+Persistence / API / runtime expansion: NONE
+Exact-SHA CI: 29925661871 / PASS
+Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
+Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Production capacity: NOT_PROVEN
+Terminal current factsources: 12
+Scope invariants: PASS / 6 OF 6
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-7-QDR8-POST-TAG-CURRENT-PRUNING
+current task status: DONE / LOCAL_ACCEPTED
+next action after local pruning acceptance: OBTAIN PRUNING COMMIT PUSH AUTHORIZATION
+Stage-QDR-9: NOT_STARTED
+ALLOW_PRUNING_COMMIT_PUBLICATION: YES / SEPARATE_EXPLICIT_AUTHORIZATION_REQUIRED
+ALLOW_STAGE_QDR_9_PLAN_NOW: NO / PRUNING_COMMIT_PUBLICATION_AND_EXACT_SHA_CI_REQUIRED
+ALLOW_API_CHANGE / ALLOW_MIGRATION / ALLOW_REPOSITORY_EXPANSION: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+本任务只裁剪已由 archive packet 与 annotated tag 固定的 Stage-QDR-7/8 current process documents，并把 current authority 收敛为 12 个 terminal factsources。归档包、tag、代码、测试、migration、API 与 runtime 均不修改；B2 capacity 保持 `DEFERRED / KNOWN_LIMITATION`，production capacity 保持 `NOT_PROVEN`，Stage-QDR-9 保持 `NOT_STARTED`。
+
+## 本轮 post-tag current pruning 状态
+
+```text
+repository: E:/Project/decision-hub
+branch: dev
+baseline HEAD / origin/dev / advertised SHA: 7b6066d1062fe49d16d1f093c8b3170354854376
+baseline ahead / behind: 0 / 0
+baseline worktree / staged: clean / empty
+QDR-7 archive canonical blob hashes: PASS / 9 OF 9 / 0 MISMATCH
+QDR-8 archive canonical blob hashes: PASS / 10 OF 10 / 0 MISMATCH
+QDR-7 pruning candidates: PASS / 30 OF 30 PRESENT IN TAG SNAPSHOT
+QDR-8 pruning candidates: PASS / 3 OF 3 PRESENT IN TAG SNAPSHOT
+TASK_SCOPE_DESIGN: PASS / 6 OF 6
+post-pruning terminal factsources: 12
+post-tag current pruning: DONE / LOCAL_ACCEPTED / THIS_DOCUMENT_COMMIT
+local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+archive packet mutation: NONE
+tag mutation: NONE
+push: NO
+Stage-QDR-9 planning: NOT_ALLOWED
+```
+
+`STATUS.md` 与 `WORK_ORDER.md` 继续作为 primary current authority；Stage-QDR-7/8 的阶段过程证据转由 `docs/gates/stage-qdr-7/`、`docs/gates/stage-qdr-8/` 和对应 annotated tag 承担。当前任务的完整 scope 冻结见 `WORK_ORDER.md`。
+
+## Historical pre-pruning authority — 2026-07-22 Stage-QDR-7/QDR-8 sequence repair local ready
 
 ```text
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING

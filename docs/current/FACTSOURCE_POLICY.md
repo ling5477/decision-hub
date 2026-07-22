@@ -1,6 +1,69 @@
 # Decision Hub Factsource Policy
+## Terminal current authority — 2026-07-22 Stage-QDR-7/QDR-8 post-tag current pruning
 
-## Terminal current authority — 2026-07-22 Stage-QDR-7/QDR-8 sequence repair local ready
+```text
+Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+Stage-QDR-7 archive: docs/gates/stage-qdr-7/
+Stage-QDR-7 archive commit: 6acf9c332434cafb45495d58f063a0f3faeaf475
+Stage-QDR-7 tag: dh-stage-qdr-7-close
+Stage-QDR-7 tag target: 6acf9c332434cafb45495d58f063a0f3faeaf475
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+Stage-QDR-8 archive: docs/gates/stage-qdr-8/
+Stage-QDR-8 close commit: 7b6066d1062fe49d16d1f093c8b3170354854376
+Stage-QDR-8 tag: dh-stage-qdr-8-close
+Stage-QDR-8 tag target: 7b6066d1062fe49d16d1f093c8b3170354854376
+Structured feedback attribution: IMPLEMENTED / DETERMINISTIC / DECISION_BOUND / TENANT_BOUND / ENVIRONMENT_BOUND
+Attribution safety: AUDITABLE / REPLAY_REFERENCE_SAFE / IDEMPOTENT / NO_SIDE_EFFECT
+Persistence / API / runtime expansion: NONE
+Exact-SHA CI: 29925661871 / PASS
+Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
+Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Production capacity: NOT_PROVEN
+Terminal current factsources: 12
+Scope invariants: PASS / 6 OF 6
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-7-QDR8-POST-TAG-CURRENT-PRUNING
+current task status: DONE / LOCAL_ACCEPTED
+next action after local pruning acceptance: OBTAIN PRUNING COMMIT PUSH AUTHORIZATION
+Stage-QDR-9: NOT_STARTED
+ALLOW_PRUNING_COMMIT_PUBLICATION: YES / SEPARATE_EXPLICIT_AUTHORIZATION_REQUIRED
+ALLOW_STAGE_QDR_9_PLAN_NOW: NO / PRUNING_COMMIT_PUBLICATION_AND_EXACT_SHA_CI_REQUIRED
+ALLOW_API_CHANGE / ALLOW_MIGRATION / ALLOW_REPOSITORY_EXPANSION: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+本任务只裁剪已由 archive packet 与 annotated tag 固定的 Stage-QDR-7/8 current process documents，并把 current authority 收敛为 12 个 terminal factsources。归档包、tag、代码、测试、migration、API 与 runtime 均不修改；B2 capacity 保持 `DEFERRED / KNOWN_LIMITATION`，production capacity 保持 `NOT_PROVEN`，Stage-QDR-9 保持 `NOT_STARTED`。
+
+## Post-pruning terminal current factsource 集合
+
+以下 12 个路径构成本轮裁剪后的 terminal current factsource 集合：
+
+```text
+AGENTS.md
+CLAUDE.md
+README.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/FACTSOURCE_POLICY.md
+docs/current/ARCHIVE_INDEX.md
+```
+
+权威层级保持不变：`STATUS.md` 与 `WORK_ORDER.md` 是 primary current authority；`FACTSOURCE_POLICY.md` 是 policy authority；`AGENTS.md`、`CLAUDE.md` 与 `CODEX_PROJECT_INSTRUCTIONS.md` 是执行指导；两个 README 是入口索引；`ROADMAP.md`、`TESTING.md`、`WORKLOG.md` 与 `ARCHIVE_INDEX.md` 提供路线、验证、执行和归档指针。入口与 supporting 文件不得覆盖 primary current authority。
+
+`docs/gates/stage-qdr-7/` 与 `docs/gates/stage-qdr-8/` 只承担 historical evidence；两个 annotated tag 固定删除前的 exact repository snapshot。已删除的 `docs/current/DH_STAGE_QDR_7*.md` 与 `docs/current/DH_STAGE_QDR_8*.md` 不再是 current factsources，不得由历史文档重新提升为当前 authority。
+
+## Historical pre-pruning authority — 2026-07-22 Stage-QDR-7/QDR-8 sequence repair local ready
 
 ```text
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING

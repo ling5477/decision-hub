@@ -1,6 +1,133 @@
 # Decision Hub 当前工单
+## Terminal current authority — 2026-07-22 Stage-QDR-7/QDR-8 post-tag current pruning
 
-## Terminal current authority — 2026-07-22 Stage-QDR-7/QDR-8 sequence repair local ready
+```text
+Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+Stage-QDR-7 archive: docs/gates/stage-qdr-7/
+Stage-QDR-7 archive commit: 6acf9c332434cafb45495d58f063a0f3faeaf475
+Stage-QDR-7 tag: dh-stage-qdr-7-close
+Stage-QDR-7 tag target: 6acf9c332434cafb45495d58f063a0f3faeaf475
+Stage-QDR-7 B1: FROZEN
+Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
+B2 capacity gate: DEFERRED / KNOWN_LIMITATION
+Stage-QDR-7 B3: CLOSED / ACCEPTED
+Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+Stage-QDR-8 archive: docs/gates/stage-qdr-8/
+Stage-QDR-8 close commit: 7b6066d1062fe49d16d1f093c8b3170354854376
+Stage-QDR-8 tag: dh-stage-qdr-8-close
+Stage-QDR-8 tag target: 7b6066d1062fe49d16d1f093c8b3170354854376
+Structured feedback attribution: IMPLEMENTED / DETERMINISTIC / DECISION_BOUND / TENANT_BOUND / ENVIRONMENT_BOUND
+Attribution safety: AUDITABLE / REPLAY_REFERENCE_SAFE / IDEMPOTENT / NO_SIDE_EFFECT
+Persistence / API / runtime expansion: NONE
+Exact-SHA CI: 29925661871 / PASS
+Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
+Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Production capacity: NOT_PROVEN
+Terminal current factsources: 12
+Scope invariants: PASS / 6 OF 6
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-7-QDR8-POST-TAG-CURRENT-PRUNING
+current task status: DONE / LOCAL_ACCEPTED
+next action after local pruning acceptance: OBTAIN PRUNING COMMIT PUSH AUTHORIZATION
+Stage-QDR-9: NOT_STARTED
+ALLOW_PRUNING_COMMIT_PUBLICATION: YES / SEPARATE_EXPLICIT_AUTHORIZATION_REQUIRED
+ALLOW_STAGE_QDR_9_PLAN_NOW: NO / PRUNING_COMMIT_PUBLICATION_AND_EXACT_SHA_CI_REQUIRED
+ALLOW_API_CHANGE / ALLOW_MIGRATION / ALLOW_REPOSITORY_EXPANSION: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+本任务只裁剪已由 archive packet 与 annotated tag 固定的 Stage-QDR-7/8 current process documents，并把 current authority 收敛为 12 个 terminal factsources。归档包、tag、代码、测试、migration、API 与 runtime 均不修改；B2 capacity 保持 `DEFERRED / KNOWN_LIMITATION`，production capacity 保持 `NOT_PROVEN`，Stage-QDR-9 保持 `NOT_STARTED`。
+
+## DH-STAGE-QDR-7-QDR8-POST-TAG-CURRENT-PRUNING
+
+### 目标与停止条件
+
+本工单只删除已经由自包含 archive packet、SHA256 manifest 与 annotated tag exact snapshot 覆盖的 Stage-QDR-7/8 current process documents，并同步 terminal authority。任一 archive canonical blob mismatch、tag target mismatch、候选缺失、scope invariant 失败、current conflict、质量门失败或禁止范围 diff 非零，都必须停止提交。
+
+### Scope 冻结
+
+`READ_SCOPE`：全部 Git tracked repository files；`docs/gates/stage-qdr-7/` 与 `docs/gates/stage-qdr-8/`；本任务所需的 branch/status/diff/log/tag 元数据；`origin/dev` 和两个目标 tag 的只读远端 refs。排除 generated、secret-bearing 与无关外部目录。
+
+`WRITE_ALLOWLIST`：以下 12 个 terminal current factsources，以及下方 33 个 `PRUNING_CANDIDATE_SCOPE` 文件的删除：
+
+```text
+AGENTS.md
+CLAUDE.md
+README.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/FACTSOURCE_POLICY.md
+docs/current/ARCHIVE_INDEX.md
+```
+
+`VALIDATION_SCOPE`：全部 Git tracked repository files、Maven 19-module quality 输入、current factsources、archive canonical Git blobs、local/remote tag refs，以及 production/test/migration/API/Repository/contracts/golden_cases/POM/workflow/docs/gates 禁止范围 diff。
+
+`FIXABLE_BLOCKER_SCOPE`：精确等于 `WRITE_ALLOWLIST`。allowlist 外 blocker 只记录并停止，不得在本任务修复。
+
+`CURRENT_FACTSOURCE_SCAN_SCOPE` 与 `POST_PRUNING_FACTSOURCE_SCOPE`：精确等于上述 12 个 terminal current factsources。
+
+`PRUNING_CANDIDATE_SCOPE`：
+
+```text
+docs/current/DH_STAGE_QDR_7_B1_CAPACITY_BLOCKER_RESOLUTION.md
+docs/current/DH_STAGE_QDR_7_B1_RESOURCE_CAPACITY_EVIDENCE.md
+docs/current/DH_STAGE_QDR_7_B1_RUNTIME_CONTRACT_SAFETY_POLICY.md
+docs/current/DH_STAGE_QDR_7_B1_SOURCE_NORMALIZATION_BLOCKER_FIX.md
+docs/current/DH_STAGE_QDR_7_B1_SOURCE_NORMALIZATION_FIX_REVIEW.md
+docs/current/DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md
+docs/current/DH_STAGE_QDR_7_B2_CAPACITY_CRITERIA_FREEZE_REVIEW.md
+docs/current/DH_STAGE_QDR_7_B2_CAPACITY_HARNESS_IMPLEMENTATION_WORK_ORDER.md
+docs/current/DH_STAGE_QDR_7_B2_CAPACITY_THRESHOLD_EVIDENCE.md
+docs/current/DH_STAGE_QDR_7_B2_CONSOLIDATED_FINAL_ACCEPTANCE_REVIEW.md
+docs/current/DH_STAGE_QDR_7_B2_FORMAL_CAPACITY_ACCEPTANCE_RESULT.md
+docs/current/DH_STAGE_QDR_7_B2_PERSISTENT_GUARDS_BLOCKER_FIX_RETRY.md
+docs/current/DH_STAGE_QDR_7_B2_PERSISTENT_GUARDS_BLOCKER_FIX.md
+docs/current/DH_STAGE_QDR_7_B2_PERSISTENT_GUARDS_IMPLEMENTATION.md
+docs/current/DH_STAGE_QDR_7_B2_PERSISTENT_GUARDS_MILESTONE_REVIEW_RETRY_2.md
+docs/current/DH_STAGE_QDR_7_B2_PERSISTENT_GUARDS_MILESTONE_REVIEW_RETRY.md
+docs/current/DH_STAGE_QDR_7_B2_PERSISTENT_GUARDS_MILESTONE_REVIEW.md
+docs/current/DH_STAGE_QDR_7_B2_PERSISTENT_GUARDS_SCHEMA_SECURITY_REVIEW.md
+docs/current/DH_STAGE_QDR_7_B2_POST_IMPLEMENTATION_CAPACITY_ACCEPTANCE.md
+docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX_RETRY.md
+docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_BLOCKER_FIX.md
+docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW_RETRY.md
+docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION_REVIEW.md
+docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_IMPLEMENTATION.md
+docs/current/DH_STAGE_QDR_7_B2_SCHEMA_ERRATA_REVIEW.md
+docs/current/DH_STAGE_QDR_7_B3_IMPLEMENTATION_WORK_ORDER.md
+docs/current/DH_STAGE_QDR_7_B3_PLAN.md
+docs/current/DH_STAGE_QDR_7_FINAL_CLOSE_RECOVERY.md
+docs/current/DH_STAGE_QDR_7_IMPLEMENTATION_WORK_ORDER.md
+docs/current/DH_STAGE_QDR_7_PLAN.md
+docs/current/DH_STAGE_QDR_8_FINAL_CLOSE_REVIEW.md
+docs/current/DH_STAGE_QDR_8_IMPLEMENTATION_WORK_ORDER.md
+docs/current/DH_STAGE_QDR_8_PLAN.md
+```
+
+### Scope invariant
+
+```text
+VALIDATION_SCOPE subset READ_SCOPE: PASS
+FIXABLE_BLOCKER_SCOPE subset WRITE_ALLOWLIST: PASS
+CURRENT_FACTSOURCE_SCAN_SCOPE subset WRITE_ALLOWLIST: PASS
+PRUNING_CANDIDATE_SCOPE subset WRITE_ALLOWLIST: PASS
+POST_PRUNING_FACTSOURCE_SCOPE subset READ_SCOPE: PASS
+POST_PRUNING_FACTSOURCE_SCOPE subset WRITE_ALLOWLIST: PASS
+TASK_SCOPE_DESIGN: PASS / 6 OF 6
+```
+
+### 验收与下一任务
+
+完成 33 个过程文档删除、12 个 terminal factsources 同步、current conflict 归零、禁止范围 diff 归零和 `mvn -B -ntp -Pquality validate` 后，创建本地 commit `docs(qdr): prune stage-qdr-7 and stage-qdr-8 current sources`。本工单不 push、不改 tag；下一任务固定为 `PUBLISH EXACT PRUNING COMMIT AND RUN EXACT-SHA CI`，Stage-QDR-9 planning 在该 CI 通过前保持禁止。
+
+## Historical pre-pruning authority — 2026-07-22 Stage-QDR-7/QDR-8 sequence repair local ready
 
 ```text
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
@@ -48,7 +175,7 @@ ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 
 Stage-QDR-7 retrospective final close/archive 已由 `6acf9c332434cafb45495d58f063a0f3faeaf475` 恢复，未重写已发布历史，B2 capacity 继续 `DEFERRED / KNOWN_LIMITATION`；Stage-QDR-8 final close 内容已在其后重放为当前文档提交。两阶段 archive 均完成但 tag 尚未创建，必须等待新 QDR-8 HEAD fast-forward 发布与 exact-SHA CI 全绿后按 QDR-7 → QDR-8 顺序创建。结构化 feedback attribution 仍仅为 domain/usecase foundation，不形成在线学习闭环或真实外部副作用。
 
-## 当前唯一下一工单
+## Historical pre-pruning next work order
 
 ```text
 task: DH-STAGE-QDR-7-RETROSPECTIVE-ARCHIVE-TAG-AND-QDR8-SEQUENCE-REPAIR
@@ -130,7 +257,7 @@ ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME_INTEGRATION: NO / NO / 
 ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ```
 
-下一唯一工单是 `DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION`。实施必须使用 [冻结工单](DH_STAGE_QDR_8_IMPLEMENTATION_WORK_ORDER.md) 的精确 scope；Batch 1/2 仅 domain/usecase，Batch 3 persistence/API 未授权。
+历史下一工单曾为 `DH-STAGE-QDR-8-STRUCTURED-FEEDBACK-ATTRIBUTION-FOUNDATION-IMPLEMENTATION`；其冻结工单原文现由 `docs/gates/stage-qdr-8/IMPLEMENTATION_WORK_ORDER.md` 与 tag `dh-stage-qdr-8-close` 保留。该口径已消费，不得覆盖本文件顶部 current authority。
 
 ## Historical pre-publication authority — 2026-07-21 same-pool recovery test concurrency fix local accepted
 
