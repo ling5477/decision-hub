@@ -1,0 +1,1170 @@
+# DH Stage-QDR-9 Implementation Work Order
+
+## Terminal current authority — 2026-07-23 implementation work order local accepted
+
+```text
+Planning baseline commit: 30dae01488700f7c1a321fde059a783cd8435b34
+Repository: E:/Project/decision-hub
+Branch: dev
+Expected implementation baseline: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+Origin baseline: 2aa5183a81d1733eec38ec2ab85de8d0c90c13a4
+Current highest migration: V14
+Selected migration: V15 / FUTURE B1 CANDIDATE / NOT CREATED
+Terminal current factsources: 12
+Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
+Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
+Stage-QDR-9 plan: DONE / LOCAL_COMMITTED
+Stage-QDR-9 implementation work order: FROZEN / LOCAL_ACCEPTED
+Stage-QDR-9 implementation: NOT_STARTED
+Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL
+Scope invariants: PASS / 8 OF 8
+B2 capacity: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+```
+
+本文件是 Stage-QDR-9 B1–B4 implementation 的唯一精确 scope contract。它只冻结后续实施文件、schema、事务、幂等、内部查询、retention、安全和测试要求；本工单任务没有创建 migration、Repository、API、Controller、运行时连接或 automatic learning。
+
+## 1. 任务分类、目标与非目标
+
+```text
+Task classification:
+PLAN_BASELINE_LOCAL_COMMIT
++ WORK_ORDER_ONLY
++ PERSISTENCE_SCHEMA_FREEZE
++ REPOSITORY_TRANSACTION_BOUNDARY_DESIGN
++ HISTORICAL_READ_MODEL_DESIGN
++ RETENTION_SAFETY_DESIGN
++ TEST_MATRIX_FREEZE
++ LOCAL_WORK_ORDER_COMMIT
++ NO_CODE_CHANGE
++ NO_TEST_CHANGE
++ NO_MIGRATION_CHANGE
++ NO_API_CHANGE
++ NO_PUSH
++ NO_TAG
++ NO_AUTOMATIC_LEARNING
++ NO_REAL_HTTP
++ NO_PROVIDER
++ NO_NQ
++ NO_AGENT
++ NO_LANGGRAPH
++ NO_PAPER
++ NO_LIVE
+```
+
+### 1.1 目标
+
+1. 将 Stage-QDR-8 deterministic attribution 结果冻结为 tenant/environment-bound 的 immutable persistence aggregate。
+2. 冻结 PostgreSQL 数据库幂等、单事务写入、duplicate-key race 和 commit-unknown fail-closed 语义。
+3. 冻结仅供内部 use case 使用的 historical evidence read model、keyset cursor 和查询上限。
+4. 冻结 reference guard、integrity、bounded retention cleanup、删除审计和多实例竞争控制。
+5. 将 B1–B4 精确限制到本工单列出的文件；B5 只冻结验收内容，不授权 archive/tag/pruning 写入。
+
+### 1.2 非目标
+
+```text
+不新增 Controller、REST endpoint、OpenAPI 或 external API
+不修改 dh_nq_feedback_events，不复用其 raw payload / NQ / Paper 语义
+不保存 raw prompt、raw provider response、credential 或完整外部 payload
+不新增 automatic learning、online learning 或 decision rerun
+不修改 Experience、Pheromone、Prompt、模型、策略、候选或 JudgeDecision
+不连接真实 HTTP、Provider、NQ、Agent、LangGraph、Paper 或 LIVE
+不重开 Stage-QDR-7 B2 capacity gate
+不声明 production capacity
+不修改 Stage-QDR-7/8 archive 或 tag
+本工单不创建 V15，不创建 Java 文件，不执行 implementation
+```
+
+## 2. 代码现实冻结
+
+| 检查项 | 仓库现实 | 工单决策 |
+|---|---|---|
+| feedback contracts | `domain.qdr.feedback` 与 `usecase.qdr.feedback` 已有 deterministic、tenant/environment-bound contracts。 | 原合同为输入；B1 不重写 Stage-QDR-8 计算语义。 |
+| current idempotency | production 没有 attribution 幂等 adapter；测试 fake 使用有界 `ConcurrentHashMap`。 | B2 使用 PostgreSQL unique constraint；禁止 JVM lock/static map。 |
+| current in-memory state | attribution production 无状态；测试 fake capacity 显式有界。 | 不新增 production cache 或无界 `Map`。 |
+| Repository ports | 没有 QDR feedback aggregate persistence 或 historical read-model port。 | B1 新增专用 ports，不扩大到通用 Repository。 |
+| JDBC patterns | 已有 tenant-bound `Jdbc*Repository`、`DuplicateKeyException`、`DataAccessException` 转换。 | 复用编码模式，不复用旧 feedback 表。 |
+| transaction patterns | `ReplayInputSnapshotAssemblyService` 使用强制 `PlatformTransactionManager`、`TransactionTemplate`、`REPEATABLE_READ`、无 fallback。 | B2 使用同等显式事务；缺 manager fail-fast。 |
+| migration sequence | versioned migration 最高为 `V14`。 | 冻结 `V15__qdr9_structured_feedback_persistence.sql`；开始 B1 前再次检查，漂移即阻断。 |
+| pagination | 现有 replay/read model 主要为 bounded offset；没有 keyset/cursor codec。 | B3 新建专用 keyset，不复用 offset API。 |
+| retention | `JdbcGuardCleanupAdapter` 已有 tenant scope、bounded batch、`FOR UPDATE SKIP LOCKED`。 | B4 复用安全模式，新增 reference hold 与删除审计。 |
+| duplicate concept | `dh_nq_feedback_events` / `JdbcNqFeedbackEventRepository` 无 environment，含 raw `payload_json`，部分 eventId 查询不 tenant-bound。 | 仅作为冲突证据；禁止迁移、关联或复用。 |
+
+## 3. Exact scope contract
+
+### 3.1 READ_SCOPE
+
+当前事实与规划：
+
+```text
+README.md
+AGENTS.md
+CLAUDE.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/FACTSOURCE_POLICY.md
+docs/current/ARCHIVE_INDEX.md
+docs/current/DH_STAGE_QDR_9_PLAN.md
+docs/current/DH_STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER.md
+```
+
+现有代码证据：
+
+```text
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/**
+dh-domain/src/test/java/com/guidinglight/decisionhub/domain/qdr/feedback/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/guard/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/readmodel/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/**
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/**
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/JdbcNqFeedbackEventRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/decision/JdbcDecisionAuditRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/ReplayInputSnapshotAssemblyService.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcDecisionReadModelQueryAdapter.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcReplayCaseRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcEvaluationCaseRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcCanonicalReplaySnapshotRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/guard/JdbcIdempotencyGuardAdapter.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/guard/JdbcGuardCleanupAdapter.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/**
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/**
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/**
+dh-app/src/main/resources/db/migration/**
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionDryRunRuntimeWiringConfig.java
+dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+pom.xml
+dh-domain/pom.xml
+dh-usecase/pom.xml
+dh-infra/pom.xml
+dh-app/pom.xml
+.github/workflows/ci.yml
+```
+
+READ_SCOPE 同时包含下列 WRITE_ALLOWLIST 全部 exact files。
+
+### 3.2 WRITE_ALLOWLIST
+
+Domain / use-case contracts：
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceErrorCode.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceException.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceRecords.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackAttributionRepository.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackReferenceValidationPort.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceTransactionBoundary.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackAttributionPersistenceService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceQuery.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidencePage.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceQueryPort.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceReadService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionResult.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionPort.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackIntegrityReport.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackIntegrityPort.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionService.java
+```
+
+JDBC adapters：
+
+```text
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackAttributionRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackReferenceValidationAdapter.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackPersistenceTransactionBoundary.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/FeedbackEvidenceCursorCodec.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcHistoricalFeedbackEvidenceQueryAdapter.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackRetentionAdapter.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackIntegrityAdapter.java
+```
+
+Migration、wiring 与 stable machine contract：
+
+```text
+dh-app/src/main/resources/db/migration/V15__qdr9_structured_feedback_persistence.sql
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
+config/qdr9-feedback/qdr9-feedback-contract.yml
+```
+
+Tests：
+
+```text
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceRecordsTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackAttributionPersistenceServiceTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceReadServiceTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionServiceTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackAttributionRepositoryTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackReferenceValidationAdapterTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/FeedbackEvidenceCursorCodecTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcHistoricalFeedbackEvidenceQueryAdapterTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackRetentionAdapterTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackIntegrityAdapterTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/V15Qdr9FeedbackPersistenceMigrationPresenceTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/V15Qdr9FeedbackPersistenceFlywayPostgresTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitectureTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+```
+
+Current docs：
+
+```text
+README.md
+AGENTS.md
+CLAUDE.md
+docs/current/DH_STAGE_QDR_9_PLAN.md
+docs/current/DH_STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/FACTSOURCE_POLICY.md
+docs/current/ARCHIVE_INDEX.md
+```
+
+### 3.3 VALIDATION_SCOPE
+
+```text
+WRITE_ALLOWLIST 全部 exact files
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/**
+dh-domain/src/test/java/com/guidinglight/decisionhub/domain/qdr/feedback/**
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/**
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/**
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/**
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/**
+dh-app/src/main/resources/db/migration/V15__qdr9_structured_feedback_persistence.sql
+dh-app/src/test/java/com/guidinglight/decisionhub/V15Qdr9FeedbackPersistenceMigrationPresenceTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/V15Qdr9FeedbackPersistenceFlywayPostgresTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitectureTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+12 terminal current factsources
+19-module Maven reactor
+```
+
+### 3.4 FIXABLE_BLOCKER_SCOPE
+
+```text
+WRITE_ALLOWLIST
+```
+
+验证发现 WRITE_ALLOWLIST 外的 blocker 时必须停止，不能顺手修复。
+
+### 3.5 CURRENT_FACTSOURCE_SCAN_SCOPE
+
+```text
+README.md
+AGENTS.md
+CLAUDE.md
+docs/current/README.md
+docs/current/STATUS.md
+docs/current/WORK_ORDER.md
+docs/current/ROADMAP.md
+docs/current/TESTING.md
+docs/current/WORKLOG.md
+docs/current/CODEX_PROJECT_INSTRUCTIONS.md
+docs/current/FACTSOURCE_POLICY.md
+docs/current/ARCHIVE_INDEX.md
+```
+
+### 3.6 MIGRATION_SCOPE
+
+```text
+dh-app/src/main/resources/db/migration/V15__qdr9_structured_feedback_persistence.sql
+dh-app/src/test/java/com/guidinglight/decisionhub/V15Qdr9FeedbackPersistenceMigrationPresenceTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/V15Qdr9FeedbackPersistenceFlywayPostgresTest.java
+```
+
+### 3.7 REPOSITORY_SCOPE
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceErrorCode.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceException.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceRecords.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackAttributionRepository.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackReferenceValidationPort.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceTransactionBoundary.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackAttributionPersistenceService.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackAttributionRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackReferenceValidationAdapter.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackPersistenceTransactionBoundary.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceRecordsTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackAttributionPersistenceServiceTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackAttributionRepositoryTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackReferenceValidationAdapterTest.java
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
+dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java
+```
+
+### 3.8 READ_MODEL_SCOPE
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceQuery.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidencePage.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceQueryPort.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceReadService.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/FeedbackEvidenceCursorCodec.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcHistoricalFeedbackEvidenceQueryAdapter.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceReadServiceTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/FeedbackEvidenceCursorCodecTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcHistoricalFeedbackEvidenceQueryAdapterTest.java
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
+dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitectureTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+Controller / OpenAPI / dh-api: EMPTY / EXCLUDED
+```
+
+### 3.9 RETENTION_SCOPE
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionResult.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionPort.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackIntegrityReport.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackIntegrityPort.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionService.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackRetentionAdapter.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackIntegrityAdapter.java
+config/qdr9-feedback/qdr9-feedback-contract.yml
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionServiceTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackRetentionAdapterTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackIntegrityAdapterTest.java
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
+dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitectureTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+```
+
+### 3.10 ARCHITECTURE_GUARD_SCOPE
+
+```text
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitectureTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+```
+
+### 3.11 Scope invariants
+
+```text
+VALIDATION_SCOPE ⊆ READ_SCOPE: PASS
+FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+MIGRATION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+REPOSITORY_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+READ_MODEL_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+RETENTION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+ARCHITECTURE_GUARD_SCOPE ⊆ VALIDATION_SCOPE: PASS
+
+TOTAL: 8 OF 8 PASS
+```
+
+每个 batch 开始前必须将本工单总 allowlist 缩小为该 batch 的 exact subset，不得扩大。任一 invariant 失败时输出 `TASK_SCOPE_DESIGN_INVALID`。
+
+## 4. V15 schema freeze
+
+### 4.1 Migration identity
+
+```text
+current highest version: V14
+selected version: V15
+exact future file:
+  dh-app/src/main/resources/db/migration/V15__qdr9_structured_feedback_persistence.sql
+state in this task: NOT CREATED
+```
+
+B1 开始前必须再次枚举 migration。若最高版本不再是 V14，输出 `DH-STAGE-QDR-9-SCHEMA-DESIGN-BLOCKER`，重新选择实际下一版本；禁止覆盖、改名或复用既有 migration。
+
+### 4.2 Physical tables
+
+仓库的 QDR persistence 主表使用 `qdr_*`，因此冻结以下四关系 aggregate：
+
+```text
+qdr_feedback_outcome_observation
+qdr_feedback_attribution
+qdr_feedback_attribution_contribution
+qdr_feedback_attribution_reference
+```
+
+`dh_nq_feedback_events` 不属于该 aggregate，不建立 FK、不回填、不搬迁数据。
+
+### 4.3 `qdr_feedback_outcome_observation`
+
+```text
+id                 uuid primary key
+tenant_id          varchar(128) not null
+environment        varchar(16) not null
+decision_id        varchar(128) not null
+trace_id           varchar(128) not null
+observation_id     varchar(128) not null
+idempotency_key    char(64) not null
+outcome_source     varchar(32) not null
+outcome_status     varchar(32) not null
+observed_at        timestamptz not null
+evaluation_time    timestamptz not null
+canonical_hash     char(64) not null
+created_at         timestamptz not null default transaction_timestamp()
+```
+
+约束：
+
+```text
+environment in ('DEV','TEST')
+outcome_source in ('DRY_RUN_RESULT','DETERMINISTIC_REPLAY','STRUCTURED_TEST_FIXTURE')
+outcome_status in ('SUCCEEDED','PARTIALLY_SUCCEEDED','FAILED')
+observed_at <= evaluation_time
+idempotency_key / canonical_hash = lowercase SHA-256
+unique (tenant_id, environment, observation_id)
+unique (tenant_id, environment, idempotency_key)
+unique (tenant_id, environment, observation_id, decision_id, trace_id, observed_at)
+```
+
+### 4.4 `qdr_feedback_attribution`
+
+```text
+id                    uuid primary key
+tenant_id             varchar(128) not null
+environment           varchar(16) not null
+observation_id        varchar(128) not null
+decision_id           varchar(128) not null
+trace_id              varchar(128) not null
+observed_at           timestamptz not null
+attribution_id        char(64) not null
+policy_id             varchar(128) not null
+policy_version        varchar(128) not null
+attribution_status    varchar(32) not null
+confidence            numeric(6,5) not null
+canonical_hash        char(64) not null
+error_code            varchar(64) not null
+created_at            timestamptz not null default transaction_timestamp()
+```
+
+约束：
+
+```text
+environment in ('DEV','TEST')
+attribution_status in ('ATTRIBUTED','INCONCLUSIVE','REJECTED')
+0 <= confidence <= 1
+attribution_id / canonical_hash = lowercase SHA-256
+unique (tenant_id, environment, attribution_id)
+foreign key
+  (tenant_id, environment, observation_id, decision_id, trace_id, observed_at)
+references qdr_feedback_outcome_observation
+  (tenant_id, environment, observation_id, decision_id, trace_id, observed_at)
+```
+
+`decision_id`、`trace_id`、`observed_at` 是 immutable query projection；复合 FK 防止它们与 observation 漂移。
+
+### 4.5 `qdr_feedback_attribution_contribution`
+
+```text
+id                 uuid primary key
+tenant_id          varchar(128) not null
+environment        varchar(16) not null
+attribution_id     char(64) not null
+dimension          varchar(64) not null
+measurement        numeric(6,5) not null
+contribution       numeric(6,5) not null
+impact             varchar(16) not null
+confidence         numeric(6,5) not null
+reason_code        varchar(64) not null
+evidence_ref       varchar(256) not null
+sort_order         smallint not null
+created_at         timestamptz not null default transaction_timestamp()
+```
+
+约束：
+
+```text
+dimension 为 AttributionDimension 封闭集合
+-1 <= measurement <= 1
+-1 <= contribution <= 1
+0 <= confidence <= 1
+impact in ('POSITIVE','NEUTRAL','NEGATIVE') 且与 contribution 符号一致
+reason_code ~ '^[A-Z][A-Z0-9_]{0,63}$'
+0 <= sort_order < 32
+unique (tenant_id, environment, attribution_id, dimension)
+unique (tenant_id, environment, attribution_id, sort_order)
+foreign key (tenant_id, environment, attribution_id)
+  references qdr_feedback_attribution (tenant_id, environment, attribution_id)
+  on delete cascade
+```
+
+### 4.6 `qdr_feedback_attribution_reference`
+
+```text
+id                 uuid primary key
+tenant_id          varchar(128) not null
+environment        varchar(16) not null
+attribution_id     char(64) not null
+reference_type     varchar(16) not null
+reference_value    varchar(256) not null
+reference_status   varchar(16) not null
+created_at         timestamptz not null default transaction_timestamp()
+```
+
+约束：
+
+```text
+reference_type in ('AUDIT','REPLAY','EVALUATION','EVIDENCE')
+reference_status in ('ACTIVE','RELEASED','INVALID')
+unique (tenant_id, environment, attribution_id, reference_type, reference_value)
+foreign key (tenant_id, environment, attribution_id)
+  references qdr_feedback_attribution (tenant_id, environment, attribution_id)
+  on delete cascade
+```
+
+初次写入只允许 `ACTIVE`。`AUDIT`、`REPLAY`、`EVALUATION` 的 `ACTIVE` 行阻止 retention；`EVIDENCE` 必须通过完整性检查，但不单独形成永久 retention hold。
+
+### 4.7 Index freeze
+
+```text
+qdr_feedback_outcome_observation:
+  (tenant_id, environment, decision_id, observed_at DESC, observation_id DESC)
+  (tenant_id, environment, trace_id, observed_at DESC, observation_id DESC)
+  (tenant_id, environment, observed_at DESC, observation_id DESC)
+
+qdr_feedback_attribution:
+  unique (tenant_id, environment, attribution_id)
+  (tenant_id, environment, observation_id)
+  (tenant_id, environment, policy_version, observed_at DESC, attribution_id DESC)
+  (tenant_id, environment, attribution_status, observed_at DESC, attribution_id DESC)
+  (tenant_id, environment, observed_at DESC, attribution_id DESC)
+
+qdr_feedback_attribution_reference:
+  (tenant_id, environment, reference_type, reference_status, created_at, attribution_id)
+```
+
+所有业务 unique/index 均以 `tenant_id + environment` 开头；禁止 cross-tenant 或 cross-environment global business unique。
+
+### 4.8 JSONB and data safety
+
+四张新表不使用 JSONB。`safeMetadata` 不在 QDR-9 落库；`canonical_hash` 只证明完整规范输入，不保存 canonical raw value。
+
+唯一 JSONB 例外是 B4 复用既有 `dh_decision_audit_event.event_json` 写删除审计，原因是删除后审计必须留在 aggregate 外且不能增加第五张 aggregate 表。固定 schema：
+
+```text
+schemaVersion
+environment
+cutoff
+reasonCode
+aggregateCount
+observationCount
+attributionCount
+aggregateHash
+```
+
+要求：
+
+```text
+top-level allowlist only
+无嵌套对象或数组
+serialized bytes <= 1024
+禁止 raw prompt/provider response/payload/credential/交易参数
+应用校验 + repository size check
+与删除同一 transaction；audit 写失败整体 rollback
+```
+
+禁止持久化：
+
+```text
+raw prompt
+raw provider response
+Authorization
+HMAC secret
+API key
+database password
+完整外部 payload
+BUY / SELL / MARKET_ORDER / PLACE_ORDER / CANCEL_ORDER
+订单、风控、账务、Paper 或 LIVE 执行参数
+```
+
+## 5. Repository、transaction 与 idempotency
+
+### 5.1 Persistence input
+
+`FeedbackPersistenceRecords` 只接收：
+
+```text
+原始 FeedbackAttributionCommand
+FeedbackCanonicalHash（不得向 read model 暴露 canonicalValue）
+已完成 audit 的 FeedbackAttributionResult
+由应用生成的 UUID row identities
+```
+
+构造时必须重新校验 tenant、environment、decision、trace、observation、policy、canonical hash、result identity、contribution 顺序和 reference 一致性。任何 mismatch 在 SQL 前拒绝。
+
+### 5.2 Single transaction
+
+`FeedbackAttributionPersistenceService` 通过强制 `FeedbackPersistenceTransactionBoundary` 执行：
+
+```text
+find tenant/environment/idempotency_key
+-> absent: confirm AUDIT / REPLAY / EVALUATION / EVIDENCE references
+-> insert observation
+-> insert attribution
+-> insert ordered contributions
+-> insert references
+-> exact read-back
+-> commit
+```
+
+要求：
+
+```text
+REPEATABLE_READ
+PROPAGATION_REQUIRED
+transaction manager missing: fail-fast
+runtime retry: 0
+全部成功或全部 rollback
+不得存在半完成 attribution
+reference confirmation 失败不得缓存或返回成功
+事务内不调用 HTTP、Provider、NQ 或其他外部系统
+```
+
+### 5.3 Database idempotency
+
+```text
+business key:
+  tenant_id + environment + idempotency_key
+
+same key + same canonical_hash:
+  exact reload observation + attribution + contributions + references
+  返回已有完整 aggregate
+  不重复写 audit、observation、children
+
+same key + different canonical_hash:
+  IDEMPOTENCY_CONFLICT
+  不覆盖、不合并、不创建第二结果
+
+cross-tenant / cross-environment:
+  永不复用
+```
+
+不得使用“先查再写”作为唯一保护。并发 winner 由 `unique (tenant_id, environment, idempotency_key)` 决定；loser 的 insert transaction 回滚后，只能在新的只读 transaction 按完整 identity reload 并比较 hash。
+
+### 5.4 Duplicate-key and exception classification
+
+```text
+DuplicateKeyException:
+  transaction rollback
+  exact scoped reload
+  same hash -> existing aggregate
+  different hash -> IDEMPOTENCY_CONFLICT
+  missing row -> PERSISTENCE_FAILURE
+
+CannotCreateTransactionException / pre-commit DataAccessException:
+  PERSISTENCE_FAILURE
+
+reference target absent or mismatch:
+  REFERENCE_INVALID
+
+commit phase connection loss / heuristic / outcome cannot prove:
+  COMMIT_OUTCOME_UNKNOWN
+  不自动 retry
+  不声称成功
+```
+
+commit unknown 后只允许 tenant/environment/idempotency key 的 read-only reconciliation：
+
+```text
+row exists + same hash -> committed result
+row exists + different hash -> IDEMPOTENCY_CONFLICT
+row absent -> COMMIT_OUTCOME_UNKNOWN remains
+```
+
+稳定失败分类至少为：
+
+```text
+IDEMPOTENCY_CONFLICT
+TENANT_SCOPE_MISMATCH
+ENVIRONMENT_SCOPE_MISMATCH
+REFERENCE_INVALID
+PERSISTENCE_FAILURE
+COMMIT_OUTCOME_UNKNOWN
+QUERY_VALIDATION_FAILED
+QUERY_FAILURE
+RETENTION_BLOCKED
+RETENTION_FAILURE
+```
+
+数据库原始 SQL、异常栈、连接信息和参数不得进入 use-case result。
+
+## 6. Reference confirmation
+
+Reference value 使用 scheme-bound safe identity；长度上限 256：
+
+```text
+AUDIT:
+  audit:<audit-event-id>
+  按 tenant_id + decision_id + trace_id + id 验证 dh_decision_audit_event
+
+REPLAY:
+  replay-case:<uuid> 或 canonical-snapshot:<uuid>
+  按 tenant_id + target id 验证 qdr_replay_case / qdr_canonical_replay_snapshot
+
+EVALUATION:
+  evaluation:<uuid>
+  按 tenant_id + target id 验证 qdr_evaluation_case
+
+EVIDENCE:
+  evidence:<safe-id>
+  与 command/contribution 的 allowlisted evidence ref 精确一致并通过 safe-reference guard
+```
+
+现有 audit/replay/evaluation 表没有统一 environment 列，因此不建立旧表 FK。新 reference row 始终保存当前 `tenant_id + environment`，validator 先绑定该 scope，再执行 tenant-bound target lookup；不得退化为 tenantless lookup。无法证明 target 时 fail-closed。
+
+## 7. Historical Evidence Read Model
+
+### 7.1 Internal-only boundary
+
+只新增 `HistoricalFeedbackEvidenceReadService` 与 query port/JDBC adapter。禁止：
+
+```text
+Controller
+REST endpoint
+OpenAPI
+dh-api change
+external API
+```
+
+如 implementation 需要 API，立即输出：
+
+```text
+STAGE_QDR_9_API_SCOPE_REVIEW_REQUIRED
+```
+
+### 7.2 Supported selectors
+
+每次查询必须携带 `tenantId + environment`，并使用以下一个 primary selector：
+
+```text
+decisionId
+traceId
+observationId
+attributionId
+policyVersion
+attributionStatus
+observedAt range
+```
+
+exact `observationId` / `attributionId` 只返回同 tenant/environment 结果；不存在或 cross-scope 均不泄露目标存在性。
+
+### 7.3 Time and page bounds
+
+```text
+pagination: keyset only
+default limit: 50
+hard max: 100
+maximum time range: 90 days
+default list range: most recent 30 days
+sort: observed_at DESC, attribution_id DESC
+SQL fetch: requested limit + 1, result never exceeds requested limit
+offset: forbidden
+unbounded list: forbidden
+database exception: QUERY_FAILURE / no partial result
+```
+
+Keyset predicate：
+
+```text
+observed_at < cursor.observedAt
+OR (observed_at = cursor.observedAt AND attribution_id < cursor.attributionId)
+```
+
+### 7.4 Cursor contract
+
+cursor 内容：
+
+```text
+version = 1
+tenantId
+environment
+selectorType
+normalizedFilterHash
+observedAt
+attributionId
+checksum
+```
+
+编码：
+
+```text
+length-prefixed canonical UTF-8 fields
+Base64URL without padding
+lowercase SHA-256 checksum over versioned canonical bytes
+```
+
+这是 internal opaque cursor 的完整性校验，不是外部 authentication token。tenant/environment/filter 必须与当前 query 重新计算并精确匹配。版本未知、Base64 非法、字段缺失、checksum 错误、scope/filter mismatch、时间或 attributionId 非法时：
+
+```text
+QUERY_VALIDATION_FAILED
+SQL not executed
+no fallback
+no partial data
+```
+
+未来若新增 external API，必须在独立 API/security review 中改为带 secret lifecycle 的签名 cursor；本 stage 不引入 secret。
+
+## 8. Retention、cleanup 与 integrity
+
+### 8.1 Frozen defaults
+
+```text
+retention enabled default: false
+default retention: 365 days from observed_at
+batch size: 100
+transaction timeout: 5 seconds
+scope: exactly one tenant + one environment
+runtime retry: 0
+```
+
+`config/qdr9-feedback/qdr9-feedback-contract.yml` 是稳定 machine contract，只含非敏感默认值、上限和 closed enums。wiring 使用 startup configuration snapshot；不提供动态 production control、调度器或外部 endpoint。
+
+### 8.2 Eligibility and holds
+
+只有超过 retention 且不存在以下 active reference 的完整 aggregate 才可删除：
+
+```text
+ACTIVE AUDIT
+ACTIVE REPLAY
+ACTIVE EVALUATION
+```
+
+`EVIDENCE` 必须先通过完整性检查；`INVALID` reference 阻断 cleanup 并返回 `RETENTION_BLOCKED`，不得通过忽略错误推进删除。
+
+### 8.3 Cleanup transaction
+
+```text
+select candidate attribution ids for one tenant/environment
+-> observed_at cutoff
+-> deterministic order
+-> limit 100
+-> FOR UPDATE SKIP LOCKED
+-> recheck ACTIVE holds
+-> write bounded deletion audit to existing dh_decision_audit_event
+-> delete children through constrained cascade
+-> delete attribution
+-> delete observation only when no attribution remains
+-> verify affected counts <= batch
+-> commit
+```
+
+删除审计和物理删除必须同事务。超时、audit failure、count mismatch、reference race、DataAccessException 或 orphan detection 均整体 rollback 并返回稳定失败；禁止静默继续。
+
+多实例并发通过 `FOR UPDATE SKIP LOCKED` 分配候选；同 aggregate 最多一个 cleaner 持锁。不得使用跨 tenant batch、全表 delete、无上限循环、定时自动重试或 JVM 全局锁。
+
+### 8.4 Integrity
+
+`FeedbackIntegrityPort` 至少提供 tenant/environment-bound 只读检查：
+
+```text
+orphan attribution
+orphan contribution
+orphan reference
+observation/attribution scope drift
+canonical hash format
+attribution id format
+contribution sort gap / duplicate dimension
+invalid reference type/status
+ACTIVE hold / retention eligibility conflict
+forbidden raw-payload-shaped column or value
+```
+
+检查结果有界；发现问题只返回 report 并阻断 cleanup，不自动猜测或修复数据。
+
+## 9. Batch freeze
+
+### B1 — Persistence Contracts and Schema Baseline
+
+允许：
+
+```text
+FeedbackPersistenceErrorCode / Exception / Records
+Repository / reference validation / transaction ports
+V15 migration
+stable qdr9 feedback machine contract
+migration presence and PostgreSQL/Testcontainers schema tests
+schema/constraint/index contract tests
+```
+
+禁止：
+
+```text
+JDBC aggregate write implementation
+read-model adapter
+retention delete
+API / Controller
+automatic learning
+```
+
+B1 涉及 migration，implementation 后必须执行独立 milestone review。下一任务：
+
+```text
+DH-STAGE-QDR-9-B1-PERSISTENCE-CONTRACTS-AND-SCHEMA-IMPLEMENTATION
+```
+
+开始条件：
+
+```text
+plan + work-order commits 已发布
+published exact SHA CI test + quality PASS
+migration highest version 仍为 V14
+B1 exact subset invariants PASS
+```
+
+### B2 — JDBC Persistence and Transactional Idempotency
+
+允许：
+
+```text
+JdbcFeedbackAttributionRepository
+JdbcFeedbackReferenceValidationAdapter
+JdbcFeedbackPersistenceTransactionBoundary
+FeedbackAttributionPersistenceService
+internal wiring
+database idempotency / duplicate-key / commit-unknown
+PostgreSQL restart persistence
+```
+
+必须 milestone review。禁止 API、runtime retry、in-memory production state、automatic learning。
+
+### B3 — Historical Evidence Internal Read Model
+
+允许：
+
+```text
+internal query models/service/port
+cursor codec
+JDBC keyset adapter
+stable ordering
+bounded result set
+```
+
+正常 validation 收口；发现 API 需求转 `STAGE_QDR_9_API_SCOPE_REVIEW_REQUIRED`。
+
+### B4 — Integrity and Retention
+
+允许：
+
+```text
+integrity report
+reference guard
+bounded cleanup
+deletion audit
+startup-disabled retention wiring
+```
+
+涉及 physical delete，必须安全 review；默认保持 disabled。
+
+### B5 — Final Close
+
+必须包含：
+
+```text
+targeted tests
+full 19-module regression
+PostgreSQL/Testcontainers real execution / zero mandatory skips
+ArchitectureTest
+quality
+12/12 current factsources / 0 conflicts
+self-contained archive packet
+source-documents copy
+archive close commit
+separate annotated tag task
+post-tag current pruning
+machine dependency scan
+```
+
+B5 不是当前 WRITE_ALLOWLIST 授权。archive、tag、pruning 必须在 final-close/archive/tag 的独立 exact scope 中重新冻结。
+
+## 10. Test matrix
+
+### 10.1 Migration / schema
+
+```text
+clean migration
+upgrade V14 -> V15
+four tables exist
+all columns/types/defaults/comments
+all PK/unique/FK/check constraints
+all indexes
+tenant/environment leading constraints
+field lengths
+forbidden nullable fields
+no JSONB in four aggregate tables
+dh_nq_feedback_events unchanged
+V15 rerun/version immutability contract
+```
+
+### 10.2 Persistence
+
+```text
+first write
+same key / same hash exact aggregate reload
+same key / different hash IDEMPOTENCY_CONFLICT
+observation insert rollback
+attribution insert rollback
+contribution insert rollback
+reference confirmation/write rollback
+duplicate-key concurrency
+cross-tenant isolation
+cross-environment isolation
+stable contribution sort
+PostgreSQL restart persistence
+commit-unknown classification
+unknown outcome no auto retry
+exact read-back mismatch fail-closed
+```
+
+### 10.3 Query
+
+```text
+decision query
+trace query
+observation query
+attribution query
+policyVersion filter
+attributionStatus filter
+observedAt range
+stable observed_at/attribution_id ordering
+cursor next page without duplicate/gap
+invalid version/base64/checksum/scope/filter cursor
+default limit 50
+hard max 100
+90-day range cap
+default 30-day range
+cross-tenant rejection
+cross-environment rejection
+database failure / no partial result
+offset query absent
+```
+
+### 10.4 Retention
+
+```text
+expired unreferenced delete
+ACTIVE AUDIT block
+ACTIVE REPLAY block
+ACTIVE EVALUATION block
+INVALID reference block
+tenant isolation
+environment isolation
+batch cap 100
+timeout 5 seconds
+concurrent cleaners / SKIP LOCKED
+partial failure rollback
+deletion audit same transaction
+audit failure rollback
+orphan contribution/reference detection
+count mismatch fail-closed
+retention disabled by default
+```
+
+### 10.5 Architecture guards
+
+```text
+no API / Controller / OpenAPI
+no HTTP
+no Provider
+no NQ
+no Agent / LangGraph
+no automatic learning
+no Experience / Pheromone / Prompt / Strategy mutation
+no order / risk / ledger / Paper / LIVE mutation
+no raw prompt / provider response / full payload persistence
+no dependency on prunable docs/current process documents
+no unbounded Map/cache/query/delete/retry
+```
+
+## 11. Validation commands
+
+每 batch 执行其最小 targeted tests；B5 执行完整集合。至少包括：
+
+```powershell
+git status --short
+git diff --check
+git diff --name-only
+mvn -B -ntp -pl dh-usecase,dh-infra,dh-app -am test
+mvn -B -ntp test
+mvn -B -ntp -Pquality validate
+```
+
+PostgreSQL/Testcontainers 必须真实执行并确认 mandatory tests `Skipped: 0`。所有 current factsources 必须扫描为 12/12、一个 authority block hash、0 conflicts。
+
+## 12. Rollback and publication discipline
+
+```text
+已发布 migration 不删除、不重写、不改名
+migration 保持 forward-compatible
+schema correction 使用新的 forward migration
+代码/文档回滚使用普通 git revert
+新表可保留但停用 wiring
+禁止 destructive down migration
+retention 默认 disabled，独立 startup switch
+禁止 reset --hard / history rewrite
+annotated tag 不移动
+```
+
+每个 batch 独立 commit。plan/work-order 发布与 exact-SHA CI 通过前，不允许开始 B1；本任务不 push、不 tag。
+
+## 13. Stop conditions and readiness
+
+出现以下任一情况立即停止：
+
+```text
+scope invariant != 8/8
+migration highest version != V14 before B1
+需要 WRITE_ALLOWLIST 外文件
+需要 API / Controller / OpenAPI
+需要复用 dh_nq_feedback_events 或保存 raw payload
+无法证明 tenant/environment isolation
+reference target 无法 fail-closed confirmation
+duplicate race 只能依赖 JVM state
+commit unknown 需要自动 retry
+retention 无法保证 active hold
+需要真实 HTTP / Provider / NQ / Agent / LangGraph / Paper / LIVE
+需要 automatic learning 或状态自动变更
+出现新 P0/P1 security/tenant/transaction/migration/API blocker
+```
+
+当前 readiness：
+
+```text
+STAGE_QDR_9_PLAN_BASELINE: COMMITTED
+STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER: DONE / LOCAL_ACCEPTED
+SCOPE_INVARIANTS: PASS / 8 OF 8
+ALLOW_PLAN_WO_PUBLICATION: YES / EXPLICIT AUTHORIZATION REQUIRED
+ALLOW_STAGE_QDR_9_B1_IMPLEMENTATION: NO / PUBLICATION_AND_EXACT_SHA_CI_REQUIRED
+ALLOW_MIGRATION_NOW: NO
+ALLOW_REPOSITORY_EXPANSION_NOW: NO
+ALLOW_API_CHANGE_NOW: NO
+ALLOW_AUTOMATIC_LEARNING: NO
+B2_CAPACITY_GATE: DEFERRED / KNOWN_LIMITATION
+PRODUCTION_CAPACITY: NOT_PROVEN
+ALLOW_REAL_HTTP: NO
+ALLOW_REAL_PROVIDER: NO
+ALLOW_NQ_RUNTIME: NO
+ALLOW_AGENT: NO
+ALLOW_LANGGRAPH: NO
+ALLOW_PAPER: NO
+ALLOW_LIVE: NO
+```
+
+下一精确任务：
+
+```text
+DH-STAGE-QDR-9-PLAN-WO-PUBLICATION-AND-EXACT-SHA-CI
+```

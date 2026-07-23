@@ -1,37 +1,72 @@
 # Decision Hub Testing
-## Terminal current authority — 2026-07-23 Stage-QDR-9 planning local accepted
+## Terminal current authority — 2026-07-23 Stage-QDR-9 implementation work order local accepted
 
 ```text
-Repository baseline: 2aa5183a81d1733eec38ec2ab85de8d0c90c13a4
+Planning baseline commit: 30dae01488700f7c1a321fde059a783cd8435b34
 Branch: dev
+Expected implementation baseline: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+Origin baseline: 2aa5183a81d1733eec38ec2ab85de8d0c90c13a4
 Remote exact-SHA CI: 30008506440 / PASS
 Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
 Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
-Stage-QDR-9 plan: DONE / LOCAL_ACCEPTED
+Stage-QDR-9 plan: DONE / LOCAL_COMMITTED
+Stage-QDR-9 implementation work order: FROZEN / LOCAL_ACCEPTED
 Stage-QDR-9 implementation: NOT_STARTED
 Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL
+Current highest migration: V14
+Selected migration: V15 / FUTURE B1 CANDIDATE / NOT CREATED
 B2 capacity: DEFERRED / KNOWN_LIMITATION
 Production capacity: NOT_PROVEN
 Terminal current factsources: 12
-Scope invariants: PASS / 6 OF 6
+Scope invariants: PASS / 8 OF 8
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
-current task: DH-STAGE-QDR-9-PLAN
+current task: DH-STAGE-QDR-9-IMPLEMENTATION-WORK-ORDER
 current task status: DONE / LOCAL_ACCEPTED
-next action: DH-STAGE-QDR-9-IMPLEMENTATION-WORK-ORDER
-ALLOW_STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER: YES / NEXT_TASK_ONLY
-ALLOW_STAGE_QDR_9_IMPLEMENTATION_NOW: NO
+next action: PUBLISH PLAN AND WORK-ORDER COMMITS AND RUN EXACT-SHA CI
+ALLOW_PLAN_WO_PUBLICATION: YES / SEPARATE EXPLICIT AUTHORIZATION REQUIRED
+ALLOW_STAGE_QDR_9_B1_IMPLEMENTATION: NO / PUBLICATION_AND_EXACT_SHA_CI_REQUIRED
 ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW / ALLOW_API_CHANGE_NOW: NO / NO / NO
 ALLOW_AUTOMATIC_LEARNING: NO
 ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ```
 
-本 planning task 只要求文档范围与 Maven quality 验证；不要求 full regression 或本地 PostgreSQL/Testcontainers。实际执行结果记录在本文本轮收口条目，不得用远端基线冒充本地执行。
+本 implementation work-order task 只要求文档范围、scope/factsource consistency 与 Maven quality 验证；不要求 full regression 或本地 PostgreSQL/Testcontainers。实际执行结果记录如下，不得用远端基线冒充本地执行。
 
-## 2026-07-23 Stage-QDR-9 planning-only validation
+## 2026-07-23 Stage-QDR-9 implementation work-order validation
+
+```text
+git diff --check: PASS / EXIT 0
+approved work-order docs changed: 13 OF 13
+unexpected files: 0
+terminal factsources: PASS / 12 OF 12
+authority hashes: PASS / 1 UNIQUE HASH / 41864a69bdf25b2eea3b5c326ed5b5a505fed0057119dfddfb253d650c163848
+current conflicts: 0
+scope invariants: PASS / 8 OF 8
+production Java diff: 0
+test diff: 0
+migration diff: 0
+API / Controller diff: 0
+Repository diff: 0
+contracts / golden_cases diff: 0
+POM / workflow diff: 0
+config diff: 0
+Stage-QDR-7/8 archive diff: 0
+mvn -B -ntp -Pquality validate: PASS / EXIT 0
+quality: PASS / 19 OF 19 REACTOR
+Checkstyle: 0 VIOLATIONS
+Spotless: PASS
+full regression: NOT RUN / NOT REQUIRED FOR WORK_ORDER_ONLY
+local PostgreSQL/Testcontainers: NOT RUN / NOT REQUIRED FOR WORK_ORDER_ONLY
+plan commit: 30dae01488700f7c1a321fde059a783cd8435b34 / LOCAL_ONLY
+work-order commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+push / tag: NOT EXECUTED
+```
+
+## Historical 2026-07-23 Stage-QDR-9 planning-only validation
 
 ```text
 git diff --check: PASS / EXIT 0

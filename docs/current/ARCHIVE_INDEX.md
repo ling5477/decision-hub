@@ -1,35 +1,40 @@
 # Decision Hub Archive Index
-## Terminal current authority — 2026-07-23 Stage-QDR-9 planning local accepted
+## Terminal current authority — 2026-07-23 Stage-QDR-9 implementation work order local accepted
 
 ```text
-Repository baseline: 2aa5183a81d1733eec38ec2ab85de8d0c90c13a4
+Planning baseline commit: 30dae01488700f7c1a321fde059a783cd8435b34
 Branch: dev
+Expected implementation baseline: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+Origin baseline: 2aa5183a81d1733eec38ec2ab85de8d0c90c13a4
 Remote exact-SHA CI: 30008506440 / PASS
 Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
 Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
-Stage-QDR-9 plan: DONE / LOCAL_ACCEPTED
+Stage-QDR-9 plan: DONE / LOCAL_COMMITTED
+Stage-QDR-9 implementation work order: FROZEN / LOCAL_ACCEPTED
 Stage-QDR-9 implementation: NOT_STARTED
 Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL
+Current highest migration: V14
+Selected migration: V15 / FUTURE B1 CANDIDATE / NOT CREATED
 B2 capacity: DEFERRED / KNOWN_LIMITATION
 Production capacity: NOT_PROVEN
 Terminal current factsources: 12
-Scope invariants: PASS / 6 OF 6
+Scope invariants: PASS / 8 OF 8
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
-current task: DH-STAGE-QDR-9-PLAN
+current task: DH-STAGE-QDR-9-IMPLEMENTATION-WORK-ORDER
 current task status: DONE / LOCAL_ACCEPTED
-next action: DH-STAGE-QDR-9-IMPLEMENTATION-WORK-ORDER
-ALLOW_STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER: YES / NEXT_TASK_ONLY
-ALLOW_STAGE_QDR_9_IMPLEMENTATION_NOW: NO
+next action: PUBLISH PLAN AND WORK-ORDER COMMITS AND RUN EXACT-SHA CI
+ALLOW_PLAN_WO_PUBLICATION: YES / SEPARATE EXPLICIT AUTHORIZATION REQUIRED
+ALLOW_STAGE_QDR_9_B1_IMPLEMENTATION: NO / PUBLICATION_AND_EXACT_SHA_CI_REQUIRED
 ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW / ALLOW_API_CHANGE_NOW: NO / NO / NO
 ALLOW_AUTOMATIC_LEARNING: NO
 ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ```
 
-Stage-QDR-9 尚未 close/archive/tag。本轮只创建 current plan；未来 B5 必须先复制原始 source documents、形成 self-contained archive packet、完成 archive commit，再由独立授权任务创建 annotated tag。
+Stage-QDR-9 尚未 implementation/close/archive/tag；current plan 与 implementation work order 已形成。未来 B5 必须先复制二者及各 batch 原始 source documents、形成 self-contained archive packet、完成 archive commit，再由独立授权任务创建 annotated tag。
 
 ## Previous terminal authority — 2026-07-23 Stage-QDR-7/QDR-8 archive source recovery and pruning CI fix
 
