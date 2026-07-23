@@ -1,5 +1,37 @@
 # Decision Hub Status
-## Terminal current authority — 2026-07-23 Stage-QDR-7/QDR-8 archive source recovery and pruning CI fix
+## Terminal current authority — 2026-07-23 Stage-QDR-9 planning local accepted
+
+```text
+Repository baseline: 2aa5183a81d1733eec38ec2ab85de8d0c90c13a4
+Branch: dev
+Remote exact-SHA CI: 30008506440 / PASS
+Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
+Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
+Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
+Stage-QDR-9 plan: DONE / LOCAL_ACCEPTED
+Stage-QDR-9 implementation: NOT_STARTED
+Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL
+B2 capacity: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Terminal current factsources: 12
+Scope invariants: PASS / 6 OF 6
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-9-PLAN
+current task status: DONE / LOCAL_ACCEPTED
+next action: DH-STAGE-QDR-9-IMPLEMENTATION-WORK-ORDER
+ALLOW_STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_9_IMPLEMENTATION_NOW: NO
+ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW / ALLOW_API_CHANGE_NOW: NO / NO / NO
+ALLOW_AUTOMATIC_LEARNING: NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+Stage-QDR-9 规划已经本地接受，主线是持久化 Stage-QDR-8 的 immutable attribution facts 并提供 tenant/environment-bound internal historical read model。implementation 为 `NOT_STARTED`；migration、Repository、API 和 automatic learning 当前均未授权。
+
+## Previous terminal authority — 2026-07-23 Stage-QDR-7/QDR-8 archive source recovery and pruning CI fix
 
 ```text
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED

@@ -1,5 +1,48 @@
 # Decision Hub Worklog
-## Terminal current authority — 2026-07-23 Stage-QDR-7/QDR-8 archive source recovery and pruning CI fix
+## Terminal current authority — 2026-07-23 Stage-QDR-9 planning local accepted
+
+```text
+Repository baseline: 2aa5183a81d1733eec38ec2ab85de8d0c90c13a4
+Branch: dev
+Remote exact-SHA CI: 30008506440 / PASS
+Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
+Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
+Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
+Stage-QDR-9 plan: DONE / LOCAL_ACCEPTED
+Stage-QDR-9 implementation: NOT_STARTED
+Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL
+B2 capacity: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+Terminal current factsources: 12
+Scope invariants: PASS / 6 OF 6
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-9-PLAN
+current task status: DONE / LOCAL_ACCEPTED
+next action: DH-STAGE-QDR-9-IMPLEMENTATION-WORK-ORDER
+ALLOW_STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER: YES / NEXT_TASK_ONLY
+ALLOW_STAGE_QDR_9_IMPLEMENTATION_NOW: NO
+ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW / ALLOW_API_CHANGE_NOW: NO / NO / NO
+ALLOW_AUTOMATIC_LEARNING: NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+本轮完成 Stage-QDR-9 planning-only 代码现实审计、方向排序、schema/transaction/idempotency/read-model/retention 设计、B1-B5、测试矩阵、scope 与 archive/tag discipline 冻结；没有实施代码、测试、migration、Repository、API 或外部连接。
+
+## 2026-07-23 — DH-STAGE-QDR-9-PLAN
+
+- 基线：`dev` / `2aa5183a81d1733eec38ec2ab85de8d0c90c13a4`，preflight worktree clean、staged empty。
+- 代码现实：production attribution 没有 persistence/query adapter 或 runtime state；测试幂等 fake 使用有界 `ConcurrentHashMap`；旧 `dh_nq_feedback_events` 不满足 tenant/environment-bound QDR-9 合同。
+- 计划：选择 persistence + internal historical read model；冻结四关系聚合、atomic transaction、DB unique idempotency、commit-unknown、keyset pagination、retention/cleanup、B1-B5 与 6/6 scope。
+- 变更：只修改 13 个批准 planning docs；unexpected files 0；所有禁止范围 diff 0。
+- 验证：`git diff --check` PASS；12/12 authority blocks 为 1 个 hash；`mvn -B -ntp -Pquality validate` PASS，19/19 Reactor、Checkstyle 0、Spotless PASS。
+- 未运行：full regression、本地 PostgreSQL/Testcontainers；planning-only 不要求。
+- 外部动作：未 stage、未 commit、未 push、未 tag。
+- 下一任务：`DH-STAGE-QDR-9-IMPLEMENTATION-WORK-ORDER`，只允许缩小 exact scopes，不得实施。
+
+## Previous terminal authority — 2026-07-23 Stage-QDR-7/QDR-8 archive source recovery and pruning CI fix
 
 ```text
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
