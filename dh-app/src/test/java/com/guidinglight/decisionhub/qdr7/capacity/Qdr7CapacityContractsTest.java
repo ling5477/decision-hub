@@ -60,16 +60,42 @@ class Qdr7CapacityContractsTest {
 
     final Qdr7CapacityContracts.CriteriaSnapshot snapshot =
         Qdr7CapacityContracts.loadCriteria(repositoryRoot, mapper);
+    final Path stableContractRoot =
+        repositoryRoot.resolve("config/qdr7-capacity").toAbsolutePath().normalize();
+    final Path currentDocsRoot = repositoryRoot.resolve("docs/current").toAbsolutePath().normalize();
 
     assertThat(snapshot.criteriaVersion()).isEqualTo(Qdr7CapacityContracts.CRITERIA_VERSION);
+    assertThat(Files.isRegularFile(snapshot.sourceDocument())).isTrue();
+    assertThat(snapshot.sourceDocument().toAbsolutePath().normalize()).startsWith(stableContractRoot);
+    assertThat(snapshot.sourceDocument().toAbsolutePath().normalize().startsWith(currentDocsRoot))
+        .isFalse();
+    assertThat(Files.size(snapshot.sourceDocument())).isPositive();
     assertThat(snapshot.sourceDocumentSha256())
         .isEqualTo(Qdr7CapacityContracts.sha256(snapshot.sourceDocument()));
+    assertThat(snapshot.root().path("scenarioRegistry")).hasSize(15);
+    assertThat(
+            snapshot
+                .root()
+                .path("numericThresholds")
+                .path("rate")
+                .path("16")
+                .path("throughputMin")
+                .asDouble())
+        .isEqualTo(38.7D);
+    assertThat(
+            snapshot
+                .root()
+                .path("numericThresholds")
+                .path("regressionMax")
+                .path("durationMs")
+                .asLong())
+        .isEqualTo(660000L);
 
     final Path copiedRoot = temporaryDirectory.resolve("drift");
     final Path copiedConfig =
         copiedRoot.resolve("config/qdr7-capacity/qdr7-capacity-thresholds.json");
     final Path copiedSource =
-        copiedRoot.resolve("docs/current/DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md");
+        copiedRoot.resolve("config/qdr7-capacity/qdr7-capacity-acceptance-criteria.md");
     Files.createDirectories(copiedConfig.getParent());
     Files.createDirectories(copiedSource.getParent());
     Files.copy(

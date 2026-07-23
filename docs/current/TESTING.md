@@ -1,44 +1,126 @@
 # Decision Hub Testing
-## Terminal current authority — 2026-07-22 Stage-QDR-7/QDR-8 post-tag current pruning
+## Terminal current authority — 2026-07-23 Stage-QDR-7/QDR-8 archive source recovery and pruning CI fix
 
 ```text
-Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-7 archive: docs/gates/stage-qdr-7/
-Stage-QDR-7 archive commit: 6acf9c332434cafb45495d58f063a0f3faeaf475
 Stage-QDR-7 tag: dh-stage-qdr-7-close
 Stage-QDR-7 tag target: 6acf9c332434cafb45495d58f063a0f3faeaf475
-Stage-QDR-7 B1: FROZEN
-Stage-QDR-7 B2: CLOSED WITH CAPACITY GATE DEFERRED
-B2 capacity gate: DEFERRED / KNOWN_LIMITATION
-Stage-QDR-7 B3: CLOSED / ACCEPTED
-Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+Stage-QDR-7 source documents: RECOVERED / 30 OF 30
+Stage-QDR-7 source documents path: docs/gates/stage-qdr-7/source-documents/
+Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-8 archive: docs/gates/stage-qdr-8/
-Stage-QDR-8 close commit: 7b6066d1062fe49d16d1f093c8b3170354854376
 Stage-QDR-8 tag: dh-stage-qdr-8-close
 Stage-QDR-8 tag target: 7b6066d1062fe49d16d1f093c8b3170354854376
-Structured feedback attribution: IMPLEMENTED / DETERMINISTIC / DECISION_BOUND / TENANT_BOUND / ENVIRONMENT_BOUND
-Attribution safety: AUDITABLE / REPLAY_REFERENCE_SAFE / IDEMPOTENT / NO_SIDE_EFFECT
-Persistence / API / runtime expansion: NONE
-Exact-SHA CI: 29925661871 / PASS
-Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
-Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Stage-QDR-8 source documents: RECOVERED / 3 OF 3
+Stage-QDR-8 source documents path: docs/gates/stage-qdr-8/source-documents/
+Pruning commit: PUBLISHED / 0c0c60c531b6143ad50ba3c62a86d5af3d031aa8
+Historical failed CI: 29930851492 / QDR7_CAPACITY_SOURCE_DOCUMENT_PRUNED
+Capacity machine contract: MIGRATED_TO_STABLE_CONFIG_PATH
+Capacity machine contract path: config/qdr7-capacity/qdr7-capacity-acceptance-criteria.md
+B2 capacity: DEFERRED / KNOWN_LIMITATION
 Production capacity: NOT_PROVEN
+Local targeted tests: PASS / 9 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
+Local ArchitectureTest: PASS / 40 OF 40
+Local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
 Terminal current factsources: 12
-Scope invariants: PASS / 6 OF 6
+Scope invariants: PASS / 7 OF 7
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
-current task: DH-STAGE-QDR-7-QDR8-POST-TAG-CURRENT-PRUNING
+current task: DH-STAGE-QDR-7-QDR8-ARCHIVE-SOURCE-RECOVERY-AND-PRUNING-CI-FIX
 current task status: DONE / LOCAL_ACCEPTED
-next action after local pruning acceptance: OBTAIN PRUNING COMMIT PUSH AUTHORIZATION
+next action after local acceptance: OBTAIN FIX COMMIT PUSH AUTHORIZATION AND RUN EXACT-SHA CI
 Stage-QDR-9: NOT_STARTED
-ALLOW_PRUNING_COMMIT_PUBLICATION: YES / SEPARATE_EXPLICIT_AUTHORIZATION_REQUIRED
-ALLOW_STAGE_QDR_9_PLAN_NOW: NO / PRUNING_COMMIT_PUBLICATION_AND_EXACT_SHA_CI_REQUIRED
+ALLOW_FIX_COMMIT_PUBLICATION: YES / SEPARATE_EXPLICIT_AUTHORIZATION_REQUIRED
+ALLOW_STAGE_QDR_9_PLAN_NOW: NO / FIX_COMMIT_PUBLICATION_AND_EXACT_SHA_CI_REQUIRED
+ALLOW_STAGE_QDR_9_IMPLEMENTATION_NOW: NO
 ALLOW_API_CHANGE / ALLOW_MIGRATION / ALLOW_REPOSITORY_EXPANSION: NO / NO / NO
 ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ```
 
-本任务只裁剪已由 archive packet 与 annotated tag 固定的 Stage-QDR-7/8 current process documents，并把 current authority 收敛为 12 个 terminal factsources。归档包、tag、代码、测试、migration、API 与 runtime 均不修改；B2 capacity 保持 `DEFERRED / KNOWN_LIMITATION`，production capacity 保持 `NOT_PROVEN`，Stage-QDR-9 保持 `NOT_STARTED`。
+本任务完成 post-tag archive source completion，并把 QDR-7 capacity machine contract 迁移到稳定 `config` 路径。Stage-QDR-7/8 的 current pruning、archive 和 annotated tag 状态保持不变；B2 capacity 继续为 `DEFERRED / KNOWN_LIMITATION`，production capacity 继续为 `NOT_PROVEN`，Stage-QDR-9 继续为 `NOT_STARTED`。
+
+## Stable machine contract and source archive governance
+
+1. `docs/current` 只承担当前状态和入口权威，不承担长期机器合同。
+2. `config`、`src/main`、`src/test`、CI、`scripts`、`deploy` 不得依赖可被 post-tag pruning 删除的 `docs/current` stage process document。
+3. 长期机器可执行合同必须位于 `config/**`、`contracts/**` 或其他明确不可裁剪目录。
+4. 阶段原始执行文档必须在 pruning 前完整复制到 `docs/gates/<stage>/source-documents/`。
+5. Annotated tag 提供不可变恢复能力，但不能替代工作树中的 searchable archive source packet。
+6. Post-tag pruning 前必须扫描 `config`、`src/main`、`src/test`、`.github`、`scripts`、`deploy` 对全部 pruning candidates 的引用。
+7. 如果 pruning candidate 仍被机器依赖，必须先迁移依赖，再允许删除 current 文件。
+8. Aggregate summary、final review 或 archive manifest 不能替代原始 plan、WO、retry、blocker 和 validation document。
+
+## 2026-07-23 archive source recovery and pruning CI fix validation
+
+### Archive and contract integrity
+
+```text
+QDR-7 recovered source documents: 30 / 30
+QDR-7 source/recovered blob mismatch: 0
+QDR-7 SHA-256 mismatch: 0
+QDR-8 recovered source documents: 3 / 3
+QDR-8 source/recovered blob mismatch: 0
+QDR-8 SHA-256 mismatch: 0
+QDR-7 criteria tag/archive/stable-config blob: 3-WAY MATCH
+capacity thresholds or scenario semantics changed: NO
+full staged diff-check: EXIT 2 / IMMUTABLE TAG-SOURCE WHITESPACE ONLY
+diff-check excluding immutable source copies: PASS / EXIT 0
+non-immutable diff-check findings: 0
+```
+
+原始 tag blob 内包含既有混合 CRLF、Markdown hard-break 尾空格和 EOF 空行；`git diff --cached --check` 会将其报告为 whitespace。恢复要求禁止改变这些字节，因此以 source/index blob equality 和 SHA-256 为高优先级完整性门，并另行确认所有非 immutable 新增/修改内容的 diff-check 为 0。
+
+### Targeted tests
+
+```powershell
+mvn -B -ntp `
+  -pl dh-app -am `
+  "-Dtest=Qdr7CapacityContractsTest,Qdr7CapacityProfileIsolationTest" `
+  "-Dsurefire.failIfNoSpecifiedTests=false" `
+  test
+```
+
+最终结果：
+
+```text
+Qdr7CapacityContractsTest: PASS / 6 TESTS
+Qdr7CapacityProfileIsolationTest: PASS / 3 TESTS
+failures / errors / skipped: 0 / 0 / 0
+```
+
+首次调用因外层 5 秒命令超时退出 `124`，未形成测试结论；第二次执行在 test compile 阶段发现当前 AssertJ 不支持 `doesNotStartWith(Path)`，退出 `1`。将该断言最小改为 `Path.startsWith(...) == false` 后，同一命令通过，未削弱路径边界。
+
+### Full regression
+
+```powershell
+mvn -B -ntp test
+```
+
+第一次完整命令虽为 `19 / 19 Reactor SUCCESS`，但 Docker Desktop daemon 未运行，Testcontainers mandatory tests 被跳过，因此未接受。启动本地 Docker Desktop 测试环境并确认 daemon 健康后重新执行，最终结果：
+
+```text
+Reactor: PASS / 19 OF 19
+tests: 1189
+failures / errors / skipped: 0 / 0 / 0
+PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10
+mandatory PostgreSQL skips: 0
+ArchitectureTest: PASS / 40 OF 40
+```
+
+### Quality gate
+
+```powershell
+mvn -B -ntp -Pquality validate
+```
+
+```text
+Reactor: PASS / 19 OF 19
+Checkstyle: 0
+Spotless: PASS
+```
 
 ## 2026-07-22 Stage-QDR-7/QDR-8 post-tag current pruning validation
 

@@ -1,6 +1,6 @@
 {
   "criteriaVersion": "qdr7-capacity-criteria-1",
-  "sourceDocument": "docs/current/DH_STAGE_QDR_7_B2_CAPACITY_ACCEPTANCE_CRITERIA.md",
+  "sourceDocument": "config/qdr7-capacity/qdr7-capacity-acceptance-criteria.md",
   "sourceDocumentSha256": "d015a48e92be91b9f6b0a5f73c358405924af15044c809e48d3034ed57973cab",
   "artifactContractVersion": "qdr7-capacity-1",
   "scenarioRegistry": [
