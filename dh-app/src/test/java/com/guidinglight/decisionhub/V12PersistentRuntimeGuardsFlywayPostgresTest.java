@@ -67,6 +67,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers(disabledWithoutDocker = true)
 class V12PersistentRuntimeGuardsFlywayPostgresTest {
 
+  private static final String HISTORICAL_MIGRATION_TARGET = "14";
   private static final String HASH_A = "a".repeat(64);
   private static final String HASH_B = "b".repeat(64);
 
@@ -1078,15 +1079,12 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
   }
 
   private static Flyway flyway(final String target) {
-    final var configuration =
-        Flyway.configure()
-            .cleanDisabled(false)
-            .dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())
-            .locations("filesystem:src/main/resources/db/migration");
-    if (target != null) {
-      configuration.target(target);
-    }
-    return configuration.load();
+    return Flyway.configure()
+        .cleanDisabled(false)
+        .dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())
+        .locations("filesystem:src/main/resources/db/migration")
+        .target(target == null ? HISTORICAL_MIGRATION_TARGET : target)
+        .load();
   }
 
   private static DriverManagerDataSource dataSource() {

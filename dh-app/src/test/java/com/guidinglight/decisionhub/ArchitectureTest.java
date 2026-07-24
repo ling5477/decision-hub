@@ -1423,9 +1423,11 @@ public class ArchitectureTest {
                     root,
                     Pattern.compile(
                             "@(Component|Service|Repository|Configuration|Bean)\\b|"
-                                    + "\\b(class|interface)\\s+\\w*(Repository|Jdbc|Controller)\\b",
+                                    + "\\bclass\\s+\\w*(Repository|Jdbc|Controller)\\b|"
+                                    + "\\binterface\\s+\\w*(Jdbc|Controller)\\b",
                             Pattern.CASE_INSENSITIVE),
-                    "Stage-QDR-8 feedback source declares runtime wiring, Repository, JDBC, or Controller",
+                    "Stage-QDR-8 feedback source declares runtime wiring, Repository implementation,"
+                            + " JDBC, or Controller",
                     violations);
             collectPatternViolations(
                     root,

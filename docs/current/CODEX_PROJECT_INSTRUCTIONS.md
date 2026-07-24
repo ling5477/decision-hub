@@ -1,40 +1,54 @@
 # Codex Project Instructions
-## Terminal current authority — 2026-07-23 Stage-QDR-9 implementation work order local accepted
+## Terminal current authority — 2026-07-24 Stage-QDR-9 B1 local accepted
 
 ```text
-Planning baseline commit: 30dae01488700f7c1a321fde059a783cd8435b34
+Implementation baseline: 735fe9c730c97c0e1a4a137c90d49883408191dc
 Branch: dev
-Expected implementation baseline: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
-Origin baseline: 2aa5183a81d1733eec38ec2ab85de8d0c90c13a4
-Remote exact-SHA CI: 30008506440 / PASS
-Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
-Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Origin baseline: 735fe9c730c97c0e1a4a137c90d49883408191dc
+Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+Remote exact-SHA CI: PENDING NEW COMMIT
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-9 plan: DONE / LOCAL_COMMITTED
 Stage-QDR-9 implementation work order: FROZEN / LOCAL_ACCEPTED
-Stage-QDR-9 implementation: NOT_STARTED
+Stage-QDR-9 overall: IN_PROGRESS / B1 LOCAL_ACCEPTED
+Stage-QDR-9 B1: IMPLEMENTED / LOCAL_ACCEPTED
 Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL
-Current highest migration: V14
-Selected migration: V15 / FUTURE B1 CANDIDATE / NOT CREATED
+Current highest migration: V15
+Selected migration: V15 / IMPLEMENTED / LOCAL_ACCEPTED
+B1 scope blocker: CLOSED / LEGACY_MIGRATION_TEST_TARGET_ALIGNED
+Domain persistence contracts: PASS
+V15 schema / clean migration / V14-to-V15 upgrade / constraints: PASS / PASS / PASS / PASS
+Legacy V12/V13 migration compatibility: PASS / EXPLICIT V14 TARGET
+JDBC Repository implementation: NOT_STARTED
+Historical read model: NOT_STARTED
+Retention: NOT_STARTED
+API / Automatic learning: NOT_ALLOWED / NOT_ALLOWED
+Local blocker tests: PASS / 28 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local B1 targeted tests: PASS / 51 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local module regression: PASS / DH-DOMAIN + DH-USECASE + DH-INFRA,DH-APP
+Local full regression: PASS / 19 OF 19 REACTOR / 1208 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
+Local architecture guards: PASS / 44 OF 44
+Local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Terminal current factsources: 12
+Scope invariants: PASS / 9 OF 9
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
+B1 milestone review: NEXT
 B2 capacity: DEFERRED / KNOWN_LIMITATION
 Production capacity: NOT_PROVEN
-Terminal current factsources: 12
-Scope invariants: PASS / 8 OF 8
-CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
-current task: DH-STAGE-QDR-9-IMPLEMENTATION-WORK-ORDER
+current task: DH-STAGE-QDR-9-B1-SCHEMA-SCOPE-BLOCKER
 current task status: DONE / LOCAL_ACCEPTED
-next action: PUBLISH PLAN AND WORK-ORDER COMMITS AND RUN EXACT-SHA CI
-ALLOW_PLAN_WO_PUBLICATION: YES / SEPARATE EXPLICIT AUTHORIZATION REQUIRED
-ALLOW_STAGE_QDR_9_B1_IMPLEMENTATION: NO / PUBLICATION_AND_EXACT_SHA_CI_REQUIRED
-ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW / ALLOW_API_CHANGE_NOW: NO / NO / NO
+next action: DH-STAGE-QDR-9-B1-MILESTONE-REVIEW
+ALLOW_B1_MILESTONE_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_B2_IMPLEMENTATION_NOW: NO / B1_MILESTONE_REVIEW_REQUIRED
+ALLOW_API_CHANGE_NOW: NO
 ALLOW_AUTOMATIC_LEARNING: NO
 ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ```
 
-Codex 下一动作仅为 `DH-STAGE-QDR-9-PLAN-WO-PUBLICATION-AND-EXACT-SHA-CI`。Work Order 已冻结 exact files、V15 candidate、B1 migration review 和 8/8 scope；发布与 exact-SHA CI 通过前不得提前实施，不得新增 API，不得接外部系统或自动学习。
+Codex 下一动作仅为 `DH-STAGE-QDR-9-B1-MILESTONE-REVIEW`。B1 已在 9/9 scope 内完成并通过本地技术验收；review 前不得开始 B2，不得实现 JDBC adapter、historical read model、retention、API 或 automatic learning。
 
 ## Previous terminal authority — 2026-07-23 Stage-QDR-7/QDR-8 archive source recovery and pruning CI fix
 

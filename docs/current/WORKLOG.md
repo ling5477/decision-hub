@@ -1,38 +1,62 @@
 # Decision Hub Worklog
-## Terminal current authority — 2026-07-23 Stage-QDR-9 implementation work order local accepted
+## Terminal current authority — 2026-07-24 Stage-QDR-9 B1 local accepted
 
 ```text
-Planning baseline commit: 30dae01488700f7c1a321fde059a783cd8435b34
+Implementation baseline: 735fe9c730c97c0e1a4a137c90d49883408191dc
 Branch: dev
-Expected implementation baseline: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
-Origin baseline: 2aa5183a81d1733eec38ec2ab85de8d0c90c13a4
-Remote exact-SHA CI: 30008506440 / PASS
-Remote regression: PASS / 19 OF 19 REACTOR / 1189 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-Remote PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
-Remote quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Origin baseline: 735fe9c730c97c0e1a4a137c90d49883408191dc
+Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+Remote exact-SHA CI: PENDING NEW COMMIT
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-9 plan: DONE / LOCAL_COMMITTED
 Stage-QDR-9 implementation work order: FROZEN / LOCAL_ACCEPTED
-Stage-QDR-9 implementation: NOT_STARTED
+Stage-QDR-9 overall: IN_PROGRESS / B1 LOCAL_ACCEPTED
+Stage-QDR-9 B1: IMPLEMENTED / LOCAL_ACCEPTED
 Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL
-Current highest migration: V14
-Selected migration: V15 / FUTURE B1 CANDIDATE / NOT CREATED
+Current highest migration: V15
+Selected migration: V15 / IMPLEMENTED / LOCAL_ACCEPTED
+B1 scope blocker: CLOSED / LEGACY_MIGRATION_TEST_TARGET_ALIGNED
+Domain persistence contracts: PASS
+V15 schema / clean migration / V14-to-V15 upgrade / constraints: PASS / PASS / PASS / PASS
+Legacy V12/V13 migration compatibility: PASS / EXPLICIT V14 TARGET
+JDBC Repository implementation: NOT_STARTED
+Historical read model: NOT_STARTED
+Retention: NOT_STARTED
+API / Automatic learning: NOT_ALLOWED / NOT_ALLOWED
+Local blocker tests: PASS / 28 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local B1 targeted tests: PASS / 51 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local module regression: PASS / DH-DOMAIN + DH-USECASE + DH-INFRA,DH-APP
+Local full regression: PASS / 19 OF 19 REACTOR / 1208 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Local PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
+Local architecture guards: PASS / 44 OF 44
+Local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Terminal current factsources: 12
+Scope invariants: PASS / 9 OF 9
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
+B1 milestone review: NEXT
 B2 capacity: DEFERRED / KNOWN_LIMITATION
 Production capacity: NOT_PROVEN
-Terminal current factsources: 12
-Scope invariants: PASS / 8 OF 8
-CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
-current task: DH-STAGE-QDR-9-IMPLEMENTATION-WORK-ORDER
+current task: DH-STAGE-QDR-9-B1-SCHEMA-SCOPE-BLOCKER
 current task status: DONE / LOCAL_ACCEPTED
-next action: PUBLISH PLAN AND WORK-ORDER COMMITS AND RUN EXACT-SHA CI
-ALLOW_PLAN_WO_PUBLICATION: YES / SEPARATE EXPLICIT AUTHORIZATION REQUIRED
-ALLOW_STAGE_QDR_9_B1_IMPLEMENTATION: NO / PUBLICATION_AND_EXACT_SHA_CI_REQUIRED
-ALLOW_MIGRATION_NOW / ALLOW_REPOSITORY_EXPANSION_NOW / ALLOW_API_CHANGE_NOW: NO / NO / NO
+next action: DH-STAGE-QDR-9-B1-MILESTONE-REVIEW
+ALLOW_B1_MILESTONE_REVIEW: YES / NEXT_TASK_ONLY
+ALLOW_B2_IMPLEMENTATION_NOW: NO / B1_MILESTONE_REVIEW_REQUIRED
+ALLOW_API_CHANGE_NOW: NO
 ALLOW_AUTOMATIC_LEARNING: NO
 ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ```
+
+## 2026-07-24 — DH-STAGE-QDR-9-B1-SCHEMA-SCOPE-BLOCKER
+
+- 基线：`735fe9c730c97c0e1a4a137c90d49883408191dc`，`dev` 与 `origin/dev` 一致；现有 13 个 B1 文件全部匹配冻结 subset。
+- 修复：仅将 `V12PersistentRuntimeGuardsFlywayPostgresTest` 与 `V13TransactionalCompatibilityCallbackFlywayPostgresTest` 的默认 Flyway target 显式固定为 V14；未修改历史断言、callback 或 V1–V15 migration。
+- 实现：保留 B1 usecase persistence contracts、V15 四关系 schema、stable machine contract、migration/schema tests 与 architecture guards；未实现 JDBC adapter、read model、retention、API 或 automatic learning。
+- 验证：blocker 28、B1 targeted 51、三组模块回归、19-module 1208 tests、PostgreSQL 17.10/Testcontainers、44 architecture guards 和 quality 全部通过，mandatory skip 为 0。
+- 状态：B1 `IMPLEMENTED / LOCAL_ACCEPTED`；remote exact-SHA CI 为 `PENDING NEW COMMIT`；下一任务仅为 `DH-STAGE-QDR-9-B1-MILESTONE-REVIEW`。
+
+## Previous task — 2026-07-23 DH-STAGE-QDR-9-IMPLEMENTATION-WORK-ORDER
 
 本轮已本地提交 Stage-QDR-9 plan，并完成 implementation work order、V15 候选、四关系 schema、transaction/idempotency、internal read model、retention、B1-B5、测试矩阵和 8/8 exact scope 冻结；没有实施代码、测试、migration、Repository、API 或外部连接。
 

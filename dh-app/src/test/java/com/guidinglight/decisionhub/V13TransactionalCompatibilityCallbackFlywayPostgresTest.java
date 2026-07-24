@@ -40,6 +40,7 @@ class V13TransactionalCompatibilityCallbackFlywayPostgresTest {
 
   private static final String GUARD_TABLE = "public.dh_qdr7_idempotency_guard";
   private static final String STATE_CHECK = "chk_dh_qdr7_idempotency_state_fields";
+  private static final String HISTORICAL_MIGRATION_TARGET = "14";
   private static final String HASH = "a".repeat(64);
   private static final Path MIGRATION_ROOT =
       Path.of("src", "main", "resources", "db", "migration").toAbsolutePath().normalize();
@@ -549,15 +550,12 @@ class V13TransactionalCompatibilityCallbackFlywayPostgresTest {
 
   private static Flyway flyway(
       final String target, final Path location, final DataSource migrationDataSource) {
-    final var configuration =
-        Flyway.configure()
-            .cleanDisabled(false)
-            .dataSource(migrationDataSource)
-            .locations("filesystem:" + location.toString().replace('\\', '/'));
-    if (target != null) {
-      configuration.target(target);
-    }
-    return configuration.load();
+    return Flyway.configure()
+        .cleanDisabled(false)
+        .dataSource(migrationDataSource)
+        .locations("filesystem:" + location.toString().replace('\\', '/'))
+        .target(target == null ? HISTORICAL_MIGRATION_TARGET : target)
+        .load();
   }
 
   private static DriverManagerDataSource dataSource() {

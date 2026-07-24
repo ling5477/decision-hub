@@ -1,0 +1,46 @@
+schemaVersion: DH-QDR9-FEEDBACK-PERSISTENCE-1
+migration:
+  version: 15
+  file: V15__qdr9_structured_feedback_persistence.sql
+  forwardOnly: true
+aggregate:
+  tables:
+    observation: qdr_feedback_outcome_observation
+    attribution: qdr_feedback_attribution
+    contribution: qdr_feedback_attribution_contribution
+    reference: qdr_feedback_attribution_reference
+  scope:
+    - tenant_id
+    - environment
+  environments:
+    - DEV
+    - TEST
+  idempotency:
+    key:
+      - tenant_id
+      - environment
+      - idempotency_key
+    hashPattern: "^[0-9a-f]{64}$"
+  limits:
+    identifier: 128
+    reasonCode: 64
+    referenceValue: 256
+    contributions: 32
+  ranges:
+    measurement: "[-1,1]"
+    contribution: "[-1,1]"
+    confidence: "[0,1]"
+  referenceTypes:
+    - AUDIT
+    - REPLAY
+    - EVALUATION
+    - EVIDENCE
+  initialReferenceStatus: ACTIVE
+safety:
+  jsonbInAggregate: forbidden
+  rawPayloadStorage: forbidden
+  canonicalValueStorage: forbidden
+  jdbcImplementationInB1: forbidden
+  api: forbidden
+  automaticLearning: forbidden
+  externalRuntime: forbidden
