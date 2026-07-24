@@ -356,7 +356,7 @@ dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitec
 dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
 ```
 
-### 3.11 Scope invariants
+### 3.11 Original scope invariants — ORIGINAL / SUPERSEDED FOR B1 FINAL ACCEPTANCE
 
 ```text
 VALIDATION_SCOPE ⊆ READ_SCOPE: PASS
@@ -368,10 +368,79 @@ READ_MODEL_SCOPE ⊆ WRITE_ALLOWLIST: PASS
 RETENTION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
 ARCHITECTURE_GUARD_SCOPE ⊆ VALIDATION_SCOPE: PASS
 
-TOTAL: 8 OF 8 PASS
+ORIGINAL TOTAL: 8 OF 8 PASS
 ```
 
 每个 batch 开始前必须将本工单总 allowlist 缩小为该 batch 的 exact subset，不得扩大。任一 invariant 失败时输出 `TASK_SCOPE_DESIGN_INVALID`。
+
+### 3.12 B1 Scope Erratum — Post-implementation governance repair
+
+本节为 `80b21f31bdb5dc7a15f327aa9617b0640fd1f22b` 完成后的透明治理修复。它不改写上方原始冻结的 `8 / 8 PASS`，该原始记录继续保留并且仅对 B1 最终验收标记为 `ORIGINAL / SUPERSEDED FOR B1 FINAL ACCEPTANCE`。
+
+首次 B1 milestone review 发现：原始 published `WRITE_ALLOWLIST` 未列出两个实际已在 B1 implementation commit 中修改的 legacy Flyway compatibility tests。因此，原始 `8 / 8 PASS` 不能单独覆盖实际提交范围，首次 review 的结论固定为：
+
+```text
+INITIAL MILESTONE REVIEW: BLOCKED
+BLOCKER: STAGE_QDR_9_B1_REVIEW_SCOPE_VIOLATION
+TASK_SCOPE_DESIGN_INVALID
+```
+
+原始 B1 技术 implementation subset 保持为 13 个文件：
+
+```text
+config/qdr9-feedback/qdr9-feedback-contract.yml
+dh-app/src/main/resources/db/migration/V15__qdr9_structured_feedback_persistence.sql
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/V15Qdr9FeedbackPersistenceFlywayPostgresTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/V15Qdr9FeedbackPersistenceMigrationPresenceTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitectureTest.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackAttributionRepository.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceErrorCode.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceException.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceRecords.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceTransactionBoundary.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackReferenceValidationPort.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceRecordsTest.java
+```
+
+批准的精确扩展仅为下列两个路径；它们同时加入 B1 effective `READ_SCOPE`、effective `WRITE_ALLOWLIST`、`VALIDATION_SCOPE` 与新 `LEGACY_MIGRATION_TEST_FIX_SCOPE`：
+
+```text
+dh-app/src/test/java/com/guidinglight/decisionhub/V12PersistentRuntimeGuardsFlywayPostgresTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/V13TransactionalCompatibilityCallbackFlywayPostgresTest.java
+```
+
+两处已提交修改的唯一语义是：当 historical target 参数为 `null` 时，显式使用 migration target `14`。禁止以下扩展：
+
+```text
+弱化或删除断言
+将 expected version 改为 15
+production callback 修改
+V1–V15 migration 修改
+任何其他 legacy test 修改
+```
+
+#### Effective B1 `WRITE_ALLOWLIST`
+
+effective B1 技术 `WRITE_ALLOWLIST` 是上列原始 13 文件加上两个 exact legacy test 文件，共 15 个技术文件。原 12 个 terminal current factsources 仍属于 B1 current-fact alignment write scope；本 erratum 与 milestone review 文档是 post-implementation governance evidence，不追溯加入原始 implementation commit。
+
+#### Effective scope invariants
+
+```text
+VALIDATION_SCOPE ⊆ READ_SCOPE: PASS
+FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+MIGRATION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+REPOSITORY_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+READ_MODEL_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+RETENTION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+ARCHITECTURE_GUARD_SCOPE ⊆ VALIDATION_SCOPE: PASS
+LEGACY_MIGRATION_TEST_FIX_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+
+EFFECTIVE TOTAL: 9 OF 9 PASS
+```
+
+`LEGACY_MIGRATION_TEST_FIX_SCOPE` 仅包含上述两份 V12/V13 test；不得据此扩大到其他历史 migration、callback、schema 或 implementation 路径。若该 effective contract 之外出现 blocker，必须输出 `STAGE_QDR_9_B1_TECHNICAL_BLOCKER_REQUIRES_NEW_TASK`，不得在本治理修复任务中修改技术文件。
 
 ## 4. V15 schema freeze
 

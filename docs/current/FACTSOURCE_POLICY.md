@@ -1,22 +1,27 @@
 # Decision Hub Factsource Policy
-## Terminal current authority — 2026-07-24 Stage-QDR-9 B1 local accepted
+## Terminal current authority — 2026-07-24 Stage-QDR-9 B1 milestone review local accepted
 
 ```text
 Implementation baseline: 735fe9c730c97c0e1a4a137c90d49883408191dc
 Branch: dev
 Origin baseline: 735fe9c730c97c0e1a4a137c90d49883408191dc
-Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
-Remote exact-SHA CI: PENDING NEW COMMIT
+B1 implementation commit: 80b21f31bdb5dc7a15f327aa9617b0640fd1f22b
+Scope-repair documentation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
+Remote exact-SHA CI: PENDING PUBLICATION
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-9 plan: DONE / LOCAL_COMMITTED
 Stage-QDR-9 implementation work order: FROZEN / LOCAL_ACCEPTED
-Stage-QDR-9 overall: IN_PROGRESS / B1 LOCAL_ACCEPTED
-Stage-QDR-9 B1: IMPLEMENTED / LOCAL_ACCEPTED
+Stage-QDR-9 overall: IN_PROGRESS / B1 CLOSED / ACCEPTED LOCALLY
+Stage-QDR-9 B1: CLOSED / ACCEPTED LOCALLY
 Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL
 Current highest migration: V15
 Selected migration: V15 / IMPLEMENTED / LOCAL_ACCEPTED
-B1 scope blocker: CLOSED / LEGACY_MIGRATION_TEST_TARGET_ALIGNED
+B1 scope blocker: RESOLVED / SCOPE CONTRACT ERRATUM
+Initial milestone review: BLOCKED / TASK_SCOPE_DESIGN_INVALID
+Scope erratum: DONE / 2 EXACT LEGACY TESTS ADDED
+Effective scope invariants: PASS / 9 OF 9
+Final milestone review: PASS
 Domain persistence contracts: PASS
 V15 schema / clean migration / V14-to-V15 upgrade / constraints: PASS / PASS / PASS / PASS
 Legacy V12/V13 migration compatibility: PASS / EXPLICIT V14 TARGET
@@ -32,23 +37,23 @@ Local PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDAT
 Local architecture guards: PASS / 44 OF 44
 Local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
 Terminal current factsources: 12
-Scope invariants: PASS / 9 OF 9
+Scope invariants: ORIGINAL 8 OF 8 / EFFECTIVE PASS 9 OF 9
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 BLOCK HASH / 0 CONFLICTS
-B1 milestone review: NEXT
+B1 milestone review: PASS / B1 ACCEPTED
 B2 capacity: DEFERRED / KNOWN_LIMITATION
 Production capacity: NOT_PROVEN
-current task: DH-STAGE-QDR-9-B1-SCHEMA-SCOPE-BLOCKER
+current task: DH-STAGE-QDR-9-B1-MILESTONE-REVIEW-BLOCKER-FIX
 current task status: DONE / LOCAL_ACCEPTED
-next action: DH-STAGE-QDR-9-B1-MILESTONE-REVIEW
-ALLOW_B1_MILESTONE_REVIEW: YES / NEXT_TASK_ONLY
-ALLOW_B2_IMPLEMENTATION_NOW: NO / B1_MILESTONE_REVIEW_REQUIRED
+next action: DH-STAGE-QDR-9-B1-COMMITS-PUBLICATION-AND-EXACT-SHA-CI
+ALLOW_B1_COMMITS_PUBLICATION: YES / EXPLICIT PUSH AUTHORIZATION REQUIRED
+ALLOW_B2_IMPLEMENTATION_NOW: NO / B1 PUBLICATION AND EXACT-SHA CI PASS REQUIRED
 ALLOW_API_CHANGE_NOW: NO
 ALLOW_AUTOMATIC_LEARNING: NO
 ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ```
 
-12 个 terminal factsources 仍由下文固定集合组成；B1 状态已同步为 `IMPLEMENTED / LOCAL_ACCEPTED`。`DH_STAGE_QDR_9_PLAN.md` 与 `DH_STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER.md` 继续作为 process authority 与入口，但不增加 terminal block 扫描基数，长期 machine contract 不得依赖这些可裁剪 process documents。
+12 个 terminal factsources 仍由下文固定集合组成；B1 状态已同步为 `CLOSED / ACCEPTED LOCALLY`，initial review 的 `BLOCKED / TASK_SCOPE_DESIGN_INVALID` 与 scope erratum 的最终 `9 / 9 PASS` 均保留在 current evidence。`DH_STAGE_QDR_9_PLAN.md`、`DH_STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER.md`、`DH_STAGE_QDR_9_B1_SCOPE_ERRATUM.md` 与 `DH_STAGE_QDR_9_B1_MILESTONE_REVIEW.md` 继续作为 process authority 与入口，但不增加 terminal block 扫描基数，长期 machine contract 不得依赖这些可裁剪 process documents。
 
 ## Previous terminal authority — 2026-07-23 Stage-QDR-7/QDR-8 archive source recovery and pruning CI fix
 
