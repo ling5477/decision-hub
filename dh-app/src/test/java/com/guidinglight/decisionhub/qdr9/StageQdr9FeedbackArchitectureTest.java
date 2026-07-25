@@ -4,6 +4,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionRepository;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionPersistenceService;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackPersistenceRecords;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackPersistenceTransactionBoundary;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackReferenceValidationPort;
@@ -16,7 +17,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
-/** Stage-QDR-9 B1 persistence/schema 边界守卫。 */
+/** Stage-QDR-9 B2 persistence/schema 边界守卫。 */
 class StageQdr9FeedbackArchitectureTest {
 
   private static final Path REPOSITORY_ROOT =
@@ -45,7 +46,7 @@ class StageQdr9FeedbackArchitectureTest {
   }
 
   @Test
-  void b1DefinesPortsAndRecordsWithoutJdbcImplementations() {
+  void b2KeepsPortsUsecaseOwnedAndLimitsImplementationToTransactionalPersistence() {
     assertThat(FeedbackAttributionRepository.class).isInterface();
     assertThat(FeedbackReferenceValidationPort.class).isInterface();
     assertThat(FeedbackPersistenceTransactionBoundary.class).isInterface();
@@ -59,8 +60,26 @@ class StageQdr9FeedbackArchitectureTest {
         .matches(Class::isRecord);
     assertThat(FeedbackPersistenceRecords.FeedbackPersistenceAggregate.class)
         .matches(Class::isRecord);
+    assertThat(FeedbackAttributionPersistenceService.class)
+        .matches(type -> !type.getPackageName().contains(".infra."));
 
-    forbiddenB2ToB4Files()
+    assertThat(
+            REPOSITORY_ROOT.resolve(
+                "dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/"
+                    + "JdbcFeedbackAttributionRepository.java"))
+        .exists();
+    assertThat(
+            REPOSITORY_ROOT.resolve(
+                "dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/"
+                    + "JdbcFeedbackReferenceValidationAdapter.java"))
+        .exists();
+    assertThat(
+            REPOSITORY_ROOT.resolve(
+                "dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/"
+                    + "JdbcFeedbackPersistenceTransactionBoundary.java"))
+        .exists();
+
+    forbiddenB3AndB4Files()
         .forEach(path -> assertThat(path).as("must remain absent in B1").doesNotExist());
   }
 
@@ -121,17 +140,8 @@ class StageQdr9FeedbackArchitectureTest {
     assertThat(body).doesNotContain("https://");
   }
 
-  private static List<Path> forbiddenB2ToB4Files() {
+  private static List<Path> forbiddenB3AndB4Files() {
     return List.of(
-        REPOSITORY_ROOT.resolve(
-            "dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/"
-                + "JdbcFeedbackAttributionRepository.java"),
-        REPOSITORY_ROOT.resolve(
-            "dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/"
-                + "JdbcFeedbackReferenceValidationAdapter.java"),
-        REPOSITORY_ROOT.resolve(
-            "dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/"
-                + "JdbcFeedbackPersistenceTransactionBoundary.java"),
         REPOSITORY_ROOT.resolve(
             "dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/"
                 + "HistoricalFeedbackEvidenceReadService.java"),

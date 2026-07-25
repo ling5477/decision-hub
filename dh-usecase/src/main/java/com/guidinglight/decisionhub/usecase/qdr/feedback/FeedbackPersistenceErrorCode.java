@@ -12,8 +12,12 @@ public enum FeedbackPersistenceErrorCode {
   REFERENCE_INVALID,
   /** PostgreSQL 写入、读取或事务前置阶段失败。 */
   PERSISTENCE_FAILURE,
+  /** 底层唯一约束冲突；只允许在 scoped reconciliation 前内部使用。 */
+  DUPLICATE_KEY,
   /** commit 结果无法证明，禁止自动重试或声称成功。 */
   COMMIT_OUTCOME_UNKNOWN,
+  /** 已有 persistence aggregate 缺少必须的 observation、attribution 或 children。 */
+  AGGREGATE_INCOMPLETE,
   /** 内部历史证据查询参数无效。 */
   QUERY_VALIDATION_FAILED,
   /** 内部历史证据查询失败。 */

@@ -11,6 +11,9 @@ import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcCanonicalReplaySnapshotRe
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcRegressionVerdictRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcReplayCaseRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.ReplayInputSnapshotAssemblyService;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcFeedbackAttributionRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcFeedbackPersistenceTransactionBoundary;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcFeedbackReferenceValidationAdapter;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcModelGatewayCallRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcModelVersionRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcPromptVersionRepository;
@@ -40,6 +43,10 @@ import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketComm
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketRepository;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketService;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceAggregateService;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionPersistenceService;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionRepository;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackPersistenceTransactionBoundary;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackReferenceValidationPort;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.DefaultQdrMockModelGatewayBaseline;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.DefaultQdrModelGatewayIntegrationService;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.DeterministicProviderTrustPolicy;
@@ -189,6 +196,61 @@ public class DecisionPipelineWiringConfig {
     @ConditionalOnMissingBean
     public RegressionVerdictRepository regressionVerdictRepository(final JdbcTemplate jdbcTemplate) {
         return new JdbcRegressionVerdictRepository(jdbcTemplate);
+    }
+
+    /**
+     * 装配 Stage-QDR-9 B2 feedback aggregate JDBC repository。
+     *
+     * @param jdbcTemplate DH-owned PostgreSQL datasource。
+     * @return 仅支持 V15 aggregate write / exact scoped reload 的 repository。
+     */
+    @Bean
+    @ConditionalOnMissingBean(FeedbackAttributionRepository.class)
+    public FeedbackAttributionRepository feedbackAttributionRepository(final JdbcTemplate jdbcTemplate) {
+        return new JdbcFeedbackAttributionRepository(jdbcTemplate);
+    }
+
+    /**
+     * 装配 V15 reference 的 tenant-bound internal validator。
+     *
+     * @param jdbcTemplate DH-owned PostgreSQL datasource。
+     * @return 不调用 HTTP、Provider、NQ 或外部 API 的 reference validator。
+     */
+    @Bean
+    @ConditionalOnMissingBean(FeedbackReferenceValidationPort.class)
+    public FeedbackReferenceValidationPort feedbackReferenceValidationPort(
+            final JdbcTemplate jdbcTemplate) {
+        return new JdbcFeedbackReferenceValidationAdapter(jdbcTemplate);
+    }
+
+    /**
+     * 装配 B2 required/repeatable-read aggregate transaction boundary。
+     *
+     * @param transactionManager Spring transaction manager；缺失时应用 fail-fast。
+     * @return 单 transaction boundary。
+     */
+    @Bean
+    @ConditionalOnMissingBean(FeedbackPersistenceTransactionBoundary.class)
+    public FeedbackPersistenceTransactionBoundary feedbackPersistenceTransactionBoundary(
+            final PlatformTransactionManager transactionManager) {
+        return new JdbcFeedbackPersistenceTransactionBoundary(transactionManager);
+    }
+
+    /**
+     * 装配 internal-only B2 feedback persistence service。
+     *
+     * <p>该 bean 不创建 Controller、REST endpoint、runtime entry 或自动学习链路。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public FeedbackAttributionPersistenceService feedbackAttributionPersistenceService(
+            final FeedbackAttributionRepository feedbackAttributionRepository,
+            final FeedbackReferenceValidationPort feedbackReferenceValidationPort,
+            final FeedbackPersistenceTransactionBoundary feedbackPersistenceTransactionBoundary) {
+        return new FeedbackAttributionPersistenceService(
+                feedbackAttributionRepository,
+                feedbackReferenceValidationPort,
+                feedbackPersistenceTransactionBoundary);
     }
 
     /** 装配现有 V10 immutable snapshot persistence port；不扩展 insert/find 合同。 */
