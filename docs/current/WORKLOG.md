@@ -1,5 +1,53 @@
 # Decision Hub Worklog
-## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 scope prewrite
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 implementation local acceptance
+
+```text
+Implementation baseline: 42697edcba9719a395aecee46830faba2c838948
+Branch: dev
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+B3 authority exact-SHA CI: PASS / RUN 30191021995
+Stage-QDR-9 B4: IMPLEMENTED / LOCAL_ACCEPTED
+Retention: IMPLEMENTED / INTERNAL ONLY / DEFAULT DISABLED
+Retention age: DEFAULT 365 DAYS
+Retention batch size: MAXIMUM 100 / SINGLE INVOCATION BOUND
+Retention timeout: 5 SECONDS / FAIL_CLOSED / NO AUTOMATIC RETRY
+Tenant/environment scope: PASS / ONE EXPLICIT DEV OR TEST SCOPE
+Candidate locking: PASS / STABLE ASC + FOR UPDATE SKIP LOCKED
+Aggregate integrity: PASS / FAIL_CLOSED
+Active AUDIT / REPLAY / EVALUATION protection: PASS
+Transactional aggregate delete: PASS / REPEATABLE_READ / ATOMIC ROLLBACK
+PostgreSQL/Testcontainers: PASS / REAL EXECUTION / POSTGRESQL 17.10 / 0 MANDATORY SKIPS
+Full local regression: PASS / 19 OF 19 REACTOR / 1242 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+Remote exact-SHA CI: PENDING B4 PUBLICATION
+Scheduler: NOT_IMPLEMENTED
+API / Automatic learning: NOT_ALLOWED / NOT_ALLOWED
+B4 effective scope invariants: PASS / 21 OF 21
+Terminal current factsources: 12
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 LOCAL ACCEPTANCE HASH / 0 CONFLICTS
+B3 review P2 backlog: 2 NON-BLOCKING TEST-GUARD ITEMS / NOT FIXED
+B2 capacity: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+current task: DH-STAGE-QDR-9-B4-RETENTION-SAFETY-AND-INTEGRITY-IMPLEMENTATION
+current task status: IMPLEMENTED / LOCAL_ACCEPTED / PENDING B4 MILESTONE REVIEW
+next action: DH-STAGE-QDR-9-B4-MILESTONE-REVIEW
+ALLOW_B4_IMPLEMENTATION: CONSUMED / LOCAL_ACCEPTED
+ALLOW_B4_MILESTONE_REVIEW: YES / LOCAL ACCEPTANCE EVIDENCE READY
+ALLOW_B5_IMPLEMENTATION_NOW: NO / B4 MILESTONE REVIEW AND PUBLICATION REQUIRED
+ALLOW_API_CHANGE_NOW / ALLOW_AUTOMATIC_LEARNING: NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+## 2026-07-26 DH-STAGE-QDR-9-B4 retention implementation local acceptance
+
+- 已在冻结的 B4 exact subset 内实现内部 retention policy、cleanup use case、JDBC cleanup/integrity adapters、Spring internal wiring 与 PostgreSQL/Testcontainers 覆盖。
+- cleanup 保持默认关闭、单租户/DEV 或 TEST 环境、单批最多 100、5 秒 fail-closed timeout；选择使用稳定升序和 \`FOR UPDATE SKIP LOCKED\`。
+- active AUDIT/REPLAY/EVALUATION reference、缺失/格式错误/范围不匹配 reference、以及不完整 aggregate 都阻断删除；reference → contribution → attribution → observation 与删除审计处于同一 \`REPEATABLE_READ\` 事务。
+- 已完成模块回归、全量回归和质量门；结果见本文件顶部 terminal authority 及 \`TESTING.md\` 的 B4 validation。
+- 未修改 V1–V15 migration、B2 write/idempotency、B3 historical read-model、API/Controller、scheduler/cron、POM/workflow、自动学习或 B3 P2 test guards；未 push、未创建 tag。
+
+## Previous terminal authority — 2026-07-26 Stage-QDR-9 B4 scope prewrite
 
 ```text
 Implementation baseline: 42697edcba9719a395aecee46830faba2c838948

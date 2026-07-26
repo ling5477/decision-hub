@@ -12,6 +12,8 @@ import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcRegressionVerdictReposito
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcReplayCaseRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.ReplayInputSnapshotAssemblyService;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcFeedbackAttributionRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcFeedbackIntegrityAdapter;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcFeedbackRetentionAdapter;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcHistoricalFeedbackEvidenceQueryAdapter;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcFeedbackPersistenceTransactionBoundary;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcFeedbackReferenceValidationAdapter;
@@ -47,9 +49,12 @@ import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceAggrega
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionPersistenceService;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionRepository;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackPersistenceTransactionBoundary;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackIntegrityPort;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.HistoricalFeedbackEvidenceQueryPort;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.HistoricalFeedbackEvidenceReadService;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackReferenceValidationPort;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackRetentionPort;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackRetentionService;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.DefaultQdrMockModelGatewayBaseline;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.DefaultQdrModelGatewayIntegrationService;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.DeterministicProviderTrustPolicy;
@@ -282,6 +287,45 @@ public class DecisionPipelineWiringConfig {
     public HistoricalFeedbackEvidenceReadService historicalFeedbackEvidenceReadService(
             final HistoricalFeedbackEvidenceQueryPort historicalFeedbackEvidenceQueryPort) {
         return new HistoricalFeedbackEvidenceReadService(historicalFeedbackEvidenceQueryPort);
+    }
+
+    /** Supplies the injected clock used only to calculate retention cutoffs. */
+    @Bean
+    @ConditionalOnMissingBean(Clock.class)
+    public Clock feedbackRetentionClock() {
+        return Clock.systemUTC();
+    }
+
+    /** Creates the bounded read-only V15 aggregate integrity inspector. */
+    @Bean
+    @ConditionalOnMissingBean(JdbcFeedbackIntegrityAdapter.class)
+    public JdbcFeedbackIntegrityAdapter jdbcFeedbackIntegrityAdapter(final JdbcTemplate jdbcTemplate) {
+        return new JdbcFeedbackIntegrityAdapter(jdbcTemplate);
+    }
+
+    /** Exposes the integrity inspector only through its internal use-case port. */
+    @Bean
+    @ConditionalOnMissingBean(FeedbackIntegrityPort.class)
+    public FeedbackIntegrityPort feedbackIntegrityPort(
+            final JdbcFeedbackIntegrityAdapter jdbcFeedbackIntegrityAdapter) {
+        return jdbcFeedbackIntegrityAdapter;
+    }
+
+    /** Creates the single-batch PostgreSQL retention adapter; it does not schedule or invoke cleanup. */
+    @Bean
+    @ConditionalOnMissingBean(FeedbackRetentionPort.class)
+    public FeedbackRetentionPort feedbackRetentionPort(
+            final JdbcTemplate jdbcTemplate,
+            final PlatformTransactionManager transactionManager) {
+        return new JdbcFeedbackRetentionAdapter(jdbcTemplate, transactionManager);
+    }
+
+    /** Creates the internal default-disabled retention service with an injected cutoff clock. */
+    @Bean
+    @ConditionalOnMissingBean
+    public FeedbackRetentionService feedbackRetentionService(
+            final FeedbackRetentionPort feedbackRetentionPort, final Clock feedbackRetentionClock) {
+        return new FeedbackRetentionService(feedbackRetentionPort, feedbackRetentionClock);
     }
 
     /** 装配现有 V10 immutable snapshot persistence port；不扩展 insert/find 合同。 */
