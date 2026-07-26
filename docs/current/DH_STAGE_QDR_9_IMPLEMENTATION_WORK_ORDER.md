@@ -1,23 +1,26 @@
 # DH Stage-QDR-9 Implementation Work Order
 
-## Terminal current authority — 2026-07-23 implementation work order local accepted
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B3 scope prewrite frozen
 
 ```text
-Planning baseline commit: 30dae01488700f7c1a321fde059a783cd8435b34
+Implementation baseline: b61f164ea078bf9455fc682adf55ecd12283bbb4
 Repository: E:/Project/decision-hub
 Branch: dev
-Expected implementation baseline: THIS_DOCUMENT_COMMIT / LOCAL_ONLY
-Origin baseline: 2aa5183a81d1733eec38ec2ab85de8d0c90c13a4
-Current highest migration: V14
-Selected migration: V15 / FUTURE B1 CANDIDATE / NOT CREATED
+Origin baseline: b61f164ea078bf9455fc682adf55ecd12283bbb4
+Current highest migration: V15 / PUBLISHED / EXACT_SHA_CI_ACCEPTED
 Terminal current factsources: 12
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
-Stage-QDR-9 plan: DONE / LOCAL_COMMITTED
-Stage-QDR-9 implementation work order: FROZEN / LOCAL_ACCEPTED
-Stage-QDR-9 implementation: NOT_STARTED
+Stage-QDR-9 plan: DONE / PUBLISHED
+Stage-QDR-9 implementation work order: FROZEN / ACCEPTED
+Stage-QDR-9 B1: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B2: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B3: SCOPE FROZEN / IMPLEMENTATION AUTHORIZED LOCALLY
+Historical evidence read model: NOT_STARTED
+Retention: NOT_STARTED
+API / Automatic learning: NOT_ALLOWED / NOT_ALLOWED
 Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL
-Scope invariants: PASS / 8 OF 8
+Scope invariants: PASS / 17 OF 17
 B2 capacity: DEFERRED / KNOWN_LIMITATION
 Production capacity: NOT_PROVEN
 ```
@@ -501,6 +504,71 @@ EFFECTIVE B2 TOTAL: 13 OF 13 PASS
 ```
 
 B2 的 publication、exact-SHA CI 与 milestone review 记录在 current authority close 中完成；本节不授权 B3 implementation。
+
+### 3.14 B3 Exact Scope Serialization — implementation prewrite
+
+`B3_READ_MODEL_IMPLEMENTATION_SCOPE`：
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceQuery.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceView.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidencePage.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceQueryPort.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceReadService.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcHistoricalFeedbackEvidenceQueryAdapter.java
+```
+
+`B3_KEYSET_CURSOR_SCOPE`：
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceQuery.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidencePage.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/FeedbackEvidenceCursorCodec.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcHistoricalFeedbackEvidenceQueryAdapter.java
+```
+
+`B3_QUERY_TEST_SCOPE`：
+
+```text
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/HistoricalFeedbackEvidenceReadServiceTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/FeedbackEvidenceCursorCodecTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcHistoricalFeedbackEvidenceQueryAdapterTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitectureTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+```
+
+`B3_WIRING_SCOPE`：
+
+```text
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
+dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java
+```
+
+上述四个集合均是已冻结 `WRITE_ALLOWLIST` 的 exact subset。B3 implementation 只允许修改此处列出的 14 个技术文件与 12 个 terminal current factsources；不授权 V1–V15 migration、B2 aggregate write/transaction/idempotency、retention/delete、Controller/API/OpenAPI、POM/workflow、archive/config、external HTTP/Provider/NQ、Agent/LangGraph、automatic learning 或交易副作用。
+
+#### Effective B3 scope invariants
+
+```text
+VALIDATION_SCOPE ⊆ READ_SCOPE: PASS
+FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+MIGRATION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+REPOSITORY_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+READ_MODEL_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+RETENTION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+ARCHITECTURE_GUARD_SCOPE ⊆ VALIDATION_SCOPE: PASS
+LEGACY_MIGRATION_TEST_FIX_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+B2_JDBC_IMPLEMENTATION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+B2_TRANSACTION_TEST_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+B2_CONCURRENCY_TEST_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+B2_WIRING_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+B3_READ_MODEL_IMPLEMENTATION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+B3_KEYSET_CURSOR_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+B3_QUERY_TEST_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+B3_WIRING_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+
+EFFECTIVE B3 TOTAL: 17 OF 17 PASS
+```
 
 ## 4. V15 schema freeze
 
