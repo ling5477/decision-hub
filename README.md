@@ -1,39 +1,49 @@
 # Decision Hub
-## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 implementation local acceptance
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 reference-liveness state-model scope design
 
 ```text
 Implementation baseline: 42697edcba9719a395aecee46830faba2c838948
 Branch: dev
+Published B4 implementation / origin/dev baseline: fa9debb4474eedc4353e1236e227eae8ef23c085
 Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
 B3 authority exact-SHA CI: PASS / RUN 30191021995
-Stage-QDR-9 B4: IMPLEMENTED / LOCAL_ACCEPTED
-Retention: IMPLEMENTED / INTERNAL ONLY / DEFAULT DISABLED
+Stage-QDR-9 B4: IMPLEMENTED LOCALLY / MILESTONE REVIEW BLOCKED
+B4 scope-prewrite commit: 1036171ff7acd85078416b907f0444ab6214b3ca
+B4 implementation commit: fa9debb4474eedc4353e1236e227eae8ef23c085
+B4 review blocker: REFERENCE_STATE_MODEL_UNRESOLVED
+P1 findings: 2
+Reference-liveness state-model design: FROZEN / LOCAL_ACCEPTED
+Forward migration: V16 CANDIDATE / NOT_CREATED
+Retention: IMPLEMENTED LOCALLY / INTERNAL ONLY / DEFAULT DISABLED
 Retention age: DEFAULT 365 DAYS
 Retention batch size: MAXIMUM 100 / SINGLE INVOCATION BOUND
 Retention timeout: 5 SECONDS / FAIL_CLOSED / NO AUTOMATIC RETRY
 Tenant/environment scope: PASS / ONE EXPLICIT DEV OR TEST SCOPE
 Candidate locking: PASS / STABLE ASC + FOR UPDATE SKIP LOCKED
 Aggregate integrity: PASS / FAIL_CLOSED
-Active AUDIT / REPLAY / EVALUATION protection: PASS
+AUDIT / REPLAY / EVALUATION current lifecycle and environment: UNRESOLVED / FAIL_CLOSED
 Transactional aggregate delete: PASS / REPEATABLE_READ / ATOMIC ROLLBACK
 PostgreSQL/Testcontainers: PASS / REAL EXECUTION / POSTGRESQL 17.10 / 0 MANDATORY SKIPS
-Full local regression: PASS / 19 OF 19 REACTOR / 1242 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Fresh full regression baseline: PASS / 19 OF 19 REACTOR / 1243 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Full regression for this documentation-only design task: NOT_RERUN / FRESH EVIDENCE REUSED
 Quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
-Remote exact-SHA CI: PENDING B4 PUBLICATION
+Remote B4 exact-SHA CI: PENDING
+B4 publication: NOT_ALLOWED
 Scheduler: NOT_IMPLEMENTED
 API / Automatic learning: NOT_ALLOWED / NOT_ALLOWED
-B4 effective scope invariants: PASS / 21 OF 21
+B4 original scope invariants: PASS / 21 OF 21
+Reference-liveness scope invariants: PASS / 27 OF 27
 Terminal current factsources: 12
-CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 LOCAL ACCEPTANCE HASH / 0 CONFLICTS
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 STATE-MODEL DESIGN HASH / 0 CONFLICTS
 B3 review P2 backlog: 2 NON-BLOCKING TEST-GUARD ITEMS / NOT FIXED
 B2 capacity: DEFERRED / KNOWN_LIMITATION
 Production capacity: NOT_PROVEN
-current task: DH-STAGE-QDR-9-B4-RETENTION-SAFETY-AND-INTEGRITY-IMPLEMENTATION
-current task status: IMPLEMENTED / LOCAL_ACCEPTED / PENDING B4 MILESTONE REVIEW
-next action: DH-STAGE-QDR-9-B4-MILESTONE-REVIEW
+current task: DH-STAGE-QDR-9-B4-REFERENCE-LIVENESS-STATE-MODEL-SCOPE-DESIGN
+current task status: FROZEN / LOCAL_ACCEPTED
+next action: DH-STAGE-QDR-9-B4-REFERENCE-LIVENESS-FORWARD-MIGRATION-IMPLEMENTATION
 ALLOW_B4_IMPLEMENTATION: CONSUMED / LOCAL_ACCEPTED
-ALLOW_B4_MILESTONE_REVIEW: YES / LOCAL ACCEPTANCE EVIDENCE READY
-ALLOW_B5_IMPLEMENTATION_NOW: NO / B4 MILESTONE REVIEW AND PUBLICATION REQUIRED
+ALLOW_B4_MILESTONE_REVIEW: NO / FORWARD MIGRATION AND P1 FIX REQUIRED
+ALLOW_B5_IMPLEMENTATION_NOW: NO / B4 MILESTONE REVIEW RETRY AND PUBLICATION REQUIRED
 ALLOW_API_CHANGE_NOW / ALLOW_AUTOMATIC_LEARNING: NO / NO
 ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
@@ -171,6 +181,8 @@ Stage-QDR-9 B1、B2 与 B3 已发布并接受；B3 historical evidence read mode
 当前 milestone review：[DH Stage-QDR-9 B1 Milestone Review](docs/current/DH_STAGE_QDR_9_B1_MILESTONE_REVIEW.md)
 当前 B2 milestone review：[DH Stage-QDR-9 B2 Milestone Review](docs/current/DH_STAGE_QDR_9_B2_MILESTONE_REVIEW.md)
 当前 B3 milestone review：[DH Stage-QDR-9 B3 Milestone Review](docs/current/DH_STAGE_QDR_9_B3_MILESTONE_REVIEW.md)
+当前 B4 reference-liveness 设计：[DH Stage-QDR-9 B4 Reference-Liveness State-Model Design](docs/current/DH_STAGE_QDR_9_B4_REFERENCE_LIVENESS_STATE_MODEL_DESIGN.md)
+当前 B4 forward-migration 工单：[DH Stage-QDR-9 B4 Reference-Liveness Forward-Migration Work Order](docs/current/DH_STAGE_QDR_9_B4_REFERENCE_LIVENESS_FORWARD_MIGRATION_WORK_ORDER.md)
 
 ## Previous terminal authority — 2026-07-23 Stage-QDR-7/QDR-8 archive source recovery and pruning CI fix
 

@@ -1452,3 +1452,28 @@ ALLOW_LIVE: NO
 ```text
 DH-STAGE-QDR-9-PLAN-WO-PUBLICATION-AND-EXACT-SHA-CI
 ```
+
+## B4 Reference-Liveness State-Model Blocker
+
+本节在既有 B4 implementation 已存在后追加，绝不重写原 B4 exact scope 或声称其已经包含下列跨模块变更。
+
+```text
+Stage-QDR-9 B4: IMPLEMENTED LOCALLY / MILESTONE REVIEW BLOCKED
+B4 scope-prewrite commit: 1036171ff7acd85078416b907f0444ab6214b3ca
+B4 implementation commit: fa9debb4474eedc4353e1236e227eae8ef23c085
+review blocker: STAGE_QDR_9_B4_REFERENCE_STATE_MODEL_UNRESOLVED
+P1 findings: 2
+P1-1: RELEASED reference snapshot cannot prove current target inactivity
+P1-2: AUDIT / REPLAY / EVALUATION have no trustworthy environment-bound lifecycle state
+selected remediation: unified qdr_reference_liveness registry
+forward migration: V16__qdr9_reference_liveness_state_model.sql / CANDIDATE / NOT_CREATED
+reference-liveness design: FROZEN / LOCAL_ACCEPTED
+B4 publication: NOT_ALLOWED
+B4 milestone review retry: NOT_ALLOWED UNTIL FORWARD MIGRATION AND P1 FIX PASS
+B5: NOT_ALLOWED
+```
+
+`event_status`、evaluation `verdict`、native row existence 和 reference snapshot `RELEASED` 均不是 lifecycle。未来 implementation 仅可依据
+`DH_STAGE_QDR_9_B4_REFERENCE_LIVENESS_STATE_MODEL_DESIGN.md` 与
+`DH_STAGE_QDR_9_B4_REFERENCE_LIVENESS_FORWARD_MIGRATION_WORK_ORDER.md` 的 27/27 exact scope 执行；retention 保持 default-disabled，
+并且不得创建 API、scheduler、automatic learning、real HTTP/provider/NQ/Agent/LangGraph/Paper/LIVE 行为。
