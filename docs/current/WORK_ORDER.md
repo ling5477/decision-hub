@@ -1,5 +1,5 @@
 # Decision Hub 当前工单
-## Terminal current authority — 2026-07-26 Stage-QDR-9 B2 publication and authority close
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B3 publication and authority close
 
 ```text
 Implementation baseline: 20fe2f54ebf043c8c80f841db856ae35bc4f61a
@@ -16,9 +16,11 @@ Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-9 plan: DONE / PUBLISHED
 Stage-QDR-9 implementation work order: FROZEN / ACCEPTED
-Stage-QDR-9 overall: IN_PROGRESS / B1+B2 CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 overall: IN_PROGRESS / B1+B2+B3 CLOSED / ACCEPTED / PUBLISHED / B4 RETENTION NOT_STARTED
 Stage-QDR-9 B1: CLOSED / ACCEPTED / PUBLISHED
 Stage-QDR-9 B2: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B3: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B4: ALLOWED / NEXT TASK ONLY
 Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL
 Current highest migration: V15
 V15: PUBLISHED / EXACT_SHA_CI_ACCEPTED
@@ -26,8 +28,14 @@ Initial milestone review: BLOCKED / TASK_SCOPE_DESIGN_INVALID
 Scope erratum: DONE / 2 EXACT LEGACY TESTS ADDED
 Effective B1 scope invariants: PASS / 9 OF 9
 Effective B2 scope invariants: PASS / 13 OF 13
+Effective B3 scope invariants: PASS / 17 OF 17
 Final B1 milestone review: PASS
 B2 milestone review record: PASS / docs/current/DH_STAGE_QDR_9_B2_MILESTONE_REVIEW.md
+B3 scope-prewrite commit: 31d42c9746d10543f7fd81559ff21822a365d6a7
+B3 implementation commit: 77906f387319cfd7d7a67cbad2c3d34459c9b1f7
+B3 implementation exact-SHA CI: PASS / RUN 30190532421
+B3 milestone review: PASS / P0 0 / P1 0 / P2 2 NON-BLOCKING BACKLOG
+B3 milestone review record: PASS / docs/current/DH_STAGE_QDR_9_B3_MILESTONE_REVIEW.md
 Domain persistence contracts: PASS
 V15 schema / clean migration / V14-to-V15 upgrade / constraints: PASS / PASS / PASS / PASS
 Legacy V12/V13 migration compatibility: PASS / EXPLICIT V14 TARGET
@@ -52,32 +60,39 @@ B2 PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY
 B2 architecture guards: PASS / ArchitectureTest + StageQdr9FeedbackArchitectureTest
 B2 exact-SHA quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
 JDBC Repository implementation: IMPLEMENTED / ACCEPTED
-Stage-QDR-9 B3: IMPLEMENTED / LOCAL_ACCEPTED
-Historical evidence read model: IMPLEMENTED / INTERNAL ONLY
-Pagination: KEYSET / observed_at DESC + attribution_id DESC
+Historical evidence read model: IMPLEMENTED / ACCEPTED / INTERNAL ONLY
+Pagination: KEYSET
+Canonical ordering: observed_at DESC, attribution_id DESC
 Page size: DEFAULT 50 / HARD MAX 100
 Maximum time range: 90 DAYS
-Cursor scope binding / tenant-environment isolation: PASS / PASS
+Cursor scope binding: PASS
+Cursor filter binding: PASS
+Tenant/environment isolation: PASS
+Parent-first child aggregation: PASS
+Read-only query: PASS
 Retention: NOT_STARTED
 API / Automatic learning: NOT_ALLOWED / NOT_ALLOWED
 Terminal current factsources: 12
 Scope invariants: PASS / 17 OF 17
-CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B3 SCOPE HASH / 0 CONFLICTS
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B3 AUTHORITY HASH / 0 CONFLICTS
+B3 review P2 backlog: 2 NON-BLOCKING TEST-GUARD ITEMS / NOT FIXED
 B2 capacity: DEFERRED / KNOWN_LIMITATION
 Production capacity: NOT_PROVEN
-current task: DH-STAGE-QDR-9-B3-HISTORICAL-EVIDENCE-READ-MODEL-IMPLEMENTATION
-current task status: DONE / LOCAL_ACCEPTED
-next action: DH-STAGE-QDR-9-B3-MILESTONE-REVIEW
+current task: DH-STAGE-QDR-9-B3-PUBLICATION-AND-AUTHORITY-CLOSE
+current task status: CLOSED / ACCEPTED / PUBLISHED / AUTHORITY EXACT-SHA CI PENDING
+next action after authority publication and CI: DH-STAGE-QDR-9-B4-RETENTION-SAFETY-AND-INTEGRITY-IMPLEMENTATION
 ALLOW_B2_MILESTONE_REVIEW: CONSUMED / PASS
-ALLOW_B3_IMPLEMENTATION: CONSUMED / LOCAL_ACCEPTED
-ALLOW_B3_MILESTONE_REVIEW: YES
+ALLOW_B3_IMPLEMENTATION: CONSUMED / PUBLISHED
+ALLOW_B3_MILESTONE_REVIEW: CONSUMED / PASS
+ALLOW_B4_IMPLEMENTATION: YES / NEXT TASK ONLY / AUTHORITY EXACT-SHA CI REQUIRED
+ALLOW_B4_IMPLEMENTATION_NOW: NO / AUTHORITY EXACT-SHA CI PENDING
 ALLOW_API_CHANGE_NOW: NO
 ALLOW_AUTOMATIC_LEARNING: NO
 ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ```
 
-`DH-STAGE-QDR-9-B1-SCHEMA-SCOPE-BLOCKER` 已完成并由后续 scope erratum 覆盖实际 15-file B1 technical subset。B1 milestone review 已 `PASS / B1 ACCEPTED`，但 B2、JDBC adapter、read model 与 retention 仍不得开始，直到两个 B1 local commits publication 与 exact-SHA CI PASS。
+`DH-STAGE-QDR-9-B1-SCHEMA-SCOPE-BLOCKER` 已完成并由后续 scope erratum 覆盖实际 15-file B1 technical subset。B1、B2 与 B3 milestone reviews 已 `PASS` 且对应提交已发布；B4 retention 仅在本 authority commit exact-SHA CI PASS 后才可作为独立实施任务开始，当前不得提前创建 delete SQL、scheduler、API 或 automatic learning。
 
 ## Previous terminal authority — 2026-07-23 Stage-QDR-7/QDR-8 archive source recovery and pruning CI fix
 
