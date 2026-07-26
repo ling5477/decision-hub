@@ -1,6 +1,6 @@
 # DH Stage-QDR-9 Implementation Work Order
 
-## Terminal current authority — 2026-07-26 Stage-QDR-9 B3 scope prewrite frozen
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B3 local acceptance
 
 ```text
 Implementation baseline: b61f164ea078bf9455fc682adf55ecd12283bbb4
@@ -15,8 +15,12 @@ Stage-QDR-9 plan: DONE / PUBLISHED
 Stage-QDR-9 implementation work order: FROZEN / ACCEPTED
 Stage-QDR-9 B1: CLOSED / ACCEPTED / PUBLISHED
 Stage-QDR-9 B2: CLOSED / ACCEPTED / PUBLISHED
-Stage-QDR-9 B3: SCOPE FROZEN / IMPLEMENTATION AUTHORIZED LOCALLY
-Historical evidence read model: NOT_STARTED
+Stage-QDR-9 B3: IMPLEMENTED / LOCAL_ACCEPTED
+Historical evidence read model: IMPLEMENTED / INTERNAL ONLY
+Pagination: KEYSET / observed_at DESC + attribution_id DESC
+Page size: DEFAULT 50 / HARD MAX 100
+Maximum time range: 90 DAYS
+Cursor scope binding / tenant-environment isolation: PASS / PASS
 Retention: NOT_STARTED
 API / Automatic learning: NOT_ALLOWED / NOT_ALLOWED
 Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL

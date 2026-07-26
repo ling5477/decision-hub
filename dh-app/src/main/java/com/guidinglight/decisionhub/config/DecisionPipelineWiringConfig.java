@@ -12,6 +12,7 @@ import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcRegressionVerdictReposito
 import com.guidinglight.decisionhub.infra.jdbc.qdr.JdbcReplayCaseRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.ReplayInputSnapshotAssemblyService;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcFeedbackAttributionRepository;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcHistoricalFeedbackEvidenceQueryAdapter;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcFeedbackPersistenceTransactionBoundary;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.feedback.JdbcFeedbackReferenceValidationAdapter;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.model.JdbcModelGatewayCallRepository;
@@ -46,6 +47,8 @@ import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceAggrega
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionPersistenceService;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionRepository;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackPersistenceTransactionBoundary;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.HistoricalFeedbackEvidenceQueryPort;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.HistoricalFeedbackEvidenceReadService;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackReferenceValidationPort;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.DefaultQdrMockModelGatewayBaseline;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.DefaultQdrModelGatewayIntegrationService;
@@ -251,6 +254,34 @@ public class DecisionPipelineWiringConfig {
                 feedbackAttributionRepository,
                 feedbackReferenceValidationPort,
                 feedbackPersistenceTransactionBoundary);
+    }
+
+    /**
+     * 装配 B3 internal-only historical evidence query port；无 Controller、API 或 retention 副作用。
+     *
+     * @param jdbcTemplate DH-owned PostgreSQL datasource。
+     * @param transactionManager mandatory read-only transaction manager。
+     * @return bounded keyset JDBC adapter。
+     */
+    @Bean
+    @ConditionalOnMissingBean(HistoricalFeedbackEvidenceQueryPort.class)
+    public HistoricalFeedbackEvidenceQueryPort historicalFeedbackEvidenceQueryPort(
+            final JdbcTemplate jdbcTemplate,
+            final PlatformTransactionManager transactionManager) {
+        return new JdbcHistoricalFeedbackEvidenceQueryAdapter(jdbcTemplate, transactionManager);
+    }
+
+    /**
+     * 装配 B3 internal use-case service；不提供外部运行时入口。
+     *
+     * @param historicalFeedbackEvidenceQueryPort tenant/environment-bound query port。
+     * @return fail-closed read service。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public HistoricalFeedbackEvidenceReadService historicalFeedbackEvidenceReadService(
+            final HistoricalFeedbackEvidenceQueryPort historicalFeedbackEvidenceQueryPort) {
+        return new HistoricalFeedbackEvidenceReadService(historicalFeedbackEvidenceQueryPort);
     }
 
     /** 装配现有 V10 immutable snapshot persistence port；不扩展 insert/find 合同。 */

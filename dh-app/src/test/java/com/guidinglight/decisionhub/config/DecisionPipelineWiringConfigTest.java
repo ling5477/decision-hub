@@ -20,6 +20,8 @@ import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionPers
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionRepository;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackPersistenceTransactionBoundary;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackReferenceValidationPort;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.HistoricalFeedbackEvidenceQueryPort;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.HistoricalFeedbackEvidenceReadService;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelQueryPort;
 import com.guidinglight.decisionhub.usecase.qdr.readmodel.DecisionReadModelService;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.ReplayInputSnapshotAssemblyService;
@@ -66,6 +68,8 @@ final class DecisionPipelineWiringConfigTest {
                     assertThat(ctx).hasSingleBean(FeedbackReferenceValidationPort.class);
                     assertThat(ctx).hasSingleBean(FeedbackPersistenceTransactionBoundary.class);
                     assertThat(ctx).hasSingleBean(FeedbackAttributionPersistenceService.class);
+                    assertThat(ctx).hasSingleBean(HistoricalFeedbackEvidenceQueryPort.class);
+                    assertThat(ctx).hasSingleBean(HistoricalFeedbackEvidenceReadService.class);
                     assertThat(ctx).hasSingleBean(DecisionProviderHealthEvaluator.class);
                     assertThat(ctx).hasSingleBean(DecisionProviderBudgetGuard.class);
                     assertThat(ctx).hasSingleBean(DecisionProviderLatencyRecorder.class);

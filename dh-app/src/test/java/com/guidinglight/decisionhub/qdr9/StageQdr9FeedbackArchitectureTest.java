@@ -79,8 +79,7 @@ class StageQdr9FeedbackArchitectureTest {
                     + "JdbcFeedbackPersistenceTransactionBoundary.java"))
         .exists();
 
-    forbiddenB3AndB4Files()
-        .forEach(path -> assertThat(path).as("must remain absent in B1").doesNotExist());
+    forbiddenB4Files().forEach(path -> assertThat(path).as("B4 file must remain absent").doesNotExist());
   }
 
   @Test
@@ -140,14 +139,25 @@ class StageQdr9FeedbackArchitectureTest {
     assertThat(body).doesNotContain("https://");
   }
 
-  private static List<Path> forbiddenB3AndB4Files() {
-    return List.of(
-        REPOSITORY_ROOT.resolve(
-            "dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/"
-                + "HistoricalFeedbackEvidenceReadService.java"),
+  @Test
+  void b3ReadModelRemainsInternalReadOnlyAndKeysetBounded() throws IOException {
+    final Path adapter =
         REPOSITORY_ROOT.resolve(
             "dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/"
-                + "JdbcHistoricalFeedbackEvidenceQueryAdapter.java"),
+                + "JdbcHistoricalFeedbackEvidenceQueryAdapter.java");
+    final String source = Files.readString(adapter).toLowerCase(java.util.Locale.ROOT);
+    assertThat(adapter).exists();
+    assertThat(source).contains("order by a.observed_at desc,a.attribution_id desc");
+    assertThat(source).doesNotContain(" offset ").doesNotContain("insert into").doesNotContain("delete from");
+    assertThat(source).contains("tenant_id=? and a.environment=?").contains("setreadonly(true)");
+    assertThat(
+            REPOSITORY_ROOT.resolve(
+                "dh-api/src/main/java/com/guidinglight/decisionhub/api/qdr/feedback"))
+        .doesNotExist();
+  }
+
+  private static List<Path> forbiddenB4Files() {
+    return List.of(
         REPOSITORY_ROOT.resolve(
             "dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/"
                 + "FeedbackRetentionService.java"),
