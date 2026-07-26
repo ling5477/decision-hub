@@ -1,12 +1,12 @@
 # DH Stage-QDR-9 Implementation Work Order
 
-## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 scope prewrite
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B3 local acceptance
 
 ```text
-Implementation baseline: 42697edcba9719a395aecee46830faba2c838948
+Implementation baseline: b61f164ea078bf9455fc682adf55ecd12283bbb4
 Repository: E:/Project/decision-hub
 Branch: dev
-Origin baseline: 42697edcba9719a395aecee46830faba2c838948
+Origin baseline: b61f164ea078bf9455fc682adf55ecd12283bbb4
 Current highest migration: V15 / PUBLISHED / EXACT_SHA_CI_ACCEPTED
 Terminal current factsources: 12
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
@@ -15,17 +15,16 @@ Stage-QDR-9 plan: DONE / PUBLISHED
 Stage-QDR-9 implementation work order: FROZEN / ACCEPTED
 Stage-QDR-9 B1: CLOSED / ACCEPTED / PUBLISHED
 Stage-QDR-9 B2: CLOSED / ACCEPTED / PUBLISHED
-Stage-QDR-9 B3: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B3: IMPLEMENTED / LOCAL_ACCEPTED
 Historical evidence read model: IMPLEMENTED / INTERNAL ONLY
 Pagination: KEYSET / observed_at DESC + attribution_id DESC
 Page size: DEFAULT 50 / HARD MAX 100
 Maximum time range: 90 DAYS
 Cursor scope binding / tenant-environment isolation: PASS / PASS
-Stage-QDR-9 B4: SCOPE FROZEN / IMPLEMENTATION AUTHORIZED LOCALLY
-Retention: NOT_STARTED / DEFAULT DISABLED / 365 DAYS / MAXIMUM 100 / 5 SECONDS
+Retention: NOT_STARTED
 API / Automatic learning: NOT_ALLOWED / NOT_ALLOWED
 Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL
-Scope invariants: PASS / 21 OF 21
+Scope invariants: PASS / 17 OF 17
 B2 capacity: DEFERRED / KNOWN_LIMITATION
 Production capacity: NOT_PROVEN
 ```
@@ -574,88 +573,6 @@ B3_WIRING_SCOPE ⊆ WRITE_ALLOWLIST: PASS
 
 EFFECTIVE B3 TOTAL: 17 OF 17 PASS
 ```
-
-### 3.15 B4 Exact Scope Serialization — retention safety implementation prewrite
-
-本节冻结 B4 的唯一技术写入集合。它在所有 Java、SQL 或测试写入之前完成；B1–B3 的原始与 effective
-scope 保持 historical evidence，未被重写。B4 不得修改 V1–V15、创建 V16、改变 B2 write/transaction/
-idempotency 或 B3 read-model semantics。
-
-`B4_RETENTION_POLICY_SCOPE`：
-
-```text
-dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceErrorCode.java
-dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionCommand.java
-dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionResult.java
-dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionPort.java
-dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackIntegrityReport.java
-dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackIntegrityPort.java
-dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionService.java
-```
-
-`B4_RETENTION_REPOSITORY_SCOPE`：
-
-```text
-dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackRetentionAdapter.java
-dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackIntegrityAdapter.java
-```
-
-`B4_RETENTION_TEST_SCOPE`：
-
-```text
-dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackRetentionServiceTest.java
-dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackRetentionAdapterTest.java
-dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackIntegrityAdapterTest.java
-dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java
-dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitectureTest.java
-```
-
-`B4_RETENTION_WIRING_SCOPE`：
-
-```text
-config/qdr9-feedback/qdr9-feedback-contract.yml
-dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
-```
-
-B4 command 必须为单一 tenant/environment、显式 enabled、正 retention age、`1..100` batch 的内部 contract；
-默认 `enabled=false`、365 days、maximum 100、5 seconds。JDBC adapter 必须在单个
-`REPEATABLE_READ` transaction 中以 `FOR UPDATE SKIP LOCKED` 选择最多一个稳定排序 batch，事务内解析并
-再次验证 AUDIT/REPLAY/EVALUATION reference。只有 `RELEASED` reference 在 tenant-bound target lookup 成功时可
-继续；ACTIVE、INVALID、缺失、格式错误、查询失败、超时和 scope mismatch 一律 fail-closed。`EVIDENCE` 只参加
-aggregate integrity，不是单独 blocking set。删除顺序固定为 reference -> contribution -> attribution ->
-observation；无法证明完整 aggregate 或任一步失败时整体 rollback。不得新增 scheduler、Controller/API、外部
-runtime、自动重试、automatic learning 或交易副作用。
-
-#### Effective B4 scope invariants
-
-```text
-VALIDATION_SCOPE ⊆ READ_SCOPE: PASS
-FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-MIGRATION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-REPOSITORY_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-READ_MODEL_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-RETENTION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-ARCHITECTURE_GUARD_SCOPE ⊆ VALIDATION_SCOPE: PASS
-LEGACY_MIGRATION_TEST_FIX_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-B2_JDBC_IMPLEMENTATION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-B2_TRANSACTION_TEST_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-B2_CONCURRENCY_TEST_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-B2_WIRING_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-B3_READ_MODEL_IMPLEMENTATION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-B3_KEYSET_CURSOR_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-B3_QUERY_TEST_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-B3_WIRING_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-B4_RETENTION_POLICY_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-B4_RETENTION_REPOSITORY_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-B4_RETENTION_TEST_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-B4_RETENTION_WIRING_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-
-EFFECTIVE B4 TOTAL: 21 OF 21 PASS
-```
-
-本 B4 scope-prewrite commit 前的 section 4–13 仅是已消费 B1–B3 planning/implementation evidence；B4
-implementation 仅依据本节、terminal current authority 与本任务验证矩阵执行。
 
 ## 4. V15 schema freeze
 
