@@ -44,19 +44,3 @@ safety:
   api: forbidden
   automaticLearning: forbidden
   externalRuntime: forbidden
-retention:
-  internalOnly: true
-  enabledByDefault: false
-  defaultAgeDays: 365
-  maximumBatchSize: 100
-  timeoutSeconds: 5
-  environments:
-    - DEV
-    - TEST
-  activeBlockingReferences:
-    - AUDIT
-    - REPLAY
-    - EVALUATION
-  scheduler: forbidden
-  externalApi: forbidden
-  automaticRetry: forbidden

@@ -24,22 +24,6 @@ public enum FeedbackPersistenceErrorCode {
   QUERY_FAILURE,
   /** active reference 或完整性问题阻止 retention。 */
   RETENTION_BLOCKED,
-  /** retention command 明确保持关闭，未执行数据库写入。 */
-  RETENTION_DISABLED,
-  /** retention command 缺少单一 tenant/environment scope。 */
-  INVALID_RETENTION_SCOPE,
-  /** retention age 不为正或超过安全上限。 */
-  INVALID_RETENTION_AGE,
-  /** retention batch 不在固定安全上限内。 */
-  INVALID_BATCH_SIZE,
-  /** AUDIT、REPLAY 或 EVALUATION reference 仍为 active。 */
-  REFERENCE_ACTIVE,
-  /** reference 缺失、格式错误、状态未知或无法证明 scope/liveness。 */
-  REFERENCE_STATUS_UNKNOWN,
-  /** retention transaction 或 PostgreSQL statement 超过固定 deadline。 */
-  RETENTION_TIMEOUT,
-  /** concurrent cleanup 无法证明安全结果。 */
-  RETENTION_CONCURRENT_CONFLICT,
   /** bounded retention 执行失败。 */
   RETENTION_FAILURE
 }
