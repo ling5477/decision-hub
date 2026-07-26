@@ -1,5 +1,47 @@
 # Decision Hub Current Docs
-## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 reference-liveness state-model scope design
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 blocked remote commit containment
+
+```text
+Implementation baseline: 42697edcba9719a395aecee46830faba2c838948
+Branch: dev
+Pre-containment origin/dev / blocked B4 implementation: fa9debb4474eedc4353e1236e227eae8ef23c085
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+B3 authority exact-SHA CI: PASS / RUN 30191021995
+Stage-QDR-9 B4: IMPLEMENTATION REVERTED / MILESTONE REVIEW BLOCKED
+Blocked remote publication: CONFIRMED / CONTAINED BY ORDINARY REVERT
+Blocked remote scope-prewrite: 1036171ff7acd85078416b907f0444ab6214b3ca / REVERTED
+Blocked remote implementation: fa9debb4474eedc4353e1236e227eae8ef23c085 / REVERTED
+Blocked implementation CI: PASS / RUN 30197726218 / DOES NOT CLOSE P1
+B4 review blocker: REFERENCE_STATE_MODEL_UNRESOLVED
+P1 findings: 2 / OPEN
+Current B4 retention code / tests / wiring: NOT PRESENT IN CURRENT TREE
+Retention runtime: NOT AVAILABLE / NO SCHEDULER / NO API / NO STARTUP INVOCATION
+Reference-liveness state-model design: FROZEN / PUBLISHED WITH CONTAINMENT
+State-model design commit: 4ef3991f8379b6653f06a22bcdf5f4b33fcb7585
+Selected architecture: OPTION B / qdr_reference_liveness registry
+Forward migration: V16 CANDIDATE / NOT CREATED
+Fresh full regression: PASS / 19 OF 19 REACTOR / 1228 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL/Testcontainers: PASS / REAL EXECUTION / POSTGRESQL 17.10 / 0 MANDATORY SKIPS
+ArchitectureTest / StageQdr9FeedbackArchitectureTest: PASS / PASS
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Containment exact-SHA CI: REQUIRED / PENDING PUBLICATION
+B4 milestone review retry / B4 retention publication / B5: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED
+API / scheduler / automatic learning: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED
+Terminal current factsources: 12
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 CONTAINMENT AUTHORITY BLOCK / 0 CONFLICTS
+B3 review P2 backlog: 2 NON-BLOCKING TEST-GUARD ITEMS / NOT FIXED
+B2 capacity: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+current task: DH-STAGE-QDR-9-B4-BLOCKED-REMOTE-COMMIT-CONTAINMENT-DECISION
+current task status: LOCAL VALIDATED / FAST_FORWARD PUBLICATION AND EXACT-SHA CI PENDING
+next action after containment publication and CI: DH-STAGE-QDR-9-B4-REFERENCE-LIVENESS-FORWARD-MIGRATION-IMPLEMENTATION
+ALLOW_V16_IMPLEMENTATION: YES / NEXT TASK ONLY / AFTER CONTAINMENT PUBLICATION AND EXACT-SHA CI
+ALLOW_B4_MILESTONE_REVIEW / ALLOW_B5_IMPLEMENTATION_NOW: NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+## Previous terminal authority — 2026-07-26 Stage-QDR-9 B4 reference-liveness state-model scope design
 
 ```text
 Implementation baseline: 42697edcba9719a395aecee46830faba2c838948
@@ -183,8 +225,9 @@ ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 - [DH Stage-QDR-9 B3 Milestone Review](DH_STAGE_QDR_9_B3_MILESTONE_REVIEW.md)
 - [DH Stage-QDR-9 B4 Reference-Liveness State-Model Design](DH_STAGE_QDR_9_B4_REFERENCE_LIVENESS_STATE_MODEL_DESIGN.md)
 - [DH Stage-QDR-9 B4 Reference-Liveness Forward-Migration Work Order](DH_STAGE_QDR_9_B4_REFERENCE_LIVENESS_FORWARD_MIGRATION_WORK_ORDER.md)
+- [DH Stage-QDR-9 B4 Blocked Remote Commit Containment](DH_STAGE_QDR_9_B4_BLOCKED_REMOTE_COMMIT_CONTAINMENT.md)
 
-B1、B2 与 B3 均已发布并接受；B4 retention implementation 存在但 milestone review 因 reference-liveness state model 未解析而阻断。统一 registry 设计已冻结，V16 仅为候选且尚未创建；B4 publication、milestone review retry 与 B5 均不允许。
+B1、B2 与 B3 均已发布并接受；已发布但未获 review acceptance 的 B4 retention implementation 已由普通 revert 隔离，当前树不含 retention code、tests 或 wiring。两个 P1 仍为 OPEN；统一 registry 设计已冻结，V16 仅为候选且尚未创建。containment 的 fast-forward publication 与 exact-SHA CI 通过前，B4 milestone review retry、B4 retention publication 与 B5 均不允许。
 
 ## Previous terminal authority — 2026-07-23 Stage-QDR-7/QDR-8 archive source recovery and pruning CI fix
 

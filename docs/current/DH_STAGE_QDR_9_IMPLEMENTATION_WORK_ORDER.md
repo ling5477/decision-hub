@@ -1,6 +1,28 @@
 # DH Stage-QDR-9 Implementation Work Order
 
-## Terminal current authority — 2026-07-26 Stage-QDR-9 B3 local acceptance
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 blocked remote commit containment
+
+```text
+Implementation baseline: 42697edcba9719a395aecee46830faba2c838948
+Branch: dev
+Pre-containment origin/dev / blocked B4 implementation: fa9debb4474eedc4353e1236e227eae8ef23c085
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B4: IMPLEMENTATION REVERTED / MILESTONE REVIEW BLOCKED
+Blocked remote publication: CONFIRMED / CONTAINED BY ORDINARY REVERT
+Blocked remote scope-prewrite / implementation: 1036171ff7acd85078416b907f0444ab6214b3ca / fa9debb4474eedc4353e1236e227eae8ef23c085
+P1 findings: 2 / OPEN
+Current B4 retention code / tests / wiring: NOT PRESENT IN CURRENT TREE
+Reference-liveness state-model design: FROZEN / PUBLISHED WITH CONTAINMENT
+State-model design commit: 4ef3991f8379b6653f06a22bcdf5f4b33fcb7585
+Selected architecture: OPTION B / qdr_reference_liveness registry
+V16: CANDIDATE / NOT CREATED
+Fresh full regression: PASS / 19 OF 19 REACTOR / 1228 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Containment exact-SHA CI: REQUIRED / PENDING PUBLICATION
+next action after containment publication and CI: DH-STAGE-QDR-9-B4-REFERENCE-LIVENESS-FORWARD-MIGRATION-IMPLEMENTATION
+```
+
+## Historical terminal authority — 2026-07-26 Stage-QDR-9 B3 local acceptance
 
 ```text
 Implementation baseline: b61f164ea078bf9455fc682adf55ecd12283bbb4
@@ -1394,3 +1416,24 @@ B5: NOT_ALLOWED
 `DH_STAGE_QDR_9_B4_REFERENCE_LIVENESS_STATE_MODEL_DESIGN.md` 与
 `DH_STAGE_QDR_9_B4_REFERENCE_LIVENESS_FORWARD_MIGRATION_WORK_ORDER.md` 的 27/27 exact scope 执行；retention 保持 default-disabled，
 并且不得创建 API、scheduler、automatic learning、real HTTP/provider/NQ/Agent/LangGraph/Paper/LIVE 行为。
+
+## B4 Blocked Remote Publication Containment
+
+```text
+B4 scope-prewrite created: 1036171ff7acd85078416b907f0444ab6214b3ca
+B4 implementation created: fa9debb4474eedc4353e1236e227eae8ef23c085
+Initial milestone review: BLOCKED / REFERENCE_STATE_MODEL_UNRESOLVED / P1 2 OPEN
+Remote publication: CONFIRMED / NOT AUTHORIZED BY THE LOCAL REVIEW STATE
+Authority divergence: CONFIRMED
+Containment decision: OPTION 1 / ORDINARY REVERT
+Implementation containment commit: 4bdcd01f597e822c0e2592bfc368de6eaac56015
+Scope withdrawal containment commit: 6fadeb6c6324f6c487175e31b5c80531e30ff9e0
+History rewrite: NONE
+Current B4 retention implementation: REVERTED / NOT PRESENT
+Historical audit: RETAINED
+Reference-liveness design: RETAINED / 4ef3991f8379b6653f06a22bcdf5f4b33fcb7585
+V16: CANDIDATE / NOT CREATED
+B4 milestone review retry / B4 retention publication / B5: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED
+```
+
+本节不删除已发布提交对象，也不把远端 publication、P1 修复或 B4 acceptance 改写为未发生或已完成。普通 revert 只使当前技术树回到 B3 authority 的等价状态；后续仅可在 containment 发布和 exact-SHA CI 通过后，以冻结的 27/27 reference-liveness scope 发起独立 V16 前向迁移实施任务。
