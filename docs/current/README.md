@@ -1,5 +1,36 @@
 # Decision Hub Current Docs
-## Terminal current authority — 2026-07-26 Stage-QDR-9 B3 publication and authority close
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 scope prewrite
+
+```text
+Implementation baseline: 42697edcba9719a395aecee46830faba2c838948
+Branch: dev
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+B3 authority exact-SHA CI: PASS / RUN 30191021995
+Stage-QDR-9 B4: SCOPE FROZEN / IMPLEMENTATION AUTHORIZED LOCALLY
+Retention: NOT_STARTED
+Retention default: DISABLED
+Retention age: DEFAULT 365 DAYS
+Retention batch size: MAXIMUM 100
+Retention timeout: 5 SECONDS / FAIL_CLOSED
+Active AUDIT / REPLAY / EVALUATION protection: REQUIRED
+API / Automatic learning: NOT_ALLOWED / NOT_ALLOWED
+B4 effective scope invariants: PASS / 21 OF 21
+Terminal current factsources: 12
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 SCOPE HASH / 0 CONFLICTS
+B3 review P2 backlog: 2 NON-BLOCKING TEST-GUARD ITEMS / NOT FIXED
+B2 capacity: DEFERRED / KNOWN_LIMITATION
+Production capacity: NOT_PROVEN
+current task: DH-STAGE-QDR-9-B4-RETENTION-SAFETY-AND-INTEGRITY-IMPLEMENTATION
+current task status: SCOPE FROZEN / IMPLEMENTATION AUTHORIZED LOCALLY
+next action: IMPLEMENT INTERNAL DEFAULT-DISABLED RETENTION CLEANUP
+ALLOW_B4_IMPLEMENTATION: YES / LOCAL SCOPE COMMIT AUTHORIZED
+ALLOW_B4_IMPLEMENTATION_NOW: YES / EXACT B4 SCOPE ONLY
+ALLOW_API_CHANGE_NOW / ALLOW_AUTOMATIC_LEARNING: NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+```
+
+## Previous terminal authority — 2026-07-26 Stage-QDR-9 B3 publication and authority close
 
 ```text
 Implementation baseline: 20fe2f54ebf043c8c80f841db856ae35bc4f61a
