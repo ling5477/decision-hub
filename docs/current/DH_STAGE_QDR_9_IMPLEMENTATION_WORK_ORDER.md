@@ -1,6 +1,37 @@
 # DH Stage-QDR-9 Implementation Work Order
 
-## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 blocked remote commit containment
+
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 producer environment contract scope design
+
+~~~text
+Implementation baseline / HEAD / origin/dev / advertised SHA: 7624bccba9b865d4b687057f41b96799cb9ba8e3
+Branch / ahead / behind / worktree / staged: dev / 0 / 0 / clean / empty
+Containment: CLOSED / ACCEPTED / PUBLISHED
+Containment exact-SHA CI: 30203970694 / PASS
+Current technical tree: B3 SAFE BASELINE
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B4: IMPLEMENTATION REVERTED / REVIEW BLOCKED
+Reference-liveness design: FROZEN / PUBLISHED
+Selected architecture: OPTION B / qdr_reference_liveness registry
+V16 implementation: BLOCKED BEFORE CODE WRITE
+V16 blocker: PRODUCER ENVIRONMENT CONTRACT MISSING / SOURCES UNRESOLVED
+AUDIT / REPLAY / EVALUATION environment contract: FROZEN / LOCAL_ACCEPTED
+AUDIT / REPLAY / EVALUATION environment source: UNRESOLVED / FAIL_CLOSED
+Producer environment scope: 31 / 31 PASS
+V16: CANDIDATE / NOT CREATED
+Retention: NOT PRESENT IN CURRENT TREE
+B4 milestone review retry / B4 publication / B5: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED
+API / scheduler / automatic learning: NOT_ALLOWED / NOT_IMPLEMENTED / NOT_ALLOWED
+Production capacity: NOT_PROVEN
+Terminal current factsources: 12 / 12
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 PRODUCER ENVIRONMENT AUTHORITY HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-CONTRACT-SCOPE-DESIGN
+current task status: LOCAL_ACCEPTED / SOURCE_BLOCKER_FROZEN
+next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER
+ALLOW_V16_IMPLEMENTATION_RETRY: NO
+~~~
+
+## Historical terminal authority — 2026-07-26 Stage-QDR-9 B4 blocked remote commit containment
 
 ```text
 Implementation baseline: 42697edcba9719a395aecee46830faba2c838948
@@ -1436,4 +1467,26 @@ V16: CANDIDATE / NOT CREATED
 B4 milestone review retry / B4 retention publication / B5: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED
 ```
 
-本节不删除已发布提交对象，也不把远端 publication、P1 修复或 B4 acceptance 改写为未发生或已完成。普通 revert 只使当前技术树回到 B3 authority 的等价状态；后续仅可在 containment 发布和 exact-SHA CI 通过后，以冻结的 27/27 reference-liveness scope 发起独立 V16 前向迁移实施任务。
+本节不删除已发布提交对象，也不把远端 publication、P1 修复或 B4 acceptance 改写为未发生或已完成。普通 revert 只使当前技术树回到 B3 authority 的等价状态；后续 V16 前向迁移还必须先解决 producer environment source blocker。
++
+## B4 Producer Environment Contract Blocker
+
+V16 implementation attempt is BLOCKED BEFORE CODE WRITE. The code audit found that AUDIT, REPLAY and EVALUATION producers do not carry an explicit FeedbackEnvironment from a trusted entry point through their native records to the future registry transition.
+
+~~~text
+BLOCKER: STAGE_QDR_9_B4_PRODUCER_ENVIRONMENT_CONTRACT_BLOCKER
+NO_DEFAULT_OR_INFERENCE: PASS
+NEW_CROSS_MODULE_SCOPE: DH_STAGE_QDR_9_B4_PRODUCER_ENVIRONMENT_SCOPE_WORK_ORDER.md
+AUDIT / REPLAY / EVALUATION CONTRACT: FROZEN / LOCAL_ACCEPTED
+AUDIT / REPLAY / EVALUATION SOURCE: UNRESOLVED / FAIL_CLOSED
+ORIGINAL_REFERENCE_LIVENESS_SCOPE: 27 / 27 PASS
+EFFECTIVE_SCOPE: 31 / 31 PASS
+V16: NOT CREATED
+B4 RETENTION: NOT PRESENT IN CURRENT TREE
+ALLOW_V16_IMPLEMENTATION_RETRY: NO
+B4 MILESTONE REVIEW RETRY / B4 PUBLICATION / B5: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED
+~~~
+
+禁止把 tenant、ID、trace、event_status、verdict、Spring profile、guard property default 或 existing target 解释为 environment；缺失时不得写 native target 或 registry transition。这个 blocker 不改变 Option B，不修改 V1-V15，不恢复 retention，也不授权 API、scheduler、automatic learning 或任何外部 runtime。
+
+下一精确任务为 DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER。只有该任务为每个 production caller 证明 explicit DEV/TEST source 并冻结必要的额外 scope 后，才能重新评估 V16 implementation retry。

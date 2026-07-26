@@ -1,5 +1,43 @@
 # Decision Hub Worklog
-## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 blocked remote commit containment
+
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 producer environment contract scope design
+
+~~~text
+Implementation baseline / HEAD / origin/dev / advertised SHA: 7624bccba9b865d4b687057f41b96799cb9ba8e3
+Branch / ahead / behind / worktree / staged: dev / 0 / 0 / clean / empty
+Containment: CLOSED / ACCEPTED / PUBLISHED
+Containment exact-SHA CI: 30203970694 / PASS
+Current technical tree: B3 SAFE BASELINE
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B4: IMPLEMENTATION REVERTED / REVIEW BLOCKED
+Reference-liveness design: FROZEN / PUBLISHED
+Selected architecture: OPTION B / qdr_reference_liveness registry
+V16 implementation: BLOCKED BEFORE CODE WRITE
+V16 blocker: PRODUCER ENVIRONMENT CONTRACT MISSING / SOURCES UNRESOLVED
+AUDIT / REPLAY / EVALUATION environment contract: FROZEN / LOCAL_ACCEPTED
+AUDIT / REPLAY / EVALUATION environment source: UNRESOLVED / FAIL_CLOSED
+Producer environment scope: 31 / 31 PASS
+V16: CANDIDATE / NOT CREATED
+Retention: NOT PRESENT IN CURRENT TREE
+B4 milestone review retry / B4 publication / B5: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED
+API / scheduler / automatic learning: NOT_ALLOWED / NOT_IMPLEMENTED / NOT_ALLOWED
+Production capacity: NOT_PROVEN
+Terminal current factsources: 12 / 12
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 PRODUCER ENVIRONMENT AUTHORITY HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-CONTRACT-SCOPE-DESIGN
+current task status: LOCAL_ACCEPTED / SOURCE_BLOCKER_FROZEN
+next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER
+ALLOW_V16_IMPLEMENTATION_RETRY: NO
+~~~
+
++## 2026-07-26 DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-CONTRACT-SCOPE-DESIGN
+
+完成 AUDIT、REPLAY、EVALUATION producer environment 调用链审计、显式 FeedbackEnvironment 合同、传播/事务设计和 31/31 exact scope freeze。审计确认现有 DecisionRequest、DecisionDryRunCommand、QdrModelGatewayIntegrationCommand、QdrRegressionEvaluationCommand、approval commands/packet 与 PersistentGuardIdentity 均不能提供可信的 canonical environment；未使用默认 DEV、tenant/ID/profile 推断或静默跳过 registry。
+
+结果：environment contract 为 FROZEN / LOCAL_ACCEPTED，但三类 environment source 为 UNRESOLVED / FAIL_CLOSED；V16 implementation 保持 BLOCKED BEFORE CODE WRITE。新增 design 和 scope work order，更新 forward migration work order、main implementation work order、12/12 terminal factsources 与 current index。未修改 Java、测试、migration、config、POM/workflow、API/Controller、scheduler、retention、B2/B3 或 archive；未 push、未创建 tag。
+
+下一任务：DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER。
+## Historical terminal authority — 2026-07-26 Stage-QDR-9 B4 blocked remote commit containment
 
 ```text
 Implementation baseline: 42697edcba9719a395aecee46830faba2c838948
