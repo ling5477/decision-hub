@@ -1,5 +1,5 @@
 # Decision Hub Status
-## Terminal current authority — 2026-07-25 Stage-QDR-9 B2 transactional persistence local accepted
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B2 publication and authority close
 
 ```text
 Implementation baseline: 20fe2f54ebf043c8c80f841db856ae35bc4f61a
@@ -8,28 +8,34 @@ B1 implementation commit: 80b21f31bdb5dc7a15f327aa9617b0640fd1f22b
 B1 scope-repair/review commit: 64a0757175e81720b2092c0a67302d619eb49291
 B1 publication: PASS / FAST_FORWARD
 B1 exact-SHA CI: PASS / RUN 30104473274
+B2 implementation commit: 5363c1930684c7c1baf0ea8a72f36d5ede870b4e
+B2 publication: PASS / FAST_FORWARD
+B2 exact-SHA CI: PASS / RUN 30187110533
+B2 milestone review: PASS / P0 0 / P1 0 / P2 1 SCOPE SERIALIZATION COMPLETED
 Stage-QDR-7: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-8: CLOSED / ACCEPTED / ARCHIVED / TAGGED / CURRENT_PRUNED
 Stage-QDR-9 plan: DONE / PUBLISHED
 Stage-QDR-9 implementation work order: FROZEN / ACCEPTED
-Stage-QDR-9 overall: IN_PROGRESS / B1 CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 overall: IN_PROGRESS / B1+B2 CLOSED / ACCEPTED / PUBLISHED
 Stage-QDR-9 B1: CLOSED / ACCEPTED / PUBLISHED
-Stage-QDR-9 B2: IMPLEMENTED / LOCAL_ACCEPTED
+Stage-QDR-9 B2: CLOSED / ACCEPTED / PUBLISHED
 Selected direction: STRUCTURED_FEEDBACK_ATTRIBUTION_PERSISTENCE + HISTORICAL_EVIDENCE_READ_MODEL
 Current highest migration: V15
 V15: PUBLISHED / EXACT_SHA_CI_ACCEPTED
 Initial milestone review: BLOCKED / TASK_SCOPE_DESIGN_INVALID
 Scope erratum: DONE / 2 EXACT LEGACY TESTS ADDED
-Effective scope invariants: PASS / 9 OF 9
-Final milestone review: PASS
+Effective B1 scope invariants: PASS / 9 OF 9
+Effective B2 scope invariants: PASS / 13 OF 13
+Final B1 milestone review: PASS
+B2 milestone review record: PASS / docs/current/DH_STAGE_QDR_9_B2_MILESTONE_REVIEW.md
 Domain persistence contracts: PASS
 V15 schema / clean migration / V14-to-V15 upgrade / constraints: PASS / PASS / PASS / PASS
 Legacy V12/V13 migration compatibility: PASS / EXPLICIT V14 TARGET
-Remote regression: PASS / 19 OF 19 REACTOR / 1208 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
-ArchitectureTest: PASS
-Checkstyle: 0
-Spotless: PASS
+B1 remote regression: PASS / 19 OF 19 REACTOR / 1208 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+B1 PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
+B1 ArchitectureTest: PASS
+B1 Checkstyle: 0
+B1 Spotless: PASS
 B2 JDBC repository: IMPLEMENTED / FOUR V15 RELATIONS / TENANT_AND_ENVIRONMENT_SCOPED
 Transactional aggregate write: PASS / REQUIRED + REPEATABLE_READ / ATOMIC ROLLBACK
 Database idempotency: PASS / UNIQUE_CONSTRAINT_DECISIVE
@@ -39,28 +45,27 @@ Duplicate-key concurrency: PASS / 16 WORKERS / ONE PHYSICAL AGGREGATE
 Commit outcome unknown: FAIL_CLOSED / NO_RETRY / READ_ONLY_RECONCILIATION_ONLY
 Reference validation: PASS / AUDIT_REPLAY_EVALUATION_TENANT_BOUND / EVIDENCE_BOUND
 PostgreSQL restart persistence: PASS / RESTART + RECONNECT + SAME_KEY_REUSED
-B2 local targeted tests: PASS / 12 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-B2 local module regression: PASS / DH-USECASE 9 OF 9 + DH-INFRA,DH-APP 15 OF 15 REACTOR
-B2 local full regression: PASS / 19 OF 19 REACTOR / 1220 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+B2 exact-SHA targeted tests: PASS / 12 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+B2 exact-SHA module regression: PASS / DH-USECASE 9 OF 9 + DH-INFRA,DH-APP 15 OF 15 REACTOR
+B2 exact-SHA full regression: PASS / 19 OF 19 REACTOR / 1220 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 B2 PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / ZERO MANDATORY SKIPS
 B2 architecture guards: PASS / ArchitectureTest + StageQdr9FeedbackArchitectureTest
-B2 local quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
-Remote exact-SHA CI: PENDING NEW B2 COMMIT
-JDBC Repository implementation: IMPLEMENTED
+B2 exact-SHA quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+JDBC Repository implementation: IMPLEMENTED / ACCEPTED
 Historical read model: NOT_STARTED
 Retention: NOT_STARTED
 API / Automatic learning: NOT_ALLOWED / NOT_ALLOWED
 Terminal current factsources: 12
 Scope invariants: PASS / 13 OF 13
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B2 AUTHORITY HASH / 0 CONFLICTS
-B2 milestone review: REQUIRED BEFORE B3
 B2 capacity: DEFERRED / KNOWN_LIMITATION
 Production capacity: NOT_PROVEN
-current task: DH-STAGE-QDR-9-B2-JDBC-PERSISTENCE-AND-TRANSACTIONAL-IDEMPOTENCY-IMPLEMENTATION
-current task status: DONE / LOCAL_ACCEPTED
-next action: DH-STAGE-QDR-9-B2-MILESTONE-REVIEW
-ALLOW_B2_MILESTONE_REVIEW: YES
-ALLOW_B3_IMPLEMENTATION_NOW: NO / B2 MILESTONE REVIEW REQUIRED
+current task: DH-STAGE-QDR-9-B2-PUBLICATION-AND-AUTHORITY-CLOSE
+current task status: CLOSED / ACCEPTED / PUBLISHED
+next action after authority publication and CI: DH-STAGE-QDR-9-B3-HISTORICAL-EVIDENCE-READ-MODEL-IMPLEMENTATION
+ALLOW_B2_MILESTONE_REVIEW: CONSUMED / PASS
+ALLOW_B3_IMPLEMENTATION: YES / NEXT TASK ONLY
+ALLOW_B3_IMPLEMENTATION_NOW: NO / SEPARATE B3 IMPLEMENTATION TASK REQUIRED
 ALLOW_API_CHANGE_NOW: NO
 ALLOW_AUTOMATIC_LEARNING: NO
 ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME: NO / NO / NO

@@ -442,6 +442,66 @@ EFFECTIVE TOTAL: 9 OF 9 PASS
 
 `LEGACY_MIGRATION_TEST_FIX_SCOPE` 仅包含上述两份 V12/V13 test；不得据此扩大到其他历史 migration、callback、schema 或 implementation 路径。若该 effective contract 之外出现 blocker，必须输出 `STAGE_QDR_9_B1_TECHNICAL_BLOCKER_REQUIRES_NEW_TASK`，不得在本治理修复任务中修改技术文件。
 
+### 3.13 B2 Effective Scope Serialization — post-implementation governance repair
+
+本节是对已经发布的 B2 技术提交 `5363c1930684c7c1baf0ea8a72f36d5ede870b4e` 的范围序列化。它不修改该提交，也不改写上方原始 `8 / 8 PASS` 或 B1 effective `9 / 9 PASS` 历史；四个 B2 exact scope sets 仅补齐 B2 实际技术文件的可独立重建记录。
+
+`B2_JDBC_IMPLEMENTATION_SCOPE`：
+
+```text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackPersistenceErrorCode.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackAttributionPersistenceService.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackAttributionRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackPersistenceTransactionBoundary.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackReferenceValidationAdapter.java
+```
+
+`B2_TRANSACTION_TEST_SCOPE`：
+
+```text
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/feedback/FeedbackAttributionPersistenceServiceTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackAttributionRepositoryTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackReferenceValidationAdapterTest.java
+```
+
+`B2_CONCURRENCY_TEST_SCOPE`：
+
+```text
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/JdbcFeedbackAttributionRepositoryTest.java
+```
+
+`B2_WIRING_SCOPE`：
+
+```text
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
+dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitectureTest.java
+```
+
+四个集合都是冻结 `WRITE_ALLOWLIST` 的 exact subsets；B2 technical subset 与 12 个 terminal current factsources 合并后覆盖 B2 implementation commit 的全部 23 个变更文件。它们不授权 V1–V15 migration、historical read model、retention/delete、Controller/API/OpenAPI、POM/workflow、QDR-7/QDR-8 archive、真实 HTTP/Provider/NQ、Agent/LangGraph 或 automatic learning。
+
+#### Effective B2 scope invariants
+
+```text
+VALIDATION_SCOPE ⊆ READ_SCOPE: PASS
+FIXABLE_BLOCKER_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+CURRENT_FACTSOURCE_SCAN_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+MIGRATION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+REPOSITORY_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+READ_MODEL_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+RETENTION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+ARCHITECTURE_GUARD_SCOPE ⊆ VALIDATION_SCOPE: PASS
+LEGACY_MIGRATION_TEST_FIX_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+B2_JDBC_IMPLEMENTATION_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+B2_TRANSACTION_TEST_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+B2_CONCURRENCY_TEST_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+B2_WIRING_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+
+EFFECTIVE B2 TOTAL: 13 OF 13 PASS
+```
+
+B2 的 publication、exact-SHA CI 与 milestone review 记录在 current authority close 中完成；本节不授权 B3 implementation。
+
 ## 4. V15 schema freeze
 
 ### 4.1 Migration identity
