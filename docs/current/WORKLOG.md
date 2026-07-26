@@ -1,5 +1,58 @@
 # Decision Hub Worklog
 
+## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 producer environment source blocker
+
+~~~text
+Design baseline / starting HEAD: 2cc75dcc8c2228af43e79d7163d7489bf67ebc97
+origin/dev / advertised SHA: 7624bccba9b865d4b687057f41b96799cb9ba8e3
+Branch / pre-commit ahead / behind / worktree / staged: dev / 1 / 0 / clean / empty
+Local documentation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUBLISHED
+Containment: CLOSED / ACCEPTED / PUBLISHED
+Current technical tree: B3 SAFE BASELINE
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B4: IMPLEMENTATION REVERTED / REVIEW BLOCKED
+Reference-liveness architecture / design: OPTION B / FROZEN
+Producer environment initial contract: FROZEN / SOURCES UNRESOLVED
+Root execution scope contract: FeedbackExecutionScope / FROZEN
+Producer environment root source: UNRESOLVED / UPSTREAM CONTRACT REQUIRED
+AUDIT environment source: UNRESOLVED / PRODUCTION CONTROLLERS HAVE NO ENVIRONMENT
+REPLAY environment source: UNRESOLVED / PRODUCTION CALLER ABSENT
+EVALUATION environment source: UNRESOLVED / PRODUCTION CALLER ABSENT
+Missing environment: REJECT AT ROOT / NO NATIVE WRITE / NO REGISTRY WRITE
+Effective source scope: 36 / 36 PASS
+V16: CANDIDATE / NOT_CREATED
+V16 implementation: BLOCKED / UPSTREAM SOURCE CONTRACT REQUIRED
+Retention: NOT PRESENT
+B4 milestone review retry / B4 publication / B5: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED
+API / scheduler / automatic learning: NOT_ALLOWED / NOT_IMPLEMENTED / NOT_ALLOWED
+Regression baseline: 1228 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Production capacity: NOT_PROVEN
+Terminal current factsources: 12 / 12
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 PRODUCER ENVIRONMENT SOURCE BLOCKER AUTHORITY HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER
+current task status: LOCAL_ACCEPTED / PRODUCER_ENVIRONMENT_SOURCE_UNRESOLVED
+next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-BLOCKER
+ALLOW_V16_IMPLEMENTATION_RETRY: NO
+~~~
+
+## 2026-07-26 DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER
+
+完成 production root caller、root-inward propagation、native/registry transaction owner 与 exact source scope 审计。唯一根类型冻结为 `FeedbackExecutionScope`；AUDIT roots 精确定位到 `DecisionDryRunController` 与 `HumanApprovalPacketController`，但现有 authenticated/request context 没有 environment。REPLAY/EVALUATION 的 `QdrRegressionEvaluationService` 没有 production caller 或 Spring wiring。
+
+结果为 blocker acceptance，而不是 source resolution success：
+
+```text
+PRODUCER_ENVIRONMENT_SOURCE_RESOLUTION: BLOCKED
+ROOT_EXECUTION_SCOPE: FROZEN
+AUDIT / REPLAY / EVALUATION SOURCE: UNRESOLVED / FAIL_CLOSED
+EFFECTIVE_SCOPE_INVARIANTS: 36 / 36 PASS
+ALLOW_V16_IMPLEMENTATION_RETRY: NO
+```
+
+新增 source-resolution authority 与 blocked implementation work order；同步 contract/scope/forward-migration/main work order、12/12 terminal factsources 与 current index。`mvn -B -ntp -Pquality validate` 真实通过 19/19 reactor、Checkstyle 0、Spotless PASS；完整回归按 documentation-only 合同未重跑，复用 1228-test containment baseline。未修改 Java、测试、migration、V16、config、POM/workflow、API/Controller、scheduler、B2/B3 或 archive；未 push、未创建 tag。
+
+下一任务：`DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-BLOCKER`。
+
 ## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 producer environment contract scope design
 
 ~~~text
@@ -30,7 +83,7 @@ next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER
 ALLOW_V16_IMPLEMENTATION_RETRY: NO
 ~~~
 
-+## 2026-07-26 DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-CONTRACT-SCOPE-DESIGN
+## 2026-07-26 DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-CONTRACT-SCOPE-DESIGN
 
 完成 AUDIT、REPLAY、EVALUATION producer environment 调用链审计、显式 FeedbackEnvironment 合同、传播/事务设计和 31/31 exact scope freeze。审计确认现有 DecisionRequest、DecisionDryRunCommand、QdrModelGatewayIntegrationCommand、QdrRegressionEvaluationCommand、approval commands/packet 与 PersistentGuardIdentity 均不能提供可信的 canonical environment；未使用默认 DEV、tenant/ID/profile 推断或静默跳过 registry。
 

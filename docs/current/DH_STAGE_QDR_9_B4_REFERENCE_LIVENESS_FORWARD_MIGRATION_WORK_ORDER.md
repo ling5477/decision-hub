@@ -14,7 +14,7 @@ B4 milestone review retry: NOT_ALLOWED UNTIL THIS WORK ORDER PASSES
 
 本工单实施统一 `qdr_reference_liveness` source-of-truth；它不修改 V1–V15，不重解释 `event_status` 或 `verdict`，不新增 API、scheduler、automatic learning 或任何外部 runtime。
 
-+## 1.1 Producer Environment Contract Blocker
+## 1.1 Producer Environment Contract Blocker
 
 ~~~text
 V16 implementation attempt: BLOCKED BEFORE CODE WRITE
@@ -30,6 +30,40 @@ next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER
 ~~~
 
 既有 27-file scope 没有覆盖所有 producer 的 earliest caller、environment command/record 传播和 atomic coordinator。新增文件清单只在 DH_STAGE_QDR_9_B4_PRODUCER_ENVIRONMENT_SCOPE_WORK_ORDER.md 中冻结；任何 source-blocker 后续发现的额外路径必须另行 scope retry，不能在 V16 implementation 中隐式扩张。
+
+## 1.2 Producer Environment Source Blocker
+
+后续全量 root caller 审计已选定唯一 `FeedbackExecutionScope` 类型、三类 root-inward 传播链与原子事务 owner，但没有找到可接受的实际 environment authority：
+
+```text
+AUDIT production roots:
+DecisionDryRunController.decide
+HumanApprovalPacketController.createApprovalPacket
+HumanApprovalPacketController.submitApprovalDecision
+
+AUDIT caller-supplied DEV/TEST:
+ABSENT
+
+REPLAY/EVALUATION production caller and Spring wiring:
+ABSENT
+
+guard property / Spring profile / default DEV:
+FORBIDDEN SOURCE
+
+source-resolution exact scope:
+36 / 36 PASS
+
+PRODUCER_ENVIRONMENT_SOURCE_RESOLUTION:
+BLOCKED
+
+ALLOW_V16_IMPLEMENTATION_RETRY:
+NO
+
+next action:
+DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-BLOCKER
+```
+
+36/36 只证明 caller、传播、事务和测试文件已完整序列化；V16 仍不得创建。必须先由独立 upstream contract 任务证明 controller/internal production caller 能显式提供 canonical DEV/TEST，且不引入 profile/config/tenant/ID inference。
 
 ## 2. V16 设计冻结
 

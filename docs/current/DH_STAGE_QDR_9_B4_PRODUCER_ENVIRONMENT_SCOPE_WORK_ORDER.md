@@ -113,3 +113,39 @@ TASK_SCOPE_DESIGN_INVALID: NO
 V16 retry 仅在独立 source-blocker 任务为每个 production caller 证明唯一、显式、可信的 FeedbackEnvironment source，并把必要文件完整纳入下一份 allowlist 后重新评估。永久禁止默认 DEV、tenant/ID/profile 推断、缺失 environment 时只跳过 registry、用 audit result/verdict 当 lifecycle、异步补写 registry、API/scheduler/automatic learning 扩张。
 
 本轮不授权 B4 milestone review retry、B4 publication、B5、API、scheduler、automatic learning、real HTTP/provider/NQ/Agent/LangGraph/Paper/LIVE。
+
+## 5. Source-resolution scope erratum — 2026-07-26
+
+原 31/31 仅覆盖 environment contract 与初始传播，不包含全部 production root callers，不能作为 implementation acceptance scope。后续审计已定位：
+
+```text
+AUDIT roots:
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunController.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/HumanApprovalPacketController.java
+
+REPLAY/EVALUATION root boundary:
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionEvaluationService.java
+
+REPLAY/EVALUATION production caller:
+NOT PRESENT
+```
+
+新增五个 exact scope 集合的完整逐文件清单位于：
+
+```text
+docs/current/DH_STAGE_QDR_9_B4_PRODUCER_ENVIRONMENT_SOURCE_IMPLEMENTATION_WORK_ORDER.md
+```
+
+scope invariant 更新为：
+
+```text
+B4_PRODUCER_ENVIRONMENT_ROOT_SOURCE_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_AUDIT_ENVIRONMENT_SOURCE_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_REPLAY_ENVIRONMENT_SOURCE_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_EVALUATION_ENVIRONMENT_SOURCE_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_PRODUCER_ENVIRONMENT_SOURCE_TEST_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+EFFECTIVE_SCOPE_INVARIANTS: 36 / 36 PASS
+TASK_SCOPE_DESIGN_INVALID: NO
+```
+
+该 scope 只冻结 future validation/write serialization，当前仍不授权代码、测试、migration、API/security contract 或 V16。由于 AUDIT 无可信 caller environment、REPLAY/EVALUATION 无 production caller，implementation retry 保持 blocked。

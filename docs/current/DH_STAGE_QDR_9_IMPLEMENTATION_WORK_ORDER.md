@@ -31,6 +31,48 @@ next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER
 ALLOW_V16_IMPLEMENTATION_RETRY: NO
 ~~~
 
+## B4 Producer Environment Source Resolution — current blocker
+
+`DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER` 已完成 production root caller、传播链、事务 owner 与 exact scope 审计：
+
+```text
+initial producer-environment design: COMPLETED / 31 OF 31
+initial source state: UNRESOLVED
+V16 attempt: BLOCKED BEFORE CODE WRITE
+selected root contract: FeedbackExecutionScope
+selected root contract path:
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/FeedbackExecutionScope.java
+root strategy: SEPARATE ROOTS / ONE SHARED STRICT TYPE
+expanded exact scope: 36 / 36 PASS
+V16: CANDIDATE / NOT_CREATED
+```
+
+代码现实同时证明：
+
+- `DecisionDryRunController` 与 `HumanApprovalPacketController` 没有 caller-supplied environment；
+- auth context 仅有 user/tenant/roles；
+- guard environment 来自 deployment configuration，且支持 staging/prod，禁止转换；
+- `QdrRegressionEvaluationService` 没有 production caller 或 Spring wiring。
+
+因此本工单不能转入 V16 retry：
+
+```text
+PRODUCER_ENVIRONMENT_SOURCE_RESOLUTION: BLOCKED
+AUDIT_ENVIRONMENT_SOURCE: UNRESOLVED
+REPLAY_ENVIRONMENT_SOURCE: UNRESOLVED
+EVALUATION_ENVIRONMENT_SOURCE: UNRESOLVED
+ALLOW_V16_IMPLEMENTATION_RETRY: NO
+ALLOW_B4_MILESTONE_REVIEW_RETRY / PUBLICATION / B5: NO / NO / NO
+NEXT_ACTION: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-BLOCKER
+```
+
+权威设计与 future blocked work order：
+
+```text
+docs/current/DH_STAGE_QDR_9_B4_PRODUCER_ENVIRONMENT_SOURCE_RESOLUTION.md
+docs/current/DH_STAGE_QDR_9_B4_PRODUCER_ENVIRONMENT_SOURCE_IMPLEMENTATION_WORK_ORDER.md
+```
+
 ## Historical terminal authority — 2026-07-26 Stage-QDR-9 B4 blocked remote commit containment
 
 ```text

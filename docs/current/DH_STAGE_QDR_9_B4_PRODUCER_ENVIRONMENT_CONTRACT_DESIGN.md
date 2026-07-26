@@ -115,3 +115,36 @@ CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 PRODUCER ENVIRONMENT AUTH
 ALLOW_V16_IMPLEMENTATION_RETRY: NO
 NEXT_ACTION: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER
 ~~~
+
+## 8. Producer source resolution erratum — 2026-07-26
+
+后续 `DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER` 已补做 API root、authentication context、rate-limit bridge 与 regression service production wiring 审计。原 31/31 结论继续保留，但其语义严格限定为：
+
+```text
+CONTRACT AND INITIAL PROPAGATION SCOPE
+SOURCE CALLERS UNRESOLVED
+SUPERSEDED FOR IMPLEMENTATION ACCEPTANCE
+```
+
+唯一根类型选定为：
+
+```text
+ROOT_EXECUTION_SCOPE_TYPE: FeedbackExecutionScope
+ROOT_EXECUTION_SCOPE_PATH:
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/FeedbackExecutionScope.java
+```
+
+真实 caller 结论：
+
+1. AUDIT 的 production roots 是 `DecisionDryRunController.decide` 与 `HumanApprovalPacketController.createApprovalPacket/submitApprovalDecision`；现有 auth/request contract 没有 environment。
+2. `DecisionDryRunGuardProperties.environment` 是 deployment configuration 且支持 staging/prod，明确禁止作为 source。
+3. REPLAY/EVALUATION 的 `QdrRegressionEvaluationService.evaluate` 没有 production constructor 或 Spring wiring；只有 test caller。
+
+因此 root type、root owners、root-inward propagation、missing-environment 行为与事务 owner 已冻结，但三类实际 environment source 仍为 `UNRESOLVED`。五个 source-resolution exact scopes 已在新工单逐文件序列化，effective scope 为 36/36 PASS；scope 完整不等于 source authority 已存在。
+
+```text
+PRODUCER_ENVIRONMENT_SOURCE_RESOLUTION: BLOCKED
+AUDIT / REPLAY / EVALUATION SOURCE: UNRESOLVED / FAIL_CLOSED
+ALLOW_V16_IMPLEMENTATION_RETRY: NO
+NEXT_ACTION: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-BLOCKER
+```
