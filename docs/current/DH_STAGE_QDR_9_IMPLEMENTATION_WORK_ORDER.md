@@ -1531,4 +1531,16 @@ B4 MILESTONE REVIEW RETRY / B4 PUBLICATION / B5: NOT_ALLOWED / NOT_ALLOWED / NOT
 
 禁止把 tenant、ID、trace、event_status、verdict、Spring profile、guard property default 或 existing target 解释为 environment；缺失时不得写 native target 或 registry transition。这个 blocker 不改变 Option B，不修改 V1-V15，不恢复 retention，也不授权 API、scheduler、automatic learning 或任何外部 runtime。
 
-下一精确任务为 DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-SOURCE-BLOCKER。只有该任务为每个 production caller 证明 explicit DEV/TEST source 并冻结必要的额外 scope 后，才能重新评估 V16 implementation retry。
+上一 source-resolution task 保持 BLOCKED 的历史事实；其 design input 已由 trusted upstream authority decision 吸收。新的实施顺序为：
+
+~~~text
+AUDIT authority: OPTION B / NEW EXPLICIT SIGNED CONTRACT REQUIRED
+REPLAY/EVALUATION: DORMANT / NO PRODUCTION ENTRY
+FeedbackExecutionScope: FROZEN / NOT IMPLEMENTED
+EFFECTIVE_UPSTREAM_SCOPE: 42 / 42 PASS
+V16: CANDIDATE / NOT CREATED
+V16 implementation: NOT ALLOWED
+NEXT_TASK: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION
+~~~
+
+该 next task 只可实施 U1/U2；不得创建 V16、registry/retention integration、REPLAY/EVALUATION controller 或 runtime wiring、API、scheduler 或 automatic learning。

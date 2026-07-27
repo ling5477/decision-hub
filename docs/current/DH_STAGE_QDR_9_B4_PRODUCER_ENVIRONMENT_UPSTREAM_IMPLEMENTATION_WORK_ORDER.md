@@ -1,0 +1,143 @@
+# DH Stage-QDR-9 B4 Producer Environment Upstream Implementation Work Order
+
+## 1. 工单状态与边界
+
+~~~text
+task: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION
+status: PLANNED / NEXT TASK ONLY
+authority design: DH_STAGE_QDR_9_B4_PRODUCER_ENVIRONMENT_UPSTREAM_AUTHORITY_DECISION.md
+AUDIT authority: OPTION B / NEW EXPLICIT SIGNED CONTRACT REQUIRED
+REPLAY/EVALUATION: DORMANT / NO PRODUCTION ENTRY
+V16 / retention / API expansion / scheduler / automatic learning: NOT AUTHORIZED
+~~~
+
+本工单仅冻结 future implementation 的精确范围；它不授权当前任务写 Java、测试、migration、configuration 或 API。U1/U2 acceptance 是 V16 的前置条件，不是 V16 implementation authorization。
+
+## 2. Future write allowlist
+
+### B4_ENVIRONMENT_AUTHORITY_CONTRACT_SCOPE
+
+~~~text
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/FeedbackEnvironment.java
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/FeedbackExecutionScope.java (NEW)
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/FeedbackExecutionScopeException.java (NEW)
+~~~
+
+### B4_AUDIT_UPSTREAM_BOUNDARY_SCOPE
+
+~~~text
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunRequest.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunController.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/HumanApprovalPacketController.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DecisionDryRunCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DefaultDecisionDryRunService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/PersistentGuardedDecisionDryRunService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DefaultDecisionOrchestrator.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/QdrModelGatewayIntegrationCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/gateway/DefaultQdrModelGatewayIntegrationService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/CreateApprovalPacketCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/SubmitApprovalDecisionCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/approval/HumanApprovalPacketCommandService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DecisionPersistenceRecords.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DecisionAuditRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/decision/JdbcDecisionAuditRepository.java
+dh-app/src/main/java/com/guidinglight/decisionhub/qdr7/PersistentDecisionDryRunRateLimiter.java
+~~~
+
+### B4_AUDIT_SECURITY_BINDING_SCOPE
+
+~~~text
+dh-security/src/main/java/com/guidinglight/decisionhub/security/AuthContext.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/security/AuthenticatedRequest.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/security/DhApiAuthenticationFilter.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDhHeaderNames.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NormalizedNqDhHeaders.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDhHeaderParser.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDhHeaderValidator.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDhHeaderValidationResult.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDryRunAuthRequest.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/HmacNqDryRunAuthenticator.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/HmacHumanApprovalEnvironmentAuthenticator.java (NEW)
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/HumanApprovalEnvironmentAuthRequest.java (NEW)
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DecisionDryRunRuntimeProperties.java
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionDryRunRuntimeWiringConfig.java
+dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
+~~~
+
+HmacHumanApprovalEnvironmentAuthenticator 与其 request type 是 scope freeze 的新边界名称，不是本任务已经创建的实现；它们的唯一职责是使 Human Approval 的外部 environment 遵守与 dry-run 相同的 signed tenant/source/environment contract。不得改用 bearer tenant、profile 或 controller constant 推断 environment。
+
+### B4_REPLAY_DORMANT_ENTRY_CONTRACT_SCOPE
+
+~~~text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionEvaluationCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionEvaluationService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/MockGatewayRegressionCaseBuilder.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/SaveReplayCaseCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/ReplayCaseRecord.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/ReplayCaseRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcReplayCaseRepository.java
+~~~
+
+### B4_EVALUATION_DORMANT_ENTRY_CONTRACT_SCOPE
+
+~~~text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionEvaluationCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionEvaluationService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/MockGatewayRegressionCaseBuilder.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/SaveEvaluationCaseCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/EvaluationCaseRecord.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/replay/EvaluationCaseRepository.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/JdbcEvaluationCaseRepository.java
+~~~
+
+两个 dormant scope 明确排除 dh-app production wiring、dh-api controller、scheduler、startup runner 与 registry transition。U2 只能让 future caller 显式传入 scope，不能制造 caller。
+
+### B4_UPSTREAM_ENVIRONMENT_TEST_SCOPE
+
+~~~text
+dh-domain/src/test/java/com/guidinglight/decisionhub/domain/qdr/feedback/FeedbackExecutionScopeTest.java (NEW)
+dh-security/src/test/java/com/guidinglight/decisionhub/security/nq/HmacNqDryRunAuthenticatorTest.java
+dh-security/src/test/java/com/guidinglight/decisionhub/security/nq/HmacHumanApprovalEnvironmentAuthenticatorTest.java (NEW)
+dh-security/src/test/java/com/guidinglight/decisionhub/security/nq/NqDhHeaderNamesTest.java
+dh-security/src/test/java/com/guidinglight/decisionhub/security/nq/NqDhHeaderParserTest.java
+dh-security/src/test/java/com/guidinglight/decisionhub/security/nq/NqDhHeaderValidatorTest.java
+dh-api/src/test/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunControllerWebMvcTest.java
+dh-api/src/test/java/com/guidinglight/decisionhub/api/decision/HumanApprovalPacketControllerWebMvcTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DefaultDecisionDryRunServiceTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/dryrun/PersistentGuardedDecisionDryRunServiceTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/approval/HumanApprovalPacketCommandServiceTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/replay/QdrRegressionEvaluationServiceTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/decision/JdbcDecisionAuditRepositoryTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionDryRunRuntimeWiringConfigTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitectureTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
+~~~
+
+## 3. Required implementation sequence
+
+~~~text
+U1: implement the shared immutable scope, signed AUDIT contract, tenant/source/environment authorization,
+    root construction, propagation, and fail-closed native/registry atomicity.
+U2: add only explicit dormant REPLAY/EVALUATION command contracts and tests; no production wiring.
+V16: permitted for planning/review only after U1 and U2 technical acceptance; migration creation needs separate authorization.
+Producer integration: only a verified real caller can integrate; otherwise remain dormant.
+Retention: reimplementation remains blocked by missing/unknown/active registry state.
+~~~
+
+Future transaction boundary is one DH PlatformTransactionManager, PROPAGATION_REQUIRED, ISOLATION_REPEATABLE_READ; native write and registry transition must roll back together. No asynchronous, after-commit or best-effort substitute is allowed.
+
+## 4. Scope invariants and acceptance tests
+
+~~~text
+B4_ENVIRONMENT_AUTHORITY_CONTRACT_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_AUDIT_UPSTREAM_BOUNDARY_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_AUDIT_SECURITY_BINDING_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_REPLAY_DORMANT_ENTRY_CONTRACT_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_EVALUATION_DORMANT_ENTRY_CONTRACT_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_UPSTREAM_ENVIRONMENT_TEST_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+EFFECTIVE_UPSTREAM_SCOPE_INVARIANTS: 42 / 42 PASS
+TASK_SCOPE_DESIGN_INVALID: NO
+~~~
+
+Acceptance must cover canonical environment signing, tamper/missing rejection, DEV/TEST acceptance, PROD/LIVE/unknown rejection, tenant/source/environment mismatch, no scope on unverified input, full AUDIT propagation, two-way rollback, dormant producer absence and architecture guards. The implementation task must not add V16, retention, controller/scheduler entrypoints for REPLAY/EVALUATION, automatic learning, real HTTP/provider/NQ/Agent/LangGraph/Paper/LIVE behavior.

@@ -211,3 +211,16 @@ Producer updates and retention share the DH PostgreSQL transaction manager. Rete
 ## 7. Required acceptance and next gate
 
 The future implementation must run targeted PostgreSQL 17.10 Testcontainers tests, `mvn -B -ntp -pl dh-usecase -am test`, `mvn -B -ntp -pl dh-infra,dh-app -am test`, `mvn -B -ntp test`, and `mvn -B -ntp -Pquality validate`. Only after all pass may the separate `DH-STAGE-QDR-9-B4-MILESTONE-REVIEW-RETRY` be authorized.
+
+## 8. Upstream contract prerequisite
+
+V16 仍为候选且未创建。前置条件已从泛化的 producer source resolution 收紧为已冻结的 U1/U2 authority contract：
+
+~~~text
+U1: AUDIT OPTION B signed tenant/source/environment authority + FeedbackExecutionScope + fail-closed propagation
+U2: REPLAY/EVALUATION dormant explicit root-command contracts without production wiring
+EFFECTIVE_UPSTREAM_SCOPE: 42 / 42 PASS
+ALLOW_V16_IMPLEMENTATION: NO
+~~~
+
+只有 U1/U2 代码、security vectors、rollback tests 与 architecture guards 通过独立技术验收后，才可另行申请 V16 migration creation。当前不创建 V16、不实施 registry、不实施 retention。

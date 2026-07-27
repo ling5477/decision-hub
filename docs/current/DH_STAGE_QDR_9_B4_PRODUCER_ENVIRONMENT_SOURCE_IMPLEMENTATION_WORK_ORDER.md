@@ -160,3 +160,17 @@ ALLOW_SOURCE_IMPLEMENTATION: NO
 ALLOW_V16_IMPLEMENTATION_RETRY: NO
 ALLOW_B4_REVIEW/PUBLICATION/B5: NO / NO / NO
 ```
+
+## 10. Upstream authority work-order handoff
+
+本工单原有 36/36 source scope 已保留为 caller/path inventory；其 environment source unresolved 不能作为 V16 或 retention 实施授权。后续唯一可执行前置工单为：
+
+~~~text
+DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION
+AUDIT authority: OPTION B / NEW EXPLICIT SIGNED CONTRACT REQUIRED
+REPLAY/EVALUATION: DORMANT / NO PRODUCTION ENTRY
+effective upstream scope: 42 / 42 PASS
+V16 implementation: NOT ALLOWED
+~~~
+
+该工单的六个 exact future scopes、HMAC 文件覆盖和 test matrix 位于 DH_STAGE_QDR_9_B4_PRODUCER_ENVIRONMENT_UPSTREAM_IMPLEMENTATION_WORK_ORDER.md。它替代本工单作为 upstream contract implementation 的范围权威；本文件不授权增加 controller、scheduler、production caller 或 registry transition。
