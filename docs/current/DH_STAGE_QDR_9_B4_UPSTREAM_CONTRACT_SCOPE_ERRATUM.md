@@ -110,7 +110,21 @@ ALLOW_V16_IMPLEMENTATION / B4 REVIEW RETRY / B4 PUBLICATION / B5: NO / NO / NO /
 
 本 erratum 不构成技术 acceptance。下一步仅为 `DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION-RETRY`；其仍必须在实际代码、PostgreSQL/Testcontainers、全量回归与质量门全部通过后，才可单独评估后续阶段。
 
-## 6. Maven module dependency scope retry
+## 6. Persistent guard PostgreSQL fixture scope retry
+
+新鲜全量回归确认 `PersistentGuardProductionWiringPostgresTest` 的三个失败均源于 legacy fixture 未携带 signed environment 与 verified execution scope。该文件此前不属于 47-file effective upstream scope；生产 `403` 是必需的 root fail-closed 结果，不能变为测试期望。
+
+~~~text
+B4_UPSTREAM_PERSISTENT_GUARD_COMPATIBILITY_TEST_SCOPE:
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/PersistentGuardProductionWiringPostgresTest.java
+ORIGINAL EFFECTIVE UPSTREAM SCOPE: 47 / 47 PASS
+CORRECTED EFFECTIVE UPSTREAM SCOPE: 48 / 48 PASS
+B4_UPSTREAM_PERSISTENT_GUARD_COMPATIBILITY_TEST_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+~~~
+
+唯一允许的 future test change 是显式传入 `FeedbackEnvironment.DEV` 或 `FeedbackEnvironment.TEST`、把它纳入 canonical HMAC，并在通过认证后创建严格的 `FeedbackExecutionScope`。不得创建 default DEV helper、nullable scope 或 mock/bypass 认证；必须保留真实 persistent guard success、基础设施 failure、nonce/retry/recovery 与 Testcontainers 断言。
+
+## 7. Maven module dependency scope retry
 
 `DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-MAVEN-DEPENDENCY-SCOPE-RETRY` 在任何实现写入前发现，future `AuthContext` 与 `HmacNqDryRunAuthenticator` 需引用 canonical `FeedbackEnvironment`，而 `dh-security` 当前未依赖其 owner `dh-domain`。该 compile blocker 不是可通过 `String`、默认 `DEV`、security-local enum 或类型迁移绕过的问题。
 
@@ -124,7 +138,7 @@ PERMITTED DOMAIN IMPORT: FeedbackEnvironment ONLY
 ROOT dependencyManagement sufficient to omit reactor version: NO
 POM / Java / test / migration change during this retry: 0 / 0 / 0 / 0
 B4_UPSTREAM_MODULE_DEPENDENCY_SCOPE ⊆ WRITE_ALLOWLIST: PASS
-EFFECTIVE_UPSTREAM_SCOPE_INVARIANTS: 47 / 47 PASS
+EFFECTIVE_UPSTREAM_SCOPE_INVARIANTS: 48 / 48 PASS
 ~~~
 
 原 corrected `46 / 46 PASS` 保留为精确历史 scope，但其 implementation acceptance 状态升级为 `BLOCKED BY UNAUTHORIZED MAVEN DEPENDENCY FILE / SUPERSEDED FOR IMPLEMENTATION ACCEPTANCE`。仅在已冻结的 `dh-security/pom.xml` 中加入上述 reactor dependency 后，才可进行下一任务；任何其他 POM 需求均必须以 `STAGE_QDR_9_B4_UPSTREAM_MODULE_DEPENDENCY_SCOPE_BLOCKER` 停止。

@@ -13,7 +13,7 @@ V16 / retention / API expansion / scheduler / automatic learning: NOT AUTHORIZED
 
 本工单仅冻结 future implementation 的精确范围；它不授权当前任务写 Java、测试、migration、configuration 或 API。U1/U2 acceptance 是 V16 的前置条件，不是 V16 implementation authorization。
 
-原 trusted-upstream `42 / 42 PASS` scope 在首次 implementation preflight 中以 `STAGE_QDR_9_B4_UPSTREAM_CONTRACT_SCOPE_BLOCKER` 确认缺少三个生产路径与三个 mandatory PostgreSQL compatibility tests。该 42-file 集合保留为历史审计事实；corrected `46 / 46 PASS` 在 Maven scope retry 前仍缺少必需的 `dh-security/pom.xml`，故二者均为 `SUPERSEDED FOR UPSTREAM IMPLEMENTATION ACCEPTANCE`。本工单的 effective scope 已扩展至 `47 / 47 PASS`。
+原 trusted-upstream `42 / 42 PASS` scope 在首次 implementation preflight 中以 `STAGE_QDR_9_B4_UPSTREAM_CONTRACT_SCOPE_BLOCKER` 确认缺少三个生产路径与三个 mandatory PostgreSQL compatibility tests。该 42-file 集合保留为历史审计事实；corrected `46 / 46 PASS` 在 Maven scope retry 前仍缺少必需的 `dh-security/pom.xml`，故二者均为 `SUPERSEDED FOR UPSTREAM IMPLEMENTATION ACCEPTANCE`。本工单的 effective scope 已扩展至 `47 / 47 PASS`。新鲜全量回归随后显示唯一 legacy persistent-guard PostgreSQL fixture 未在该范围；本 task 的 Part A 将它精确纳入 `48 / 48 PASS`，Part B 只能在本 scope erratum 独立提交后执行。
 
 ## 2. Future write allowlist
 
@@ -160,6 +160,14 @@ dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityAcce
 
 未来仅允许升级既有 PostgreSQL/Testcontainers fixture：显式提供 `DEV` 或 `TEST` environment、重算 canonical HMAC、验证 fingerprint 分隔，并保留 recovery、repeatability 与 capacity 断言强度。旧无 environment 签名请求必须被拒绝；不得默认 `DEV`、跳过签名、禁用 environment 校验或降低 mandatory integration path。
 
+### B4_UPSTREAM_PERSISTENT_GUARD_COMPATIBILITY_TEST_SCOPE
+
+~~~text
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/PersistentGuardProductionWiringPostgresTest.java
+~~~
+
+该精确 scope 只允许升级这个 existing PostgreSQL fixture 的请求构造：调用点或严格必填 helper 必须显式写出 `FeedbackEnvironment.DEV` 或 `FeedbackEnvironment.TEST`；environment 属于 canonical HMAC，verified root 必须交付 `FeedbackExecutionScope`。不得引入 default DEV、nullable environment、profile inference、mock/bypass authenticator，也不得把 production guard 的 `403` fail-closed 变成 fixture success。原 persistent wiring 成功、数据库基础设施失败、nonce/retry/recovery 与 Testcontainers 断言必须保留。
+
 ## 3. Required implementation sequence
 
 ~~~text
@@ -187,9 +195,10 @@ B4_UPSTREAM_ORCHESTRATOR_PROPAGATION_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
 B4_UPSTREAM_FINGERPRINT_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
 B4_UPSTREAM_COMPATIBILITY_TEST_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
 B4_UPSTREAM_MODULE_DEPENDENCY_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_UPSTREAM_PERSISTENT_GUARD_COMPATIBILITY_TEST_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
 ORIGINAL_TRUSTED_UPSTREAM_SCOPE: 42 / 42 PASS / BLOCKED DURING IMPLEMENTATION / SUPERSEDED FOR IMPLEMENTATION ACCEPTANCE
 CORRECTED_UPSTREAM_SCOPE: 46 / 46 PASS / BLOCKED BY UNAUTHORIZED MAVEN DEPENDENCY FILE / SUPERSEDED FOR IMPLEMENTATION ACCEPTANCE
-EFFECTIVE_UPSTREAM_SCOPE_INVARIANTS: 47 / 47 PASS
+EFFECTIVE_UPSTREAM_SCOPE_INVARIANTS: 48 / 48 PASS
 TASK_SCOPE_DESIGN_INVALID: NO
 ~~~
 

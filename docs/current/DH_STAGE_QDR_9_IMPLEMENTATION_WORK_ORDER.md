@@ -1558,7 +1558,7 @@ SCOPE_ERRATUM: DONE / 6 EXACT FILES ADDED
 EFFECTIVE_UPSTREAM_SCOPE: 46 / 46 PASS
 V16: CANDIDATE / NOT CREATED
 V16 implementation: NOT ALLOWED
-NEXT_TASK: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION-RETRY
+NEXT_TASK: DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-SCOPE-BLOCKER-RETRY-2
 ~~~
 
-scope erratum 精确加入 `DecisionDryRunErrorCode`、`DecisionOrchestrator`、`DecisionDryRunRequestFingerprint` 与三个既有 PostgreSQL compatibility tests；它不修改原 42-file 历史事实，也不实施代码。该 next task 只可实施 U1/U2；不得创建 V16、registry/retention integration、REPLAY/EVALUATION controller 或 runtime wiring、API、scheduler 或 automatic learning。
+scope erratum 精确加入 `DecisionDryRunErrorCode`、`DecisionOrchestrator`、`DecisionDryRunRequestFingerprint` 与三个既有 PostgreSQL compatibility tests；它不修改原 42-file 历史事实，也不实施代码。下一 retry 的 Part A 已将唯一遗留 PostgreSQL fixture `PersistentGuardProductionWiringPostgresTest` 加入 `B4_UPSTREAM_PERSISTENT_GUARD_COMPATIBILITY_TEST_SCOPE`；effective upstream scope 因此为 `48 / 48 PASS`。Part B 只能升级该 fixture 的显式 signed DEV/TEST environment 与 verified `FeedbackExecutionScope`，并保留 persistent guard 成功、基础设施错误和恢复语义；不得创建 V16、registry/retention integration、REPLAY/EVALUATION controller 或 runtime wiring、API、scheduler 或 automatic learning。

@@ -209,3 +209,17 @@ ALLOW_B4_MILESTONE_REVIEW_RETRY: NO
 ALLOW_B4_PUBLICATION: NO
 ALLOW_B5_IMPLEMENTATION: NO
 ~~~
+
+## 9.2 Persistent guard compatibility scope erratum
+
+`PersistentGuardProductionWiringPostgresTest` 在本次 implementation continuation 的新鲜全量回归中是唯一失败类：三个 legacy request/command 没有 signed `FeedbackEnvironment` 与 verified `FeedbackExecutionScope`，因此正确触发 root `403` fail-closed。这个结果证明 security contract 生效，不得通过 default DEV、profile inference、HMAC bypass、mock authenticator 或放宽 production guard 恢复旧 fixture。
+
+~~~text
+B4_UPSTREAM_PERSISTENT_GUARD_COMPATIBILITY_TEST_SCOPE:
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/PersistentGuardProductionWiringPostgresTest.java
+ORIGINAL EFFECTIVE SCOPE: 47 / 47 PASS
+CORRECTED EFFECTIVE SCOPE: 48 / 48 PASS
+PERSISTENT_GUARD_FIXTURE: SCOPE AUTHORIZED / TECHNICAL FIX PENDING
+~~~
+
+该 one-file PostgreSQL scope 只允许按显式 `DEV` 或 `TEST` 重建 signed fixture，并保留 persistent wiring 的 success、infrastructure failure、nonce/retry/recovery 与 Testcontainers 验证。它不授予 Human Approval lifecycle authority；REPLAY/EVALUATION 保持 dormant，V16、registry、retention 与 runtime expansion 均未获授权。

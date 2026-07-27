@@ -4,40 +4,42 @@
 
 - [Maven module dependency scope erratum](DH_STAGE_QDR_9_B4_UPSTREAM_MODULE_DEPENDENCY_SCOPE_ERRATUM.md)
 - [Upstream contract scope erratum](DH_STAGE_QDR_9_B4_UPSTREAM_CONTRACT_SCOPE_ERRATUM.md)
+- [Persistent guard fixture scope erratum](DH_STAGE_QDR_9_B4_PERSISTENT_GUARD_FIXTURE_SCOPE_ERRATUM.md)
 - [Upstream implementation work order](DH_STAGE_QDR_9_B4_PRODUCER_ENVIRONMENT_UPSTREAM_IMPLEMENTATION_WORK_ORDER.md)
 
-`dh-security -> dh-domain` 已经 DAG 审计批准，但当前尚未修改 POM；唯一 future POM 范围为 `dh-security/pom.xml`，只为引用 canonical `FeedbackEnvironment`。有效 upstream scope 为 `47 / 47 PASS`，upstream implementation 仍在任何代码提交前阻断。
+`dh-security -> dh-domain` 已由已实现的单向依赖使用，且只导入 canonical `FeedbackEnvironment`。upstream implementation 在工作区等待验证；唯一 scope blocker 是 legacy persistent guard PostgreSQL fixture。它现已获 one-file 兼容性范围授权，effective upstream scope 为 `48 / 48 PASS`；fixture technical fix 与完整回归仍待执行。
 
-## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 upstream Maven dependency scope retry
+## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 persistent guard compatibility scope retry
 
 ~~~text
-Scope-retry baseline / starting HEAD: 1971f3dc29fb690dcbd64cb7b0c62c797d81cbb1
-Parent: 75c2449972c4b6f15689144478f31c0b7edf8126
+Scope-blocker retry baseline / starting HEAD: 675430a8a8e6cceaab75bb72c1fc1bf64af2da46
+Parent: 1971f3dc29fb690dcbd64cb7b0c62c797d81cbb1
 origin/dev / advertised SHA: 7624bccba9b865d4b687057f41b96799cb9ba8e3 / FRESHLY VERIFIED
-Branch / pre-commit ahead / behind / worktree / staged: dev / 4 / 0 / clean / empty
+Branch / pre-commit ahead / behind / worktree / staged: dev / 5 / 0 / dirty / empty
 Local documentation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUBLISHED
 Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
 Stage-QDR-9 B4: IMPLEMENTATION REVERTED / REVIEW BLOCKED
 Trusted upstream authority: OPTION B / FROZEN
-Upstream contract implementation: BLOCKED BEFORE CODE COMMIT
-Current blocker: MAVEN MODULE DEPENDENCY OUTSIDE FROZEN SCOPE
+Upstream contract implementation: IMPLEMENTED IN WORKTREE / VALIDATION BLOCKED
+Current blocker: PERSISTENT GUARD POSTGRESQL FIXTURE OUTSIDE FROZEN SCOPE
 Canonical environment type / owner: FeedbackEnvironment / dh-domain
 Authorized dependency: dh-security -> dh-domain / APPROVED
-Module dependency scope: FROZEN / dh-security/pom.xml / canonical FeedbackEnvironment only
-Effective upstream scope: 47 / 47 PASS
-FeedbackExecutionScope: FROZEN / NOT IMPLEMENTED
-HMAC environment binding / AUDIT environment propagation: NOT IMPLEMENTED / NOT IMPLEMENTED
+Module dependency scope: IMPLEMENTED / dh-security/pom.xml / canonical FeedbackEnvironment only
+Effective upstream scope: 48 / 48 PASS
+FeedbackExecutionScope: IMPLEMENTED IN WORKTREE / VALIDATION BLOCKED
+HMAC environment binding / AUDIT environment propagation: IMPLEMENTED IN WORKTREE / VALIDATION BLOCKED
+Persistent guard fixture: SCOPE AUTHORIZED / TECHNICAL FIX PENDING
 REPLAY / EVALUATION runtime: DORMANT / DORMANT
-V16 / registry / retention: CANDIDATE-NOT CREATED / NOT STARTED / NOT PRESENT
+V16 / registry / retention: CANDIDATE-NOT CREATED / NOT IMPLEMENTED / NOT PRESENT
 B4 review retry / publication / B5 / API / scheduler / automatic learning: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED / NO NEW ENDPOINT / NOT_IMPLEMENTED / NOT_ALLOWED
-Regression baseline: 1228 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Fresh full regression: BLOCKED / 1238 TESTS / 3 FAILURES / 0 ERRORS / 0 SKIPPED
 Production capacity: NOT_PROVEN
 Terminal current factsources: 12 / 12
-CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 UPSTREAM MAVEN DEPENDENCY SCOPE RETRY HASH / 0 CONFLICTS
-current task: DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-MAVEN-DEPENDENCY-SCOPE-RETRY
-current task status: LOCAL_ACCEPTED / MODULE_DEPENDENCY_SCOPE_FROZEN
-next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION-RETRY-2
-ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION_RETRY: YES / NEXT TASK ONLY
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 PERSISTENT GUARD COMPATIBILITY SCOPE RETRY HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-SCOPE-BLOCKER-RETRY-2
+current task status: SCOPE ERRATUM ACCEPTED / IMPLEMENTATION VALIDATION PENDING
+next action: DH-STAGE-QDR-9-B4-PERSISTENT-GUARD-COMPATIBILITY-FIXTURE-UPGRADE
+ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION_RETRY: YES / CURRENT TASK PART B ONLY
 ALLOW_V16_IMPLEMENTATION / ALLOW_B4_MILESTONE_REVIEW_RETRY / ALLOW_B4_PUBLICATION / ALLOW_B5_IMPLEMENTATION: NO / NO / NO / NO
 ~~~
 

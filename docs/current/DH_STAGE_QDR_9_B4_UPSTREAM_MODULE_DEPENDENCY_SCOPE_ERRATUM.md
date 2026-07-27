@@ -89,6 +89,22 @@ TASK_SCOPE_DESIGN_INVALID: NO
 
 本结论不等同于 implementation acceptance：HMAC environment binding、`FeedbackExecutionScope`、AUDIT propagation、registry、retention、V16、API、scheduler 与 automatic learning 全部仍未实现或未授权。
 
-## 6. 后续限制
+## 6. Persistent guard PostgreSQL fixture scope correction
 
-下一任务仅为 `DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION-RETRY-2`。它可在精确 47-file scope 内实施并验证上游合同；不授权 V16、B4 milestone review retry、B4 publication、B5、API、scheduler、automatic learning、real HTTP/provider/NQ、Agent/LangGraph、Paper 或 LIVE。
+`DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-SCOPE-BLOCKER-RETRY-2` 的新鲜全量回归在唯一未纳入 47-file scope 的 legacy fixture 中发现三项失败。该 fixture 以无 `FeedbackEnvironment` 和无 verified `FeedbackExecutionScope` 的旧命令进入 production persistent guard；root 返回 `403` 是正确的 fail-closed 行为，不得通过默认 `DEV`、HMAC bypass 或降低 guard 校验恢复旧断言。
+
+```text
+B4_UPSTREAM_PERSISTENT_GUARD_COMPATIBILITY_TEST_SCOPE:
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/PersistentGuardProductionWiringPostgresTest.java
+
+47 / 47: dh-security -> dh-domain Maven dependency scope
+48 / 48: persistent guard PostgreSQL fixture scope
+B4_UPSTREAM_PERSISTENT_GUARD_COMPATIBILITY_TEST_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+EFFECTIVE_UPSTREAM_SCOPE_INVARIANTS: 48 / 48 PASS
+```
+
+该精确 test scope 只允许令 fixture 在调用点显式传入 `DEV` 或 `TEST`、重算 canonical HMAC、构造 verified `FeedbackExecutionScope`，并保留 original persistent-wiring 成功、基础设施失败、nonce/retry/recovery 断言。它不扩大 Maven/POM 权限，也不授权任何 production guard 语义变更。
+
+## 7. 后续限制
+
+本 scope erratum 提交后，下一步仅为同一任务的 Part B：`PersistentGuardProductionWiringPostgresTest` 在精确 48-file scope 内的 signed-environment fixture upgrade 与完整验证。仍不授权 V16、B4 milestone review retry、B4 publication、B5、API、scheduler、automatic learning、real HTTP/provider/NQ、Agent/LangGraph、Paper 或 LIVE。
