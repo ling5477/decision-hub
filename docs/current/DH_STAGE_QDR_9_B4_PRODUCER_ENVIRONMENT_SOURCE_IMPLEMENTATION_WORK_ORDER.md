@@ -166,10 +166,12 @@ ALLOW_B4_REVIEW/PUBLICATION/B5: NO / NO / NO
 本工单原有 36/36 source scope 已保留为 caller/path inventory；其 environment source unresolved 不能作为 V16 或 retention 实施授权。后续唯一可执行前置工单为：
 
 ~~~text
-DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION
+DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION-RETRY
 AUDIT authority: OPTION B / NEW EXPLICIT SIGNED CONTRACT REQUIRED
 REPLAY/EVALUATION: DORMANT / NO PRODUCTION ENTRY
-effective upstream scope: 42 / 42 PASS
+original trusted-upstream scope: 42 / 42 PASS / BLOCKED DURING IMPLEMENTATION
+scope erratum: DONE / 6 EXACT FILES ADDED
+effective upstream scope: 46 / 46 PASS
 V16 implementation: NOT ALLOWED
 ~~~
 

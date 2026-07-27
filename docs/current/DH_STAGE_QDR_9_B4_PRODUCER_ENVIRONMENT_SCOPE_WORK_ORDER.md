@@ -149,3 +149,16 @@ TASK_SCOPE_DESIGN_INVALID: NO
 ```
 
 该 scope 只冻结 future validation/write serialization，当前仍不授权代码、测试、migration、API/security contract 或 V16。由于 AUDIT 无可信 caller environment、REPLAY/EVALUATION 无 production caller，implementation retry 保持 blocked。
+
+## 6. Upstream contract scope-retry erratum
+
+本 31/31 与其后 36/36 source inventories 保留为历史 scope 事实。首次 trusted-upstream implementation preflight 发现另有三个 production files 与三个 existing PostgreSQL compatibility tests 不在 42-file upstream allowlist 中，因此不允许以本文件的原集合替代实现 acceptance。
+
+~~~text
+original trusted-upstream scope: 42 / 42 PASS / BLOCKED DURING IMPLEMENTATION
+scope erratum: DONE / 6 EXACT FILES ADDED
+corrected effective upstream scope: 46 / 46 PASS
+next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION-RETRY
+~~~
+
+该 erratum 不授权 Java、测试、migration 或 V16 写入；新增路径与 no-default-`DEV`、signed fixture、orchestrator propagation 规则以 `DH_STAGE_QDR_9_B4_UPSTREAM_CONTRACT_SCOPE_ERRATUM.md` 和 upstream implementation work order 为准。

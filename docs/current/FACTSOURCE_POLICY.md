@@ -1,18 +1,24 @@
 # Decision Hub Factsource Policy
 
-## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 trusted upstream environment authority
+## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 upstream contract scope retry
 
 ~~~text
-Design baseline / starting HEAD: 9e7dfdc557b4a8d5c0768bdd3414f775971c0d73
+Scope-retry baseline / starting HEAD: 75c2449972c4b6f15689144478f31c0b7edf8126
+Parent: 9e7dfdc557b4a8d5c0768bdd3414f775971c0d73
 origin/dev / advertised SHA: 7624bccba9b865d4b687057f41b96799cb9ba8e3
-Branch / pre-commit ahead / behind / worktree / staged: dev / 2 / 0 / clean / empty
+Branch / pre-commit ahead / behind / worktree / staged: dev / 3 / 0 / clean / empty
 Local documentation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUBLISHED
 Containment: CLOSED / ACCEPTED / PUBLISHED
 Current technical tree: B3 SAFE BASELINE
 Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
 Stage-QDR-9 B4: IMPLEMENTATION REVERTED / REVIEW BLOCKED
 Reference-liveness architecture / design: OPTION B / FROZEN
-Producer environment initial contract: FROZEN / UPSTREAM AUTHORITY DESIGN RESOLVED
+Trusted upstream authority: OPTION B / FROZEN
+Upstream contract implementation: BLOCKED BEFORE CODE WRITE
+Upstream blocker: STAGE_QDR_9_B4_UPSTREAM_CONTRACT_SCOPE_BLOCKER / FROZEN WRITE ALLOWLIST INCOMPLETE
+Scope erratum: DONE / 6 EXACT FILES ADDED
+Structured environment error scope / orchestrator propagation scope / fingerprint scope: FROZEN / FROZEN / FROZEN
+Legacy integration compatibility scope: FROZEN / 3 POSTGRESQL TESTS
 Root execution scope contract: FeedbackExecutionScope / FROZEN / NOT IMPLEMENTED
 Producer environment root source: AUDIT OPTION B / REPLAY-EVALUATION DORMANT
 AUDIT environment authority: NEW EXPLICIT SIGNED CONTRACT REQUIRED
@@ -20,7 +26,8 @@ REPLAY producer runtime: DORMANT / NO PRODUCTION ENTRY
 EVALUATION producer runtime: DORMANT / NO PRODUCTION ENTRY
 Missing or unverified environment: REJECT AT ROOT / NO NATIVE WRITE / NO REGISTRY WRITE
 Environment inference: PROHIBITED
-Effective upstream scope: 42 / 42 PASS
+Original trusted-upstream scope: 42 / 42 PASS / BLOCKED DURING IMPLEMENTATION / SUPERSEDED FOR IMPLEMENTATION ACCEPTANCE
+Effective upstream scope: 46 / 46 PASS
 V16: CANDIDATE / NOT_CREATED
 V16 implementation: NOT ALLOWED / UPSTREAM CONTRACT IMPLEMENTATION REQUIRED
 Retention: NOT PRESENT
@@ -29,11 +36,11 @@ API / scheduler / automatic learning: NOT_ALLOWED / NOT_IMPLEMENTED / NOT_ALLOWE
 Regression baseline: 1228 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Production capacity: NOT_PROVEN
 Terminal current factsources: 12 / 12
-CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 UPSTREAM ENVIRONMENT AUTHORITY DESIGN HASH / 0 CONFLICTS
-current task: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-BLOCKER
-current task status: LOCAL_ACCEPTED / UPSTREAM_AUTHORITY_DESIGN_RESOLVED
-next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION
-ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION: YES / NEXT TASK ONLY
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 UPSTREAM CONTRACT SCOPE RETRY HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-SCOPE-RETRY
+current task status: LOCAL_ACCEPTED / SCOPE_RETRY_FROZEN
+next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION-RETRY
+ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION_RETRY: YES / NEXT TASK ONLY
 ALLOW_V16_IMPLEMENTATION_RETRY: NO
 ~~~
 

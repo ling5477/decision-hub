@@ -4,7 +4,7 @@
 
 ~~~text
 task: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION
-status: PLANNED / NEXT TASK ONLY
+status: FROZEN / SCOPE-RETRY ACCEPTED / IMPLEMENTATION RETRY NEXT TASK ONLY
 authority design: DH_STAGE_QDR_9_B4_PRODUCER_ENVIRONMENT_UPSTREAM_AUTHORITY_DECISION.md
 AUDIT authority: OPTION B / NEW EXPLICIT SIGNED CONTRACT REQUIRED
 REPLAY/EVALUATION: DORMANT / NO PRODUCTION ENTRY
@@ -12,6 +12,8 @@ V16 / retention / API expansion / scheduler / automatic learning: NOT AUTHORIZED
 ~~~
 
 本工单仅冻结 future implementation 的精确范围；它不授权当前任务写 Java、测试、migration、configuration 或 API。U1/U2 acceptance 是 V16 的前置条件，不是 V16 implementation authorization。
+
+原 trusted-upstream `42 / 42 PASS` scope 在首次 implementation preflight 中以 `STAGE_QDR_9_B4_UPSTREAM_CONTRACT_SCOPE_BLOCKER` 确认缺少三个生产路径与三个 mandatory PostgreSQL compatibility tests。该 42-file 集合保留为历史审计事实，但对 implementation acceptance 的状态固定为 `BLOCKED DURING IMPLEMENTATION / SUPERSEDED FOR UPSTREAM IMPLEMENTATION ACCEPTANCE`；本工单的 corrected effective scope 是 `46 / 46 PASS`。
 
 ## 2. Future write allowlist
 
@@ -114,6 +116,40 @@ dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitec
 dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java
 ~~~
 
+### B4_UPSTREAM_ERROR_CLASSIFICATION_SCOPE
+
+~~~text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DecisionDryRunErrorCode.java
+~~~
+
+未来仅允许增加冻结的结构化 environment 拒绝分类；不得删除既有错误码、改变无关 HTTP 映射、把环境错误返回为成功或扩大为自由文本错误。
+
+### B4_UPSTREAM_ORCHESTRATOR_PROPAGATION_SCOPE
+
+~~~text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/DecisionOrchestrator.java
+~~~
+
+未来仅允许接收或传播 verified `FeedbackExecutionScope`，保证 tenant/environment 经过 orchestrator 到 AUDIT persistence 不漂移；不得在该层创建默认 `DEV`、从 profile 或 tenant 推断环境、改变决策业务语义或启动 dormant runtime。
+
+### B4_UPSTREAM_FINGERPRINT_SCOPE
+
+~~~text
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DecisionDryRunRequestFingerprint.java
+~~~
+
+未来必须把 verified `FeedbackEnvironment` 放入确定性 canonical fingerprint。同 tenant/source/request、不同 environment 的 fingerprint 必须不同；同 environment 的 fingerprint 必须稳定。禁止 enum hashCode、对象 identity hash、非确定序列化、忽略 environment 或默认值。
+
+### B4_UPSTREAM_COMPATIBILITY_TEST_SCOPE
+
+~~~text
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/DecisionDryRunSamePoolRecoveryPostgresTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/DecisionDryRunActualWiringRepeatabilityPostgresTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityAcceptanceIT.java
+~~~
+
+未来仅允许升级既有 PostgreSQL/Testcontainers fixture：显式提供 `DEV` 或 `TEST` environment、重算 canonical HMAC、验证 fingerprint 分隔，并保留 recovery、repeatability 与 capacity 断言强度。旧无 environment 签名请求必须被拒绝；不得默认 `DEV`、跳过签名、禁用 environment 校验或降低 mandatory integration path。
+
 ## 3. Required implementation sequence
 
 ~~~text
@@ -136,8 +172,13 @@ B4_AUDIT_SECURITY_BINDING_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
 B4_REPLAY_DORMANT_ENTRY_CONTRACT_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
 B4_EVALUATION_DORMANT_ENTRY_CONTRACT_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
 B4_UPSTREAM_ENVIRONMENT_TEST_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
-EFFECTIVE_UPSTREAM_SCOPE_INVARIANTS: 42 / 42 PASS
+B4_UPSTREAM_ERROR_CLASSIFICATION_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_UPSTREAM_ORCHESTRATOR_PROPAGATION_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_UPSTREAM_FINGERPRINT_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_UPSTREAM_COMPATIBILITY_TEST_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+ORIGINAL_TRUSTED_UPSTREAM_SCOPE: 42 / 42 PASS / BLOCKED DURING IMPLEMENTATION / SUPERSEDED FOR IMPLEMENTATION ACCEPTANCE
+EFFECTIVE_UPSTREAM_SCOPE_INVARIANTS: 46 / 46 PASS
 TASK_SCOPE_DESIGN_INVALID: NO
 ~~~
 
-Acceptance must cover canonical environment signing, tamper/missing rejection, DEV/TEST acceptance, PROD/LIVE/unknown rejection, tenant/source/environment mismatch, no scope on unverified input, full AUDIT propagation, two-way rollback, dormant producer absence and architecture guards. The implementation task must not add V16, retention, controller/scheduler entrypoints for REPLAY/EVALUATION, automatic learning, real HTTP/provider/NQ/Agent/LangGraph/Paper/LIVE behavior.
+Acceptance must cover canonical environment signing, tamper/missing rejection, DEV/TEST acceptance, PROD/LIVE/unknown rejection, tenant/source/environment mismatch, no scope on unverified input, full AUDIT propagation, environment-bound fingerprint stability/separation, upgraded PostgreSQL compatibility fixtures, two-way rollback, dormant producer absence and architecture guards. The implementation task must not add V16, retention, controller/scheduler entrypoints for REPLAY/EVALUATION, automatic learning, real HTTP/provider/NQ/Agent/LangGraph/Paper/LIVE behavior.

@@ -165,6 +165,19 @@ Retention: missing / unknown / active registry state blocks deletion
 
 ## 9. Readiness
 
+## 9.1 Scope-retry erratum
+
+首次 implementation preflight 证明原 trusted-upstream `42 / 42 PASS` scope 未覆盖 `DecisionDryRunErrorCode`、`DecisionOrchestrator`、`DecisionDryRunRequestFingerprint` 与三个既有 PostgreSQL compatibility tests。42-file 集合仍是 authority design 的原始审计事实，但对 implementation acceptance 固定为：
+
+~~~text
+ORIGINAL TRUSTED-UPSTREAM SCOPE: 42 / 42 PASS
+IMPLEMENTATION PRECHECK: BLOCKED BEFORE CODE WRITE
+SCOPE ERRATUM: DONE / 6 EXACT FILES ADDED
+CORRECTED EFFECTIVE UPSTREAM SCOPE: 46 / 46 PASS
+~~~
+
+erratum 只补齐 future implementation 的 write/test scope；它不实施 signed environment、`FeedbackExecutionScope`、AUDIT propagation、V16、registry 或 retention。缺失 environment 仍必须 root fail-closed，且旧无 environment fixture 不得通过默认 `DEV` 保持兼容。
+
 ~~~text
 UPSTREAM_ENVIRONMENT_AUTHORITY_DESIGN: DONE
 AUDIT_AUTHORITY_OPTION: B
@@ -175,7 +188,7 @@ REPLAY_RUNTIME: DORMANT
 EVALUATION_RUNTIME: DORMANT
 NO_DEFAULT_ENVIRONMENT: PASS
 MISSING_ENVIRONMENT_FAIL_CLOSED: PASS
-ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION: YES / NEXT TASK ONLY
+ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION_RETRY: YES / NEXT TASK ONLY
 ALLOW_V16_IMPLEMENTATION: NO
 ALLOW_B4_MILESTONE_REVIEW_RETRY: NO
 ALLOW_B4_PUBLICATION: NO
