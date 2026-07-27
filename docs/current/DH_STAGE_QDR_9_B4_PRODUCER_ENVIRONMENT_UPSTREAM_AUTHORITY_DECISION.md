@@ -19,6 +19,21 @@ ALLOW_V16_IMPLEMENTATION: NO
 ~~~
 本决策解决的是 environment authority 的设计选择，不把尚未实现的上游合同或 registry 写入描述为已可用。FeedbackEnvironment 是 tenant-scoped routing/security attribute，不是 Spring profile、部署配置或普通业务扩展字段。
 
+## 1.1 Maven module dependency decision
+
+~~~text
+task: DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-MAVEN-DEPENDENCY-SCOPE-RETRY
+canonical environment type: FeedbackEnvironment
+type owner: dh-domain
+authorized dependency: dh-security -> dh-domain / APPROVED
+scope: compile
+future POM file: dh-security/pom.xml ONLY
+permitted import: FeedbackEnvironment ONLY
+forbidden import: FeedbackExecutionScope and all other domain qdr.feedback types
+~~~
+
+Maven reactor 审计证明 `dh-domain` 仅依赖 `dh-common`，不直接或传递依赖 `dh-security`；`dh-security` 当前也只依赖 `dh-common`。因此该单向依赖不会形成 cycle，也不会把 Spring、JDBC、Web、provider 或 security implementation concern 反向带入 domain。root `dependencyManagement` 不管理 reactor module version，future dependency 必须沿用当前 `${project.version}` 约定。该决定只授权 future POM 的单一 dependency 条目，不代表其已添加，且不授权 HMAC binding、`FeedbackExecutionScope`、AUDIT propagation 或 V16 implementation。
+
 ## 2. AUDIT 现状事实矩阵
 
 | 检查项 | DecisionDryRunController.decide | HumanApprovalPacketController.createApprovalPacket / submitApprovalDecision |

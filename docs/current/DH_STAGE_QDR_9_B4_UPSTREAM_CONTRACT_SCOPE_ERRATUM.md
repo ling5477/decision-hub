@@ -109,3 +109,22 @@ ALLOW_V16_IMPLEMENTATION / B4 REVIEW RETRY / B4 PUBLICATION / B5: NO / NO / NO /
 ```
 
 本 erratum 不构成技术 acceptance。下一步仅为 `DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION-RETRY`；其仍必须在实际代码、PostgreSQL/Testcontainers、全量回归与质量门全部通过后，才可单独评估后续阶段。
+
+## 6. Maven module dependency scope retry
+
+`DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-MAVEN-DEPENDENCY-SCOPE-RETRY` 在任何实现写入前发现，future `AuthContext` 与 `HmacNqDryRunAuthenticator` 需引用 canonical `FeedbackEnvironment`，而 `dh-security` 当前未依赖其 owner `dh-domain`。该 compile blocker 不是可通过 `String`、默认 `DEV`、security-local enum 或类型迁移绕过的问题。
+
+实际 Maven reactor/DAG 审计确认 `dh-domain` 不直接或传递依赖 `dh-security`；`dh-domain` 与 `dh-security` 当前 production tree 均只到 `dh-common` 和 Jackson。故直接加入 `dh-security -> dh-domain` 无 Maven cycle，且不会将 Spring、JDBC、Web、provider 或 security implementation concern 引入 domain/security 边界。
+
+~~~text
+MAVEN_MODULE_DEPENDENCY_SCOPE: dh-security/pom.xml ONLY
+AUTHORIZED FUTURE DEPENDENCY: com.guidinglight:dh-domain:${project.version}
+MAVEN SCOPE: compile (default)
+PERMITTED DOMAIN IMPORT: FeedbackEnvironment ONLY
+ROOT dependencyManagement sufficient to omit reactor version: NO
+POM / Java / test / migration change during this retry: 0 / 0 / 0 / 0
+B4_UPSTREAM_MODULE_DEPENDENCY_SCOPE ⊆ WRITE_ALLOWLIST: PASS
+EFFECTIVE_UPSTREAM_SCOPE_INVARIANTS: 47 / 47 PASS
+~~~
+
+原 corrected `46 / 46 PASS` 保留为精确历史 scope，但其 implementation acceptance 状态升级为 `BLOCKED BY UNAUTHORIZED MAVEN DEPENDENCY FILE / SUPERSEDED FOR IMPLEMENTATION ACCEPTANCE`。仅在已冻结的 `dh-security/pom.xml` 中加入上述 reactor dependency 后，才可进行下一任务；任何其他 POM 需求均必须以 `STAGE_QDR_9_B4_UPSTREAM_MODULE_DEPENDENCY_SCOPE_BLOCKER` 停止。

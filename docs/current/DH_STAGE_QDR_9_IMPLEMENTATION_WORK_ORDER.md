@@ -1,5 +1,21 @@
 # DH Stage-QDR-9 Implementation Work Order
 
+## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 upstream Maven dependency scope retry
+
+~~~text
+starting HEAD / parent: 1971f3dc29fb690dcbd64cb7b0c62c797d81cbb1 / 75c2449972c4b6f15689144478f31c0b7edf8126
+origin/dev: 7624bccba9b865d4b687057f41b96799cb9ba8e3 / FRESHLY VERIFIED
+upstream contract implementation: BLOCKED BEFORE CODE COMMIT
+current blocker: MAVEN MODULE DEPENDENCY OUTSIDE FROZEN SCOPE
+canonical environment type / owner: FeedbackEnvironment / dh-domain
+authorized dependency: dh-security -> dh-domain / APPROVED
+module dependency scope: dh-security/pom.xml ONLY
+effective upstream scope: 47 / 47 PASS
+V16 / registry / retention: CANDIDATE-NOT CREATED / NOT STARTED / NOT PRESENT
+next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION-RETRY-2
+ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION_RETRY: YES / NEXT TASK ONLY
+ALLOW_V16_IMPLEMENTATION / B4 review retry / B4 publication / B5: NO / NO / NO / NO
+~~~
 
 ## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 producer environment contract scope design
 

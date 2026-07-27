@@ -1,5 +1,42 @@
 # Decision Hub Worklog
 
+## 2026-07-27 Stage-QDR-9 B4 upstream Maven dependency scope retry
+
+已完成 Maven reactor/DAG 审计：`dh-domain` 与 `dh-security` 的 production dependency tree 均只到 `dh-common`；`dh-domain` 不依赖 `dh-security`，加入 `dh-security -> dh-domain` 无 cycle 且不引入 Spring/JDBC/Web。新增 `DH_STAGE_QDR_9_B4_UPSTREAM_MODULE_DEPENDENCY_SCOPE_ERRATUM.md`，将唯一 future POM 文件 `dh-security/pom.xml` 及仅可 import `FeedbackEnvironment` 的边界冻结入 `47 / 47 PASS`。`mvn -B -ntp -Pquality validate` 实际通过 19/19 Reactor、Checkstyle 0、Spotless PASS。本轮实际 POM、Java、测试、migration、V16 与运行时变更均为 0。
+
+## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 upstream Maven dependency scope retry
+
+~~~text
+Scope-retry baseline / starting HEAD: 1971f3dc29fb690dcbd64cb7b0c62c797d81cbb1
+Parent: 75c2449972c4b6f15689144478f31c0b7edf8126
+origin/dev / advertised SHA: 7624bccba9b865d4b687057f41b96799cb9ba8e3 / FRESHLY VERIFIED
+Branch / pre-commit ahead / behind / worktree / staged: dev / 4 / 0 / clean / empty
+Local documentation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUBLISHED
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B4: IMPLEMENTATION REVERTED / REVIEW BLOCKED
+Trusted upstream authority: OPTION B / FROZEN
+Upstream contract implementation: BLOCKED BEFORE CODE COMMIT
+Current blocker: MAVEN MODULE DEPENDENCY OUTSIDE FROZEN SCOPE
+Canonical environment type / owner: FeedbackEnvironment / dh-domain
+Authorized dependency: dh-security -> dh-domain / APPROVED
+Module dependency scope: FROZEN / dh-security/pom.xml / canonical FeedbackEnvironment only
+Effective upstream scope: 47 / 47 PASS
+FeedbackExecutionScope: FROZEN / NOT IMPLEMENTED
+HMAC environment binding / AUDIT environment propagation: NOT IMPLEMENTED / NOT IMPLEMENTED
+REPLAY / EVALUATION runtime: DORMANT / DORMANT
+V16 / registry / retention: CANDIDATE-NOT CREATED / NOT STARTED / NOT PRESENT
+B4 review retry / publication / B5 / API / scheduler / automatic learning: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED / NO NEW ENDPOINT / NOT_IMPLEMENTED / NOT_ALLOWED
+Regression baseline: 1228 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Production capacity: NOT_PROVEN
+Terminal current factsources: 12 / 12
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 UPSTREAM MAVEN DEPENDENCY SCOPE RETRY HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-MAVEN-DEPENDENCY-SCOPE-RETRY
+current task status: LOCAL_ACCEPTED / MODULE_DEPENDENCY_SCOPE_FROZEN
+next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION-RETRY-2
+ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION_RETRY: YES / NEXT TASK ONLY
+ALLOW_V16_IMPLEMENTATION / ALLOW_B4_MILESTONE_REVIEW_RETRY / ALLOW_B4_PUBLICATION / ALLOW_B5_IMPLEMENTATION: NO / NO / NO / NO
+~~~
+
 ## 2026-07-27 Stage-QDR-9 B4 upstream contract scope retry
 
 首次 upstream contract implementation preflight 在任何代码写入前停止：原 trusted-upstream `42 / 42 PASS` allowlist 未覆盖三个必要生产路径（结构化 environment 错误、orchestrator propagation、request fingerprint）及三个既有 PostgreSQL compatibility tests。新增 `DH_STAGE_QDR_9_B4_UPSTREAM_CONTRACT_SCOPE_ERRATUM.md`，并将四个精确 scope sets 冻结入 corrected effective `46 / 46 PASS`。本轮技术变更为 0；`FeedbackExecutionScope`、signed environment、V16、registry 与 retention 均未实现。下一步仅为独立的 `DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-IMPLEMENTATION-RETRY`。

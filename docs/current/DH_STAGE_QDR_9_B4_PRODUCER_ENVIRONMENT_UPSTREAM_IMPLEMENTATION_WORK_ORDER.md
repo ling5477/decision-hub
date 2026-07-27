@@ -13,9 +13,19 @@ V16 / retention / API expansion / scheduler / automatic learning: NOT AUTHORIZED
 
 本工单仅冻结 future implementation 的精确范围；它不授权当前任务写 Java、测试、migration、configuration 或 API。U1/U2 acceptance 是 V16 的前置条件，不是 V16 implementation authorization。
 
-原 trusted-upstream `42 / 42 PASS` scope 在首次 implementation preflight 中以 `STAGE_QDR_9_B4_UPSTREAM_CONTRACT_SCOPE_BLOCKER` 确认缺少三个生产路径与三个 mandatory PostgreSQL compatibility tests。该 42-file 集合保留为历史审计事实，但对 implementation acceptance 的状态固定为 `BLOCKED DURING IMPLEMENTATION / SUPERSEDED FOR UPSTREAM IMPLEMENTATION ACCEPTANCE`；本工单的 corrected effective scope 是 `46 / 46 PASS`。
+原 trusted-upstream `42 / 42 PASS` scope 在首次 implementation preflight 中以 `STAGE_QDR_9_B4_UPSTREAM_CONTRACT_SCOPE_BLOCKER` 确认缺少三个生产路径与三个 mandatory PostgreSQL compatibility tests。该 42-file 集合保留为历史审计事实；corrected `46 / 46 PASS` 在 Maven scope retry 前仍缺少必需的 `dh-security/pom.xml`，故二者均为 `SUPERSEDED FOR UPSTREAM IMPLEMENTATION ACCEPTANCE`。本工单的 effective scope 已扩展至 `47 / 47 PASS`。
 
 ## 2. Future write allowlist
+
+### B4_UPSTREAM_MODULE_DEPENDENCY_SCOPE
+
+~~~text
+dh-security/pom.xml
+~~~
+
+本文件是唯一可修改的 future POM。只允许加入既有 reactor dependency `com.guidinglight:dh-domain:${project.version}`，默认 `compile` scope；目的仅为编译期引用 `FeedbackEnvironment`。`dh-domain` 不依赖 `dh-security`，两 module 的当前 production tree 不含 Spring/JDBC/Web runtime，故依赖方向已审核为无环。不得修改 root POM、`dh-domain/pom.xml`、`dependencyManagement`、repository、plugin、profile、Java 或 test plugin 配置。
+
+`dh-security` 对 `dh-domain` 的 future import 仅允许 `FeedbackEnvironment`。`FeedbackExecutionScope` 继续只能在 verified root boundary 创建；不得在 authenticator 内创建、导入或以 `String`、`Map`、默认 `DEV` 取代。
 
 ### B4_ENVIRONMENT_AUTHORITY_CONTRACT_SCOPE
 
@@ -176,8 +186,10 @@ B4_UPSTREAM_ERROR_CLASSIFICATION_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
 B4_UPSTREAM_ORCHESTRATOR_PROPAGATION_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
 B4_UPSTREAM_FINGERPRINT_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
 B4_UPSTREAM_COMPATIBILITY_TEST_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
+B4_UPSTREAM_MODULE_DEPENDENCY_SCOPE ⊆ FUTURE_WRITE_ALLOWLIST: PASS
 ORIGINAL_TRUSTED_UPSTREAM_SCOPE: 42 / 42 PASS / BLOCKED DURING IMPLEMENTATION / SUPERSEDED FOR IMPLEMENTATION ACCEPTANCE
-EFFECTIVE_UPSTREAM_SCOPE_INVARIANTS: 46 / 46 PASS
+CORRECTED_UPSTREAM_SCOPE: 46 / 46 PASS / BLOCKED BY UNAUTHORIZED MAVEN DEPENDENCY FILE / SUPERSEDED FOR IMPLEMENTATION ACCEPTANCE
+EFFECTIVE_UPSTREAM_SCOPE_INVARIANTS: 47 / 47 PASS
 TASK_SCOPE_DESIGN_INVALID: NO
 ~~~
 
