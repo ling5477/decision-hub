@@ -167,6 +167,79 @@ class DecisionDryRunControllerWebMvcTest {
                                 decision ->
                                         Set.of("BUY", "SELL", "PLACE_ORDER", "CANCEL_ORDER")
                                                 .contains(decision.action().name())));
+        assertFalse(auditRepository.auditEvents().isEmpty());
+        assertTrue(
+                auditRepository.auditEvents().stream()
+                        .allMatch(
+                                event ->
+                                        event.environment().name().equals("DEV")
+                                                && "DEV".equals(event.eventJson().get("environment"))));
+    }
+
+    @Test
+    void missingInvalidAndTamperedEnvironmentFailClosedBeforeBusinessAudit() throws Exception {
+        final InMemoryDecisionAuditRepository auditRepository = new InMemoryDecisionAuditRepository();
+        final InMemoryDecisionCoreRepository decisionCoreRepository =
+                new InMemoryDecisionCoreRepository();
+        mockMvc =
+                newMockMvc(
+                        true,
+                        auditRepository,
+                        2048,
+                        1000,
+                        32768,
+                        defaultOrchestrator(auditRepository),
+                        decisionCoreRepository);
+
+        final Map<String, Object> missing = legalEnvelope("req-environment-missing");
+        missing.remove("environment");
+        mockMvc
+                .perform(signedPost(missing, objectMapper.writeValueAsString(missing)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ENVIRONMENT_REQUIRED"))
+                .andExpect(jsonPath("$.auditRef").doesNotExist());
+
+        final Map<String, Object> invalid = legalEnvelope("req-environment-invalid");
+        invalid.put("environment", "LOCAL");
+        mockMvc
+                .perform(signedPost(invalid, objectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ENVIRONMENT_INVALID"))
+                .andExpect(jsonPath("$.auditRef").doesNotExist());
+
+        final Map<String, Object> signedDev = legalEnvelope("req-environment-tampered");
+        final String signedDevBody = objectMapper.writeValueAsString(signedDev);
+        final NqDryRunAuthRequest unsigned =
+                new NqDryRunAuthRequest(
+                        "POST",
+                        "/api/ai/decision-dry-runs",
+                        value(signedDev.get("source")),
+                        value(signedDev.get("source")),
+                        "tenant-a",
+                        value(signedDev.get("tenantId")),
+                        value(signedDev.get("environment")),
+                        value(signedDev.get("timestamp")),
+                        value(signedDev.get("nonce")),
+                        "",
+                        value(signedDev.get("requestId")),
+                        value(signedDev.get("traceId")),
+                        value(signedDev.get("schemaVersion")),
+                        signedDevBody,
+                        signedDevBody.getBytes(StandardCharsets.UTF_8).length,
+                        NOW);
+        final String signature =
+                HmacNqDryRunAuthenticator.hmacSha256Hex(
+                        SECRET, HmacNqDryRunAuthenticator.signatureMaterial(unsigned));
+        signedDev.put("environment", "TEST");
+        mockMvc
+                .perform(postWithSignature(signedDev, objectMapper.writeValueAsString(signedDev), signature))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("SIGNATURE_INVALID"))
+                .andExpect(jsonPath("$.auditRef").doesNotExist());
+
+        assertTrue(auditRepository.auditEvents().isEmpty());
+        assertTrue(auditRepository.requests().isEmpty());
+        assertTrue(decisionCoreRepository.findByTenantIdAndRequestKey("tenant-a", "req-environment-missing").isEmpty());
     }
 
     @Test
@@ -539,6 +612,9 @@ class DecisionDryRunControllerWebMvcTest {
                         new HmacNqDryRunAuthenticator(
                                 Set.of("NQ_DRYRUN"),
                                 Set.of("tenant-a:NQ_DRYRUN"),
+                                Set.of("NQ_DRYRUN::DEV", "NQ_DRYRUN::TEST"),
+                                Set.of("tenant-a::DEV", "tenant-a::TEST"),
+                                Set.of("tenant-a::NQ_DRYRUN::DEV", "tenant-a::NQ_DRYRUN::TEST"),
                                 SECRET,
                                 Duration.ofMinutes(5),
                                 maxPayloadBytes,
@@ -580,6 +656,7 @@ class DecisionDryRunControllerWebMvcTest {
         m.put("traceId", "trace-" + requestId);
         m.put("tenantId", "tenant-a");
         m.put("source", "NQ_DRYRUN");
+        m.put("environment", "DEV");
         m.put("timestamp", NOW.toString());
         m.put("nonce", "nonce-" + requestId);
         m.put("schemaVersion", "1.0.0");
@@ -673,6 +750,7 @@ class DecisionDryRunControllerWebMvcTest {
                         value(envelope.get("source")),
                         "tenant-a",
                         value(envelope.get("tenantId")),
+                        value(envelope.get("environment")),
                         value(envelope.get("timestamp")),
                         value(envelope.get("nonce")),
                         "",

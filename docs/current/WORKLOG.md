@@ -1,5 +1,9 @@
 # Decision Hub Worklog
 
+## 2026-07-28 Stage-QDR-9 B4 upstream environment contract implementation
+
+在 scope erratum commit `94ca8f0` 之后，仅修改 `PersistentGuardProductionWiringPostgresTest`：所有 persistent-guard 业务命令调用点显式提供 `FeedbackEnvironment.DEV`，严格 fixture 同时设置 command environment 与 `FeedbackExecutionScope`。未引入 default DEV、nullable environment、HMAC bypass、mock authenticator 或 production guard 语义变更；原 success、503/infrastructure、nonce/retry/recovery 断言保留。blocker PostgreSQL test 10/0/0/0、SamePool 4/0/0/0、ActualWiring 1/0/0/0、完整回归 1238/0/0/0 和质量门均通过。QDR-7 B2 capacity profile 未在本任务执行，状态保持 `DEFERRED / KNOWN LIMITATION`，production capacity 保持 `NOT_PROVEN`。下一步仅为独立 milestone review；未授权 V16、registry、retention、API、scheduler、automatic learning、push 或 tag。
+
 ## 2026-07-27 Stage-QDR-9 B4 persistent guard compatibility scope prewrite
 
 已完成 remote freshness、V15 migration 和 existing 47-file implementation diff 审计。新鲜全量回归的三项失败全部属于 `PersistentGuardProductionWiringPostgresTest`：它仍使用未签名 environment/未 verified scope 的 legacy fixture，production root 的 `403` fail-closed 行为正确。新增 `DH_STAGE_QDR_9_B4_PERSISTENT_GUARD_FIXTURE_SCOPE_ERRATUM.md`，将该 exact fixture 作为 `B4_UPSTREAM_PERSISTENT_GUARD_COMPATIBILITY_TEST_SCOPE` 加入 effective `48 / 48 PASS`。scope prewrite 未修改 Java、测试、POM、migration、V16、registry 或 retention；Part B 只能在本 erratum 形成独立本地提交后升级 fixture。
@@ -8,37 +12,45 @@
 
 已完成 Maven reactor/DAG 审计：`dh-domain` 与 `dh-security` 的 production dependency tree 均只到 `dh-common`；`dh-domain` 不依赖 `dh-security`，加入 `dh-security -> dh-domain` 无 cycle 且不引入 Spring/JDBC/Web。新增 `DH_STAGE_QDR_9_B4_UPSTREAM_MODULE_DEPENDENCY_SCOPE_ERRATUM.md`，将唯一 future POM 文件 `dh-security/pom.xml` 及仅可 import `FeedbackEnvironment` 的边界冻结入 `47 / 47 PASS`。`mvn -B -ntp -Pquality validate` 实际通过 19/19 Reactor、Checkstyle 0、Spotless PASS。本轮实际 POM、Java、测试、migration、V16 与运行时变更均为 0。
 
-## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 persistent guard compatibility scope retry
+## Terminal current authority — 2026-07-28 Stage-QDR-9 B4 upstream environment contract local acceptance
 
 ~~~text
-Scope-blocker retry baseline / starting HEAD: 675430a8a8e6cceaab75bb72c1fc1bf64af2da46
-Parent: 1971f3dc29fb690dcbd64cb7b0c62c797d81cbb1
+Implementation baseline / starting HEAD: 94ca8f0dc84b58b60eef7727440cc4d276dd8c37
+Parent / scope-erratum baseline: 675430a8a8e6cceaab75bb72c1fc1bf64af2da46
 origin/dev / advertised SHA: 7624bccba9b865d4b687057f41b96799cb9ba8e3 / FRESHLY VERIFIED
-Branch / pre-commit ahead / behind / worktree / staged: dev / 5 / 0 / dirty / empty
-Local documentation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUBLISHED
+Branch / pre-commit ahead / behind / worktree / staged: dev / 6 / 0 / dirty / empty
+Scope erratum commit: 94ca8f0dc84b58b60eef7727440cc4d276dd8c37 / LOCAL_ONLY / NOT_PUBLISHED
+Local implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUBLISHED
 Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
 Stage-QDR-9 B4: IMPLEMENTATION REVERTED / REVIEW BLOCKED
-Trusted upstream authority: OPTION B / FROZEN
-Upstream contract implementation: IMPLEMENTED IN WORKTREE / VALIDATION BLOCKED
-Current blocker: PERSISTENT GUARD POSTGRESQL FIXTURE OUTSIDE FROZEN SCOPE
+Trusted upstream environment contract: IMPLEMENTED / LOCAL_ACCEPTED
+AUDIT authority: OPTION B / SIGNED TENANT-SOURCE-ENVIRONMENT
 Canonical environment type / owner: FeedbackEnvironment / dh-domain
-Authorized dependency: dh-security -> dh-domain / APPROVED
-Module dependency scope: IMPLEMENTED / dh-security/pom.xml / canonical FeedbackEnvironment only
-Effective upstream scope: 48 / 48 PASS
-FeedbackExecutionScope: IMPLEMENTED IN WORKTREE / VALIDATION BLOCKED
-HMAC environment binding / AUDIT environment propagation: IMPLEMENTED IN WORKTREE / VALIDATION BLOCKED
-Persistent guard fixture: SCOPE AUTHORIZED / TECHNICAL FIX PENDING
+dh-security -> dh-domain: IMPLEMENTED / FeedbackEnvironment ONLY
+FeedbackExecutionScope: IMPLEMENTED / LOCAL_ACCEPTED
+HMAC environment binding: PASS
+Tenant/source/environment authorization: PASS
+Missing, invalid, tampered or unauthorized environment: FAIL_CLOSED
+Structured environment errors: PASS
+DecisionOrchestrator propagation: PASS
+Decision Dry Run fingerprint: ENVIRONMENT-BOUND
+AUDIT environment propagation: PASS
+Persistent guard PostgreSQL compatibility: PASS / EXPLICIT SIGNED ENVIRONMENT
+Human Approval lifecycle authority: NOT_ALLOWED
 REPLAY / EVALUATION runtime: DORMANT / DORMANT
-V16 / registry / retention: CANDIDATE-NOT CREATED / NOT IMPLEMENTED / NOT PRESENT
-B4 review retry / publication / B5 / API / scheduler / automatic learning: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED / NO NEW ENDPOINT / NOT_IMPLEMENTED / NOT_ALLOWED
-Fresh full regression: BLOCKED / 1238 TESTS / 3 FAILURES / 0 ERRORS / 0 SKIPPED
+V16 / reference-liveness registry / retention: CANDIDATE-NOT CREATED / NOT_STARTED / NOT PRESENT
+B4 milestone review retry / B4 publication / B5 / API / scheduler / automatic learning: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED / NO NEW ENDPOINT / NOT_IMPLEMENTED / NOT_ALLOWED
+Remote exact-SHA CI: PENDING UPSTREAM CONTRACT PUBLICATION
+Fresh full regression: 1238 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+QDR-7 B2 capacity: DEFERRED / KNOWN LIMITATION
 Production capacity: NOT_PROVEN
+Effective upstream scope: 48 / 48 PASS
 Terminal current factsources: 12 / 12
-CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 PERSISTENT GUARD COMPATIBILITY SCOPE RETRY HASH / 0 CONFLICTS
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 UPSTREAM ENVIRONMENT CONTRACT IMPLEMENTATION HASH / 0 CONFLICTS
 current task: DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-SCOPE-BLOCKER-RETRY-2
-current task status: SCOPE ERRATUM ACCEPTED / IMPLEMENTATION VALIDATION PENDING
-next action: DH-STAGE-QDR-9-B4-PERSISTENT-GUARD-COMPATIBILITY-FIXTURE-UPGRADE
-ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION_RETRY: YES / CURRENT TASK PART B ONLY
+current task status: IMPLEMENTED / LOCAL_ACCEPTED
+next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-MILESTONE-REVIEW
+ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION_RETRY: CONSUMED / LOCAL_ACCEPTED
 ALLOW_V16_IMPLEMENTATION / ALLOW_B4_MILESTONE_REVIEW_RETRY / ALLOW_B4_PUBLICATION / ALLOW_B5_IMPLEMENTATION: NO / NO / NO / NO
 ~~~
 

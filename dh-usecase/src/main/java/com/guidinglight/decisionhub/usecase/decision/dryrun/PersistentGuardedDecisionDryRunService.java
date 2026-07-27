@@ -109,6 +109,13 @@ public final class PersistentGuardedDecisionDryRunService
 
   @Override
   public DecisionDryRunResult execute(final DecisionDryRunCommand command) {
+    if (!hasVerifiedExecutionScope(command)) {
+      return delegate.reject(
+          command,
+          403,
+          DecisionDryRunErrorCode.POLICY_DENIED,
+          "dry-run request lacks verified execution authority");
+    }
     return runtimeService == null ? executePersistent(command) : runtimeService.execute(command);
   }
 
@@ -359,6 +366,7 @@ public final class PersistentGuardedDecisionDryRunService
             command.requestId(),
             command.tenantId(),
             command.traceId(),
+            command.executionScope().environment(),
             eventType,
             errorCode == null
                 ? DecisionAuditEventStatus.SUCCESS
@@ -385,6 +393,13 @@ public final class PersistentGuardedDecisionDryRunService
         command == null ? null : command.requestId(),
         command == null ? null : command.traceId(),
         null);
+  }
+
+  private static boolean hasVerifiedExecutionScope(final DecisionDryRunCommand command) {
+    return command != null
+        && command.executionScope() != null
+        && command.executionScope().tenantId().equals(command.tenantId())
+        && command.executionScope().environment().name().equals(command.environment());
   }
 
   /** 关闭 B3 bounded executor；旧无 runtime-policy 构造路径无资源可关闭。 */

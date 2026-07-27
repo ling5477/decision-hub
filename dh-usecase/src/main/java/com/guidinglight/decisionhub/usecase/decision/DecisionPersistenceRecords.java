@@ -5,6 +5,7 @@ import com.guidinglight.decisionhub.domain.decision.DecisionPolicyStatus;
 import com.guidinglight.decisionhub.domain.decision.DecisionRiskLevel;
 import com.guidinglight.decisionhub.domain.decision.DecisionType;
 import com.guidinglight.decisionhub.domain.decision.ProviderSignalStatus;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -163,6 +164,7 @@ public final class DecisionPersistenceRecords {
       String decisionId,
       String tenantId,
       String traceId,
+      FeedbackEnvironment environment,
       DecisionAuditEventType eventType,
       DecisionAuditEventStatus eventStatus,
       Map<String, Object> eventJson,
@@ -177,9 +179,45 @@ public final class DecisionPersistenceRecords {
       traceId = requireText(traceId, "traceId");
       eventType = Objects.requireNonNull(eventType, "eventType");
       eventStatus = Objects.requireNonNull(eventStatus, "eventStatus");
-      eventJson = eventJson == null ? Map.of() : Map.copyOf(eventJson);
+      eventJson = withEnvironment(eventJson, environment);
       createdAt = Objects.requireNonNull(createdAt, "createdAt");
     }
+
+    /** Preserves non-feedback audit callers without manufacturing an environment. */
+    public AuditEventRecord(
+        final String id,
+        final String decisionId,
+        final String tenantId,
+        final String traceId,
+        final DecisionAuditEventType eventType,
+        final DecisionAuditEventStatus eventStatus,
+        final Map<String, Object> eventJson,
+        final String errorCode,
+        final Instant createdAt) {
+      this(
+          id,
+          decisionId,
+          tenantId,
+          traceId,
+          null,
+          eventType,
+          eventStatus,
+          eventJson,
+          errorCode,
+          createdAt);
+    }
+  }
+
+  private static Map<String, Object> withEnvironment(
+      final Map<String, Object> eventJson, final FeedbackEnvironment environment) {
+    final Map<String, Object> payload = new java.util.LinkedHashMap<>();
+    if (eventJson != null) {
+      payload.putAll(eventJson);
+    }
+    if (environment != null) {
+      payload.put("environment", environment.name());
+    }
+    return Map.copyOf(payload);
   }
 
   private static String requireText(final String value, final String field) {

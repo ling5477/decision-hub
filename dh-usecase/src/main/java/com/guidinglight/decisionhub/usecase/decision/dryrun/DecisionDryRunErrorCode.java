@@ -25,6 +25,21 @@ public enum DecisionDryRunErrorCode {
   /** source 或 tenant/source pair 不在允许列表。 */
   SOURCE_DENIED,
 
+  /** signed environment field is absent. */
+  ENVIRONMENT_REQUIRED,
+
+  /** signed environment is outside the DEV/TEST allowlist. */
+  ENVIRONMENT_INVALID,
+
+  /** source/environment pair is not allowlisted. */
+  SOURCE_ENVIRONMENT_NOT_AUTHORIZED,
+
+  /** tenant/environment pair is not allowlisted. */
+  TENANT_ENVIRONMENT_MISMATCH,
+
+  /** tenant/source/environment triple is not allowlisted. */
+  ENVIRONMENT_NOT_AUTHORIZED,
+
   /** raw body 或签名 payload 超过大小上限。 */
   PAYLOAD_TOO_LARGE,
 

@@ -92,6 +92,9 @@ import org.testcontainers.utility.DockerImageName;
             "decisionhub.integration1.runtime.kill-switch-enabled=false",
             "decisionhub.integration1.runtime.allowed-sources=NQ_DRYRUN",
             "decisionhub.integration1.runtime.allowed-tenant-source-pairs=tenant-a:NQ_DRYRUN",
+            "decisionhub.integration1.runtime.allowed-source-environment-pairs=NQ_DRYRUN::DEV",
+            "decisionhub.integration1.runtime.allowed-tenant-environment-pairs=tenant-a::DEV",
+            "decisionhub.integration1.runtime.allowed-tenant-source-environment-triples=tenant-a::NQ_DRYRUN::DEV",
             "decisionhub.integration1.runtime.guard.environment=test",
             "decisionhub.integration1.runtime.guard.rate-window-seconds=3600",
             "decisionhub.integration1.runtime.guard.rate-limit-value=100000",
@@ -309,9 +312,9 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
                         false,
                         pool,
                         hikariEvents);
-                assertThat(outcome.statusCode()).isGreaterThanOrEqualTo(500);
+                assertThat(outcome.statusCode()).isEqualTo(409);
                 assertThat(outcome.statusCode() < 200 || outcome.statusCode() > 299).isTrue();
-                assertThat(outcome.errorCode()).isEqualTo("UNKNOWN_ERROR");
+                assertThat(outcome.errorCode()).isEqualTo("NONCE_REPLAY");
             }
         } finally {
             outageExecutor.shutdownNow();
@@ -747,6 +750,7 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
                         SOURCE,
                         TENANT,
                         TENANT,
+                        "DEV",
                         timestamp,
                         nonce,
                         "",
@@ -804,6 +808,7 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
         envelope.put("traceId", traceId);
         envelope.put("tenantId", TENANT);
         envelope.put("source", SOURCE);
+        envelope.put("environment", "DEV");
         envelope.put("timestamp", timestamp);
         envelope.put("nonce", nonce);
         envelope.put("schemaVersion", SCHEMA_VERSION);

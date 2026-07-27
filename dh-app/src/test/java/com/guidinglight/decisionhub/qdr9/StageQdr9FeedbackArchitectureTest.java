@@ -156,6 +156,60 @@ class StageQdr9FeedbackArchitectureTest {
         .doesNotExist();
   }
 
+  @Test
+  void signedEnvironmentAuthorityRemainsExplicitAndNoProducerRuntimeIsAdded() throws IOException {
+    final String environment =
+        source("dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/"
+            + "FeedbackEnvironment.java");
+    final String scope =
+        source("dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/"
+            + "FeedbackExecutionScope.java");
+    final String authenticator =
+        source("dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/"
+            + "HmacNqDryRunAuthenticator.java");
+    final String controller =
+        source("dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/"
+            + "DecisionDryRunController.java");
+    final String auditRecord =
+        source("dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/"
+            + "DecisionPersistenceRecords.java");
+
+    assertThat(environment).contains("DEV", "TEST").doesNotContain("LIVE", "PROD", "PAPER");
+    assertThat(scope)
+        .contains("FeedbackExecutionScope(String tenantId, FeedbackEnvironment environment)")
+        .doesNotContain("ThreadLocal", "FeedbackEnvironment.DEV", "getActiveProfiles");
+    assertThat(authenticator)
+        .contains("FeedbackEnvironment")
+        .doesNotContain("FeedbackExecutionScope", "ThreadLocal", "FeedbackEnvironment.DEV");
+    assertThat(controller)
+        .contains("new FeedbackExecutionScope", ".withExecutionScope(")
+        .doesNotContain("ThreadLocal", "FeedbackEnvironment.DEV", "getActiveProfiles");
+    assertThat(auditRecord)
+        .contains("FeedbackEnvironment environment", "payload.put(\"environment\", environment.name())");
+
+    try (Stream<Path> migrations =
+        Files.list(REPOSITORY_ROOT.resolve("dh-app/src/main/resources/db/migration"))) {
+      assertThat(migrations.map(path -> path.getFileName().toString()))
+          .noneMatch(name -> name.startsWith("V16__"));
+    }
+    List.of(
+            "dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/"
+                + "QdrReferenceLivenessRegistry.java",
+            "dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/"
+                + "JdbcQdrReferenceLivenessRegistry.java",
+            "dh-app/src/main/java/com/guidinglight/decisionhub/qdr9/"
+                + "FeedbackRetentionScheduler.java",
+            "dh-api/src/main/java/com/guidinglight/decisionhub/api/qdr/replay/"
+                + "QdrReplayController.java",
+            "dh-api/src/main/java/com/guidinglight/decisionhub/api/qdr/replay/"
+                + "QdrEvaluationController.java")
+        .forEach(path -> assertThat(REPOSITORY_ROOT.resolve(path)).doesNotExist());
+  }
+
+  private static String source(final String relativePath) throws IOException {
+    return Files.readString(REPOSITORY_ROOT.resolve(relativePath));
+  }
+
   private static List<Path> forbiddenB4Files() {
     return List.of(
         REPOSITORY_ROOT.resolve(

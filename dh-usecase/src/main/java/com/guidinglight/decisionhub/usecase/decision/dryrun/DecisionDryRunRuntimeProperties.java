@@ -24,6 +24,9 @@ public record DecisionDryRunRuntimeProperties(
     boolean devOrTestProfile,
     Set<String> allowedSources,
     Set<String> allowedTenantSourcePairs,
+    Set<String> allowedSourceEnvironmentPairs,
+    Set<String> allowedTenantEnvironmentPairs,
+    Set<String> allowedTenantSourceEnvironmentTriples,
     int memoryCapBytes) {
 
   private static final String CANONICAL_SOURCE = "NQ_DRYRUN";
@@ -40,8 +43,40 @@ public record DecisionDryRunRuntimeProperties(
   public DecisionDryRunRuntimeProperties {
     allowedSources = normalizeConfiguredSources(allowedSources);
     allowedTenantSourcePairs = normalizeConfiguredPairs(allowedTenantSourcePairs);
+    allowedSourceEnvironmentPairs = normalizeConfiguredSourceEnvironmentPairs(allowedSourceEnvironmentPairs);
+    allowedTenantEnvironmentPairs = normalizeConfiguredTenantEnvironmentPairs(allowedTenantEnvironmentPairs);
+    allowedTenantSourceEnvironmentTriples =
+        normalizeConfiguredTenantSourceEnvironmentTriples(allowedTenantSourceEnvironmentTriples);
     validatePairsBelongToAllowlist(allowedSources, allowedTenantSourcePairs);
+    validateEnvironmentBindings(
+        allowedSources,
+        allowedTenantSourcePairs,
+        allowedSourceEnvironmentPairs,
+        allowedTenantEnvironmentPairs,
+        allowedTenantSourceEnvironmentTriples);
     memoryCapBytes = memoryCapBytes <= 0 ? 32 * 1024 : memoryCapBytes;
+  }
+
+  /** Preserves the former runtime-property contract; absent environment authorization remains denied. */
+  public DecisionDryRunRuntimeProperties(
+      final boolean enabled,
+      final boolean productionEnabled,
+      final boolean killSwitchEnabled,
+      final boolean devOrTestProfile,
+      final Set<String> allowedSources,
+      final Set<String> allowedTenantSourcePairs,
+      final int memoryCapBytes) {
+    this(
+        enabled,
+        productionEnabled,
+        killSwitchEnabled,
+        devOrTestProfile,
+        allowedSources,
+        allowedTenantSourcePairs,
+        Set.of(),
+        Set.of(),
+        Set.of(),
+        memoryCapBytes);
   }
 
   /**
@@ -75,6 +110,23 @@ public record DecisionDryRunRuntimeProperties(
    */
   public boolean tenantSourceAllowed(final String tenantId, final String source) {
     return allowedTenantSourcePairs.contains(requestPair(tenantId, source));
+  }
+
+  /** Returns whether the signed source is authorized for the signed environment. */
+  public boolean sourceEnvironmentAllowed(final String source, final String environment) {
+    return allowedSourceEnvironmentPairs.contains(source + PAIR_SEPARATOR + environment);
+  }
+
+  /** Returns whether the authenticated tenant is authorized for the signed environment. */
+  public boolean tenantEnvironmentAllowed(final String tenantId, final String environment) {
+    return allowedTenantEnvironmentPairs.contains(requestPair(tenantId, environment));
+  }
+
+  /** Returns whether the complete tenant/source/environment binding is explicitly authorized. */
+  public boolean tenantSourceEnvironmentAllowed(
+      final String tenantId, final String source, final String environment) {
+    return allowedTenantSourceEnvironmentTriples.contains(
+        requestPair(tenantId, source) + PAIR_SEPARATOR + environment);
   }
 
   /**
@@ -125,6 +177,58 @@ public record DecisionDryRunRuntimeProperties(
     return parts[0].trim() + PAIR_SEPARATOR + canonicalConfiguredSource(parts[1]);
   }
 
+  private static Set<String> normalizeConfiguredSourceEnvironmentPairs(
+      final Set<String> configuredPairs) {
+    return normalizeEnvironmentBindings(configuredPairs, 2, true);
+  }
+
+  private static Set<String> normalizeConfiguredTenantEnvironmentPairs(
+      final Set<String> configuredPairs) {
+    return normalizeEnvironmentBindings(configuredPairs, 2, false);
+  }
+
+  private static Set<String> normalizeConfiguredTenantSourceEnvironmentTriples(
+      final Set<String> configuredTriples) {
+    return normalizeEnvironmentBindings(configuredTriples, 3, false);
+  }
+
+  private static Set<String> normalizeEnvironmentBindings(
+      final Set<String> configuredBindings, final int partCount, final boolean sourceFirst) {
+    if (configuredBindings == null) {
+      return Set.of();
+    }
+    return configuredBindings.stream()
+        .map(binding -> normalizeEnvironmentBinding(binding, partCount, sourceFirst))
+        .collect(Collectors.toUnmodifiableSet());
+  }
+
+  private static String normalizeEnvironmentBinding(
+      final String configuredBinding, final int partCount, final boolean sourceFirst) {
+    if (configuredBinding == null || configuredBinding.isBlank()) {
+      throw new IllegalArgumentException("dry-run environment binding must not be blank");
+    }
+    final String[] parts = configuredBinding.trim().split(PAIR_SEPARATOR, -1);
+    if (parts.length != partCount) {
+      throw new IllegalArgumentException("dry-run environment binding has an invalid part count");
+    }
+    final int environmentIndex = partCount - 1;
+    final String environment = parts[environmentIndex].trim();
+    if (!("DEV".equals(environment) || "TEST".equals(environment))) {
+      throw new IllegalArgumentException("dry-run environment must be DEV or TEST");
+    }
+    final String first = parts[0].trim();
+    if (first.isEmpty()) {
+      throw new IllegalArgumentException("dry-run environment binding identity must not be blank");
+    }
+    if (sourceFirst && !CANONICAL_SOURCE.equals(first)) {
+      throw new IllegalArgumentException("dry-run source/environment source must be NQ_DRYRUN");
+    }
+    if (partCount == 3 && !CANONICAL_SOURCE.equals(parts[1].trim())) {
+      throw new IllegalArgumentException("dry-run tenant/source/environment source must be NQ_DRYRUN");
+    }
+    return String.join(PAIR_SEPARATOR, java.util.Arrays.stream(parts).map(String::trim).toList());
+  }
+
   /**
    * 建立 request lookup key，不对不可信 source 做 trim、大小写变换或 alias 映射。
    *
@@ -166,6 +270,32 @@ public record DecisionDryRunRuntimeProperties(
       final String source = pair.substring(pair.indexOf(PAIR_SEPARATOR) + PAIR_SEPARATOR.length());
       if (!configuredSources.contains(source)) {
         throw new IllegalArgumentException("dry-run tenant/source pair source is not in allowedSources");
+      }
+    }
+  }
+
+  private static void validateEnvironmentBindings(
+      final Set<String> configuredSources,
+      final Set<String> configuredTenantSourcePairs,
+      final Set<String> configuredSourceEnvironmentPairs,
+      final Set<String> configuredTenantEnvironmentPairs,
+      final Set<String> configuredTriples) {
+    for (final String sourceEnvironment : configuredSourceEnvironmentPairs) {
+      final String source = sourceEnvironment.substring(0, sourceEnvironment.indexOf(PAIR_SEPARATOR));
+      if (!configuredSources.contains(source)) {
+        throw new IllegalArgumentException("dry-run source/environment source is not in allowedSources");
+      }
+    }
+    for (final String triple : configuredTriples) {
+      final String[] parts = triple.split(PAIR_SEPARATOR, -1);
+      final String tenantSource = parts[0] + PAIR_SEPARATOR + parts[1];
+      final String sourceEnvironment = parts[1] + PAIR_SEPARATOR + parts[2];
+      final String tenantEnvironment = parts[0] + PAIR_SEPARATOR + parts[2];
+      if (!configuredTenantSourcePairs.contains(tenantSource)
+          || !configuredSourceEnvironmentPairs.contains(sourceEnvironment)
+          || !configuredTenantEnvironmentPairs.contains(tenantEnvironment)) {
+        throw new IllegalArgumentException(
+            "dry-run tenant/source/environment triple requires all pair authorizations");
       }
     }
   }

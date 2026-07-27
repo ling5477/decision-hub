@@ -153,7 +153,16 @@ class DecisionDryRunRuntimeWiringConfigTest {
   private DecisionDryRunRuntimeProperties properties(
       final String allowedSources, final String allowedTenantSourcePairs) {
     return config.decisionDryRunRuntimeProperties(
-        testEnvironment, false, false, false, allowedSources, allowedTenantSourcePairs, 32768);
+        testEnvironment,
+        false,
+        false,
+        false,
+        allowedSources,
+        allowedTenantSourcePairs,
+        "NQ_DRYRUN::DEV",
+        "tenant-a::DEV",
+        "tenant-a::NQ_DRYRUN::DEV",
+        32768);
   }
 
   private static MockEnvironment testEnvironment() {

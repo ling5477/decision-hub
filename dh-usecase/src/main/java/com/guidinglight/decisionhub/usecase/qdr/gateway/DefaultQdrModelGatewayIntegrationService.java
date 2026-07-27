@@ -1,5 +1,6 @@
 package com.guidinglight.decisionhub.usecase.qdr.gateway;
 
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
 import com.guidinglight.decisionhub.domain.qdr.model.PromptModelSafetyRules;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditEventStatus;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditEventType;
@@ -255,6 +256,7 @@ public final class DefaultQdrModelGatewayIntegrationService implements QdrModelG
                         command.requestId(),
                         command.tenantId(),
                         command.traceId(),
+                        environmentOf(command),
                         success
                                 ? DecisionAuditEventType.DECISION_COMPLETED
                                 : eventTypeFor(failureCode),
@@ -287,6 +289,7 @@ public final class DefaultQdrModelGatewayIntegrationService implements QdrModelG
                         command.requestId(),
                         command.tenantId(),
                         command.traceId(),
+                        environmentOf(command),
                         eventTypeFor(failureCode),
                         DecisionAuditEventStatus.FAILED,
                         Map.of(
@@ -307,6 +310,11 @@ public final class DefaultQdrModelGatewayIntegrationService implements QdrModelG
         } catch (final RuntimeException ignored) {
             // 审计自身失败时仍必须 fail-closed；异常内容不能向 response 侧扩散。
         }
+    }
+
+    private static FeedbackEnvironment environmentOf(
+            final QdrModelGatewayIntegrationCommand command) {
+        return command.executionScope() == null ? null : command.executionScope().environment();
     }
 
     private void writeFailureTraceAndAuditSafely(
