@@ -1,5 +1,62 @@
 # Decision Hub Worklog
 
+## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 identity and replay namespace scope design
+
+~~~text
+Design baseline / origin/dev / advertised SHA: b0ff11e4057077ad7e0fe91d691116f069dc744e / FRESHLY VERIFIED
+Identity/replay design authority commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUBLISHED
+Upstream containment: PASS / PUBLISHED / EXACT-SHA CI 30508286349 PASS
+Published implementation: 549ed5a3224ce3ce375452dcf57629c73e3101d0 / PUBLISHED AND REVERTED
+Current technical tree: B3 SAFE BASELINE
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B4: IMPLEMENTATION REVERTED / REVIEW BLOCKED
+Upstream environment implementation: REVERTED / SECURITY REVIEW BLOCKED
+Persistent identity environment isolation: DESIGN FROZEN / NOT IMPLEMENTED
+QDR7 rate audit environment: DESIGN FROZEN / NOT IMPLEMENTED
+Replay namespace environment isolation: DESIGN FROZEN / NOT IMPLEMENTED
+Canonical identity versions: QDR9-RATE-IDENTITY-2 / QDR9-IDEMPOTENCY-IDENTITY-2 / QDR9-RECOVERY-IDENTITY-2
+Canonical replay version / encoding: QDR9-DRYRUN-REPLAY-2 / QDR9-LP1
+Legacy persistent identity strategy: OPTION B / BLOCKED BY UNBOUNDED EXPIRED TOMBSTONES
+Legacy replay strategy: OPTION B / BLOCKED BY UNBOUNDED CONFIGURED TTL AND CURRENT NON-ATOMIC PORT
+Audit environment storage: FORWARD MIGRATION REQUIRED
+Highest migration / V16: V15 / CANDIDATE-NOT CREATED
+Reference-liveness registry / retention: NOT IMPLEMENTED / NOT PRESENT
+Effective scope invariants: PASS / 54 OF 54
+Technical P1 / Technical P2: 1 OPEN / 1 OPEN
+Governance P1: RECORDED / PUBLISHED BEFORE MILESTONE REVIEW
+Regression baseline: REUSED / 1228 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Full regression this task: NOT_RERUN / DOCUMENTATION-ONLY SECURITY DESIGN
+QDR-7 B2 capacity / Production capacity: DEFERRED-KNOWN LIMITATION / NOT_PROVEN
+B4 review retry / B4 publication / B5: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED
+V16 / new endpoint / scheduler / automatic learning: NOT_ALLOWED / NO / NO / NO
+Terminal current factsources: 12 / 12
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 IDENTITY-REPLAY DESIGN AUTHORITY HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-IDENTITY-AND-REPLAY-NAMESPACE-SCOPE-DESIGN
+current task status: LOCAL_ACCEPTED / BLOCKERS FROZEN / IMPLEMENTATION NOT AUTHORIZED
+next action: DH-STAGE-QDR-9-B4-AUDIT-ENVIRONMENT-FORWARD-MIGRATION-SCOPE-DESIGN
+ALLOW_IDENTITY_REPLAY_IMPLEMENTATION: NO
+ALLOW_V16_IMPLEMENTATION / ALLOW_B4_MILESTONE_REVIEW_RETRY / ALLOW_B4_PUBLICATION / ALLOW_B5_IMPLEMENTATION: NO / NO / NO / NO
+~~~
+
+## 2026-07-30 — Identity and replay namespace scope design
+
+- 在 `b0ff11e…` clean baseline 审计 persistent rate、idempotency、recovery、request fingerprint、
+  QDR7 rate audit 与 dry-run replay namespace。
+- 只读追溯 `549ed5a…`，确认 historical `AuditEventRecord` compatibility constructor 会传 null，
+  且 historical replay key 仍未加入 environment；未恢复该实现。
+- 冻结三个 persistent identity version、`QDR9-LP1` codec 与
+  `QDR9-DRYRUN-REPLAY-2`。
+- legacy persistent/replay 均选择安全保守 Option B；分别因永久 tombstone、无界 configured TTL
+  与非原子 current port 保持 BLOCKED。
+- 确认 audit storage 无结构化 environment column，结论为 `FORWARD MIGRATION REQUIRED`。
+- 新增六个 exact scope set，保留既有 48/48 并形成 54/54 invariant PASS。
+- 更新 12/12 current factsources；authority block 内容哈希唯一、current conflicts 0。
+- `mvn -B -ntp -Pquality validate` 权威重跑 exit 0，19/19 reactor success、
+  Checkstyle 0、Spotless PASS。
+- 未运行 full regression；复用 containment 的 1228 tests / 0 failures / 0 errors / 0 skipped。
+- 未修改 Java、tests、POM、migration、config、workflow 或 API；未创建 V16、registry、retention、
+  endpoint、scheduler、automatic learning、push 或 tag。
+
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 upstream contract remote containment
 
 ~~~text

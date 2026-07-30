@@ -59,6 +59,71 @@ DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-IDENTITY-AND-REPLAY-NAMESPACE-SCOPE-DESIGN
 
 当前禁止 P1/P2 implementation、V16、reference-liveness registry、retention、B4 milestone review retry、B4 publication、B5、API、scheduler 与 automatic learning。QDR-7 B2 capacity 继续 `DEFERRED / KNOWN LIMITATION`，production capacity 继续 `NOT_PROVEN`。
 
+## Upstream Persistent Identity and Replay Namespace Blocker — 2026-07-30
+
+~~~text
+task:
+DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-IDENTITY-AND-REPLAY-NAMESPACE-SCOPE-DESIGN
+
+baseline:
+b0ff11e4057077ad7e0fe91d691116f069dc744e
+
+published implementation:
+549ed5a3224ce3ce375452dcf57629c73e3101d0 / PUBLISHED AND REVERTED
+
+current technical tree:
+B3 SAFE BASELINE
+
+technical P1 / P2:
+1 OPEN / 1 OPEN
+
+persistent identity environment isolation:
+DESIGN FROZEN / NOT IMPLEMENTED
+
+QDR7 rate audit environment:
+DESIGN FROZEN / NOT IMPLEMENTED
+
+replay namespace environment isolation:
+DESIGN FROZEN / NOT IMPLEMENTED
+
+legacy persistent strategy:
+OPTION B / CONTRACT BLOCKED
+
+legacy replay strategy:
+OPTION B / CONTRACT BLOCKED
+
+audit environment storage:
+FORWARD MIGRATION REQUIRED
+
+effective scope:
+54 / 54 PASS
+
+V16 / registry / retention:
+CANDIDATE-NOT CREATED / NOT IMPLEMENTED / NOT PRESENT
+
+ALLOW_IDENTITY_REPLAY_IMPLEMENTATION:
+NO
+~~~
+
+本 scope-design 冻结 `QDR9-RATE-IDENTITY-2`、`QDR9-IDEMPOTENCY-IDENTITY-2`、
+`QDR9-RECOVERY-IDENTITY-2` 与 `QDR9-DRYRUN-REPLAY-2`，统一使用 `QDR9-LP1`
+UTF-8 length-prefixed canonical encoding，但保持 rate、idempotency、recovery、replay 独立 namespace。
+verified environment 唯一来源是 `command.executionScope().environment()`。
+
+现有 audit storage 无结构化 environment column，禁止复用 `event_json` 或 `event_status`，因此需要
+forward migration。现有 idempotency `EXPIRED` tombstone 无物理删除，legacy replay TTL 无 hard ceiling
+且当前 port 无 atomic legacy-check + v2 admission；两类 legacy 选择安全保守 Option B，但 implementation
+继续 blocked。
+
+下一步仅为：
+
+~~~text
+DH-STAGE-QDR-9-B4-AUDIT-ENVIRONMENT-FORWARD-MIGRATION-SCOPE-DESIGN
+~~~
+
+该任务必须先冻结 migration sequencing，不得占用 candidate V16，不得实施 P1/P2、registry、retention、
+B4 review retry/publication 或 B5。
+
 ## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 upstream Maven dependency scope retry
 
 ~~~text

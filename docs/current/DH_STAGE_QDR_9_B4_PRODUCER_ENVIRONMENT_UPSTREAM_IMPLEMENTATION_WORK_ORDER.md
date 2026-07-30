@@ -55,6 +55,57 @@ DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-IDENTITY-AND-REPLAY-NAMESPACE-SCOPE-DESIGN
 
 该入口不授权 P1/P2 implementation、V16、registry、retention、B4 milestone review retry、B4 publication、B5、endpoint、scheduler 或 automatic learning。
 
+## Upstream Persistent Identity and Replay Namespace Blocker — 2026-07-30
+
+后续 scope-design 已完成代码现实审计并冻结 canonical contract，但未实施 technical P1/P2：
+
+~~~text
+scope-design baseline:
+b0ff11e4057077ad7e0fe91d691116f069dc744e
+
+published and reverted implementation:
+549ed5a3224ce3ce375452dcf57629c73e3101d0
+
+current safe tree:
+B3 SAFE BASELINE
+
+persistent identity:
+QDR9-RATE-IDENTITY-2 / QDR9-IDEMPOTENCY-IDENTITY-2 / QDR9-RECOVERY-IDENTITY-2
+DESIGN FROZEN / NOT IMPLEMENTED
+
+rate audit environment:
+command.executionScope().environment()
+DESIGN FROZEN / NOT IMPLEMENTED
+
+replay namespace:
+QDR9-DRYRUN-REPLAY-2 / QDR9-LP1
+DESIGN FROZEN / NOT IMPLEMENTED
+
+legacy persistent identity:
+OPTION B / BLOCKED BY UNBOUNDED EXPIRED TOMBSTONES
+
+legacy replay:
+OPTION B / BLOCKED BY UNBOUNDED CONFIGURED TTL AND CURRENT PORT
+
+audit environment storage:
+FORWARD MIGRATION REQUIRED
+
+effective scope invariants:
+54 / 54 PASS
+
+ALLOW_IDENTITY_REPLAY_IMPLEMENTATION:
+NO
+~~~
+
+现有 persistent 表的 `environment` 来自部署 guard property，不是 signed request environment；现有
+audit table 无结构化 environment column；现有 replay key 不含 version/environment，且 legacy TTL
+无全局 hard ceiling。所以下一步必须先执行
+`DH-STAGE-QDR-9-B4-AUDIT-ENVIRONMENT-FORWARD-MIGRATION-SCOPE-DESIGN`，不得直接恢复或
+cherry-pick `549ed5a…`。
+
+本 blocker 保留既有 48/48 历史 scope，并以六个 exact subset invariant 扩展为 54/54。它不创建
+migration、V16、registry 或 retention，不启动 B4 review retry/publication/B5。
+
 ## 1. 工单状态与边界
 
 ~~~text
