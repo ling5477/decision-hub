@@ -1,5 +1,46 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-07-31 Stage-QDR-9 B4 minimal P1/P2 implementation
+
+~~~text
+Implementation baseline / parent: 7fb0907acef477c04431445faf40e16db8dff0fb / 229910e31b9b5cba5fe944e4f3a497df73843d20
+origin/dev / advertised SHA: 229910e31b9b5cba5fe944e4f3a497df73843d20 / 229910e31b9b5cba5fe944e4f3a497df73843d20 / FRESHLY VERIFIED
+Local implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT PUBLISHED
+Current technical tree: MINIMAL ENVIRONMENT-BOUND REMEDIATION IMPLEMENTED LOCALLY
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B4: MINIMAL P1/P2 IMPLEMENTED / LOCAL_ACCEPTED / MILESTONE REVIEW PENDING
+Minimal remediation path: M1
+Technical P1: IMPLEMENTED / LOCAL_ACCEPTED
+Technical P2: IMPLEMENTED / LOCAL_ACCEPTED
+Signed environment / tenant-source-environment authorization: PASS / PASS
+Persistent rate-idempotency-recovery identity / fingerprint: ENVIRONMENT-BOUND / PASS
+Replay namespace / QDR7 structured rate audit environment: ENVIRONMENT-BOUND / PASS
+Root fail-closed / transaction rollback: PASS / PASS
+Owner operational attestation: ACCEPTED / FIRST_PARTY_OPERATIONAL_ATTESTATION
+Legacy compatibility: NOT REQUIRED / OWNER-CONFIRMED NO REAL DATA
+Migration: NOT REQUIRED
+Highest migration / V16 / V17 / V18: V15 / NOT CREATED / NOT CREATED / NOT CREATED
+Registry / retention: NOT IMPLEMENTED / NOT PRESENT
+Exact scope: PASS / 20 PRODUCTION / 16 TEST / 0 MIGRATION / 5 AUTHORITY / 0 UNEXPECTED
+PostgreSQL/Testcontainers: PASS / POSTGRESQL 17.10 / 0 MANDATORY SKIPS
+Module regression: PASS / 4 OF 4 COMMANDS
+Full regression: PASS / 19 OF 19 REACTOR / 1243 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+QDR-7 B2 capacity / Production capacity: DEFERRED-KNOWN LIMITATION / NOT_PROVEN
+Remote publication: PENDING MILESTONE REVIEW
+Server deployment / push / tag: NO / NO / NONE
+B4 publication / B5 / V16 implementation: NOT ALLOWED / NOT ALLOWED / NOT ALLOWED
+current task: DH-STAGE-QDR-9-B4-MINIMAL-P1-P2-IMPLEMENTATION
+current task status: DONE / LOCAL_ACCEPTED / UNPUBLISHED
+next action: DH-STAGE-QDR-9-B4-MINIMAL-P1-P2-MILESTONE-REVIEW
+ALLOW_MINIMAL_P1_P2_MILESTONE_REVIEW: YES
+ALLOW_PUSH / ALLOW_SERVER_DEPLOYMENT: NO / NO
+~~~
+
+该 authority 只同步 owner-confirmed M1 最小修复结果，不恢复 legacy compatibility、
+retirement、backfill、migration、registry 或 retention。历史 blocker/design authority 保持原文，
+后续只有独立 milestone review 可以决定是否允许 B4 publication。
+
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 owner-attested M1 rebaseline
 
 ~~~text

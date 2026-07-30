@@ -10,6 +10,8 @@ import com.guidinglight.decisionhub.domain.decision.DecisionAction;
 import com.guidinglight.decisionhub.domain.decision.DecisionPolicyStatus;
 import com.guidinglight.decisionhub.domain.decision.DecisionRiskLevel;
 import com.guidinglight.decisionhub.domain.decision.DecisionType;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionAuditRepository;
 import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionReplayQueryRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcGuardCleanupAdapter;
@@ -427,6 +429,8 @@ class PersistentGuardProductionWiringPostgresTest {
       assertThat(
               limiter
                   .check(
+                      new FeedbackExecutionScope(
+                          "tenant-plus", FeedbackEnvironment.TEST),
                       "NQ_DRYRUN",
                       "tenant-plus",
                       PersistentDecisionDryRunRateLimiter.ROUTE,
@@ -438,6 +442,8 @@ class PersistentGuardProductionWiringPostgresTest {
       assertThat(
               limiter
                   .check(
+                      new FeedbackExecutionScope(
+                          "tenant-minus", FeedbackEnvironment.TEST),
                       "NQ_DRYRUN",
                       "tenant-minus",
                       PersistentDecisionDryRunRateLimiter.ROUTE,
@@ -817,6 +823,7 @@ class PersistentGuardProductionWiringPostgresTest {
         "trace-" + suffix,
         "tenant-a",
         "NQ_DRYRUN",
+        "TEST",
         "2026-07-12T00:00:00Z",
         "nonce-" + suffix,
         "1",
@@ -833,7 +840,8 @@ class PersistentGuardProductionWiringPostgresTest {
             Instant.parse("2026-07-12T00:00:00Z"),
             List.of("evidence-safe"),
             128),
-        false);
+        false,
+        new FeedbackExecutionScope("tenant-a", FeedbackEnvironment.TEST));
   }
 
   private static PersistentGuardIdentity identity(final String tenant) {

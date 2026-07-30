@@ -35,6 +35,21 @@ public final class AuthenticatedRequest {
   }
 
   /**
+   * 读取完整已认证上下文，不从 header、body 或 tenant 属性重建 authority。
+   *
+   * @param request 当前 HTTP 请求
+   * @return authentication filter 写入的完整上下文
+   * @throws ErrorResponseException 上下文缺失或 tenant 不完整时抛出 401
+   */
+  public static AuthContext requireAuthContext(final HttpServletRequest request) {
+    final AuthContext context = authContext(request);
+    if (context == null || context.tenantId() == null || context.tenantId().isBlank()) {
+      throw new ErrorResponseException(HttpStatus.UNAUTHORIZED);
+    }
+    return context;
+  }
+
+  /**
    * 校验 run tenant 与调用方 tenant 一致。
    *
    * @param expectedTenant 调用方 tenant。

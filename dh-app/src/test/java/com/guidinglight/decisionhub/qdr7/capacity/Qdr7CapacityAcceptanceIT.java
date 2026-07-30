@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Volume;
 import com.guidinglight.decisionhub.DecisionHubApplication;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
 import com.guidinglight.decisionhub.security.StaticTokenVerifier;
 import com.guidinglight.decisionhub.security.nq.HmacNqDryRunAuthenticator;
 import com.guidinglight.decisionhub.security.nq.NqDryRunAuthRequest;
@@ -2424,6 +2425,7 @@ class Qdr7CapacityAcceptanceIT {
       envelope.put("traceId", traceId);
       envelope.put("tenantId", TENANT);
       envelope.put("source", requestedSource);
+      envelope.put("environment", "TEST");
       envelope.put("timestamp", timestamp);
       envelope.put("nonce", nonce);
       envelope.put("schemaVersion", SCHEMA);
@@ -2460,6 +2462,8 @@ class Qdr7CapacityAcceptanceIT {
               requestedSource,
               TENANT,
               TENANT,
+              FeedbackEnvironment.TEST,
+              "TEST",
               timestamp,
               nonce,
               "",

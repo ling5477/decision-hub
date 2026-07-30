@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidinglight.decisionhub.security.StaticTokenVerifier;
 import com.guidinglight.decisionhub.security.nq.HmacNqDryRunAuthenticator;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
 import com.guidinglight.decisionhub.security.nq.NqDryRunAuthRequest;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.MockModelProvider;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelProviderPort;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -118,6 +120,30 @@ class DecisionDryRunActualWiringRepeatabilityPostgresTest {
     void fiveSequentialAndEightConcurrentProtectedRequestsRemainStructured2xx() throws Exception {
         assertThat(modelProvider).isExactlyInstanceOf(MockModelProvider.class);
 
+        final String crossEnvironmentSuffix = "cross-environment";
+        final String crossEnvironmentRequestId =
+                "qdr7-repeatability-" + crossEnvironmentSuffix;
+        seedFailedDevIdentity(crossEnvironmentRequestId);
+        final RequestOutcome crossEnvironment =
+                sendProtectedRequest(crossEnvironmentSuffix);
+        assertStructuredSuccess(crossEnvironment);
+        assertThat(
+                        jdbcTemplate.queryForObject(
+                                "select state from dh_qdr7_idempotency_guard"
+                                        + " where environment='dev' and tenant_id=? and request_id=?",
+                                String.class,
+                                TENANT,
+                                crossEnvironmentRequestId))
+                .isEqualTo("FAILED");
+        assertThat(
+                        jdbcTemplate.queryForObject(
+                                "select state from dh_qdr7_idempotency_guard"
+                                        + " where environment='test' and tenant_id=? and request_id=?",
+                                String.class,
+                                TENANT,
+                                crossEnvironmentRequestId))
+                .isEqualTo("COMPLETED");
+
         final List<RequestOutcome> sequential = new ArrayList<>();
         for (int ordinal = 1; ordinal <= 5; ordinal++) {
             sequential.add(sendProtectedRequest("sequential-" + ordinal));
@@ -156,20 +182,20 @@ class DecisionDryRunActualWiringRepeatabilityPostgresTest {
         assertThat(sequential).hasSize(5);
         assertThat(concurrent).hasSize(8);
         assertThat(jdbcTemplate.queryForObject("select count(*) from dh_nq_replay_nonce", Integer.class))
-                .isEqualTo(13);
+                .isEqualTo(14);
         assertThat(
                         jdbcTemplate.queryForObject(
                                 "select count(*) from dh_qdr7_idempotency_guard"
                                         + " where tenant_id=? and state='COMPLETED'",
                                 Integer.class,
                                 TENANT))
-                .isEqualTo(13);
+                .isEqualTo(14);
         assertThat(
                         jdbcTemplate.queryForObject(
                                 "select sum(request_count) from dh_qdr7_rate_limit_bucket where tenant_id=?",
                                 Integer.class,
                                 TENANT))
-                .isEqualTo(13);
+                .isEqualTo(14);
         assertThat(
                         jdbcTemplate.queryForObject(
                                 "select count(*) from qdr_model_gateway_call"
@@ -177,7 +203,7 @@ class DecisionDryRunActualWiringRepeatabilityPostgresTest {
                                         + " and status='SUCCEEDED' and provider_kind='MOCK'",
                                 Integer.class,
                                 TENANT))
-                .isEqualTo(13);
+                .isEqualTo(14);
         assertThat(
                         jdbcTemplate.queryForObject(
                                 "select count(*) from qdr_model_gateway_call"
@@ -186,6 +212,24 @@ class DecisionDryRunActualWiringRepeatabilityPostgresTest {
                                 Integer.class,
                                 TENANT))
                 .isZero();
+    }
+
+    private void seedFailedDevIdentity(final String requestId) {
+        jdbcTemplate.update(
+                "insert into dh_qdr7_idempotency_guard"
+                        + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,"
+                        + " hash_version,state,state_version,stable_error_code,created_at,updated_at,"
+                        + " failed_at,expires_at,retention_until)"
+                        + " values (?,'dev',?,'NQ_DRYRUN',?,?,'"
+                        + "a".repeat(64)
+                        + "','QDR7-DRYRUN-CJSON-1','FAILED',0,'DEV_ONLY_FAILURE',"
+                        + " transaction_timestamp(),transaction_timestamp(),transaction_timestamp(),"
+                        + " transaction_timestamp()+interval '10 minute',"
+                        + " transaction_timestamp()+interval '1 hour')",
+                UUID.randomUUID(),
+                ENDPOINT,
+                TENANT,
+                requestId);
     }
 
     private RequestOutcome sendProtectedRequest(final String suffix) throws Exception {
@@ -204,6 +248,8 @@ class DecisionDryRunActualWiringRepeatabilityPostgresTest {
                         SOURCE,
                         TENANT,
                         TENANT,
+                        FeedbackEnvironment.TEST,
+                        "TEST",
                         timestamp,
                         nonce,
                         "",
@@ -245,6 +291,7 @@ class DecisionDryRunActualWiringRepeatabilityPostgresTest {
         envelope.put("traceId", traceId);
         envelope.put("tenantId", TENANT);
         envelope.put("source", SOURCE);
+        envelope.put("environment", "TEST");
         envelope.put("timestamp", timestamp);
         envelope.put("nonce", nonce);
         envelope.put("schemaVersion", SCHEMA_VERSION);

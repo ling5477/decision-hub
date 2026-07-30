@@ -231,6 +231,15 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
                     "missing dry-run request",
                     DecisionAuditEventType.POLICY_DENIED);
         }
+        if (!command.hasVerifiedExecutionScope()) {
+            return DecisionDryRunResult.rejected(
+                    403,
+                    DecisionDryRunErrorCode.POLICY_DENIED,
+                    "dry-run request lacks verified execution authority",
+                    requestId(command),
+                    traceId(command),
+                    null);
+        }
         if (!properties.runtimeEnabled()) {
             return rejectWithoutThrowing(
                     command,
@@ -516,6 +525,10 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
             final DecisionDryRunErrorCode errorCode,
             final String message,
             final DecisionAuditEventType eventType) {
+        if (command == null || !command.hasVerifiedExecutionScope()) {
+            return DecisionDryRunResult.rejected(
+                    status, errorCode, message, requestId(command), traceId(command), null);
+        }
         try {
             final String auditRef =
                     writeAudit(
@@ -750,7 +763,12 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
         }
         if (errorCode == DecisionDryRunErrorCode.POLICY_DENIED
                 || errorCode == DecisionDryRunErrorCode.SOURCE_DENIED
-                || errorCode == DecisionDryRunErrorCode.TENANT_MISMATCH) {
+                || errorCode == DecisionDryRunErrorCode.TENANT_MISMATCH
+                || errorCode == DecisionDryRunErrorCode.ENVIRONMENT_REQUIRED
+                || errorCode == DecisionDryRunErrorCode.ENVIRONMENT_INVALID
+                || errorCode == DecisionDryRunErrorCode.SOURCE_ENVIRONMENT_NOT_AUTHORIZED
+                || errorCode == DecisionDryRunErrorCode.TENANT_ENVIRONMENT_MISMATCH
+                || errorCode == DecisionDryRunErrorCode.ENVIRONMENT_NOT_AUTHORIZED) {
             return DecisionAuditEventType.POLICY_DENIED;
         }
         return DecisionAuditEventType.DECISION_FAILED;

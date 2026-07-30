@@ -1,5 +1,7 @@
 package com.guidinglight.decisionhub.security.nq;
 
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
+
 /**
  * Integration-1 limited dry-run HMAC / replay gate 结果。
  *
@@ -11,11 +13,19 @@ package com.guidinglight.decisionhub.security.nq;
  * @param errorCode canonical error code；放行时为 OK。
  * @param reason 可审计安全摘要。
  */
-public record NqDryRunAuthResult(boolean allowed, int status, String errorCode, String reason) {
+public record NqDryRunAuthResult(
+    boolean allowed,
+    int status,
+    String errorCode,
+    String reason,
+    FeedbackExecutionScope executionScope) {
 
-  /** 返回通过结果。 */
-  public static NqDryRunAuthResult success() {
-    return new NqDryRunAuthResult(true, 200, "OK", "OK");
+  /** 返回携带唯一 verified root scope 的通过结果。 */
+  public static NqDryRunAuthResult success(final FeedbackExecutionScope executionScope) {
+    if (executionScope == null) {
+      throw new IllegalArgumentException("verified execution scope is required");
+    }
+    return new NqDryRunAuthResult(true, 200, "OK", "OK", executionScope);
   }
 
   /**
@@ -28,6 +38,6 @@ public record NqDryRunAuthResult(boolean allowed, int status, String errorCode, 
    */
   public static NqDryRunAuthResult rejected(
       final int status, final String errorCode, final String reason) {
-    return new NqDryRunAuthResult(false, status, errorCode, reason);
+    return new NqDryRunAuthResult(false, status, errorCode, reason, null);
   }
 }

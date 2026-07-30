@@ -11,6 +11,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.guidinglight.decisionhub.security.StaticTokenVerifier;
 import com.guidinglight.decisionhub.security.nq.HmacNqDryRunAuthenticator;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
 import com.guidinglight.decisionhub.security.nq.NqDryRunAuthRequest;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
@@ -43,6 +44,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -99,6 +101,7 @@ import org.testcontainers.utility.DockerImageName;
             "decisionhub.integration1.runtime.guard.idempotency-ttl-seconds=600",
             "decisionhub.integration1.runtime.guard.retention-seconds=3600",
             "decisionhub.security.nq-feedback.replay.guard-type=jdbc",
+            "decisionhub.integration1.runtime.max-queue-wait-ms=500",
             "spring.datasource.hikari.maximum-pool-size=10",
             "spring.datasource.hikari.minimum-idle=2",
             "spring.datasource.hikari.connection-timeout=1000",
@@ -185,7 +188,10 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
         persistentVolumeId = persistentVolumeId();
 
         final PreparedRequest stateAnchor = prepare("state-anchor");
+        seedFailedDevIdentity(stateAnchor.requestId());
         assertStructuredSuccess(send(stateAnchor));
+        assertThat(idempotencyState(stateAnchor.requestId(), "dev")).isEqualTo("FAILED");
+        assertThat(idempotencyState(stateAnchor.requestId(), "test")).isEqualTo("COMPLETED");
         committedForContextRestart = stateAnchor;
         final String promptChecksumBefore = canonicalPromptChecksum();
 
@@ -309,9 +315,9 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
                         false,
                         pool,
                         hikariEvents);
-                assertThat(outcome.statusCode()).isGreaterThanOrEqualTo(500);
+                assertThat(outcome.statusCode()).isEqualTo(409);
                 assertThat(outcome.statusCode() < 200 || outcome.statusCode() > 299).isTrue();
-                assertThat(outcome.errorCode()).isEqualTo("UNKNOWN_ERROR");
+                assertThat(outcome.errorCode()).isEqualTo("NONCE_REPLAY");
             }
         } finally {
             outageExecutor.shutdownNow();
@@ -747,6 +753,8 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
                         SOURCE,
                         TENANT,
                         TENANT,
+                        FeedbackEnvironment.TEST,
+                        "TEST",
                         timestamp,
                         nonce,
                         "",
@@ -804,6 +812,7 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
         envelope.put("traceId", traceId);
         envelope.put("tenantId", TENANT);
         envelope.put("source", SOURCE);
+        envelope.put("environment", "TEST");
         envelope.put("timestamp", timestamp);
         envelope.put("nonce", nonce);
         envelope.put("schemaVersion", SCHEMA_VERSION);
@@ -864,16 +873,41 @@ class DecisionDryRunSamePoolRecoveryPostgresTest {
 
     private int idempotencyRowCount(final String requestId) {
         return jdbcTemplate.queryForObject(
-                "select count(*) from dh_qdr7_idempotency_guard where tenant_id=? and request_id=?",
+                "select count(*) from dh_qdr7_idempotency_guard"
+                        + " where environment='test' and tenant_id=? and request_id=?",
                 Integer.class,
                 TENANT,
                 requestId);
     }
 
     private String idempotencyState(final String requestId) {
+        return idempotencyState(requestId, "test");
+    }
+
+    private String idempotencyState(final String requestId, final String environment) {
         return jdbcTemplate.queryForObject(
-                "select state from dh_qdr7_idempotency_guard where tenant_id=? and request_id=?",
+                "select state from dh_qdr7_idempotency_guard"
+                        + " where environment=? and tenant_id=? and request_id=?",
                 String.class,
+                environment,
+                TENANT,
+                requestId);
+    }
+
+    private void seedFailedDevIdentity(final String requestId) {
+        jdbcTemplate.update(
+                "insert into dh_qdr7_idempotency_guard"
+                        + " (guard_id,environment,endpoint,source,tenant_id,request_id,request_hash,"
+                        + " hash_version,state,state_version,stable_error_code,created_at,updated_at,"
+                        + " failed_at,expires_at,retention_until)"
+                        + " values (?,'dev',?,'NQ_DRYRUN',?,?,'"
+                        + "b".repeat(64)
+                        + "','QDR7-DRYRUN-CJSON-1','FAILED',0,'DEV_ONLY_FAILURE',"
+                        + " transaction_timestamp(),transaction_timestamp(),transaction_timestamp(),"
+                        + " transaction_timestamp()+interval '10 minute',"
+                        + " transaction_timestamp()+interval '1 hour')",
+                UUID.randomUUID(),
+                ENDPOINT,
                 TENANT,
                 requestId);
     }

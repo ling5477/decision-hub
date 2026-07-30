@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.guidinglight.decisionhub.domain.decision.DecisionAction;
 import com.guidinglight.decisionhub.domain.decision.DecisionOutput;
 import com.guidinglight.decisionhub.domain.decision.ProviderSignalStatus;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditRepository;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOutputAssembler;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOrchestrator;
@@ -29,6 +31,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -197,6 +200,25 @@ class DefaultDecisionDryRunServiceTest {
     assertRejected(result, 503, DecisionDryRunErrorCode.PROVIDER_DISABLED);
   }
 
+  @Test
+  void missingVerifiedScopeRejectsBeforeOrchestratorAndBusinessAudit() {
+    final AtomicInteger orchestratorInvocations = new AtomicInteger();
+    final RecordingDecisionAuditReplayRepository repository =
+        new RecordingDecisionAuditReplayRepository();
+    final DecisionOrchestrator orchestrator =
+        request -> {
+          orchestratorInvocations.incrementAndGet();
+          throw new AssertionError("unverified command must not reach orchestrator");
+        };
+
+    final DecisionDryRunResult result =
+        service(repository, enabled(), orchestrator).execute(unverifiedCommand());
+
+    assertRejected(result, 403, DecisionDryRunErrorCode.POLICY_DENIED);
+    assertEquals(0, orchestratorInvocations.get());
+    assertEquals(0, repository.auditEventCount());
+  }
+
   private static DefaultDecisionDryRunService service(
       final DecisionAuditRepository repository,
       final DecisionDryRunRuntimeProperties properties,
@@ -276,6 +298,7 @@ class DefaultDecisionDryRunServiceTest {
         "trace-dryrun-1",
         "tenant-a",
         "NQ_DRYRUN",
+        "TEST",
         "2026-07-04T00:00:00Z",
         "nonce-dryrun-1",
         "1.0.0",
@@ -292,7 +315,24 @@ class DefaultDecisionDryRunServiceTest {
             NOW,
             List.of("evidence://dryrun/1"),
             approxBytes),
-        forbiddenMaterialDetected);
+        forbiddenMaterialDetected,
+        new FeedbackExecutionScope("tenant-a", FeedbackEnvironment.TEST));
+  }
+
+  private static DecisionDryRunCommand unverifiedCommand() {
+    final DecisionDryRunCommand verified = command();
+    return new DecisionDryRunCommand(
+        verified.requestId(),
+        verified.traceId(),
+        verified.tenantId(),
+        verified.source(),
+        verified.timestamp(),
+        verified.nonce(),
+        verified.schemaVersion(),
+        verified.dryRun(),
+        verified.forbiddenCapabilities(),
+        verified.context(),
+        verified.forbiddenMaterialDetected());
   }
 
   private static void assertRejected(

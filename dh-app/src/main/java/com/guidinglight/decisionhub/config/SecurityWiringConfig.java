@@ -1,5 +1,6 @@
 package com.guidinglight.decisionhub.config;
 
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
 import com.guidinglight.decisionhub.infra.jdbc.JdbcNonceReplayGuard;
 import com.guidinglight.decisionhub.security.StaticTokenVerifier;
 import com.guidinglight.decisionhub.security.TokenVerifier;
@@ -49,8 +50,15 @@ public class SecurityWiringConfig {
   @Bean
   public TokenVerifier tokenVerifier(
       @Value("${decisionhub.security.api.token-sha256:}") final String tokenSha256,
-      @Value("${decisionhub.security.api.tenant-id:}") final String tenantId) {
-    return new StaticTokenVerifier(tokenSha256, "dh-api", tenantId, Set.of("DH_API"));
+      @Value("${decisionhub.security.api.tenant-id:}") final String tenantId,
+      @Value("${decisionhub.integration1.runtime.guard.environment:}")
+          final String guardEnvironment) {
+    return new StaticTokenVerifier(
+        tokenSha256,
+        "dh-api",
+        tenantId,
+        Set.of("DH_API"),
+        FeedbackEnvironment.fromGuardConfiguration(guardEnvironment));
   }
 
   /**

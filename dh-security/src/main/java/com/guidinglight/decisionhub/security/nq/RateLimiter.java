@@ -1,5 +1,6 @@
 package com.guidinglight.decisionhub.security.nq;
 
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import java.time.Instant;
 
 /**
@@ -51,5 +52,31 @@ public interface RateLimiter {
       final String requestId,
       final String traceId) {
     return check(source, tenantId, route, now);
+  }
+
+  /**
+   * 携带 verified execution scope 的 dry-run admission。
+   *
+   * <p>generic NQ feedback limiter 保留旧行为；persistent dry-run implementation 必须覆盖本方法，
+   * 且不得从 deployment profile、identity string 或默认值推断 environment。
+   *
+   * @param executionScope 认证根建立的 tenant/environment authority
+   * @param source canonical source
+   * @param tenantId 已认证 tenant
+   * @param route canonical route
+   * @param now 调用时钟
+   * @param requestId 安全 request reference
+   * @param traceId 安全 trace reference
+   * @return 独立 rate/store 错误分类
+   */
+  default RateLimitResult check(
+      final FeedbackExecutionScope executionScope,
+      final String source,
+      final String tenantId,
+      final String route,
+      final Instant now,
+      final String requestId,
+      final String traceId) {
+    return check(source, tenantId, route, now, requestId, traceId);
   }
 }

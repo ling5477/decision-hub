@@ -8,6 +8,8 @@ import com.guidinglight.decisionhub.domain.decision.DecisionAction;
 import com.guidinglight.decisionhub.domain.decision.DecisionPolicyStatus;
 import com.guidinglight.decisionhub.domain.decision.DecisionRiskLevel;
 import com.guidinglight.decisionhub.domain.decision.DecisionType;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionAuditRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcGuardCleanupAdapter;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcIdempotencyGuardAdapter;
@@ -38,7 +40,9 @@ import java.sql.SQLException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -70,6 +74,8 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
   private static final String HISTORICAL_MIGRATION_TARGET = "14";
   private static final String HASH_A = "a".repeat(64);
   private static final String HASH_B = "b".repeat(64);
+  private static final int RATE_WINDOW_SECONDS = 60;
+  private static final int RATE_WINDOW_MIN_REMAINING_SECONDS = 30;
 
   @Container
   static final PostgreSQLContainer<?> POSTGRES =
@@ -202,6 +208,7 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
 
   @Test
   void fixedWindowAdmissionHasExactConcurrentWinnerCountAndIsolation() throws Exception {
+    awaitStableRateWindow();
     final PersistentGuardIdentity identity = identity("tenant-rate");
     final int limit = 10;
     final var executor = Executors.newFixedThreadPool(8);
@@ -211,7 +218,9 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
               transaction.execute(
                   status ->
                       new JdbcRateLimitAdmissionAdapter(jdbc)
-                              .tryAcquire(new RateLimitAdmissionCommand(identity, 60, limit))
+                              .tryAcquire(
+                                  new RateLimitAdmissionCommand(
+                                      identity, RATE_WINDOW_SECONDS, limit))
                               .status()
                           == RateLimitAdmissionStatus.ACCEPTED);
       final var futures = executor.invokeAll(java.util.Collections.nCopies(40, attempt));
@@ -231,7 +240,8 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
             status ->
                 new JdbcRateLimitAdmissionAdapter(jdbc)
                     .tryAcquire(
-                        new RateLimitAdmissionCommand(identity("tenant-other"), 60, limit)));
+                        new RateLimitAdmissionCommand(
+                            identity("tenant-other"), RATE_WINDOW_SECONDS, limit)));
     final var otherEnvironment =
         transaction.execute(
             status ->
@@ -243,10 +253,72 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
                                 PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
                                 PersistentGuardIdentity.NQ_DRYRUN_SOURCE,
                                 "tenant-rate"),
-                            60,
+                            RATE_WINDOW_SECONDS,
                             limit)));
     assertThat(otherTenant.status()).isEqualTo(RateLimitAdmissionStatus.ACCEPTED);
     assertThat(otherEnvironment.status()).isEqualTo(RateLimitAdmissionStatus.ACCEPTED);
+
+    final int environmentLimit = 7;
+    assertThat(
+            concurrentAccepted(
+                identity("dev", "tenant-dev-first"), 24, environmentLimit))
+        .isEqualTo(environmentLimit);
+    assertThat(
+            transaction
+                .execute(
+                    status ->
+                        new JdbcRateLimitAdmissionAdapter(jdbc)
+                            .tryAcquire(
+                                new RateLimitAdmissionCommand(
+                                    identity("test", "tenant-dev-first"),
+                                    RATE_WINDOW_SECONDS,
+                                    environmentLimit)))
+                .status())
+        .isEqualTo(RateLimitAdmissionStatus.ACCEPTED);
+
+    assertThat(
+            concurrentAccepted(
+                identity("test", "tenant-test-first"), 24, environmentLimit))
+        .isEqualTo(environmentLimit);
+    assertThat(
+            transaction
+                .execute(
+                    status ->
+                        new JdbcRateLimitAdmissionAdapter(jdbc)
+                            .tryAcquire(
+                                new RateLimitAdmissionCommand(
+                                    identity("dev", "tenant-test-first"),
+                                    RATE_WINDOW_SECONDS,
+                                    environmentLimit)))
+                .status())
+        .isEqualTo(RateLimitAdmissionStatus.ACCEPTED);
+
+    final int mixedLimit = 6;
+    final PersistentGuardIdentity mixedDev = identity("dev", "tenant-mixed-environment");
+    final PersistentGuardIdentity mixedTest = identity("test", "tenant-mixed-environment");
+    final List<Callable<String>> mixedAttempts = new ArrayList<>();
+    for (int ordinal = 0; ordinal < 24; ordinal++) {
+      mixedAttempts.add(taggedRateAttempt(mixedDev, mixedLimit, "dev"));
+      mixedAttempts.add(taggedRateAttempt(mixedTest, mixedLimit, "test"));
+    }
+    final var mixedExecutor = Executors.newFixedThreadPool(12);
+    try {
+      final var mixedFutures = mixedExecutor.invokeAll(mixedAttempts);
+      int devAccepted = 0;
+      int testAccepted = 0;
+      for (final var future : mixedFutures) {
+        final String acceptedEnvironment = future.get(10, TimeUnit.SECONDS);
+        if ("dev".equals(acceptedEnvironment)) {
+          devAccepted++;
+        } else if ("test".equals(acceptedEnvironment)) {
+          testAccepted++;
+        }
+      }
+      assertThat(devAccepted).isEqualTo(mixedLimit);
+      assertThat(testAccepted).isEqualTo(mixedLimit);
+    } finally {
+      mixedExecutor.shutdownNow();
+    }
   }
 
   @Test
@@ -277,6 +349,28 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
     } finally {
       executor.shutdownNow();
     }
+
+    final IdempotencyAdmissionCommand devCommand =
+        new IdempotencyAdmissionCommand(
+            identity("dev", "tenant-concurrent-idem"),
+            command.requestId(),
+            HASH_B,
+            IdempotencyAdmissionCommand.HASH_VERSION,
+            Duration.ofMinutes(10),
+            Duration.ofHours(1));
+    assertThat(
+            transaction
+                .execute(status -> new JdbcIdempotencyGuardAdapter(jdbc).admit(devCommand))
+                .status())
+        .isEqualTo(IdempotencyAdmissionStatus.ADMITTED);
+    assertThat(
+            jdbc.queryForObject(
+                "select count(*) from dh_qdr7_idempotency_guard"
+                    + " where tenant_id=? and request_id=?",
+                Integer.class,
+                command.identity().tenantId(),
+                command.requestId()))
+        .isEqualTo(2);
   }
 
   @Test
@@ -897,6 +991,7 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
             Clock.systemUTC());
     final RateLimitResult uncertainResult =
         limiter.check(
+            new FeedbackExecutionScope("tenant-commit-unknown", FeedbackEnvironment.TEST),
             "NQ_DRYRUN",
             "tenant-commit-unknown",
             PersistentDecisionDryRunRateLimiter.ROUTE,
@@ -1070,9 +1165,71 @@ class V12PersistentRuntimeGuardsFlywayPostgresTest {
             Collectors.toMap(info -> info.getVersion().getVersion(), MigrationInfo::getChecksum));
   }
 
+  private int concurrentAccepted(
+      final PersistentGuardIdentity identity, final int attempts, final int limit) throws Exception {
+    final var executor = Executors.newFixedThreadPool(8);
+    try {
+      final Callable<Boolean> attempt =
+          () ->
+              transaction.execute(
+                  status ->
+                      new JdbcRateLimitAdmissionAdapter(jdbc)
+                              .tryAcquire(
+                                  new RateLimitAdmissionCommand(
+                                      identity, RATE_WINDOW_SECONDS, limit))
+                              .status()
+                          == RateLimitAdmissionStatus.ACCEPTED);
+      final var futures = executor.invokeAll(java.util.Collections.nCopies(attempts, attempt));
+      int accepted = 0;
+      for (final var future : futures) {
+        if (Boolean.TRUE.equals(future.get(10, TimeUnit.SECONDS))) {
+          accepted++;
+        }
+      }
+      return accepted;
+    } finally {
+      executor.shutdownNow();
+    }
+  }
+
+  private Callable<String> taggedRateAttempt(
+      final PersistentGuardIdentity identity, final int limit, final String environment) {
+    return () ->
+        Boolean.TRUE.equals(
+                transaction.execute(
+                    status ->
+                        new JdbcRateLimitAdmissionAdapter(jdbc)
+                                .tryAcquire(
+                                    new RateLimitAdmissionCommand(
+                                        identity, RATE_WINDOW_SECONDS, limit))
+                                .status()
+                            == RateLimitAdmissionStatus.ACCEPTED))
+            ? environment
+            : "";
+  }
+
+  private void awaitStableRateWindow() throws InterruptedException {
+    while (true) {
+      final long epochSeconds =
+          jdbc.queryForObject(
+              "select floor(extract(epoch from clock_timestamp()))::bigint", Long.class);
+      final long secondsRemaining =
+          RATE_WINDOW_SECONDS - Math.floorMod(epochSeconds, RATE_WINDOW_SECONDS);
+      if (secondsRemaining >= RATE_WINDOW_MIN_REMAINING_SECONDS) {
+        return;
+      }
+      Thread.sleep(TimeUnit.SECONDS.toMillis(secondsRemaining + 1));
+    }
+  }
+
   private static PersistentGuardIdentity identity(final String tenant) {
+    return identity("test", tenant);
+  }
+
+  private static PersistentGuardIdentity identity(
+      final String environment, final String tenant) {
     return new PersistentGuardIdentity(
-        "test",
+        environment,
         PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
         PersistentGuardIdentity.NQ_DRYRUN_SOURCE,
         tenant);

@@ -13,6 +13,8 @@ import com.guidinglight.decisionhub.domain.decision.DecisionReplayTimelineView;
 import com.guidinglight.decisionhub.domain.decision.DecisionReplayView;
 import com.guidinglight.decisionhub.domain.decision.DecisionRiskLevel;
 import com.guidinglight.decisionhub.domain.decision.DecisionType;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyAdmissionCommand;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyAdmissionResult;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyGuardPort;
@@ -243,6 +245,7 @@ class PersistentGuardedDecisionDryRunServiceTest {
         "trace-1",
         "tenant-a",
         "NQ_DRYRUN",
+        "TEST",
         "2026-07-12T00:00:00Z",
         "nonce-1",
         "1",
@@ -259,7 +262,8 @@ class PersistentGuardedDecisionDryRunServiceTest {
             Instant.parse("2026-07-12T00:00:00Z"),
             List.of("evidence-1"),
             128),
-        false);
+        false,
+        new FeedbackExecutionScope("tenant-a", FeedbackEnvironment.TEST));
   }
 
   private static DecisionDryRunGuardProperties properties() {

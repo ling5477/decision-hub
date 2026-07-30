@@ -1,5 +1,7 @@
 package com.guidinglight.decisionhub.security.nq;
 
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -18,7 +20,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * <p>本实现只处理入站 dry-run 校验，不发起 HTTP、不调用 NQ、不读取 provider 或 credential。它复用既有
  * {@link NonceReplayGuard} 端口承接持久化 replay 防护，并将 replay key 命名空间绑定到
- * tenant/source/endpoint/nonce/requestId，避免与旧 feedback endpoint 或其他 future endpoint 共享 nonce 空间。
+ * environment/tenant/source/endpoint/nonce/requestId，避免跨环境或与其他 endpoint 共享 nonce 空间。
  *
  * <p>线程安全：类本身不可变，是否线程安全取决于注入的 {@link NonceReplayGuard} 是否满足原子
  * mark-if-absent 语义。
@@ -114,6 +116,15 @@ public final class HmacNqDryRunAuthenticator {
       return NqDryRunAuthResult.rejected(
           401, "SIGNATURE_INVALID", "replay or signature binding key is missing");
     }
+    final FeedbackEnvironment environment;
+    try {
+      environment = FeedbackEnvironment.fromWire(request.environment());
+    } catch (final IllegalArgumentException error) {
+      return NqDryRunAuthResult.rejected(
+          403,
+          isBlank(request.environment()) ? "ENVIRONMENT_REQUIRED" : "ENVIRONMENT_INVALID",
+          "dry-run environment is missing or unsupported");
+    }
     if (!verifySignature(request)) {
       return NqDryRunAuthResult.rejected(401, "SIGNATURE_INVALID", "bad dry-run signature");
     }
@@ -125,8 +136,29 @@ public final class HmacNqDryRunAuthenticator {
       return NqDryRunAuthResult.rejected(
           403, "SOURCE_DENIED", "tenant/source pair is not allowlisted");
     }
+    if (request.authenticatedEnvironment() == null) {
+      return NqDryRunAuthResult.rejected(
+          403,
+          "ENVIRONMENT_NOT_AUTHORIZED",
+          "authenticated caller has no dry-run environment authority");
+    }
+    if (request.authenticatedEnvironment() != environment) {
+      return NqDryRunAuthResult.rejected(
+          403,
+          "TENANT_ENVIRONMENT_MISMATCH",
+          "body environment does not match authenticated tenant environment");
+    }
+    final FeedbackExecutionScope executionScope;
+    try {
+      executionScope = new FeedbackExecutionScope(request.authenticatedTenantId(), environment);
+    } catch (final IllegalArgumentException error) {
+      return NqDryRunAuthResult.rejected(
+          403, "ENVIRONMENT_NOT_AUTHORIZED", "verified execution scope cannot be established");
+    }
     final String replayKey =
-        normalizePair(request.tenantId(), source)
+        environment.name()
+            + "::"
+            + normalizePair(request.tenantId(), source)
             + "::"
             + value(request.path())
             + "::"
@@ -137,7 +169,7 @@ public final class HmacNqDryRunAuthenticator {
     if (!replayGuard.markIfAbsent(replayKey, replayExpiresAt)) {
       return NqDryRunAuthResult.rejected(409, "NONCE_REPLAY", "dry-run nonce replay detected");
     }
-    return NqDryRunAuthResult.success();
+    return NqDryRunAuthResult.success(executionScope);
   }
 
   /**
@@ -158,7 +190,7 @@ public final class HmacNqDryRunAuthenticator {
   /**
    * 生成 dry-run 签名材料。
    *
-   * <p>签名材料固定为 method/path/source/tenant/requestId/traceId/timestamp/nonce/schemaVersion/bodySha256，
+   * <p>签名材料固定为 method/path/source/tenant/environment/requestId/traceId/timestamp/nonce/schemaVersion/bodySha256，
    * 其中 source 使用 request 的 wire-level 精确值，body 使用 SHA-256 hash 而非原文，避免签名工具或日志误带 raw
    * body。
    *
@@ -172,6 +204,7 @@ public final class HmacNqDryRunAuthenticator {
         value(request.path()),
         wireValue(request.sourceSystem()),
         value(request.tenantId()),
+        value(request.environment()),
         value(request.requestId()),
         value(request.traceId()),
         value(request.timestampHeader()),

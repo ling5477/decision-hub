@@ -1,5 +1,6 @@
 package com.guidinglight.decisionhub.security;
 
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -30,12 +31,31 @@ public final class StaticTokenVerifier implements TokenVerifier {
       final String userId,
       final String tenantId,
       final Set<String> roles) {
+    this(expectedSha256Hex, userId, tenantId, roles, null);
+  }
+
+  /**
+   * 构造可携带显式 trusted feedback environment 的 verifier。
+   *
+   * @param expectedSha256Hex 受信 token 的 SHA-256 hex；为空时表示拒绝所有请求。
+   * @param userId 认证成功后的用户标识。
+   * @param tenantId 认证成功后的租户标识。
+   * @param roles 认证成功后的内部角色标签。
+   * @param environment 从 guard configuration 显式建立的 DEV/TEST authority；不得推断。
+   */
+  public StaticTokenVerifier(
+      final String expectedSha256Hex,
+      final String userId,
+      final String tenantId,
+      final Set<String> roles,
+      final FeedbackEnvironment environment) {
     this.expectedSha256Hex = normalize(expectedSha256Hex);
     this.authContext =
         new AuthContext(
             defaultValue(userId, "api-user"),
             defaultValue(tenantId, ""),
-            roles == null ? Set.of() : Set.copyOf(roles));
+            roles == null ? Set.of() : Set.copyOf(roles),
+            environment);
   }
 
   @Override

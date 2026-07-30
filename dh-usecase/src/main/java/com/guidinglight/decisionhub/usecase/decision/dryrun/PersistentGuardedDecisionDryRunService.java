@@ -109,6 +109,25 @@ public final class PersistentGuardedDecisionDryRunService
 
   @Override
   public DecisionDryRunResult execute(final DecisionDryRunCommand command) {
+    if (command == null || !command.hasVerifiedExecutionScope()) {
+      return delegate.reject(
+          command,
+          403,
+          DecisionDryRunErrorCode.POLICY_DENIED,
+          "dry-run request lacks verified execution authority");
+    }
+    if (guardProperties.runtimeEnabled()
+        && !command
+            .executionScope()
+            .environment()
+            .persistentValue()
+            .equals(guardProperties.environment())) {
+      return delegate.reject(
+          command,
+          503,
+          DecisionDryRunErrorCode.GUARD_CONFIGURATION_INVALID,
+          "dry-run verified environment does not match guard configuration");
+    }
     return runtimeService == null ? executePersistent(command) : runtimeService.execute(command);
   }
 
@@ -342,7 +361,7 @@ public final class PersistentGuardedDecisionDryRunService
 
   private PersistentGuardIdentity identity(final DecisionDryRunCommand command) {
     return new PersistentGuardIdentity(
-        guardProperties.environment(),
+        command.executionScope().environment().persistentValue(),
         PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
         command.source(),
         command.tenantId());

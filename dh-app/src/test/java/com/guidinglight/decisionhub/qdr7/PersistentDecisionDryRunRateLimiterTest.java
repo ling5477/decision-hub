@@ -2,6 +2,8 @@ package com.guidinglight.decisionhub.qdr7;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import com.guidinglight.decisionhub.security.nq.RateLimitResult;
 import com.guidinglight.decisionhub.usecase.decision.InMemoryDecisionAuditRepository;
 import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunGuardProperties;
@@ -9,6 +11,7 @@ import com.guidinglight.decisionhub.usecase.qdr.guard.PersistentGuardStoreExcept
 import com.guidinglight.decisionhub.usecase.qdr.guard.RateLimitAdmissionResult;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 /** Persistent rate bridge的store/commit错误映射与no-fallback回归。 */
@@ -33,6 +36,7 @@ class PersistentDecisionDryRunRateLimiterTest {
 
     final RateLimitResult result =
         limiter.check(
+            scope(),
             "NQ_DRYRUN",
             "tenant-a",
             PersistentDecisionDryRunRateLimiter.ROUTE,
@@ -61,6 +65,7 @@ class PersistentDecisionDryRunRateLimiterTest {
 
     final RateLimitResult result =
         limiter.check(
+            scope(),
             "NQ_DRYRUN",
             "tenant-a",
             PersistentDecisionDryRunRateLimiter.ROUTE,
@@ -90,6 +95,7 @@ class PersistentDecisionDryRunRateLimiterTest {
 
     final RateLimitResult result =
         limiter.check(
+            scope(),
             "NQ_DRYRUN",
             "tenant-a",
             PersistentDecisionDryRunRateLimiter.ROUTE,
@@ -98,6 +104,129 @@ class PersistentDecisionDryRunRateLimiterTest {
             "trace-1");
 
     assertThat(result.reason()).isEqualTo(RateLimitResult.REASON_STORE_UNAVAILABLE);
+  }
+
+  @Test
+  void oldEnvironmentlessPathAndConfigurationMismatchFailBeforeAdmission() {
+    final PersistentDecisionDryRunRateLimiter limiter =
+        new PersistentDecisionDryRunRateLimiter(
+            command -> {
+              throw new AssertionError("unverified or mismatched scope must not consume quota");
+            },
+            directTransactions(),
+            new InMemoryDecisionAuditRepository(),
+            properties(),
+            Clock.systemUTC());
+
+    assertThat(
+            limiter
+                .check(
+                    "NQ_DRYRUN",
+                    "tenant-a",
+                    PersistentDecisionDryRunRateLimiter.ROUTE,
+                    null,
+                    "request-old",
+                    "trace-old")
+                .reason())
+        .isEqualTo(RateLimitResult.REASON_CONFIGURATION_INVALID);
+    assertThat(
+            limiter
+                .check(
+                    new FeedbackExecutionScope("tenant-a", FeedbackEnvironment.DEV),
+                    "NQ_DRYRUN",
+                    "tenant-a",
+                    PersistentDecisionDryRunRateLimiter.ROUTE,
+                    null,
+                    "request-mismatch",
+                    "trace-mismatch")
+                .reason())
+        .isEqualTo(RateLimitResult.REASON_CONFIGURATION_INVALID);
+  }
+
+  @Test
+  void acceptedRateAuditCarriesCanonicalVerifiedEnvironment() {
+    final InMemoryDecisionAuditRepository audits = new InMemoryDecisionAuditRepository();
+    final Instant now = Instant.parse("2026-07-30T00:00:00Z");
+    final PersistentDecisionDryRunRateLimiter limiter =
+        new PersistentDecisionDryRunRateLimiter(
+            command ->
+                new RateLimitAdmissionResult(
+                    com.guidinglight.decisionhub.usecase.qdr.guard.RateLimitAdmissionStatus.ACCEPTED,
+                    now,
+                    now.plusSeconds(60),
+                    now,
+                    1L,
+                    10),
+            directTransactions(),
+            audits,
+            properties(),
+            Clock.fixed(now, java.time.ZoneOffset.UTC));
+
+    final RateLimitResult result =
+        limiter.check(
+            scope(),
+            "NQ_DRYRUN",
+            "tenant-a",
+            PersistentDecisionDryRunRateLimiter.ROUTE,
+            now,
+            "request-audit",
+            "trace-audit");
+
+    assertThat(result.allowed()).isTrue();
+    assertThat(audits.auditEvents()).hasSize(1);
+    assertThat(audits.auditEvents().getFirst().eventJson())
+        .containsEntry("environment", "TEST");
+  }
+
+  @Test
+  void rateLimitedAuditCarriesCanonicalVerifiedEnvironment() {
+    final InMemoryDecisionAuditRepository audits = new InMemoryDecisionAuditRepository();
+    final Instant now = Instant.parse("2026-07-30T00:00:00Z");
+    final PersistentDecisionDryRunRateLimiter limiter =
+        new PersistentDecisionDryRunRateLimiter(
+            command ->
+                new RateLimitAdmissionResult(
+                    com.guidinglight.decisionhub.usecase.qdr.guard.RateLimitAdmissionStatus
+                        .RATE_LIMITED,
+                    now,
+                    now.plusSeconds(60),
+                    now,
+                    10L,
+                    10),
+            directTransactions(),
+            audits,
+            properties(),
+            Clock.fixed(now, java.time.ZoneOffset.UTC));
+
+    final RateLimitResult result =
+        limiter.check(
+            scope(),
+            "NQ_DRYRUN",
+            "tenant-a",
+            PersistentDecisionDryRunRateLimiter.ROUTE,
+            now,
+            "request-limited-audit",
+            "trace-limited-audit");
+
+    assertThat(result.allowed()).isFalse();
+    assertThat(audits.auditEvents()).hasSize(1);
+    assertThat(audits.auditEvents().getFirst().eventJson())
+        .containsEntry("environment", "TEST")
+        .containsEntry("status", "RATE_LIMITED");
+  }
+
+  private static FeedbackExecutionScope scope() {
+    return new FeedbackExecutionScope("tenant-a", FeedbackEnvironment.TEST);
+  }
+
+  private static com.guidinglight.decisionhub.usecase.qdr.guard.GuardTransactionBoundary
+      directTransactions() {
+    return new com.guidinglight.decisionhub.usecase.qdr.guard.GuardTransactionBoundary() {
+      @Override
+      public <T> T required(final java.util.function.Supplier<T> action) {
+        return action.get();
+      }
+    };
   }
 
   private static DecisionDryRunGuardProperties properties() {

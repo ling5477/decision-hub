@@ -14,6 +14,7 @@ import com.guidinglight.decisionhub.api.GlobalExceptionHandler;
 import com.guidinglight.decisionhub.api.security.DhApiAuthenticationFilter;
 import com.guidinglight.decisionhub.common.util.TimeProvider;
 import com.guidinglight.decisionhub.security.AuthContext;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
 import com.guidinglight.decisionhub.security.nq.HmacNqDryRunAuthenticator;
 import com.guidinglight.decisionhub.security.nq.InMemoryNonceReplayGuard;
 import com.guidinglight.decisionhub.security.nq.InMemoryRateLimiter;
@@ -51,6 +52,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,12 +80,14 @@ class DecisionDryRunControllerWebMvcTest {
 
     private ObjectMapper objectMapper;
     private MockMvc mockMvc;
+    private FeedbackEnvironment authenticatedEnvironment;
 
     @BeforeEach
     void setUp() {
         TimeProvider.useClock(CLOCK);
         objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        authenticatedEnvironment = FeedbackEnvironment.DEV;
         mockMvc = newMockMvc(true, new InMemoryDecisionAuditRepository(), 2048, 1000);
     }
 
@@ -132,6 +136,71 @@ class DecisionDryRunControllerWebMvcTest {
         assertFalse(response.contains("SELL"));
         assertFalse(response.contains("PLACE_ORDER"));
         assertFalse(response.contains("CANCEL_ORDER"));
+    }
+
+    @Test
+    void validSignedTestEnvironmentRequestIsAccepted() throws Exception {
+        authenticatedEnvironment = FeedbackEnvironment.TEST;
+        final Map<String, Object> envelope = legalEnvelope("req-test-environment");
+        envelope.put("environment", "TEST");
+
+        mockMvc
+                .perform(signedPost(envelope, objectMapper.writeValueAsString(envelope)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void missingInvalidAndTamperedEnvironmentFailClosed() throws Exception {
+        final Map<String, Object> missing = legalEnvelope("req-env-missing");
+        missing.remove("environment");
+        mockMvc
+                .perform(signedPost(missing, objectMapper.writeValueAsString(missing)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ENVIRONMENT_REQUIRED"));
+
+        final Map<String, Object> invalid = legalEnvelope("req-env-invalid");
+        invalid.put("environment", "LOCAL");
+        mockMvc
+                .perform(signedPost(invalid, objectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ENVIRONMENT_INVALID"));
+
+        final Map<String, Object> signedDev = legalEnvelope("req-env-tamper");
+        final String signedBody = objectMapper.writeValueAsString(signedDev);
+        final MockHttpServletRequestBuilder signed = signedPost(signedDev, signedBody);
+        signedDev.put("environment", "TEST");
+        signed.content(objectMapper.writeValueAsString(signedDev));
+        mockMvc
+                .perform(signed)
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("SIGNATURE_INVALID"));
+    }
+
+    @Test
+    void environmentMismatchRejectsBeforeOrchestratorAndBusinessAudit() throws Exception {
+        final AtomicInteger orchestratorInvocations = new AtomicInteger();
+        final InMemoryDecisionAuditRepository auditRepository = new InMemoryDecisionAuditRepository();
+        mockMvc =
+                newMockMvc(
+                        true,
+                        auditRepository,
+                        2048,
+                        1000,
+                        32768,
+                        request -> {
+                            orchestratorInvocations.incrementAndGet();
+                            throw new AssertionError("environment mismatch must not reach orchestrator");
+                        });
+        authenticatedEnvironment = FeedbackEnvironment.TEST;
+        final Map<String, Object> envelope = legalEnvelope("req-env-mismatch");
+
+        mockMvc
+                .perform(signedPost(envelope, objectMapper.writeValueAsString(envelope)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("TENANT_ENVIRONMENT_MISMATCH"));
+
+        assertEquals(0, orchestratorInvocations.get());
+        assertEquals(0, auditRepository.auditEvents().size());
     }
 
     @Test
@@ -555,7 +624,11 @@ class DecisionDryRunControllerWebMvcTest {
                         new DhApiAuthenticationFilter(
                                 token ->
                                         GOOD_TOKEN.equals(token)
-                                                ? new AuthContext("user-a", "tenant-a", Set.of("DH_API"))
+                                                ? new AuthContext(
+                                                        "user-a",
+                                                        "tenant-a",
+                                                        Set.of("DH_API"),
+                                                        authenticatedEnvironment)
                                                 : null))
                 .build();
     }
@@ -580,6 +653,7 @@ class DecisionDryRunControllerWebMvcTest {
         m.put("traceId", "trace-" + requestId);
         m.put("tenantId", "tenant-a");
         m.put("source", "NQ_DRYRUN");
+        m.put("environment", "DEV");
         m.put("timestamp", NOW.toString());
         m.put("nonce", "nonce-" + requestId);
         m.put("schemaVersion", "1.0.0");
@@ -673,6 +747,8 @@ class DecisionDryRunControllerWebMvcTest {
                         value(envelope.get("source")),
                         "tenant-a",
                         value(envelope.get("tenantId")),
+                        authenticatedEnvironment,
+                        value(envelope.get("environment")),
                         value(envelope.get("timestamp")),
                         value(envelope.get("nonce")),
                         "",

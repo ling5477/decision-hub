@@ -3,6 +3,8 @@ package com.guidinglight.decisionhub.usecase.decision.dryrun;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
@@ -32,13 +34,15 @@ class DecisionDryRunRequestFingerprintTest {
             baseline.traceId(),
             "tenant-b",
             baseline.source(),
+            baseline.environment(),
             baseline.timestamp(),
             baseline.nonce(),
             baseline.schemaVersion(),
             baseline.dryRun(),
             baseline.forbiddenCapabilities(),
             baseline.context(),
-            false);
+            false,
+            new FeedbackExecutionScope("tenant-b", FeedbackEnvironment.DEV));
 
     assertNotEquals(fingerprint.hash(baseline), fingerprint.hash(changedTenant));
   }
@@ -53,7 +57,7 @@ class DecisionDryRunRequestFingerprintTest {
             Set.of("A", "\uE000", "\uD800\uDC00"));
 
     assertEquals(
-        "378fbe3f0b139d0014640647893e612b4ce9d49cfcbc65c1c2dd97fc96e47ab8",
+        "c03af1493a39a0cc0bc28bbb95bf56bd7543b0bdb532f58a77cc3536e762d814",
         fingerprint.hash(vector));
   }
 
@@ -78,15 +82,30 @@ class DecisionDryRunRequestFingerprintTest {
             baseline.traceId(),
             baseline.tenantId(),
             baseline.source(),
+            baseline.environment(),
             baseline.timestamp(),
             baseline.nonce(),
             baseline.schemaVersion(),
             baseline.dryRun(),
             baseline.forbiddenCapabilities(),
             reorderedContext,
-            false);
+            false,
+            baseline.executionScope());
 
     assertNotEquals(fingerprint.hash(baseline), fingerprint.hash(reordered));
+  }
+
+  @Test
+  void sameInputIsStableWithinEnvironmentAndDiffersAcrossDevAndTest() {
+    final DecisionDryRunCommand dev =
+        command("request-a", "trace-a", "nonce-a", Set.of("A"), FeedbackEnvironment.DEV);
+    final DecisionDryRunCommand sameDev =
+        command("request-a", "trace-a", "nonce-a", Set.of("A"), FeedbackEnvironment.DEV);
+    final DecisionDryRunCommand test =
+        command("request-a", "trace-a", "nonce-a", Set.of("A"), FeedbackEnvironment.TEST);
+
+    assertEquals(fingerprint.hash(dev), fingerprint.hash(sameDev));
+    assertNotEquals(fingerprint.hash(dev), fingerprint.hash(test));
   }
 
   private static DecisionDryRunCommand command(
@@ -94,11 +113,21 @@ class DecisionDryRunRequestFingerprintTest {
       final String traceId,
       final String nonce,
       final Set<String> capabilities) {
+    return command(requestId, traceId, nonce, capabilities, FeedbackEnvironment.DEV);
+  }
+
+  private static DecisionDryRunCommand command(
+      final String requestId,
+      final String traceId,
+      final String nonce,
+      final Set<String> capabilities,
+      final FeedbackEnvironment environment) {
     return new DecisionDryRunCommand(
         requestId,
         traceId,
         "tenant-a",
         "NQ_DRYRUN",
+        environment.name(),
         "2026-07-12T00:00:00Z",
         nonce,
         "1.0",
@@ -115,6 +144,7 @@ class DecisionDryRunRequestFingerprintTest {
             Instant.parse("2026-07-12T00:00:00Z"),
             List.of("evidence-b", "evidence-a"),
             100),
-        false);
+        false,
+        new FeedbackExecutionScope("tenant-a", environment));
   }
 }

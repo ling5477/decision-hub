@@ -29,6 +29,8 @@ public final class DecisionDryRunRequestFingerprint {
 
   private static String canonicalJson(final DecisionDryRunCommand command) {
     final DecisionDryRunContext context = Objects.requireNonNull(command.context(), "context");
+    final String verifiedEnvironment =
+        Objects.requireNonNull(command.executionScope(), "executionScope").environment().name();
     final List<String> capabilities = new ArrayList<>(command.forbiddenCapabilities());
     capabilities.sort(DecisionDryRunRequestFingerprint::compareCodePoints);
     final List<String> evidence = new ArrayList<>(context.evidenceRefs());
@@ -60,6 +62,8 @@ public final class DecisionDryRunRequestFingerprint {
         + field("source", command.source())
         + ","
         + field("tenantId", command.tenantId())
+        + ","
+        + field("environment", verifiedEnvironment)
         + "}";
   }
 

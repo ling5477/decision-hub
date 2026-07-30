@@ -1,5 +1,41 @@
 # Decision Hub Worklog
 
+## 2026-07-31 — Minimal P1/P2 verified-environment implementation
+
+- 从 `7fb0907acef477c04431445faf40e16db8dff0fb` 开始，仅消费 discovery 冻结的
+  20 个 production、16 个 test、0 个 migration 与 5 个 authority 文件；unexpected file 为 0。
+- 实现 canonical `FeedbackEnvironment` 与 immutable `FeedbackExecutionScope`，将 environment
+  绑定 signed HMAC material、verified `AuthContext` 与 tenant/source/environment 联合授权。
+- rate、idempotency、recovery identity、deterministic request fingerprint 与 opaque nonce replay
+  key 均改为使用 verified execution scope；QDR7 `QDR7_RATE_LIMIT_ADMISSION` structured JSON
+  从同一 scope 记录 environment，admission/audit required transaction rollback 语义保持不变。
+- root 对 payload、timestamp、nonce、source、tenant、environment、HMAC 与 joint authorization
+  均 fail-closed；失败路径不调用 orchestrator，不写 persistent guard、business audit 或 recovery。
+- PostgreSQL/Testcontainers mandatory fixtures 全部在 PostgreSQL 17.10 真实执行且零 skip。
+  same-pool fixture 保留 8 并发/100 请求及全 2xx 断言，仅将测试专用 queue-wait 显式设为
+  500ms，以容纳本机 Docker exec 转发延迟；该结果不声明 production capacity。
+- 全量回归首次发现固定 60 秒窗口测试从 `02:27:53` 运行 7.439 秒跨窗，导致每个环境
+  winner 从 6 变为 12。RCA 后在同一 exact test fixture 使用 PostgreSQL `clock_timestamp()`
+  等待至少剩余 30 秒再启动并发；未放宽 60 秒窗口、limit、并发或 exact winner 断言。
+- 四组模块回归 PASS；修复后 `mvn -B -ntp test` 为 19/19 Reactor SUCCESS，新鲜
+  191 个 Surefire XML 共 1243 tests、0 failures、0 errors、0 skipped。
+- `mvn -B -ntp -Pquality validate` 为 19/19 Reactor SUCCESS、Checkstyle 0、Spotless PASS。
+- legacy compatibility、retirement、backfill、V16/V17/V18、registry、retention、scheduler、
+  API/Repository/schema、server deployment、real HTTP/Provider/NQ/Agent/LangGraph 与交易副作用
+  均未实现；未 push、未创建 tag。
+
+~~~text
+Current technical tree: MINIMAL ENVIRONMENT-BOUND REMEDIATION IMPLEMENTED LOCALLY
+Minimal remediation path: M1
+Technical P1: IMPLEMENTED / LOCAL_ACCEPTED
+Technical P2: IMPLEMENTED / LOCAL_ACCEPTED
+Legacy compatibility: NOT REQUIRED / OWNER-CONFIRMED NO REAL DATA
+Migration: NOT REQUIRED
+Remote publication: PENDING MILESTONE REVIEW
+Production capacity: NOT_PROVEN
+next action: DH-STAGE-QDR-9-B4-MINIMAL-P1-P2-MILESTONE-REVIEW
+~~~
+
 ## 2026-07-30 — Owner-attested M1 rebaseline and complete minimal implementation discovery
 
 - 以 `229910e31b9b5cba5fe944e4f3a497df73843d20` 为 clean baseline；只读

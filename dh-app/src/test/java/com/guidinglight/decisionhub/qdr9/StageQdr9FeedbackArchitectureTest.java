@@ -156,6 +156,91 @@ class StageQdr9FeedbackArchitectureTest {
         .doesNotExist();
   }
 
+  @Test
+  void minimalEnvironmentAuthorityRemainsExplicitAndMigrationFree() throws IOException {
+    final String environment =
+        source(
+            "dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/"
+                + "FeedbackEnvironment.java");
+    final String scope =
+        source(
+            "dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/"
+                + "FeedbackExecutionScope.java");
+    final String authenticator =
+        source(
+            "dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/"
+                + "HmacNqDryRunAuthenticator.java");
+    final String controller =
+        source(
+            "dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/"
+                + "DecisionDryRunController.java");
+    final String rateLimiter =
+        source(
+            "dh-app/src/main/java/com/guidinglight/decisionhub/qdr7/"
+                + "PersistentDecisionDryRunRateLimiter.java");
+    final String persistentGuard =
+        source(
+            "dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/"
+                + "PersistentGuardedDecisionDryRunService.java");
+    final String fingerprint =
+        source(
+            "dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/"
+                + "DecisionDryRunRequestFingerprint.java");
+
+    assertThat(environment).contains("DEV", "TEST").doesNotContain("UNKNOWN,", "LOCAL,", "PAPER,", "LIVE,");
+    assertThat(scope)
+        .contains("FeedbackExecutionScope(String tenantId, FeedbackEnvironment environment)")
+        .doesNotContain("ThreadLocal", "static FeedbackExecutionScope");
+    assertThat(authenticator)
+        .contains(
+            "new FeedbackExecutionScope",
+            "request.authenticatedEnvironment()",
+            "value(request.environment())",
+            "environment.name()")
+        .doesNotContain("FeedbackEnvironment.DEV", "getActiveProfiles", "ThreadLocal");
+    assertThat(controller)
+        .contains(
+            "AuthenticatedRequest.requireAuthContext",
+            "authResult.executionScope()",
+            "command.executionScope()")
+        .doesNotContain("new FeedbackExecutionScope", "getActiveProfiles", "ThreadLocal");
+    assertThat(rateLimiter)
+        .contains(
+            "executionScope.environment().persistentValue()",
+            "\"environment\"",
+            "executionScope.environment().name()");
+    assertThat(persistentGuard)
+        .contains(
+            "command.executionScope().environment().persistentValue()",
+            "command.hasVerifiedExecutionScope()");
+    assertThat(fingerprint)
+        .contains("command.executionScope()", "field(\"environment\", verifiedEnvironment)");
+
+    try (Stream<Path> migrations =
+        Files.list(REPOSITORY_ROOT.resolve("dh-app/src/main/resources/db/migration"))) {
+      assertThat(migrations.map(path -> path.getFileName().toString()))
+          .noneMatch(
+              name ->
+                  name.startsWith("V16__")
+                      || name.startsWith("V17__")
+                      || name.startsWith("V18__"));
+    }
+    List.of(
+            "dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/feedback/"
+                + "QdrReferenceLivenessRegistry.java",
+            "dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/feedback/"
+                + "JdbcQdrReferenceLivenessRegistry.java",
+            "dh-app/src/main/java/com/guidinglight/decisionhub/qdr9/"
+                + "FeedbackRetentionScheduler.java",
+            "dh-api/src/main/java/com/guidinglight/decisionhub/api/qdr/replay/"
+                + "QdrReplayController.java")
+        .forEach(path -> assertThat(REPOSITORY_ROOT.resolve(path)).doesNotExist());
+  }
+
+  private static String source(final String relativePath) throws IOException {
+    return Files.readString(REPOSITORY_ROOT.resolve(relativePath));
+  }
+
   private static List<Path> forbiddenB4Files() {
     return List.of(
         REPOSITORY_ROOT.resolve(

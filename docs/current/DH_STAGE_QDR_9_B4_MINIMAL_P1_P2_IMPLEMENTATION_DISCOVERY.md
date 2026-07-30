@@ -1,5 +1,48 @@
 # DH Stage-QDR-9 B4 Minimal P1/P2 Implementation Discovery
 
+## 0. Discovery consumption result — 2026-07-31
+
+~~~text
+task:
+DH-STAGE-QDR-9-B4-MINIMAL-P1-P2-IMPLEMENTATION
+
+complete discovery:
+CONSUMED / PASS
+
+minimal remediation path:
+M1
+
+technical P1 / technical P2:
+IMPLEMENTED / LOCAL_ACCEPTED
+IMPLEMENTED / LOCAL_ACCEPTED
+
+current technical tree:
+MINIMAL ENVIRONMENT-BOUND REMEDIATION IMPLEMENTED LOCALLY
+
+actual scope:
+20 PRODUCTION / 16 TEST / 0 MIGRATION / 5 AUTHORITY / 0 UNEXPECTED
+
+legacy compatibility / migration:
+NOT REQUIRED / OWNER-CONFIRMED NO REAL DATA
+NOT REQUIRED
+
+full regression / quality:
+PASS / 19 OF 19 / 1243 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+
+remote publication:
+PENDING MILESTONE REVIEW
+
+production capacity:
+NOT_PROVEN
+
+next action:
+DH-STAGE-QDR-9-B4-MINIMAL-P1-P2-MILESTONE-REVIEW
+~~~
+
+四份 exact allowlist 保持冻结且未扩充；implementation 未创建 scope erratum、migration、
+legacy compatibility/retirement/backfill、server deployment、push 或 tag。
+
 ## 1. Discovery decision
 
 ~~~text

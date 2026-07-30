@@ -1,5 +1,64 @@
 # DH Stage-QDR-9 Implementation Work Order
 
+## Minimal P1/P2 Implementation — 2026-07-31
+
+~~~text
+task:
+DH-STAGE-QDR-9-B4-MINIMAL-P1-P2-IMPLEMENTATION
+
+implementation baseline:
+7fb0907acef477c04431445faf40e16db8dff0fb
+
+local implementation commit:
+THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT PUBLISHED
+
+selected remediation path:
+M1
+
+technical P1 / technical P2:
+IMPLEMENTED / LOCAL_ACCEPTED
+IMPLEMENTED / LOCAL_ACCEPTED
+
+current technical tree:
+MINIMAL ENVIRONMENT-BOUND REMEDIATION IMPLEMENTED LOCALLY
+
+legacy compatibility:
+NOT REQUIRED / OWNER-CONFIRMED NO REAL DATA
+
+migration:
+NOT REQUIRED
+
+scope:
+PASS / 20 PRODUCTION / 16 TEST / 0 MIGRATION / 5 AUTHORITY / 0 UNEXPECTED
+
+PostgreSQL/Testcontainers:
+PASS / POSTGRESQL 17.10 / 0 MANDATORY SKIPS
+
+full regression:
+PASS / 19 OF 19 / 1243 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+
+quality:
+PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+
+remote publication:
+PENDING MILESTONE REVIEW
+
+production capacity:
+NOT_PROVEN
+
+next action:
+DH-STAGE-QDR-9-B4-MINIMAL-P1-P2-MILESTONE-REVIEW
+
+ALLOW_MINIMAL_P1_P2_MILESTONE_REVIEW:
+YES
+
+ALLOW_PUSH / ALLOW_SERVER_DEPLOYMENT / ALLOW_V16_IMPLEMENTATION / ALLOW_B4_PUBLICATION / ALLOW_B5:
+NO / NO / NO / NO / NO
+~~~
+
+该 implementation 只消费 owner-attested M1 exact allowlists；未恢复本文件中的历史
+V16/V17/V18、registry、retention 或 legacy transition 设计。
+
 ## Owner-Attested M1 Rebaseline and Minimal Implementation Discovery — 2026-07-30
 
 ~~~text

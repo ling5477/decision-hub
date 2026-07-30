@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
@@ -193,6 +195,7 @@ class LimitedDryRunRuntimeServiceTest {
         "trace-" + suffix,
         "tenant-a",
         "NQ_DRYRUN",
+        "TEST",
         Instant.parse("2026-07-20T00:00:00Z").toString(),
         "nonce-" + suffix,
         "1.0",
@@ -209,7 +212,8 @@ class LimitedDryRunRuntimeServiceTest {
             Instant.parse("2026-07-20T00:00:00Z"),
             List.of("evidence:1"),
             1024),
-        false);
+        false,
+        new FeedbackExecutionScope("tenant-a", FeedbackEnvironment.TEST));
   }
 
   private static DecisionDryRunResult success(final String action) {

@@ -1,5 +1,6 @@
 package com.guidinglight.decisionhub.qdr7;
 
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import com.guidinglight.decisionhub.security.nq.RateLimitResult;
 import com.guidinglight.decisionhub.security.nq.RateLimiter;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditEventStatus;
@@ -67,14 +68,34 @@ public final class PersistentDecisionDryRunRateLimiter implements RateLimiter {
     if (!properties.runtimeEnabled()) {
       return RateLimitResult.pass();
     }
+    return RateLimitResult.configurationInvalid();
+  }
+
+  @Override
+  public RateLimitResult check(
+      final FeedbackExecutionScope executionScope,
+      final String source,
+      final String tenantId,
+      final String route,
+      final Instant ignoredNow,
+      final String requestId,
+      final String traceId) {
+    if (!properties.runtimeEnabled()) {
+      return RateLimitResult.pass();
+    }
     if (!ROUTE.equals(route)) {
+      return RateLimitResult.configurationInvalid();
+    }
+    if (executionScope == null
+        || !executionScope.tenantId().equals(tenantId)
+        || !executionScope.environment().persistentValue().equals(properties.environment())) {
       return RateLimitResult.configurationInvalid();
     }
     final PersistentGuardIdentity identity;
     try {
       identity =
           new PersistentGuardIdentity(
-              properties.environment(),
+              executionScope.environment().persistentValue(),
               PersistentGuardIdentity.DECISION_DRY_RUN_ENDPOINT,
               source,
               tenantId);
@@ -92,7 +113,7 @@ public final class PersistentDecisionDryRunRateLimiter implements RateLimiter {
                 if (admission.status()
                     != com.guidinglight.decisionhub.usecase.qdr.guard.RateLimitAdmissionStatus
                         .STORE_UNAVAILABLE) {
-                  writeAudit(requestId, traceId, identity, admission);
+                  writeAudit(requestId, traceId, executionScope, identity, admission);
                 }
                 return admission;
               });
@@ -113,6 +134,7 @@ public final class PersistentDecisionDryRunRateLimiter implements RateLimiter {
   private void writeAudit(
       final String requestId,
       final String traceId,
+      final FeedbackExecutionScope executionScope,
       final PersistentGuardIdentity identity,
       final RateLimitAdmissionResult result) {
     auditRepository.saveAuditEvent(
@@ -132,6 +154,8 @@ public final class PersistentDecisionDryRunRateLimiter implements RateLimiter {
                 identity.endpoint(),
                 "source",
                 identity.source(),
+                "environment",
+                executionScope.environment().name(),
                 "status",
                 result.status().name()),
             result.status()

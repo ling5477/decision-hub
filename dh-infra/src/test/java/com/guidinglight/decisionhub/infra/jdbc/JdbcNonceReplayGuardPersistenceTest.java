@@ -60,7 +60,8 @@ class JdbcNonceReplayGuardPersistenceTest {
 
   @Test
   void persistent_nonce_rejects_replay_after_restart_simulation() {
-    final String replayKey = "nexus-quant::nonce-restart::req-restart";
+    final String replayKey =
+        "TEST::tenant-a::NQ_DRYRUN::/api/ai/decision-dry-runs::nonce-restart::req-restart";
     final Instant expiresAt = futureExpiry();
 
     // 第一个 guard 实例登记成功。
@@ -78,13 +79,20 @@ class JdbcNonceReplayGuardPersistenceTest {
     final JdbcNonceReplayGuard guard = new JdbcNonceReplayGuard(jdbcTemplate, false);
 
     // 不同 source/requestId/nonce 组合 -> 不同 replay_key -> 互不影响，均首次通过。
-    assertThat(guard.markIfAbsent("nexus-quant::n-a::req-a", expiresAt)).isTrue();
-    assertThat(guard.markIfAbsent("nexus-quant::n-a::req-b", expiresAt)).isTrue();
-    assertThat(guard.markIfAbsent("other-source::n-a::req-a", expiresAt)).isTrue();
-    assertThat(guard.markIfAbsent("nexus-quant::n-b::req-a", expiresAt)).isTrue();
+    assertThat(guard.markIfAbsent("DEV::tenant-a::NQ_DRYRUN::path::n-a::req-a", expiresAt))
+        .isTrue();
+    assertThat(guard.markIfAbsent("TEST::tenant-a::NQ_DRYRUN::path::n-a::req-a", expiresAt))
+        .isTrue();
+    assertThat(guard.markIfAbsent("TEST::tenant-a::NQ_DRYRUN::path::n-a::req-b", expiresAt))
+        .isTrue();
+    assertThat(guard.markIfAbsent("TEST::tenant-a::other-source::path::n-a::req-a", expiresAt))
+        .isTrue();
+    assertThat(guard.markIfAbsent("TEST::tenant-b::NQ_DRYRUN::path::n-b::req-a", expiresAt))
+        .isTrue();
 
     // 相同 replay_key 第二次 -> 重放，拒绝。
-    assertThat(guard.markIfAbsent("nexus-quant::n-a::req-a", expiresAt)).isFalse();
+    assertThat(guard.markIfAbsent("TEST::tenant-a::NQ_DRYRUN::path::n-a::req-a", expiresAt))
+        .isFalse();
   }
 
   @Test

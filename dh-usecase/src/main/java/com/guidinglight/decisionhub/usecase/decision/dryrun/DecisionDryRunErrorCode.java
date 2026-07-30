@@ -25,6 +25,21 @@ public enum DecisionDryRunErrorCode {
   /** source 或 tenant/source pair 不在允许列表。 */
   SOURCE_DENIED,
 
+  /** signed environment 缺失。 */
+  ENVIRONMENT_REQUIRED,
+
+  /** signed environment 不属于 canonical DEV/TEST。 */
+  ENVIRONMENT_INVALID,
+
+  /** source/environment 组合未授权。 */
+  SOURCE_ENVIRONMENT_NOT_AUTHORIZED,
+
+  /** bearer tenant environment 与 signed environment 不一致。 */
+  TENANT_ENVIRONMENT_MISMATCH,
+
+  /** tenant/source/environment 联合授权失败。 */
+  ENVIRONMENT_NOT_AUTHORIZED,
+
   /** raw body 或签名 payload 超过大小上限。 */
   PAYLOAD_TOO_LARGE,
 
