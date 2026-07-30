@@ -179,6 +179,83 @@ retention、B4 review retry/publication 或 B5。
 DH-STAGE-QDR-9-B4-LEGACY-PERSISTENT-IDENTITY-BLOCKER
 ~~~
 
+## Legacy Persistent Identity Retirement Blocker — 2026-07-30
+
+~~~text
+task:
+DH-STAGE-QDR-9-B4-LEGACY-PERSISTENT-IDENTITY-BLOCKER
+
+baseline:
+aab84e896595bbd8b3f5e99e8b2880ca28f8e7a4
+
+legacy Option B previous state:
+CONSERVATIVE BLOCKING / NO TERMINATION CONTRACT
+
+selected normal terminal option:
+L2 / BOUNDED CONSERVATIVE BLOCKING + PHYSICAL RETIREMENT
+
+selected tombstone retirement:
+T1 / TRANSACTIONAL PHYSICAL DELETE
+
+unknown/unprovable fallback:
+BLOCK
+
+EXPIRED tombstone:
+UNBOUNDED / UNIQUE AND LOOKUP BLOCKING / NO CURRENT DELETE PATH
+
+rate cutoff:
+UNRESOLVED / MAXIMUM IN-FLIGHT GUARD TRANSACTION LIFETIME NOT AVAILABLE
+
+idempotency cutoff:
+UNRESOLVED / COMMIT-UNKNOWN RECONCILIATION HARD MAXIMUM NOT AVAILABLE
+
+recovery cutoff:
+UNRESOLVED / INDEPENDENT RESULT AVAILABILITY HARD MAXIMUM NOT AVAILABLE
+
+cleanup contract:
+FROZEN / INTERNAL-ONLY / DEFAULT-DISABLED / TENANT+FAMILY SCOPED / BOUNDED
+
+retirement audit:
+FROZEN / INDEPENDENT STRUCTURED STORAGE / NOT IMPLEMENTED
+
+legacy identity migration:
+REQUIRED
+
+migration ordering:
+V16 REGISTRY -> V17 AUDIT ENVIRONMENT -> V18 LEGACY IDENTITY CANDIDATE
+
+V18 artifact:
+NOT CREATED / EXACT PATH NOT AUTHORIZED
+
+effective scope:
+66 / 66 PASS
+
+technical P1 / P2:
+1 OPEN / 1 OPEN
+
+ALLOW_LEGACY_IDENTITY_IMPLEMENTATION:
+NO
+~~~
+
+当前 `dh_qdr7_rate_limit_bucket` 已有 bounded physical cleanup；`dh_qdr7_idempotency_guard` cleanup
+只转换为 `EXPIRED` 并清空 result/error/lease，row 继续参与 unique/exact lookup，因此 tombstone
+lifetime 无上限。Recovery 没有独立 legacy table，复用同一 guard row 与 tenant-bound
+`dh_decision_output` reference。
+
+L2 是唯一允许的正常迁移终态，L1 只保留为 UNKNOWN fallback；L3 会造成 duplicate execution 与
+rate bypass；L4 缺少可信历史 environment。T1 必须在同一 required transaction 内完成 candidate
+lock、cutoff/state/lease/result/commit-outcome final recheck、independent structured audit 与 exact
+DELETE，任何一步失败整批 rollback。
+
+本 task 只完成 documentation/security design，未修改 Java、tests、POM 或 migration；未创建
+V16/V17/V18；未实施 persistent identity/replay、registry、retention、review retry/publication 或 B5。
+
+下一任务：
+
+~~~text
+DH-STAGE-QDR-9-B4-LEGACY-PERSISTENT-IDENTITY-LIFETIME-BLOCKER
+~~~
+
 ## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 upstream Maven dependency scope retry
 
 ~~~text

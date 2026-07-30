@@ -25,8 +25,9 @@ NO
 本工单是未来实施入口的冻结记录，不是实施授权。Audit environment 已完成 scope design，但 implementation
 仍被 V16 predecessor 和 producer cutover 阻断。当前仍有三个前置 blocker：
 
-1. audit environment 已冻结为 V17 Option A/B1/S2；persistent identity version storage 尚未冻结；
-2. legacy idempotency tombstone 没有安全 retirement；
+1. audit environment 已冻结为 V17 Option A/B1/S2；persistent identity version storage 需要
+   V18 candidate，但 artifact scope 尚未冻结；
+2. legacy persistent identity 已选择 L2/T1，但 three-cutoff hard lifetime proof 尚未闭合；
 3. legacy replay TTL 无 hard ceiling，且 port 不支持原子 legacy-check + v2 admission。
 
 任何 blocker 未关闭时不得修改本工单所列生产或测试文件。
@@ -39,7 +40,8 @@ IDEMPOTENCY_IDENTITY_VERSION=QDR9-IDEMPOTENCY-IDENTITY-2
 RECOVERY_IDENTITY_VERSION=QDR9-RECOVERY-IDENTITY-2
 REPLAY_NAMESPACE_VERSION=QDR9-DRYRUN-REPLAY-2
 CANONICAL_ENCODING=QDR9-LP1
-LEGACY_PERSISTENT_OPTION=B / BLOCKED
+LEGACY_PERSISTENT_OPTION=L2 / NORMAL PATH SELECTED / LIFETIME BLOCKED
+LEGACY_TOMBSTONE_RETIREMENT=T1 / NOT IMPLEMENTED
 LEGACY_REPLAY_OPTION=B / BLOCKED
 AUDIT_ENVIRONMENT_STORAGE=FORWARD MIGRATION REQUIRED
 AUDIT_EVENT_COMPATIBILITY_CONSTRUCTOR=REMOVE
@@ -58,14 +60,19 @@ request authority。
 - audit migration sequence：DONE / S2，V16 registry 后为 V17 audit environment；
 - candidate：`V17__qdr9_audit_environment_storage.sql` / NOT CREATED；
 - persistent identity version/verified-environment storage：仍由 legacy persistent blocker 冻结；
+- legacy retirement audit：独立 structured storage / V18 candidate semantics / NOT CREATED；
 - clean/upgrade/backfill/constraint/index/Testcontainers matrix：FROZEN / NOT IMPLEMENTED。
 
 ### L1 — legacy persistent identity blocker
 
-- 证明 legacy rate window 最大 3600 秒；
-- 冻结 legacy idempotency tombstone 的 bounded retirement；
-- 冻结 atomic legacy check + v2 admission；
-- 禁止默认 DEV 或按 deployment environment backfill。
+- selected option：L2 / bounded conservative blocking + physical retirement；
+- selected tombstone retirement：T1 / same-transaction audit + DELETE；
+- frozen cleanup：internal-only、default-disabled、tenant/family scoped、bounded、stable-order、
+  `FOR UPDATE SKIP LOCKED`、no automatic retry；
+- unresolved：maximum in-flight transaction、commit-unknown reconciliation、independent recovery
+  availability hard ceilings；
+- migration：required / `V16 -> V17 -> V18 candidate` / artifact path not authorized；
+- next blocker：`DH-STAGE-QDR-9-B4-LEGACY-PERSISTENT-IDENTITY-LIFETIME-BLOCKER`。
 
 ### L2 — legacy replay blocker
 
@@ -103,6 +110,8 @@ P1/P2 acceptance 前不得启动 B4 review retry。
 - 需要把 environment 放入 JSON/message/log；
 - 需要忽略未过期 legacy replay key；
 - 需要物理删除 idempotency tombstone 而无 migration/rollback；
+- 需要在 independent structured retirement audit 写入并提交前物理删除；
+- 需要把 90 days 或 cleanup safety grace 当作缺失 hard ceiling；
 - 需要新 endpoint、scheduler、registry、retention、B5 或 automatic learning；
 - 需要真实 HTTP/provider/NQ/Agent/LangGraph/Paper/LIVE。
 
@@ -170,5 +179,5 @@ NO / NO
 ## 7. Next action
 
 ~~~text
-DH-STAGE-QDR-9-B4-LEGACY-PERSISTENT-IDENTITY-BLOCKER
+DH-STAGE-QDR-9-B4-LEGACY-PERSISTENT-IDENTITY-LIFETIME-BLOCKER
 ~~~

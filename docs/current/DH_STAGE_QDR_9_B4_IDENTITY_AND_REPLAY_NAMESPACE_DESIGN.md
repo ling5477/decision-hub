@@ -31,7 +31,7 @@ PERSISTENT_IDENTITY_CONTRACT:
 FROZEN / NOT IMPLEMENTED
 
 LEGACY_PERSISTENT_IDENTITY:
-OPTION B / CONTRACT BLOCKED
+L2 SELECTED / RETIREMENT CONTRACT BLOCKED BY UNPROVEN HARD LIFETIME CEILINGS
 
 RATE_AUDIT_ENVIRONMENT:
 FROZEN / NOT IMPLEMENTED
@@ -231,10 +231,16 @@ guard property、tenant mapping、source mapping 或默认 `DEV` 均不得参与
 
 ~~~text
 SELECTED LEGACY PERSISTENT IDENTITY OPTION:
-B / CONSERVATIVE LEGACY BLOCKING
+L2 / BOUNDED CONSERVATIVE BLOCKING + PHYSICAL RETIREMENT
 
 LEGACY_PERSISTENT_IDENTITY_CONTRACT:
-BLOCKED
+NORMAL PATH SELECTED / IMPLEMENTATION BLOCKED
+
+UNKNOWN/UNPROVABLE FALLBACK:
+BLOCK
+
+SELECTED TOMBSTONE RETIREMENT:
+T1 / TRANSACTIONAL PHYSICAL DELETE
 ~~~
 
 当前表虽有 `environment`，但该值只证明部署配置，不证明请求的 signed `FeedbackEnvironment`。因此全部现有 row
@@ -243,17 +249,31 @@ BLOCKED
 未来 v2 写入必须使用独立 version + verified environment namespace，并在写入前保守检查：
 
 - active legacy rate bucket 匹配 endpoint/source/tenant/current DB window：fail-closed，直到 window 结束；
-- legacy idempotency row 匹配 endpoint/source/tenant/requestId：fail-closed，不复用其 result；
+- legacy idempotency/recovery row 匹配 endpoint/source/tenant/requestId：在 retirement 前 fail-closed，
+  不跨 environment 复用其 result；
 - legacy check 必须忽略旧 deployment environment，禁止借此推断 DEV/TEST；
 - legacy 检查与 v2 admission 必须由 PostgreSQL 原子合同保护，不能先查后写。
 
-Option A 被拒绝，因为忽略 legacy idempotency row 会允许同 requestId 的历史结果重复执行，并重置旧的
-rate consumption。Option C 被拒绝，因为 current row 没有可信历史字段证明 signed environment。
+永久保守阻断不能作为正常终态，因为 EXPIRED tombstone 会造成永久 availability failure；它只作为
+UNKNOWN fallback。忽略 legacy namespace 会允许同 requestId 的历史结果重复执行并重置旧 rate
+consumption。可信环境迁移也被拒绝，因为 current row 没有历史字段证明 signed environment。
 
-阻断原因：rate window 有 3600 秒 hard ceiling，但 idempotency cleanup 只转为永久 `EXPIRED`
-tombstone，当前不存在安全物理删除。兼容窗口结束条件只能是未来 migration/retirement 合同显式标识
-legacy row、证明不再有旧 writer，并经受审查的 bounded cleanup 移除或隔离全部 legacy tombstone；
-不得按时间、tenant、profile 或 deployment environment 自动结束。
+Legacy retirement blocker 已选择 L2 正常路径：
+`LIVE -> EXPIRED_BUT_BLOCKING -> RETIREMENT_ELIGIBLE -> PHYSICALLY_RETIRED`，并选择 T1
+transactional physical delete。Cleanup 必须 default-disabled、tenant/family scoped、bounded、
+stable-order、`FOR UPDATE SKIP LOCKED`，在同一 required transaction 内完成 final recheck、
+independent structured retirement audit 与 exact delete。
+
+合同仍 BLOCKED：rate window 虽有 3600 秒 ceiling，但 maximum in-flight guard transaction lifetime
+为 `NOT_AVAILABLE`；idempotency 的 commit-unknown reconciliation hard maximum 和 independent
+recovery/business-result availability hard maximum也为 `NOT_AVAILABLE`。因此 rate、idempotency、
+recovery 三个 cutoff 均不得伪造为已冻结。完整事实、方案、scope 与 test matrix 位于：
+
+~~~text
+DH_STAGE_QDR_9_B4_LEGACY_PERSISTENT_IDENTITY_DESIGN.md
+DH_STAGE_QDR_9_B4_LEGACY_PERSISTENT_IDENTITY_WORK_ORDER.md
+DH_STAGE_QDR_9_B4_LEGACY_PERSISTENT_IDENTITY_SCOPE_ERRATUM.md
+~~~
 
 ## 5. Rate audit environment
 
@@ -459,10 +479,13 @@ Forward migration 至少需要解决：
 - audit structured environment storage；
 - persistent identity version 与 verified environment 的 legacy/v2 可区分存储；
 - legacy tombstone 的安全识别与 retirement 合同。
+- independent structured retirement audit storage。
 
 Audit environment scope design 已冻结 migration version/path、upgrade path、nullable legacy rows、
 new-write constraints、rollback 与 PostgreSQL tests；未创建 migration，且不复用 candidate V16。
-persistent identity version storage、legacy tombstone retirement 与 replay atomic admission 仍是独立 blocker。
+persistent identity version storage 和 retirement audit 需要 V16/V17 之后的 V18 candidate；具体
+artifact path 必须等待 lifetime blocker 与独立 sequencing acceptance，当前未创建且不得伪造。
+Legacy replay atomic admission 仍是独立 blocker。
 
 ~~~text
 IDENTITY_REPLAY_NAMESPACE_DESIGN:
@@ -472,7 +495,7 @@ DEV_TEST_ISOLATION:
 PASS / DESIGN
 
 EFFECTIVE_SCOPE_INVARIANTS:
-60 / 60 PASS
+66 / 66 PASS
 
 ALLOW_IDENTITY_REPLAY_IMPLEMENTATION:
 NO
@@ -493,9 +516,10 @@ NO
 ## 11. Next action
 
 ~~~text
-DH-STAGE-QDR-9-B4-LEGACY-PERSISTENT-IDENTITY-BLOCKER
+DH-STAGE-QDR-9-B4-LEGACY-PERSISTENT-IDENTITY-LIFETIME-BLOCKER
 ~~~
 
-Audit storage 已冻结为 Option A，backfill 为 B1，migration sequence 为 S2，candidate 为 V17。
-下一任务必须关闭 legacy persistent idempotency tombstone 与 atomic legacy-check + v2 admission；
-不得创建 V16/V17。legacy replay TTL/atomic admission 合同继续在独立 blocker 中保持 OPEN。
+Legacy persistent identity 的正常终态已选择 L2、tombstone retirement 已选择 T1、migration
+ordering 已保留为 `V16 -> V17 -> V18 candidate`，但三个 cutoff 因 hard lifetime proof 缺失仍
+UNRESOLVED。下一任务只允许关闭 lifetime blocker；不得创建 V16/V17/V18。Legacy replay
+TTL/atomic admission 合同继续在独立 blocker 中保持 OPEN。
