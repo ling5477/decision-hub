@@ -1,5 +1,80 @@
 # DH Stage-QDR-9 Implementation Work Order
 
+## Engineering Discipline Reset and Minimal Remediation Rebaseline — 2026-07-30
+
+~~~text
+task:
+DH-STAGE-QDR-9-B4-ENGINEERING-DISCIPLINE-RESET-AND-MINIMAL-REMEDIATION-PLAN
+
+primary delivery goal:
+P1 verified-environment persistent rate/idempotency identity and structured rate audit
+P2 verified-environment replay namespace
+
+actual legacy data:
+NOT_PROVABLE
+
+rate / idempotency / replay / audit data class:
+D / D / D / D
+
+selected remediation path:
+M4
+
+selected migration reassessment:
+R4 / INSUFFICIENT OPERATIONAL EVIDENCE
+
+reference-liveness registry required for P1/P2:
+NO
+
+V16 required before audit environment storage:
+NO
+
+V18 required for confirmed current data:
+NO / NO CONFIRMED CURRENT DATA
+
+previous V16 -> V17 -> V18 sequence:
+HISTORICAL DESIGN EVIDENCE
+SUPERSEDED FOR MINIMAL REMEDIATION EXECUTION
+
+previous 54 / 60 / 66 scopes:
+HISTORICAL DESIGN EVIDENCE
+NOT ACTIVE IMPLEMENTATION GATE
+
+canonical plan:
+docs/current/DH_STAGE_QDR_9_B4_ENGINEERING_DISCIPLINE_RESET_AND_MINIMAL_REMEDIATION_PLAN.md
+
+minimal implementation:
+NOT AUTHORIZED / EVIDENCE BLOCKER FIRST
+
+V16 / V17 / V18:
+NOT CREATED / NOT CREATED / NOT CREATED
+
+registry / retention:
+NOT IMPLEMENTED / NOT PRESENT
+
+review retry / publication / B5:
+NOT ALLOWED / NOT ALLOWED / NOT ALLOWED
+
+next action:
+DH-STAGE-QDR-9-B4-DEPLOYMENT-AND-LEGACY-DATA-EVIDENCE-BLOCKER
+~~~
+
+该 rebaseline 只重置当前 delivery path，不删除或改写历史设计。GitHub Actions success、Flyway
+schema、Testcontainers fixture、生产类可写路径和 commit publication 均不是真实 deployment/data
+证据。当前没有获授权的 environment inventory、running SHA、真实流量、row inventory 或
+zero-downtime requirement，因此不得选择 M1/M2/M3，不得继续 lifetime blocker、V18、registry 或
+retention 设计。
+
+M4 evidence blocker 解除后，必须先完成一次完整 discovery，并一次性冻结
+`MINIMAL_IMPLEMENTATION_WRITE_ALLOWLIST`、`MINIMAL_TEST_ALLOWLIST`、`MIGRATION_ALLOWLIST`
+与 `FACTSOURCE_UPDATE_ALLOWLIST`。implementation 中发现 allowlist 外文件时必须停止并返回
+discovery，不得新增 scope erratum。
+
+未来 M1/M2 最小边界只允许 verified `FeedbackEnvironment` / `FeedbackExecutionScope`、
+signed HMAC/AuthContext environment、tenant/source/environment authorization、environment-bound
+rate/idempotency/replay、structured QDR7 rate-audit environment、DEV/TEST/root fail-closed、
+PostgreSQL/Testcontainers 和必要 architecture guards。registry、retention、cleanup、scheduler、
+historical backfill、V18、generic audit query API、automatic learning 与 B5 明确排除。
+
 ## Upstream Environment Contract Remote Containment — 2026-07-30
 
 ~~~text

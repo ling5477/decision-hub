@@ -1,5 +1,44 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 engineering discipline reset
+
+~~~text
+Reset baseline / parent: 2249c312cbc8afd6314751941075e209be06ba01 / aab84e896595bbd8b3f5e99e8b2880ca28f8e7a4
+origin/dev / advertised SHA: b0ff11e4057077ad7e0fe91d691116f069dc744e / b0ff11e4057077ad7e0fe91d691116f069dc744e / FRESHLY VERIFIED
+Local documentation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT PUBLISHED
+Current technical tree: B3 SAFE BASELINE
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B4: IMPLEMENTATION REVERTED / REVIEW BLOCKED
+Engineering discipline transition: RESET IN PROGRESS -> PASS / DELIVERY PATH REBASELINED
+Technical P1: OPEN / persistent rate-idempotency identity and QDR7 rate-audit verified environment
+Technical P2: OPEN / replay namespace excludes verified environment
+Blocked implementation deployment / real traffic / persistent writes: NOT_PROVABLE / NOT_PROVABLE / NOT_PROVABLE
+Legacy-data requirement: NOT_PROVABLE
+Rate / idempotency / replay / audit data class: D / D / D / D
+Selected remediation path: M4 / DEPLOYMENT AND LEGACY DATA EVIDENCE REQUIRED
+Selected migration reassessment: R4 / INSUFFICIENT EVIDENCE / IMPLEMENTATION BLOCKED
+Reference-liveness registry required for P1/P2: NO
+V16 required before audit environment storage: NO
+V18 required for confirmed current data: NO / NO CONFIRMED CURRENT DATA
+P1/P2 independent from registry-retention: YES
+Previous 54/60/66 scopes: HISTORICAL DESIGN EVIDENCE / SUPERSEDED FOR MINIMAL REMEDIATION EXECUTION
+Canonical active authority: docs/current/STATUS.md
+Canonical implementation plan: docs/current/DH_STAGE_QDR_9_B4_ENGINEERING_DISCIPLINE_RESET_AND_MINIMAL_REMEDIATION_PLAN.md
+V16 / V17 / V18: NOT CREATED / NOT CREATED / NOT CREATED
+Registry: NOT IMPLEMENTED
+Retention: NOT PRESENT
+Full regression: NOT RERUN / DOCUMENTATION-ONLY GOVERNANCE RESET
+Reused containment regression: 1228 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+QDR-7 B2 capacity / Production capacity: DEFERRED-KNOWN LIMITATION / NOT_PROVEN
+B4 review retry / B4 publication / B5: NOT ALLOWED / NOT ALLOWED / NOT ALLOWED
+ALLOW_MINIMAL_IMPLEMENTATION_DISCOVERY: NO / EVIDENCE BLOCKER FIRST
+ALLOW_LEGACY_LIFETIME_BLOCKER / ALLOW_V16_IMPLEMENTATION: NO / NO
+current task: DH-STAGE-QDR-9-B4-ENGINEERING-DISCIPLINE-RESET-AND-MINIMAL-REMEDIATION-PLAN
+current task status: LOCAL DOCUMENTATION RESET PASS / IMPLEMENTATION BLOCKED BY OPERATIONAL EVIDENCE
+next action: DH-STAGE-QDR-9-B4-DEPLOYMENT-AND-LEGACY-DATA-EVIDENCE-BLOCKER
+~~~
+
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 legacy persistent identity blocker
 
 ~~~text

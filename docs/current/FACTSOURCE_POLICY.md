@@ -1,5 +1,54 @@
 # Decision Hub Factsource Policy
 
+## Active authority policy — 2026-07-30 Stage-QDR-9 B4 reset
+
+~~~text
+Canonical active authority:
+docs/current/STATUS.md
+
+Canonical implementation plan:
+docs/current/DH_STAGE_QDR_9_B4_ENGINEERING_DISCIPLINE_RESET_AND_MINIMAL_REMEDIATION_PLAN.md
+
+Terminal factsources full-sync events:
+CONTAINMENT
+IMPLEMENTATION MILESTONE ACCEPTANCE
+PUBLICATION
+AUTHORITY CLOSE
+STAGE CLOSE
+
+Scope design / investigation / blocker update set:
+docs/current/STATUS.md
+docs/current/DH_STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER.md
+ONE TARGET DESIGN OR PLAN DOCUMENT
+
+Historical B4 identity/replay, audit environment, legacy identity and scope errata:
+HISTORICAL DESIGN EVIDENCE
+NOT ACTIVE IMPLEMENTATION GATE
+
+Previous 54 / 60 / 66 scopes:
+SUPERSEDED FOR MINIMAL REMEDIATION EXECUTION
+
+Scope erratum policy during implementation:
+STOP IMPLEMENTATION / RETURN TO DISCOVERY
+NO NEW SCOPE ERRATUM CHAIN
+~~~
+
+### Policy
+
+1. `STATUS.md` 是当前状态、允许项、禁止项和 next action 的唯一 active authority。
+2. 当前 Stage-QDR-9 B4 的唯一 canonical plan 是
+   `DH_STAGE_QDR_9_B4_ENGINEERING_DISCIPLINE_RESET_AND_MINIMAL_REMEDIATION_PLAN.md`。
+3. 十二个 terminal factsources 只在 containment、implementation milestone acceptance、
+   publication、authority close 或 stage close 时完整同步。
+4. scope design、investigation 和 blocker 子任务只更新 `STATUS.md`、Stage-QDR-9 主工单及一个
+   目标设计/计划文档；不得复制完整状态到十二个 factsources。
+5. 历史 identity/replay、audit environment、legacy identity 与 scope errata 不删除、不改写；
+   它们可作为风险证据，但不再是 active implementation acceptance gate。
+6. 完整 discovery 必须先于 implementation allowlist。implementation 发现 allowlist 外文件时，
+   必须停止并返回 discovery，不得继续追加 scope erratum。
+7. 事实优先级保持为实际代码/命令与经授权 operational evidence 高于 current docs；schema、
+   fixture、CI 和 commit publication 不得冒充真实 deployment/data evidence。
+
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 legacy persistent identity blocker
 
 ~~~text
