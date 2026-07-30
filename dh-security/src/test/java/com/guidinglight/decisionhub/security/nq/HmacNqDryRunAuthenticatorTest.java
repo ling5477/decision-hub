@@ -22,7 +22,7 @@ class HmacNqDryRunAuthenticatorTest {
   private static final String SECRET = "unit-test-dryrun-secret";
   private static final String BODY =
       "{\"requestId\":\"req-1\",\"traceId\":\"trace-1\",\"tenantId\":\"tenant-a\","
-          + "\"source\":\"NQ_DRYRUN\",\"environment\":\"DEV\",\"timestamp\":\"2026-07-04T00:00:00Z\","
+          + "\"source\":\"NQ_DRYRUN\",\"timestamp\":\"2026-07-04T00:00:00Z\","
           + "\"nonce\":\"nonce-1\",\"schemaVersion\":\"1.0.0\",\"dryRun\":true}";
 
   @Test
@@ -39,74 +39,6 @@ class HmacNqDryRunAuthenticatorTest {
   }
 
   @Test
-  void devAndTestAreIndependentlyAuthorized() {
-    assertTrue(
-        authenticator()
-            .authenticate(signedWithEnvironment("nonce-dev", NOW.toString(), BODY, "DEV"))
-            .allowed());
-    assertTrue(
-        authenticator()
-            .authenticate(signedWithEnvironment("nonce-test", NOW.toString(), BODY, "TEST"))
-            .allowed());
-  }
-
-  @Test
-  void missingAndUnsupportedEnvironmentAreRejectedBeforeBusinessAuthorization() {
-    final NqDryRunAuthResult missing =
-        authenticator().authenticate(signedWithEnvironment("nonce-missing-env", NOW.toString(), BODY, null));
-    final NqDryRunAuthResult invalid =
-        authenticator().authenticate(signedWithEnvironment("nonce-invalid-env", NOW.toString(), BODY, "LOCAL"));
-
-    assertEquals("ENVIRONMENT_REQUIRED", missing.errorCode());
-    assertEquals(403, missing.status());
-    assertEquals("ENVIRONMENT_INVALID", invalid.errorCode());
-    assertEquals(403, invalid.status());
-  }
-
-  @Test
-  void environmentTamperingInvalidatesTheSignedMaterialInBothDirections() {
-    final NqDryRunAuthResult devToTest =
-        authenticator()
-            .authenticate(
-                withEnvironment(
-                    signedWithEnvironment("nonce-dev-to-test", NOW.toString(), BODY, "DEV"), "TEST"));
-    final NqDryRunAuthResult testToDev =
-        authenticator()
-            .authenticate(
-                withEnvironment(
-                    signedWithEnvironment("nonce-test-to-dev", NOW.toString(), BODY, "TEST"), "DEV"));
-
-    assertEquals("SIGNATURE_INVALID", devToTest.errorCode());
-    assertEquals("SIGNATURE_INVALID", testToDev.errorCode());
-  }
-
-  @Test
-  void jointTenantSourceEnvironmentAuthorizationFailsClosedAtEachBinding() {
-    final NqDryRunAuthResult sourceEnvironmentDenied =
-        authenticatorWith(
-                Set.of("NQ_DRYRUN::DEV"),
-                Set.of("tenant-a::TEST"),
-                Set.of("tenant-a::NQ_DRYRUN::TEST"))
-            .authenticate(signedWithEnvironment("nonce-source-env", NOW.toString(), BODY, "TEST"));
-    final NqDryRunAuthResult tenantEnvironmentDenied =
-        authenticatorWith(
-                Set.of("NQ_DRYRUN::TEST"),
-                Set.of("tenant-a::DEV"),
-                Set.of("tenant-a::NQ_DRYRUN::TEST"))
-            .authenticate(signedWithEnvironment("nonce-tenant-env", NOW.toString(), BODY, "TEST"));
-    final NqDryRunAuthResult tripleDenied =
-        authenticatorWith(
-                Set.of("NQ_DRYRUN::TEST"),
-                Set.of("tenant-a::TEST"),
-                Set.of("tenant-a::NQ_DRYRUN::DEV"))
-            .authenticate(signedWithEnvironment("nonce-triple-env", NOW.toString(), BODY, "TEST"));
-
-    assertEquals("SOURCE_ENVIRONMENT_NOT_AUTHORIZED", sourceEnvironmentDenied.errorCode());
-    assertEquals("TENANT_ENVIRONMENT_MISMATCH", tenantEnvironmentDenied.errorCode());
-    assertEquals("ENVIRONMENT_NOT_AUTHORIZED", tripleDenied.errorCode());
-  }
-
-  @Test
   void invalidSignatureIsRejected() {
     final NqDryRunAuthRequest request =
         new NqDryRunAuthRequest(
@@ -116,7 +48,6 @@ class HmacNqDryRunAuthenticatorTest {
             "NQ_DRYRUN",
             "tenant-a",
             "tenant-a",
-            "DEV",
             NOW.toString(),
             "nonce-bad",
             "bad",
@@ -172,9 +103,6 @@ class HmacNqDryRunAuthenticatorTest {
         new HmacNqDryRunAuthenticator(
                 Set.of("NQ_DRYRUN"),
                 Set.of("tenant-a:NQ_DRYRUN"),
-                Set.of("NQ_DRYRUN::DEV"),
-                Set.of("tenant-a::DEV"),
-                Set.of("tenant-a::NQ_DRYRUN::DEV"),
                 SECRET,
                 Duration.ofMinutes(5),
                 32,
@@ -195,7 +123,6 @@ class HmacNqDryRunAuthenticatorTest {
             "NQ_DRYRUN",
             "tenant-a",
             "tenant-a",
-            "DEV",
             NOW.toString(),
             "nonce-nq-uppercase-source",
             "",
@@ -212,7 +139,6 @@ class HmacNqDryRunAuthenticatorTest {
             "/api/ai/decision-dry-runs",
             "NQ_DRYRUN",
             "tenant-a",
-            "DEV",
             "req-1",
             "trace-1",
             NOW.toString(),
@@ -227,7 +153,6 @@ class HmacNqDryRunAuthenticatorTest {
             unsigned.sourceSystem(),
             unsigned.authenticatedTenantId(),
             unsigned.tenantId(),
-            unsigned.environment(),
             unsigned.timestampHeader(),
             unsigned.nonce(),
             HmacNqDryRunAuthenticator.hmacSha256Hex(SECRET, nqStyleMaterial),
@@ -286,7 +211,6 @@ class HmacNqDryRunAuthenticatorTest {
             "nq_dryrun",
             canonical.authenticatedTenantId(),
             canonical.tenantId(),
-            canonical.environment(),
             canonical.timestampHeader(),
             canonical.nonce(),
             canonical.signature(),
@@ -313,7 +237,6 @@ class HmacNqDryRunAuthenticatorTest {
             "NQ_DRYRUN",
             "tenant-a",
             "tenant-a",
-            "DEV",
             NOW.toString(),
             "nonce-mismatched-material",
             "",
@@ -330,7 +253,6 @@ class HmacNqDryRunAuthenticatorTest {
             "/api/ai/decision-dry-runs",
             "nq_dryrun",
             "tenant-a",
-            "DEV",
             "req-1",
             "trace-1",
             NOW.toString(),
@@ -345,7 +267,6 @@ class HmacNqDryRunAuthenticatorTest {
             unsigned.sourceSystem(),
             unsigned.authenticatedTenantId(),
             unsigned.tenantId(),
-            unsigned.environment(),
             unsigned.timestampHeader(),
             unsigned.nonce(),
             HmacNqDryRunAuthenticator.hmacSha256Hex(SECRET, mismatchedMaterial),
@@ -363,22 +284,9 @@ class HmacNqDryRunAuthenticatorTest {
   }
 
   private static HmacNqDryRunAuthenticator authenticator() {
-    return authenticatorWith(
-        Set.of("NQ_DRYRUN::DEV", "NQ_DRYRUN::TEST"),
-        Set.of("tenant-a::DEV", "tenant-a::TEST"),
-        Set.of("tenant-a::NQ_DRYRUN::DEV", "tenant-a::NQ_DRYRUN::TEST"));
-  }
-
-  private static HmacNqDryRunAuthenticator authenticatorWith(
-      final Set<String> allowedSourceEnvironmentPairs,
-      final Set<String> allowedTenantEnvironmentPairs,
-      final Set<String> allowedTenantSourceEnvironmentTriples) {
     return new HmacNqDryRunAuthenticator(
         Set.of("NQ_DRYRUN"),
         Set.of("tenant-a:NQ_DRYRUN"),
-        allowedSourceEnvironmentPairs,
-        allowedTenantEnvironmentPairs,
-        allowedTenantSourceEnvironmentTriples,
         SECRET,
         Duration.ofMinutes(5),
         2048,
@@ -387,11 +295,6 @@ class HmacNqDryRunAuthenticatorTest {
 
   private static NqDryRunAuthRequest signed(
       final String nonce, final String timestamp, final String body) {
-    return signedWithEnvironment(nonce, timestamp, body, "DEV");
-  }
-
-  private static NqDryRunAuthRequest signedWithEnvironment(
-      final String nonce, final String timestamp, final String body, final String environment) {
     final NqDryRunAuthRequest unsigned =
         new NqDryRunAuthRequest(
             "POST",
@@ -400,7 +303,6 @@ class HmacNqDryRunAuthenticatorTest {
             "NQ_DRYRUN",
             "tenant-a",
             "tenant-a",
-            environment,
             timestamp,
             nonce,
             "",
@@ -413,27 +315,6 @@ class HmacNqDryRunAuthenticatorTest {
     return withSignature(unsigned);
   }
 
-  private static NqDryRunAuthRequest withEnvironment(
-      final NqDryRunAuthRequest request, final String environment) {
-    return new NqDryRunAuthRequest(
-        request.method(),
-        request.path(),
-        request.sourceHeader(),
-        request.sourceSystem(),
-        request.authenticatedTenantId(),
-        request.tenantId(),
-        environment,
-        request.timestampHeader(),
-        request.nonce(),
-        request.signature(),
-        request.requestId(),
-        request.traceId(),
-        request.schemaVersion(),
-        request.rawBody(),
-        request.contentLength(),
-        request.now());
-  }
-
   private static NqDryRunAuthRequest signedWithSource(
       final String source, final String tenantId, final String nonce) {
     final NqDryRunAuthRequest unsigned =
@@ -444,7 +325,6 @@ class HmacNqDryRunAuthenticatorTest {
             source,
             "tenant-a",
             tenantId,
-            "DEV",
             NOW.toString(),
             nonce,
             "",
@@ -467,7 +347,6 @@ class HmacNqDryRunAuthenticatorTest {
             sourceBody,
             "tenant-a",
             tenantId,
-            "DEV",
             NOW.toString(),
             nonce,
             "",
@@ -491,7 +370,6 @@ class HmacNqDryRunAuthenticatorTest {
         unsigned.sourceSystem(),
         unsigned.authenticatedTenantId(),
         unsigned.tenantId(),
-        unsigned.environment(),
         unsigned.timestampHeader(),
         unsigned.nonce(),
         signature,

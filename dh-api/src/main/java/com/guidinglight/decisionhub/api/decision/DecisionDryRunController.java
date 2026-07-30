@@ -6,9 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidinglight.decisionhub.api.TraceIdFilter;
 import com.guidinglight.decisionhub.api.security.AuthenticatedRequest;
 import com.guidinglight.decisionhub.common.util.TimeProvider;
-import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
-import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
-import com.guidinglight.decisionhub.security.AuthContext;
 import com.guidinglight.decisionhub.security.nq.HmacNqDryRunAuthenticator;
 import com.guidinglight.decisionhub.security.nq.NormalizedNqDhHeaders;
 import com.guidinglight.decisionhub.security.nq.NqDhHeaderParser;
@@ -155,7 +152,6 @@ public final class DecisionDryRunController {
                   parsed.request().source(),
                   tenantId,
                   parsed.request().tenantId(),
-                  parsed.request().environment(),
                   headers.timestamp(),
                   headers.nonce(),
                   headers.signature(),
@@ -174,14 +170,6 @@ public final class DecisionDryRunController {
                 authResult.reason()),
             httpTraceId);
       }
-
-      final AuthContext verifiedContext =
-          requireAuthenticatedContext(httpRequest)
-              .withVerifiedFeedbackAuthority(
-                  parsed.request().source(), FeedbackEnvironment.fromWire(parsed.request().environment()));
-      command =
-          command.withExecutionScope(
-              new FeedbackExecutionScope(verifiedContext.tenantId(), verifiedContext.environment()));
 
       // 必须先完成HMAC/timestamp/nonce认证，再消费persistent rate状态；same nonce不能读取后续guard结果。
       final RateLimitResult rateLimit =
@@ -266,15 +254,13 @@ public final class DecisionDryRunController {
         request == null ? null : request.traceId(),
         request == null ? null : request.tenantId(),
         request == null ? null : request.source(),
-        request == null ? null : request.environment(),
         request == null ? null : request.timestamp(),
         request == null ? null : request.nonce(),
         request == null ? null : request.schemaVersion(),
         request != null && Boolean.TRUE.equals(request.dryRun()),
         request == null ? Set.of() : request.forbiddenCapabilities(),
         toContext(context),
-        forbiddenMaterialDetected,
-        null);
+        forbiddenMaterialDetected);
   }
 
   private DecisionDryRunContext toContext(final JsonNode context) {
@@ -400,14 +386,6 @@ public final class DecisionDryRunController {
   private static String resolveHttpTraceId(final HttpServletRequest httpRequest) {
     final Object attr = httpRequest.getAttribute(TraceIdFilter.TRACE_HEADER);
     return attr == null ? null : attr.toString();
-  }
-
-  private static AuthContext requireAuthenticatedContext(final HttpServletRequest request) {
-    final AuthContext context = AuthenticatedRequest.authContext(request);
-    if (context == null || context.tenantId() == null || context.tenantId().isBlank()) {
-      throw new ErrorResponseException(org.springframework.http.HttpStatus.UNAUTHORIZED);
-    }
-    return context;
   }
 
   private static boolean same(final String a, final String b) {

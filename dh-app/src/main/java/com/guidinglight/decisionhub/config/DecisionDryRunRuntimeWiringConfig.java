@@ -172,9 +172,6 @@ public class DecisionDryRunRuntimeWiringConfig {
      * @param killSwitchEnabled        kill switch；true 时立即 fail-closed。
      * @param allowedSources           source allowlist。
      * @param allowedTenantSourcePairs tenant/source pair allowlist。
-     * @param allowedSourceEnvironmentPairs source/environment pair allowlist。
-     * @param allowedTenantEnvironmentPairs tenant/environment pair allowlist。
-     * @param allowedTenantSourceEnvironmentTriples full tenant/source/environment allowlist。
      * @param memoryCapBytes           decisionContext 内存上限。
      * @return dry-run runtime 配置快照。
      */
@@ -187,9 +184,6 @@ public class DecisionDryRunRuntimeWiringConfig {
             @Value("${decisionhub.integration1.runtime.kill-switch-enabled:false}") final boolean killSwitchEnabled,
             @Value("${decisionhub.integration1.runtime.allowed-sources:NQ_DRYRUN}") final String allowedSources,
             @Value("${decisionhub.integration1.runtime.allowed-tenant-source-pairs:}") final String allowedTenantSourcePairs,
-            @Value("${decisionhub.integration1.runtime.allowed-source-environment-pairs:}") final String allowedSourceEnvironmentPairs,
-            @Value("${decisionhub.integration1.runtime.allowed-tenant-environment-pairs:}") final String allowedTenantEnvironmentPairs,
-            @Value("${decisionhub.integration1.runtime.allowed-tenant-source-environment-triples:}") final String allowedTenantSourceEnvironmentTriples,
             @Value("${decisionhub.integration1.runtime.memory-cap-bytes:32768}") final int memoryCapBytes) {
         final boolean devOrTest =
                 NonceReplayGuardType.isDevOrTest(List.of(environment.getActiveProfiles()));
@@ -200,9 +194,6 @@ public class DecisionDryRunRuntimeWiringConfig {
                 devOrTest,
                 splitRequiredSourceCsv(allowedSources),
                 splitOptionalPairCsv(allowedTenantSourcePairs),
-                splitOptionalPairCsv(allowedSourceEnvironmentPairs),
-                splitOptionalPairCsv(allowedTenantEnvironmentPairs),
-                splitOptionalPairCsv(allowedTenantSourceEnvironmentTriples),
                 memoryCapBytes);
     }
 
@@ -267,9 +258,6 @@ public class DecisionDryRunRuntimeWiringConfig {
         return new HmacNqDryRunAuthenticator(
                 properties.allowedSources(),
                 properties.allowedTenantSourcePairs(),
-                properties.allowedSourceEnvironmentPairs(),
-                properties.allowedTenantEnvironmentPairs(),
-                properties.allowedTenantSourceEnvironmentTriples(),
                 hmacSecret,
                 Duration.ofSeconds(maxClockSkewSeconds),
                 maxPayloadBytes,

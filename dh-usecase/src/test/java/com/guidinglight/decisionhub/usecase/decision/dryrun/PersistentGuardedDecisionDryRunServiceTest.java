@@ -2,7 +2,6 @@ package com.guidinglight.decisionhub.usecase.decision.dryrun;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.guidinglight.decisionhub.usecase.decision.InMemoryDecisionAuditRepository;
 import com.guidinglight.decisionhub.domain.decision.DecisionAction;
@@ -14,8 +13,6 @@ import com.guidinglight.decisionhub.domain.decision.DecisionReplayTimelineView;
 import com.guidinglight.decisionhub.domain.decision.DecisionReplayView;
 import com.guidinglight.decisionhub.domain.decision.DecisionRiskLevel;
 import com.guidinglight.decisionhub.domain.decision.DecisionType;
-import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
-import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyAdmissionCommand;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyAdmissionResult;
 import com.guidinglight.decisionhub.usecase.qdr.guard.IdempotencyGuardPort;
@@ -147,33 +144,6 @@ class PersistentGuardedDecisionDryRunServiceTest {
     assertEquals(DecisionDryRunErrorCode.IDEMPOTENCY_COMMIT_UNKNOWN, result.errorCode());
   }
 
-  @Test
-  void unverifiedScopeIsRejectedBeforePersistentAdmissionOrAudit() {
-    final InMemoryDecisionAuditRepository auditRepository = new InMemoryDecisionAuditRepository();
-    final DecisionDryRunService service =
-        new PersistentGuardedDecisionDryRunService(
-            rejectingDelegate(),
-            unusedPort(),
-            new com.guidinglight.decisionhub.usecase.qdr.guard.GuardTransactionBoundary() {
-              @Override
-              public <T> T required(final java.util.function.Supplier<T> action) {
-                throw new AssertionError("unverified command must not start a persistent transaction");
-              }
-            },
-            auditRepository,
-            new DecisionDryRunRequestFingerprint(),
-            new DecisionDryRunSafeResultProjector(query -> null),
-            properties(),
-            Clock.systemUTC());
-
-    final DecisionDryRunResult result = service.execute(unscopedCommand());
-
-    assertFalse(result.success());
-    assertEquals(403, result.status());
-    assertEquals(DecisionDryRunErrorCode.POLICY_DENIED, result.errorCode());
-    assertTrue(auditRepository.auditEvents().isEmpty());
-  }
-
   private static DecisionDryRunService rejectingDelegate() {
     return new DecisionDryRunService() {
       @Override
@@ -268,17 +238,11 @@ class PersistentGuardedDecisionDryRunServiceTest {
   }
 
   private static DecisionDryRunCommand command() {
-    return unscopedCommand()
-        .withExecutionScope(new FeedbackExecutionScope("tenant-a", FeedbackEnvironment.DEV));
-  }
-
-  private static DecisionDryRunCommand unscopedCommand() {
     return new DecisionDryRunCommand(
         "request-1",
         "trace-1",
         "tenant-a",
         "NQ_DRYRUN",
-        "DEV",
         "2026-07-12T00:00:00Z",
         "nonce-1",
         "1",
@@ -295,8 +259,7 @@ class PersistentGuardedDecisionDryRunServiceTest {
             Instant.parse("2026-07-12T00:00:00Z"),
             List.of("evidence-1"),
             128),
-        false,
-        null);
+        false);
   }
 
   private static DecisionDryRunGuardProperties properties() {

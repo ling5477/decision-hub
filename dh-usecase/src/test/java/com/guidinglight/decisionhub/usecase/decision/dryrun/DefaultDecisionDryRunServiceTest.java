@@ -8,8 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.guidinglight.decisionhub.domain.decision.DecisionAction;
 import com.guidinglight.decisionhub.domain.decision.DecisionOutput;
 import com.guidinglight.decisionhub.domain.decision.ProviderSignalStatus;
-import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
-import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import com.guidinglight.decisionhub.usecase.decision.DecisionAuditRepository;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOutputAssembler;
 import com.guidinglight.decisionhub.usecase.decision.DecisionOrchestrator;
@@ -43,8 +41,6 @@ class DefaultDecisionDryRunServiceTest {
 
   private static final Instant NOW = Instant.parse("2026-07-04T00:00:00Z");
   private static final Clock CLOCK = Clock.fixed(NOW, ZoneOffset.UTC);
-  private static final FeedbackExecutionScope EXECUTION_SCOPE =
-      new FeedbackExecutionScope("tenant-a", FeedbackEnvironment.DEV);
 
   @Test
   void validDryRunReturnsReadonlySnapshotAndWritesAuditTraceReplayRefs() {
@@ -82,7 +78,6 @@ class DefaultDecisionDryRunServiceTest {
     assertFalse(result.snapshot().traceSummary().toString().contains("raw provider response"));
     assertFalse(result.snapshot().traceSummary().toString().contains("credential"));
     assertTrue(repository.auditEventCount() >= 1);
-    assertEquals(EXECUTION_SCOPE, gatewayIntegration.lastCommand.executionScope());
     assertTrue(repository.outputCount() >= 1);
     final var decisionRequest =
         decisionCoreRepository
@@ -158,19 +153,6 @@ class DefaultDecisionDryRunServiceTest {
             .execute(command(true, false, 100_000));
 
     assertRejected(result, 500, DecisionDryRunErrorCode.MEMORY_LIMIT_EXCEEDED);
-  }
-
-  @Test
-  void missingVerifiedExecutionScopeFailsClosedWithoutBusinessAudit() {
-    final RecordingDecisionAuditReplayRepository repository =
-        new RecordingDecisionAuditReplayRepository();
-
-    final DecisionDryRunResult result =
-        service(repository, enabled(), new DefaultDecisionOrchestrator()).execute(unscopedCommand());
-
-    assertRejected(result, 403, DecisionDryRunErrorCode.POLICY_DENIED);
-    assertEquals(0, repository.auditEventCount());
-    assertEquals(0, repository.outputCount());
   }
 
   @Test
@@ -289,22 +271,11 @@ class DefaultDecisionDryRunServiceTest {
 
   private static DecisionDryRunCommand command(
       final boolean dryRun, final boolean forbiddenMaterialDetected, final int approxBytes) {
-    return unscopedCommand(dryRun, forbiddenMaterialDetected, approxBytes)
-        .withExecutionScope(EXECUTION_SCOPE);
-  }
-
-  private static DecisionDryRunCommand unscopedCommand() {
-    return unscopedCommand(true, false, 1024);
-  }
-
-  private static DecisionDryRunCommand unscopedCommand(
-      final boolean dryRun, final boolean forbiddenMaterialDetected, final int approxBytes) {
     return new DecisionDryRunCommand(
         "req-dryrun-1",
         "trace-dryrun-1",
         "tenant-a",
         "NQ_DRYRUN",
-        "DEV",
         "2026-07-04T00:00:00Z",
         "nonce-dryrun-1",
         "1.0.0",
@@ -321,8 +292,7 @@ class DefaultDecisionDryRunServiceTest {
             NOW,
             List.of("evidence://dryrun/1"),
             approxBytes),
-        forbiddenMaterialDetected,
-        null);
+        forbiddenMaterialDetected);
   }
 
   private static void assertRejected(
@@ -376,7 +346,6 @@ class DefaultDecisionDryRunServiceTest {
 
     private final ModelGatewayFailureCode failureCode;
     private int invocations;
-    private QdrModelGatewayIntegrationCommand lastCommand;
 
     private RecordingGatewayIntegration() {
       this(null);
@@ -390,7 +359,6 @@ class DefaultDecisionDryRunServiceTest {
     public QdrModelGatewayIntegrationResult invoke(
         final QdrModelGatewayIntegrationCommand command) {
       invocations++;
-      lastCommand = command;
       if (failureCode != null) {
         throw new QdrModelGatewayIntegrationException(failureCode, "gateway failed closed");
       }

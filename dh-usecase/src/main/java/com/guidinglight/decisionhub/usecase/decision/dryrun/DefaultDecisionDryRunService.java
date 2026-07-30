@@ -174,7 +174,7 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
                             null,
                             "DRY_RUN_RECEIVED");
             final DecisionRequest request = toDecisionRequest(command);
-            final DecisionOutput output = orchestrator.decide(command.executionScope(), request);
+            final DecisionOutput output = orchestrator.decide(request);
             final DecisionDryRunResult providerFailure = mapProviderFailure(command, output);
             if (providerFailure != null) {
                 recordQuantDecision(decisionCoreSession, command, output, null);
@@ -230,15 +230,6 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
                     DecisionDryRunErrorCode.POLICY_DENIED,
                     "missing dry-run request",
                     DecisionAuditEventType.POLICY_DENIED);
-        }
-        if (!hasVerifiedExecutionScope(command)) {
-            return DecisionDryRunResult.rejected(
-                    403,
-                    DecisionDryRunErrorCode.POLICY_DENIED,
-                    "dry-run request lacks verified execution authority",
-                    requestId(command),
-                    traceId(command),
-                    null);
         }
         if (!properties.runtimeEnabled()) {
             return rejectWithoutThrowing(
@@ -457,8 +448,7 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
                 command.context().market(),
                 command.context().timeframe(),
                 output.getRiskLevel().name(),
-                command.context().evidenceRefs(),
-                command.executionScope());
+                command.context().evidenceRefs());
     }
 
     private DecisionRequest toDecisionRequest(final DecisionDryRunCommand command) {
@@ -526,10 +516,6 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
             final DecisionDryRunErrorCode errorCode,
             final String message,
             final DecisionAuditEventType eventType) {
-        if (!hasVerifiedExecutionScope(command)) {
-            return DecisionDryRunResult.rejected(
-                    status, errorCode, message, requestId(command), traceId(command), null);
-        }
         try {
             final String auditRef =
                     writeAudit(
@@ -570,7 +556,6 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
                         requestId,
                         tenantId(command),
                         traceId(command),
-                        command.executionScope().environment(),
                         eventType,
                         eventStatus,
                         Map.of(
@@ -593,13 +578,6 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
                 && !isBlank(command.timestamp())
                 && !isBlank(command.nonce())
                 && !isBlank(command.schemaVersion());
-    }
-
-    private static boolean hasVerifiedExecutionScope(final DecisionDryRunCommand command) {
-        return command != null
-                && command.executionScope() != null
-                && command.executionScope().tenantId().equals(command.tenantId())
-                && command.executionScope().environment().name().equals(command.environment());
     }
 
     private static boolean requiredContextPresent(final DecisionDryRunContext context) {
@@ -772,12 +750,7 @@ public final class DefaultDecisionDryRunService implements DecisionDryRunService
         }
         if (errorCode == DecisionDryRunErrorCode.POLICY_DENIED
                 || errorCode == DecisionDryRunErrorCode.SOURCE_DENIED
-                || errorCode == DecisionDryRunErrorCode.TENANT_MISMATCH
-                || errorCode == DecisionDryRunErrorCode.ENVIRONMENT_REQUIRED
-                || errorCode == DecisionDryRunErrorCode.ENVIRONMENT_INVALID
-                || errorCode == DecisionDryRunErrorCode.SOURCE_ENVIRONMENT_NOT_AUTHORIZED
-                || errorCode == DecisionDryRunErrorCode.TENANT_ENVIRONMENT_MISMATCH
-                || errorCode == DecisionDryRunErrorCode.ENVIRONMENT_NOT_AUTHORIZED) {
+                || errorCode == DecisionDryRunErrorCode.TENANT_MISMATCH) {
             return DecisionAuditEventType.POLICY_DENIED;
         }
         return DecisionAuditEventType.DECISION_FAILED;

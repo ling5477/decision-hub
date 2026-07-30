@@ -1,6 +1,5 @@
 package com.guidinglight.decisionhub.security.nq;
 
-import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -30,9 +29,6 @@ public final class HmacNqDryRunAuthenticator {
 
   private final Set<String> allowedSources;
   private final Set<String> allowedTenantSourcePairs;
-  private final Set<String> allowedSourceEnvironmentPairs;
-  private final Set<String> allowedTenantEnvironmentPairs;
-  private final Set<String> allowedTenantSourceEnvironmentTriples;
   private final String secret;
   private final Duration maxClockSkew;
   private final long maxPayloadBytes;
@@ -51,9 +47,6 @@ public final class HmacNqDryRunAuthenticator {
   public HmacNqDryRunAuthenticator(
       final Set<String> allowedSources,
       final Set<String> allowedTenantSourcePairs,
-      final Set<String> allowedSourceEnvironmentPairs,
-      final Set<String> allowedTenantEnvironmentPairs,
-      final Set<String> allowedTenantSourceEnvironmentTriples,
       final String secret,
       final Duration maxClockSkew,
       final long maxPayloadBytes,
@@ -73,34 +66,10 @@ public final class HmacNqDryRunAuthenticator {
                 .map(HmacNqDryRunAuthenticator::normalizePairConfig)
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.toUnmodifiableSet());
-    this.allowedSourceEnvironmentPairs = normalizeConfiguredBindings(allowedSourceEnvironmentPairs);
-    this.allowedTenantEnvironmentPairs = normalizeConfiguredBindings(allowedTenantEnvironmentPairs);
-    this.allowedTenantSourceEnvironmentTriples =
-        normalizeConfiguredBindings(allowedTenantSourceEnvironmentTriples);
     this.secret = secret == null ? "" : secret;
     this.maxClockSkew = maxClockSkew == null ? Duration.ofMinutes(5) : maxClockSkew;
     this.maxPayloadBytes = maxPayloadBytes <= 0 ? 64 * 1024L : maxPayloadBytes;
     this.replayGuard = Objects.requireNonNull(replayGuard, "replayGuard");
-  }
-
-  /** Preserves the former constructor while making every environment authorization fail closed. */
-  public HmacNqDryRunAuthenticator(
-      final Set<String> allowedSources,
-      final Set<String> allowedTenantSourcePairs,
-      final String secret,
-      final Duration maxClockSkew,
-      final long maxPayloadBytes,
-      final NonceReplayGuard replayGuard) {
-    this(
-        allowedSources,
-        allowedTenantSourcePairs,
-        Set.of(),
-        Set.of(),
-        Set.of(),
-        secret,
-        maxClockSkew,
-        maxPayloadBytes,
-        replayGuard);
   }
 
   /**
@@ -145,15 +114,6 @@ public final class HmacNqDryRunAuthenticator {
       return NqDryRunAuthResult.rejected(
           401, "SIGNATURE_INVALID", "replay or signature binding key is missing");
     }
-    final FeedbackEnvironment environment;
-    try {
-      environment = FeedbackEnvironment.fromWire(request.environment());
-    } catch (final IllegalArgumentException error) {
-      return NqDryRunAuthResult.rejected(
-          403,
-          isBlank(request.environment()) ? "ENVIRONMENT_REQUIRED" : "ENVIRONMENT_INVALID",
-          "dry-run environment is missing or unsupported");
-    }
     if (!verifySignature(request)) {
       return NqDryRunAuthResult.rejected(401, "SIGNATURE_INVALID", "bad dry-run signature");
     }
@@ -164,26 +124,6 @@ public final class HmacNqDryRunAuthenticator {
     if (!allowedTenantSourcePairs.contains(pair)) {
       return NqDryRunAuthResult.rejected(
           403, "SOURCE_DENIED", "tenant/source pair is not allowlisted");
-    }
-    final String environmentName = environment.name();
-    if (!allowedSourceEnvironmentPairs.contains(normalizePair(source, environmentName))) {
-      return NqDryRunAuthResult.rejected(
-          403,
-          "SOURCE_ENVIRONMENT_NOT_AUTHORIZED",
-          "dry-run source/environment pair is not allowlisted");
-    }
-    if (!allowedTenantEnvironmentPairs.contains(normalizePair(request.tenantId(), environmentName))) {
-      return NqDryRunAuthResult.rejected(
-          403,
-          "TENANT_ENVIRONMENT_MISMATCH",
-          "dry-run tenant/environment pair is not allowlisted");
-    }
-    if (!allowedTenantSourceEnvironmentTriples.contains(
-        normalizeTriple(request.tenantId(), source, environmentName))) {
-      return NqDryRunAuthResult.rejected(
-          403,
-          "ENVIRONMENT_NOT_AUTHORIZED",
-          "dry-run tenant/source/environment binding is not allowlisted");
     }
     final String replayKey =
         normalizePair(request.tenantId(), source)
@@ -218,7 +158,7 @@ public final class HmacNqDryRunAuthenticator {
   /**
    * 生成 dry-run 签名材料。
    *
-   * <p>签名材料固定为 method/path/source/tenant/environment/requestId/traceId/timestamp/nonce/schemaVersion/bodySha256，
+   * <p>签名材料固定为 method/path/source/tenant/requestId/traceId/timestamp/nonce/schemaVersion/bodySha256，
    * 其中 source 使用 request 的 wire-level 精确值，body 使用 SHA-256 hash 而非原文，避免签名工具或日志误带 raw
    * body。
    *
@@ -232,7 +172,6 @@ public final class HmacNqDryRunAuthenticator {
         value(request.path()),
         wireValue(request.sourceSystem()),
         value(request.tenantId()),
-        value(request.environment()),
         value(request.requestId()),
         value(request.traceId()),
         value(request.timestampHeader()),
@@ -321,20 +260,6 @@ public final class HmacNqDryRunAuthenticator {
 
   private static String normalizePair(final String tenantId, final String source) {
     return value(tenantId).trim() + "::" + wireValue(source);
-  }
-
-  private static String normalizeTriple(
-      final String tenantId, final String source, final String environment) {
-    return value(tenantId).trim() + "::" + wireValue(source) + "::" + wireValue(environment);
-  }
-
-  private static Set<String> normalizeConfiguredBindings(final Set<String> configuredBindings) {
-    return configuredBindings == null
-        ? Set.of()
-        : configuredBindings.stream()
-            .filter(binding -> !isBlank(binding))
-            .map(String::trim)
-            .collect(Collectors.toUnmodifiableSet());
   }
 
   private static String normalizeConfiguredSource(final String value) {

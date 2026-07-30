@@ -13,7 +13,6 @@ import java.util.Set;
  * @param traceId trace ID。
  * @param tenantId tenant ID；必须与认证上下文一致。
  * @param source 来源；首批仅允许 dev/test 的 NQ_DRYRUN。
- * @param environment 显式 signed 环境；仅允许 DEV 或 TEST，不能由 profile 或服务器推断。
  * @param timestamp body timestamp；必须与 canonical timestamp header 一致。
  * @param nonce body nonce；必须与 canonical nonce header 一致。
  * @param schemaVersion schema version。
@@ -26,7 +25,6 @@ public record DecisionDryRunRequest(
     String traceId,
     String tenantId,
     String source,
-    String environment,
     String timestamp,
     String nonce,
     String schemaVersion,

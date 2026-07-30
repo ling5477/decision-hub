@@ -15,7 +15,6 @@ import java.time.Instant;
  * @param sourceSystem body.source。
  * @param authenticatedTenantId API bearer token 认证后的 tenant。
  * @param tenantId body.tenantId。
- * @param environment body.environment；必须是显式 signed DEV 或 TEST。
  * @param timestampHeader canonical X-NQ-DH-Timestamp header，必须是 UTC Z。
  * @param nonce canonical X-NQ-DH-Nonce header。
  * @param signature canonical X-NQ-DH-Signature header。
@@ -33,7 +32,6 @@ public record NqDryRunAuthRequest(
     String sourceSystem,
     String authenticatedTenantId,
     String tenantId,
-    String environment,
     String timestampHeader,
     String nonce,
     String signature,

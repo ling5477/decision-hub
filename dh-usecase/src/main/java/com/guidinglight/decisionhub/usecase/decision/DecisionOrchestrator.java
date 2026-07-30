@@ -2,7 +2,6 @@ package com.guidinglight.decisionhub.usecase.decision;
 
 import com.guidinglight.decisionhub.domain.decision.DecisionOutput;
 import com.guidinglight.decisionhub.domain.decision.DecisionRequest;
-import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 
 /**
  * GateK K2 Decision Pipeline MVP 编排入口。
@@ -19,14 +18,4 @@ public interface DecisionOrchestrator {
    * @return K1 冻结输出合同；永不代表交易指令
    */
   DecisionOutput decide(DecisionRequest request);
-
-  /**
-   * Executes a verified feedback request without re-parsing or inferring its execution scope.
-   *
-   * <p>The default preserves non-feedback callers; trusted feedback roots must use this overload.
-   */
-  default DecisionOutput decide(
-      final FeedbackExecutionScope executionScope, final DecisionRequest request) {
-    return decide(request);
-  }
 }

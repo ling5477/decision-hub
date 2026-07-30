@@ -110,9 +110,6 @@ import org.testcontainers.utility.DockerImageName;
       "decisionhub.integration1.runtime.kill-switch-enabled=false",
       "decisionhub.integration1.runtime.allowed-sources=NQ_DRYRUN",
       "decisionhub.integration1.runtime.allowed-tenant-source-pairs=qdr7-capacity:NQ_DRYRUN",
-      "decisionhub.integration1.runtime.allowed-source-environment-pairs=NQ_DRYRUN::DEV",
-      "decisionhub.integration1.runtime.allowed-tenant-environment-pairs=qdr7-capacity::DEV",
-      "decisionhub.integration1.runtime.allowed-tenant-source-environment-triples=qdr7-capacity::NQ_DRYRUN::DEV",
       "decisionhub.integration1.runtime.guard.environment=test",
       "decisionhub.integration1.runtime.guard.rate-window-seconds=3600",
       "decisionhub.integration1.runtime.guard.rate-limit-value=100000",
@@ -198,15 +195,6 @@ class Qdr7CapacityAcceptanceIT {
     registry.add(
         "decisionhub.integration1.runtime.allowed-tenant-source-pairs",
         () -> TENANT + ":" + SOURCE);
-    registry.add(
-        "decisionhub.integration1.runtime.allowed-source-environment-pairs",
-        () -> SOURCE + "::DEV");
-    registry.add(
-        "decisionhub.integration1.runtime.allowed-tenant-environment-pairs",
-        () -> TENANT + "::DEV");
-    registry.add(
-        "decisionhub.integration1.runtime.allowed-tenant-source-environment-triples",
-        () -> TENANT + "::" + SOURCE + "::DEV");
   }
 
   @LocalServerPort private int applicationPort;
@@ -1664,11 +1652,6 @@ class Qdr7CapacityAcceptanceIT {
     properties.put("decisionhub.integration1.runtime.kill-switch-enabled", false);
     properties.put("decisionhub.integration1.runtime.allowed-sources", SOURCE);
     properties.put("decisionhub.integration1.runtime.allowed-tenant-source-pairs", tenant + ":" + SOURCE);
-    properties.put("decisionhub.integration1.runtime.allowed-source-environment-pairs", SOURCE + "::DEV");
-    properties.put("decisionhub.integration1.runtime.allowed-tenant-environment-pairs", tenant + "::DEV");
-    properties.put(
-        "decisionhub.integration1.runtime.allowed-tenant-source-environment-triples",
-        tenant + "::" + SOURCE + "::DEV");
     properties.put("decisionhub.integration1.runtime.guard.environment", "test");
     properties.put("decisionhub.integration1.runtime.guard.rate-window-seconds", 3600);
     properties.put("decisionhub.integration1.runtime.guard.rate-limit-value", 100000);
@@ -2441,7 +2424,6 @@ class Qdr7CapacityAcceptanceIT {
       envelope.put("traceId", traceId);
       envelope.put("tenantId", TENANT);
       envelope.put("source", requestedSource);
-      envelope.put("environment", "DEV");
       envelope.put("timestamp", timestamp);
       envelope.put("nonce", nonce);
       envelope.put("schemaVersion", SCHEMA);
@@ -2478,7 +2460,6 @@ class Qdr7CapacityAcceptanceIT {
               requestedSource,
               TENANT,
               TENANT,
-              "DEV",
               timestamp,
               nonce,
               "",

@@ -10,8 +10,6 @@ import com.guidinglight.decisionhub.domain.decision.DecisionAction;
 import com.guidinglight.decisionhub.domain.decision.DecisionPolicyStatus;
 import com.guidinglight.decisionhub.domain.decision.DecisionRiskLevel;
 import com.guidinglight.decisionhub.domain.decision.DecisionType;
-import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
-import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionAuditRepository;
 import com.guidinglight.decisionhub.infra.jdbc.decision.JdbcDecisionReplayQueryRepository;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.guard.JdbcGuardCleanupAdapter;
@@ -112,7 +110,7 @@ class PersistentGuardProductionWiringPostgresTest {
   @Test
   void completedDuplicateUsesActualSpringJdbcResultReferenceAndSafeProjection() {
     try (AnnotationConfigApplicationContext context = springContext(dataSource())) {
-      final DecisionDryRunCommand command = command("completed", FeedbackEnvironment.DEV);
+      final DecisionDryRunCommand command = command("completed");
       final String resultId = "result-completed";
       completeGuard(context, command, resultId);
 
@@ -379,7 +377,7 @@ class PersistentGuardProductionWiringPostgresTest {
   @Test
   void realJdbcIdempotencyCommitUnknownDoesNotReadmitOrExecuteBusiness() {
     final AtomicBoolean failed = new AtomicBoolean();
-    final DecisionDryRunCommand command = command("commit-unknown", FeedbackEnvironment.DEV);
+    final DecisionDryRunCommand command = command("commit-unknown");
     final String requestHash = new DecisionDryRunRequestFingerprint().hash(command);
     try (AnnotationConfigApplicationContext uncertain =
         springContext(afterCommitFailureDataSource(dataSource(), failed))) {
@@ -457,7 +455,7 @@ class PersistentGuardProductionWiringPostgresTest {
       assertThat(windows)
           .allSatisfy(window -> assertThat(window).isBetween(dbBefore.minusSeconds(60), dbAfter));
 
-      final DecisionDryRunCommand command = command("clock", FeedbackEnvironment.DEV);
+      final DecisionDryRunCommand command = command("clock");
       final String hash = new DecisionDryRunRequestFingerprint().hash(command);
       final IdempotencyRecordView received =
           boundary.required(
@@ -647,7 +645,7 @@ class PersistentGuardProductionWiringPostgresTest {
       final String suffix, final java.util.function.Consumer<JdbcTemplate> corruption) {
     resetDatabase();
     try (AnnotationConfigApplicationContext context = springContext(dataSource())) {
-      final DecisionDryRunCommand command = command(suffix, FeedbackEnvironment.DEV);
+      final DecisionDryRunCommand command = command(suffix);
       final String resultId = "result-" + suffix;
       completeGuard(context, command, resultId);
       corruption.accept(jdbc);
@@ -724,7 +722,7 @@ class PersistentGuardProductionWiringPostgresTest {
       final GuardTransactionBoundary boundary,
       final IdempotencyGuardPort guards,
       final String suffix) {
-    final DecisionDryRunCommand command = command(suffix, FeedbackEnvironment.DEV);
+    final DecisionDryRunCommand command = command(suffix);
     final String hash = new DecisionDryRunRequestFingerprint().hash(command);
     final IdempotencyRecordView received =
         boundary.required(
@@ -813,14 +811,12 @@ class PersistentGuardProductionWiringPostgresTest {
         errorCode);
   }
 
-  private static DecisionDryRunCommand command(
-      final String suffix, final FeedbackEnvironment environment) {
+  private static DecisionDryRunCommand command(final String suffix) {
     return new DecisionDryRunCommand(
         "request-" + suffix,
         "trace-" + suffix,
         "tenant-a",
         "NQ_DRYRUN",
-        environment.name(),
         "2026-07-12T00:00:00Z",
         "nonce-" + suffix,
         "1",
@@ -837,8 +833,7 @@ class PersistentGuardProductionWiringPostgresTest {
             Instant.parse("2026-07-12T00:00:00Z"),
             List.of("evidence-safe"),
             128),
-        false,
-        new FeedbackExecutionScope("tenant-a", environment));
+        false);
   }
 
   private static PersistentGuardIdentity identity(final String tenant) {

@@ -60,9 +60,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
             "decisionhub.integration1.runtime.kill-switch-enabled=false",
             "decisionhub.integration1.runtime.allowed-sources=NQ_DRYRUN",
             "decisionhub.integration1.runtime.allowed-tenant-source-pairs=tenant-a:NQ_DRYRUN",
-            "decisionhub.integration1.runtime.allowed-source-environment-pairs=NQ_DRYRUN::DEV",
-            "decisionhub.integration1.runtime.allowed-tenant-environment-pairs=tenant-a::DEV",
-            "decisionhub.integration1.runtime.allowed-tenant-source-environment-triples=tenant-a::NQ_DRYRUN::DEV",
             "decisionhub.integration1.runtime.guard.environment=test",
             "decisionhub.integration1.runtime.guard.rate-window-seconds=60",
             "decisionhub.integration1.runtime.guard.rate-limit-value=100000",
@@ -207,7 +204,6 @@ class DecisionDryRunActualWiringRepeatabilityPostgresTest {
                         SOURCE,
                         TENANT,
                         TENANT,
-                        "DEV",
                         timestamp,
                         nonce,
                         "",
@@ -249,7 +245,6 @@ class DecisionDryRunActualWiringRepeatabilityPostgresTest {
         envelope.put("traceId", traceId);
         envelope.put("tenantId", TENANT);
         envelope.put("source", SOURCE);
-        envelope.put("environment", "DEV");
         envelope.put("timestamp", timestamp);
         envelope.put("nonce", nonce);
         envelope.put("schemaVersion", SCHEMA_VERSION);

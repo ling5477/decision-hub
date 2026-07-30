@@ -1,6 +1,5 @@
 package com.guidinglight.decisionhub.usecase.qdr.gateway;
 
-import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -20,7 +19,6 @@ import java.util.UUID;
  * @param timeframe     脱敏 timeframe。
  * @param riskLevel     已有 QDR risk summary。
  * @param evidenceRefs  已脱敏 evidence refs。
- * @param executionScope verified feedback scope when this command originated from the signed dry-run root.
  */
 public record QdrModelGatewayIntegrationCommand(
         String tenantId,
@@ -31,8 +29,7 @@ public record QdrModelGatewayIntegrationCommand(
         String market,
         String timeframe,
         String riskLevel,
-        List<String> evidenceRefs,
-        FeedbackExecutionScope executionScope) {
+        List<String> evidenceRefs) {
 
     /** 校验 gateway integration 所需字段，集合复制避免后续被调用方修改。 */
     public QdrModelGatewayIntegrationCommand {
@@ -45,33 +42,6 @@ public record QdrModelGatewayIntegrationCommand(
         timeframe = requireText(timeframe, "timeframe");
         riskLevel = requireText(riskLevel, "riskLevel");
         evidenceRefs = List.copyOf(evidenceRefs == null ? List.of() : evidenceRefs);
-        if (executionScope != null && !tenantId.equals(executionScope.tenantId())) {
-            throw new IllegalArgumentException("executionScope tenant must match tenantId");
-        }
-    }
-
-    /** Preserves existing non-feedback gateway callers without inventing an environment. */
-    public QdrModelGatewayIntegrationCommand(
-            final String tenantId,
-            final String traceId,
-            final String requestId,
-            final UUID decisionRunId,
-            final String symbol,
-            final String market,
-            final String timeframe,
-            final String riskLevel,
-            final List<String> evidenceRefs) {
-        this(
-                tenantId,
-                traceId,
-                requestId,
-                decisionRunId,
-                symbol,
-                market,
-                timeframe,
-                riskLevel,
-                evidenceRefs,
-                null);
     }
 
     private static String requireText(final String value, final String field) {

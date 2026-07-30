@@ -1,44 +1,36 @@
 # Decision Hub Archive Index
 
-## Terminal current authority — 2026-07-28 Stage-QDR-9 B4 upstream environment contract local acceptance
+## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 persistent guard compatibility scope retry
 
 ~~~text
-Implementation baseline / starting HEAD: 94ca8f0dc84b58b60eef7727440cc4d276dd8c37
-Parent / scope-erratum baseline: 675430a8a8e6cceaab75bb72c1fc1bf64af2da46
+Scope-blocker retry baseline / starting HEAD: 675430a8a8e6cceaab75bb72c1fc1bf64af2da46
+Parent: 1971f3dc29fb690dcbd64cb7b0c62c797d81cbb1
 origin/dev / advertised SHA: 7624bccba9b865d4b687057f41b96799cb9ba8e3 / FRESHLY VERIFIED
-Branch / pre-commit ahead / behind / worktree / staged: dev / 6 / 0 / dirty / empty
-Scope erratum commit: 94ca8f0dc84b58b60eef7727440cc4d276dd8c37 / LOCAL_ONLY / NOT_PUBLISHED
-Local implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUBLISHED
+Branch / pre-commit ahead / behind / worktree / staged: dev / 5 / 0 / dirty / empty
+Local documentation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUBLISHED
 Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
 Stage-QDR-9 B4: IMPLEMENTATION REVERTED / REVIEW BLOCKED
-Trusted upstream environment contract: IMPLEMENTED / LOCAL_ACCEPTED
-AUDIT authority: OPTION B / SIGNED TENANT-SOURCE-ENVIRONMENT
+Trusted upstream authority: OPTION B / FROZEN
+Upstream contract implementation: IMPLEMENTED IN WORKTREE / VALIDATION BLOCKED
+Current blocker: PERSISTENT GUARD POSTGRESQL FIXTURE OUTSIDE FROZEN SCOPE
 Canonical environment type / owner: FeedbackEnvironment / dh-domain
-dh-security -> dh-domain: IMPLEMENTED / FeedbackEnvironment ONLY
-FeedbackExecutionScope: IMPLEMENTED / LOCAL_ACCEPTED
-HMAC environment binding: PASS
-Tenant/source/environment authorization: PASS
-Missing, invalid, tampered or unauthorized environment: FAIL_CLOSED
-Structured environment errors: PASS
-DecisionOrchestrator propagation: PASS
-Decision Dry Run fingerprint: ENVIRONMENT-BOUND
-AUDIT environment propagation: PASS
-Persistent guard PostgreSQL compatibility: PASS / EXPLICIT SIGNED ENVIRONMENT
-Human Approval lifecycle authority: NOT_ALLOWED
-REPLAY / EVALUATION runtime: DORMANT / DORMANT
-V16 / reference-liveness registry / retention: CANDIDATE-NOT CREATED / NOT_STARTED / NOT PRESENT
-B4 milestone review retry / B4 publication / B5 / API / scheduler / automatic learning: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED / NO NEW ENDPOINT / NOT_IMPLEMENTED / NOT_ALLOWED
-Remote exact-SHA CI: PENDING UPSTREAM CONTRACT PUBLICATION
-Fresh full regression: 1238 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-QDR-7 B2 capacity: DEFERRED / KNOWN LIMITATION
-Production capacity: NOT_PROVEN
+Authorized dependency: dh-security -> dh-domain / APPROVED
+Module dependency scope: IMPLEMENTED / dh-security/pom.xml / canonical FeedbackEnvironment only
 Effective upstream scope: 48 / 48 PASS
+FeedbackExecutionScope: IMPLEMENTED IN WORKTREE / VALIDATION BLOCKED
+HMAC environment binding / AUDIT environment propagation: IMPLEMENTED IN WORKTREE / VALIDATION BLOCKED
+Persistent guard fixture: SCOPE AUTHORIZED / TECHNICAL FIX PENDING
+REPLAY / EVALUATION runtime: DORMANT / DORMANT
+V16 / registry / retention: CANDIDATE-NOT CREATED / NOT IMPLEMENTED / NOT PRESENT
+B4 review retry / publication / B5 / API / scheduler / automatic learning: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED / NO NEW ENDPOINT / NOT_IMPLEMENTED / NOT_ALLOWED
+Fresh full regression: BLOCKED / 1238 TESTS / 3 FAILURES / 0 ERRORS / 0 SKIPPED
+Production capacity: NOT_PROVEN
 Terminal current factsources: 12 / 12
-CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 UPSTREAM ENVIRONMENT CONTRACT IMPLEMENTATION HASH / 0 CONFLICTS
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 B4 PERSISTENT GUARD COMPATIBILITY SCOPE RETRY HASH / 0 CONFLICTS
 current task: DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-SCOPE-BLOCKER-RETRY-2
-current task status: IMPLEMENTED / LOCAL_ACCEPTED
-next action: DH-STAGE-QDR-9-B4-PRODUCER-ENVIRONMENT-UPSTREAM-CONTRACT-MILESTONE-REVIEW
-ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION_RETRY: CONSUMED / LOCAL_ACCEPTED
+current task status: SCOPE ERRATUM ACCEPTED / IMPLEMENTATION VALIDATION PENDING
+next action: DH-STAGE-QDR-9-B4-PERSISTENT-GUARD-COMPATIBILITY-FIXTURE-UPGRADE
+ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION_RETRY: YES / CURRENT TASK PART B ONLY
 ALLOW_V16_IMPLEMENTATION / ALLOW_B4_MILESTONE_REVIEW_RETRY / ALLOW_B4_PUBLICATION / ALLOW_B5_IMPLEMENTATION: NO / NO / NO / NO
 ~~~
 

@@ -11,7 +11,6 @@ import com.guidinglight.decisionhub.domain.decision.DecisionRiskLevel;
 import com.guidinglight.decisionhub.domain.decision.DecisionRiskReview;
 import com.guidinglight.decisionhub.domain.decision.DecisionSubject;
 import com.guidinglight.decisionhub.domain.decision.DecisionType;
-import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
@@ -162,14 +161,7 @@ public final class DefaultDecisionOrchestrator implements DecisionOrchestrator {
    */
   @Override
   public DecisionOutput decide(final DecisionRequest request) {
-    return decide(null, request);
-  }
-
-  /** Propagates a verified feedback scope to every terminal audit event without changing decisions. */
-  @Override
-  public DecisionOutput decide(
-      final FeedbackExecutionScope executionScope, final DecisionRequest request) {
-    final DecisionRun run = DecisionRun.from(executionScope, request, clock.instant());
+    final DecisionRun run = DecisionRun.from(request, clock.instant());
     DecisionTraceStepName currentStep = DecisionTraceStepName.POLICY_CHECK;
     try {
       persist(() -> auditRepository.saveRequest(requestRecord(run, request)));
@@ -507,7 +499,6 @@ public final class DefaultDecisionOrchestrator implements DecisionOrchestrator {
         run.decisionId,
         output.getTenantId(),
         output.getTraceId(),
-        run.executionScope == null ? null : run.executionScope.environment(),
         eventType,
         eventStatus,
         Map.of(
@@ -726,31 +717,19 @@ public final class DefaultDecisionOrchestrator implements DecisionOrchestrator {
     private final String traceId;
     private final String tenantId;
     private final Instant startedAt;
-    private final FeedbackExecutionScope executionScope;
     private int sequence;
 
     private DecisionRun(
-        final String decisionId,
-        final String traceId,
-        final String tenantId,
-        final Instant startedAt,
-        final FeedbackExecutionScope executionScope) {
+        final String decisionId, final String traceId, final String tenantId, final Instant startedAt) {
       this.decisionId = decisionId;
       this.traceId = traceId;
       this.tenantId = tenantId;
       this.startedAt = startedAt;
-      this.executionScope = executionScope;
     }
 
-    private static DecisionRun from(
-        final FeedbackExecutionScope executionScope,
-        final DecisionRequest request,
-        final Instant startedAt) {
+    private static DecisionRun from(final DecisionRequest request, final Instant startedAt) {
       final String requestId = requestId(request);
-      if (executionScope != null && !executionScope.tenantId().equals(tenantId(request))) {
-        throw new IllegalArgumentException("feedback execution scope tenant does not match decision request");
-      }
-      return new DecisionRun(requestId, traceId(request), tenantId(request), startedAt, executionScope);
+      return new DecisionRun(requestId, traceId(request), tenantId(request), startedAt);
     }
 
     private String nextId(final String prefix) {
