@@ -1,5 +1,64 @@
 # DH Stage-QDR-9 Implementation Work Order
 
+## Upstream Environment Contract Remote Containment — 2026-07-30
+
+~~~text
+containment decision:
+OPTION 1A / ORDINARY REVERT OF IMPLEMENTATION ONLY
+
+design evolution:
+OPTION B FROZEN
+SCOPE EXPANDED TO 48 / 48
+
+published implementation:
+549ed5a3224ce3ce375452dcf57629c73e3101d0
+
+published exact-SHA CI:
+30283326199 / PASS
+REGRESSION PASS ONLY
+DOES NOT CLOSE SECURITY REVIEW
+
+publication authorization:
+NOT PROVABLE
+
+pre-publication milestone review:
+NOT COMPLETED
+
+retrospective review:
+BLOCKED
+
+technical P1:
+1 OPEN / persistent identity and QDR7 rate-audit environment integrity
+
+technical P2:
+1 OPEN / replay key excludes environment
+
+governance P1:
+PUBLISHED BEFORE MILESTONE REVIEW
+
+ordinary revert:
+df921f275c61d67cebbb95c0924391866a6d09dc
+
+design/scope commits:
+PRESERVED
+
+history rewrite:
+NONE
+
+current technical tree:
+B3 SAFE BASELINE
+
+current upstream implementation:
+NOT PRESENT
+
+next action after containment publication and exact-SHA CI:
+DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-IDENTITY-AND-REPLAY-NAMESPACE-SCOPE-DESIGN
+~~~
+
+本工单透明保留完整时序：设计链完成，scope 发展到 `48 / 48`，implementation 创建并远端发布，exact-SHA CI 通过；随后追溯 milestone/security review 识别 technical P1/P2 与发布时序 governance P1；实现通过 ordinary revert 撤销，设计/scope 链继续保留。不得描述为 implementation 从未发布、技术审查通过或 P1/P2 已修复。
+
+当前禁止 P1/P2 implementation、V16、reference-liveness registry、retention、B4 milestone review retry、B4 publication、B5、API、scheduler 与 automatic learning。QDR-7 B2 capacity 继续 `DEFERRED / KNOWN LIMITATION`，production capacity 继续 `NOT_PROVEN`。
+
 ## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 upstream Maven dependency scope retry
 
 ~~~text

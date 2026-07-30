@@ -1,5 +1,60 @@
 # DH Stage-QDR-9 B4 Producer Environment Upstream Implementation Work Order
 
+## Upstream Environment Contract Remote Containment — 2026-07-30
+
+本工单冻结的设计与 `48 / 48` scope 链继续保留，但其实现授权已经消耗且实现已被 containment。当前状态覆盖下方历史执行状态：
+
+~~~text
+design/scope:
+FROZEN / PUBLISHED / 48 OF 48
+
+published implementation:
+549ed5a3224ce3ce375452dcf57629c73e3101d0
+
+published exact-SHA CI:
+30283326199 / PASS / REGRESSION PASS ONLY
+
+pre-publication milestone review:
+NOT COMPLETED
+
+retrospective review:
+BLOCKED
+
+technical P1:
+1 OPEN / persistent identity and QDR7 rate-audit environment integrity
+
+technical P2:
+1 OPEN / replay key excludes environment
+
+governance P1:
+PUBLISHED BEFORE MILESTONE REVIEW
+
+containment:
+OPTION 1A / ORDINARY REVERT OF IMPLEMENTATION ONLY
+
+implementation revert:
+df921f275c61d67cebbb95c0924391866a6d09dc
+
+current implementation code:
+NOT PRESENT IN CURRENT TREE
+
+FeedbackExecutionScope / signed environment contract:
+DESIGNED / NOT IMPLEMENTED
+
+history rewrite:
+NONE
+~~~
+
+本 containment 不把历史写成“implementation 从未发布”，也不把 `30283326199` 的绿灯解释为安全审查通过。六条设计/scope 提交保持 ancestor；production Java、tests、POM、config 与 workflow 已恢复为 B3 safe baseline。P1/P2 未修复。
+
+本工单不得直接恢复 implementation。后续唯一允许入口是 containment 发布及最终 authority exact-SHA CI 通过后的独立 scope-design 任务：
+
+~~~text
+DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-IDENTITY-AND-REPLAY-NAMESPACE-SCOPE-DESIGN
+~~~
+
+该入口不授权 P1/P2 implementation、V16、registry、retention、B4 milestone review retry、B4 publication、B5、endpoint、scheduler 或 automatic learning。
+
 ## 1. 工单状态与边界
 
 ~~~text

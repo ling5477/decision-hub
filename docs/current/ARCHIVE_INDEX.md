@@ -1,5 +1,43 @@
 # Decision Hub Archive Index
 
+## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 upstream contract remote containment
+
+~~~text
+Containment baseline / published implementation: 549ed5a3224ce3ce375452dcf57629c73e3101d0
+Published implementation parent: 94ca8f0dc84b58b60eef7727440cc4d276dd8c37
+origin/dev / advertised SHA before containment publication: 549ed5a3224ce3ce375452dcf57629c73e3101d0 / FRESHLY VERIFIED
+Implementation revert commit: df921f275c61d67cebbb95c0924391866a6d09dc / PUBLICATION AUTHORIZED
+Containment authority commit: THIS_DOCUMENT_COMMIT / PUBLICATION AUTHORIZED
+Containment decision / history rewrite: OPTION 1A / ORDINARY REVERT OF IMPLEMENTATION ONLY / NONE
+Design/scope chain: PRESERVED / 2cc75dcc + 9e7dfdc + 75c24499 + 1971f3dc + 675430a8 + 94ca8f0d
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B4: IMPLEMENTATION REVERTED / REVIEW BLOCKED
+Trusted upstream environment design / upstream scope: FROZEN + PUBLISHED / 48 OF 48 FROZEN
+Published implementation CI: 30283326199 / PASS / REGRESSION PASS ONLY / DOES NOT CLOSE SECURITY REVIEW
+Publication authorization / pre-publication milestone review: NOT PROVABLE / NOT COMPLETED
+Retrospective review: BLOCKED
+Technical P1: 1 OPEN / persistent identity and QDR7 rate-audit environment integrity
+Technical P2: 1 OPEN / replay key excludes environment
+Governance P1: PUBLISHED BEFORE MILESTONE REVIEW
+Current technical tree: RESTORED TO B3 SAFE BASELINE / 0 TECHNICAL-CONFIG-WORKFLOW DIFF VS 7624bcc
+Current upstream implementation code / FeedbackExecutionScope / signed environment contract: NOT PRESENT / DESIGNED-NOT IMPLEMENTED / DESIGNED-NOT IMPLEMENTED
+Persistent identity / AUDIT rate-event / replay namespace environment isolation: NOT IMPLEMENTED / NOT IMPLEMENTED / NOT IMPLEMENTED
+V16 / reference-liveness registry / retention: CANDIDATE-NOT CREATED / NOT IMPLEMENTED / NOT PRESENT
+Fresh module regression: PASS / 4 OF 4 COMMANDS
+Fresh full regression: PASS / 19 OF 19 REACTOR / 1228 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL/Testcontainers / architecture / quality: REAL POSTGRESQL 17.10 + 0 MANDATORY SKIPS / PASS / 19 OF 19 + CHECKSTYLE 0 + SPOTLESS PASS
+B4 milestone review retry / B4 publication / B5: NOT_ALLOWED / NOT_ALLOWED / NOT_ALLOWED
+API / scheduler / automatic learning: NO NEW ENDPOINT / NOT_IMPLEMENTED / NOT_ALLOWED
+QDR-7 B2 capacity / Production capacity: DEFERRED-KNOWN LIMITATION / NOT_PROVEN
+Terminal current factsources: 12 / 12
+CURRENT_FACTSOURCE_CONSISTENCY: PASS / 12 OF 12 / 1 UPSTREAM REMOTE CONTAINMENT AUTHORITY HASH / 0 CONFLICTS
+current task: DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-REMOTE-CONTAINMENT-DECISION
+current task status: LOCAL_ACCEPTED / PUBLICATION AND EXACT-SHA CI REQUIRED
+next action after containment publication and CI: DH-STAGE-QDR-9-B4-UPSTREAM-CONTRACT-IDENTITY-AND-REPLAY-NAMESPACE-SCOPE-DESIGN
+ALLOW_IDENTITY_AND_REPLAY_SCOPE_DESIGN: YES / AFTER CONTAINMENT PUBLICATION AND EXACT-SHA CI ONLY
+ALLOW_V16_IMPLEMENTATION / ALLOW_B4_MILESTONE_REVIEW_RETRY / ALLOW_B4_PUBLICATION / ALLOW_B5_IMPLEMENTATION: NO / NO / NO / NO
+~~~
+
 ## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 persistent guard compatibility scope retry
 
 ~~~text
