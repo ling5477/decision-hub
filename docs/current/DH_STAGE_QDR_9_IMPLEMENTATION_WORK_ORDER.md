@@ -124,6 +124,61 @@ DH-STAGE-QDR-9-B4-AUDIT-ENVIRONMENT-FORWARD-MIGRATION-SCOPE-DESIGN
 该任务必须先冻结 migration sequencing，不得占用 candidate V16，不得实施 P1/P2、registry、retention、
 B4 review retry/publication 或 B5。
 
+## Audit Environment Structured Storage Blocker — 2026-07-30
+
+~~~text
+task:
+DH-STAGE-QDR-9-B4-AUDIT-ENVIRONMENT-FORWARD-MIGRATION-SCOPE-DESIGN
+
+baseline:
+9249bf78a2eaace4c59aedff788e37e083b72b3b
+
+actual audit table:
+dh_decision_audit_event
+
+selected audit storage:
+OPTION A / NULLABLE STRUCTURED COLUMN + STAGED NEW-WRITE ENFORCEMENT
+
+selected historical backfill:
+B1 / NULL UNKNOWN LEGACY
+
+selected migration sequence:
+S2 / V16 REFERENCE-LIVENESS REGISTRY THEN V17 AUDIT ENVIRONMENT
+
+candidate audit migration:
+V17__qdr9_audit_environment_storage.sql / NOT CREATED
+
+compatibility constructor:
+REMOVE / NO LEGACY ENVIRONMENTLESS PRODUCTION RECORD
+
+rate audit environment source:
+verified FeedbackExecutionScope.environment()
+
+effective scope:
+60 / 60 PASS
+
+technical P1 / P2:
+1 OPEN / 1 OPEN
+
+ALLOW_AUDIT_ENVIRONMENT_MIGRATION_IMPLEMENTATION:
+NO / BLOCKED BY V16 SEQUENCE AND PRODUCER CUTOVER
+~~~
+
+`event_status` 继续只表示 `SUCCESS`/`FAILED`，`event_json` 和日志不得存储或推断 environment。V17
+保留历史 row 为 `NULL / UNKNOWN LEGACY`，不默认 DEV/TEST；新受信 row 必须显式写 `DEV`/`TEST`。
+QDR7 rate identity 与 rate audit 使用同一 verified `FeedbackExecutionScope`，并保持 admission/audit
+同一 required transaction。
+
+V16 仍由 `qdr_reference_liveness` registry candidate 独占且未创建；V17 不能越过 V16 实施。
+本设计未修改 Java、测试、POM 或 migration，未实现 identity/replay/upstream environment、registry、
+retention、B4 review retry/publication 或 B5。
+
+下一任务：
+
+~~~text
+DH-STAGE-QDR-9-B4-LEGACY-PERSISTENT-IDENTITY-BLOCKER
+~~~
+
 ## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 upstream Maven dependency scope retry
 
 ~~~text

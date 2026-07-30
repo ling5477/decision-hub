@@ -37,7 +37,13 @@ RATE_AUDIT_ENVIRONMENT:
 FROZEN / NOT IMPLEMENTED
 
 AUDIT_ENVIRONMENT_STORAGE:
-FORWARD MIGRATION REQUIRED
+DESIGN FROZEN / OPTION A / V17 CANDIDATE NOT CREATED
+
+AUDIT_ENVIRONMENT_BACKFILL:
+B1 / NULL UNKNOWN LEGACY
+
+AUDIT_MIGRATION_SEQUENCE:
+S2 / V16 REGISTRY THEN V17 AUDIT ENVIRONMENT
 
 REPLAY_NAMESPACE:
 FROZEN / NOT IMPLEMENTED
@@ -275,8 +281,10 @@ Controller 完成 signature、timestamp、nonce、source、tenant/source/environ
 production source。
 
 当前 `dh_decision_audit_event` 只有通用 `event_json`，没有可信结构化 environment column，故必须新增
-forward migration。迁移版本与 exact migration path 本轮不选择；V16 已被 reference-liveness 设计占用为
-candidate 且未创建，下一任务必须先冻结 migration sequencing。
+forward migration。后续 audit environment scope design 已选择 Option A：V17 在 native audit table
+增加 nullable structured column，历史 row 保持 `NULL / UNKNOWN LEGACY`，新写入通过 staged
+`CHECK (environment IS NOT NULL) NOT VALID` 强制非空。V16 继续由 reference-liveness registry 独占，
+migration sequence 冻结为 S2：V16 registry 后才允许 V17 audit environment。两者均未创建。
 
 ## 6. Versioned replay namespace
 
@@ -436,8 +444,14 @@ V15
 V16 present:
 NO
 
-FORWARD_MIGRATION_REQUIRED:
-YES
+V17 present:
+NO
+
+AUDIT MIGRATION CANDIDATE:
+V17__qdr9_audit_environment_storage.sql / NOT CREATED
+
+SELECTED AUDIT STORAGE / BACKFILL / SEQUENCE:
+OPTION A / B1 / S2
 ~~~
 
 Forward migration 至少需要解决：
@@ -446,8 +460,9 @@ Forward migration 至少需要解决：
 - persistent identity version 与 verified environment 的 legacy/v2 可区分存储；
 - legacy tombstone 的安全识别与 retirement 合同。
 
-本任务不选择 migration version 或 path，不创建 migration，也不复用 candidate V16。下一任务必须先冻结
-migration sequencing、upgrade path、nullable legacy rows、new-write constraints、rollback 与 PostgreSQL tests。
+Audit environment scope design 已冻结 migration version/path、upgrade path、nullable legacy rows、
+new-write constraints、rollback 与 PostgreSQL tests；未创建 migration，且不复用 candidate V16。
+persistent identity version storage、legacy tombstone retirement 与 replay atomic admission 仍是独立 blocker。
 
 ~~~text
 IDENTITY_REPLAY_NAMESPACE_DESIGN:
@@ -457,7 +472,7 @@ DEV_TEST_ISOLATION:
 PASS / DESIGN
 
 EFFECTIVE_SCOPE_INVARIANTS:
-54 / 54 PASS
+60 / 60 PASS
 
 ALLOW_IDENTITY_REPLAY_IMPLEMENTATION:
 NO
@@ -478,8 +493,9 @@ NO
 ## 11. Next action
 
 ~~~text
-DH-STAGE-QDR-9-B4-AUDIT-ENVIRONMENT-FORWARD-MIGRATION-SCOPE-DESIGN
+DH-STAGE-QDR-9-B4-LEGACY-PERSISTENT-IDENTITY-BLOCKER
 ~~~
 
-该任务还必须携带 persistent identity version storage sequencing，并保留 legacy replay blocker。migration
-scope 接受后仍不得直接 implementation；legacy replay TTL/atomic admission 合同须在独立 blocker 中关闭。
+Audit storage 已冻结为 Option A，backfill 为 B1，migration sequence 为 S2，candidate 为 V17。
+下一任务必须关闭 legacy persistent idempotency tombstone 与 atomic legacy-check + v2 admission；
+不得创建 V16/V17。legacy replay TTL/atomic admission 合同继续在独立 blocker 中保持 OPEN。

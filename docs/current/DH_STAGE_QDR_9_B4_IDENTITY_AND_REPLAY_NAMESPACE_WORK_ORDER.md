@@ -22,9 +22,10 @@ ALLOW_IMPLEMENTATION:
 NO
 ~~~
 
-本工单是未来实施入口的冻结记录，不是实施授权。当前有三个前置 blocker：
+本工单是未来实施入口的冻结记录，不是实施授权。Audit environment 已完成 scope design，但 implementation
+仍被 V16 predecessor 和 producer cutover 阻断。当前仍有三个前置 blocker：
 
-1. audit environment 与 persistent identity version 需要 forward migration；
+1. audit environment 已冻结为 V17 Option A/B1/S2；persistent identity version storage 尚未冻结；
 2. legacy idempotency tombstone 没有安全 retirement；
 3. legacy replay TTL 无 hard ceiling，且 port 不支持原子 legacy-check + v2 admission。
 
@@ -52,11 +53,12 @@ request authority。
 
 ### M1 — migration sequencing scope design
 
-- 冻结 audit structured environment column；
-- 冻结 persistent identity version/verified-environment storage；
-- 冻结 legacy nullable rows、new-write constraints、indexes 与 rollback；
-- 不占用或假定 V16；
-- 输出 clean migration、V15 upgrade、legacy row 与 constraint Testcontainers matrix。
+- audit structured environment column：DONE / OPTION A；
+- audit legacy backfill：DONE / B1 NULL UNKNOWN LEGACY；
+- audit migration sequence：DONE / S2，V16 registry 后为 V17 audit environment；
+- candidate：`V17__qdr9_audit_environment_storage.sql` / NOT CREATED；
+- persistent identity version/verified-environment storage：仍由 legacy persistent blocker 冻结；
+- clean/upgrade/backfill/constraint/index/Testcontainers matrix：FROZEN / NOT IMPLEMENTED。
 
 ### L1 — legacy persistent identity blocker
 
@@ -155,8 +157,8 @@ NO
 migration creation:
 NO
 
-V16 / registry / retention:
-NO / NO / NO
+V16 / V17 / registry / retention:
+NO / NO / NO / NO
 
 B4 review retry / publication / B5:
 NO / NO / NO
@@ -168,5 +170,5 @@ NO / NO
 ## 7. Next action
 
 ~~~text
-DH-STAGE-QDR-9-B4-AUDIT-ENVIRONMENT-FORWARD-MIGRATION-SCOPE-DESIGN
+DH-STAGE-QDR-9-B4-LEGACY-PERSISTENT-IDENTITY-BLOCKER
 ~~~
