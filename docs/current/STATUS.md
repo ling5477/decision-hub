@@ -1,5 +1,53 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 owner-attested M1 rebaseline
+
+~~~text
+Rebaseline baseline / origin/dev: 229910e31b9b5cba5fe944e4f3a497df73843d20 / 229910e31b9b5cba5fe944e4f3a497df73843d20
+Starting ahead / behind / worktree / staged: 0 / 0 / CLEAN / EMPTY
+Local documentation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT PUBLISHED
+Current technical tree: B3 SAFE BASELINE
+Stage-QDR-9 B1 / B2 / B3: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 B4: IMPLEMENTATION REVERTED / REVIEW BLOCKED
+Technical P1: OPEN / verified-environment persistent rate-idempotency identity and QDR7 rate audit
+Technical P2: OPEN / verified-environment replay namespace
+Owner operational attestation: ACCEPTED / FIRST_PARTY_OPERATIONAL_ATTESTATION
+Actual DH deployment / real external traffic: ABSENT / ABSENT
+Operational DH database / real persistent DH data: ABSENT / ABSENT
+Existing rows: LOCAL DEVELOPMENT AND AUTOMATED TESTS ONLY / REBUILDABLE
+Legacy retention / zero downtime: NOT REQUIRED / NOT REQUIRED
+Available 2C2G server: NQ 168-HOUR ACCEPTANCE ONLY / DH DEPLOYMENT FORBIDDEN
+Actual legacy data: OWNER_CONFIRMED ABSENT
+Selected remediation path: M1
+Historical repository-only evidence audit: M4 / INSUFFICIENT WITHOUT OWNER OR RUNTIME EVIDENCE
+Historical M4 superseded by: OWNER OPERATIONAL ATTESTATION
+Complete production-test-wiring discovery: PASS
+Minimal implementation scope: FROZEN / EXACT FILES / NO CUMULATIVE SCOPE COUNT
+Existing-column/key environment isolation: YES
+Single forward migration required: NO
+DEV/TEST rebuild instead of backfill: YES
+Legacy retirement migration: NO
+V16 / V17 / V18: NOT CREATED / NOT CREATED / NOT CREATED
+Registry / retention: NOT IMPLEMENTED / NOT PRESENT / NOT REQUIRED FOR P1/P2
+Legacy retirement / historical backfill: NOT REQUIRED / NOT REQUIRED
+Canonical plan: docs/current/DH_STAGE_QDR_9_B4_ENGINEERING_DISCIPLINE_RESET_AND_MINIMAL_REMEDIATION_PLAN.md
+Canonical discovery: docs/current/DH_STAGE_QDR_9_B4_MINIMAL_P1_P2_IMPLEMENTATION_DISCOVERY.md
+Full regression: NOT RERUN / DOCUMENTATION-ONLY DISCOVERY
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+QDR-7 B2 capacity / Production capacity: DEFERRED-KNOWN LIMITATION / NOT_PROVEN
+B4 review retry / B4 publication / B5: NOT ALLOWED / NOT ALLOWED / NOT ALLOWED
+ALLOW_MINIMAL_P1_P2_IMPLEMENTATION: YES / NEXT TASK ONLY / EXACT ALLOWLIST ONLY
+ALLOW_SERVER_DEPLOYMENT / ALLOW_V16_IMPLEMENTATION: NO / NO
+current task: DH-STAGE-QDR-9-B4-OWNER-ATTESTED-M1-REBASELINE-AND-MINIMAL-IMPLEMENTATION-DISCOVERY
+current task status: OWNER ATTESTATION ACCEPTED / M1 SELECTED / DISCOVERY PASS / SCOPE FROZEN
+next action: DH-STAGE-QDR-9-B4-MINIMAL-P1-P2-IMPLEMENTATION
+~~~
+
+该 authority 只更新当前 delivery path，不同步全部 terminal factsources。旧 M4 audit、
+identity/replay/audit migration design 与 containment 文档保持历史原文；它们继续作为
+`HISTORICAL DESIGN EVIDENCE`，不再作为 M1 implementation gate。后续 implementation 超出
+exact allowlist 时必须停止并返回 complete discovery，不得新增 scope erratum。
+
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 engineering discipline reset
 
 ~~~text

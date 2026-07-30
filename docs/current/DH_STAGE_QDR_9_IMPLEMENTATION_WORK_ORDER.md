@@ -1,5 +1,108 @@
 # DH Stage-QDR-9 Implementation Work Order
 
+## Owner-Attested M1 Rebaseline and Minimal Implementation Discovery — 2026-07-30
+
+~~~text
+task:
+DH-STAGE-QDR-9-B4-OWNER-ATTESTED-M1-REBASELINE-AND-MINIMAL-IMPLEMENTATION-DISCOVERY
+
+owner operational attestation:
+ACCEPTED / FIRST_PARTY_OPERATIONAL_ATTESTATION
+
+actual deployment / traffic / operational database / real persistent data:
+ABSENT / ABSENT / ABSENT / ABSENT
+
+legacy retention / zero downtime / historical backfill:
+NOT REQUIRED / NOT REQUIRED / NOT REQUIRED
+
+selected remediation path:
+M1
+
+historical repository-only evidence audit:
+M4 / INSUFFICIENT WITHOUT OWNER OR RUNTIME EVIDENCE
+
+historical M4 superseded by:
+OWNER OPERATIONAL ATTESTATION
+
+complete discovery:
+PASS
+
+minimal implementation scope:
+FROZEN / EXACT FILES
+
+migration required:
+NO
+
+V16 / V17 / V18:
+NOT CREATED / NOT CREATED / NOT CREATED
+
+reference-liveness registry / retention:
+NOT REQUIRED / NOT REQUIRED
+
+server deployment:
+FORBIDDEN / NQ 168-HOUR ACCEPTANCE SERVER EXCLUDED
+
+minimal implementation:
+AUTHORIZED FOR NEXT TASK ONLY / EXACT ALLOWLIST ONLY
+
+review retry / publication / B5:
+NOT ALLOWED / NOT ALLOWED / NOT ALLOWED
+
+next action:
+DH-STAGE-QDR-9-B4-MINIMAL-P1-P2-IMPLEMENTATION
+~~~
+
+### Implementation objective
+
+只实现 verified `FeedbackEnvironment` / `FeedbackExecutionScope`、signed HMAC/bearer environment、
+tenant/source/environment authorization、environment-bound rate/idempotency/recovery/fingerprint/
+replay，以及既有 QDR7 rate audit JSONB 中的 structured environment。
+
+### Migration decision
+
+~~~text
+Can environment isolation be implemented using existing columns/keys?
+YES
+
+Is a single forward migration required for new structured audit environment?
+NO
+
+Can DEV/TEST databases be rebuilt instead of legacy backfill?
+YES
+
+Is any legacy retirement migration required?
+NO
+~~~
+
+V12 已为 rate/idempotency identity 提供 environment key；V4 replay table 接受 opaque
+environment-bound key；V5 audit `event_json` 已是 structured JSONB。因此 minimal migration
+allowlist 为空，不创建 V16/V17/V18。
+
+### Frozen exact allowlists
+
+`MINIMAL_PRODUCTION_WRITE_ALLOWLIST`、`MINIMAL_TEST_WRITE_ALLOWLIST`、
+`MINIMAL_MIGRATION_ALLOWLIST` 与 `MINIMAL_CURRENT_AUTHORITY_ALLOWLIST` 的唯一完整版本位于：
+
+- `docs/current/DH_STAGE_QDR_9_B4_ENGINEERING_DISCIPLINE_RESET_AND_MINIMAL_REMEDIATION_PLAN.md`
+- `docs/current/DH_STAGE_QDR_9_B4_MINIMAL_P1_P2_IMPLEMENTATION_DISCOVERY.md`
+
+Implementation 开始后如发现 allowlist 外必需文件：
+
+~~~text
+STOP IMPLEMENTATION
+RETURN TO COMPLETE DISCOVERY
+~~~
+
+不得新增 scope erratum，不得继续累计 42/46/47/48/54/60/66 scope count。
+
+### Explicit exclusions
+
+- legacy tombstone retirement、dual-read/write、legacy blocking、historical backfill；
+- V16/V17/V18、reference-liveness registry、retention、scheduler/cleanup subsystem；
+- real NQ、real Provider、real HTTP、Agent/LangGraph、Paper、LIVE；
+- DH server deployment、NQ acceptance server 使用；
+- B4 review publication、B5、push 或 tag。
+
 ## Engineering Discipline Reset and Minimal Remediation Rebaseline — 2026-07-30
 
 ~~~text

@@ -1,25 +1,26 @@
-# DH Stage-QDR-9 B4 Engineering Discipline Reset and Minimal Remediation Plan
+# DH Stage-QDR-9 B4 Owner-Attested M1 Rebaseline and Minimal Remediation Plan
 
 ## 1. 决策状态
 
 ~~~text
 task:
-DH-STAGE-QDR-9-B4-ENGINEERING-DISCIPLINE-RESET-AND-MINIMAL-REMEDIATION-PLAN
+DH-STAGE-QDR-9-B4-OWNER-ATTESTED-M1-REBASELINE-AND-MINIMAL-IMPLEMENTATION-DISCOVERY
 
 classification:
-DOCUMENTATION / GOVERNANCE_RESET / DELIVERY_PATH_REBASELINE
+DOCUMENTATION / OWNER_OPERATIONAL_ATTESTATION / M1_REBASELINE / COMPLETE_DISCOVERY
 
-starting HEAD:
-2249c312cbc8afd6314751941075e209be06ba01
+repository:
+E:/Project/decision-hub
 
-starting HEAD parent:
-aab84e896595bbd8b3f5e99e8b2880ca28f8e7a4
+branch:
+dev
 
-origin/dev / advertised SHA:
-b0ff11e4057077ad7e0fe91d691116f069dc744e
+starting HEAD / origin/dev:
+229910e31b9b5cba5fe944e4f3a497df73843d20
+229910e31b9b5cba5fe944e4f3a497df73843d20
 
 starting ahead / behind:
-3 / 0
+0 / 0
 
 current technical tree:
 B3 SAFE BASELINE
@@ -28,26 +29,46 @@ Stage-QDR-9 B4:
 IMPLEMENTATION REVERTED / REVIEW BLOCKED
 
 technical P1:
-OPEN / persistent rate and idempotency identity must bind verified environment;
-QDR7 rate audit must record verified environment structurally
+OPEN / persistent rate-idempotency identity and QDR7 rate-audit must bind verified environment
 
 technical P2:
-OPEN / replay namespace must bind verified environment
+OPEN / replay nonce namespace must bind verified environment
 
-actual legacy data:
-NOT_PROVABLE
+owner operational attestation:
+ACCEPTED / FIRST_PARTY_OPERATIONAL_ATTESTATION
 
-selected minimal remediation path:
-M4 / DEPLOYMENT AND LEGACY DATA EVIDENCE REQUIRED BEFORE IMPLEMENTATION
+ACTUAL_LEGACY_DATA:
+OWNER_CONFIRMED ABSENT
 
-migration reassessment:
-R4 / INSUFFICIENT OPERATIONAL EVIDENCE
+MINIMAL_REMEDIATION_PATH:
+M1
 
-engineering discipline reset:
-PASS / DELIVERY PATH REBASELINED
+LEGACY RETIREMENT SUBSYSTEM:
+NOT REQUIRED
 
-minimal implementation plan:
-BLOCKED BY OPERATIONAL EVIDENCE
+HISTORICAL BACKFILL:
+NOT REQUIRED
+
+ZERO-DOWNTIME MIGRATION:
+NOT REQUIRED
+
+V18:
+NOT REQUIRED
+
+REGISTRY REQUIRED FOR P1/P2:
+NO
+
+RETENTION REQUIRED FOR P1/P2:
+NO
+
+MIGRATION_REQUIRED:
+NO
+
+COMPLETE_DISCOVERY:
+PASS
+
+MINIMAL_IMPLEMENTATION_SCOPE:
+FROZEN
 
 local documentation commit:
 THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT PUBLISHED
@@ -56,335 +77,331 @@ push / tag:
 NO / NONE
 ~~~
 
-本文件是 Stage-QDR-9 B4 当前唯一 canonical remediation plan。任务输入同时给出了较短的
-`DH_STAGE_QDR_9_B4_MINIMAL_REMEDIATION_PLAN.md` 名称和本文件的精确交付路径；为避免生成两个
-相互竞争的 authority，本轮采用精确交付路径作为唯一主文档，不创建短名副本。
+本文件继续作为 Stage-QDR-9 B4 的唯一 canonical remediation plan。此前 M4
+repository-only evidence audit 保留在本文件第 6 节及 Git 历史中；M4 的证据规则没有被删除或
+描述为错误，只是其“缺少 owner/runtime evidence”的 blocker 已由 project owner 的 first-party
+operational attestation 解除。
 
-## 2. Primary delivery goal
+## 2. Owner operational attestation
 
-本阶段当前唯一交付目标是安全关闭两个已验证 finding：
+### 2.1 Attestation
+
+标记：
+
+~~~text
+FIRST_PARTY_OPERATIONAL_ATTESTATION
+~~~
+
+The DH project owner confirms that, as of 2026-07-30:
+
+- DH has never been deployed to an actual server or runtime environment.
+- DH has processed no real external traffic.
+- No operational DH database or real persistent DH data exists.
+- Existing database rows are limited to local development and automated tests.
+- No legacy DH data must be retained.
+- No zero-downtime migration is required for the current remediation.
+- DEV/TEST databases may be rebuilt.
+- The available 2-core/2-GB server is dedicated to the ongoing NQ
+  168-hour acceptance and must not host DH.
+
+### 2.2 证据属性
+
+该声明是 project owner 对 DH operational reality 的第一方陈述，不能描述为：
+
+- GitHub-verified deployment evidence；
+- DBA inventory；
+- production database evidence；
+- repository 自动推导出的 deployment/data 结论。
+
+本轮没有扩充 owner 声明，也没有删除任何受支持句子：
+
+~~~text
+unsupported assertions removed:
+NONE
+~~~
+
+## 3. M1 rebaseline
+
+Owner attestation 直接回答了原 M4 blocker 中 repository 无法证明的问题，因此当前分类改为：
+
+~~~text
+ACTUAL_DH_DEPLOYMENT:
+ABSENT
+
+REAL_EXTERNAL_TRAFFIC:
+ABSENT
+
+OPERATIONAL_DH_DATABASE:
+ABSENT
+
+REAL_PERSISTENT_DH_DATA:
+ABSENT
+
+RATE / IDEMPOTENCY / REPLAY / AUDIT LEGACY DATA:
+OWNER_CONFIRMED ABSENT
+
+DEV_TEST_ONLY_ROWS:
+REBUILDABLE
+
+DATA_RETENTION REQUIREMENT:
+NONE
+
+ZERO_DOWNTIME REQUIREMENT:
+NONE
+
+SELECTED MINIMAL REMEDIATION PATH:
+M1
+~~~
+
+M1 只允许 clean-cutover 的最小 P1/P2 修复。它不授权生产部署、真实流量、NQ server 使用或
+任何 legacy subsystem。
+
+## 4. Primary delivery goal
+
+只关闭以下已验证 finding：
 
 1. P1：
-   - persistent rate identity 使用 verified environment；
-   - persistent idempotency identity 使用同一个 verified environment；
-   - `QDR7_RATE_LIMIT_ADMISSION` 结构化记录该 verified environment。
+   - `FeedbackEnvironment` / `FeedbackExecutionScope` 成为唯一 verified environment contract；
+   - HMAC canonical material、bearer `AuthContext` 与 tenant/source/environment authorization
+     绑定同一个 scope；
+   - persistent rate identity 和 persistent idempotency/recovery identity 使用该 scope；
+   - `QDR7_RATE_LIMIT_ADMISSION` 的 `event_json` 结构化记录该 verified environment。
 2. P2：
-   - replay namespace 使用同一个 verified environment。
+   - replay/nonce key namespace 绑定同一个 verified environment。
+3. 与上述修复直接相关：
+   - request fingerprint 绑定 environment；
+   - DEV/TEST same-environment duplicate 与 cross-environment isolation；
+   - 缺失、未验证或不一致 environment 全部 fail-closed。
 
-以下事项不是当前 P1/P2 实现的自动前置：
+明确排除：
 
-- reference-liveness registry lifecycle；
-- retention pipeline；
-- 完整 legacy retirement subsystem；
-- 永久 tombstone cleanup framework；
-- retirement audit subsystem；
-- 历史 environment backfill；
-- V18 candidate；
-- scheduler、generic audit query API、automatic learning 或 B5。
+- legacy tombstone retirement；
+- online dual-read/write、legacy blocking 与 historical backfill；
+- V16/V17/V18 或任何新 migration；
+- reference-liveness registry；
+- retention、scheduler、cleanup subsystem；
+- real NQ、real Provider、real HTTP；
+- Agent/LangGraph、Paper、LIVE；
+- server deployment；
+- API endpoint 扩张、automatic learning 或 B5。
 
-只有经授权的真实部署和数据证据证明需要时，才允许重新评估这些事项。该规则不删除历史设计，也不
-改写已经发生的审计记录。
+## 5. Complete implementation discovery result
 
-## 3. 范围与停止条件
+详细代码证据和 exact-file allowlist 位于：
 
-### 3.1 本任务允许
+`docs/current/DH_STAGE_QDR_9_B4_MINIMAL_P1_P2_IMPLEMENTATION_DISCOVERY.md`
 
-- 审计当前 authority、Git 历史、CI/CD、Compose、runtime profile、migration schema、
-  operational worklog 与可见 GitHub deployment metadata；
-- 将 legacy concern 分类为 A/B/C/D；
-- 唯一选择 M1/M2/M3/M4 和 R1/R2/R3/R4；
-- 更新本计划、`STATUS.md`、Stage-QDR-9 主工单和 `FACTSOURCE_POLICY.md`；
-- 执行 docs-only diff 检查和 Maven quality；
-- 创建一个本地 docs-only commit。
+### 5.1 Security/root path
 
-### 3.2 本任务禁止
+- `DecisionDryRunController` 当前只从 `AuthenticatedRequest.requireTenantId` 取得 tenant，
+  `AuthContext` 没有 environment。
+- `DecisionDryRunRequest` 没有 environment。
+- `NqDryRunAuthRequest` 与 `HmacNqDryRunAuthenticator.signatureMaterial` 没有 environment。
+- 当前 replay key 为 tenant/source/path/nonce/requestId，未包含 environment。
+- `FeedbackExecutionScope` 当前不存在。
+- M1 implementation 必须在 HMAC signature、tenant/source allowlist 与 bearer environment
+  一致性全部通过后创建 verified scope；任何更早创建的 body/config scope 都不是可信 authority。
 
-- Java、测试、POM、migration、runtime 配置或 workflow 变更；
-- 新 scope erratum、新 lifetime blocker、新 migration work order 或新 cleanup design；
-- 创建 V16、V17、V18、registry、retention、scheduler、API、B5；
-- B4 milestone review retry、B4 publication、push 或 tag；
-- 访问未获授权的真实数据库、真实用户数据、凭证或生产写接口。
+### 5.2 Persistent identity and recovery
 
-### 3.3 停止条件
+- V12 的 rate primary key 已包含
+  `(environment, endpoint, source, tenant_id, window_start)`。
+- V12 的 idempotency unique identity 已包含
+  `(environment, endpoint, source, tenant_id, request_id)`。
+- JDBC rate/idempotency repositories 已按完整 identity 查询，无需 schema 变更。
+- 当前 `PersistentDecisionDryRunRateLimiter` 和
+  `PersistentGuardedDecisionDryRunService` 都从
+  `DecisionDryRunGuardProperties.environment()` 构造 identity；该配置不是 request verified
+  authority。
+- 当前 request fingerprint 包含 tenant/source/schema/context，但不含 environment。
+- M1 implementation 必须使用 verified scope 的 environment 构造 rate、idempotency 与
+  recovery identity，并让 guard 配置仅作为一致性 safety gate；scope/config 不一致时 fail-closed。
 
-任何未来 implementation 在完成一次性 discovery 后发现 allowlist 外文件，必须：
+### 5.3 Replay
+
+- `NonceReplayGuard` 是原子 `markIfAbsent(replayKey, expiresAt)` port。
+- `JdbcNonceReplayGuard` 与 V4 表把 replay key 作为 opaque `varchar(512)` primary key；
+  environment 可由 authenticator 编入 key，无需拆列或 migration。
+- same environment 的相同 nonce/requestId 必须命中同一 key 并拒绝；
+  DEV 与 TEST 必须形成不同 key，且两边各自保留 duplicate protection。
+- 现有 TTL 与惰性 cleanup 不需要为 P2 修改；本轮不引入 scheduler 或新 cleanup subsystem。
+
+### 5.4 Audit and transaction
+
+- V5 `dh_decision_audit_event.event_json` 是结构化 `jsonb`，现有
+  `AuditEventRecord` / `JdbcDecisionAuditRepository` 已能保存结构化 map。
+- P1 只要求 QDR7 rate admission 记录 verified environment；在其 `event_json` 增加 canonical
+  `environment` 字段即可，不需要新列。
+- rate admission 与 QDR7 rate audit 当前已位于同一个
+  `GuardTransactionBoundary.required` transaction；implementation 必须保持 admission/audit
+  原子 rollback。
+- generic audit rows、read model 与其他 constructor 不需要修改。
+
+## 6. Historical repository-only evidence audit
+
+### 6.1 保留结论
 
 ~~~text
-STOP IMPLEMENTATION
-RETURN TO DISCOVERY
+Historical repository-only evidence audit:
+M4 / insufficient without owner or runtime evidence
+
+Superseded by:
+owner operational attestation
 ~~~
 
-不得再通过连续 scope erratum 扩张实施范围。
+### 6.2 Repository-only evidence
 
-## 4. Engineering discipline assessment
-
-| 项目 | 事实 | 判定 |
+| 事实源 | 历史审查结论 | 当前解释 |
 |---|---|---|
-| publication sequence | `549ed5a` 在 pre-publication milestone review 未完成时发布；随后因 P1/P2 被普通 revert | governance failure 已由 containment 保留证据并隔离 |
-| scope freeze effectiveness | 实施范围从 42/46/47/48 继续演进到 54/60/66 | 早期 freeze 未能形成稳定实施边界 |
-| document-to-code ratio | `origin/dev..2249c312` 为 3 个本地 docs commit、23 个文档类文件、4199 insertions、0 production/test/migration lines | 设计增长没有推进 P1/P2 可交付代码 |
-| current delivery blockage | 三个 hard lifetime ceiling 无真实数据需求证明，却成为普通修复前置 | delivery path 被推演复杂度阻断 |
-| reset verdict | 保留历史设计，撤销其 active acceptance-gate 地位；现实证据优先 | PASS |
+| Git history | `549ed5a` published，之后由 `df921f2` ordinary revert | 证明发布/回退，不证明 deployment |
+| GitHub Actions | published implementation CI success | 只证明 build/test |
+| GitHub Deployments / Environments | repository 渠道未发现记录 | 单独不足以证明从未部署 |
+| `.github/workflows/ci.yml` | build/test/quality，无 deploy job | repository 内没有 deployment workflow |
+| Compose / ops docs | local Postgres + Redis | local development evidence |
+| Flyway V4/V5/V12/V15 | schema capability 存在 | 不证明 operational rows |
+| production classes | persistent write path 存在 | 不证明 path 被真实调用 |
+| Testcontainers fixtures | 测试会写相关 rows | test-only evidence |
 
-`54 / 54`、`60 / 60`、`66 / 66` 继续作为 `HISTORICAL DESIGN EVIDENCE` 可供风险
-复核，但状态统一为：
+原 M4 的方法论保持有效：repository-only evidence 不能单独断言真实 deployment/data
+状态。本轮改变来自明确的 `FIRST_PARTY_OPERATIONAL_ATTESTATION`，不是对旧审查的否定。
 
-~~~text
-NOT ACTIVE IMPLEMENTATION GATE
-SUPERSEDED FOR MINIMAL REMEDIATION EXECUTION
-~~~
-
-## 5. Actual deployment and data reality audit
-
-### 5.1 证据规则
-
-以下证据只证明 schema 或测试能力，不证明真实 legacy data：
-
-- Flyway migration 或表存在；
-- Testcontainers、fixture 或集成测试 insert；
-- production class 具备写路径；
-- commit 已 push；
-- GitHub Actions 执行或通过。
-
-真实 operational data 至少需要可关联的 deployment、running commit、实际写入、保留状态和环境
-inventory 证据。涉及真实数据库时还必须有显式只读授权；本任务没有该授权。
-
-### 5.2 已核验证据
-
-| 事实源 | 证据 | 结论 |
-|---|---|---|
-| Git history | `549ed5a` 为 published implementation；`df921f2` 普通 revert；当前树为 B3 safe baseline | 证明发布和回退，不证明部署 |
-| GitHub Actions | commit `549ed5a` 对应 CI run `30283326199`，event=`push`，conclusion=`success` | 仅构建/测试 |
-| GitHub Deployments | 以 `sha=549ed5a` 查询返回 0；repository Environments 返回 0 | 该 GitHub 渠道无部署记录；不能排除外部部署 |
-| `.github/workflows/ci.yml` | 只有 build/test 与 quality；`permissions: contents: read`；无 deploy job | CI/CD 不包含部署 |
-| `ops/README.md` / Compose | Compose 明确为本地 Postgres + Redis | 本地开发设施，不是环境 inventory |
-| runtime profiles | prod profile 只提供配置能力；limited runtime 默认 disabled、production disabled、kill switch enabled | 不证明实例曾运行 |
-| deployment artifacts | 仓库未发现 Helm/K8s/Terraform/deploy workflow/environment inventory | 无仓库内部署证据 |
-| schema | V12 创建 persistent rate/idempotency 表；V13/V14 调整状态合同；当前最高 V15 | schema-only possibility |
-| production code | rate/idempotency 当前可写 PostgreSQL；environment 来自 guard configuration；rate audit JSON 不含 environment；replay ref 为 `replay:<requestId>` | 证明 P1/P2 代码现实，不证明真实数据 |
-| tests | PostgreSQL/Testcontainers fixture 明确插入和查询相关 rows | test-only evidence |
-| operational records | current authority/worklog 记录 production capacity `NOT_PROVEN`，无 running SHA、真实流量、row inventory 或维护窗口证据 | operational evidence 不足 |
-| real database | 未提供已授权环境清单、只读连接或脱敏 row inventory | 不访问；真实数据状态不可证明 |
-
-### 5.3 必答问题
+## 7. Migration decision
 
 ~~~text
-Was 549ed5a ever deployed to a running DH instance?
-NOT_PROVABLE
-
-Did that instance process real external traffic?
-NOT_PROVABLE
-
-Did it write persistent rate/idempotency rows?
-NOT_PROVABLE
-
-Do any current authorized environments contain legacy rows that must survive the remediation?
-NOT_PROVABLE
-
-Is zero-downtime migration a real requirement?
-NOT_PROVABLE
-~~~
-
-GitHub Deployments 为 0 不能推导“从未部署”；同样，schema 和测试存在也不能推导“必须兼容真实
-legacy rows”。
-
-## 6. Data reality classification
-
-分类定义：
-
-- A：有 deployment、运行、写入和保留证据的 confirmed operational data；
-- B：仅 Testcontainers、fixture 或本地开发数据库中的 test-only data；
-- C：表和代码支持，但没有运行证据的 schema-only possibility；
-- D：缺少权限或证据，无法确认真实环境状态。
-
-当前结果：
-
-~~~text
-RATE LEGACY DATA CLASS:
-D
-
-IDEMPOTENCY LEGACY DATA CLASS:
-D
-
-REPLAY LEGACY DATA CLASS:
-D
-
-AUDIT LEGACY DATA CLASS:
-D
-~~~
-
-仓库内同时存在 B 类测试证据和 C 类 schema/code possibility，但没有足够证据把任何 operational
-状态从 D 降为 B/C，也没有 A 类证据。
-
-## 7. Minimal remediation path
-
-~~~text
-SELECTED MINIMAL REMEDIATION PATH:
-M4
-~~~
-
-选择理由：
-
-- M1 要求所有相关数据均已证明为 B/C；当前无法证明，故不选择；
-- M2 要求 A 类数据和允许维护窗口；两项均无证据；
-- M3 要求 A 类数据及明确零停机要求；两项均无证据，禁止选择；
-- M4 精确匹配“无环境/数据权限，真实数据与零停机要求不可证明”。
-
-当前拒绝的复杂度：
-
-- 不继续设计 legacy lifetime ceiling；
-- 不继续设计 V18、永久 tombstone、retirement audit 或在线 dual-read/write；
-- 不将“可能存在”提升为“必须迁移”；
-- 不以 registry/retention 代替 P1/P2 最小修复。
-
-解除 M4 至少需要一份经过授权、可审查且脱敏的 evidence packet：
-
-1. 当前允许环境 inventory 和 owner；
-2. 每个环境实际运行过的 commit SHA 与时间窗；
-3. `549ed5a` 是否启动并接收外部流量；
-4. rate/idempotency/replay/audit 相关表的存在性、row count、最早/最晚时间和可保留要求；
-5. writer 是否可停、允许维护窗口与 in-flight drain 条件；
-6. 明确的 zero-downtime 要求或明确“不要求”；
-7. 证据采集命令、执行人/系统、时间和脱敏结果。
-
-不得在文档或日志中记录数据库密码、连接 secret、token 或原始用户数据。
-
-## 8. Migration reassessment
-
-~~~text
-Is reference-liveness registry required to fix P1/P2?
-NO
-
-Is V16 required before audit environment storage?
-NO
-
-Is V18 required for confirmed current data?
-NO / NO CONFIRMED CURRENT DATA REQUIRES IT
-
-Can P1/P2 be fixed independently from registry/retention?
+Can environment isolation be implemented using existing columns/keys?
 YES
 
-SELECTED MIGRATION REASSESSMENT:
-R4 / INSUFFICIENT EVIDENCE / IMPLEMENTATION BLOCKED
+Is a single forward migration required for new structured audit environment?
+NO
+
+Can DEV/TEST databases be rebuilt instead of legacy backfill?
+YES
+
+Is any legacy retirement migration required?
+NO
 ~~~
 
 依据：
 
-- V12 已使 persistent rate/idempotency schema 具有 environment 字段；P1 的核心缺口是 environment
-  authority 与同一 verified scope 的传播，不是 reference-liveness registry。
-- 当前 V5 `dh_decision_audit_event` 没有独立 environment column；未来最小 discovery 必须判断是否
-  用一个 additive migration 为新 `QDR7_RATE_LIMIT_ADMISSION` 写入增加结构化 environment。
-  该 schema 需求不依赖 registry。
-- replay namespace 是应用身份编码问题，不依赖 registry 或 retention。
-- V16/V17/V18 均未创建。此前 `V16 registry -> V17 audit -> V18 legacy` 序列保留为历史设计证据，
-  但对最小修复执行标记为 `SUPERSEDED FOR MINIMAL REMEDIATION EXECUTION`。
-- “V18 当前不需要”只表示没有 confirmed current data 支持它；如果 evidence packet 后续证明 A 类
-  数据存在，必须重新选择 M2/M3 并重新评估一次性 migration。
+- rate/idempotency 的现有 V12 identity 已原生包含 environment；
+- replay 的 V4 opaque primary key 可包含 environment-bound canonical key；
+- QDR7 rate audit 的 V5 `event_json` 已是结构化 JSONB；
+- owner 确认不存在需保留的 legacy DH data；
+- P1/P2 不需要 dedicated audit environment column、backfill、registry 或 retention。
 
-本任务不预占新的 migration version。解除 M4 并完成一次性 discovery 后，`MIGRATION_ALLOWLIST`
-才能冻结 exact filename、DDL、兼容/回滚验证和是否需要 backfill。
-
-## 9. Future minimal implementation boundary
-
-如果 evidence packet 使路径转为 M1 或 M2，未来 implementation 只允许围绕：
-
-1. canonical `FeedbackEnvironment` 与 `FeedbackExecutionScope`；
-2. signed environment HMAC binding；
-3. verified `AuthContext` environment；
-4. tenant/source/environment authorization；
-5. environment-bound rate identity；
-6. environment-bound idempotency identity；
-7. environment-bound replay namespace；
-8. structured QDR7 rate-audit environment；
-9. DEV/TEST isolation tests；
-10. root fail-closed tests；
-11. PostgreSQL/Testcontainers regression；
-12. 必要 architecture guards。
-
-潜在 schema 需求只限 QDR7 rate-audit 的 structured environment storage；是否需要 migration、
-backfill 和 exact constraint 由 evidence + discovery 决定。
-
-明确排除：
-
-- reference-liveness registry；
-- retention、cleanup、scheduler；
-- legacy retirement subsystem；
-- historical backfill（除非 A 类数据证据明确要求）；
-- V18；
-- generic audit query API；
-- API 契约扩张；
-- automatic learning、B5、真实 Provider/NQ/HTTP、Paper 或 LIVE。
-
-## 10. One-time discovery contract
-
-M4 解除后，implementation 前必须一次性审计：
-
-- production call graph；
-- all constructors；
-- all repositories；
-- all schema paths；
-- all Spring wiring；
-- all mandatory tests；
-- all architecture guards；
-- all compatibility fixtures；
-- all Maven dependencies。
-
-discovery 必须一次性输出：
+因此：
 
 ~~~text
-MINIMAL_IMPLEMENTATION_WRITE_ALLOWLIST
-MINIMAL_TEST_ALLOWLIST
-MIGRATION_ALLOWLIST
-FACTSOURCE_UPDATE_ALLOWLIST
-~~~
+MINIMAL_MIGRATION_ALLOWLIST:
+EMPTY
 
-在这些 exact allowlist 冻结前：
+V16 / V17 / V18:
+NOT CREATED / NOT CREATED / NOT CREATED
 
-~~~text
-ALLOW_MINIMAL_IMPLEMENTATION:
+ALLOW_V16_IMPLEMENTATION:
 NO
 ~~~
 
-## 11. Authority model simplification
+## 8. Exact implementation scope
+
+以下四个列表是完整 discovery 后的单一 active allowlist。历史 42/46/47/48/54/60/66
+计数不继续累计，也不是 active implementation gate。
+
+### 8.1 MINIMAL_PRODUCTION_WRITE_ALLOWLIST
 
 ~~~text
-Canonical active authority:
+dh-api/src/main/java/com/guidinglight/decisionhub/api/security/AuthenticatedRequest.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunController.java
+dh-api/src/main/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunRequest.java
+dh-app/src/main/java/com/guidinglight/decisionhub/config/SecurityWiringConfig.java
+dh-app/src/main/java/com/guidinglight/decisionhub/qdr7/PersistentDecisionDryRunRateLimiter.java
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/FeedbackEnvironment.java
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/FeedbackExecutionScope.java
+dh-domain/src/main/java/com/guidinglight/decisionhub/domain/qdr/feedback/FeedbackExecutionScopeException.java
+dh-security/pom.xml
+dh-security/src/main/java/com/guidinglight/decisionhub/security/AuthContext.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/StaticTokenVerifier.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/HmacNqDryRunAuthenticator.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDryRunAuthRequest.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/NqDryRunAuthResult.java
+dh-security/src/main/java/com/guidinglight/decisionhub/security/nq/RateLimiter.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DecisionDryRunCommand.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DecisionDryRunErrorCode.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DecisionDryRunRequestFingerprint.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DefaultDecisionDryRunService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/decision/dryrun/PersistentGuardedDecisionDryRunService.java
+~~~
+
+### 8.2 MINIMAL_TEST_WRITE_ALLOWLIST
+
+~~~text
+dh-api/src/test/java/com/guidinglight/decisionhub/api/decision/DecisionDryRunControllerWebMvcTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/V12PersistentRuntimeGuardsFlywayPostgresTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/DecisionDryRunActualWiringRepeatabilityPostgresTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/DecisionDryRunSamePoolRecoveryPostgresTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/PersistentDecisionDryRunRateLimiterTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/PersistentGuardProductionWiringPostgresTest.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityAcceptanceIT.java
+dh-app/src/test/java/com/guidinglight/decisionhub/qdr9/StageQdr9FeedbackArchitectureTest.java
+dh-domain/src/test/java/com/guidinglight/decisionhub/contracts/DecisionContractGapGuardTest.java
+dh-domain/src/test/java/com/guidinglight/decisionhub/domain/qdr/feedback/FeedbackExecutionScopeTest.java
+dh-infra/src/test/java/com/guidinglight/decisionhub/infra/jdbc/JdbcNonceReplayGuardPersistenceTest.java
+dh-security/src/test/java/com/guidinglight/decisionhub/security/nq/HmacNqDryRunAuthenticatorTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DecisionDryRunRequestFingerprintTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/dryrun/DefaultDecisionDryRunServiceTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/dryrun/LimitedDryRunRuntimeServiceTest.java
+dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/decision/dryrun/PersistentGuardedDecisionDryRunServiceTest.java
+~~~
+
+### 8.3 MINIMAL_MIGRATION_ALLOWLIST
+
+~~~text
+EMPTY
+~~~
+
+### 8.4 MINIMAL_CURRENT_AUTHORITY_ALLOWLIST
+
+~~~text
 docs/current/STATUS.md
-
-Canonical implementation plan:
 docs/current/DH_STAGE_QDR_9_B4_ENGINEERING_DISCIPLINE_RESET_AND_MINIMAL_REMEDIATION_PLAN.md
+docs/current/DH_STAGE_QDR_9_B4_MINIMAL_P1_P2_IMPLEMENTATION_DISCOVERY.md
+docs/current/DH_STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER.md
+docs/current/WORKLOG.md
 ~~~
 
-十二个 terminal factsources 只在以下事件同步：
+本 discovery task 只修改上述 authority 文件中的四个既有文件并创建一个 discovery 文件；后续
+implementation 才可使用 production/test allowlist。
 
-1. containment；
-2. implementation milestone acceptance；
-3. publication；
-4. authority close；
-5. stage close。
+## 9. Implementation order
 
-scope design、investigation 和 blocker 子任务只更新：
+1. 建立 canonical `FeedbackEnvironment` / `FeedbackExecutionScope`，增加 `dh-security -> dh-domain`
+   的唯一必要模块依赖。
+2. 让 bearer `AuthContext`、body environment、HMAC canonical material 和 tenant/source/environment
+   allowlist 在 authenticator root 汇合；验证通过后才创建 scope。
+3. 将 scope 传给 rate limiter 与 `DecisionDryRunCommand`；缺失、mismatch、unsupported environment
+   全部 fail-closed。
+4. 用 scope environment 构造 rate、idempotency、recovery identity，并加入 request fingerprint。
+5. 用 scope environment 构造 replay key；验证 same-environment replay rejection 与 DEV/TEST isolation。
+6. 在既有 QDR7 rate audit `event_json` 写入 canonical environment，保持 admission/audit 同事务。
+7. 运行 targeted、PostgreSQL/Testcontainers、capacity、architecture、module/full regression 与 quality；
+   在 milestone review 前不得 publish。
 
-- `docs/current/STATUS.md`；
-- `docs/current/DH_STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER.md`；
-- 当前唯一目标设计/计划文档。
+## 10. Stop condition
 
-历史 identity/replay design、audit environment design、legacy identity design 与 scope errata 不删除、
-不改写，统一视为：
+Implementation 发现 allowlist 外必需文件时：
 
 ~~~text
-HISTORICAL DESIGN EVIDENCE
-NOT ACTIVE IMPLEMENTATION GATE
+STOP IMPLEMENTATION
+RETURN TO COMPLETE DISCOVERY
 ~~~
 
-## 12. Validation and readiness
+不得创建 scope erratum，不得在实施中追加文件，也不得恢复历史累计 scope 计数。
+
+## 11. Validation and readiness
 
 ~~~text
 full regression:
-NOT_RERUN / DOCUMENTATION-ONLY GOVERNANCE RESET
-
-reused containment baseline:
-1228 tests / 0 failures / 0 errors / 0 skipped
+NOT RERUN / DOCUMENTATION-ONLY DISCOVERY
 
 quality:
 PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
@@ -395,34 +412,31 @@ MUST REMAIN 0
 V16 / V17 / V18 files:
 MUST REMAIN 0
 
-ENGINEERING_DISCIPLINE_RESET:
-PASS
+OWNER_ATTESTATION:
+ACCEPTED
 
-ACTUAL_LEGACY_DATA:
-NOT_PROVABLE
+ACTUAL_DH_DEPLOYMENT:
+ABSENT
+
+REAL_LEGACY_DATA:
+ABSENT
 
 MINIMAL_REMEDIATION_PATH:
-M4
+M1
 
-PREVIOUS_54_60_66_SCOPES:
-HISTORICAL
-
-REGISTRY_REQUIRED_FOR_P1_P2:
-NO
-
-V18_REQUIRED:
-NO / NO CONFIRMED CURRENT DATA
-
-MINIMAL_IMPLEMENTATION_PLAN:
-BLOCKED
-
-AUTHORITY_MODEL_SIMPLIFIED:
+COMPLETE_DISCOVERY:
 PASS
 
-ALLOW_MINIMAL_IMPLEMENTATION_DISCOVERY:
-NO / EVIDENCE BLOCKER FIRST
+MINIMAL_IMPLEMENTATION_SCOPE:
+FROZEN
 
-ALLOW_LEGACY_LIFETIME_BLOCKER:
+MIGRATION_REQUIRED:
+NO
+
+ALLOW_MINIMAL_P1_P2_IMPLEMENTATION:
+YES / NEXT TASK ONLY / EXACT ALLOWLIST ONLY
+
+ALLOW_SERVER_DEPLOYMENT:
 NO
 
 ALLOW_V16_IMPLEMENTATION:
@@ -438,11 +452,11 @@ PRODUCTION_CAPACITY:
 NOT_PROVEN
 ~~~
 
-## 13. Next concrete action
+## 12. Next concrete action
 
 ~~~text
-DH-STAGE-QDR-9-B4-DEPLOYMENT-AND-LEGACY-DATA-EVIDENCE-BLOCKER
+DH-STAGE-QDR-9-B4-MINIMAL-P1-P2-IMPLEMENTATION
 ~~~
 
-该任务只能取得或记录经授权的部署与脱敏数据证据，不实施代码、migration、registry、retention、
-review retry、publication 或 B5。
+该任务只能按第 8 节 exact allowlist 和第 9 节顺序实施；不得部署 DH，不得占用 NQ
+168-hour acceptance server，不得 push 或 publication-first。

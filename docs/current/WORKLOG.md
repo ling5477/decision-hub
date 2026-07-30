@@ -1,5 +1,35 @@
 # Decision Hub Worklog
 
+## 2026-07-30 — Owner-attested M1 rebaseline and complete minimal implementation discovery
+
+- 以 `229910e31b9b5cba5fe944e4f3a497df73843d20` 为 clean baseline；只读
+  `git fetch origin --prune` 后确认 `origin/dev` 已前移到同一 SHA，starting ahead/behind 为
+  `0/0`，不同于任务附件中的旧 `4/0`。
+- 接受 project owner 的 `FIRST_PARTY_OPERATIONAL_ATTESTATION`：DH 从未真实部署、没有真实外部
+  流量、没有 operational DH database 或真实持久数据，现有 row 仅来自 local development 与
+  automated tests；不要求 legacy retention 或 zero-downtime，DEV/TEST 可重建。
+- 明确 available 2C2G server 仅用于 NQ 168-hour acceptance；本轮和下一 implementation 均禁止
+  部署 DH 或干扰该验收。
+- 将 active remediation path 从 M4 改为 M1；保留旧 M4 为
+  `Historical repository-only evidence audit: M4 / insufficient without owner or runtime evidence`，
+  并记录其由 owner attestation supersede，而不是把旧审查描述为错误。
+- 完整检查 dry-run request/controller、HMAC canonicalization、verified AuthContext、
+  tenant/source authorization、rate/idempotency/recovery identity、fingerprint、nonce replay port/
+  JDBC/TTL、QDR7 rate audit、audit JDBC、transaction boundary、Spring wiring、全部 constructor/
+  caller、PostgreSQL/Testcontainers、capacity、recovery/repeatability、architecture guard 与 Maven
+  dependency。
+- 确认 V12 rate/idempotency keys 已包含 environment，V4 replay table 可保存 opaque
+  environment-bound key，V5 audit `event_json` 已是 structured JSONB；选择
+  `MIGRATION_REQUIRED: NO`，不创建 V16/V17/V18，不需要 backfill、registry 或 retention。
+- 一次性冻结四个 exact-file allowlist；不继续累计历史 42/46/47/48/54/60/66 scope count。
+- canonical plan 更新为 owner-attested M1；新增
+  `DH_STAGE_QDR_9_B4_MINIMAL_P1_P2_IMPLEMENTATION_DISCOVERY.md`，并只同步 `STATUS.md`、
+  Stage-QDR-9 work order 与本 worklog。
+- full regression 未运行，符合 documentation-only task；`mvn -B -ntp -Pquality validate`
+  exit 0，19/19 Reactor SUCCESS、Checkstyle 0、Spotless PASS。
+- 未修改 Java、test、POM、migration、config、workflow 或 API；未创建 legacy retirement、
+  registry、retention、scheduler、server deployment、push 或 tag。
+
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 legacy persistent identity blocker
 
 ~~~text
