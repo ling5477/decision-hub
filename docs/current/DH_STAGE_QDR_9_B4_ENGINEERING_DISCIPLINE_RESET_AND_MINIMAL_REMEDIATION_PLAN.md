@@ -1,5 +1,89 @@
 # DH Stage-QDR-9 B4 Owner-Attested M1 Rebaseline and Minimal Remediation Plan
 
+## Current authority — B4 final close — 2026-07-31
+
+~~~text
+Task:
+DH-STAGE-QDR-9-B4-AUTHORITY-PUBLICATION-AND-FINAL-CLOSE
+
+Stage-QDR-9 B4:
+CLOSED / ACCEPTED / PUBLISHED
+
+B4 active scope:
+COMPLETED
+
+Minimal P1/P2 remediation:
+CLOSED / ACCEPTED / PUBLISHED
+
+Implementation commit:
+6baabe113a3efa447ddd8036bb1b6c086ce1bcff
+
+Implementation CI:
+30625943817 / PASS
+
+Minimal remediation authority:
+064774df6eabb75678b7a46cd01b524e870d3ca0
+
+Minimal remediation authority CI:
+30626830036 / PASS
+
+B4 remaining-scope rebaseline:
+9d472b4642f4d17fc4ee3c0cc7a0d66a0b7d7d83
+
+Rebaseline review:
+PASS
+
+B4 final-close review:
+PASS / AUTHORITY REBASELINE REVIEW ACCEPTED
+
+Active P0 / P1 / publication-blocking P2:
+0 / 0 / 0
+
+Rebaseline exact-SHA CI:
+30632879649 / PASS
+
+Reference-liveness:
+DEFERRED / NOT IMPLEMENTED
+FUTURE INDEPENDENT CAPABILITY
+
+Retention:
+DEFERRED / NOT IMPLEMENTED
+FUTURE INDEPENDENT CAPABILITY
+
+V16:
+HISTORICAL CANDIDATE / NOT AUTHORIZED
+
+V17/V18:
+SUPERSEDED / NOT ACTIVE
+
+Formal capacity:
+DEFERRED / KNOWN LIMITATION
+
+Required for B4 functional close:
+NO
+
+Required for production-ready:
+YES
+
+Production capacity:
+NOT_PROVEN
+
+B5:
+NOT AUTHORIZED
+
+Server deployment:
+NOT PERFORMED / NOT AUTHORIZED
+
+Next action:
+DH-STAGE-QDR-9-POST-B4-NEXT-GATE-DECISION
+
+ALLOW_B5 / ALLOW_V16_IMPLEMENTATION / ALLOW_RETENTION_IMPLEMENTATION / ALLOW_SERVER_DEPLOYMENT:
+NO / NO / NO / NO
+~~~
+
+M1 remediation、authority publication 与 remaining-scope rebaseline 证据链已满足 B4 功能关闭。
+本关闭不改变 deferred capability 的所有权，不证明 production capacity，也不授权部署。
+
 ## Current authority — B4 readiness authority rebaseline — 2026-07-31
 
 ~~~text

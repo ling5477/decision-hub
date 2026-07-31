@@ -1,5 +1,96 @@
 # Decision Hub Worklog
 
+## 2026-07-31 — Stage-QDR-9 B4 authority publication and final close
+
+- `9d472b4642f4d17fc4ee3c0cc7a0d66a0b7d7d83` 已通过普通 fast-forward 发布；发布后
+  HEAD、`origin/dev` 与 advertised SHA 精确一致，ahead/behind 为 `0/0`，无 history rewrite
+  或 force push。
+- rebaseline exact-SHA CI run `30632879649` 为 PASS：test 与 Quality job 均 success；两组
+  Reactor 均为 19/19 SUCCESS；191 份 Surefire XML 汇总为 1243 tests、0 failures、0 errors、
+  0 skipped；PostgreSQL 17.10/Testcontainers 真实执行，两个 mandatory reports 均为 0 skipped；
+  Checkstyle 0、Spotless PASS。
+- 本 final-close authority 仅同步 5 份 canonical 文档；未修改代码、测试、POM、migration、
+  config/workflow，未创建 tag，未执行 server deployment，也未授权 B5、V16 或 retention。
+
+~~~text
+Task:
+DH-STAGE-QDR-9-B4-AUTHORITY-PUBLICATION-AND-FINAL-CLOSE
+
+Stage-QDR-9 B4:
+CLOSED / ACCEPTED / PUBLISHED
+
+B4 active scope:
+COMPLETED
+
+Minimal P1/P2 remediation:
+CLOSED / ACCEPTED / PUBLISHED
+
+Implementation commit:
+6baabe113a3efa447ddd8036bb1b6c086ce1bcff
+
+Implementation CI:
+30625943817 / PASS
+
+Minimal remediation authority:
+064774df6eabb75678b7a46cd01b524e870d3ca0
+
+Minimal remediation authority CI:
+30626830036 / PASS
+
+B4 remaining-scope rebaseline:
+9d472b4642f4d17fc4ee3c0cc7a0d66a0b7d7d83
+
+Rebaseline review:
+PASS
+
+B4 final-close review:
+PASS / AUTHORITY REBASELINE REVIEW ACCEPTED
+
+Active P0 / P1 / publication-blocking P2:
+0 / 0 / 0
+
+Rebaseline exact-SHA CI:
+30632879649 / PASS
+
+Reference-liveness:
+DEFERRED / NOT IMPLEMENTED
+FUTURE INDEPENDENT CAPABILITY
+
+Retention:
+DEFERRED / NOT IMPLEMENTED
+FUTURE INDEPENDENT CAPABILITY
+
+V16:
+HISTORICAL CANDIDATE / NOT AUTHORIZED
+
+V17/V18:
+SUPERSEDED / NOT ACTIVE
+
+Formal capacity:
+DEFERRED / KNOWN LIMITATION
+
+Required for B4 functional close:
+NO
+
+Required for production-ready:
+YES
+
+Production capacity:
+NOT_PROVEN
+
+B5:
+NOT AUTHORIZED
+
+Server deployment:
+NOT PERFORMED / NOT AUTHORIZED
+
+Next action:
+DH-STAGE-QDR-9-POST-B4-NEXT-GATE-DECISION
+
+ALLOW_B5 / ALLOW_V16_IMPLEMENTATION / ALLOW_RETENTION_IMPLEMENTATION / ALLOW_SERVER_DEPLOYMENT:
+NO / NO / NO / NO
+~~~
+
 ## 2026-07-31 — B4 readiness authority rebaseline
 
 - 修复 `WORK_ORDER.md` 仍把 legacy persistent identity/V16 链路声明为当前任务的 authority
