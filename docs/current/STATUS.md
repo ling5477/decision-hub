@@ -1,5 +1,88 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-07-31 Stage-QDR-9 B4 minimal P1/P2 publication and authority close
+
+~~~text
+Owner operational attestation:
+ACCEPTED
+
+Minimal remediation path:
+M1
+
+Minimal P1/P2 remediation:
+CLOSED / ACCEPTED / PUBLISHED
+
+Discovery commit:
+7fb0907acef477c04431445faf40e16db8dff0fb
+
+Implementation commit:
+6baabe113a3efa447ddd8036bb1b6c086ce1bcff
+
+Milestone review:
+PASS / P0 0 / P1 0 / PUBLICATION-BLOCKING P2 0
+
+Implementation exact-SHA CI:
+30625943817 / PASS
+
+Signed environment:
+PASS
+
+Tenant/source/environment authorization:
+PASS
+
+Rate environment isolation:
+PASS
+
+Idempotency environment isolation:
+PASS
+
+Replay namespace isolation:
+PASS
+
+Recovery/fingerprint isolation:
+PASS
+
+QDR7 rate-audit environment:
+PASS
+
+Root fail-closed:
+PASS
+
+Legacy compatibility:
+NOT REQUIRED / OWNER-CONFIRMED NO REAL DATA
+
+Migration:
+NOT REQUIRED
+
+Implementation publication:
+PASS / ORDINARY FAST-FORWARD / NO HISTORY REWRITE / NO FORCE PUSH
+
+Server deployment:
+NOT PERFORMED / NOT AUTHORIZED
+
+Stage-QDR-9 B4 overall:
+NOT CLOSED
+
+V16:
+NOT AUTHORIZED
+
+B5:
+NOT AUTHORIZED
+
+Formal capacity gate:
+NOT EXECUTED
+
+Production capacity:
+NOT_PROVEN
+
+Next action:
+DH-STAGE-QDR-9-B4-POST-REMEDIATION-READINESS-REASSESSMENT
+~~~
+
+该 authority 只关闭并发布 owner-attested M1 minimal P1/P2 remediation，不关闭完整 B4，
+不授权 V16、B5、server deployment、legacy compatibility、registry、retention 或正式 capacity
+acceptance；QDR-7 B2 capacity 继续为 `DEFERRED / KNOWN_LIMITATION`。
+
 ## Terminal current authority — 2026-07-31 Stage-QDR-9 B4 minimal P1/P2 implementation
 
 ~~~text

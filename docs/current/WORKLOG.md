@@ -1,5 +1,97 @@
 # Decision Hub Worklog
 
+## 2026-07-31 — Minimal P1/P2 publication and authority close
+
+- 基线精确匹配 `229910e31b9b5cba5fe944e4f3a497df73843d20 ->
+  7fb0907acef477c04431445faf40e16db8dff0fb ->
+  6baabe113a3efa447ddd8036bb1b6c086ce1bcff`，工作区 clean、staged empty、behind 0。
+- milestone review 在 publication 前完成并为 PASS；P0、P1 与 publication-blocking P2 均为 0。
+- `git push origin dev` 以普通 fast-forward 发布 discovery 与 implementation；未 rewrite history，
+  未使用 force push。
+- implementation exact-SHA CI run `30625943817` 为 PASS：test 与 Quality job 均 success，
+  19/19 Reactor SUCCESS，191 份 Surefire XML 共 1243 tests、0 failures、0 errors、0 skipped。
+- PostgreSQL/Testcontainers 在 PostgreSQL 17.10 真实执行，mandatory reports 均为 0 skipped；
+  `ArchitectureTest` 40/40、`StageQdr9FeedbackArchitectureTest` 6/6，Checkstyle 0、Spotless PASS。
+- 本 authority close 仅修改冻结的 5 份 authority 文档；未修改 Java、测试、POM、migration、
+  config/workflow，未部署 DH、未干扰 NQ 168-hour acceptance、未创建 tag。
+
+~~~text
+Owner operational attestation:
+ACCEPTED
+
+Minimal remediation path:
+M1
+
+Minimal P1/P2 remediation:
+CLOSED / ACCEPTED / PUBLISHED
+
+Discovery commit:
+7fb0907acef477c04431445faf40e16db8dff0fb
+
+Implementation commit:
+6baabe113a3efa447ddd8036bb1b6c086ce1bcff
+
+Milestone review:
+PASS / P0 0 / P1 0 / PUBLICATION-BLOCKING P2 0
+
+Implementation exact-SHA CI:
+30625943817 / PASS
+
+Signed environment:
+PASS
+
+Tenant/source/environment authorization:
+PASS
+
+Rate environment isolation:
+PASS
+
+Idempotency environment isolation:
+PASS
+
+Replay namespace isolation:
+PASS
+
+Recovery/fingerprint isolation:
+PASS
+
+QDR7 rate-audit environment:
+PASS
+
+Root fail-closed:
+PASS
+
+Legacy compatibility:
+NOT REQUIRED / OWNER-CONFIRMED NO REAL DATA
+
+Migration:
+NOT REQUIRED
+
+Implementation publication:
+PASS / ORDINARY FAST-FORWARD / NO HISTORY REWRITE / NO FORCE PUSH
+
+Server deployment:
+NOT PERFORMED / NOT AUTHORIZED
+
+Stage-QDR-9 B4 overall:
+NOT CLOSED
+
+V16:
+NOT AUTHORIZED
+
+B5:
+NOT AUTHORIZED
+
+Formal capacity gate:
+NOT EXECUTED
+
+Production capacity:
+NOT_PROVEN
+
+Next action:
+DH-STAGE-QDR-9-B4-POST-REMEDIATION-READINESS-REASSESSMENT
+~~~
+
 ## 2026-07-31 — Minimal P1/P2 verified-environment implementation
 
 - 从 `7fb0907acef477c04431445faf40e16db8dff0fb` 开始，仅消费 discovery 冻结的

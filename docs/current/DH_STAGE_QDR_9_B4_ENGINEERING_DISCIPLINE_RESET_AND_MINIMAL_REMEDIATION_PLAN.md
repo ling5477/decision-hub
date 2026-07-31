@@ -1,5 +1,88 @@
 # DH Stage-QDR-9 B4 Owner-Attested M1 Rebaseline and Minimal Remediation Plan
 
+## Current authority — Minimal P1/P2 publication and authority close — 2026-07-31
+
+~~~text
+Owner operational attestation:
+ACCEPTED
+
+Minimal remediation path:
+M1
+
+Minimal P1/P2 remediation:
+CLOSED / ACCEPTED / PUBLISHED
+
+Discovery commit:
+7fb0907acef477c04431445faf40e16db8dff0fb
+
+Implementation commit:
+6baabe113a3efa447ddd8036bb1b6c086ce1bcff
+
+Milestone review:
+PASS / P0 0 / P1 0 / PUBLICATION-BLOCKING P2 0
+
+Implementation exact-SHA CI:
+30625943817 / PASS
+
+Signed environment:
+PASS
+
+Tenant/source/environment authorization:
+PASS
+
+Rate environment isolation:
+PASS
+
+Idempotency environment isolation:
+PASS
+
+Replay namespace isolation:
+PASS
+
+Recovery/fingerprint isolation:
+PASS
+
+QDR7 rate-audit environment:
+PASS
+
+Root fail-closed:
+PASS
+
+Legacy compatibility:
+NOT REQUIRED / OWNER-CONFIRMED NO REAL DATA
+
+Migration:
+NOT REQUIRED
+
+Implementation publication:
+PASS / ORDINARY FAST-FORWARD / NO HISTORY REWRITE / NO FORCE PUSH
+
+Server deployment:
+NOT PERFORMED / NOT AUTHORIZED
+
+Stage-QDR-9 B4 overall:
+NOT CLOSED
+
+V16:
+NOT AUTHORIZED
+
+B5:
+NOT AUTHORIZED
+
+Formal capacity gate:
+NOT EXECUTED
+
+Production capacity:
+NOT_PROVEN
+
+Next action:
+DH-STAGE-QDR-9-B4-POST-REMEDIATION-READINESS-REASSESSMENT
+~~~
+
+本次 close 只结束 M1 minimal P1/P2 remediation milestone。它不改变 owner attestation 的
+证据属性，不关闭完整 B4，也不授权 migration、legacy compatibility、registry、retention、
+server deployment、V16、B5 或正式 capacity acceptance。
+
 ## 0. Minimal P1/P2 implementation result — 2026-07-31
 
 ~~~text
