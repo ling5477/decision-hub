@@ -1,5 +1,125 @@
 # DH Stage-QDR-9 Implementation Work Order
 
+## Terminal current authority — 2026-07-31 B4 readiness authority rebaseline
+
+~~~text
+Task:
+DH-STAGE-QDR-9-B4-READINESS-AUTHORITY-BLOCKER
+
+Authority baseline:
+064774df6eabb75678b7a46cd01b524e870d3ca0
+
+Local documentation commit:
+THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT PUBLISHED
+
+Minimal P1/P2 remediation:
+CLOSED / ACCEPTED / PUBLISHED
+
+Active P0 / P1:
+0 / 0
+
+Implementation exact-SHA CI:
+30625943817 / PASS
+
+Authority exact-SHA CI:
+30626830036 / PASS
+
+Stage-QDR-9 B4:
+REMEDIATION CLOSED / FINAL CLOSE REVIEW PENDING
+
+Stage-QDR-9 B4 active scope:
+- signed environment authority
+- tenant/source/environment authorization
+- rate/idempotency environment isolation
+- replay namespace isolation
+- recovery/fingerprint isolation
+- QDR7 rate-audit environment
+- root fail-closed
+- milestone and publication evidence
+
+B4 active scope result:
+IMPLEMENTED / ACCEPTED / PUBLISHED
+
+Reference-liveness:
+DEFERRED / NOT IMPLEMENTED
+
+Reference-liveness state model:
+DEFERRED / NOT IMPLEMENTED / FUTURE INDEPENDENT CAPABILITY STAGE
+
+Reference-liveness registry:
+NOT IMPLEMENTED / NOT A CURRENT B4 CLOSE GATE
+
+Retention eligibility/deletion/audit:
+DEFERRED / NOT IMPLEMENTED / FUTURE INDEPENDENT CAPABILITY STAGE
+
+Retention:
+DEFERRED / NOT IMPLEMENTED
+
+V16:
+HISTORICAL CANDIDATE / NOT AUTHORIZED
+
+Historical V17/V18 sequence:
+SUPERSEDED / NOT ACTIVE
+
+Historical 54/60/66 scopes:
+HISTORICAL DESIGN EVIDENCE / NOT ACTIVE IMPLEMENTATION GATES
+
+QDR-7 B2 formal capacity:
+DEFERRED / KNOWN LIMITATION
+
+Formal capacity:
+DEFERRED / KNOWN LIMITATION
+
+Required for B4 functional close:
+NO
+
+Required for production-ready declaration:
+YES
+
+Production capacity:
+NOT_PROVEN
+
+DH deployment / real persistent data:
+NONE / NONE
+
+Primary current status:
+docs/current/STATUS.md
+
+Current execution order:
+docs/current/WORK_ORDER.md
+
+Stage authority:
+docs/current/DH_STAGE_QDR_9_IMPLEMENTATION_WORK_ORDER.md
+
+Canonical remediation evidence:
+docs/current/DH_STAGE_QDR_9_B4_ENGINEERING_DISCIPLINE_RESET_AND_MINIMAL_REMEDIATION_PLAN.md
+
+Historical designs:
+reference-liveness / retention / V16 / identity-replay / audit-storage documents
+
+READINESS_AUTHORITY_BLOCKER:
+RESOLVED
+
+CURRENT_AUTHORITY_CONSISTENCY:
+PASS / 0 CONFLICTS
+
+B4_FINAL_CLOSE_REVIEW_ELIGIBLE:
+YES
+
+Next action:
+DH-STAGE-QDR-9-B4-FINAL-CLOSE-REVIEW
+
+ALLOW_V16_IMPLEMENTATION / ALLOW_RETENTION_IMPLEMENTATION / ALLOW_B4_CLOSE_NOW / ALLOW_B5:
+NO / NO / NO / NO
+~~~
+
+Stage-QDR-9 B4 的当前功能范围只包含已发布的 verified-environment remediation 及其 milestone/
+publication evidence。Reference-liveness state model、registry 和 retention eligibility/deletion/audit
+已延期到未来独立 capability stage，不是当前 B4 close gate，也不授权 V16。
+
+本节之后的旧 implementation order、scope、`current task` 与 `next action` 只保留历史证据属性；
+旧 V16/V17/V18 sequence 与 54/60/66 scope 不再是 active implementation gate。
+
 ## Terminal current authority — 2026-07-31 B4 minimal P1/P2 publication and authority close
 
 ~~~text
