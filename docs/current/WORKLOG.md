@@ -1,5 +1,19 @@
 # Decision Hub Worklog
 
+## 2026-07-31 — Stage-QDR-9 B5 final close execution（进行中）
+
+- planning commit `5be3943aa82e7408f080fe95732379b5e329deb0` 已普通 fast-forward 发布；
+  exact-SHA CI run `30639680724` 的 Quality 与 Testcontainers jobs 均 success。
+- 技术基线 `c7f940c0c48900a0cfb7eac86aac745c8006629c` 与 CI `30633947829` 已重新核验；
+  B1–B4 均为 `CLOSED / ACCEPTED / PUBLISHED`，active P0/P1 为 `0/0`。
+- 12 个 terminal factsources 已对齐到 B5 governance close in progress；旧 authority 仅保留为历史时间线。
+- `docs/gates/stage-qdr-9/` 已创建；31 份精确 source documents 已逐字节复制并完成 SHA-256 比对，
+  当前 missing/unexpected/hash failures 均为 0。
+- 本阶段未修改 Java、tests、migration、API、Repository、contracts、POM/workflow；未执行 capacity 或部署。
+- Close commit 前 `mvn -B -ntp -Pquality validate` 以 exit 0 完成：19/19 reactor SUCCESS、
+  Checkstyle 0、Spotless PASS；full tests 未在本地重跑。
+- close commit、exact-SHA CI、annotated tag 与 post-tag cleanup 尚未执行，不提前记录为完成。
+
 ## 2026-07-31 — Stage-QDR-9 B5 final-close plan
 
 - planning preflight 验证 `dev`、HEAD、`origin/dev` 与 advertised SHA 均为

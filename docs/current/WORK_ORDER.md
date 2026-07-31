@@ -1,5 +1,24 @@
 # Decision Hub 当前工单
 
+## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final close execution
+
+~~~text
+Task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE
+Task type: GOVERNANCE FINAL CLOSE / DOCS ONLY
+Stage-QDR-9: FUNCTIONALLY COMPLETE / GOVERNANCE CLOSE IN PROGRESS
+B1 / B2 / B3 / B4: CLOSED / ACCEPTED / PUBLISHED
+B5: PHASE 1 COMPLETE / PHASE 2 IN PROGRESS / PHASE 3-4 PENDING
+Technical implementation: NONE
+Terminal factsources: 12 / 12 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+Archive sources: 31 / 31 / HASH VERIFIED
+Formal capacity: NOT_EXECUTED / DEFERRED
+Production capacity: NOT_PROVEN
+Only next action: PUBLISH CLOSE COMMIT -> VERIFY EXACT-SHA CI -> CREATE ANNOTATED TAG -> PRUNE CURRENT SOURCES -> PUBLISH CLEANUP
+Forbidden: TECHNICAL CHANGE / CAPACITY / DEPLOYMENT / V16 / RETENTION / REFERENCE-LIVENESS / REAL RUNTIME
+~~~
+
+此工单只允许完成冻结的 B5 四阶段；后续旧工单均为历史时间线证据。
+
 ## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final-close plan
 
 ~~~text

@@ -1,5 +1,16 @@
 # Decision Hub Current Docs
 
+## 当前执行 — Stage-QDR-9 B5 final close（2026-07-31）
+
+- Stage-QDR-9：`FUNCTIONALLY COMPLETE / GOVERNANCE CLOSE IN PROGRESS`。
+- B1–B4：`CLOSED / ACCEPTED / PUBLISHED`；B5：`FINAL_CLOSE EXECUTION IN PROGRESS`。
+- [Stage-QDR-9 archive packet](../gates/stage-qdr-9/README.md) 已创建并正在执行 close/tag 前验证。
+- Terminal factsources：`12 / 12 / SYNCHRONIZED / 0 CURRENT CONFLICTS`。
+- Close tag `dh-stage-qdr-9-close` 与 post-tag current cleanup：`PENDING`。
+- Formal capacity：`NOT_EXECUTED / DEFERRED`；production capacity：`NOT_PROVEN`。
+
+本节之后的 Stage-QDR-9 planning/B4 区块是历史时间线；当前结论以 `STATUS.md` 与 `WORK_ORDER.md` 为准。
+
 ## 当前任务 — Stage-QDR-9 B5 final-close plan（2026-07-31）
 
 - [B5 Stage Final Close Plan](DH_STAGE_QDR_9_B5_STAGE_FINAL_CLOSE_PLAN.md)

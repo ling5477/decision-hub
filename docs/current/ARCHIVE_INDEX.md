@@ -1,5 +1,16 @@
 # Decision Hub Archive Index
 
+## Stage-QDR-9 archive — close in progress
+
+- Archive packet：[`docs/gates/stage-qdr-9/`](../gates/stage-qdr-9/README.md)
+- Technical baseline：`c7f940c0c48900a0cfb7eac86aac745c8006629c`；CI `30633947829 / PASS`。
+- Planning commit：`5be3943aa82e7408f080fe95732379b5e329deb0 / PUBLISHED / CI 30639680724 PASS`。
+- Source copies：`31 / 31 / SHA-256 VERIFIED`。
+- Close commit / annotated tag / cleanup commit：`PENDING / PENDING / PENDING`。
+- Formal capacity：`NOT_EXECUTED / DEFERRED`；production capacity：`NOT_PROVEN`。
+
+本节后的旧 B4 authority 区块仅为历史索引证据。
+
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 legacy persistent identity blocker
 
 ~~~text

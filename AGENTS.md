@@ -1,5 +1,30 @@
 # Decision Hub Agent Guidelines
 
+## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final close in progress
+
+~~~text
+Task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE
+Stage-QDR-9: FUNCTIONALLY COMPLETE / GOVERNANCE CLOSE IN PROGRESS
+B1 / B2 / B3 / B4: CLOSED / ACCEPTED / PUBLISHED
+B5: FINAL_CLOSE EXECUTION IN PROGRESS / GOVERNANCE ONLY / NO TECHNICAL IMPLEMENTATION
+Technical baseline: c7f940c0c48900a0cfb7eac86aac745c8006629c
+Accepted technical CI: 30633947829 / PASS / 1243 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Planning commit: 5be3943aa82e7408f080fe95732379b5e329deb0 / PUBLISHED / CI 30639680724 PASS
+Archive: docs/gates/stage-qdr-9/ / CREATED / PRE-TAG VERIFICATION IN PROGRESS
+Close tag: dh-stage-qdr-9-close / PENDING
+Post-tag cleanup: PENDING
+Terminal factsources: 12 / 12 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+Formal capacity: NOT_EXECUTED / DEFERRED
+Production capacity: NOT_PROVEN
+Reference-liveness / retention: DEFERRED / FUTURE INDEPENDENT CAPABILITY
+V16 / V17 / V18: HISTORICAL OR SUPERSEDED / NOT AUTHORIZED
+Real HTTP / Provider / NQ / Agent / LangGraph / Paper / LIVE: NOT AUTHORIZED
+Next action: COMPLETE CLOSE COMMIT -> EXACT-SHA CI -> ANNOTATED TAG -> POST-TAG CLEANUP
+~~~
+
+本节是当前执行指导；后续所有早于 B5 的“current authority”区块均为历史时间线证据，不能覆盖
+`docs/current/STATUS.md` 与 `docs/current/WORK_ORDER.md` 的当前结论。
+
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 legacy persistent identity blocker
 
 ~~~text

@@ -1,5 +1,24 @@
 # Decision Hub Testing
 
+## Terminal validation record — 2026-07-31 Stage-QDR-9 B5 final close in progress
+
+~~~text
+Task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE
+Planning commit CI: 30639680724 / PASS / exact head 5be3943aa82e7408f080fe95732379b5e329deb0
+Reused technical CI: 30633947829 / PASS / exact head c7f940c0c48900a0cfb7eac86aac745c8006629c
+Reused tests: 1243 / 0 failures / 0 errors / 0 skipped
+Reused PostgreSQL/Testcontainers: 17.10 / REAL EXECUTION / MANDATORY REPORTS NOT SKIPPED
+Full tests rerun locally: NO
+Formal capacity executed: NO / DEFERRED
+Archive source copy: 31 PLANNED / 31 COPIED / 0 HASH FAILURES
+Terminal factsources: 12 / 12 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+Local quality before close commit: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS / EXIT 0
+Close commit exact-SHA CI: PENDING
+Tag and cleanup validation: PENDING
+~~~
+
+本记录只陈述已执行证据；普通 CI 和 reused tests 不构成 formal capacity acceptance。
+
 ## Terminal validation record — 2026-07-31 Stage-QDR-9 B5 final-close plan
 
 ~~~text

@@ -1,5 +1,23 @@
 # Decision Hub Roadmap
 
+## 当前路线 — Stage-QDR-9 B5 governance close in progress
+
+~~~text
+Stage-QDR-9: FUNCTIONALLY COMPLETE / GOVERNANCE CLOSE IN PROGRESS
+B1-B4: CLOSED / ACCEPTED / PUBLISHED
+B5: FINAL_CLOSE EXECUTION IN PROGRESS / NO TECHNICAL IMPLEMENTATION
+Completed: PLAN PUBLICATION + EXACT-SHA CI + AUTHORITY/TECHNICAL REVALIDATION
+In progress: FACTSOURCE SYNCHRONIZATION + ARCHIVE PACKET + SOURCE MANIFEST
+Pending: CLOSE COMMIT + EXACT-SHA CI + ANNOTATED TAG + POST-TAG CLEANUP
+Formal capacity: NOT_EXECUTED / DEFERRED
+Production capacity: NOT_PROVEN
+Deferred: REFERENCE-LIVENESS / RETENTION / V16-V18 / LEGACY RETIREMENT
+Next-stage planning: BLOCKED UNTIL TAG + CLEANUP + REMOTE ALIGNMENT
+Next-stage implementation: NOT AUTHORIZED
+~~~
+
+本节后的旧路线仅为历史时间线，不恢复任何 superseded/deferred capability。
+
 ## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final-close plan
 
 ~~~text

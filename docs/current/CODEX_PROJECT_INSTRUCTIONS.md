@@ -1,5 +1,23 @@
 # Codex Project Instructions
 
+## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final close in progress
+
+~~~text
+Current task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE
+Stage-QDR-9: FUNCTIONALLY COMPLETE / GOVERNANCE CLOSE IN PROGRESS
+B1-B4: CLOSED / ACCEPTED / PUBLISHED
+B5: GOVERNANCE-ONLY FINAL CLOSE / TECHNICAL IMPLEMENTATION NONE
+Archive: docs/gates/stage-qdr-9/ / 31 SOURCE COPIES VERIFIED
+Close tag / post-tag cleanup: PENDING / PENDING
+Formal capacity: NOT_EXECUTED / DEFERRED
+Production capacity: NOT_PROVEN
+Reference-liveness / retention / V16-V18: DEFERRED OR HISTORICAL / NOT AUTHORIZED
+Next-stage planning: BLOCKED UNTIL B5 TAG AND CLEANUP COMPLETE
+Real HTTP / Provider / NQ / Agent / LangGraph / Paper / LIVE: NOT AUTHORIZED
+~~~
+
+执行者只能完成冻结 B5 的 docs-only close 流程；后续旧 authority 区块均为历史证据。
+
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 legacy persistent identity blocker
 
 ~~~text
