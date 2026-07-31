@@ -1,5 +1,30 @@
 # Decision Hub Worklog
 
+## 2026-07-31 — Stage-QDR-9 B5 final-close plan
+
+- planning preflight 验证 `dev`、HEAD、`origin/dev` 与 advertised SHA 均为
+  `c7f940c0c48900a0cfb7eac86aac745c8006629c`，ahead/behind `0/0`，worktree/staged clean/empty；
+  local/remote `dh-stage-qdr-9-close` 均缺席，`docs/gates/stage-qdr-9` 不存在。
+- GitHub Actions run `30633947829` 与技术 baseline SHA 精确一致，Quality 与
+  `build & test (Testcontainers / Docker)` jobs 均 success；接受证据为 1243/0/0/0、PostgreSQL
+  17.10/Testcontainers real execution。本 planning task 未重跑 full tests 或 PostgreSQL。
+- `FACTSOURCE_POLICY.md` 推导出的 12 个 terminal factsources 已逐个盘点：planning baseline 实际为
+  10 stale / 2 current。该残差进入 B5 同步矩阵，本轮不以 `CURRENT_CONFLICT=0` 阻断 planning。
+- 新 B5 plan 冻结 31 份 source copy、self-contained archive packet、close commit/exact-SHA CI/
+  annotated tag/remote verification、post-tag cleanup、capacity 与 deferred capability handoff。
+- Maven `-Pquality validate` 为 19/19 reactor SUCCESS、Checkstyle 0、Spotless PASS；forbidden
+  production/test/migration/API/Repository/contracts diff 为 0。本轮未创建 archive、未关闭 Stage、
+  未执行 capacity、未部署、未 push、未创建 tag。
+
+~~~text
+Task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE-PLAN
+Plan result: DONE / LOCAL ACCEPTED
+B5 type: FINAL_CLOSE_BATCH
+B5 technical implementation required: NO
+B5 governance close execution required: YES
+Next task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE
+~~~
+
 ## 2026-07-31 — Stage-QDR-9 B4 authority publication and final close
 
 - `9d472b4642f4d17fc4ee3c0cc7a0d66a0b7d7d83` 已通过普通 fast-forward 发布；发布后

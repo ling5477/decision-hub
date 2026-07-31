@@ -1,5 +1,37 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final-close plan
+
+~~~text
+Task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE-PLAN
+Planning baseline: c7f940c0c48900a0cfb7eac86aac745c8006629c
+Accepted CI: 30633947829 / PASS / 1243 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Stage-QDR-9 B1 / B2 / B3 / B4: CLOSED / ACCEPTED / PUBLISHED
+Active P0 / P1: 0 / 0
+Stage-QDR-9 functional close eligibility: YES
+Stage-QDR-9 governance close: NOT COMPLETED
+B5 type: FINAL_CLOSE_BATCH
+B5 technical implementation required: NO
+B5 governance close execution required: YES
+B5 final-close execution: NOT EXECUTED
+Terminal factsource planning inventory: 12 TOTAL / 10 STALE / 2 CURRENT
+Formal capacity: NOT_EXECUTED / DEFERRED
+Production capacity: NOT_PROVEN
+Production ready: NO
+Reference-liveness / retention: DEFERRED / FUTURE INDEPENDENT CAPABILITY
+V16 / V17 / V18: HISTORICAL OR SUPERSEDED / NOT AUTHORIZED
+Planning document: docs/current/DH_STAGE_QDR_9_B5_STAGE_FINAL_CLOSE_PLAN.md
+Planning document commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT PUBLISHED
+Next action: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE
+ALLOW_B5_GOVERNANCE_CLOSE_EXECUTION: YES / NEXT TASK ONLY
+ALLOW_STAGE_QDR_9_CLOSE_NOW / ALLOW_ARCHIVE_CREATION_NOW / ALLOW_TAG_NOW / ALLOW_POST_TAG_PRUNING_NOW: NO / NO / NO / NO
+ALLOW_NEXT_STAGE_PLAN / ALLOW_V16_IMPLEMENTATION / ALLOW_RETENTION_IMPLEMENTATION / ALLOW_CAPACITY_EXECUTION / ALLOW_SERVER_DEPLOYMENT: NO / NO / NO / NO / NO
+~~~
+
+本轮只完成 B5 final-close planning。下一任务必须在同一个 consolidated execution 中按
+authority/evidence revalidation、factsource+archive、close commit+CI+tag、post-tag cleanup 四个内部
+阶段执行；当前不得提前创建 archive、关闭 Stage、创建 tag 或 pruning。
+
 ## Terminal current authority — 2026-07-31 Stage-QDR-9 B4 final close
 
 ~~~text

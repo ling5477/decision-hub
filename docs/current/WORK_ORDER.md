@@ -1,5 +1,31 @@
 # Decision Hub 当前工单
 
+## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final-close plan
+
+~~~text
+Task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE-PLAN
+Task type: PLANNING_ONLY + DOCS_ONLY_CHANGE
+Planning baseline: c7f940c0c48900a0cfb7eac86aac745c8006629c
+Stage-QDR-9 B1 / B2 / B3 / B4: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 functional close eligibility: YES
+Stage-QDR-9 governance close: NOT COMPLETED
+B5 type: FINAL_CLOSE_BATCH
+B5 technical implementation required: NO
+B5 governance close execution required: YES
+B5 execution: NOT EXECUTED
+Consolidated phases: 1 AUTHORITY REVALIDATION / 2 FACTSOURCE+ARCHIVE / 3 CLOSE COMMIT+CI+TAG / 4 POST-TAG CLEANUP
+Formal capacity: NOT_EXECUTED / DEFERRED
+Production capacity: NOT_PROVEN
+Planning document: docs/current/DH_STAGE_QDR_9_B5_STAGE_FINAL_CLOSE_PLAN.md
+Next task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE
+ALLOW_B5_GOVERNANCE_CLOSE_EXECUTION: YES / NEXT TASK ONLY
+ALLOW_STAGE_QDR_9_CLOSE_NOW / ALLOW_ARCHIVE_CREATION_NOW / ALLOW_TAG_NOW / ALLOW_POST_TAG_PRUNING_NOW: NO / NO / NO / NO
+ALLOW_NEXT_STAGE_PLAN / ALLOW_V16_IMPLEMENTATION / ALLOW_RETENTION_IMPLEMENTATION / ALLOW_CAPACITY_EXECUTION / ALLOW_SERVER_DEPLOYMENT: NO / NO / NO / NO / NO
+~~~
+
+下一工单只能按 B5 plan 的四个内部 checkpoint 一次收口。除出现新的真实 P0/P1、代码 diff、
+migration/API/Repository 或安全边界变化外，不得拆出 docs-fix/review 循环。
+
 ## Terminal current authority — 2026-07-31 Stage-QDR-9 B4 final close
 
 ~~~text

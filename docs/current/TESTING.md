@@ -1,5 +1,28 @@
 # Decision Hub Testing
 
+## Terminal validation record — 2026-07-31 Stage-QDR-9 B5 final-close plan
+
+~~~text
+Task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE-PLAN
+Task scope: PLANNING_ONLY / DOCS_ONLY
+Technical baseline: c7f940c0c48900a0cfb7eac86aac745c8006629c
+Accepted CI: 30633947829 / PASS / exact head SHA matched
+Accepted tests: 1243 / 0 failures / 0 errors / 0 skipped
+PostgreSQL/Testcontainers: 17.10 / real execution / mandatory reports not skipped
+Architecture: PASS
+Accepted quality: 19 of 19 / Checkstyle 0 / Spotless PASS
+Full tests this planning task: NOT_RERUN
+PostgreSQL/Testcontainers this planning task: NOT_RERUN
+Evidence disposition: REUSED TECHNICAL BASELINE / NOT CAPACITY ACCEPTANCE
+Planning quality validate: PASS / 19 of 19 reactor / exit 0
+Checkstyle / Spotless: 0 violations / PASS
+Forbidden technical-scope diff: PASS / 0 files
+Archive / tag / pruning / capacity / deployment: NOT EXECUTED
+~~~
+
+本 planning task 仅运行 docs-only boundary checks 与 Maven quality。下一 B5 execution 必须在 close
+commit 发布后验证该 commit 的 exact-SHA CI；普通回归与 1243 tests 不得描述为 formal capacity。
+
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 legacy persistent identity blocker
 
 ~~~text

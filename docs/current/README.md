@@ -1,5 +1,15 @@
 # Decision Hub Current Docs
 
+## 当前任务 — Stage-QDR-9 B5 final-close plan（2026-07-31）
+
+- [B5 Stage Final Close Plan](DH_STAGE_QDR_9_B5_STAGE_FINAL_CLOSE_PLAN.md)
+- B1-B4：`CLOSED / ACCEPTED / PUBLISHED`。
+- B5：`FINAL_CLOSE_BATCH / PLAN DONE / EXECUTION NOT STARTED`；不需要技术实现，需要治理关闭执行。
+- Stage-QDR-9：functional close eligible，但 governance close、archive、tag 与 post-tag cleanup 尚未执行。
+- Formal capacity：`NOT_EXECUTED / DEFERRED`；production capacity：`NOT_PROVEN`；production ready：`NO`。
+- 下一精确任务：`DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE`。
+- 当前禁止：Stage close、archive、tag、pruning、V16/retention/capacity/deployment，以及任何技术/API/migration/Repository 变更。
+
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 legacy persistent identity blocker
 
 ~~~text

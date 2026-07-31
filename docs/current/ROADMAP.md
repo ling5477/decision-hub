@@ -1,5 +1,26 @@
 # Decision Hub Roadmap
 
+## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final-close plan
+
+~~~text
+Stage-QDR-9 B1 / B2 / B3 / B4: CLOSED / ACCEPTED / PUBLISHED
+Stage-QDR-9 functional close eligibility: YES
+Stage-QDR-9 governance close: NOT COMPLETED
+B5: FINAL_CLOSE_BATCH / PLAN DONE / EXECUTION NOT STARTED
+Technical implementation required: NO
+Governance close execution required: YES
+Route: REVALIDATE -> SYNCHRONIZE+ARCHIVE -> CLOSE COMMIT+CI+TAG -> POST-TAG CLEANUP
+Formal capacity: NOT_EXECUTED / DEFERRED
+Production capacity: NOT_PROVEN
+Reference-liveness / retention: DEFERRED / FUTURE INDEPENDENT CAPABILITY
+V16 / V17 / V18: HISTORICAL OR SUPERSEDED / NOT AUTHORIZED
+Next action: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE
+Next-stage planning: NOT ALLOWED UNTIL ARCHIVE+TAG+CLEANUP+REMOTE ALIGNMENT
+~~~
+
+本路线不恢复 legacy retirement、reference-liveness、retention、capacity 或 deployment。它们只能由
+Stage-QDR-9 完整关闭后的未来独立 planning 重新授权。
+
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 legacy persistent identity blocker
 
 ~~~text
