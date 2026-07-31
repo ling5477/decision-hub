@@ -1,23 +1,27 @@
 # Decision Hub 当前工单
 
-## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final close execution
+## Terminal current authority — 2026-07-31 Stage-QDR-9 final close
 
 ~~~text
 Task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE
 Task type: GOVERNANCE FINAL CLOSE / DOCS ONLY
-Stage-QDR-9: FUNCTIONALLY COMPLETE / GOVERNANCE CLOSE IN PROGRESS
+Stage-QDR-9: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 B1 / B2 / B3 / B4: CLOSED / ACCEPTED / PUBLISHED
-B5: PHASE 1 COMPLETE / PHASE 2 IN PROGRESS / PHASE 3-4 PENDING
+B5: PHASE 1-4 COMPLETE / GOVERNANCE CLOSE DONE
 Technical implementation: NONE
 Terminal factsources: 12 / 12 / SYNCHRONIZED / 0 CURRENT CONFLICTS
 Archive sources: 31 / 31 / HASH VERIFIED
 Formal capacity: NOT_EXECUTED / DEFERRED
 Production capacity: NOT_PROVEN
-Only next action: PUBLISH CLOSE COMMIT -> VERIFY EXACT-SHA CI -> CREATE ANNOTATED TAG -> PRUNE CURRENT SOURCES -> PUBLISH CLEANUP
+Close commit / CI: 88b1d6d8ea68c39eaa74486e5e0bcb6502e00036 / 30640835327 PASS
+Tag: dh-stage-qdr-9-close / ANNOTATED / LOCAL+REMOTE TARGET VERIFIED
+Current process sources: 31 / 31 PRUNED
+Cleanup commit: THIS_CLEANUP_COMMIT / PUBLICATION PENDING
+Only next action: DH-POST-STAGE-QDR-9-NEXT-STAGE-PLANNING / PLANNING ONLY
 Forbidden: TECHNICAL CHANGE / CAPACITY / DEPLOYMENT / V16 / RETENTION / REFERENCE-LIVENESS / REAL RUNTIME
 ~~~
 
-此工单只允许完成冻结的 B5 四阶段；后续旧工单均为历史时间线证据。
+此工单关闭 B5。后续旧工单均为历史时间线证据；下一任务只能冻结新阶段 plan/scope，不能实施。
 
 ## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final-close plan
 

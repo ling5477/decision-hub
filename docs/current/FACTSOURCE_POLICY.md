@@ -1,18 +1,19 @@
 # Decision Hub Factsource Policy
 
-## Active authority policy — 2026-07-31 Stage-QDR-9 B5 final close
+## Active authority policy — 2026-07-31 Stage-QDR-9 closed
 
 ~~~text
 Primary current-state authority: docs/current/STATUS.md + docs/current/WORK_ORDER.md
 Policy authority: docs/current/FACTSOURCE_POLICY.md
 Terminal factsources: 12 / 12 / FULL SYNC EVENT / 0 CURRENT CONFLICTS
-Current event: STAGE CLOSE IN PROGRESS
+Current event: STAGE CLOSE COMPLETE / TAGGED / POST-TAG SOURCES PRUNED
 Archive authority: docs/gates/stage-qdr-9/
 Historical blocks: PRESERVED AS HISTORICAL / SUPERSEDED / CONSUMED / ARCHIVED REFERENCE
 Formal capacity: NOT_EXECUTED / DEFERRED
 Production capacity: NOT_PROVEN
 Deferred capabilities: NOT CURRENT REQUIREMENTS / NOT IMPLEMENTATION AUTHORIZATION
-Post-tag rule: PRUNE ONLY THE 31 MANIFESTED STAGE PROCESS SOURCES
+Post-tag result: 31 MANIFESTED STAGE PROCESS SOURCES PRUNED / ARCHIVE RETAINED
+Next-stage rule: PLANNING ONLY / NO IMPLEMENTATION AUTHORIZATION
 ~~~
 
 入口和执行指导不得覆盖 primary authority；本节后的 B4 policy/authority 区块均为历史时间线。

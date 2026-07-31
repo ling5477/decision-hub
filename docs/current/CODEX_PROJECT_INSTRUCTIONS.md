@@ -1,18 +1,19 @@
 # Codex Project Instructions
 
-## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final close in progress
+## Terminal current authority — 2026-07-31 Stage-QDR-9 final close
 
 ~~~text
 Current task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE
-Stage-QDR-9: FUNCTIONALLY COMPLETE / GOVERNANCE CLOSE IN PROGRESS
+Stage-QDR-9: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 B1-B4: CLOSED / ACCEPTED / PUBLISHED
-B5: GOVERNANCE-ONLY FINAL CLOSE / TECHNICAL IMPLEMENTATION NONE
+B5: GOVERNANCE-ONLY FINAL CLOSE COMPLETE / TECHNICAL IMPLEMENTATION NONE
 Archive: docs/gates/stage-qdr-9/ / 31 SOURCE COPIES VERIFIED
-Close tag / post-tag cleanup: PENDING / PENDING
+Close tag: dh-stage-qdr-9-close / ANNOTATED / LOCAL+REMOTE VERIFIED
+Post-tag cleanup: 31 CURRENT SOURCES PRUNED / CLEANUP PUBLICATION PENDING
 Formal capacity: NOT_EXECUTED / DEFERRED
 Production capacity: NOT_PROVEN
 Reference-liveness / retention / V16-V18: DEFERRED OR HISTORICAL / NOT AUTHORIZED
-Next-stage planning: BLOCKED UNTIL B5 TAG AND CLEANUP COMPLETE
+Next-stage planning: DH-POST-STAGE-QDR-9-NEXT-STAGE-PLANNING / AFTER CLEANUP REMOTE ALIGNMENT
 Real HTTP / Provider / NQ / Agent / LangGraph / Paper / LIVE: NOT AUTHORIZED
 ~~~
 

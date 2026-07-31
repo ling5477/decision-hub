@@ -1,31 +1,36 @@
 # Decision Hub Status
 
-## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final close in progress
+## Terminal current authority — 2026-07-31 Stage-QDR-9 final close
 
 ~~~text
 Task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE
-Stage-QDR-9: FUNCTIONALLY COMPLETE / GOVERNANCE CLOSE IN PROGRESS
+Stage-QDR-9: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 B1 / B2 / B3 / B4: CLOSED / ACCEPTED / PUBLISHED
-B5: FINAL_CLOSE EXECUTION IN PROGRESS / GOVERNANCE ONLY
+B5: FINAL_CLOSE COMPLETE / GOVERNANCE ONLY
 B5 technical implementation: NONE
 Technical baseline: c7f940c0c48900a0cfb7eac86aac745c8006629c
 Accepted technical CI: 30633947829 / PASS / 1243 / 0 / 0 / 0 / PostgreSQL 17.10
 Planning commit: 5be3943aa82e7408f080fe95732379b5e329deb0 / PUBLISHED / CI 30639680724 PASS
 Active P0 / P1: 0 / 0
 Terminal factsources: 12 / 12 / SYNCHRONIZED / CURRENT_CONFLICT 0
-Archive: docs/gates/stage-qdr-9/ / CREATED / 31 OF 31 SOURCES VERIFIED
-Close commit / exact-SHA CI / annotated tag / post-tag cleanup: PENDING
+Archive: docs/gates/stage-qdr-9/ / PRESENT / 31 OF 31 SOURCES VERIFIED
+Close commit: 88b1d6d8ea68c39eaa74486e5e0bcb6502e00036 / PUBLISHED
+Close exact-SHA CI: 30640835327 / PASS
+Annotated tag: dh-stage-qdr-9-close / LOCAL+REMOTE VERIFIED / TARGET 88b1d6d8ea68c39eaa74486e5e0bcb6502e00036
+Post-tag current sources: 31 / 31 PRUNED AS PLANNED
+Cleanup commit: THIS_CLEANUP_COMMIT / PUBLICATION PENDING
 Formal capacity: NOT_EXECUTED / DEFERRED
 Production capacity: NOT_PROVEN
 Production ready: NO
 Reference-liveness / retention: DEFERRED / FUTURE INDEPENDENT CAPABILITY
 V16 / V17 / V18: HISTORICAL OR SUPERSEDED / NOT AUTHORIZED
-Next action: COMPLETE B5 CLOSE COMMIT, CI, TAG AND CLEANUP
-ALLOW_NEXT_STAGE_PLANNING: NO / B5 CLEANUP AND REMOTE ALIGNMENT REQUIRED
+Next action: DH-POST-STAGE-QDR-9-NEXT-STAGE-PLANNING / PLANNING ONLY
+ALLOW_NEXT_STAGE_PLANNING: YES / AFTER CLEANUP PUBLICATION AND REMOTE ALIGNMENT
 ALLOW_NEXT_STAGE_IMPLEMENTATION / ALLOW_V16 / ALLOW_RETENTION / ALLOW_CAPACITY / ALLOW_DEPLOYMENT: NO / NO / NO / NO / NO
 ~~~
 
-本节是唯一 primary current-state authority；后续旧区块均为历史时间线证据。
+本节是唯一 primary current-state authority；后续旧区块均为历史时间线证据。下一任务只能规划，
+不得自动选择 V16、retention、reference-liveness、capacity、部署或任何 runtime 实现。
 
 ## Terminal current authority — 2026-07-31 Stage-QDR-9 B5 final-close plan
 

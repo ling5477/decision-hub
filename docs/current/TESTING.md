@@ -1,6 +1,6 @@
 # Decision Hub Testing
 
-## Terminal validation record — 2026-07-31 Stage-QDR-9 B5 final close in progress
+## Terminal validation record — 2026-07-31 Stage-QDR-9 final close
 
 ~~~text
 Task: DH-STAGE-QDR-9-B5-STAGE-FINAL-CLOSE
@@ -13,8 +13,12 @@ Formal capacity executed: NO / DEFERRED
 Archive source copy: 31 PLANNED / 31 COPIED / 0 HASH FAILURES
 Terminal factsources: 12 / 12 / SYNCHRONIZED / 0 CURRENT CONFLICTS
 Local quality before close commit: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS / EXIT 0
-Close commit exact-SHA CI: PENDING
-Tag and cleanup validation: PENDING
+Close commit exact-SHA CI: 30640835327 / PASS / exact head 88b1d6d8ea68c39eaa74486e5e0bcb6502e00036
+Close CI jobs: Quality success / build & test (Testcontainers / Docker) success
+Annotated tag: dh-stage-qdr-9-close / LOCAL+REMOTE PEELED TARGET VERIFIED
+Post-tag source residue: 0 / 31 PRUNED
+Cleanup local quality: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS / EXIT 0
+Cleanup publication / exact-SHA CI: PENDING
 ~~~
 
 本记录只陈述已执行证据；普通 CI 和 reused tests 不构成 formal capacity acceptance。

@@ -1,14 +1,16 @@
 # Decision Hub
 
-## 当前状态 — Stage-QDR-9 B5 final close in progress
+## 当前状态 — Stage-QDR-9 closed
 
-- Stage-QDR-9：`FUNCTIONALLY COMPLETE / GOVERNANCE CLOSE IN PROGRESS`。
-- B1–B4：`CLOSED / ACCEPTED / PUBLISHED`；B5 仅执行治理关闭，无技术实现。
+- Stage-QDR-9：`CLOSED / ACCEPTED / ARCHIVED / TAGGED`；B5 仅执行治理关闭，无技术实现。
+- B1–B4：`CLOSED / ACCEPTED / PUBLISHED`。
 - 技术基线：`c7f940c0c48900a0cfb7eac86aac745c8006629c`；accepted CI：`30633947829 / PASS`。
 - B5 plan：`5be3943aa82e7408f080fe95732379b5e329deb0 / PUBLISHED / CI 30639680724 PASS`。
-- Archive：[`docs/gates/stage-qdr-9/`](docs/gates/stage-qdr-9/)；close tag 与 post-tag cleanup 尚待完成。
+- Archive：[`docs/gates/stage-qdr-9/`](docs/gates/stage-qdr-9/)；annotated tag `dh-stage-qdr-9-close`
+  已在本地与远端验证指向 `88b1d6d8ea68c39eaa74486e5e0bcb6502e00036`；31 个 current sources 已按 manifest prune。
 - Formal capacity：`NOT_EXECUTED / DEFERRED`；production capacity：`NOT_PROVEN`；production ready：`NO`。
 - Reference-liveness、retention、V16/V17/V18 及真实 HTTP/Provider/NQ/Agent/LangGraph/Paper/LIVE 均未授权。
+- 唯一下一动作：`DH-POST-STAGE-QDR-9-NEXT-STAGE-PLANNING`（planning-only；不授权实现）。
 
 以下早于 B5 的 authority 区块仅保留为历史时间线，不再构成当前状态或实施授权。
 

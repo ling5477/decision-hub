@@ -1,5 +1,16 @@
 # Decision Hub Worklog
 
+## 2026-07-31 — Stage-QDR-9 close tag 与 post-tag cleanup（进行中）
+
+- close commit `88b1d6d8ea68c39eaa74486e5e0bcb6502e00036` 已普通 fast-forward 发布；exact-SHA CI
+  `30640835327` 的 Quality 与 Testcontainers jobs 均 success。
+- annotated tag `dh-stage-qdr-9-close` 已创建并推送；本地 target 与远端 peeled target 均为 close SHA。
+- 删除前重新验证 31/31 archive copies 与 source hashes；随后只删除 manifest 中 31 个
+  `docs/current/DH_STAGE_QDR_9*.md`，未删除 shared authority/policy/testing/governance 文件。
+- Cleanup 后 `mvn -B -ntp -Pquality validate` 以 exit 0 完成：19/19 reactor SUCCESS、Checkstyle 0、
+  Spotless PASS；current source residue 与机器依赖均为 0。
+- cleanup commit、push、cleanup CI 与最终远端对齐仍待执行，不提前记录为通过。
+
 ## 2026-07-31 — Stage-QDR-9 B5 final close execution（进行中）
 
 - planning commit `5be3943aa82e7408f080fe95732379b5e329deb0` 已普通 fast-forward 发布；

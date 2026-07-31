@@ -9,10 +9,10 @@ Source hash failures: 0
 Terminal factsources: 12 / 12 / 0 CURRENT CONFLICTS
 Technical diff: 0 / PASS
 Local quality: 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS / EXIT 0
-Close commit: THIS_CLOSE_COMMIT
-Close exact-SHA CI: PENDING REMOTE RUN / REQUIRED BEFORE TAG
-Annotated tag: dh-stage-qdr-9-close / PENDING
-Post-tag cleanup: PENDING
+Close commit: 88b1d6d8ea68c39eaa74486e5e0bcb6502e00036 / PUBLISHED
+Close exact-SHA CI: 30640835327 / PASS
+Annotated tag: dh-stage-qdr-9-close / LOCAL+REMOTE VERIFIED / TARGET CLOSE COMMIT
+Post-tag cleanup: 31 CURRENT SOURCES PRUNED / CLEANUP PUBLICATION PENDING
 ~~~
 
 Archive-before-tag gate 在 packet inventory、source manifest、SHA256SUMS、docs-only boundary 与 local quality

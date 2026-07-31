@@ -1,12 +1,14 @@
 # Decision Hub Archive Index
 
-## Stage-QDR-9 archive — close in progress
+## Stage-QDR-9 archive — closed
 
 - Archive packet：[`docs/gates/stage-qdr-9/`](../gates/stage-qdr-9/README.md)
 - Technical baseline：`c7f940c0c48900a0cfb7eac86aac745c8006629c`；CI `30633947829 / PASS`。
 - Planning commit：`5be3943aa82e7408f080fe95732379b5e329deb0 / PUBLISHED / CI 30639680724 PASS`。
 - Source copies：`31 / 31 / SHA-256 VERIFIED`。
-- Close commit / annotated tag / cleanup commit：`PENDING / PENDING / PENDING`。
+- Close commit：`88b1d6d8ea68c39eaa74486e5e0bcb6502e00036`；exact-SHA CI `30640835327 / PASS`。
+- Annotated tag：`dh-stage-qdr-9-close`；本地与远端 peeled target 均为 close commit。
+- Cleanup commit：`THIS_CLEANUP_COMMIT / PUBLICATION PENDING`；31 个 current source 已按 manifest prune。
 - Formal capacity：`NOT_EXECUTED / DEFERRED`；production capacity：`NOT_PROVEN`。
 
 本节后的旧 B4 authority 区块仅为历史索引证据。

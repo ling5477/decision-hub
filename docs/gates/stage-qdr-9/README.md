@@ -29,5 +29,6 @@ Production ready: NO
 - `STATUS_SNAPSHOT.md`：tag 前 12 个 terminal factsources 快照。
 - `SOURCE_MANIFEST.md`、`SHA256SUMS`、`source-documents/`：31 份源文档与完整性证据。
 
-Tag `dh-stage-qdr-9-close` 只能在包含本 packet 的 close commit exact-SHA CI 通过后创建；
-post-tag cleanup 只删除 manifest 精确列出的 current source，不能改写本归档的历史技术含义。
+包含本 packet 的 close commit `88b1d6d8ea68c39eaa74486e5e0bcb6502e00036` 已通过 exact-SHA CI
+`30640835327`。Annotated tag `dh-stage-qdr-9-close` 的本地与远端 peeled target 已验证为该 SHA。
+Post-tag cleanup 只删除 manifest 精确列出的 31 个 current source，不改写本归档的历史技术含义。

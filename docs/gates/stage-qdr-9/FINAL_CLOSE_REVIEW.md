@@ -35,5 +35,5 @@ cleanup 可独立 revert，但不能改变 tag 指向。
 
 ## Decision
 
-`STAGE_QDR_9_FUNCTIONAL_CLOSE = PASS`。Governance close 仅在 close commit publication、exact-SHA CI、
-annotated tag remote verification 与 cleanup publication 全部完成后为 PASS。
+`STAGE_QDR_9_FUNCTIONAL_CLOSE = PASS`。Close commit publication、exact-SHA CI 与 annotated tag remote
+verification 已完成；governance close 仅待 cleanup commit publication 与最终远端对齐。
