@@ -1,5 +1,42 @@
 # Decision Hub Factsource Policy
 
+## Terminal current authority — 2026-08-01 feedback containment milestone functional close
+
+~~~text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-MILESTONE-FINAL-CLOSE
+Milestone: CLOSED / ACCEPTED / PUBLISHED / GOVERNANCE CLOSE PENDING TAG
+Implementation: fddf3558255b5a4f8f6071da42363649942afe46 / PUBLISHED
+Implementation exact-SHA CI: 30701063741 / PASS / QUALITY + TESTCONTAINERS
+Security exact-diff review: PASS / 0 REPORTABLE FINDINGS / ACTIVE P0-P3 0
+CodeRabbit: NOT_EXECUTED / TOOL_OR_NETWORK_BLOCKED
+Ingress boundary: INGEST_ONLY / NO_IMPLICIT_LEARNING / NO_MUTABLE_LEARNING_STORE_ACCESS
+Inbound ExperienceFeedbackService.apply callers: 0
+Inbound ExperienceStore / PheromoneStore / FailureCaseStore writes: 0 / 0 / 0
+ExperienceFeedbackService and mutable stores: RETAINED / NOT REACHABLE FROM INBOUND FEEDBACK
+API / migration / Repository / contracts / POM / workflow / NQ: UNCHANGED / NONE
+Legacy environment contract: UNCHANGED / CHARACTERIZED
+Structured QDR attribution: INTERNAL-ONLY / UNCHANGED / NOT CONNECTED
+Archive: docs/gates/platform-hardening-feedback-side-effect-containment/ / COMPLETE
+Archive sources / SHA-256: 2 OF 2 / VERIFIED / 0 MISSING / 0 UNEXPECTED
+Archive close commit: THIS_ARCHIVE_COMMIT / PUBLICATION AUTHORIZED / EXACT-SHA CI REQUIRED
+Close tag: dh-platform-hardening-feedback-side-effect-containment-close / PENDING
+Post-tag cleanup: PLANNED / 2 CURRENT PROCESS SOURCES
+Terminal factsources: 12 / 12 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+Stage-QDR-9: CLOSED / ACCEPTED / ARCHIVED / TAGGED / IMMUTABLE / NOT REOPENED
+Formal capacity: NOT_EXECUTED / DEFERRED
+Production capacity / production ready: NOT_PROVEN / NO
+Next action: PUBLISH CLOSE COMMIT -> EXACT-SHA CI -> ANNOTATED TAG -> POST-TAG CLEANUP
+Next-stage implementation: NOT AUTHORIZED
+ALLOW_FEEDBACK_LEARNING / ALLOW_CASE_PROMOTION / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION: NO / NO / NO / NO
+ALLOW_CAPACITY / ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是 tag 前唯一 terminal authority。其后的 local-implementation、Stage-QDR-9 及更早区块均为历史时间线，
+不得覆盖本节或授权任何技术实现。Governance close 只有在 close commit exact-SHA CI 和 annotated tag
+本地/远端 peeled target 验证完成后才能标记为 `ARCHIVED / TAGGED`。
+
+
 ## Active authority policy — 2026-07-31 Stage-QDR-9 closed
 
 ~~~text
