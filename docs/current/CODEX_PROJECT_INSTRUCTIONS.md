@@ -1,5 +1,25 @@
 # Codex Project Instructions
 
+## Terminal current authority — 2026-08-01 feedback containment implementation handoff
+
+~~~text
+Current task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-CONSOLIDATED-IMPLEMENTATION
+Task authorization: B1-B3 CONSOLIDATED / EXACT ALLOWLIST / LOCAL COMMIT ONLY
+Canonical work order: docs/current/DH_PLATFORM_HARDENING_FEEDBACK_SIDE_EFFECT_CONTAINMENT_IMPLEMENTATION_WORK_ORDER.md
+Stage-QDR-9: CLOSED / ACCEPTED / ARCHIVED / TAGGED / IMMUTABLE
+Target boundary: NqFeedbackIngestionService = INGEST_ONLY / NO_IMPLICIT_LEARNING
+Required result: INBOUND PRODUCTION APPLY CALLS = 0 / MUTABLE STORE INTERACTIONS = 0
+API / migration / Repository / contracts / POM / workflow: FORBIDDEN
+Structured attribution connection: FORBIDDEN / KEEP INTERNAL-ONLY
+Implementation commit: ONE LOCAL COMMIT / NO PUSH / NO TAG
+B4 final close: SEPARATE TASK
+Reference-liveness / retention / capacity / NQ / Provider / Agent / LangGraph / Paper / LIVE: NOT AUTHORIZED
+~~~
+
+执行前必须重新验证 baseline、callsite inventory 与精确 allowlist。B1 不拆 standalone review；B1–B3 在同一
+implementation task 完成。发现 allowlist 外依赖、API/migration/Repository 需求或 hidden mutation 时立即停止，
+返回 `DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-SCOPE-BLOCKER`。
+
 ## Terminal current authority — 2026-08-01 feedback side-effect containment handoff
 
 ~~~text

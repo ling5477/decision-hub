@@ -1,5 +1,28 @@
 # Decision Hub 当前工单
 
+## Terminal current authority — 2026-08-01 consolidated implementation handoff
+
+~~~text
+Completed task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-IMPLEMENTATION-WORK-ORDER
+Work-order result: DONE / LOCAL DOCS ACCEPTED
+Call-chain inventory: PASS
+Implicit mutation: CONFIRMED
+Security contract: INGEST_ONLY / NO_IMPLICIT_LEARNING / NO_MUTABLE_LEARNING_STORE_ACCESS
+Implementation design: B1-B3 CONSOLIDATED / ONE LOCAL IMPLEMENTATION COMMIT
+API / migration / Repository impact: NONE / NONE / NONE
+Only next task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-CONSOLIDATED-IMPLEMENTATION
+Next-task authorization: EXACT PRODUCTION + TEST + FACTSOURCE ALLOWLIST ONLY
+Implementation in this work-order task: NOT EXECUTED / NOT AUTHORIZED
+B4 final close: SEPARATE TASK / NOT AUTHORIZED NOW
+Push / tag: NOT AUTHORIZED
+Forbidden: SCOPE EXPANSION / API / MIGRATION / REPOSITORY / NQ / PROVIDER / AGENT / LANGGRAPH / PAPER / LIVE
+~~~
+
+下一任务只能按
+`DH_PLATFORM_HARDENING_FEEDBACK_SIDE_EFFECT_CONTAINMENT_IMPLEMENTATION_WORK_ORDER.md` 的 B1–B3 与精确
+allowlist 一次实施、测试和本地提交。若需要任何 forbidden path，停止并返回 scope blocker；不得边做边扩。
+以下 selected next-stage work-order handoff 已被本工单消费，保留为历史时间线。
+
 ## Terminal current authority — 2026-08-01 selected next-stage work-order handoff
 
 ~~~text

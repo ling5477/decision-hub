@@ -1,5 +1,38 @@
 # Decision Hub Testing
 
+## Terminal validation record — 2026-08-01 feedback containment implementation work order
+
+~~~text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-IMPLEMENTATION-WORK-ORDER
+Task scope: WORK_ORDER_ONLY / SECURITY BOUNDARY DESIGN / DOCS ONLY
+Baseline HEAD / plan commit: 241663f3ba60cb4d7273bf3b2374ec79509b7cf4
+HEAD parent / origin/dev: ddaf7c37e772dcd798d4631eabe0471d26527756
+Ahead / behind before write: 1 / 0
+Worktree / staged before write: clean / empty
+Call-chain inventory: PASS
+Production ExperienceFeedbackService apply callsites: 2 / BOTH CLASSIFIED
+Direct mutable-store write methods: 3 / ONE OWNER SERVICE
+Listener / scheduler / callback mutable references: 0 FOUND
+Scope invariants: PASS / 3 OF 3
+Forbidden technical-scope diff: 0
+Migration / API / Repository / contracts / POM / workflow diff: 0
+docs/gates diff: 0
+Unexpected files: 0
+Quality validate: PASS / EXIT 0 / 19 OF 19 REACTOR SUCCESS
+Checkstyle: 0 violations
+Spotless: PASS
+Full tests this task: NOT_RERUN / DOCS-ONLY WORK ORDER
+PostgreSQL/Testcontainers this task: NOT_RERUN
+Formal capacity: NOT_EXECUTED
+Production capacity: NOT_PROVEN
+Technical implementation: NOT EXECUTED / NOT AUTHORIZED
+Push / tag: NOT EXECUTED
+~~~
+
+本轮真实执行 `git fetch --prune origin`、scope/diff/callsite scans 与
+`mvn -B -ntp -Pquality validate`。Maven exit 0，19/19 reactor success、Checkstyle 0、Spotless PASS。
+完整测试和 PostgreSQL/Testcontainers 按 work-order-only 约束未重跑；历史 CI 只作为背景，不计入本轮验证。
+
 ## Terminal validation record — 2026-08-01 post-Stage-QDR-9 next stage planning
 
 ~~~text

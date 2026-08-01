@@ -1,6 +1,6 @@
 # Decision Hub
 
-## 当前状态 — post-Stage-QDR-9 next stage plan frozen
+## 当前状态 — feedback side-effect containment work order frozen
 
 - Stage-QDR-9：`CLOSED / ACCEPTED / ARCHIVED / TAGGED`；B5 仅执行治理关闭，无技术实现。
 - B1–B4：`CLOSED / ACCEPTED / PUBLISHED`。
@@ -13,8 +13,10 @@
 - Post-stage plan：[`DH_POST_STAGE_QDR_9_NEXT_STAGE_PLAN.md`](docs/current/DH_POST_STAGE_QDR_9_NEXT_STAGE_PLAN.md)
   已选择 `DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT`，只收口 legacy feedback 的隐式
   Experience/Pheromone mutation，不新增 learning、API、migration 或 runtime integration。
-- 唯一下一动作：`DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-IMPLEMENTATION-WORK-ORDER`；
-  只允许 work-order/scope freeze，不授权 implementation。
+- Implementation work order：[`DH_PLATFORM_HARDENING_FEEDBACK_SIDE_EFFECT_CONTAINMENT_IMPLEMENTATION_WORK_ORDER.md`](docs/current/DH_PLATFORM_HARDENING_FEEDBACK_SIDE_EFFECT_CONTAINMENT_IMPLEMENTATION_WORK_ORDER.md)
+  已冻结调用链、两类安全合同、精确 production/test/factsource allowlists 与 regression matrix。
+- 唯一下一动作：`DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-CONSOLIDATED-IMPLEMENTATION`；
+  只允许 B1–B3 exact scope、完整回归与一个本地 commit，禁止 push、tag 和 scope expansion。
 
 以下 Stage-QDR-9 authority 区块仅保留为历史时间线，不再构成当前状态或实施授权。
 

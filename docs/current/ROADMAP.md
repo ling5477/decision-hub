@@ -1,21 +1,24 @@
 # Decision Hub Roadmap
 
-## 当前路线 — feedback side-effect containment plan frozen
+## 当前路线 — feedback side-effect containment work order frozen
 
 ~~~text
 Stage-QDR-9: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 Post-stage planning: DONE
 Selected stage: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT
+Implementation work order: DONE / CALL CHAIN + ALLOWLIST + TEST MATRIX FROZEN
 Route: B1 SECURITY CONTRACT -> B2 SIDE-EFFECT DECOUPLING -> B3 REGRESSION GUARDS -> B4 FINAL CLOSE
-Next task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-IMPLEMENTATION-WORK-ORDER
-Implementation now: NOT AUTHORIZED
+Next task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-CONSOLIDATED-IMPLEMENTATION
+Next task scope: B1-B3 / EXACT ALLOWLIST / ONE LOCAL COMMIT / NO PUSH
+B4: SEPARATE FINAL-CLOSE TASK
 Deferred: REFERENCE-LIVENESS / RETENTION / FORMAL CAPACITY / NQ-DH INTEGRATION / FEEDBACK EVOLUTION / AGENT
 Production capacity: NOT_PROVEN
 ~~~
 
-当前路线先消除 legacy NQ feedback ingress 的 implicit Experience/Pheromone mutation，再考虑任何 bounded
-case evolution 或 Agent prerequisite。该路线不使用 `Stage-QDR-10`，不混入 production readiness 或
-cross-repo integration。以下 Stage-QDR-9 路线均为 closed-stage 历史时间线。
+下一任务按冻结工单一次完成 B1–B3：把 legacy NQ feedback ingress 与两个 production `apply` caller
+收口为 ingest-only，增加 wiring/architecture/zero-interaction guards，并在完整回归后只做本地提交。
+不得混入 production readiness、feedback evolution 或 cross-repo integration。以下 Stage-QDR-9 路线均为
+closed-stage 历史时间线。
 
 ## Historical current route — Stage-QDR-9 closed
 

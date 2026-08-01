@@ -1,5 +1,35 @@
 # Decision Hub Worklog
 
+## 2026-08-01 — Feedback side-effect containment implementation work order
+
+- 基线符合状态 A：`dev`，HEAD/plan commit `241663f3ba60cb4d7273bf3b2374ec79509b7cf4`，parent 与
+  `origin/dev` 均为 `ddaf7c37e772dcd798d4631eabe0471d26527756`，ahead/behind `1/0`，写入前
+  worktree/staged clean/empty。
+- 从实际代码冻结完整生产链：authentication/idempotency/rate/HMAC/header binding -> Controller ->
+  ingestion -> validator/repository/router -> 8 handlers -> legacy event append -> implicit learning mutation。
+- 全仓确认两个 production `ExperienceFeedbackService#apply` caller：真实 inbound
+  `AbstractNqFeedbackEventHandler` 与无生产 caller 但已装配的 `DefaultNqIntegrationUseCase`；三个 mutable-store
+  写方法只由 `DefaultExperienceFeedbackService` 拥有，未发现 listener/scheduler/callback 旁路。
+- 冻结现有 `NqFeedbackIngestionService` 为 `INGEST_ONLY / NO_IMPLICIT_LEARNING` port；后续 B2 将 ingress
+  wiring 拆入独立 `FeedbackIngestionWiringConfig`，并把两个 production caller 都改为 append-only。
+- 未强接 structured QDR feedback：deterministic service 无 production bean，internal persistence service 使用
+  V15 Repository；接入会扩大语义与 Repository scope。
+- 已冻结 16 个 production paths、8 个 test paths、factsource allowlist、API/auth/rate/idempotency compatibility、
+  unit/Spring/WebMvc/architecture/full regression matrix，以及 B1–B3 consolidated + B4 separate close discipline。
+- `mvn -B -ntp -Pquality validate` exit 0：19/19 reactor SUCCESS、Checkstyle 0、Spotless PASS；技术、测试、
+  migration、API、Repository、contracts、POM、workflow 与 archive diff 均为 0。完整测试未重跑。
+- 本轮未实施 Java/test/API/migration/Repository/NQ/Provider/Agent/LangGraph/Paper/LIVE，未执行 capacity，
+  未 push、未创建 tag。
+
+~~~text
+Work-order result: DONE
+Call-chain inventory: PASS
+Implicit mutation: CONFIRMED
+Allow consolidated implementation: YES / NEXT TASK ONLY
+Allow implementation in this task: NO
+Next task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-CONSOLIDATED-IMPLEMENTATION
+~~~
+
 ## 2026-08-01 — Post-Stage-QDR-9 next stage planning
 
 - 只读核验 `dev`、HEAD、`origin/dev` 与 advertised SHA 均为 `ddaf7c37e772dcd798d4631eabe0471d26527756`，
