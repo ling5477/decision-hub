@@ -1,5 +1,60 @@
 # Decision Hub Testing
 
+## Terminal current authority — 2026-08-02 post-feedback-containment next-stage planning
+
+~~~text
+Task: DH-POST-FEEDBACK-SIDE-EFFECT-CONTAINMENT-NEXT-STAGE-PLANNING
+Plan result: DONE / SCOPE FROZEN / DOCS ONLY
+Closed milestone: CLOSED / ACCEPTED / ARCHIVED / TAGGED / NOT REOPENED
+Planning baseline: 071bc29ee3c03b4099623c4ade441783cc22091f
+Selected workstream: FEEDBACK_ENVELOPE_EVENT_ATOMIC_PERSISTENCE
+Selected stage: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY
+Selected stage type: DH_OWNED / PLATFORM_HARDENING / DATA_CONSISTENCY_AND_SECURITY_BOUNDARY
+Current code gap: ENVELOPE SAVE AND LEGACY EVENT APPEND LACK ONE ATOMIC RESULT
+Risk classification: SECURITY_HARDENING_CANDIDATE / NOT CURRENT P0 OR P1
+Selected stage scope: FROZEN / 4 BATCHES
+Migration / API impact: NONE / NONE
+Repository impact: YES / B1 REVIEW REQUIRED
+Formal capacity: NOT_EXECUTED / PRODUCTION_READINESS_GATE / DEFERRED
+Production capacity: NOT_PROVEN
+Next action: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-IMPLEMENTATION-WORK-ORDER
+ALLOW_NEXT_STAGE_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_NEXT_STAGE_IMPLEMENTATION_NOW: NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是新的 planning authority。完整候选矩阵、transaction/repository review gate、4 个 batches、测试与
+close discipline 见 `DH_POST_FEEDBACK_SIDE_EFFECT_CONTAINMENT_NEXT_STAGE_PLAN.md`。本规划只允许进入
+implementation work order，不授权技术实现；以下 feedback containment 与 Stage-QDR-9 区块均为已关闭历史。
+
+## Terminal validation record — 2026-08-02 post-feedback-containment next-stage planning
+
+~~~text
+Task: DH-POST-FEEDBACK-SIDE-EFFECT-CONTAINMENT-NEXT-STAGE-PLANNING
+Task scope: PLANNING_ONLY / DOCS_ONLY_CHANGE
+Baseline HEAD / origin/dev / advertised SHA: 071bc29ee3c03b4099623c4ade441783cc22091f
+Ahead / behind before write: 0 / 0
+Worktree / staged before write: clean / empty
+Closed-milestone factsources: PASS / 12 OF 12 / ONE HASH / 0 CONFLICTS
+Planning-authority write-scope sources: PASS / 8 OF 8 / ONE HASH
+Forbidden technical diff: 0
+Archive diff: 0
+Quality validate: PASS / EXIT 0 / 19 OF 19 REACTOR SUCCESS
+Checkstyle: 0 violations
+Spotless: PASS
+Full tests this task: NOT_RERUN / PLANNING ONLY
+Reused CI: 30701063741 / 30702114843 / 30702569171 / HISTORICAL ONLY
+Reused regression: 1252 / 0 / 0 / 0 / POSTGRESQL 17.10 / NOT THIS-TASK EXECUTION
+Formal capacity: NOT EXECUTED
+Production capacity: NOT PROVEN
+~~~
+
+本轮只执行 Git/tag/archive/scope/code-reality 检查和 Maven quality validate。历史完整回归与三个 CI run
+只作为已关闭 milestone 的背景证据，不计为本轮 test 或 capacity acceptance。
+
+
 ## Terminal current authority — 2026-08-01 feedback containment milestone final close
 
 ~~~text

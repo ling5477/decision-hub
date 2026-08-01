@@ -1,5 +1,47 @@
 # Decision Hub Worklog
 
+## Terminal current authority — 2026-08-02 post-feedback-containment next-stage planning
+
+~~~text
+Task: DH-POST-FEEDBACK-SIDE-EFFECT-CONTAINMENT-NEXT-STAGE-PLANNING
+Plan result: DONE / SCOPE FROZEN / DOCS ONLY
+Closed milestone: CLOSED / ACCEPTED / ARCHIVED / TAGGED / NOT REOPENED
+Planning baseline: 071bc29ee3c03b4099623c4ade441783cc22091f
+Selected workstream: FEEDBACK_ENVELOPE_EVENT_ATOMIC_PERSISTENCE
+Selected stage: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY
+Selected stage type: DH_OWNED / PLATFORM_HARDENING / DATA_CONSISTENCY_AND_SECURITY_BOUNDARY
+Current code gap: ENVELOPE SAVE AND LEGACY EVENT APPEND LACK ONE ATOMIC RESULT
+Risk classification: SECURITY_HARDENING_CANDIDATE / NOT CURRENT P0 OR P1
+Selected stage scope: FROZEN / 4 BATCHES
+Migration / API impact: NONE / NONE
+Repository impact: YES / B1 REVIEW REQUIRED
+Formal capacity: NOT_EXECUTED / PRODUCTION_READINESS_GATE / DEFERRED
+Production capacity: NOT_PROVEN
+Next action: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-IMPLEMENTATION-WORK-ORDER
+ALLOW_NEXT_STAGE_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_NEXT_STAGE_IMPLEMENTATION_NOW: NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是新的 planning authority。完整候选矩阵、transaction/repository review gate、4 个 batches、测试与
+close discipline 见 `DH_POST_FEEDBACK_SIDE_EFFECT_CONTAINMENT_NEXT_STAGE_PLAN.md`。本规划只允许进入
+implementation work order，不授权技术实现；以下 feedback containment 与 Stage-QDR-9 区块均为已关闭历史。
+
+## 2026-08-02 — Post-feedback-containment next-stage planning
+
+- 验证 `dev`、HEAD/origin/advertised SHA `071bc29e...`、ahead/behind `0/0`、clean/empty baseline。
+- 验证 close tag 本地与远端 peeled target 均为 `86381c6a...`，archive 存在且 milestone current residue 为 0。
+- 从代码确认 envelope save 与 legacy event append 之间没有统一原子边界；append failure 后相同 eventId
+  重试会在 dispatch 前返回 duplicate，现有测试没有覆盖 rollback/recovery/commit-unknown 完整性。
+- 比较八类 workstream 后选择 `DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY`，冻结 4 个 batches；
+  formal capacity、reference-liveness、retention、feedback evolution、Agent 与 NQ-DH 继续独立 deferred。
+- 仅修改 allowlisted docs；technical/archive diff 为 0。`mvn -B -ntp -Pquality validate` exit 0，
+  19/19 reactor success、Checkstyle 0、Spotless PASS；完整测试未重跑。
+- 下一任务只允许 implementation work order，不授权实现、push、tag、capacity 或任何外部 runtime。
+
+
 ## Terminal current authority — 2026-08-01 feedback containment milestone final close
 
 ~~~text
