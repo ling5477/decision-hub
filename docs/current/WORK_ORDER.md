@@ -1,5 +1,27 @@
 # Decision Hub 当前工单
 
+## Terminal current authority — 2026-08-01 implementation-to-final-close handoff
+
+~~~text
+Completed task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-CONSOLIDATED-IMPLEMENTATION
+Result: DONE / LOCAL_ACCEPTED
+FEEDBACK_SIDE_EFFECT_CONTAINMENT: IMPLEMENTED / LOCAL_ACCEPTED
+Boundary: INGEST_ONLY / NO_IMPLICIT_LEARNING / NO_MUTABLE_LEARNING_STORE_ACCESS
+Inbound apply callers / mutable store writes: 0 / 0
+Validation: 19 OF 19 / 1252 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED / QUALITY PASS
+Implementation commit: THIS_IMPLEMENTATION_COMMIT / LOCAL_ONLY / NOT PUSHED
+Only next task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-MILESTONE-FINAL-CLOSE
+Next-task authorization: REVIEW AND CLOSE PLANNING ONLY / PUSH REQUIRES SEPARATE AUTHORIZATION
+Remote implementation CI: PENDING
+Milestone final close: NOT_STARTED
+Tag: ABSENT / NOT AUTHORIZED
+Production capacity: NOT_PROVEN
+Forbidden: IMPLEMENTATION PUSH / TAG / FEEDBACK LEARNING / API / MIGRATION / REPOSITORY / NQ / PROVIDER / AGENT / LANGGRAPH / PAPER / LIVE
+~~~
+
+当前实现不得继续扩展。下一任务只能重新审查精确 implementation diff，并在取得独立授权后执行 publication、
+exact-SHA CI、archive-before-tag 与 final close；不得在本任务提前 push 或创建 tag。
+
 ## Terminal current authority — 2026-08-01 consolidated implementation handoff
 
 ~~~text

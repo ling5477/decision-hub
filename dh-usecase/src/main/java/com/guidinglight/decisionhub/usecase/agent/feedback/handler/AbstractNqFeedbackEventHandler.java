@@ -7,7 +7,6 @@ import com.guidinglight.decisionhub.common.util.TimeProvider;
 import com.guidinglight.decisionhub.domain.feedback.FeedbackSource;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEnvelope;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEvent;
-import com.guidinglight.decisionhub.usecase.agent.ExperienceFeedbackService;
 import com.guidinglight.decisionhub.usecase.agent.NqFeedbackEventRepository;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackEventHandler;
 import java.util.HashMap;
@@ -17,13 +16,12 @@ import java.util.Map;
 /**
  * Stage2-PoC-B2：handler 公共基类。
  *
- * <p>每个 8 个 handler 的最小闭环：
+ * <p>8 个 handler 的共同 ingest-only 行为：
  *
  * <ol>
  *   <li>解析 {@code envelope.payloadJson} 为 {@code Map<String,Object>}（失败则降级为空 map）。
- *   <li>构造 Stage1 {@link NqFeedbackEvent} 桥接现有 {@link ExperienceFeedbackService}。
+ *   <li>构造 Stage1 {@link NqFeedbackEvent}，保持既有事件格式。
  *   <li>追加 Stage1 事件（{@link NqFeedbackEventRepository#append}）便于 Stage1 查询继续可用。
- *   <li>调用 {@link ExperienceFeedbackService#apply(NqFeedbackEvent)} 触发经验/信息素更新。
  * </ol>
  *
  * <p>禁止在子类里写复杂业务推理；子类只能贡献：positive 判定、FeedbackSource 选择、candidateId 解析。
@@ -32,15 +30,12 @@ import java.util.Map;
  */
 public abstract class AbstractNqFeedbackEventHandler implements NqFeedbackEventHandler {
 
-  private final ExperienceFeedbackService experienceFeedbackService;
   private final NqFeedbackEventRepository feedbackEventRepository;
   private final ObjectMapper objectMapper;
 
   protected AbstractNqFeedbackEventHandler(
-      final ExperienceFeedbackService experienceFeedbackService,
       final NqFeedbackEventRepository feedbackEventRepository,
       final ObjectMapper objectMapper) {
-    this.experienceFeedbackService = experienceFeedbackService;
     this.feedbackEventRepository = feedbackEventRepository;
     this.objectMapper = objectMapper;
   }
@@ -61,7 +56,6 @@ public abstract class AbstractNqFeedbackEventHandler implements NqFeedbackEventH
             envelope.getOccurredAt(),
             envelope.getReceivedAt() == null ? TimeProvider.now() : envelope.getReceivedAt());
     feedbackEventRepository.append(event);
-    experienceFeedbackService.apply(event);
   }
 
   /** 子类决定 Stage1 FeedbackSource 映射（BACKTEST / PAPER / RISK / RELEASE / LIVE / REVIEW）。 */

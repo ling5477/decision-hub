@@ -64,7 +64,7 @@ public final class DefaultNqFeedbackIngestionService implements NqFeedbackIngest
       return IngestionResult.duplicate(envelope.getEventId());
     }
 
-    // 4. 派发 handler；handler 内部失败由 handler 自身降级，不影响 ACCEPTED 响应。
+    // 4. 派发 append-only handler；append 或未知异常直接向上失败关闭，不返回 false success。
     router.route(envelope, command.getTenantId());
 
     return IngestionResult.accepted(envelope.getEventId());

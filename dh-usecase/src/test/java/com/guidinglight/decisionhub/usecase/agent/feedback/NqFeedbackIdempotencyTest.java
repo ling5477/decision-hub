@@ -2,10 +2,12 @@ package com.guidinglight.decisionhub.usecase.agent.feedback;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEnvelope;
+import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEvent;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEventType;
 import com.guidinglight.decisionhub.usecase.agent.NqFeedbackEventRepository;
 import com.guidinglight.decisionhub.usecase.agent.ResearchRunRepository;
@@ -13,7 +15,9 @@ import com.guidinglight.decisionhub.usecase.agent.feedback.impl.DefaultNqFeedbac
 import com.guidinglight.decisionhub.usecase.agent.feedback.impl.DefaultNqFeedbackIngestionService;
 import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryNqFeedbackEventRepository;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
@@ -143,6 +147,45 @@ class NqFeedbackIdempotencyTest {
     assertTrue(feedbackRepo.findEnvelopeByEventId("e-forbidden-store").isEmpty());
   }
 
+  @Test
+  void repositoryWriteFailurePropagatesAndDoesNotDispatchHandler() {
+    final ResearchRunRepository runRepo = B2TestFixtures.repoWithRun(TRACE);
+    final AtomicInteger handlerCalls = new AtomicInteger();
+    final NqFeedbackIngestionService service =
+        new DefaultNqFeedbackIngestionService(
+            new DefaultNqFeedbackContractValidator(runRepo, new ObjectMapper()),
+            new FailingSaveRepository(),
+            (envelope, tenantId) -> handlerCalls.incrementAndGet());
+
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            service.ingest(
+                B2TestFixtures.legalCommand(
+                    "e-save-failure", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE)));
+    assertEquals(0, handlerCalls.get(), "failed persistence must not dispatch a handler");
+  }
+
+  @Test
+  void unknownHandlerFailurePropagatesInsteadOfReturningAccepted() {
+    final ResearchRunRepository runRepo = B2TestFixtures.repoWithRun(TRACE);
+    final NqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
+    final NqFeedbackIngestionService service =
+        new DefaultNqFeedbackIngestionService(
+            new DefaultNqFeedbackContractValidator(runRepo, new ObjectMapper()),
+            feedbackRepo,
+            (envelope, tenantId) -> {
+              throw new IllegalStateException("unexpected handler failure");
+            });
+
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            service.ingest(
+                B2TestFixtures.legalCommand(
+                    "e-handler-failure", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE)));
+  }
+
   /** 计数 handler，断言重放时不重复调用。 */
   private static final class CountingHandler implements NqFeedbackEventHandler {
     private final NqFeedbackEventType type;
@@ -162,6 +205,28 @@ class NqFeedbackIdempotencyTest {
     public void handle(final NqFeedbackEnvelope envelope, final String tenantId) {
       assertSame(type, envelope.getEventType());
       counter.incrementAndGet();
+    }
+  }
+
+  private static final class FailingSaveRepository implements NqFeedbackEventRepository {
+    @Override
+    public void append(final NqFeedbackEvent event) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<NqFeedbackEvent> listByRun(final String tenantId, final String runId) {
+      return List.of();
+    }
+
+    @Override
+    public boolean saveEnvelope(final NqFeedbackEnvelope envelope) {
+      throw new IllegalStateException("save failed");
+    }
+
+    @Override
+    public Optional<NqFeedbackEnvelope> findEnvelopeByEventId(final String eventId) {
+      return Optional.empty();
     }
   }
 }

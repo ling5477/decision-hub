@@ -41,13 +41,12 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 /**
- * Stage1 闭环验收测试：
- * 创建 ResearchRun -&gt; 启动 -&gt; 生成候选 -&gt; 仲裁 -&gt; 接收 NQ Feedback -&gt; 更新 ExperienceEntry / PheromoneEdge。
+ * Stage1 闭环兼容性测试：feedback ingress 只追加事件；mutable learning 仅在测试显式直调 service 时发生。
  */
 class ResearchRunStage1ClosedLoopTest {
 
   @Test
-  void create_start_judge_feedback_updates_experience() {
+  void feedbackIngressIsAppendOnly_andExplicitLearningRemainsIsolated() {
     final ResearchRunRepository runRepo = new InMemoryResearchRunRepository();
     final AgentTaskRepository taskRepo = new InMemoryAgentTaskRepository();
     final StrategyCandidateRepository candidateRepo = new InMemoryStrategyCandidateRepository();
@@ -69,8 +68,7 @@ class ResearchRunStage1ClosedLoopTest {
         new DefaultResearchRunQueryService(runRepo, taskRepo, candidateRepo, judgeRepo);
     final ExperienceFeedbackService experienceFeedback =
         new DefaultExperienceFeedbackService(experienceStore, pheromoneStore, failureCaseStore);
-    final NqIntegrationUseCase nqIntegration =
-        new DefaultNqIntegrationUseCase(feedbackEventRepo, experienceFeedback);
+    final NqIntegrationUseCase nqIntegration = new DefaultNqIntegrationUseCase(feedbackEventRepo);
 
     final ResearchRun created =
         command.create("t-test", "topic-a", Map.of("hint", "stage1-test"));
@@ -114,15 +112,13 @@ class ResearchRunStage1ClosedLoopTest {
     final List<NqFeedbackEvent> persisted =
         feedbackEventRepo.listByRun("t-test", created.getRunId());
     assertEquals(1, persisted.size(), "feedback event should be persisted");
-
-    final List<ExperienceEntry> experiences = experienceStore.listAll("t-test");
-    assertEquals(1, experiences.size(), "experience entry should be created");
-    assertTrue(experiences.get(0).getScore() > 0, "positive feedback should reinforce score");
-
-    assertEquals(
-        1,
-        pheromoneStore.listByFrom("t-test", "trend-up").size(),
-        "pheromone edge should be created for the positive trail");
+    assertTrue(experienceStore.listAll("t-test").isEmpty(), "ingress must not write experience");
+    assertTrue(
+        pheromoneStore.listByFrom("t-test", "trend-up").isEmpty(),
+        "ingress must not write pheromone");
+    assertTrue(
+        failureCaseStore.listByRun("t-test", created.getRunId()).isEmpty(),
+        "ingress must not write failure cases");
 
     final NqFeedbackEvent riskRejection =
         NqFeedbackEvent.create(
@@ -138,9 +134,27 @@ class ResearchRunStage1ClosedLoopTest {
             TimeProvider.now());
     nqIntegration.onFeedback(riskRejection);
 
-    final ExperienceEntry afterPenalty = experienceStore.listAll("t-test").get(0);
+    assertEquals(
+        2,
+        feedbackEventRepo.listByRun("t-test", created.getRunId()).size(),
+        "append-only compatibility entry must retain both events");
+    assertTrue(experienceStore.listAll("t-test").isEmpty());
+    assertTrue(pheromoneStore.listByFrom("t-test", "trend-up").isEmpty());
+    assertTrue(failureCaseStore.listByRun("t-test", created.getRunId()).isEmpty());
+
+    // Explicit learning capability remains testable only through direct service invocation.
+    experienceFeedback.apply(positiveEvent);
+    experienceFeedback.apply(riskRejection);
+
+    final List<ExperienceEntry> experiences = experienceStore.listAll("t-test");
+    assertEquals(1, experiences.size(), "explicit learning should create one experience entry");
+    final ExperienceEntry afterPenalty = experiences.get(0);
     assertEquals(1L, afterPenalty.getSuccessCount());
     assertEquals(1L, afterPenalty.getFailureCount());
+    assertEquals(
+        1,
+        pheromoneStore.listByFrom("t-test", "trend-up").size(),
+        "explicit learning should preserve the positive trail behavior");
     assertFalse(
         failureCaseStore.listByRun("t-test", created.getRunId()).isEmpty(),
         "risk rejection must be captured into failure-case store");

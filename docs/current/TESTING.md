@@ -1,5 +1,37 @@
 # Decision Hub Testing
 
+## Terminal validation record — 2026-08-01 feedback containment consolidated implementation
+
+~~~text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-CONSOLIDATED-IMPLEMENTATION
+FEEDBACK_SIDE_EFFECT_CONTAINMENT: IMPLEMENTED / LOCAL_ACCEPTED
+Docs baseline: 49fa8442556bcc971119932421e1f606bc349054 / PUBLISHED
+Docs exact-SHA CI: 30694264770 / PASS / QUALITY + TESTCONTAINERS
+Scope invariants: PASS / 3 OF 3
+Production apply callers before / after: 2 / 0
+Inbound ExperienceStore / PheromoneStore / FailureCaseStore writes after: 0 / 0 / 0
+Hidden listener / scheduler / callback / reflection mutation: 0
+Handler unit tests: PASS / 6
+Ingestion and compatibility tests: PASS / 17
+WebMvc and rate-limit tests: PASS / 29
+Spring wiring and architecture tests: PASS / 46
+Targeted regression: PASS / 3 COMMANDS
+Full regression: PASS / 19 OF 19 REACTOR
+Total tests / failures / errors / skipped: 1252 / 0 / 0 / 0
+PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / V1-V15
+Quality: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+API / migration / Repository / contracts / POM / workflow diff: 0
+Implementation commit: THIS_IMPLEMENTATION_COMMIT / LOCAL_ONLY / NOT PUSHED
+Remote implementation CI: PENDING
+Milestone final close: NOT_STARTED
+Production capacity: NOT_PROVEN
+~~~
+
+定向命令因 PowerShell/Surefire 多模块语义补充了整体引号与
+`-Dsurefire.failIfNoSpecifiedTests=false`；最终三个定向命令均真实执行目标测试。完整 `mvn -B -ntp test`
+与 `mvn -B -ntp -Pquality validate` 均 exit 0。CodeRabbit CLI 因官方安装端点连续返回
+`curl (35) Recv failure: Connection reset by peer` 未能运行，未用人工结果冒充。
+
 ## Terminal validation record — 2026-08-01 feedback containment implementation work order
 
 ~~~text

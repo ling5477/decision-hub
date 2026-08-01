@@ -1,5 +1,38 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-08-01 feedback containment local implementation accepted
+
+~~~text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-CONSOLIDATED-IMPLEMENTATION
+Task result: IMPLEMENTED / LOCAL_ACCEPTED / ONE LOCAL COMMIT
+FEEDBACK_SIDE_EFFECT_CONTAINMENT: IMPLEMENTED / LOCAL_ACCEPTED
+Docs baseline / exact-SHA CI: 49fa8442556bcc971119932421e1f606bc349054 / 30694264770 PASS
+Stage-QDR-9: CLOSED / ACCEPTED / ARCHIVED / TAGGED / IMMUTABLE
+Selected stage: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT
+Ingress boundary: INGEST_ONLY / NO_IMPLICIT_LEARNING / NO_MUTABLE_LEARNING_STORE_ACCESS
+Inbound ExperienceFeedbackService apply callers: 0
+Inbound ExperienceStore / PheromoneStore / FailureCaseStore writes: 0 / 0 / 0
+ExperienceFeedbackService and mutable stores: RETAINED / NOT REACHABLE FROM INBOUND FEEDBACK
+Legacy environment contract: UNCHANGED / CHARACTERIZED
+API / migration / Repository / contracts / POM / workflow: UNCHANGED
+Structured QDR attribution: INTERNAL-ONLY / UNCHANGED / NOT CONNECTED
+Full regression: PASS / 19 OF 19 / 1252 / 0 / 0 / 0 / POSTGRESQL 17.10
+Quality: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+Implementation commit: THIS_IMPLEMENTATION_COMMIT / LOCAL_ONLY / NOT PUSHED
+Remote implementation CI: PENDING
+Milestone final close: NOT_STARTED
+Formal capacity: NOT_EXECUTED / DEFERRED
+Production capacity: NOT_PROVEN
+Next action: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-MILESTONE-FINAL-CLOSE
+ALLOW_IMPLEMENTATION_PUSH / ALLOW_TAG: NO / NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_CASE_PROMOTION / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION: NO / NO / NO / NO
+ALLOW_CAPACITY / ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是新的 primary current-state authority。B1–B3 已完成且只本地接受；下一任务必须独立执行 milestone
+final close，未取得授权前不得 push implementation、创建 tag、扩 API/migration/Repository 或启用 learning。
+
 ## Terminal current authority — 2026-08-01 feedback side-effect containment work order
 
 ~~~text

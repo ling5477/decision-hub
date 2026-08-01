@@ -18,8 +18,10 @@ TEST_MATRIX: FROZEN
 API_CHANGE_REQUIRED: NO
 MIGRATION_REQUIRED: NO
 REPOSITORY_EXPANSION_REQUIRED: NO
-ALLOW_CONSOLIDATED_IMPLEMENTATION: YES / NEXT TASK ONLY
-ALLOW_IMPLEMENTATION_NOW: NO
+CONSOLIDATED_IMPLEMENTATION: DONE / LOCAL_ACCEPTED
+FEEDBACK_SIDE_EFFECT_CONTAINMENT: IMPLEMENTED / LOCAL_ACCEPTED
+ALLOW_CONSOLIDATED_IMPLEMENTATION: CONSUMED
+ALLOW_IMPLEMENTATION_NOW: NO / IMPLEMENTATION COMPLETE
 PRODUCTION_CAPACITY: NOT_PROVEN
 ```
 
@@ -562,10 +564,11 @@ Production capacity: NOT_PROVEN
 ## 16. Next concrete action
 
 ```text
-DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-CONSOLIDATED-IMPLEMENTATION
+DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-MILESTONE-FINAL-CLOSE
 ```
 
-该任务才允许按本工单 B1–B3 和精确 allowlist 实施；本工单本身不授权立即实现。
+该任务只能执行独立 security/exact-diff review，并在取得 publication authorization 后完成 push、exact-SHA
+CI、archive-before-tag 与 close；不得继续扩大 B1–B3 implementation。
 
 ## 17. This-task validation record
 
@@ -584,4 +587,34 @@ Spotless: PASS
 Full tests: NOT_RERUN / DOCS-ONLY TASK
 Technical implementation: NOT EXECUTED
 Push / tag: NOT EXECUTED
+```
+
+## 18. Consolidated implementation acceptance record
+
+```text
+Implementation baseline: 49fa8442556bcc971119932421e1f606bc349054
+Docs baseline publication: PASS / LOCAL+ORIGIN+ADVERTISED SHA ALIGNED
+Docs exact-SHA CI: 30694264770 / PASS / QUALITY + TESTCONTAINERS
+Scope invariants: PASS / 3 OF 3
+Production paths / test paths / factsource paths: 16 / 8 / 9
+INGEST_ONLY boundary: IMPLEMENTED
+Production ExperienceFeedbackService apply callers before / after: 2 / 0
+Inbound ExperienceStore / PheromoneStore / FailureCaseStore writes: 0 / 0 / 0
+Eight handlers: APPEND-ONLY / 8 OF 8
+DefaultNqIntegrationUseCase: APPEND-ONLY
+FeedbackIngestionWiringConfig: IMPLEMENTED / NO LEARNING DEPENDENCY
+ExperienceFeedbackService and stores: RETAINED / NOT IN INBOUND GRAPH
+Hidden listener / scheduler / callback / reflection mutation: 0
+API / migration / Repository / contracts / POM / workflow diff: 0
+Legacy environment: UNCHANGED / CHARACTERIZED
+Structured QDR attribution: INTERNAL-ONLY / NOT CONNECTED
+Targeted regression: PASS / 23 + 29 + 46 TESTS
+Full regression: PASS / 19 OF 19 / 1252 / 0 / 0 / 0
+PostgreSQL/Testcontainers: REAL EXECUTION / POSTGRESQL 17.10 / V1-V15
+Quality: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+CodeRabbit: NOT_EXECUTED / CLI INSTALL BLOCKED BY CONNECTION RESET
+Implementation commit: THIS_IMPLEMENTATION_COMMIT / LOCAL_ONLY / NOT PUSHED
+Remote implementation CI: PENDING
+Milestone final close: NOT STARTED
+Production capacity: NOT_PROVEN
 ```

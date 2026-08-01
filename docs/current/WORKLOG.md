@@ -1,5 +1,31 @@
 # Decision Hub Worklog
 
+## 2026-08-01 — Feedback side-effect containment consolidated implementation
+
+- 发布 docs baseline `49fa8442556bcc971119932421e1f606bc349054`，local/origin/advertised SHA 对齐；exact-SHA
+  CI `30694264770` 的 Quality 与 Testcontainers jobs 均 success。
+- 重新验证 16 production、8 test、9 factsource allowlists 与 3/3 scope invariants；实施前 production
+  `ExperienceFeedbackService#apply` caller 为 2，未发现 hidden listener/scheduler/callback/reflection mutation。
+- 从 `AbstractNqFeedbackEventHandler`、8 个 handlers 与 `DefaultNqIntegrationUseCase` 移除 learning service，
+  保留 validation、envelope save、routing 与 event append；production inbound apply callers 降为 0。
+- 新建 `FeedbackIngestionWiringConfig` 并加入 production-context dependency graph、standalone wiring 与
+  architecture source guards；learning service/stores 保留，但不再从 Controller/ingestion/handler 可达。
+- 定向回归分别通过 23、29、46 tests；完整回归 19/19、1252/0/0/0，PostgreSQL 17.10/Testcontainers
+  与 V1–V15 real execution；quality 19/19、Checkstyle 0、Spotless PASS。
+- API、migration、Repository/JDBC、contracts/golden_cases、POM/workflow、legacy environment、structured QDR、
+  NQ/Provider/Agent/LangGraph 均未修改；capacity 未执行，production capacity 仍为 `NOT_PROVEN`。
+- CodeRabbit CLI 官方安装端点连续 connection reset，自动审查未执行；未伪造审查结论。
+- implementation 将作为一个本地 commit 创建，不 push、不 tag；下一动作是独立 milestone final close。
+
+~~~text
+FEEDBACK_SIDE_EFFECT_CONTAINMENT: IMPLEMENTED / LOCAL_ACCEPTED
+Boundary: INGEST_ONLY / NO_IMPLICIT_LEARNING / NO_MUTABLE_LEARNING_STORE_ACCESS
+Implementation commit: THIS_IMPLEMENTATION_COMMIT / LOCAL_ONLY / NOT PUSHED
+Next task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-MILESTONE-FINAL-CLOSE
+REMOTE_IMPLEMENTATION_CI: PENDING
+MILESTONE_FINAL_CLOSE: NOT_STARTED
+~~~
+
 ## 2026-08-01 — Feedback side-effect containment implementation work order
 
 - 基线符合状态 A：`dev`，HEAD/plan commit `241663f3ba60cb4d7273bf3b2374ec79509b7cf4`，parent 与

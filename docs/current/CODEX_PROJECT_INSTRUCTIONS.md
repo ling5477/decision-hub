@@ -1,5 +1,27 @@
 # Codex Project Instructions
 
+## Terminal current authority — 2026-08-01 feedback containment implementation complete locally
+
+~~~text
+Completed task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-CONSOLIDATED-IMPLEMENTATION
+Implementation status: DONE / LOCAL_ACCEPTED / NOT PUBLISHED
+FEEDBACK_SIDE_EFFECT_CONTAINMENT: IMPLEMENTED / LOCAL_ACCEPTED
+Canonical work order: docs/current/DH_PLATFORM_HARDENING_FEEDBACK_SIDE_EFFECT_CONTAINMENT_IMPLEMENTATION_WORK_ORDER.md
+Stage-QDR-9: CLOSED / ACCEPTED / ARCHIVED / TAGGED / IMMUTABLE
+Boundary: INGEST_ONLY / NO_IMPLICIT_LEARNING / NO_MUTABLE_LEARNING_STORE_ACCESS
+Inbound learning callers and mutable store writes: ZERO
+API / migration / Repository / contracts / POM / workflow: UNCHANGED
+Implementation commit: THIS_IMPLEMENTATION_COMMIT / LOCAL_ONLY / NOT PUSHED
+Remote implementation CI: PENDING
+Milestone final close: NOT_STARTED
+Next task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-MILESTONE-FINAL-CLOSE
+Push / tag: NOT AUTHORIZED
+Reference-liveness / retention / capacity / NQ / Provider / Agent / LangGraph / Paper / LIVE: NOT AUTHORIZED
+~~~
+
+执行者不得继续实现或扩 scope。下一任务先做 security/exact-diff review；只有独立 publication authorization
+后才允许 push，随后必须 exact-SHA CI、archive-before-tag 与 close。以下 implementation handoff 已被消费。
+
 ## Terminal current authority — 2026-08-01 feedback containment implementation handoff
 
 ~~~text

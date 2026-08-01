@@ -14,6 +14,9 @@ package com.guidinglight.decisionhub.usecase.agent.feedback;
  *     5. NqFeedbackEventTypeRouter 派发 handler
  *     6. 返回 ACCEPTED
  * </pre>
+ *
+ * <p>稳定边界：{@code INGEST_ONLY / NO_IMPLICIT_LEARNING / NO_MUTABLE_LEARNING_STORE_ACCESS}。成功接收只保存
+ * envelope 并追加既有 feedback event；不得触发经验、信息素或失败案例写入。
  */
 public interface NqFeedbackIngestionService {
 

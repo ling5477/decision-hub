@@ -1,6 +1,6 @@
 # Decision Hub
 
-## 当前状态 — feedback side-effect containment work order frozen
+## 当前状态 — feedback side-effect containment implemented locally
 
 - Stage-QDR-9：`CLOSED / ACCEPTED / ARCHIVED / TAGGED`；B5 仅执行治理关闭，无技术实现。
 - B1–B4：`CLOSED / ACCEPTED / PUBLISHED`。
@@ -10,13 +10,22 @@
   已在本地与远端验证指向 `88b1d6d8ea68c39eaa74486e5e0bcb6502e00036`；31 个 current sources 已按 manifest prune。
 - Formal capacity：`NOT_EXECUTED / DEFERRED`；production capacity：`NOT_PROVEN`；production ready：`NO`。
 - Reference-liveness、retention、V16/V17/V18 及真实 HTTP/Provider/NQ/Agent/LangGraph/Paper/LIVE 均未授权。
-- Post-stage plan：[`DH_POST_STAGE_QDR_9_NEXT_STAGE_PLAN.md`](docs/current/DH_POST_STAGE_QDR_9_NEXT_STAGE_PLAN.md)
-  已选择 `DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT`，只收口 legacy feedback 的隐式
-  Experience/Pheromone mutation，不新增 learning、API、migration 或 runtime integration。
+- Docs baseline：`49fa8442556bcc971119932421e1f606bc349054 / PUBLISHED`；exact-SHA CI
+  `30694264770 / PASS / Quality + Testcontainers`。
+- `DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT`：`IMPLEMENTED / LOCAL_ACCEPTED`；legacy
+  feedback 已固化为 `INGEST_ONLY / NO_IMPLICIT_LEARNING / NO_MUTABLE_LEARNING_STORE_ACCESS`。
+- `FEEDBACK_SIDE_EFFECT_CONTAINMENT: IMPLEMENTED / LOCAL_ACCEPTED`；`REMOTE_IMPLEMENTATION_CI: PENDING`；
+  `MILESTONE_FINAL_CLOSE: NOT_STARTED`。
 - Implementation work order：[`DH_PLATFORM_HARDENING_FEEDBACK_SIDE_EFFECT_CONTAINMENT_IMPLEMENTATION_WORK_ORDER.md`](docs/current/DH_PLATFORM_HARDENING_FEEDBACK_SIDE_EFFECT_CONTAINMENT_IMPLEMENTATION_WORK_ORDER.md)
-  已冻结调用链、两类安全合同、精确 production/test/factsource allowlists 与 regression matrix。
-- 唯一下一动作：`DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-CONSOLIDATED-IMPLEMENTATION`；
-  只允许 B1–B3 exact scope、完整回归与一个本地 commit，禁止 push、tag 和 scope expansion。
+  已按精确 allowlist 完成 B1–B3；8 handlers 与 compatibility use case 只 append event，inbound
+  `ExperienceFeedbackService.apply` callers 和三个 mutable store interactions 均为 0。
+- Learning service 与 stores 保留但不再从 inbound feedback 可达；API、migration、Repository、contracts、
+  POM/workflow、structured QDR、NQ/Provider/Agent/LangGraph 均未改变。
+- 本地验证：`1252 tests / 0 failures / 0 errors / 0 skipped / PostgreSQL 17.10`；quality `19/19 / Checkstyle 0 /
+  Spotless PASS`。
+- Implementation commit：`THIS_IMPLEMENTATION_COMMIT / LOCAL_ONLY / NOT_PUSHED`；未创建 tag。
+- 唯一下一动作：`DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-MILESTONE-FINAL-CLOSE`；
+  implementation push、remote CI、archive 与 tag 需独立授权。
 
 以下 Stage-QDR-9 authority 区块仅保留为历史时间线，不再构成当前状态或实施授权。
 

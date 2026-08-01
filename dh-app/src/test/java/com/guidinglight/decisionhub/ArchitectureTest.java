@@ -1451,6 +1451,135 @@ public class ArchitectureTest {
         }
     }
 
+    /** Feedback ingress 必须保持 append-only，永久禁止重新依赖 mutable learning capability。 */
+    @Test
+    void feedbackContainment_rule41_ingressPackagesDoNotDependOnLearningServiceOrStores() {
+        final JavaClasses classes = importMainClasses();
+        noClasses()
+                .that()
+                .resideInAPackage("..usecase.agent.feedback..")
+                .should()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName(
+                        "com.guidinglight.decisionhub.usecase.agent.ExperienceFeedbackService")
+                .check(classes);
+        noClasses()
+                .that()
+                .resideInAPackage("..usecase.agent.feedback..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAPackage("..memory.agent..")
+                .check(classes);
+        noClasses()
+                .that()
+                .resideInAPackage("..api.feedback..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAPackage("..memory.agent..")
+                .check(classes);
+        noClasses()
+                .that()
+                .haveSimpleName("FeedbackIngestionWiringConfig")
+                .should()
+                .dependOnClassesThat()
+                .resideInAPackage("..memory.agent..")
+                .check(classes);
+        noClasses()
+                .that()
+                .haveSimpleName("FeedbackIngestionWiringConfig")
+                .should()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName(
+                        "com.guidinglight.decisionhub.usecase.agent.ExperienceFeedbackService")
+                .check(classes);
+        noClasses()
+                .that()
+                .haveSimpleName("DefaultNqIntegrationUseCase")
+                .should()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName(
+                        "com.guidinglight.decisionhub.usecase.agent.ExperienceFeedbackService")
+                .check(classes);
+    }
+
+    /** Source guard 覆盖全部 handler、router、ingestion、Controller、wiring 与 compatibility bean。 */
+    @Test
+    void feedbackContainment_rule42_ingressSourcesForbidHiddenLearningMutationPaths() {
+        final List<Path> roots =
+                List.of(
+                        Path.of(
+                                        "..",
+                                        "dh-usecase",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "usecase",
+                                        "agent",
+                                        "feedback")
+                                .toAbsolutePath()
+                                .normalize(),
+                        Path.of(
+                                        "..",
+                                        "dh-api",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "api",
+                                        "feedback")
+                                .toAbsolutePath()
+                                .normalize(),
+                        Path.of(
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "config",
+                                        "FeedbackIngestionWiringConfig.java")
+                                .toAbsolutePath()
+                                .normalize(),
+                        Path.of(
+                                        "..",
+                                        "dh-usecase",
+                                        "src",
+                                        "main",
+                                        "java",
+                                        "com",
+                                        "guidinglight",
+                                        "decisionhub",
+                                        "usecase",
+                                        "agent",
+                                        "impl",
+                                        "DefaultNqIntegrationUseCase.java")
+                                .toAbsolutePath()
+                                .normalize());
+        final Pattern hiddenMutation =
+                Pattern.compile(
+                        "ExperienceFeedbackService|ExperienceStore|PheromoneStore|FailureCaseStore|"
+                                + "ObjectProvider\\s*<\\s*ExperienceFeedbackService|"
+                                + "ApplicationContext\\s*\\.\\s*getBean|"
+                                + "@(EventListener|TransactionalEventListener|Scheduled|Async)\\b|"
+                                + "TransactionSynchronization|afterCommit|Class\\.forName|Method\\.invoke");
+        final List<String> violations = new ArrayList<>();
+        for (Path root : roots) {
+            collectPatternViolations(
+                    root,
+                    hiddenMutation,
+                    "feedback ingress contains forbidden learning dependency or hidden mutation path",
+                    violations);
+        }
+        if (!violations.isEmpty()) {
+            fail("feedback side-effect containment violations:\n" + String.join("\n", violations));
+        }
+    }
+
     private static void collectForbiddenTokenViolations(
             final Path rootOrFile, final List<String> tokens, final List<String> violations) {
         if (!Files.exists(rootOrFile)) {

@@ -1,24 +1,28 @@
 # Decision Hub Roadmap
 
-## 当前路线 — feedback side-effect containment work order frozen
+## 当前路线 — feedback side-effect containment B1–B3 local accepted
 
 ~~~text
 Stage-QDR-9: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 Post-stage planning: DONE
 Selected stage: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT
-Implementation work order: DONE / CALL CHAIN + ALLOWLIST + TEST MATRIX FROZEN
-Route: B1 SECURITY CONTRACT -> B2 SIDE-EFFECT DECOUPLING -> B3 REGRESSION GUARDS -> B4 FINAL CLOSE
-Next task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-CONSOLIDATED-IMPLEMENTATION
-Next task scope: B1-B3 / EXACT ALLOWLIST / ONE LOCAL COMMIT / NO PUSH
-B4: SEPARATE FINAL-CLOSE TASK
+Docs baseline: 49fa8442556bcc971119932421e1f606bc349054 / PUBLISHED / CI 30694264770 PASS
+B1-B3: IMPLEMENTED / LOCAL_ACCEPTED / INGEST_ONLY / ZERO INBOUND LEARNING WRITES
+FEEDBACK_SIDE_EFFECT_CONTAINMENT: IMPLEMENTED / LOCAL_ACCEPTED
+Implementation verification: 1252 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED / QUALITY PASS
+Implementation commit: THIS_IMPLEMENTATION_COMMIT / LOCAL_ONLY / NOT PUSHED
+REMOTE_IMPLEMENTATION_CI: PENDING
+MILESTONE_FINAL_CLOSE: NOT_STARTED
+Route: B1-B3 COMPLETE -> B4 MILESTONE FINAL CLOSE
+Next task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-MILESTONE-FINAL-CLOSE
+B4: SEPARATE REVIEW + AUTHORIZED PUBLICATION + EXACT-SHA CI + ARCHIVE/TAG CLOSE
 Deferred: REFERENCE-LIVENESS / RETENTION / FORMAL CAPACITY / NQ-DH INTEGRATION / FEEDBACK EVOLUTION / AGENT
 Production capacity: NOT_PROVEN
 ~~~
 
-下一任务按冻结工单一次完成 B1–B3：把 legacy NQ feedback ingress 与两个 production `apply` caller
-收口为 ingest-only，增加 wiring/architecture/zero-interaction guards，并在完整回归后只做本地提交。
-不得混入 production readiness、feedback evolution 或 cross-repo integration。以下 Stage-QDR-9 路线均为
-closed-stage 历史时间线。
+B1–B3 已按冻结工单完成：legacy NQ feedback ingress 的两个 production `apply` caller 已清零，独立 wiring、
+architecture 与 zero-interaction guards 已通过完整回归。下一任务仅允许独立 final-close；不得混入 production
+readiness、feedback evolution 或 cross-repo integration。以下 Stage-QDR-9 路线均为 closed-stage 历史时间线。
 
 ## Historical current route — Stage-QDR-9 closed
 

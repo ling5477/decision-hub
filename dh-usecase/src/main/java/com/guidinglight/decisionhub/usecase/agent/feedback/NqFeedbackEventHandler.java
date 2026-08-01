@@ -10,7 +10,8 @@ import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEventType;
  *
  * <ol>
  *   <li>实现 {@link #supportedType()} 表明它处理哪个 {@link NqFeedbackEventType}。
- *   <li>实现 {@link #handle(NqFeedbackEnvelope, String)} 完成"分类接收 + 触发已有经验反馈服务的最小闭环"； 禁止在 handler 中写复杂业务推理或交易语义。
+ *   <li>实现 {@link #handle(NqFeedbackEnvelope, String)} 完成分类接收与既有 feedback event append；禁止在
+ *       handler 中触发 learning mutation、复杂业务推理或交易语义。
  * </ol>
  *
  * <p>持久化 envelope 由 {@code NqFeedbackIngestionService} 在派发之前统一处理；handler 不应直接 save envelope。
