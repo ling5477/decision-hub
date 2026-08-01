@@ -1,6 +1,6 @@
 # Decision Hub Current Docs
 
-## 当前状态 — Stage-QDR-9 closed（2026-07-31）
+## 当前状态 — post-Stage-QDR-9 plan frozen（2026-08-01）
 
 - Stage-QDR-9：`CLOSED / ACCEPTED / ARCHIVED / TAGGED`。
 - B1–B4：`CLOSED / ACCEPTED / PUBLISHED`；B5：`FINAL_CLOSE COMPLETE / GOVERNANCE ONLY`。
@@ -10,6 +10,11 @@
 - Current process sources：`31 / 31 PRUNED AS PLANNED`。
 - Formal capacity：`NOT_EXECUTED / DEFERRED`；production capacity：`NOT_PROVEN`；production ready：`NO`。
 - Reference-liveness、retention、V16/V17/V18、真实 HTTP/Provider/NQ/Agent/LangGraph/Paper/LIVE：未授权。
+- Next-stage plan：[DH Post-Stage-QDR-9 Next Stage Plan](DH_POST_STAGE_QDR_9_NEXT_STAGE_PLAN.md)。
+- Selected stage：`DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT / SCOPE FROZEN`。
+- Implementation now：`NOT AUTHORIZED`。
+- 选择原因：当前 legacy NQ feedback ingress 仍隐式调用 Experience/Pheromone mutation；下一阶段只做
+  default-deny containment，不实现 feedback learning。
 
 ## Current authority
 
@@ -24,9 +29,9 @@
 
 ## 唯一下一动作
 
-`DH-POST-STAGE-QDR-9-NEXT-STAGE-PLANNING`，仅允许 planning/scope freeze。Cleanup commit 发布并完成
-远端对齐前不得启动；该 planning 不自动选择 V16、retention、reference-liveness、capacity 或部署，
-也不授权任何 next-stage implementation。
+`DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-IMPLEMENTATION-WORK-ORDER`，仅允许
+implementation work-order、精确 allowlist 和 compatibility matrix freeze。不得直接实施；不得恢复 V16、
+retention、reference-liveness、capacity，也不得接 NQ runtime、Agent、LangGraph、Provider 或 LIVE。
 
 Stage-QDR-9 的原始 plan、work order、batch reviews、designs、errata 与 final-close evidence 已全部移入
 [`docs/gates/stage-qdr-9/`](../gates/stage-qdr-9/)，不得再从 `docs/current` 恢复为 active authority。

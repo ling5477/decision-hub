@@ -1,5 +1,28 @@
 # Decision Hub Worklog
 
+## 2026-08-01 — Post-Stage-QDR-9 next stage planning
+
+- 只读核验 `dev`、HEAD、`origin/dev` 与 advertised SHA 均为 `ddaf7c37e772dcd798d4631eabe0471d26527756`，
+  ahead/behind `0/0`，写入前 worktree/staged clean/empty；Stage-QDR-9 tag、archive、31 source copies、
+  44-entry hash ledger 与 current residue 均满足前置条件。
+- 遍历指定 current authority、Stage-QDR-9 close evidence、12 个主要模块生产源码、migrations、相关 tests、
+  capacity harness 与 CI，确认技术树相对 accepted baseline 无 diff。
+- 当前最高价值缺口不是 deferred 能力轮转，而是 legacy NQ feedback ingress 无条件调用
+  `ExperienceFeedbackService` 并更新 Experience/Pheromone/FailureCase；新 structured feedback 包则明确禁止
+  learning/state mutation。
+- 比较 7 类候选后，唯一选择 `DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT`，冻结 4 个
+  batches、`NO_MIGRATION / NO_API_CHANGE / INGEST_ONLY / NO_IMPLICIT_LEARNING` 安全边界。
+- `mvn -B -ntp -Pquality validate` exit 0：19/19 reactor SUCCESS、Checkstyle 0、Spotless PASS；
+  forbidden technical diff、archive diff、unexpected files 均为 0。Full tests 未重跑；formal capacity 未执行。
+- 本轮未实施代码/test/migration/API/Repository/NQ/Provider/Agent/LangGraph/Paper/LIVE，未 push、未创建 tag。
+
+~~~text
+Plan result: DONE / SCOPE FROZEN
+Selected stage: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT
+Next task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-IMPLEMENTATION-WORK-ORDER
+Allow implementation now: NO
+~~~
+
 ## 2026-07-31 — Stage-QDR-9 close tag 与 post-tag cleanup（进行中）
 
 - close commit `88b1d6d8ea68c39eaa74486e5e0bcb6502e00036` 已普通 fast-forward 发布；exact-SHA CI

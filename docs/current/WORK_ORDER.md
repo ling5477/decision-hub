@@ -1,5 +1,27 @@
 # Decision Hub 当前工单
 
+## Terminal current authority — 2026-08-01 selected next-stage work-order handoff
+
+~~~text
+Completed task: DH-POST-STAGE-QDR-9-NEXT-STAGE-PLANNING
+Plan result: DONE / SCOPE FROZEN / DOCS ONLY
+Stage-QDR-9: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+Selected stage: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT
+Core objective: DECOUPLE NQ FEEDBACK INGEST FROM IMPLICIT EXPERIENCE/PHEROMONE/FAILURE-CASE MUTATION
+Batch count: 4
+Migration impact: NONE
+API impact: NONE
+NQ / Provider / Agent / LangGraph impact: NONE / NONE / CONTAINMENT ONLY / NONE
+Only next task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-IMPLEMENTATION-WORK-ORDER
+Work-order task authorization: PLANNING / DISCOVERY / EXACT ALLOWLIST ONLY
+Implementation authorization: NO
+Forbidden: CODE WRITE / TEST WRITE / MIGRATION / API / REPOSITORY / NQ / PROVIDER / AGENT / LANGGRAPH / PAPER / LIVE
+~~~
+
+下一工单只能把已冻结 plan 转换为可审查的 implementation work order，确认精确 files、compatibility
+impact、B1 security review 和 batch commands。不得在同一任务开始 B1 或修改技术文件。以下
+Stage-QDR-9 工单均为 closed-stage 历史时间线。
+
 ## Terminal current authority — 2026-07-31 Stage-QDR-9 final close
 
 ~~~text

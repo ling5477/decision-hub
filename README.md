@@ -1,6 +1,6 @@
 # Decision Hub
 
-## 当前状态 — Stage-QDR-9 closed
+## 当前状态 — post-Stage-QDR-9 next stage plan frozen
 
 - Stage-QDR-9：`CLOSED / ACCEPTED / ARCHIVED / TAGGED`；B5 仅执行治理关闭，无技术实现。
 - B1–B4：`CLOSED / ACCEPTED / PUBLISHED`。
@@ -10,9 +10,13 @@
   已在本地与远端验证指向 `88b1d6d8ea68c39eaa74486e5e0bcb6502e00036`；31 个 current sources 已按 manifest prune。
 - Formal capacity：`NOT_EXECUTED / DEFERRED`；production capacity：`NOT_PROVEN`；production ready：`NO`。
 - Reference-liveness、retention、V16/V17/V18 及真实 HTTP/Provider/NQ/Agent/LangGraph/Paper/LIVE 均未授权。
-- 唯一下一动作：`DH-POST-STAGE-QDR-9-NEXT-STAGE-PLANNING`（planning-only；不授权实现）。
+- Post-stage plan：[`DH_POST_STAGE_QDR_9_NEXT_STAGE_PLAN.md`](docs/current/DH_POST_STAGE_QDR_9_NEXT_STAGE_PLAN.md)
+  已选择 `DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT`，只收口 legacy feedback 的隐式
+  Experience/Pheromone mutation，不新增 learning、API、migration 或 runtime integration。
+- 唯一下一动作：`DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-IMPLEMENTATION-WORK-ORDER`；
+  只允许 work-order/scope freeze，不授权 implementation。
 
-以下早于 B5 的 authority 区块仅保留为历史时间线，不再构成当前状态或实施授权。
+以下 Stage-QDR-9 authority 区块仅保留为历史时间线，不再构成当前状态或实施授权。
 
 ## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 legacy persistent identity blocker
 

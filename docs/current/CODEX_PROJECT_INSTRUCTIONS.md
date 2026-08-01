@@ -1,5 +1,24 @@
 # Codex Project Instructions
 
+## Terminal current authority — 2026-08-01 feedback side-effect containment handoff
+
+~~~text
+Current task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-IMPLEMENTATION-WORK-ORDER
+Task authorization: WORK_ORDER_ONLY / DISCOVERY / DOCS_ONLY
+Selected plan: docs/current/DH_POST_STAGE_QDR_9_NEXT_STAGE_PLAN.md
+Stage-QDR-9: CLOSED / ACCEPTED / ARCHIVED / TAGGED / IMMUTABLE
+Selected stage: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT
+Core boundary: INGEST_ONLY / NO_IMPLICIT_LEARNING
+Implementation now: NOT AUTHORIZED
+Migration / API / Repository / NQ / Provider: NOT AUTHORIZED
+Reference-liveness / retention / capacity: DEFERRED / NOT AUTHORIZED
+Agent / LangGraph / Paper / LIVE: NOT AUTHORIZED
+~~~
+
+执行者下一轮只能生成 implementation work order、精确 allowlist、compatibility matrix 和 B1 security
+review gate；不得修改代码或测试。完整冻结内容以 selected plan 与 `STATUS.md + WORK_ORDER.md` 为准。
+以下 Stage-QDR-9 instruction 区块均为 closed-stage 历史时间线。
+
 ## Terminal current authority — 2026-07-31 Stage-QDR-9 final close
 
 ~~~text

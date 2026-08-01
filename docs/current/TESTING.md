@@ -1,5 +1,37 @@
 # Decision Hub Testing
 
+## Terminal validation record — 2026-08-01 post-Stage-QDR-9 next stage planning
+
+~~~text
+Task: DH-POST-STAGE-QDR-9-NEXT-STAGE-PLANNING
+Task scope: PLANNING_ONLY / DOCS_ONLY_CHANGE
+Baseline HEAD / origin/dev / advertised SHA: ddaf7c37e772dcd798d4631eabe0471d26527756
+Ahead / behind before write: 0 / 0
+Worktree / staged before write: clean / empty
+Close tag local + remote peeled target: 88b1d6d8ea68c39eaa74486e5e0bcb6502e00036 / VERIFIED
+Archive direct artifacts: 15 / 15
+Archive source copies: 31 / 31
+SHA256SUMS: 44 / 0 failures
+Stage-QDR-9 current residue: 0
+Technical diff from accepted baseline through cleanup: 0
+Forbidden technical-scope diff this task: 0
+docs/gates diff: 0
+Unexpected files: 0
+Planning quality validate: PASS / EXIT 0 / 19 OF 19 REACTOR SUCCESS
+Checkstyle: 0 violations
+Spotless: PASS
+Full tests this task: NOT_RERUN
+Formal capacity: NOT_EXECUTED
+Reused CI evidence: 30633947829 / 30640835327 / 30642095807
+Evidence disposition: REUSED / NOT THIS-TASK EXECUTION / NOT CAPACITY ACCEPTANCE
+Selected stage: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT
+Implementation: NOT EXECUTED / NOT AUTHORIZED
+~~~
+
+本轮仅以 `mvn -B -ntp -Pquality validate` 验证 docs-only 变更；完整测试按 planning task 约束未重跑。
+既有 1243-test technical baseline 与 close/cleanup CI 只作为复用证据，不写成本轮执行，也不构成
+formal capacity acceptance。
+
 ## Terminal validation record — 2026-07-31 Stage-QDR-9 final close
 
 ~~~text
