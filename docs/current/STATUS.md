@@ -1,10 +1,10 @@
 # Decision Hub Status
 
-## Terminal current authority — 2026-08-01 feedback containment milestone functional close
+## Terminal current authority — 2026-08-01 feedback containment milestone final close
 
 ~~~text
 Task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-MILESTONE-FINAL-CLOSE
-Milestone: CLOSED / ACCEPTED / PUBLISHED / GOVERNANCE CLOSE PENDING TAG
+Milestone: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 Implementation: fddf3558255b5a4f8f6071da42363649942afe46 / PUBLISHED
 Implementation exact-SHA CI: 30701063741 / PASS / QUALITY + TESTCONTAINERS
 Security exact-diff review: PASS / 0 REPORTABLE FINDINGS / ACTIVE P0-P3 0
@@ -18,23 +18,24 @@ Legacy environment contract: UNCHANGED / CHARACTERIZED
 Structured QDR attribution: INTERNAL-ONLY / UNCHANGED / NOT CONNECTED
 Archive: docs/gates/platform-hardening-feedback-side-effect-containment/ / COMPLETE
 Archive sources / SHA-256: 2 OF 2 / VERIFIED / 0 MISSING / 0 UNEXPECTED
-Archive close commit: THIS_ARCHIVE_COMMIT / PUBLICATION AUTHORIZED / EXACT-SHA CI REQUIRED
-Close tag: dh-platform-hardening-feedback-side-effect-containment-close / PENDING
-Post-tag cleanup: PLANNED / 2 CURRENT PROCESS SOURCES
+Archive close commit: 86381c6a47a5d68eb7ab9f57892e42e282ac63ea / PUBLISHED
+Archive close exact-SHA CI: 30702114843 / PASS / QUALITY 91374827027 + TESTCONTAINERS 91374826988
+Close tag: dh-platform-hardening-feedback-side-effect-containment-close / ANNOTATED / LOCAL+REMOTE VERIFIED
+Close tag target: 86381c6a47a5d68eb7ab9f57892e42e282ac63ea
+Post-tag cleanup: COMPLETE / 2 CURRENT PROCESS SOURCES PRUNED / CURRENT RESIDUE 0
 Terminal factsources: 12 / 12 / SYNCHRONIZED / 0 CURRENT CONFLICTS
 Stage-QDR-9: CLOSED / ACCEPTED / ARCHIVED / TAGGED / IMMUTABLE / NOT REOPENED
 Formal capacity: NOT_EXECUTED / DEFERRED
 Production capacity / production ready: NOT_PROVEN / NO
-Next action: PUBLISH CLOSE COMMIT -> EXACT-SHA CI -> ANNOTATED TAG -> POST-TAG CLEANUP
+Next action: DH-POST-FEEDBACK-SIDE-EFFECT-CONTAINMENT-NEXT-STAGE-PLANNING / PLANNING ONLY
 Next-stage implementation: NOT AUTHORIZED
 ALLOW_FEEDBACK_LEARNING / ALLOW_CASE_PROMOTION / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION: NO / NO / NO / NO
 ALLOW_CAPACITY / ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ~~~
 
-本节是 tag 前唯一 terminal authority。其后的 local-implementation、Stage-QDR-9 及更早区块均为历史时间线，
-不得覆盖本节或授权任何技术实现。Governance close 只有在 close commit exact-SHA CI 和 annotated tag
-本地/远端 peeled target 验证完成后才能标记为 `ARCHIVED / TAGGED`。
+本节是 post-tag cleanup 后唯一 terminal authority。其后的 pre-tag、local-implementation、Stage-QDR-9 及
+更早区块均为历史时间线，不得覆盖本节或授权任何技术实现。下一阶段只能另起 planning-first 任务。
 
 
 ## Terminal current authority — 2026-08-01 feedback containment local implementation accepted
@@ -95,7 +96,7 @@ ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_NQ_RUNTIME / ALLOW_PAPER / ALLOW_L
 ~~~
 
 本节是新的 primary current-state authority。精确生产/test/factsource allowlists、实际调用链、兼容矩阵与
-B1–B4 纪律见 `DH_PLATFORM_HARDENING_FEEDBACK_SIDE_EFFECT_CONTAINMENT_IMPLEMENTATION_WORK_ORDER.md`。
+B1–B4 历史纪律见 `../gates/platform-hardening-feedback-side-effect-containment/source/DH_PLATFORM_HARDENING_FEEDBACK_SIDE_EFFECT_CONTAINMENT_IMPLEMENTATION_WORK_ORDER.md`。
 本 work-order task 没有实施代码；以下 post-stage planning 区块已被本工单 handoff 消费，保留为时间线证据。
 
 ## Terminal current authority — 2026-08-01 post-Stage-QDR-9 next stage planning
@@ -126,7 +127,7 @@ ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PA
 ~~~
 
 本节是新的 primary current-state authority。完整候选矩阵、4 个 batches、write/security boundaries、
-test matrix、review triggers 与 close discipline 见 `DH_POST_STAGE_QDR_9_NEXT_STAGE_PLAN.md`。本规划只允许
+test matrix、review triggers 与 close discipline 的历史快照见 `../gates/platform-hardening-feedback-side-effect-containment/source/DH_POST_STAGE_QDR_9_NEXT_STAGE_PLAN.md`。本规划只允许
 进入 implementation work order，不授权代码实施；以下 Stage-QDR-9 区块均为 closed-stage 历史时间线。
 
 ## Terminal current authority — 2026-07-31 Stage-QDR-9 final close
