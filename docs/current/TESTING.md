@@ -1,5 +1,61 @@
 # Decision Hub Testing
 
+## Terminal current authority — 2026-08-02 feedback ingest atomicity work order
+
+~~~text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-IMPLEMENTATION-WORK-ORDER
+Task result: DONE / SCOPE FROZEN / DOCS ONLY / IMPLEMENTATION NOT STARTED
+Planning commit: f087f562bdf9802c19ebeebcb8c1523cd390130f / LOCAL ONLY
+Closed milestone: CLOSED / ACCEPTED / ARCHIVED / TAGGED / NOT REOPENED
+Selected stage: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY
+Selected design: UNIT_OF_WORK
+Transaction participant inventory: PASS / SAME JDBC TEMPLATE / SYNCHRONOUS ROUTE
+Atomic boundary / rollback / safe retry / commit unknown: FROZEN / FROZEN / FROZEN / FROZEN
+JDBC / in-memory parity: FROZEN
+Conflict arbitration: INSERT ON CONFLICT DO NOTHING + SAME-TRANSACTION READ-BACK
+Production / test / factsource allowlists: FROZEN / 7 / 9 / 9 EXACT PATHS
+Scope invariants: PASS / 3 OF 3
+API / migration / schema: NONE / NONE / NONE
+Technical implementation/test diff: 0 / 0
+Quality validation: PASS / EXIT 0 / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Full tests: NOT_RERUN / WORK_ORDER ONLY
+Work-order commit: THIS_DOCUMENT_COMMIT / LOCAL ONLY / NOT PUSHED
+Production capacity: NOT_PROVEN
+Next action: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-CONSOLIDATED-IMPLEMENTATION
+ALLOW_CONSOLIDATED_IMPLEMENTATION: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_NOW: NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_CAPACITY / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_AGENT / ALLOW_LANGGRAPH: NO / NO / NO / NO
+ALLOW_PAPER / ALLOW_LIVE / ALLOW_PUSH / ALLOW_TAG: NO / NO / NO / NO
+~~~
+
+完整 code reality、transaction ownership、conflict-safe duplicate、failure taxonomy、in-memory snapshot、精确
+allowlists 与 PostgreSQL/Testcontainers 矩阵见
+`DH_PLATFORM_HARDENING_FEEDBACK_INGEST_ATOMICITY_IMPLEMENTATION_WORK_ORDER.md`。本轮未实施代码；以下 planning
+与已关闭 milestone 区块均为历史时间线，不得覆盖本工单或授权范围外实现。
+
+## Terminal validation record — 2026-08-02 feedback ingest atomicity work order
+
+~~~text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-IMPLEMENTATION-WORK-ORDER
+Task scope: WORK_ORDER_ONLY / SECURITY_AUDIT / DOCS_ONLY_CHANGE
+Baseline HEAD / parent / origin-dev: f087f562 / 071bc29e / 071bc29e
+Ahead / behind before write: 1 / 0
+Worktree / staged before write: clean / empty
+Transaction participant inventory: PASS
+Scope invariants: PASS / 3 OF 3
+Only allowlisted docs: PASS / 10 OF 10 / 0 UNEXPECTED
+Forbidden technical diff / archive diff: 0 / 0
+Quality validate / Checkstyle / Spotless: PASS EXIT 0 / 0 VIOLATIONS / PASS
+Full tests: NOT_RERUN / WORK_ORDER ONLY
+Production capacity: NOT PROVEN
+Push / tag: NOT EXECUTED / NOT EXECUTED
+~~~
+
+本轮只执行 code-reality、transaction/repository security review、Git/scope 检查和 Maven quality validate；
+不得把历史 CI、历史 regression 或 PostgreSQL 证据记成本轮测试结果。
+
+
 ## Terminal current authority — 2026-08-02 post-feedback-containment next-stage planning
 
 ~~~text

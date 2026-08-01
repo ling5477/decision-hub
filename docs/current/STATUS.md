@@ -1,5 +1,40 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-08-02 feedback ingest atomicity work order
+
+~~~text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-IMPLEMENTATION-WORK-ORDER
+Task result: DONE / SCOPE FROZEN / DOCS ONLY / IMPLEMENTATION NOT STARTED
+Planning commit: f087f562bdf9802c19ebeebcb8c1523cd390130f / LOCAL ONLY
+Closed milestone: CLOSED / ACCEPTED / ARCHIVED / TAGGED / NOT REOPENED
+Selected stage: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY
+Selected design: UNIT_OF_WORK
+Transaction participant inventory: PASS / SAME JDBC TEMPLATE / SYNCHRONOUS ROUTE
+Atomic boundary / rollback / safe retry / commit unknown: FROZEN / FROZEN / FROZEN / FROZEN
+JDBC / in-memory parity: FROZEN
+Conflict arbitration: INSERT ON CONFLICT DO NOTHING + SAME-TRANSACTION READ-BACK
+Production / test / factsource allowlists: FROZEN / 7 / 9 / 9 EXACT PATHS
+Scope invariants: PASS / 3 OF 3
+API / migration / schema: NONE / NONE / NONE
+Technical implementation/test diff: 0 / 0
+Quality validation: PASS / EXIT 0 / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Full tests: NOT_RERUN / WORK_ORDER ONLY
+Work-order commit: THIS_DOCUMENT_COMMIT / LOCAL ONLY / NOT PUSHED
+Production capacity: NOT_PROVEN
+Next action: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-CONSOLIDATED-IMPLEMENTATION
+ALLOW_CONSOLIDATED_IMPLEMENTATION: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_NOW: NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_CAPACITY / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_AGENT / ALLOW_LANGGRAPH: NO / NO / NO / NO
+ALLOW_PAPER / ALLOW_LIVE / ALLOW_PUSH / ALLOW_TAG: NO / NO / NO / NO
+~~~
+
+完整 code reality、transaction ownership、conflict-safe duplicate、failure taxonomy、in-memory snapshot、精确
+allowlists 与 PostgreSQL/Testcontainers 矩阵见
+`DH_PLATFORM_HARDENING_FEEDBACK_INGEST_ATOMICITY_IMPLEMENTATION_WORK_ORDER.md`。本轮未实施代码；以下 planning
+与已关闭 milestone 区块均为历史时间线，不得覆盖本工单或授权范围外实现。
+
+
 ## Terminal current authority — 2026-08-02 post-feedback-containment next-stage planning
 
 ~~~text

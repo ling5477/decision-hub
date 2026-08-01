@@ -1,5 +1,21 @@
 # DH Post-Feedback-Side-Effect-Containment Next Stage Plan
 
+## Work-order handoff — 2026-08-02
+
+```text
+Implementation work order: DONE / SCOPE FROZEN / DOCS ONLY
+Selected design: UNIT_OF_WORK
+Transaction participant inventory: PASS
+API / migration / schema: NONE / NONE / NONE
+Consolidated implementation: AUTHORIZED FOR NEXT TASK ONLY / NOT STARTED
+Work order: DH_PLATFORM_HARDENING_FEEDBACK_INGEST_ATOMICITY_IMPLEMENTATION_WORK_ORDER.md
+Next task: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-CONSOLIDATED-IMPLEMENTATION
+```
+
+本 planning document 保持冻结；精确 production/test/factsource allowlists、conflict-safe duplicate、JDBC 与
+in-memory unit-of-work、safe retry、commit-unknown 和 PostgreSQL 矩阵由 implementation work order 承接。
+本轮未实施代码，不授权 push/tag、learning、capacity、NQ/Provider/Agent/LangGraph/Paper/LIVE。
+
 > Task: `DH-POST-FEEDBACK-SIDE-EFFECT-CONTAINMENT-NEXT-STAGE-PLANNING`
 > Date: `2026-08-02`
 > Type: `PLANNING_ONLY / POST_MILESTONE_TRANSITION_REVIEW / CODE_REALITY_GAP_REVIEW / DOCS_ONLY_CHANGE`
