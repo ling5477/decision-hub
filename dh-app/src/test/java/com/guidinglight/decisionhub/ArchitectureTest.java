@@ -148,6 +148,71 @@ public class ArchitectureTest {
                 .check(importMainClasses());
     }
 
+    /** Feedback ingestion usecase 保持 framework-neutral，事务能力只能由 adapter 实现。 */
+    @Test
+    void feedbackIngestAtomicity_usecaseDoesNotDependOnSpringTransaction() {
+        noClasses()
+                .that()
+                .resideInAPackage("..usecase.agent.feedback..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage("org.springframework.transaction..", "org.springframework.jdbc..")
+                .check(importMainClasses());
+    }
+
+    /** 原子 ingress 禁止异步、REQUIRES_NEW、动态 bean lookup 或 transaction callback 补写。 */
+    @Test
+    void feedbackIngestAtomicity_forbidsBypassAndSplitTransactionTokens() {
+        final List<Path> sources =
+                List.of(
+                        Path.of("..", "dh-usecase", "src", "main", "java", "com", "guidinglight",
+                                "decisionhub", "usecase", "agent", "feedback"),
+                        Path.of("..", "dh-infra", "src", "main", "java", "com", "guidinglight",
+                                "decisionhub", "infra", "jdbc", "JdbcNqFeedbackEventRepository.java"),
+                        Path.of("src", "main", "java", "com", "guidinglight", "decisionhub", "config",
+                                "FeedbackIngestionWiringConfig.java"),
+                        Path.of("src", "main", "java", "com", "guidinglight", "decisionhub", "config",
+                                "Stage2JdbcWiringConfig.java"));
+        final List<String> forbidden =
+                List.of(
+                        "REQUIRES_NEW",
+                        "@Async",
+                        "ApplicationEventPublisher",
+                        "TransactionSynchronization",
+                        "ApplicationContext#getBean",
+                        "ObjectProvider",
+                        "CompletableFuture",
+                        "new Thread(");
+        final List<String> violations = new ArrayList<>();
+        for (Path source : sources) {
+            final Path absolute = source.toAbsolutePath().normalize();
+            if (!Files.exists(absolute)) {
+                violations.add("missing feedback atomicity source: " + absolute);
+                continue;
+            }
+            try (Stream<Path> walker =
+                         Files.isDirectory(absolute) ? Files.walk(absolute) : Stream.of(absolute)) {
+                walker.filter(path -> path.toString().endsWith(".java"))
+                        .forEach(
+                                path -> {
+                                    try {
+                                        final String body = Files.readString(path, StandardCharsets.UTF_8);
+                                        forbidden.stream()
+                                                .filter(body::contains)
+                                                .forEach(token -> violations.add(path + " contains " + token));
+                                    } catch (IOException error) {
+                                        violations.add("failed to read " + path + ": " + error.getMessage());
+                                    }
+                                });
+            } catch (IOException error) {
+                violations.add("failed to scan " + absolute + ": " + error.getMessage());
+            }
+        }
+        if (!violations.isEmpty()) {
+            fail("feedback ingest atomicity bypass violations:\n" + String.join("\n", violations));
+        }
+    }
+
     /**
      * Stage1-CLOSE ④ api 控制器 @RequestMapping/@GetMapping/@PostMapping 不能命中 /orders|/trades|/live。
      */

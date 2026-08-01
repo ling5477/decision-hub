@@ -472,7 +472,8 @@ class NqFeedbackControllerWebMvcTest {
         new DefaultNqFeedbackIngestionService(
             new DefaultNqFeedbackContractValidator(runRepository, objectMapper),
             feedbackRepository,
-            (envelope, tenantId) -> routeCalls.incrementAndGet());
+            (envelope, tenantId) -> routeCalls.incrementAndGet(),
+            feedbackRepository);
     final MockMvc realPipelineMockMvc = newMockMvc(realService);
     final Map<String, Object> envelope = legalEnvelope("evt-forbidden-real-pipeline");
     envelope.put("payloadJson", forbiddenPayloadJson());

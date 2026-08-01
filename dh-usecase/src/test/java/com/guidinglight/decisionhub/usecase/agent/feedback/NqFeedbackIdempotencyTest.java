@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.guidinglight.decisionhub.domain.feedback.FeedbackSource;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEnvelope;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEvent;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEventType;
@@ -38,12 +39,12 @@ class NqFeedbackIdempotencyTest {
   @Test
   void replaySameEventIdSavesOnceAndDispatchesOnce() {
     final ResearchRunRepository runRepo = B2TestFixtures.repoWithRun(TRACE);
-    final NqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
+    final InMemoryNqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
     final AtomicInteger handlerCalls = new AtomicInteger(0);
 
     final Map<NqFeedbackEventType, NqFeedbackEventHandler> handlerMap = new HashMap<>();
     for (NqFeedbackEventType t : NqFeedbackEventType.values()) {
-      handlerMap.put(t, new CountingHandler(t, handlerCalls));
+      handlerMap.put(t, new CountingHandler(t, handlerCalls, feedbackRepo));
     }
     final NqFeedbackEventTypeRouter router =
         (envelope, tenantId) -> handlerMap.get(envelope.getEventType()).handle(envelope, tenantId);
@@ -51,7 +52,7 @@ class NqFeedbackIdempotencyTest {
     final NqFeedbackContractValidator validator =
         new DefaultNqFeedbackContractValidator(runRepo, new ObjectMapper());
     final NqFeedbackIngestionService service =
-        new DefaultNqFeedbackIngestionService(validator, feedbackRepo, router);
+        new DefaultNqFeedbackIngestionService(validator, feedbackRepo, router, feedbackRepo);
 
     final IngestionCommand cmd =
         B2TestFixtures.legalCommand(
@@ -74,17 +75,18 @@ class NqFeedbackIdempotencyTest {
   @Test
   void differentEventIdsDispatchSeparately() {
     final ResearchRunRepository runRepo = B2TestFixtures.repoWithRun(TRACE);
-    final NqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
+    final InMemoryNqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
     final AtomicInteger handlerCalls = new AtomicInteger(0);
 
     final NqFeedbackEventTypeRouter router =
         (envelope, tenantId) -> {
           handlerCalls.incrementAndGet();
+          appendEvent(feedbackRepo, envelope, tenantId);
         };
     final NqFeedbackContractValidator validator =
         new DefaultNqFeedbackContractValidator(runRepo, new ObjectMapper());
     final NqFeedbackIngestionService service =
-        new DefaultNqFeedbackIngestionService(validator, feedbackRepo, router);
+        new DefaultNqFeedbackIngestionService(validator, feedbackRepo, router, feedbackRepo);
 
     service.ingest(B2TestFixtures.legalCommand("e-a", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE));
     service.ingest(B2TestFixtures.legalCommand("e-b", NqFeedbackEventType.PAPER_RUN_STARTED, TRACE));
@@ -99,13 +101,13 @@ class NqFeedbackIdempotencyTest {
   @Test
   void rejectedDoesNotPersistEnvelope() {
     final ResearchRunRepository runRepo = B2TestFixtures.repoWithRun(TRACE);
-    final NqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
+    final InMemoryNqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
     final AtomicInteger handlerCalls = new AtomicInteger(0);
     final NqFeedbackEventTypeRouter router = (envelope, tenantId) -> handlerCalls.incrementAndGet();
     final NqFeedbackContractValidator validator =
         new DefaultNqFeedbackContractValidator(runRepo, new ObjectMapper());
     final NqFeedbackIngestionService service =
-        new DefaultNqFeedbackIngestionService(validator, feedbackRepo, router);
+        new DefaultNqFeedbackIngestionService(validator, feedbackRepo, router, feedbackRepo);
 
     final IngestionCommand bad =
         B2TestFixtures.commandWith(
@@ -122,13 +124,13 @@ class NqFeedbackIdempotencyTest {
   @Test
   void forbiddenPayloadDoesNotPersistEnvelopeOrDispatchHandler() {
     final ResearchRunRepository runRepo = B2TestFixtures.repoWithRun(TRACE);
-    final NqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
+    final InMemoryNqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
     final AtomicInteger handlerCalls = new AtomicInteger(0);
     final NqFeedbackEventTypeRouter router = (envelope, tenantId) -> handlerCalls.incrementAndGet();
     final NqFeedbackContractValidator validator =
         new DefaultNqFeedbackContractValidator(runRepo, new ObjectMapper());
     final NqFeedbackIngestionService service =
-        new DefaultNqFeedbackIngestionService(validator, feedbackRepo, router);
+        new DefaultNqFeedbackIngestionService(validator, feedbackRepo, router, feedbackRepo);
 
     final IngestionCommand forbidden =
         B2TestFixtures.commandWith(
@@ -151,11 +153,13 @@ class NqFeedbackIdempotencyTest {
   void repositoryWriteFailurePropagatesAndDoesNotDispatchHandler() {
     final ResearchRunRepository runRepo = B2TestFixtures.repoWithRun(TRACE);
     final AtomicInteger handlerCalls = new AtomicInteger();
+    final FailingSaveRepository repository = new FailingSaveRepository();
     final NqFeedbackIngestionService service =
         new DefaultNqFeedbackIngestionService(
             new DefaultNqFeedbackContractValidator(runRepo, new ObjectMapper()),
-            new FailingSaveRepository(),
-            (envelope, tenantId) -> handlerCalls.incrementAndGet());
+            repository,
+            (envelope, tenantId) -> handlerCalls.incrementAndGet(),
+            repository);
 
     assertThrows(
         IllegalStateException.class,
@@ -169,14 +173,15 @@ class NqFeedbackIdempotencyTest {
   @Test
   void unknownHandlerFailurePropagatesInsteadOfReturningAccepted() {
     final ResearchRunRepository runRepo = B2TestFixtures.repoWithRun(TRACE);
-    final NqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
+    final InMemoryNqFeedbackEventRepository feedbackRepo = new InMemoryNqFeedbackEventRepository();
     final NqFeedbackIngestionService service =
         new DefaultNqFeedbackIngestionService(
             new DefaultNqFeedbackContractValidator(runRepo, new ObjectMapper()),
             feedbackRepo,
             (envelope, tenantId) -> {
               throw new IllegalStateException("unexpected handler failure");
-            });
+            },
+            feedbackRepo);
 
     assertThrows(
         IllegalStateException.class,
@@ -190,10 +195,15 @@ class NqFeedbackIdempotencyTest {
   private static final class CountingHandler implements NqFeedbackEventHandler {
     private final NqFeedbackEventType type;
     private final AtomicInteger counter;
+    private final NqFeedbackEventRepository repository;
 
-    CountingHandler(final NqFeedbackEventType type, final AtomicInteger counter) {
+    CountingHandler(
+        final NqFeedbackEventType type,
+        final AtomicInteger counter,
+        final NqFeedbackEventRepository repository) {
       this.type = type;
       this.counter = counter;
+      this.repository = repository;
     }
 
     @Override
@@ -205,10 +215,30 @@ class NqFeedbackIdempotencyTest {
     public void handle(final NqFeedbackEnvelope envelope, final String tenantId) {
       assertSame(type, envelope.getEventType());
       counter.incrementAndGet();
+      appendEvent(repository, envelope, tenantId);
     }
   }
 
-  private static final class FailingSaveRepository implements NqFeedbackEventRepository {
+  private static void appendEvent(
+      final NqFeedbackEventRepository repository,
+      final NqFeedbackEnvelope envelope,
+      final String tenantId) {
+    repository.append(
+        NqFeedbackEvent.create(
+            tenantId,
+            envelope.getTraceId(),
+            "candidate-1",
+            envelope.getTraceId(),
+            FeedbackSource.PAPER,
+            envelope.getEventType().name(),
+            true,
+            Map.of("rawPayloadJson", envelope.getPayloadJson()),
+            envelope.getOccurredAt(),
+            envelope.getReceivedAt()));
+  }
+
+  private static final class FailingSaveRepository
+      implements NqFeedbackEventRepository, NqFeedbackIngestionUnitOfWork {
     @Override
     public void append(final NqFeedbackEvent event) {
       throw new UnsupportedOperationException();
@@ -227,6 +257,11 @@ class NqFeedbackIdempotencyTest {
     @Override
     public Optional<NqFeedbackEnvelope> findEnvelopeByEventId(final String eventId) {
       return Optional.empty();
+    }
+
+    @Override
+    public <T> T required(final java.util.function.Supplier<T> action) {
+      return action.get();
     }
   }
 }

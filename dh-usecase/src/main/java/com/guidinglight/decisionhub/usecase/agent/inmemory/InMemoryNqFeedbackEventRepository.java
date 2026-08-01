@@ -3,6 +3,7 @@ package com.guidinglight.decisionhub.usecase.agent.inmemory;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEnvelope;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEvent;
 import com.guidinglight.decisionhub.usecase.agent.NqFeedbackEventRepository;
+import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionUnitOfWork;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * NqFeedbackEventRepository 的内存实现（DH-P1-4-RESIDUAL-FIX-IMPL-BATCH-2：bounded memory cap）。
@@ -35,7 +37,8 @@ import java.util.Optional;
  *
  * <p>线程安全：写入与清理为复合「清理-驱逐-写入」操作，统一用方法级 {@code synchronized} 串行化。
  */
-public final class InMemoryNqFeedbackEventRepository implements NqFeedbackEventRepository {
+public final class InMemoryNqFeedbackEventRepository
+    implements NqFeedbackEventRepository, NqFeedbackIngestionUnitOfWork {
 
   /** 保守默认全局事件上限。 */
   public static final int DEFAULT_MAX_EVENTS = 10_000;
@@ -178,6 +181,29 @@ public final class InMemoryNqFeedbackEventRepository implements NqFeedbackEventR
     return envelopesByEventId.size();
   }
 
+  /**
+   * 在 repository 自身 monitor 下执行完整工作单元，并在任何 unchecked failure 时恢复全部可变状态。
+   *
+   * <p>两个 {@link LinkedHashMap} 的插入顺序也属于 cleanup/eviction 语义，因此 snapshot 与 restore 都保持原顺序；
+   * event list 逐项复制，禁止浅复制导致 rollback 后残留 append。
+   */
+  @Override
+  public synchronized <T> T required(final Supplier<T> action) {
+    final Supplier<T> checked = Objects.requireNonNull(action, "action");
+    final Map<String, NqFeedbackEnvelope> envelopeSnapshot =
+        new LinkedHashMap<>(envelopesByEventId);
+    final Map<String, List<NqFeedbackEvent>> eventSnapshot = snapshotEvents();
+    try {
+      return checked.get();
+    } catch (final RuntimeException | Error failure) {
+      envelopesByEventId.clear();
+      envelopesByEventId.putAll(envelopeSnapshot);
+      indexByRun.clear();
+      eventSnapshot.forEach((key, events) -> indexByRun.put(key, new ArrayList<>(events)));
+      throw failure;
+    }
+  }
+
   // ---- 内部：清理与驱逐（均在 synchronized 方法内调用）----
 
   private int removeExpiredEvents(final Instant now) {
@@ -198,6 +224,12 @@ public final class InMemoryNqFeedbackEventRepository implements NqFeedbackEventR
       }
     }
     return removed;
+  }
+
+  private Map<String, List<NqFeedbackEvent>> snapshotEvents() {
+    final Map<String, List<NqFeedbackEvent>> snapshot = new LinkedHashMap<>();
+    indexByRun.forEach((key, events) -> snapshot.put(key, new ArrayList<>(events)));
+    return snapshot;
   }
 
   private int removeExpiredEnvelopes(final Instant now) {

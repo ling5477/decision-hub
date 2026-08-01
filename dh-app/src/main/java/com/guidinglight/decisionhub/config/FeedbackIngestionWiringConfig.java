@@ -8,6 +8,7 @@ import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackContractVal
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackEventHandler;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackEventTypeRouter;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionService;
+import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionUnitOfWork;
 import com.guidinglight.decisionhub.usecase.agent.feedback.handler.BacktestResultReadyHandler;
 import com.guidinglight.decisionhub.usecase.agent.feedback.handler.PaperRunAlertRaisedHandler;
 import com.guidinglight.decisionhub.usecase.agent.feedback.handler.PaperRunCreatedHandler;
@@ -40,8 +41,8 @@ public class FeedbackIngestionWiringConfig {
 
   /** 装配有界的 legacy feedback event repository。 */
   @Bean
-  @ConditionalOnMissingBean
-  public NqFeedbackEventRepository nqFeedbackEventRepository(
+  @ConditionalOnMissingBean(NqFeedbackEventRepository.class)
+  public InMemoryNqFeedbackEventRepository nqFeedbackEventRepository(
       @Value("${decisionhub.security.nq-feedback.feedback-store.max-events:10000}")
           final int maxEvents,
       @Value("${decisionhub.security.nq-feedback.feedback-store.per-tenant-max-events:1000}")
@@ -122,8 +123,9 @@ public class FeedbackIngestionWiringConfig {
   public NqFeedbackIngestionService nqFeedbackIngestionService(
       final NqFeedbackContractValidator validator,
       final NqFeedbackEventRepository repository,
-      final NqFeedbackEventTypeRouter router) {
-    return new DefaultNqFeedbackIngestionService(validator, repository, router);
+      final NqFeedbackEventTypeRouter router,
+      final NqFeedbackIngestionUnitOfWork unitOfWork) {
+    return new DefaultNqFeedbackIngestionService(validator, repository, router, unitOfWork);
   }
 
   @Bean

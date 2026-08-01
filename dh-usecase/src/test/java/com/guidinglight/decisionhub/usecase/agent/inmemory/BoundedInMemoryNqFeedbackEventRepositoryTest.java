@@ -158,6 +158,32 @@ class BoundedInMemoryNqFeedbackEventRepositoryTest {
   }
 
   @Test
+  void unit_of_work_rollback_restores_cleanup_eviction_and_idempotency_state() {
+    final MutableClock clock = new MutableClock(T0);
+    final InMemoryNqFeedbackEventRepository repo =
+        new InMemoryNqFeedbackEventRepository(1, 1, Duration.ofSeconds(100), clock);
+    repo.append(event("tenant-old", "run-old", T0));
+    assertTrue(repo.saveEnvelope(envelope("evt-old", T0)));
+    clock.advance(Duration.ofSeconds(120));
+
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            repo.required(
+                () -> {
+                  repo.append(event("tenant-new", "run-new", T0.plusSeconds(120)));
+                  repo.saveEnvelope(envelope("evt-new", T0.plusSeconds(120)));
+                  throw new IllegalStateException("controlled rollback");
+                }));
+
+    assertEquals(1, repo.size());
+    assertEquals(1, repo.listByRun("tenant-old", "run-old").size());
+    assertTrue(repo.listByRun("tenant-new", "run-new").isEmpty());
+    assertTrue(repo.findEnvelopeByEventId("evt-old").isPresent());
+    assertTrue(repo.findEnvelopeByEventId("evt-new").isEmpty());
+  }
+
+  @Test
   void bad_config_fails_closed() {
     assertThrows(
         IllegalArgumentException.class,

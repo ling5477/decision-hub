@@ -8,15 +8,25 @@ import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEnvelope;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEvent;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEventType;
 import com.guidinglight.decisionhub.usecase.agent.NqFeedbackEventRepository;
+import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionTransactionException;
+import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionUnitOfWork;
+import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.springframework.dao.DuplicateKeyException;
+import java.util.function.Supplier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Stage2-PoC-B5：NqFeedbackEventRepository 的 JDBC 实现。
@@ -26,7 +36,8 @@ import org.springframework.jdbc.core.RowMapper;
  *
  * <p>本实现不调用任何外部服务，不发起 HTTP，不处理订单/成交/仓位。
  */
-public final class JdbcNqFeedbackEventRepository implements NqFeedbackEventRepository {
+public final class JdbcNqFeedbackEventRepository
+    implements NqFeedbackEventRepository, NqFeedbackIngestionUnitOfWork {
 
   private static final String INSERT_EVENT_SQL =
       "insert into dh_nq_feedback_events"
@@ -46,7 +57,8 @@ public final class JdbcNqFeedbackEventRepository implements NqFeedbackEventRepos
           + " (id, tenant_id, run_id, candidate_id, trace_id, source, event_type, positive,"
           + "  status, payload_json, occurred_at, received_at,"
           + "  event_id, schema_version, validation_status, source_job_id, request_id, correlation_id)"
-          + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?, ?, ?, ?, ?, ?, ?)";
+          + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?, ?, ?, ?, ?, ?, ?)"
+          + " on conflict do nothing";
 
   private static final String SELECT_BY_EVENT_ID_SQL =
       "select event_id, event_type, occurred_at, source, source_job_id, trace_id,"
@@ -65,12 +77,61 @@ public final class JdbcNqFeedbackEventRepository implements NqFeedbackEventRepos
 
   private final JdbcTemplate jdbcTemplate;
   private final ObjectMapper objectMapper;
+  private final TransactionTemplate transactionTemplate;
 
   /** 构造。 */
   public JdbcNqFeedbackEventRepository(
-      final JdbcTemplate jdbcTemplate, final ObjectMapper objectMapper) {
+      final JdbcTemplate jdbcTemplate,
+      final ObjectMapper objectMapper,
+      final PlatformTransactionManager transactionManager) {
     this.jdbcTemplate = Objects.requireNonNull(jdbcTemplate, "jdbcTemplate");
     this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
+    final DataSource repositoryDataSource =
+        Objects.requireNonNull(jdbcTemplate.getDataSource(), "jdbcTemplate.dataSource");
+    if (!(Objects.requireNonNull(transactionManager, "transactionManager")
+        instanceof DataSourceTransactionManager dataSourceTransactionManager)) {
+      throw new IllegalArgumentException(
+          "feedback ingestion requires a DataSourceTransactionManager");
+    }
+    if (dataSourceTransactionManager.getDataSource() != repositoryDataSource) {
+      throw new IllegalArgumentException(
+          "feedback ingestion transaction manager DataSource does not match repository DataSource");
+    }
+    this.transactionTemplate = new TransactionTemplate(transactionManager);
+    this.transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+  }
+
+  @Override
+  public <T> T required(final Supplier<T> action) {
+    final Supplier<T> checked = Objects.requireNonNull(action, "action");
+    final boolean[] actionCompleted = {false};
+    try {
+      return transactionTemplate.execute(
+          status -> {
+            try {
+              final T result = checked.get();
+              actionCompleted[0] = true;
+              return result;
+            } catch (final RuntimeException | Error failure) {
+              throw new ActionFailure(failure);
+            }
+          });
+    } catch (final ActionFailure failure) {
+      failure.rethrowCause();
+      throw new AssertionError("unreachable");
+    } catch (final CannotCreateTransactionException failure) {
+      throw persistenceFailure("feedback ingestion transaction cannot be created", failure);
+    } catch (final TransactionSystemException failure) {
+      if (actionCompleted[0]) {
+        throw new NqFeedbackIngestionTransactionException(
+            NqFeedbackIngestionTransactionException.ErrorCode.COMMIT_OUTCOME_UNKNOWN,
+            "feedback ingestion commit outcome cannot be proven",
+            failure);
+      }
+      throw persistenceFailure("feedback ingestion transaction rollback failed", failure);
+    } catch (final TransactionException failure) {
+      throw persistenceFailure("feedback ingestion transaction failed", failure);
+    }
   }
 
   @Override
@@ -102,36 +163,35 @@ public final class JdbcNqFeedbackEventRepository implements NqFeedbackEventRepos
   @Override
   public boolean saveEnvelope(final NqFeedbackEnvelope envelope) {
     Objects.requireNonNull(envelope, "envelope");
-    // 双重保障：先按 eventId 查一次，命中则视作幂等（false）。再写入时若并发命中唯一索引，捕获后返回 false。
-    if (findEnvelopeByEventId(envelope.getEventId()).isPresent()) {
-      return false;
-    }
     final Instant receivedAt = envelope.getReceivedAt() != null ? envelope.getReceivedAt() : Instant.now();
-    try {
-      jdbcTemplate.update(
-          INSERT_ENVELOPE_SQL,
-          envelope.getEventId(),
-          envelope.getSourceSystem(),
-          ENVELOPE_RUN_ID_PLACEHOLDER,
-          null,
-          envelope.getTraceId(),
-          FeedbackSource.PAPER.name(),
-          envelope.getEventType().name(),
-          ENVELOPE_DEFAULT_POSITIVE,
-          ENVELOPE_DEFAULT_STATUS,
-          envelope.getPayloadJson(),
-          Timestamp.from(envelope.getOccurredAt()),
-          Timestamp.from(receivedAt),
-          envelope.getEventId(),
-          envelope.getSchemaVersion(),
-          ENVELOPE_VALIDATION_STATUS_VALID,
-          envelope.getSourceJobId(),
-          envelope.getRequestId(),
-          envelope.getCorrelationId());
+    final int updated =
+        jdbcTemplate.update(
+            INSERT_ENVELOPE_SQL,
+            envelope.getEventId(),
+            envelope.getSourceSystem(),
+            ENVELOPE_RUN_ID_PLACEHOLDER,
+            null,
+            envelope.getTraceId(),
+            FeedbackSource.PAPER.name(),
+            envelope.getEventType().name(),
+            ENVELOPE_DEFAULT_POSITIVE,
+            ENVELOPE_DEFAULT_STATUS,
+            envelope.getPayloadJson(),
+            Timestamp.from(envelope.getOccurredAt()),
+            Timestamp.from(receivedAt),
+            envelope.getEventId(),
+            envelope.getSchemaVersion(),
+            ENVELOPE_VALIDATION_STATUS_VALID,
+            envelope.getSourceJobId(),
+            envelope.getRequestId(),
+            envelope.getCorrelationId());
+    if (updated == 1) {
       return true;
-    } catch (DuplicateKeyException ex) {
+    }
+    if (updated == 0 && findEnvelopeByEventId(envelope.getEventId()).isPresent()) {
       return false;
     }
+    throw persistenceFailure("feedback envelope conflict could not be reconciled", null);
   }
 
   @Override
@@ -195,6 +255,34 @@ public final class JdbcNqFeedbackEventRepository implements NqFeedbackEventRepos
       return objectMapper.readValue(json, PAYLOAD_TYPE);
     } catch (Exception e) {
       throw new IllegalStateException("failed to deserialize payloadJson", e);
+    }
+  }
+
+  private static NqFeedbackIngestionTransactionException persistenceFailure(
+      final String safeMessage, final Throwable cause) {
+    if (cause == null) {
+      return new NqFeedbackIngestionTransactionException(
+          NqFeedbackIngestionTransactionException.ErrorCode.PERSISTENCE_FAILURE, safeMessage);
+    }
+    return new NqFeedbackIngestionTransactionException(
+        NqFeedbackIngestionTransactionException.ErrorCode.PERSISTENCE_FAILURE,
+        safeMessage,
+        cause);
+  }
+
+  private static final class ActionFailure extends RuntimeException {
+    private final Throwable actionCause;
+
+    private ActionFailure(final Throwable actionCause) {
+      super("feedback ingestion action failed", actionCause);
+      this.actionCause = actionCause;
+    }
+
+    private void rethrowCause() {
+      if (actionCause instanceof RuntimeException runtimeException) {
+        throw runtimeException;
+      }
+      throw (Error) actionCause;
     }
   }
 }

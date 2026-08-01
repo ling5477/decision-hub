@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Stage2-PoC-B5：JDBC 仓储装配。
@@ -34,9 +35,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class Stage2JdbcWiringConfig {
 
   @Bean
-  public NqFeedbackEventRepository nqFeedbackEventRepository(
-      final JdbcTemplate jdbcTemplate, final ObjectMapper nqFeedbackObjectMapper) {
-    return new JdbcNqFeedbackEventRepository(jdbcTemplate, nqFeedbackObjectMapper);
+  public JdbcNqFeedbackEventRepository nqFeedbackEventRepository(
+      final JdbcTemplate jdbcTemplate,
+      final ObjectMapper nqFeedbackObjectMapper,
+      final PlatformTransactionManager transactionManager) {
+    return new JdbcNqFeedbackEventRepository(
+        jdbcTemplate, nqFeedbackObjectMapper, transactionManager);
   }
 
   @Bean

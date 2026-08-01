@@ -1,5 +1,51 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-08-02 feedback ingest atomicity local implementation
+
+~~~text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-CONSOLIDATED-IMPLEMENTATION
+Task result: IMPLEMENTED / LOCAL_ACCEPTED / NOT PUSHED
+Docs baseline: 16ecded2f3708d69e05afe5f2a4f621c823d8be3 / PUBLISHED
+Docs baseline exact-SHA CI: 30710328666 / PASS / QUALITY 91396539930 + TESTCONTAINERS 91396539969
+Selected stage: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY
+Feedback ingest atomicity: IMPLEMENTED / LOCAL_ACCEPTED
+Atomic boundary: UNIT_OF_WORK / SAME_DATASOURCE / PROPAGATION_REQUIRED
+JDBC: TRANSACTION_TEMPLATE / FAIL_FAST_DATASOURCE_IDENTITY / ON_CONFLICT_DO_NOTHING + READBACK
+In-memory: ATOMIC_SNAPSHOT_RESTORE / JDBC_SEMANTIC_PARITY
+Rollback: ENVELOPE_AND_EVENT_ALL_OR_NOTHING
+Safe retry / response-loss retry: SUPPORTED / PASS
+Commit unknown: INTERNAL_CLASSIFICATION / NO_AUTOMATIC_RETRY / NO_API_CHANGE
+Concurrent same key: ONE COMPLETE WINNER / ENVELOPE 1 + EVENT 1
+Scope invariants: PASS / 3 OF 3
+Production / test / factsource allowlists: PASS / 7 / 9 / 9 EXACT PATHS / 0 UNEXPECTED
+API / migration / schema / contracts / POM / workflow / NQ: UNCHANGED / NONE
+Learning containment: UNCHANGED / PASS
+Inbound ExperienceFeedbackService.apply callers: 0
+Inbound ExperienceStore / PheromoneStore / FailureCaseStore writes: 0 / 0 / 0
+Targeted atomicity matrix: PASS / 56 UNIT+API+JDBC + 55 APP/WIRING/ARCHITECTURE/POSTGRESQL
+PostgreSQL / Flyway: 17.10 / V1-V15 / REAL TESTCONTAINERS / 0 SKIPPED
+Module regression: PASS / 15 OF 15 REACTOR
+Full regression: PASS / 19 OF 19 REACTOR / 1274 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+CodeRabbit: NOT_EXECUTED / CLI_NOT_INSTALLED / INSTALL_SCRIPT_BLOCKED_BY_POLICY
+Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL ONLY / NOT PUSHED
+Remote implementation CI: PENDING
+Milestone final close: NOT_STARTED
+Production capacity / production ready: NOT_PROVEN / NO
+Current factsources: 9 / 9 / SYNCHRONIZED / 0 CONFLICTS
+Next action: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-MILESTONE-FINAL-CLOSE
+ALLOW_MILESTONE_FINAL_CLOSE: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW / ALLOW_TAG_NOW: NO / NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_CAPACITY / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_AGENT / ALLOW_LANGGRAPH: NO / NO / NO / NO
+ALLOW_PAPER / ALLOW_LIVE: NO / NO
+~~~
+
+本节是 consolidated implementation 本地接受后的唯一 terminal authority。implementation commit 只能保留
+在本地；push、exact-diff security review、remote exact-SHA CI、archive、tag 与 post-tag cleanup 只能由独立
+milestone final close 任务执行。以下 work-order、planning 与已关闭 milestone 区块均为历史时间线，不得覆盖本节。
+
+
 ## Terminal current authority — 2026-08-02 feedback ingest atomicity work order
 
 ~~~text

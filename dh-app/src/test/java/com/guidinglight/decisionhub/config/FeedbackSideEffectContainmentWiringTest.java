@@ -21,6 +21,7 @@ import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionCommand;
 import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionOutcome;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackEventHandler;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionService;
+import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionUnitOfWork;
 import com.guidinglight.decisionhub.usecase.agent.inmemory.InMemoryResearchRunRepository;
 import java.time.Instant;
 import java.util.ArrayDeque;
@@ -68,6 +69,7 @@ class FeedbackSideEffectContainmentWiringTest {
   @Autowired private ApplicationContext context;
   @Autowired private NqFeedbackIngestionService ingestionService;
   @Autowired private NqFeedbackEventRepository eventRepository;
+  @Autowired private NqFeedbackIngestionUnitOfWork unitOfWork;
   @Autowired private ResearchRunRepository researchRunRepository;
   @Autowired private ExperienceStore experienceStore;
   @Autowired private PheromoneStore pheromoneStore;
@@ -80,6 +82,7 @@ class FeedbackSideEffectContainmentWiringTest {
     assertThat(context.getBeansOfType(IdempotencyFilter.class)).hasSize(1);
     assertThat(context.getBeansOfType(NqFeedbackAuthenticator.class)).hasSize(1);
     assertThat(context.getBeansOfType(RateLimiter.class)).isNotEmpty();
+    assertThat(unitOfWork).isSameAs(eventRepository);
   }
 
   @Test
@@ -116,6 +119,9 @@ class FeedbackSideEffectContainmentWiringTest {
             isolated -> {
               assertThat(isolated).hasNotFailed();
               assertThat(isolated).hasSingleBean(NqFeedbackIngestionService.class);
+              assertThat(isolated).hasSingleBean(NqFeedbackIngestionUnitOfWork.class);
+              assertThat(isolated.getBean(NqFeedbackIngestionUnitOfWork.class))
+                  .isSameAs(isolated.getBean(NqFeedbackEventRepository.class));
               assertThat(isolated).hasSingleBean(NqIntegrationUseCase.class);
               assertThat(isolated.getBeansOfType(NqFeedbackEventHandler.class)).hasSize(8);
               assertThat(isolated).doesNotHaveBean(ExperienceFeedbackService.class);
