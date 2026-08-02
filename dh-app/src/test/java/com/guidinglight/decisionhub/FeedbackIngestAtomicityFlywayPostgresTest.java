@@ -14,6 +14,7 @@ import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionCommand;
 import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionOutcome;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackEventTypeRouter;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionService;
+import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionTransactionException;
 import com.guidinglight.decisionhub.usecase.agent.feedback.ValidationResult;
 import com.guidinglight.decisionhub.usecase.agent.feedback.impl.DefaultNqFeedbackIngestionService;
 import java.time.Instant;
@@ -123,8 +124,91 @@ class FeedbackIngestAtomicityFlywayPostgresTest {
             () ->
                 service(repository, repository, appendRouter(repository)).ingest(command))
         .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("incomplete or inconsistent");
+        .hasMessageContaining("orphan envelope");
     assertCounts(command.getEventId(), 1, 0);
+  }
+
+  @Test
+  void orphanEnvelopeIsNotCompletedByUnrelatedSameContentEventAndConflictIsNotDuplicate() {
+    final IngestionCommand unrelated = command("evt-unrelated-pg");
+    final IngestionCommand orphan = command("evt-orphan-pg");
+    assertThat(service(repository, repository, appendRouter(repository)).ingest(unrelated).getOutcome())
+        .isEqualTo(IngestionOutcome.ACCEPTED);
+    repository.required(
+        () -> {
+          assertThat(repository.saveEnvelope(envelope(orphan))).isTrue();
+          return null;
+        });
+
+    assertThatThrownBy(
+            () -> service(repository, repository, appendRouter(repository)).ingest(orphan))
+        .isInstanceOf(NqFeedbackIngestionTransactionException.class)
+        .hasMessageContaining("orphan envelope");
+    assertThat(
+            jdbc.queryForObject(
+                "select count(*) from dh_nq_feedback_events where event_id=?",
+                Integer.class,
+                orphan.getEventId()))
+        .isOne();
+    assertCorrelatedCount(orphan.getEventId(), 0);
+
+    final IngestionCommand conflict =
+        withPayload(
+            unrelated,
+            unrelated.getPayloadJson().replace("candidate-1", "candidate-conflict"));
+    assertThatThrownBy(
+            () -> service(repository, repository, appendRouter(repository)).ingest(conflict))
+        .isInstanceOf(NqFeedbackIngestionTransactionException.class)
+        .hasMessageContaining("conflicts with canonical envelope");
+    assertCounts(unrelated.getEventId(), 1, 1);
+  }
+
+  @Test
+  void eventOnlyCrossTenantEventConflictAndAmbiguousCorrelationAreFailClosed() {
+    final IngestionCommand eventOnly = command("evt-event-only-pg");
+    insertCorrelatedEvent(eventOnly.getEventId(), TENANT, TRACE, "PAPER", eventOnly.getRawEventType());
+    assertThatThrownBy(
+            () -> service(repository, repository, appendRouter(repository)).ingest(eventOnly))
+        .isInstanceOf(NqFeedbackIngestionTransactionException.class)
+        .hasMessageContaining("orphan routed event");
+    assertCounts(eventOnly.getEventId(), 0, 1);
+
+    final IngestionCommand crossTenant = command("evt-cross-tenant-pg");
+    assertThat(service(repository, repository, appendRouter(repository)).ingest(crossTenant).getOutcome())
+        .isEqualTo(IngestionOutcome.ACCEPTED);
+    assertThatThrownBy(
+            () ->
+                service(repository, repository, appendRouter(repository))
+                    .ingest(withTenant(crossTenant, "tenant-other")))
+        .isInstanceOf(NqFeedbackIngestionTransactionException.class)
+        .hasMessageContaining("correlation conflicts");
+
+    final IngestionCommand conflictingEvent = command("evt-event-conflict-pg");
+    repository.required(
+        () -> {
+          assertThat(repository.saveEnvelope(envelope(conflictingEvent))).isTrue();
+          return null;
+        });
+    insertCorrelatedEvent(
+        conflictingEvent.getEventId(), TENANT, TRACE, "BACKTEST", conflictingEvent.getRawEventType());
+    assertThatThrownBy(
+            () ->
+                service(repository, repository, appendRouter(repository)).ingest(conflictingEvent))
+        .isInstanceOf(NqFeedbackIngestionTransactionException.class)
+        .hasMessageContaining("correlation conflicts");
+
+    final IngestionCommand ambiguous = command("evt-ambiguous-pg");
+    repository.required(
+        () -> {
+          assertThat(repository.saveEnvelope(envelope(ambiguous))).isTrue();
+          return null;
+        });
+    insertCorrelatedEvent(ambiguous.getEventId(), TENANT, TRACE, "PAPER", ambiguous.getRawEventType());
+    insertCorrelatedEvent(ambiguous.getEventId(), TENANT, TRACE, "PAPER", ambiguous.getRawEventType());
+    assertThatThrownBy(
+            () -> service(repository, repository, appendRouter(repository)).ingest(ambiguous))
+        .isInstanceOf(NqFeedbackIngestionTransactionException.class)
+        .hasMessageContaining("ambiguous");
   }
 
   @Test
@@ -159,6 +243,53 @@ class FeedbackIngestAtomicityFlywayPostgresTest {
       assertThat(outcomes.stream().filter(IngestionOutcome.DUPLICATE::equals).count())
           .isEqualTo(workers - 1L);
       assertCounts(command.getEventId(), 1, 1);
+    } finally {
+      executor.shutdownNow();
+      assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+    }
+  }
+
+  @Test
+  void concurrentConflictingSameEventIdHasOneCompleteWinnerAndConflictsAreNotDuplicates()
+      throws Exception {
+    final int workers = 8;
+    final IngestionCommand first = command("evt-concurrent-conflict-pg");
+    final IngestionCommand second =
+        withPayload(
+            first, first.getPayloadJson().replace("candidate-1", "candidate-conflict"));
+    final NqFeedbackIngestionService service =
+        service(repository, repository, appendRouter(repository));
+    final ExecutorService executor = Executors.newFixedThreadPool(workers);
+    final CountDownLatch ready = new CountDownLatch(workers);
+    final CountDownLatch start = new CountDownLatch(1);
+    final List<Future<String>> futures = new ArrayList<>();
+    try {
+      for (int index = 0; index < workers; index++) {
+        final IngestionCommand candidate = index % 2 == 0 ? first : second;
+        futures.add(
+            executor.submit(
+                () -> {
+                  ready.countDown();
+                  if (!start.await(10, TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("start barrier timed out");
+                  }
+                  try {
+                    return service.ingest(candidate).getOutcome().name();
+                  } catch (NqFeedbackIngestionTransactionException conflict) {
+                    return "CONFLICT";
+                  }
+                }));
+      }
+      assertThat(ready.await(10, TimeUnit.SECONDS)).isTrue();
+      start.countDown();
+      final List<String> outcomes = new ArrayList<>();
+      for (Future<String> future : futures) {
+        outcomes.add(future.get(20, TimeUnit.SECONDS));
+      }
+      assertThat(outcomes.stream().filter("ACCEPTED"::equals).count()).isOne();
+      assertThat(outcomes.stream().filter("DUPLICATE"::equals).count()).isEqualTo(3L);
+      assertThat(outcomes.stream().filter("CONFLICT"::equals).count()).isEqualTo(4L);
+      assertCounts(first.getEventId(), 1, 1);
     } finally {
       executor.shutdownNow();
       assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
@@ -204,6 +335,40 @@ class FeedbackIngestAtomicityFlywayPostgresTest {
         NqFeedbackEnvelope.DEFAULT_SCHEMA_VERSION,
         "{\"candidateId\":\"candidate-1\",\"paperRunId\":\"pr-1\"}",
         NOW.plusSeconds(1));
+  }
+
+  private static IngestionCommand withPayload(
+      final IngestionCommand command, final String payloadJson) {
+    return IngestionCommand.of(
+        command.getTenantId(),
+        command.getEventId(),
+        command.getRawEventType(),
+        command.getOccurredAt(),
+        command.getSourceSystem(),
+        command.getSourceJobId(),
+        command.getTraceId(),
+        command.getRequestId(),
+        command.getCorrelationId(),
+        command.getSchemaVersion(),
+        payloadJson,
+        command.getReceivedAt());
+  }
+
+  private static IngestionCommand withTenant(
+      final IngestionCommand command, final String tenantId) {
+    return IngestionCommand.of(
+        tenantId,
+        command.getEventId(),
+        command.getRawEventType(),
+        command.getOccurredAt(),
+        command.getSourceSystem(),
+        command.getSourceJobId(),
+        command.getTraceId(),
+        command.getRequestId(),
+        command.getCorrelationId(),
+        command.getSchemaVersion(),
+        command.getPayloadJson(),
+        command.getReceivedAt());
   }
 
   private static NqFeedbackEnvelope envelope(final IngestionCommand command) {
@@ -259,6 +424,42 @@ class FeedbackIngestAtomicityFlywayPostgresTest {
         .isEqualTo(expectedEvents);
   }
 
+  private void insertCorrelatedEvent(
+      final String envelopeEventId,
+      final String tenantId,
+      final String traceId,
+      final String source,
+      final String eventType) {
+    jdbc.update(
+        "insert into dh_nq_feedback_events"
+            + " (id,tenant_id,run_id,candidate_id,trace_id,source,event_type,positive,status,"
+            + " payload_json,occurred_at,received_at,correlation_id)"
+            + " values (?,?,?,?,?,?,?,?,?,cast(? as jsonb),?,?,?)",
+        java.util.UUID.randomUUID().toString(),
+        tenantId,
+        traceId,
+        "candidate-direct",
+        traceId,
+        source,
+        eventType,
+        true,
+        "RECEIVED",
+        "{}",
+        java.sql.Timestamp.from(NOW),
+        java.sql.Timestamp.from(NOW.plusSeconds(1)),
+        envelopeEventId);
+  }
+
+  private void assertCorrelatedCount(final String envelopeEventId, final int expected) {
+    assertThat(
+            jdbc.queryForObject(
+                "select count(*) from dh_nq_feedback_events"
+                    + " where event_id is null and correlation_id=?",
+                Integer.class,
+                envelopeEventId))
+        .isEqualTo(expected);
+  }
+
   private static final class FailingAppendRepository implements NqFeedbackEventRepository {
     private final NqFeedbackEventRepository delegate;
 
@@ -284,6 +485,26 @@ class FeedbackIngestAtomicityFlywayPostgresTest {
     @Override
     public Optional<NqFeedbackEnvelope> findEnvelopeByEventId(final String eventId) {
       return delegate.findEnvelopeByEventId(eventId);
+    }
+
+    @Override
+    public void beginEventCorrelation(
+        final NqFeedbackEnvelope envelope, final String tenantId) {
+      delegate.beginEventCorrelation(envelope, tenantId);
+    }
+
+    @Override
+    public void endEventCorrelation() {
+      delegate.endEventCorrelation();
+    }
+
+    @Override
+    public FeedbackIngestionPersistence findIngestionPersistence(
+        final String eventId,
+        final String tenantId,
+        final String traceId,
+        final NqFeedbackEventType eventType) {
+      return delegate.findIngestionPersistence(eventId, tenantId, traceId, eventType);
     }
   }
 }

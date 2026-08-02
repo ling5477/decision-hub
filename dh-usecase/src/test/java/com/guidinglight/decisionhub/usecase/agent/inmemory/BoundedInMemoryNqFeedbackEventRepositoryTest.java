@@ -9,6 +9,7 @@ import com.guidinglight.decisionhub.domain.feedback.FeedbackSource;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEnvelope;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEvent;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEventType;
+import com.guidinglight.decisionhub.usecase.agent.NqFeedbackEventRepository.FeedbackIngestionPersistenceState;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -184,6 +185,48 @@ class BoundedInMemoryNqFeedbackEventRepositoryTest {
   }
 
   @Test
+  void exactCorrelationIndexParticipatesInRollbackAndTtlCleanup() {
+    final MutableClock clock = new MutableClock(T0);
+    final InMemoryNqFeedbackEventRepository repo =
+        new InMemoryNqFeedbackEventRepository(10, 10, Duration.ofSeconds(100), clock);
+    final NqFeedbackEnvelope envelope = envelope("evt-correlated", T0);
+    assertTrue(repo.saveEnvelope(envelope));
+    repo.beginEventCorrelation(envelope, "tenant-a");
+    try {
+      repo.append(correlatedEvent("tenant-a", "trace", T0));
+    } finally {
+      repo.endEventCorrelation();
+    }
+    assertEquals(
+        FeedbackIngestionPersistenceState.COMPLETE_MATCH,
+        repo.findIngestionPersistence(
+                envelope.getEventId(), "tenant-a", "trace", envelope.getEventType())
+            .state());
+
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            repo.required(
+                () -> {
+                  clock.advance(Duration.ofSeconds(120));
+                  repo.cleanupExpired();
+                  throw new IllegalStateException("controlled rollback");
+                }));
+    assertEquals(
+        FeedbackIngestionPersistenceState.COMPLETE_MATCH,
+        repo.findIngestionPersistence(
+                envelope.getEventId(), "tenant-a", "trace", envelope.getEventType())
+            .state());
+
+    assertEquals(2, repo.cleanupExpired());
+    assertEquals(
+        FeedbackIngestionPersistenceState.ABSENT,
+        repo.findIngestionPersistence(
+                envelope.getEventId(), "tenant-a", "trace", envelope.getEventType())
+            .state());
+  }
+
+  @Test
   void bad_config_fails_closed() {
     assertThrows(
         IllegalArgumentException.class,
@@ -205,5 +248,20 @@ class BoundedInMemoryNqFeedbackEventRepositoryTest {
     final InMemoryNqFeedbackEventRepository repo = new InMemoryNqFeedbackEventRepository();
     repo.append(event("tenant-a", "run-1", T0));
     assertEquals(1, repo.size());
+  }
+
+  private static NqFeedbackEvent correlatedEvent(
+      final String tenant, final String trace, final Instant receivedAt) {
+    return NqFeedbackEvent.create(
+        tenant,
+        trace,
+        "cand",
+        trace,
+        FeedbackSource.PAPER,
+        NqFeedbackEventType.PAPER_RUN_CREATED.name(),
+        true,
+        Map.of("rawPayloadJson", "{}"),
+        T0,
+        receivedAt);
   }
 }

@@ -13,11 +13,14 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEnvelope;
+import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEvent;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEventType;
+import com.guidinglight.decisionhub.domain.feedback.FeedbackSource;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionTransactionException;
 import java.sql.Connection;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -172,6 +175,29 @@ class JdbcNqFeedbackEventRepositoryTest {
     assertThat(repository.findEnvelopeByEventId(null)).isEmpty();
   }
 
+  @Test
+  void appendPersistsExplicitEnvelopeEventIdCorrelationAndRejectsMismatchedEvent() {
+    when(jdbcTemplate.update(anyString(), any(Object[].class))).thenReturn(1);
+    final NqFeedbackEnvelope envelope = sampleEnvelope("evt-correlated");
+    repository.beginEventCorrelation(envelope, "tenant-1");
+    try {
+      repository.append(sampleEvent("tenant-1", FeedbackSource.PAPER));
+    } finally {
+      repository.endEventCorrelation();
+    }
+
+    assertThat(captureLastUpdateArgument(jdbcTemplate)).isEqualTo("evt-correlated");
+
+    repository.beginEventCorrelation(envelope, "tenant-1");
+    try {
+      assertThatThrownBy(() -> repository.append(sampleEvent("tenant-other", FeedbackSource.PAPER)))
+          .isInstanceOf(NqFeedbackIngestionTransactionException.class)
+          .hasMessageContaining("does not match");
+    } finally {
+      repository.endEventCorrelation();
+    }
+  }
+
   private NqFeedbackEnvelope sampleEnvelope(final String eventId) {
     return NqFeedbackEnvelope.of(
         eventId,
@@ -184,6 +210,20 @@ class JdbcNqFeedbackEventRepositoryTest {
         "corr-1",
         NqFeedbackEnvelope.DEFAULT_SCHEMA_VERSION,
         "{\"paperRunId\":\"pr-1\"}",
+        Instant.parse("2026-05-20T10:00:01Z"));
+  }
+
+  private NqFeedbackEvent sampleEvent(final String tenantId, final FeedbackSource source) {
+    return NqFeedbackEvent.create(
+        tenantId,
+        "trace-1",
+        "candidate-1",
+        "trace-1",
+        source,
+        NqFeedbackEventType.PAPER_RUN_CREATED.name(),
+        true,
+        Map.of("rawPayloadJson", "{}"),
+        Instant.parse("2026-05-20T10:00:00Z"),
         Instant.parse("2026-05-20T10:00:01Z"));
   }
 
@@ -200,6 +240,15 @@ class JdbcNqFeedbackEventRepositoryTest {
     return mockingDetails(template).getInvocations().stream()
         .filter(invocation -> "update".equals(invocation.getMethod().getName()))
         .count();
+  }
+
+  private static Object captureLastUpdateArgument(final JdbcTemplate template) {
+    return mockingDetails(template).getInvocations().stream()
+        .filter(invocation -> "update".equals(invocation.getMethod().getName()))
+        .map(Invocation::getArguments)
+        .map(arguments -> arguments[arguments.length - 1])
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("expected JdbcTemplate.update(...)"));
   }
 
   private static final class CommitUnknownManager extends DataSourceTransactionManager {

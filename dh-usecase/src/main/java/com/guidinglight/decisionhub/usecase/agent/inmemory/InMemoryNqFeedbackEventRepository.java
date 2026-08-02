@@ -2,6 +2,8 @@ package com.guidinglight.decisionhub.usecase.agent.inmemory;
 
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEnvelope;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEvent;
+import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEventType;
+import com.guidinglight.decisionhub.domain.feedback.FeedbackSource;
 import com.guidinglight.decisionhub.usecase.agent.NqFeedbackEventRepository;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionUnitOfWork;
 import java.time.Clock;
@@ -61,6 +63,10 @@ public final class InMemoryNqFeedbackEventRepository
   private final Map<String, List<NqFeedbackEvent>> indexByRun = new LinkedHashMap<>();
   // eventId 唯一键幂等；LinkedHashMap 保插入序便于驱逐最老。
   private final Map<String, NqFeedbackEnvelope> envelopesByEventId = new LinkedHashMap<>();
+  // routed event 只能通过显式 envelope eventId 关联；禁止按 payload/content tuple 反查。
+  private final Map<String, List<NqFeedbackEvent>> correlatedEventsByEnvelopeId =
+      new LinkedHashMap<>();
+  private final ThreadLocal<EventCorrelation> activeEventCorrelation = new ThreadLocal<>();
 
   /** 默认构造：有界默认值。 */
   public InMemoryNqFeedbackEventRepository() {
@@ -99,6 +105,10 @@ public final class InMemoryNqFeedbackEventRepository
   @Override
   public synchronized void append(final NqFeedbackEvent event) {
     Objects.requireNonNull(event, "event");
+    final EventCorrelation correlation = activeEventCorrelation.get();
+    if (correlation != null && !correlation.matches(event)) {
+      throw new IllegalStateException("routed feedback event does not match envelope correlation");
+    }
     final Instant now = clock.instant();
     // 1) TTL 清理优先。
     removeExpiredEvents(now);
@@ -117,6 +127,11 @@ public final class InMemoryNqFeedbackEventRepository
     indexByRun
         .computeIfAbsent(compositeKey(event.getTenantId(), event.getRunId()), k -> new ArrayList<>())
         .add(event);
+    if (correlation != null) {
+      correlatedEventsByEnvelopeId
+          .computeIfAbsent(correlation.envelopeEventId(), ignored -> new ArrayList<>())
+          .add(event);
+    }
   }
 
   @Override
@@ -151,6 +166,67 @@ public final class InMemoryNqFeedbackEventRepository
   @Override
   public synchronized Optional<NqFeedbackEnvelope> findEnvelopeByEventId(final String eventId) {
     return Optional.ofNullable(envelopesByEventId.get(eventId));
+  }
+
+  @Override
+  public void beginEventCorrelation(
+      final NqFeedbackEnvelope envelope, final String tenantId) {
+    Objects.requireNonNull(envelope, "envelope");
+    Objects.requireNonNull(tenantId, "tenantId");
+    if (activeEventCorrelation.get() != null) {
+      throw new IllegalStateException("nested feedback event correlation is not allowed");
+    }
+    activeEventCorrelation.set(
+        new EventCorrelation(
+            envelope.getEventId(),
+            tenantId,
+            envelope.getTraceId(),
+            envelope.getEventType().name(),
+            expectedSource(envelope.getEventType())));
+  }
+
+  @Override
+  public void endEventCorrelation() {
+    activeEventCorrelation.remove();
+  }
+
+  @Override
+  public synchronized FeedbackIngestionPersistence findIngestionPersistence(
+      final String eventId,
+      final String tenantId,
+      final String traceId,
+      final NqFeedbackEventType eventType) {
+    final Optional<NqFeedbackEnvelope> envelope =
+        Optional.ofNullable(envelopesByEventId.get(eventId));
+    final List<NqFeedbackEvent> candidates =
+        correlatedEventsByEnvelopeId.getOrDefault(eventId, List.of());
+    if (candidates.size() > 1) {
+      return new FeedbackIngestionPersistence(
+          FeedbackIngestionPersistenceState.AMBIGUOUS_CORRELATION, envelope);
+    }
+    if (candidates.isEmpty()) {
+      return new FeedbackIngestionPersistence(
+          envelope.isPresent()
+              ? FeedbackIngestionPersistenceState.ENVELOPE_ONLY
+              : FeedbackIngestionPersistenceState.ABSENT,
+          envelope);
+    }
+    if (envelope.isEmpty()) {
+      return new FeedbackIngestionPersistence(
+          FeedbackIngestionPersistenceState.EVENT_ONLY, Optional.empty());
+    }
+    final NqFeedbackEvent event = candidates.get(0);
+    final boolean exact =
+        Objects.equals(tenantId, event.getTenantId())
+            && Objects.equals(traceId, event.getTraceId())
+            && Objects.equals(traceId, event.getRunId())
+            && eventType.name().equals(event.getEventType())
+            && expectedSource(eventType) == event.getSource();
+    return new FeedbackIngestionPersistence(
+        exact
+            ? FeedbackIngestionPersistenceState.COMPLETE_MATCH
+            : FeedbackIngestionPersistenceState.EVENT_CONFLICT,
+        envelope);
   }
 
   /**
@@ -193,6 +269,7 @@ public final class InMemoryNqFeedbackEventRepository
     final Map<String, NqFeedbackEnvelope> envelopeSnapshot =
         new LinkedHashMap<>(envelopesByEventId);
     final Map<String, List<NqFeedbackEvent>> eventSnapshot = snapshotEvents();
+    final Map<String, List<NqFeedbackEvent>> correlationSnapshot = snapshotCorrelations();
     try {
       return checked.get();
     } catch (final RuntimeException | Error failure) {
@@ -200,6 +277,9 @@ public final class InMemoryNqFeedbackEventRepository
       envelopesByEventId.putAll(envelopeSnapshot);
       indexByRun.clear();
       eventSnapshot.forEach((key, events) -> indexByRun.put(key, new ArrayList<>(events)));
+      correlatedEventsByEnvelopeId.clear();
+      correlationSnapshot.forEach(
+          (key, events) -> correlatedEventsByEnvelopeId.put(key, new ArrayList<>(events)));
       throw failure;
     }
   }
@@ -214,8 +294,10 @@ public final class InMemoryNqFeedbackEventRepository
       final List<NqFeedbackEvent> events = runs.next().getValue();
       final Iterator<NqFeedbackEvent> it = events.iterator();
       while (it.hasNext()) {
-        if (isExpired(it.next().getReceivedAt(), now)) {
+        final NqFeedbackEvent event = it.next();
+        if (isExpired(event.getReceivedAt(), now)) {
           it.remove();
+          removeCorrelation(event);
           removed++;
         }
       }
@@ -229,6 +311,13 @@ public final class InMemoryNqFeedbackEventRepository
   private Map<String, List<NqFeedbackEvent>> snapshotEvents() {
     final Map<String, List<NqFeedbackEvent>> snapshot = new LinkedHashMap<>();
     indexByRun.forEach((key, events) -> snapshot.put(key, new ArrayList<>(events)));
+    return snapshot;
+  }
+
+  private Map<String, List<NqFeedbackEvent>> snapshotCorrelations() {
+    final Map<String, List<NqFeedbackEvent>> snapshot = new LinkedHashMap<>();
+    correlatedEventsByEnvelopeId.forEach(
+        (key, events) -> snapshot.put(key, new ArrayList<>(events)));
     return snapshot;
   }
 
@@ -303,7 +392,8 @@ public final class InMemoryNqFeedbackEventRepository
       return false;
     }
     final List<NqFeedbackEvent> events = indexByRun.get(oldestRunKey);
-    events.remove(oldestIdx);
+    final NqFeedbackEvent removed = events.remove(oldestIdx);
+    removeCorrelation(removed);
     if (events.isEmpty()) {
       indexByRun.remove(oldestRunKey);
     }
@@ -331,6 +421,40 @@ public final class InMemoryNqFeedbackEventRepository
 
   private static Instant receivedAtOrOldest(final NqFeedbackEvent event) {
     return event.getReceivedAt() == null ? OLDEST : event.getReceivedAt();
+  }
+
+  private void removeCorrelation(final NqFeedbackEvent event) {
+    final Iterator<Map.Entry<String, List<NqFeedbackEvent>>> correlations =
+        correlatedEventsByEnvelopeId.entrySet().iterator();
+    while (correlations.hasNext()) {
+      final List<NqFeedbackEvent> events = correlations.next().getValue();
+      events.removeIf(candidate -> Objects.equals(candidate.getEventId(), event.getEventId()));
+      if (events.isEmpty()) {
+        correlations.remove();
+      }
+    }
+  }
+
+  private static FeedbackSource expectedSource(final NqFeedbackEventType eventType) {
+    return eventType == NqFeedbackEventType.BACKTEST_RESULT_READY
+        ? FeedbackSource.BACKTEST
+        : FeedbackSource.PAPER;
+  }
+
+  private record EventCorrelation(
+      String envelopeEventId,
+      String tenantId,
+      String traceId,
+      String eventType,
+      FeedbackSource source) {
+
+    private boolean matches(final NqFeedbackEvent event) {
+      return Objects.equals(tenantId, event.getTenantId())
+          && Objects.equals(traceId, event.getTraceId())
+          && Objects.equals(traceId, event.getRunId())
+          && Objects.equals(eventType, event.getEventType())
+          && source == event.getSource();
+    }
   }
 
   private static String compositeKey(final String tenantId, final String runId) {

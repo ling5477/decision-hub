@@ -11,6 +11,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.guidinglight.decisionhub.api.GlobalExceptionHandler;
 import com.guidinglight.decisionhub.api.security.DhApiAuthenticationFilter;
 import com.guidinglight.decisionhub.security.AuthContext;
+import com.guidinglight.decisionhub.domain.feedback.FeedbackSource;
+import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEvent;
 import com.guidinglight.decisionhub.domain.research.ResearchRun;
 import com.guidinglight.decisionhub.domain.research.ResearchRunStatus;
 import com.guidinglight.decisionhub.security.nq.HmacNqFeedbackAuthenticator;
@@ -409,6 +411,58 @@ class NqFeedbackControllerWebMvcTest {
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.status").value("RECEIVED"))
         .andExpect(jsonPath("$.outcome").value("DUPLICATE"));
+  }
+
+  @Test
+  void post_existingEventIdWithInvalidPayloadReturnsValidationErrorNotDuplicate() throws Exception {
+    final InMemoryResearchRunRepository runRepository = new InMemoryResearchRunRepository();
+    runRepository.save(
+        ResearchRun.rehydrate(
+            "trace-1",
+            "tenant-a",
+            "trace-1",
+            "feedback validation precedence",
+            Map.of(),
+            ResearchRunStatus.CREATED,
+            Instant.parse("2026-06-28T00:00:00Z"),
+            Instant.parse("2026-06-28T00:00:00Z")));
+    final InMemoryNqFeedbackEventRepository repository =
+        new InMemoryNqFeedbackEventRepository();
+    final NqFeedbackIngestionService realService =
+        new DefaultNqFeedbackIngestionService(
+            new DefaultNqFeedbackContractValidator(runRepository, objectMapper),
+            repository,
+            (envelope, tenantId) ->
+                repository.append(
+                    NqFeedbackEvent.create(
+                        tenantId,
+                        envelope.getTraceId(),
+                        "candidate-webmvc",
+                        envelope.getTraceId(),
+                        FeedbackSource.PAPER,
+                        envelope.getEventType().name(),
+                        true,
+                        Map.of("rawPayloadJson", envelope.getPayloadJson()),
+                        envelope.getOccurredAt(),
+                        envelope.getReceivedAt())),
+            repository);
+    final MockMvc realPipelineMockMvc = newMockMvc(realService);
+    final Map<String, Object> envelope = legalEnvelope("evt-validation-before-duplicate-web");
+    final String firstBody = objectMapper.writeValueAsString(envelope);
+    realPipelineMockMvc
+        .perform(signedPost(envelope, firstBody, "nonce-valid-first", Instant.now()))
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.outcome").value("ACCEPTED"));
+
+    envelope.put("payloadJson", "{\"rawPayloadJson\":\"{}\"}");
+    final String invalidBody = objectMapper.writeValueAsString(envelope);
+    realPipelineMockMvc
+        .perform(signedPost(envelope, invalidBody, "nonce-invalid-retry", Instant.now()))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errorCode").value("INVALID_SCHEMA"));
+
+    org.junit.jupiter.api.Assertions.assertEquals(1, repository.envelopeCount());
+    org.junit.jupiter.api.Assertions.assertEquals(1, repository.size());
   }
 
   @Test

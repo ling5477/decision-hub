@@ -1,5 +1,56 @@
 # Decision Hub Testing
 
+## Terminal current authority — 2026-08-02 feedback ingest atomicity security remediation
+
+~~~text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-SECURITY-BLOCKER
+Task result: FIXED / LOCAL_SECURITY_REMEDIATED / NOT PUSHED
+Remediation baseline / blocked implementation: 2cb44f406ff618a531d1ca44e2c1e6848750ed75 / PRESERVED
+Implementation parent / origin/dev: 16ecded2f3708d69e05afe5f2a4f621c823d8be3
+Feedback ingest atomicity: IMPLEMENTED / LOCAL_SECURITY_REMEDIATED
+Final close: BLOCKED ATTEMPT PRESERVED / RETRY PENDING
+P1-1 duplicate validation order: FIXED / VALIDATION_AND_STRICT_CANONICALIZATION_BEFORE_LOOKUP
+P1-2 exact event correlation: FIXED / EXACT_ENVELOPE_EVENT_IDENTITY_REQUIRED
+Duplicate JSON object keys: FAIL_CLOSED / INVALID_SCHEMA / ZERO WRITES
+Orphan / event-only / conflict / ambiguity: FAIL_CLOSED / NO_AUTOMATIC_REPAIR
+Active P0 / P1: 0 / 0
+Codex Security exact-diff review: PASS / 0 REPORTABLE FINDINGS / FINAL SNAPSHOT SEALED
+Codex Security snapshot: codex-security-snapshot/v1:sha256:f4af9a31a77027b6e9b47e4ed241fcb928c64cbf8ee9d65169c21c98a021ddea
+Atomic boundary: UNIT_OF_WORK / SAME_DATASOURCE / PROPAGATION_REQUIRED / UNCHANGED
+JDBC / in-memory: EXACT_CORRELATION / TRANSACTION_AND_ROLLBACK_PARITY
+Rollback / safe retry / response-loss retry: PASS / PASS / PASS
+Commit unknown: FAIL_CLOSED / NO_AUTOMATIC_RETRY / UNCHANGED
+Concurrent same key: ONE COMPLETE WINNER / CONFLICTS_NOT_DUPLICATES / NO_PARTIAL_STATE
+Changed production / test / factsource files: 4 / 6 / 10 / 0 UNEXPECTED
+API / migration / schema / contracts / POM / workflow / NQ: UNCHANGED / NONE
+Learning containment: UNCHANGED / INBOUND MUTABLE-STORE WRITES 0
+Targeted reactor: PASS / 15 OF 15 REACTOR / POSTGRESQL TESTCONTAINERS
+Full regression: PASS / 19 OF 19 REACTOR / 1286 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL / Flyway: 17.10 / V1-V15 / REAL TESTCONTAINERS / 0 SKIPPED
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+CodeRabbit: NOT_EXECUTED / CLI_NOT_INSTALLED / INSTALL_SCRIPT_BLOCKED_BY_POLICY
+Security remediation commit: THIS_DOCUMENT_COMMIT / LOCAL ONLY / NOT PUSHED
+Implementation publication: NOT_STARTED
+Close tag: ABSENT
+Current factsources: 10 / 10 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+Production capacity / production ready: NOT_PROVEN / NO
+Next action: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-MILESTONE-FINAL-CLOSE-RETRY
+ALLOW_FINAL_CLOSE_RETRY: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW / ALLOW_TAG_NOW: NO / NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_CAPACITY / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_AGENT / ALLOW_LANGGRAPH: NO / NO / NO / NO
+ALLOW_PAPER / ALLOW_LIVE: NO / NO
+~~~
+
+本节是 security blocker remediation 完成后的唯一 terminal authority。原 milestone final-close 的
+`BLOCKED` / security review `FAIL` 结论作为历史事实保留，不得改写为已通过；本轮只关闭两条 P1 并允许
+后续独立 final-close retry。完整修复、测试与安全复核证据见
+`DH_PLATFORM_HARDENING_FEEDBACK_INGEST_ATOMICITY_SECURITY_BLOCKER.md`。以下 local implementation、
+work-order、planning 与更早区块均为历史时间线，不得覆盖本节或授权 push、tag、capacity、NQ/runtime
+integration、真实 provider、Agent/LangGraph、Paper 或 LIVE。
+
+
+
 ## Terminal current authority — 2026-08-02 feedback ingest atomicity local implementation
 
 ~~~text

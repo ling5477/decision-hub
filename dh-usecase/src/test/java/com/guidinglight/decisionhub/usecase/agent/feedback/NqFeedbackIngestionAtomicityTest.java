@@ -120,6 +120,70 @@ class NqFeedbackIngestionAtomicityTest {
   }
 
   @Test
+  void orphanEnvelopeIsNotCompletedByUnrelatedSameContentEvent() {
+    final InMemoryNqFeedbackEventRepository repository = new InMemoryNqFeedbackEventRepository();
+    final NqFeedbackIngestionService service = service(repository, repository, appendRouter(repository));
+    final IngestionCommand unrelated = command("evt-unrelated");
+    final IngestionCommand orphan = command("evt-orphan-same-content");
+    assertEquals(IngestionOutcome.ACCEPTED, service.ingest(unrelated).getOutcome());
+    assertTrue(repository.saveEnvelope(validator().validate(orphan).getEnvelope()));
+
+    assertThrows(NqFeedbackIngestionTransactionException.class, () -> service.ingest(orphan));
+    assertEquals(2, repository.envelopeCount());
+    assertEquals(1, repository.size());
+  }
+
+  @Test
+  void eventOnlyCrossTenantAndAmbiguousCorrelationAreFailClosed() {
+    final InMemoryNqFeedbackEventRepository eventOnlyRepository =
+        new InMemoryNqFeedbackEventRepository();
+    final IngestionCommand eventOnlyCommand = command("evt-event-only");
+    final NqFeedbackEnvelope eventOnlyEnvelope =
+        validator().validate(eventOnlyCommand).getEnvelope();
+    eventOnlyRepository.beginEventCorrelation(eventOnlyEnvelope, TENANT);
+    try {
+      appendEvent(eventOnlyRepository, eventOnlyEnvelope, TENANT);
+    } finally {
+      eventOnlyRepository.endEventCorrelation();
+    }
+    assertThrows(
+        NqFeedbackIngestionTransactionException.class,
+        () ->
+            service(eventOnlyRepository, eventOnlyRepository, appendRouter(eventOnlyRepository))
+                .ingest(eventOnlyCommand));
+
+    final InMemoryNqFeedbackEventRepository crossTenantRepository =
+        new InMemoryNqFeedbackEventRepository();
+    final NqFeedbackIngestionService crossTenantService =
+        service(crossTenantRepository, crossTenantRepository, appendRouter(crossTenantRepository));
+    final IngestionCommand original = command("evt-cross-tenant");
+    assertEquals(IngestionOutcome.ACCEPTED, crossTenantService.ingest(original).getOutcome());
+    final IngestionCommand otherTenant = withTenant(original, "tenant-other");
+    assertThrows(
+        NqFeedbackIngestionTransactionException.class,
+        () -> crossTenantService.ingest(otherTenant));
+
+    final InMemoryNqFeedbackEventRepository ambiguousRepository =
+        new InMemoryNqFeedbackEventRepository();
+    final IngestionCommand ambiguousCommand = command("evt-ambiguous");
+    final NqFeedbackEnvelope ambiguousEnvelope =
+        validator().validate(ambiguousCommand).getEnvelope();
+    assertTrue(ambiguousRepository.saveEnvelope(ambiguousEnvelope));
+    ambiguousRepository.beginEventCorrelation(ambiguousEnvelope, TENANT);
+    try {
+      appendEvent(ambiguousRepository, ambiguousEnvelope, TENANT);
+      appendEvent(ambiguousRepository, ambiguousEnvelope, TENANT);
+    } finally {
+      ambiguousRepository.endEventCorrelation();
+    }
+    assertThrows(
+        NqFeedbackIngestionTransactionException.class,
+        () ->
+            service(ambiguousRepository, ambiguousRepository, appendRouter(ambiguousRepository))
+                .ingest(ambiguousCommand));
+  }
+
+  @Test
   void concurrentSameKeyProducesExactlyOneCompleteWinnerWithoutSleep() throws Exception {
     final int workers = 8;
     final InMemoryNqFeedbackEventRepository repository = new InMemoryNqFeedbackEventRepository();
@@ -155,6 +219,53 @@ class NqFeedbackIngestionAtomicityTest {
     }
   }
 
+  @Test
+  void concurrentConflictingSameEventIdHasOneWinnerAndNeverMislabelsConflictAsDuplicate()
+      throws Exception {
+    final int workers = 8;
+    final InMemoryNqFeedbackEventRepository repository = new InMemoryNqFeedbackEventRepository();
+    final NqFeedbackIngestionService service = service(repository, repository, appendRouter(repository));
+    final IngestionCommand first = command("evt-concurrent-conflict");
+    final IngestionCommand second =
+        B2TestFixtures.commandWith(
+            first,
+            "payloadJson",
+            first.getPayloadJson().replace("cand-1", "cand-conflict"));
+    final ExecutorService executor = Executors.newFixedThreadPool(workers);
+    final CountDownLatch ready = new CountDownLatch(workers);
+    final CountDownLatch start = new CountDownLatch(1);
+    final List<Future<String>> futures = new ArrayList<>();
+    try {
+      for (int index = 0; index < workers; index++) {
+        final IngestionCommand candidate = index % 2 == 0 ? first : second;
+        futures.add(
+            executor.submit(
+                () -> {
+                  ready.countDown();
+                  assertTrue(start.await(5, TimeUnit.SECONDS));
+                  try {
+                    return service.ingest(candidate).getOutcome().name();
+                  } catch (NqFeedbackIngestionTransactionException conflict) {
+                    return "CONFLICT";
+                  }
+                }));
+      }
+      assertTrue(ready.await(5, TimeUnit.SECONDS));
+      start.countDown();
+      final List<String> outcomes = new ArrayList<>();
+      for (Future<String> future : futures) {
+        outcomes.add(future.get(10, TimeUnit.SECONDS));
+      }
+      assertEquals(1L, outcomes.stream().filter("ACCEPTED"::equals).count());
+      assertEquals(3L, outcomes.stream().filter("DUPLICATE"::equals).count());
+      assertEquals(4L, outcomes.stream().filter("CONFLICT"::equals).count());
+      assertComplete(repository);
+    } finally {
+      executor.shutdownNow();
+      assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+    }
+  }
+
   private static NqFeedbackIngestionService service(
       final NqFeedbackEventRepository repository,
       final NqFeedbackIngestionUnitOfWork unitOfWork,
@@ -169,6 +280,23 @@ class NqFeedbackIngestionAtomicityTest {
 
   private static IngestionCommand command(final String eventId) {
     return B2TestFixtures.legalCommand(eventId, NqFeedbackEventType.PAPER_RUN_CREATED, TRACE);
+  }
+
+  private static IngestionCommand withTenant(
+      final IngestionCommand command, final String tenantId) {
+    return IngestionCommand.of(
+        tenantId,
+        command.getEventId(),
+        command.getRawEventType(),
+        command.getOccurredAt(),
+        command.getSourceSystem(),
+        command.getSourceJobId(),
+        command.getTraceId(),
+        command.getRequestId(),
+        command.getCorrelationId(),
+        command.getSchemaVersion(),
+        command.getPayloadJson(),
+        command.getReceivedAt());
   }
 
   private static NqFeedbackEventTypeRouter appendRouter(
@@ -230,6 +358,26 @@ class NqFeedbackIngestionAtomicityTest {
     @Override
     public Optional<NqFeedbackEnvelope> findEnvelopeByEventId(final String eventId) {
       return delegate.findEnvelopeByEventId(eventId);
+    }
+
+    @Override
+    public void beginEventCorrelation(
+        final NqFeedbackEnvelope envelope, final String tenantId) {
+      delegate.beginEventCorrelation(envelope, tenantId);
+    }
+
+    @Override
+    public void endEventCorrelation() {
+      delegate.endEventCorrelation();
+    }
+
+    @Override
+    public FeedbackIngestionPersistence findIngestionPersistence(
+        final String eventId,
+        final String tenantId,
+        final String traceId,
+        final NqFeedbackEventType eventType) {
+      return delegate.findIngestionPersistence(eventId, tenantId, traceId, eventType);
     }
   }
 }

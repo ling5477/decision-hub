@@ -1,12 +1,15 @@
 package com.guidinglight.decisionhub.usecase.agent.feedback.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEnvelope;
-import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEvent;
 import com.guidinglight.decisionhub.usecase.agent.NqFeedbackEventRepository;
+import com.guidinglight.decisionhub.usecase.agent.NqFeedbackEventRepository.FeedbackIngestionPersistence;
 import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionCommand;
+import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionErrorCode;
 import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionResult;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackContractValidator;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackEventTypeRouter;
@@ -14,9 +17,7 @@ import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionSe
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionTransactionException;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionUnitOfWork;
 import com.guidinglight.decisionhub.usecase.agent.feedback.ValidationResult;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Stage2-PoC-B2：默认 NQ feedback ingestion 服务。
@@ -24,16 +25,17 @@ import java.util.Optional;
  * <p>编排 §Batch 2.4 - §Batch 2.5：
  *
  * <ol>
- *   <li>幂等优先：若 {@code findEnvelopeByEventId} 命中，则直接返回 DUPLICATE，不再校验、不再派发。
- *   <li>调用 {@link NqFeedbackContractValidator}；失败返回 REJECTED。
- *   <li>调用 {@link NqFeedbackEventRepository#saveEnvelope}；返回 {@code false}（并发竞态）视为 DUPLICATE。
- *   <li>调用 {@link NqFeedbackEventTypeRouter#route} 派发 handler。
+ *   <li>先完成契约校验与 canonical payload 计算；失败返回 REJECTED，且不进入写边界。
+ *   <li>在原子边界内按 exact envelope-event correlation 分类持久化状态。
+ *   <li>仅 COMPLETE_MATCH 返回 DUPLICATE；冲突、orphan 或歧义状态统一 fail-closed。
+ *   <li>ABSENT 时保存 envelope，并在显式 eventId 关联上下文内同步派发 handler。
  *   <li>返回 ACCEPTED。
  * </ol>
  */
 public final class DefaultNqFeedbackIngestionService implements NqFeedbackIngestionService {
 
-  private static final ObjectMapper PAYLOAD_MAPPER = new ObjectMapper();
+  private static final ObjectMapper PAYLOAD_MAPPER =
+      JsonMapper.builder().enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION).build();
 
   private final NqFeedbackContractValidator validator;
   private final NqFeedbackEventRepository repository;
@@ -54,66 +56,91 @@ public final class DefaultNqFeedbackIngestionService implements NqFeedbackIngest
   @Override
   public IngestionResult ingest(final IngestionCommand command) {
     Objects.requireNonNull(command, "command");
-    return unitOfWork.required(() -> ingestAtomic(command));
-  }
-
-  private IngestionResult ingestAtomic(final IngestionCommand command) {
-    // 1. 幂等优先：eventId 为空时不查；非空命中即返回 DUPLICATE。
-    if (command.getEventId() != null && !command.getEventId().isBlank()) {
-      final Optional<NqFeedbackEnvelope> existing =
-          repository.findEnvelopeByEventId(command.getEventId());
-      if (existing.isPresent()) {
-        return completeDuplicateOrFail(existing.get(), command.getTenantId());
-      }
-    }
-
-    // 2. 契约校验。
+    // Validation/canonicalization is deliberately side-effect free and precedes duplicate lookup.
     final ValidationResult validation = validator.validate(command);
     if (!validation.isValid()) {
       return IngestionResult.rejected(
           command.getEventId(), validation.getErrorCode(), validation.getMessage());
     }
-
     final NqFeedbackEnvelope envelope = validation.getEnvelope();
+    if (!hasUnambiguousCanonicalPayload(envelope.getPayloadJson())) {
+      return IngestionResult.rejected(
+          command.getEventId(),
+          IngestionErrorCode.INVALID_SCHEMA,
+          "payload contains duplicate object field");
+    }
+    return unitOfWork.required(() -> ingestValidatedAtomic(envelope, command.getTenantId()));
+  }
 
-    // 3. 保存 envelope；并发竞态下重复键视为 DUPLICATE。
-    final boolean firstWrite = repository.saveEnvelope(envelope);
-    if (!firstWrite) {
-      final NqFeedbackEnvelope existing =
-          repository
-              .findEnvelopeByEventId(envelope.getEventId())
-              .orElseThrow(
-                  () ->
-                      persistenceFailure(
-                          "feedback envelope conflict could not be reconciled"));
-      return completeDuplicateOrFail(existing, command.getTenantId());
+  private IngestionResult ingestValidatedAtomic(
+      final NqFeedbackEnvelope envelope, final String tenantId) {
+    final Resolution initial = resolve(envelope, tenantId);
+    if (initial.state() != ResolutionState.ABSENT) {
+      return duplicateOrFail(initial, envelope.getEventId());
     }
 
-    // 4. 派发 append-only handler；append 或未知异常直接向上失败关闭，不返回 false success。
-    router.route(envelope, command.getTenantId());
+    final boolean firstWrite = repository.saveEnvelope(envelope);
+    if (!firstWrite) {
+      // Concurrent winner must be reconciled in the same transaction using exact correlation.
+      return duplicateOrFail(resolve(envelope, tenantId), envelope.getEventId());
+    }
+
+    repository.beginEventCorrelation(envelope, tenantId);
+    try {
+      router.route(envelope, tenantId);
+    } finally {
+      repository.endEventCorrelation();
+    }
+
+    final Resolution completed = resolve(envelope, tenantId);
+    if (completed.state() != ResolutionState.COMPLETE_MATCH) {
+      throw persistenceFailure("feedback ingestion did not produce one exact correlated event");
+    }
 
     return IngestionResult.accepted(envelope.getEventId());
   }
 
-  private IngestionResult completeDuplicateOrFail(
-      final NqFeedbackEnvelope envelope, final String tenantId) {
-    final boolean complete =
-        repository.listByRun(tenantId, envelope.getTraceId()).stream()
-            .anyMatch(event -> matchesEnvelope(event, envelope));
-    if (!complete) {
-      throw persistenceFailure("feedback ingestion state is incomplete or inconsistent");
+  private Resolution resolve(final NqFeedbackEnvelope expected, final String tenantId) {
+    final FeedbackIngestionPersistence persistence =
+        repository.findIngestionPersistence(
+            expected.getEventId(), tenantId, expected.getTraceId(), expected.getEventType());
+    if (persistence.envelope().isPresent()
+        && !sameCanonicalEnvelope(persistence.envelope().get(), expected)) {
+      return new Resolution(ResolutionState.ENVELOPE_CONFLICT);
     }
-    return IngestionResult.duplicate(envelope.getEventId());
+    return new Resolution(ResolutionState.valueOf(persistence.state().name()));
   }
 
-  private static boolean matchesEnvelope(
-      final NqFeedbackEvent event, final NqFeedbackEnvelope envelope) {
-    final Map<String, Object> eventPayload = event.getPayloadJson();
-    final Object rawPayload = eventPayload.get("rawPayloadJson");
-    return envelope.getEventType().name().equals(event.getEventType())
-        && Objects.equals(envelope.getOccurredAt(), event.getOccurredAt())
-        && rawPayload instanceof String raw
-        && sameJsonPayload(envelope.getPayloadJson(), raw);
+  private static IngestionResult duplicateOrFail(
+      final Resolution resolution, final String eventId) {
+    if (resolution.state() == ResolutionState.COMPLETE_MATCH) {
+      return IngestionResult.duplicate(eventId);
+    }
+    final String safeMessage =
+        switch (resolution.state()) {
+          case ENVELOPE_CONFLICT -> "feedback eventId conflicts with canonical envelope";
+          case ENVELOPE_ONLY -> "feedback ingestion has an orphan envelope";
+          case EVENT_ONLY -> "feedback ingestion has an orphan routed event";
+          case EVENT_CONFLICT -> "feedback routed event correlation conflicts";
+          case AMBIGUOUS_CORRELATION -> "feedback routed event correlation is ambiguous";
+          case ABSENT -> "feedback ingestion conflict could not be reconciled";
+          case COMPLETE_MATCH -> throw new AssertionError("handled above");
+        };
+    throw persistenceFailure(safeMessage);
+  }
+
+  private static boolean sameCanonicalEnvelope(
+      final NqFeedbackEnvelope left, final NqFeedbackEnvelope right) {
+    return Objects.equals(left.getEventId(), right.getEventId())
+        && left.getEventType() == right.getEventType()
+        && Objects.equals(left.getOccurredAt(), right.getOccurredAt())
+        && Objects.equals(left.getSourceSystem(), right.getSourceSystem())
+        && Objects.equals(left.getSourceJobId(), right.getSourceJobId())
+        && Objects.equals(left.getTraceId(), right.getTraceId())
+        && Objects.equals(left.getRequestId(), right.getRequestId())
+        && Objects.equals(left.getCorrelationId(), right.getCorrelationId())
+        && Objects.equals(left.getSchemaVersion(), right.getSchemaVersion())
+        && sameJsonPayload(left.getPayloadJson(), right.getPayloadJson());
   }
 
   private static boolean sameJsonPayload(final String left, final String right) {
@@ -121,40 +148,30 @@ public final class DefaultNqFeedbackIngestionService implements NqFeedbackIngest
       final JsonNode leftTree = PAYLOAD_MAPPER.readTree(left);
       final JsonNode rightTree = PAYLOAD_MAPPER.readTree(right);
       return Objects.equals(leftTree, rightTree);
-    } catch (final JsonProcessingException ignored) {
-      // Legacy invalid JSON can only match by its exact non-string whitespace-normalized form.
-      return normalizeJsonWhitespace(left).equals(normalizeJsonWhitespace(right));
+    } catch (final JsonProcessingException invalidValidatedPayload) {
+      throw persistenceFailure("validated feedback payload cannot be canonicalized");
     }
   }
 
-  /** JSONB 回读会规范对象空白；只移除字符串字面量外的空白，避免改变字符串字段值。 */
-  private static String normalizeJsonWhitespace(final String value) {
-    if (value == null) {
-      return "";
+  private static boolean hasUnambiguousCanonicalPayload(final String payload) {
+    try {
+      return PAYLOAD_MAPPER.readTree(payload) != null;
+    } catch (final JsonProcessingException invalidPayload) {
+      return false;
     }
-    final StringBuilder normalized = new StringBuilder(value.length());
-    boolean quoted = false;
-    boolean escaped = false;
-    for (int index = 0; index < value.length(); index++) {
-      final char current = value.charAt(index);
-      if (quoted) {
-        normalized.append(current);
-        if (escaped) {
-          escaped = false;
-        } else if (current == '\\') {
-          escaped = true;
-        } else if (current == '"') {
-          quoted = false;
-        }
-      } else if (current == '"') {
-        quoted = true;
-        normalized.append(current);
-      } else if (!Character.isWhitespace(current)) {
-        normalized.append(current);
-      }
-    }
-    return normalized.toString();
   }
+
+  private enum ResolutionState {
+    ABSENT,
+    COMPLETE_MATCH,
+    ENVELOPE_ONLY,
+    EVENT_ONLY,
+    ENVELOPE_CONFLICT,
+    EVENT_CONFLICT,
+    AMBIGUOUS_CORRELATION
+  }
+
+  private record Resolution(ResolutionState state) {}
 
   private static NqFeedbackIngestionTransactionException persistenceFailure(
       final String safeMessage) {

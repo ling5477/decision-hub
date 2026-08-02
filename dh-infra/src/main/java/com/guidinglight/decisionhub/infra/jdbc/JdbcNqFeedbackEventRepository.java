@@ -42,8 +42,8 @@ public final class JdbcNqFeedbackEventRepository
   private static final String INSERT_EVENT_SQL =
       "insert into dh_nq_feedback_events"
           + " (id, tenant_id, run_id, candidate_id, trace_id, source, event_type, positive,"
-          + "  status, payload_json, occurred_at, received_at)"
-          + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?)";
+          + "  status, payload_json, occurred_at, received_at, correlation_id)"
+          + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?, ?)";
 
   private static final String SELECT_BY_RUN_SQL =
       "select id, tenant_id, run_id, candidate_id, trace_id, source, event_type, positive,"
@@ -66,6 +66,12 @@ public final class JdbcNqFeedbackEventRepository
           + " from dh_nq_feedback_events"
           + " where event_id = ?";
 
+  private static final String SELECT_CORRELATED_EVENT_SQL =
+      "select id, tenant_id, run_id, trace_id, source, event_type"
+          + " from dh_nq_feedback_events"
+          + " where correlation_id = ? and event_id is null"
+          + " order by id";
+
   private static final String ENVELOPE_VALIDATION_STATUS_VALID = "VALID";
   private static final String ENVELOPE_DEFAULT_STATUS = "RECEIVED";
   /** envelope 写入时与 Stage1 NqFeedbackEvent 共表，positive 字段在 envelope 路径下不可用，默认 {@code true}。 */
@@ -78,6 +84,7 @@ public final class JdbcNqFeedbackEventRepository
   private final JdbcTemplate jdbcTemplate;
   private final ObjectMapper objectMapper;
   private final TransactionTemplate transactionTemplate;
+  private final ThreadLocal<EventCorrelation> activeEventCorrelation = new ThreadLocal<>();
 
   /** 构造。 */
   public JdbcNqFeedbackEventRepository(
@@ -137,6 +144,10 @@ public final class JdbcNqFeedbackEventRepository
   @Override
   public void append(final NqFeedbackEvent event) {
     Objects.requireNonNull(event, "event");
+    final EventCorrelation correlation = activeEventCorrelation.get();
+    if (correlation != null && !correlation.matches(event)) {
+      throw persistenceFailure("routed feedback event does not match envelope correlation", null);
+    }
     jdbcTemplate.update(
         INSERT_EVENT_SQL,
         event.getEventId(),
@@ -150,7 +161,8 @@ public final class JdbcNqFeedbackEventRepository
         ENVELOPE_DEFAULT_STATUS,
         writeJson(event.getPayloadJson()),
         Timestamp.from(event.getOccurredAt()),
-        Timestamp.from(event.getReceivedAt()));
+        Timestamp.from(event.getReceivedAt()),
+        correlation == null ? null : correlation.envelopeEventId());
   }
 
   @Override
@@ -205,6 +217,75 @@ public final class JdbcNqFeedbackEventRepository
       return Optional.empty();
     }
     return Optional.of(rows.get(0));
+  }
+
+  @Override
+  public void beginEventCorrelation(
+      final NqFeedbackEnvelope envelope, final String tenantId) {
+    Objects.requireNonNull(envelope, "envelope");
+    Objects.requireNonNull(tenantId, "tenantId");
+    if (activeEventCorrelation.get() != null) {
+      throw persistenceFailure("nested feedback event correlation is not allowed", null);
+    }
+    activeEventCorrelation.set(
+        new EventCorrelation(
+            envelope.getEventId(),
+            tenantId,
+            envelope.getTraceId(),
+            envelope.getEventType().name(),
+            expectedSource(envelope.getEventType())));
+  }
+
+  @Override
+  public void endEventCorrelation() {
+    activeEventCorrelation.remove();
+  }
+
+  @Override
+  public FeedbackIngestionPersistence findIngestionPersistence(
+      final String eventId,
+      final String tenantId,
+      final String traceId,
+      final NqFeedbackEventType eventType) {
+    final Optional<NqFeedbackEnvelope> envelope = findEnvelopeByEventId(eventId);
+    final List<CorrelatedEvent> candidates =
+        jdbcTemplate.query(
+            SELECT_CORRELATED_EVENT_SQL,
+            (rs, rowNum) ->
+                new CorrelatedEvent(
+                    rs.getString("tenant_id"),
+                    rs.getString("run_id"),
+                    rs.getString("trace_id"),
+                    FeedbackSource.valueOf(rs.getString("source")),
+                    rs.getString("event_type")),
+            eventId);
+    if (candidates.size() > 1) {
+      return new FeedbackIngestionPersistence(
+          FeedbackIngestionPersistenceState.AMBIGUOUS_CORRELATION, envelope);
+    }
+    if (candidates.isEmpty()) {
+      return new FeedbackIngestionPersistence(
+          envelope.isPresent()
+              ? FeedbackIngestionPersistenceState.ENVELOPE_ONLY
+              : FeedbackIngestionPersistenceState.ABSENT,
+          envelope);
+    }
+    if (envelope.isEmpty()) {
+      return new FeedbackIngestionPersistence(
+          FeedbackIngestionPersistenceState.EVENT_ONLY, Optional.empty());
+    }
+    final CorrelatedEvent event = candidates.get(0);
+    final boolean exact =
+        Objects.equals(tenantId, event.tenantId())
+            && Objects.equals(traceId, event.traceId())
+            && Objects.equals(traceId, event.runId())
+            && eventType.name().equals(event.eventType())
+            && expectedSource(eventType) == event.source();
+    return new FeedbackIngestionPersistence(
+        exact
+            ? FeedbackIngestionPersistenceState.COMPLETE_MATCH
+            : FeedbackIngestionPersistenceState.EVENT_CONFLICT,
+        envelope);
   }
 
   private RowMapper<NqFeedbackEvent> eventRowMapper() {
@@ -268,6 +349,31 @@ public final class JdbcNqFeedbackEventRepository
         NqFeedbackIngestionTransactionException.ErrorCode.PERSISTENCE_FAILURE,
         safeMessage,
         cause);
+  }
+
+  private static FeedbackSource expectedSource(final NqFeedbackEventType eventType) {
+    return eventType == NqFeedbackEventType.BACKTEST_RESULT_READY
+        ? FeedbackSource.BACKTEST
+        : FeedbackSource.PAPER;
+  }
+
+  private record CorrelatedEvent(
+      String tenantId, String runId, String traceId, FeedbackSource source, String eventType) {}
+
+  private record EventCorrelation(
+      String envelopeEventId,
+      String tenantId,
+      String traceId,
+      String eventType,
+      FeedbackSource source) {
+
+    private boolean matches(final NqFeedbackEvent event) {
+      return Objects.equals(tenantId, event.getTenantId())
+          && Objects.equals(traceId, event.getTraceId())
+          && Objects.equals(traceId, event.getRunId())
+          && Objects.equals(eventType, event.getEventType())
+          && source == event.getSource();
+    }
   }
 
   private static final class ActionFailure extends RuntimeException {

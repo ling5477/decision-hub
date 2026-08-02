@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.guidinglight.decisionhub.domain.feedback.FeedbackSource;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEnvelope;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEvent;
@@ -150,6 +152,82 @@ class NqFeedbackIdempotencyTest {
   }
 
   @Test
+  void validationPrecedesDuplicateForMissingFieldAndUnknownEventType() {
+    final InMemoryNqFeedbackEventRepository repository = new InMemoryNqFeedbackEventRepository();
+    final NqFeedbackIngestionService service = service(repository);
+    final IngestionCommand original =
+        B2TestFixtures.legalCommand(
+            "evt-validation-precedence", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE);
+    assertEquals(IngestionOutcome.ACCEPTED, service.ingest(original).getOutcome());
+
+    final IngestionCommand missingRequired =
+        B2TestFixtures.commandWith(original, "payloadJson", "{\"rawPayloadJson\":\"{}\"}");
+    final IngestionCommand unknownType =
+        B2TestFixtures.commandWith(original, "rawEventType", "NOT_A_FEEDBACK_EVENT");
+
+    assertEquals(IngestionErrorCode.INVALID_SCHEMA, service.ingest(missingRequired).getErrorCode());
+    assertEquals(IngestionErrorCode.UNKNOWN_EVENT_TYPE, service.ingest(unknownType).getErrorCode());
+    assertEquals(1, repository.envelopeCount());
+    assertEquals(1, repository.size());
+  }
+
+  @Test
+  void canonicalObjectKeyReorderingIsDuplicateButRealPayloadDifferencesConflict()
+      throws Exception {
+    final InMemoryNqFeedbackEventRepository repository = new InMemoryNqFeedbackEventRepository();
+    final NqFeedbackIngestionService service = service(repository);
+    final IngestionCommand base =
+        B2TestFixtures.legalCommand(
+            "evt-canonical-conflict", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE);
+    final IngestionCommand withArray =
+        B2TestFixtures.commandWith(base, "payloadJson", payloadWithSequence(base, 1, 2));
+    assertEquals(IngestionOutcome.ACCEPTED, service.ingest(withArray).getOutcome());
+
+    final IngestionCommand reordered =
+        B2TestFixtures.commandWith(
+            withArray, "payloadJson", reverseObjectKeys(withArray.getPayloadJson()));
+    assertEquals(IngestionOutcome.DUPLICATE, service.ingest(reordered).getOutcome());
+
+    final IngestionCommand arrayOrderConflict =
+        B2TestFixtures.commandWith(withArray, "payloadJson", payloadWithSequence(base, 2, 1));
+    final IngestionCommand valueConflict =
+        B2TestFixtures.commandWith(
+            withArray,
+            "payloadJson",
+            withArray.getPayloadJson().replace("\"strategyName\":\"S1\"", "\"strategyName\":\"S2\""));
+    assertThrows(NqFeedbackIngestionTransactionException.class, () -> service.ingest(arrayOrderConflict));
+    assertThrows(NqFeedbackIngestionTransactionException.class, () -> service.ingest(valueConflict));
+    assertEquals(1, repository.envelopeCount());
+    assertEquals(1, repository.size());
+  }
+
+  @Test
+  void duplicateObjectKeysFailClosedInsteadOfCollapsingToDuplicate() {
+    final InMemoryNqFeedbackEventRepository repository = new InMemoryNqFeedbackEventRepository();
+    final NqFeedbackIngestionService service = service(repository);
+    final IngestionCommand base =
+        B2TestFixtures.legalCommand(
+            "evt-duplicate-object-key", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE);
+    final IngestionCommand repeatedKey =
+        B2TestFixtures.commandWith(
+            base,
+            "payloadJson",
+            base.getPayloadJson()
+                .replace(
+                    "\"candidateId\":\"cand-1\"",
+                    "\"candidateId\":\"first\",\"candidateId\":\"cand-1\""));
+
+    final IngestionResult rejected = service.ingest(repeatedKey);
+    assertEquals(IngestionOutcome.REJECTED, rejected.getOutcome());
+    assertEquals(IngestionErrorCode.INVALID_SCHEMA, rejected.getErrorCode());
+    assertEquals(0, repository.envelopeCount());
+    assertEquals(0, repository.size());
+    assertEquals(IngestionOutcome.ACCEPTED, service.ingest(base).getOutcome());
+    assertEquals(1, repository.envelopeCount());
+    assertEquals(1, repository.size());
+  }
+
+  @Test
   void repositoryWriteFailurePropagatesAndDoesNotDispatchHandler() {
     final ResearchRunRepository runRepo = B2TestFixtures.repoWithRun(TRACE);
     final AtomicInteger handlerCalls = new AtomicInteger();
@@ -237,6 +315,36 @@ class NqFeedbackIdempotencyTest {
             envelope.getReceivedAt()));
   }
 
+  private static NqFeedbackIngestionService service(
+      final InMemoryNqFeedbackEventRepository repository) {
+    return new DefaultNqFeedbackIngestionService(
+        new DefaultNqFeedbackContractValidator(B2TestFixtures.repoWithRun(TRACE), new ObjectMapper()),
+        repository,
+        (envelope, tenantId) -> appendEvent(repository, envelope, tenantId),
+        repository);
+  }
+
+  private static String payloadWithSequence(
+      final IngestionCommand command, final int first, final int second) throws Exception {
+    final ObjectMapper mapper = new ObjectMapper();
+    final ObjectNode payload = (ObjectNode) mapper.readTree(command.getPayloadJson());
+    final ArrayNode sequence = payload.putArray("sequence");
+    sequence.add(first);
+    sequence.add(second);
+    return mapper.writeValueAsString(payload);
+  }
+
+  private static String reverseObjectKeys(final String payloadJson) throws Exception {
+    final ObjectMapper mapper = new ObjectMapper();
+    final ObjectNode source = (ObjectNode) mapper.readTree(payloadJson);
+    final java.util.List<String> names = new java.util.ArrayList<>();
+    source.fieldNames().forEachRemaining(names::add);
+    java.util.Collections.reverse(names);
+    final ObjectNode reversed = mapper.createObjectNode();
+    names.forEach(name -> reversed.set(name, source.get(name)));
+    return mapper.writeValueAsString(reversed);
+  }
+
   private static final class FailingSaveRepository
       implements NqFeedbackEventRepository, NqFeedbackIngestionUnitOfWork {
     @Override
@@ -257,6 +365,16 @@ class NqFeedbackIdempotencyTest {
     @Override
     public Optional<NqFeedbackEnvelope> findEnvelopeByEventId(final String eventId) {
       return Optional.empty();
+    }
+
+    @Override
+    public FeedbackIngestionPersistence findIngestionPersistence(
+        final String eventId,
+        final String tenantId,
+        final String traceId,
+        final NqFeedbackEventType eventType) {
+      return new FeedbackIngestionPersistence(
+          FeedbackIngestionPersistenceState.ABSENT, Optional.empty());
     }
 
     @Override
