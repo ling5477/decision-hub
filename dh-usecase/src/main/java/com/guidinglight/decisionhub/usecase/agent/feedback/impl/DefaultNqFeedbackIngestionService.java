@@ -1,6 +1,5 @@
 package com.guidinglight.decisionhub.usecase.agent.feedback.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,7 +66,7 @@ public final class DefaultNqFeedbackIngestionService implements NqFeedbackIngest
       return IngestionResult.rejected(
           command.getEventId(),
           IngestionErrorCode.INVALID_SCHEMA,
-          "payload contains duplicate object field");
+          "payload must contain exactly one unambiguous JSON object");
     }
     return unitOfWork.required(() -> ingestValidatedAtomic(envelope, command.getTenantId()));
   }
@@ -144,21 +143,20 @@ public final class DefaultNqFeedbackIngestionService implements NqFeedbackIngest
   }
 
   private static boolean sameJsonPayload(final String left, final String right) {
-    try {
-      final JsonNode leftTree = PAYLOAD_MAPPER.readTree(left);
-      final JsonNode rightTree = PAYLOAD_MAPPER.readTree(right);
-      return Objects.equals(leftTree, rightTree);
-    } catch (final JsonProcessingException invalidValidatedPayload) {
+    final JsonNode leftTree =
+        DefaultNqFeedbackContractValidator.parseStrictSingleRootObject(PAYLOAD_MAPPER, left);
+    final JsonNode rightTree =
+        DefaultNqFeedbackContractValidator.parseStrictSingleRootObject(PAYLOAD_MAPPER, right);
+    if (leftTree == null || rightTree == null) {
       throw persistenceFailure("validated feedback payload cannot be canonicalized");
     }
+    return Objects.equals(leftTree, rightTree);
   }
 
   private static boolean hasUnambiguousCanonicalPayload(final String payload) {
-    try {
-      return PAYLOAD_MAPPER.readTree(payload) != null;
-    } catch (final JsonProcessingException invalidPayload) {
-      return false;
-    }
+    return DefaultNqFeedbackContractValidator.parseStrictSingleRootObject(
+            PAYLOAD_MAPPER, payload)
+        != null;
   }
 
   private enum ResolutionState {

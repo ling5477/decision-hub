@@ -11,6 +11,7 @@ import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEventType;
 import com.guidinglight.decisionhub.infra.jdbc.JdbcNqFeedbackEventRepository;
 import com.guidinglight.decisionhub.usecase.agent.NqFeedbackEventRepository;
 import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionCommand;
+import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionErrorCode;
 import com.guidinglight.decisionhub.usecase.agent.feedback.IngestionOutcome;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackEventTypeRouter;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionService;
@@ -109,6 +110,56 @@ class FeedbackIngestAtomicityFlywayPostgresTest {
     assertThat(service.ingest(command).getOutcome()).isEqualTo(IngestionOutcome.ACCEPTED);
     assertThat(service.ingest(command).getOutcome()).isEqualTo(IngestionOutcome.DUPLICATE);
     assertCounts(command.getEventId(), 1, 1);
+  }
+
+  @Test
+  void strictSingleRootPrecedesJdbcDuplicateResolutionAndRejectedInputsWriteNothing() {
+    final NqFeedbackIngestionService service =
+        service(repository, repository, appendRouter(repository));
+    final IngestionCommand existing = command("evt-strict-root-pg");
+    assertThat(service.ingest(existing).getOutcome()).isEqualTo(IngestionOutcome.ACCEPTED);
+
+    final IngestionCommand reordered =
+        withPayload(
+            existing, "{\"paperRunId\":\"pr-1\",\"candidateId\":\"candidate-1\"}");
+    assertThat(service.ingest(reordered).getOutcome()).isEqualTo(IngestionOutcome.DUPLICATE);
+    assertThat(
+            service
+                .ingest(withPayload(existing, existing.getPayloadJson() + " \r\n\t"))
+                .getOutcome())
+        .isEqualTo(IngestionOutcome.DUPLICATE);
+
+    for (String trailingValue : List.of("{}", "42")) {
+      final var rejected =
+          service.ingest(
+              withPayload(existing, existing.getPayloadJson() + " " + trailingValue));
+      assertThat(rejected.getOutcome()).isEqualTo(IngestionOutcome.REJECTED);
+      assertThat(rejected.getErrorCode()).isEqualTo(IngestionErrorCode.INVALID_SCHEMA);
+    }
+    assertCounts(existing.getEventId(), 1, 1);
+
+    final IngestionCommand newTrailingRoot =
+        withPayload(command("evt-new-trailing-root-pg"), "{\"candidateId\":\"candidate-1\"} {}");
+    final IngestionCommand newTrailingScalar =
+        withPayload(
+            command("evt-new-trailing-scalar-pg"),
+            "{\"candidateId\":\"candidate-1\"} true");
+    assertThat(service.ingest(newTrailingRoot).getErrorCode())
+        .isEqualTo(IngestionErrorCode.INVALID_SCHEMA);
+    assertThat(service.ingest(newTrailingScalar).getErrorCode())
+        .isEqualTo(IngestionErrorCode.INVALID_SCHEMA);
+    assertThat(
+            jdbc.queryForObject(
+                "select count(*) from dh_nq_feedback_events where event_id in (?,?)",
+                Integer.class,
+                newTrailingRoot.getEventId(),
+                newTrailingScalar.getEventId()))
+        .isZero();
+    assertCorrelatedCount(newTrailingRoot.getEventId(), 0);
+    assertCorrelatedCount(newTrailingScalar.getEventId(), 0);
+    assertThat(
+            jdbc.queryForObject("select count(*) from dh_nq_feedback_events", Integer.class))
+        .isEqualTo(2);
   }
 
   @Test

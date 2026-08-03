@@ -448,6 +448,7 @@ class NqFeedbackControllerWebMvcTest {
             repository);
     final MockMvc realPipelineMockMvc = newMockMvc(realService);
     final Map<String, Object> envelope = legalEnvelope("evt-validation-before-duplicate-web");
+    final String validPayloadJson = envelope.get("payloadJson").toString();
     final String firstBody = objectMapper.writeValueAsString(envelope);
     realPipelineMockMvc
         .perform(signedPost(envelope, firstBody, "nonce-valid-first", Instant.now()))
@@ -458,6 +459,18 @@ class NqFeedbackControllerWebMvcTest {
     final String invalidBody = objectMapper.writeValueAsString(envelope);
     realPipelineMockMvc
         .perform(signedPost(envelope, invalidBody, "nonce-invalid-retry", Instant.now()))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errorCode").value("INVALID_SCHEMA"));
+
+    envelope.put("payloadJson", validPayloadJson + " {\"unexpected\":true}");
+    final String trailingRootBody = objectMapper.writeValueAsString(envelope);
+    realPipelineMockMvc
+        .perform(
+            signedPost(
+                envelope,
+                trailingRootBody,
+                "nonce-invalid-trailing-root",
+                Instant.now()))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errorCode").value("INVALID_SCHEMA"));
 

@@ -1,5 +1,80 @@
 # DH Platform Hardening Feedback Ingest Atomicity Security Blocker
 
+## 0. Retry authority and closure evidence
+
+```text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-SECURITY-BLOCKER-RETRY
+Primary classification: P3_SECURITY_FIX + STRICT_JSON_SINGLE_ROOT_VALIDATION
+Task result: FIXED / LOCAL_SECURITY_REMEDIATED / NOT PUSHED
+Retry baseline: 77d778cc67ada445c52a74757ce30e9a537b72e3
+Previous remediation parent: 2cb44f406ff618a531d1ca44e2c1e6848750ed75
+Origin baseline: 16ecded2f3708d69e05afe5f2a4f621c823d8be3
+FEEDBACK_INGEST_ATOMICITY: IMPLEMENTED / LOCAL_SECURITY_REMEDIATED
+FINAL_CLOSE_ATTEMPTS: BLOCKED HISTORY PRESERVED / RETRY PENDING
+P1 DUPLICATE VALIDATION ORDER: FIXED
+P1 EXACT EVENT CORRELATION: FIXED
+P3 STRICT JSON SINGLE ROOT: FIXED
+ACTIVE P0 / P1: 0 / 0
+REPORTABLE SECURITY FINDINGS: 0
+Current factsources: 9 / 9 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+IMPLEMENTATION PUBLICATION: NOT_STARTED
+PRODUCTION CAPACITY: NOT_PROVEN
+IMPLEMENTATION/REMEDIATION COMMIT: THIS_DOCUMENT_COMMIT / LOCAL ONLY / NOT PUSHED
+NEXT TASK: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-MILESTONE-FINAL-CLOSE-RETRY-2
+```
+
+本轮只修复 `payloadJson` 在首个 JSON root 后仍可夹带非空白 token 的 P3 security finding；此前两次
+final-close 的 `BLOCKED` 历史、P1 remediation 结论和未发布状态均保留在本文件后续章节，未被重写。
+
+### 0.1 Minimal implementation
+
+- `DefaultNqFeedbackContractValidator` 以同一个 parser helper 强制一个 JSON object root、启用
+  `STRICT_DUPLICATE_DETECTION`、并在读取 root 后显式要求 EOF。
+- `DefaultNqFeedbackIngestionService` 的防御性 canonical check 与 duplicate comparison 复用该 helper；
+  validation/canonicalization 继续发生在 unit of work 和 duplicate lookup 之前。
+- 合法 object key reorder 保持 duplicate 语义；object/array/string/number/boolean/null/非法 trailing token、
+  duplicate key 与非 object root 均映射既有 `INVALID_SCHEMA`，不新增 wire error code。
+- 本轮生产改动仅 2 个文件；测试改动仅 4 个文件。未改 API main、DTO、OpenAPI、migration、schema、
+  Repository contract、POM、workflow、NQ、HTTP/provider、Agent、LangGraph 或 learning stores。
+
+### 0.2 Verification
+
+```text
+Strict parser / trailing-token matrix: PASS
+Duplicate precedence / zero envelope-event writes: PASS
+In-memory and JDBC parity: PASS
+WebMvc ingress path: PASS
+PostgreSQL/Testcontainers: PostgreSQL 17.10 / Flyway V1-V15 / real execution
+Targeted reactor: PASS / 15 OF 15
+Full regression: PASS / 19 OF 19 / 1291 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Quality: PASS / 19 OF 19 / Checkstyle 0 / Spotless PASS
+CodeRabbit: NOT_EXECUTED / CLI_NOT_INSTALLED / INSTALL_BLOCKED
+Codex Security cumulative diff: PASS / 9 OF 9 source worklist / 0 REPORTABLE FINDINGS
+```
+
+Codex Security 对基线 `16ecded2f3708d69e05afe5f2a4f621c823d8be3` 至当前 retry working tree 的累计 diff
+完成了 threat model、finding discovery、validation 和 attack-path analysis。扫描期间动态复现了
+PostgreSQL sub-microsecond timestamp 的 self-only rollback；因零持久化、无跨 tenant/identity/data impact 且
+microsecond retry 正常，按攻击路径 policy 判定为 non-reportable compatibility defect（`ignore`），不影响
+本轮 `0 REPORTABLE FINDINGS` 结论，也未越权把它纳入 strict-JSON patch。
+
+### 0.3 Boundary confirmation
+
+```text
+TRAILING_OBJECT / TRAILING_SCALAR: REJECTED / REJECTED
+INVALID_TRAILING_REQUEST_DUPLICATE: NO
+ZERO_WRITE_ON_REJECTION: PASS
+PREVIOUS_P1_FIXES: PASS
+API_CHANGE / MIGRATION_CHANGE / SCHEMA_CHANGE: NONE / NONE / NONE
+LEARNING STORE INBOUND WRITES: 0
+PUSH / TAG / ARCHIVE / CAPACITY GATE: NOT EXECUTED / NOT EXECUTED / NOT EXECUTED / NOT EXECUTED
+ALLOW_FINAL_CLOSE_RETRY: YES
+ALLOW_IMPLEMENTATION_PUSH_NOW: NO
+```
+
+本轮 current factsources 为 9/9 同步；临时 Codex Security 工件不进入 `docs/gates`，不构成 archive 或 tag。
+
+
 ## 1. Authority and decision
 
 ```text

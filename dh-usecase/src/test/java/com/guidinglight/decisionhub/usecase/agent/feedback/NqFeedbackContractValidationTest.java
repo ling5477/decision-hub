@@ -162,6 +162,52 @@ class NqFeedbackContractValidationTest {
     assertNotNull(r.getEnvelope());
   }
 
+  @Test
+  void payloadRequiresExactlyOneJsonRootAndAllowsOnlyTrailingWhitespace() {
+    final NqFeedbackContractValidator validator = newValidator();
+    final IngestionCommand base =
+        B2TestFixtures.legalCommand(
+            "e-strict-single-root", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE);
+
+    final ValidationResult whitespace =
+        validator.validate(
+            B2TestFixtures.commandWith(
+                base, "payloadJson", base.getPayloadJson() + " \r\n\t"));
+    assertTrue(whitespace.isValid(), "JSON whitespace after the only root must remain valid");
+
+    final java.util.List<String> forbiddenTrailingValues =
+        java.util.List.of("{}", "[]", "\"extra\"", "42", "true", "false", "null", "@");
+    for (String trailingValue : forbiddenTrailingValues) {
+      final ValidationResult result =
+          validator.validate(
+              B2TestFixtures.commandWith(
+                  base, "payloadJson", base.getPayloadJson() + " " + trailingValue));
+      assertFalse(result.isValid(), "trailing token must be rejected: " + trailingValue);
+      assertEquals(IngestionErrorCode.INVALID_SCHEMA, result.getErrorCode());
+    }
+  }
+
+  @Test
+  void duplicateJsonObjectKeysAreInvalidAtTheContractBoundary() {
+    final NqFeedbackContractValidator validator = newValidator();
+    final IngestionCommand base =
+        B2TestFixtures.legalCommand(
+            "e-contract-duplicate-key", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE);
+    final IngestionCommand duplicateKey =
+        B2TestFixtures.commandWith(
+            base,
+            "payloadJson",
+            base.getPayloadJson()
+                .replace(
+                    "\"candidateId\":\"cand-1\"",
+                    "\"candidateId\":\"first\",\"candidateId\":\"cand-1\""));
+
+    final ValidationResult result = validator.validate(duplicateKey);
+
+    assertFalse(result.isValid());
+    assertEquals(IngestionErrorCode.INVALID_SCHEMA, result.getErrorCode());
+  }
+
   /** 构造 PAPER_RUN_CREATED 的合法 payload，再由单测只改一个风险字段。 */
   private static Map<String, Object> legalPaperRunCreatedPayload() {
     final Map<String, Object> payload = new LinkedHashMap<>();

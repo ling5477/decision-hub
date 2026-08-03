@@ -1,5 +1,6 @@
 package com.guidinglight.decisionhub.usecase.agent.feedback.impl;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEnvelope;
@@ -227,11 +228,29 @@ public final class DefaultNqFeedbackContractValidator implements NqFeedbackContr
     return null;
   }
 
-  /** 解析 payload 根对象；失败或非对象返回 {@code null}，由调用方映射为既有 INVALID_SCHEMA。 */
+  /** 解析唯一 payload 根对象；失败、非对象、重复字段或尾随 token 返回 {@code null}。 */
   private JsonNode parsePayload(final String payloadJson) {
+    return parseStrictSingleRootObject(objectMapper, payloadJson);
+  }
+
+  /**
+   * 解析完整 feedback payload，并要求输入只含一个 JSON object root。
+   *
+   * <p>Why：{@link ObjectMapper#readTree(String)} 默认允许首个 root 后仍有 token。这里在 parser 层启用重复字段检测，
+   * 读取首个 tree 后再显式推进到 EOF，确保 validator 与 ingestion canonical comparison 对同一完整输入给出一致结论。
+   */
+  static JsonNode parseStrictSingleRootObject(
+      final ObjectMapper mapper, final String payloadJson) {
     try {
-      final JsonNode node = objectMapper.readTree(payloadJson);
-      return node != null && node.isObject() ? node : null;
+      final ObjectMapper checkedMapper = java.util.Objects.requireNonNull(mapper, "mapper");
+      try (JsonParser parser = checkedMapper.createParser(payloadJson)) {
+        parser.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+        final JsonNode node = checkedMapper.readTree(parser);
+        if (node == null || !node.isObject()) {
+          return null;
+        }
+        return parser.nextToken() == null ? node : null;
+      }
     } catch (Exception ex) {
       return null;
     }

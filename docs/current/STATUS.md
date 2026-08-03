@@ -1,5 +1,49 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-08-03 feedback ingest strict JSON single-root security blocker retry
+
+~~~text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-SECURITY-BLOCKER-RETRY
+Task result: FIXED / LOCAL_SECURITY_REMEDIATED / NOT PUSHED
+Retry baseline / previous remediation HEAD: 77d778cc67ada445c52a74757ce30e9a537b72e3 / PRESERVED
+Previous remediation parent: 2cb44f406ff618a531d1ca44e2c1e6848750ed75 / PRESERVED
+Origin baseline: 16ecded2f3708d69e05afe5f2a4f621c823d8be3
+Feedback ingest atomicity: IMPLEMENTED / LOCAL_SECURITY_REMEDIATED
+Final-close attempts: BLOCKED HISTORY PRESERVED / RETRY PENDING
+P1 duplicate validation order: FIXED / VALIDATION_AND_STRICT_CANONICALIZATION_BEFORE_LOOKUP
+P1 exact event correlation: FIXED / EXACT_ENVELOPE_EVENT_IDENTITY_REQUIRED
+P3 strict JSON single root: FIXED / ONE OBJECT ROOT + JSON WHITESPACE + EOF ONLY
+Trailing object / array / scalar / boolean / null / malformed token: REJECTED / INVALID_SCHEMA / ZERO WRITES
+Trailing whitespace: ACCEPTED
+Duplicate JSON object keys: FAIL_CLOSED / INVALID_SCHEMA / ZERO WRITES
+Canonical JSON: COMPLETE VALIDATED INPUT / OBJECT KEY REORDER REMAINS DUPLICATE
+Current retry diff production / test / factsources / unexpected: 2 / 4 / 9 / 0
+API / migration / schema / contracts / POM / workflow / NQ: UNCHANGED / NONE
+Learning containment: UNCHANGED / INBOUND MUTABLE-STORE WRITES 0
+Codex Security cumulative-diff review: PASS / 0 REPORTABLE FINDINGS / FINAL SNAPSHOT SEALED
+Codex Security snapshot: codex-security-snapshot/v1:sha256:edc97872a8dfd71a0366f43c810d7b41010bff8569030fe5230d24828e46ac3a
+Codex Security reviewed production worklist: 9 OF 9 / candidate receipts 3 OF 3
+CodeRabbit: NOT_EXECUTED / CLI_NOT_INSTALLED / INSTALL_BLOCKED
+Targeted reactor: PASS / 15 OF 15 REACTOR / POSTGRESQL TESTCONTAINERS
+Full regression: PASS / 19 OF 19 REACTOR / 1291 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL / Flyway: 17.10 / V1-V15 / REAL TESTCONTAINERS / 0 SKIPPED
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Implementation/remediation commit: THIS_DOCUMENT_COMMIT / LOCAL ONLY / NOT PUSHED
+Implementation publication / close tag: NOT_STARTED / ABSENT
+Current factsources: 9 / 9 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+Production capacity / production ready: NOT_PROVEN / NO
+Next action: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-MILESTONE-FINAL-CLOSE-RETRY-2
+ALLOW_FINAL_CLOSE_RETRY: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW / ALLOW_TAG_NOW: NO / NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_CAPACITY / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_AGENT / ALLOW_LANGGRAPH: NO / NO / NO / NO
+ALLOW_PAPER / ALLOW_LIVE: NO / NO
+~~~
+
+本节是 strict JSON single-root security blocker retry 完成后的唯一 terminal authority。此前两次
+milestone final-close 的 `BLOCKED` 与 security review 历史均保留在下方，不能改写为已通过。本轮未执行
+final close、push、tag、archive、capacity gate 或任何真实外部集成；后续 final-close retry 必须作为独立任务执行。
+
 ## Terminal current authority — 2026-08-02 feedback ingest atomicity security remediation
 
 ~~~text

@@ -228,6 +228,72 @@ class NqFeedbackIdempotencyTest {
   }
 
   @Test
+  void trailingTokensAreRejectedBeforeDuplicateLookupWithoutNewSideEffects() {
+    final InMemoryNqFeedbackEventRepository repository = new InMemoryNqFeedbackEventRepository();
+    final AtomicInteger handlerCalls = new AtomicInteger();
+    final NqFeedbackIngestionService service =
+        new DefaultNqFeedbackIngestionService(
+            new DefaultNqFeedbackContractValidator(
+                B2TestFixtures.repoWithRun(TRACE), new ObjectMapper()),
+            repository,
+            (envelope, tenantId) -> {
+              handlerCalls.incrementAndGet();
+              appendEvent(repository, envelope, tenantId);
+            },
+            repository);
+    final IngestionCommand base =
+        B2TestFixtures.legalCommand(
+            "evt-trailing-token-precedence", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE);
+    assertEquals(IngestionOutcome.ACCEPTED, service.ingest(base).getOutcome());
+
+    for (String trailingValue :
+        List.of("{}", "[]", "\"extra\"", "42", "true", "false", "null", "@")) {
+      final IngestionResult result =
+          service.ingest(
+              B2TestFixtures.commandWith(
+                  base, "payloadJson", base.getPayloadJson() + " " + trailingValue));
+      assertEquals(IngestionOutcome.REJECTED, result.getOutcome());
+      assertEquals(IngestionErrorCode.INVALID_SCHEMA, result.getErrorCode());
+    }
+
+    final IngestionCommand invalidFirstRoot =
+        B2TestFixtures.commandWith(base, "payloadJson", "[]");
+    final IngestionResult invalidFirstRootResult = service.ingest(invalidFirstRoot);
+    assertEquals(IngestionOutcome.REJECTED, invalidFirstRootResult.getOutcome());
+    assertEquals(IngestionErrorCode.INVALID_SCHEMA, invalidFirstRootResult.getErrorCode());
+    assertEquals(1, handlerCalls.get(), "invalid requests must not reach the router");
+    assertEquals(1, repository.envelopeCount());
+    assertEquals(1, repository.size());
+  }
+
+  @Test
+  void trailingRootForNewEventIdLeavesEnvelopeAndEventStoresEmpty() {
+    final InMemoryNqFeedbackEventRepository repository = new InMemoryNqFeedbackEventRepository();
+    final AtomicInteger handlerCalls = new AtomicInteger();
+    final NqFeedbackIngestionService service =
+        new DefaultNqFeedbackIngestionService(
+            new DefaultNqFeedbackContractValidator(
+                B2TestFixtures.repoWithRun(TRACE), new ObjectMapper()),
+            repository,
+            (envelope, tenantId) -> handlerCalls.incrementAndGet(),
+            repository);
+    final IngestionCommand base =
+        B2TestFixtures.legalCommand(
+            "evt-new-trailing-root", NqFeedbackEventType.PAPER_RUN_CREATED, TRACE);
+    final IngestionCommand trailingRoot =
+        B2TestFixtures.commandWith(
+            base, "payloadJson", base.getPayloadJson() + " {\"unexpected\":true}");
+
+    final IngestionResult result = service.ingest(trailingRoot);
+
+    assertEquals(IngestionOutcome.REJECTED, result.getOutcome());
+    assertEquals(IngestionErrorCode.INVALID_SCHEMA, result.getErrorCode());
+    assertEquals(0, handlerCalls.get());
+    assertEquals(0, repository.envelopeCount());
+    assertEquals(0, repository.size());
+  }
+
+  @Test
   void repositoryWriteFailurePropagatesAndDoesNotDispatchHandler() {
     final ResearchRunRepository runRepo = B2TestFixtures.repoWithRun(TRACE);
     final AtomicInteger handlerCalls = new AtomicInteger();
