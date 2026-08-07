@@ -4,7 +4,7 @@
 
 ~~~text
 Task: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-MILESTONE-FINAL-CLOSE-RETRY-3
-Milestone: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
+Milestone: CLOSED / ACCEPTED / ARCHIVED / TAGGED
 Implementation: 1c41a85e94a48ded74ce7a71e65b45f8d239a12b / PUBLISHED
 Implementation exact-SHA CI: 31184220520 / PASS / QUALITY 92884622294 + TESTCONTAINERS 92884622330
 Prior failed exact-SHA CI: 30823448218 / PRESERVED / READ_COMMITTED_TORN_STATE_READ / NOT INFRASTRUCTURE
@@ -18,14 +18,14 @@ Learning containment: PASS / INBOUND MUTABLE-STORE WRITES 0
 API / migration / schema / contracts / POM / workflow / NQ: UNCHANGED / NONE
 Archive: docs/gates/platform-hardening-feedback-ingest-atomicity/ / COMPLETE
 Archive sources / SHA-256: 4 OF 4 / VERIFIED / 0 MISSING / 0 UNEXPECTED / 0 HASH FAILURES
-Archive close commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUBLISHED
-Archive close exact-SHA CI: PENDING
-Close tag: dh-platform-hardening-feedback-ingest-atomicity-close / PENDING CLOSE CI
-Post-tag cleanup: PENDING / 4 CURRENT PROCESS SOURCES PRESENT
+Archive close commit: b8e1e07c4721c7e71789bc69bcb83819e9f47e40 / PUBLISHED
+Archive close exact-SHA CI: 31189681961 / PASS / QUALITY 92903026336 + TESTCONTAINERS 92903026391
+Close tag: dh-platform-hardening-feedback-ingest-atomicity-close / ANNOTATED / LOCAL+REMOTE VERIFIED / TARGET b8e1e07c4721c7e71789bc69bcb83819e9f47e40
+Post-tag cleanup: COMPLETE / 4 CURRENT PROCESS SOURCES PRUNED / CURRENT RESIDUE 0
 Terminal factsources: 12 / 12 / SYNCHRONIZED / 0 CURRENT CONFLICTS
 Formal capacity: NOT_EXECUTED / DEFERRED
 Production capacity / production ready: NOT_PROVEN / NO
-Next action: PUBLISH CLOSE COMMIT -> EXACT-SHA CI -> ANNOTATED TAG -> POST-TAG CLEANUP
+Next action: DH-POST-FEEDBACK-INGEST-ATOMICITY-NEXT-STAGE-PLANNING / PLANNING ONLY
 Next stage: DH-POST-FEEDBACK-INGEST-ATOMICITY-NEXT-STAGE-PLANNING / PLANNING ONLY
 Next-stage implementation: NOT AUTHORIZED
 ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING / ALLOW_CAPACITY: NO / NO / NO / NO
@@ -85,7 +85,7 @@ archive、tag、capacity、feedback learning、NQ/runtime、真实 HTTP/provider
 Paper 或 LIVE。
 
 完整修复、回归、安全边界与发布纪律证据见
-[`DH_PLATFORM_HARDENING_FEEDBACK_INGEST_ATOMICITY_PUBLICATION_BLOCKER.md`](DH_PLATFORM_HARDENING_FEEDBACK_INGEST_ATOMICITY_PUBLICATION_BLOCKER.md)。
+[`DH_PLATFORM_HARDENING_FEEDBACK_INGEST_ATOMICITY_PUBLICATION_BLOCKER.md`](../gates/platform-hardening-feedback-ingest-atomicity/source/DH_PLATFORM_HARDENING_FEEDBACK_INGEST_ATOMICITY_PUBLICATION_BLOCKER.md)。
 
 ## Terminal current authority — 2026-08-03 feedback ingest strict JSON single-root security blocker retry
 
@@ -356,7 +356,7 @@ ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 
 ## Current authority
 
-- [DH_PLATFORM_HARDENING_FEEDBACK_INGEST_ATOMICITY_SECURITY_BLOCKER.md](DH_PLATFORM_HARDENING_FEEDBACK_INGEST_ATOMICITY_SECURITY_BLOCKER.md)：当前 feedback-ingest atomicity 两条 P1 修复、安全复核与 final-close retry authority。
+- [DH_PLATFORM_HARDENING_FEEDBACK_INGEST_ATOMICITY_SECURITY_BLOCKER.md](../gates/platform-hardening-feedback-ingest-atomicity/source/DH_PLATFORM_HARDENING_FEEDBACK_INGEST_ATOMICITY_SECURITY_BLOCKER.md)：已归档的 feedback-ingest atomicity 两条 P1 修复与安全阻断历史。
 - [STATUS.md](STATUS.md)：primary current-state authority。
 - [WORK_ORDER.md](WORK_ORDER.md)：唯一当前工单与 next action。
 - [FACTSOURCE_POLICY.md](FACTSOURCE_POLICY.md)：factsource hierarchy 与 full-sync 规则。

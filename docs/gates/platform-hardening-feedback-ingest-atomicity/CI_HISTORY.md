@@ -17,4 +17,12 @@
 - Tests: `1293 / 0 / 0 / 0`
 - PostgreSQL/Flyway: `17.10 / V1-V15`
 
-Close-commit and cleanup-commit exact-SHA CI results are recorded after publication.
+## Close exact-SHA CI
+
+- Close SHA: `b8e1e07c4721c7e71789bc69bcb83819e9f47e40`
+- Run: `31189681961 / PASS`
+- Quality: `92903026336 / PASS`
+- Testcontainers: `92903026391 / PASS`
+- Mandatory Testcontainers assertion: `PASS`
+
+Cleanup exact-SHA CI is recorded after cleanup publication.

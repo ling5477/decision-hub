@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`PASS / CLOSE COMMIT AUTHORIZED / TAG REQUIRES CLOSE EXACT-SHA CI`
+`PASS / CLOSED / ACCEPTED / ARCHIVED / TAGGED`
 
 ## Accepted facts
 
@@ -14,6 +14,8 @@
 - Envelope/event correlation is exact; orphan, conflict, and ambiguity fail closed.
 - Envelope plus event persistence is all-or-nothing; commit-unknown fails closed without automatic retry.
 - Inbound feedback has zero mutable learning-store writes.
+- Close exact-SHA CI `31189681961` passed Quality and Testcontainers, including the mandatory Testcontainers assertion.
+- Annotated tag `dh-platform-hardening-feedback-ingest-atomicity-close` resolves locally and remotely to `b8e1e07...`.
 
 ## Non-blocking limitations
 

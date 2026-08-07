@@ -13,5 +13,8 @@
 | Machine dependencies on current source docs | `0` |
 | Forbidden technical diff | `0` |
 | Current factsource conflicts | `0` |
+| Close exact-SHA CI | `31189681961 / PASS` |
+| Annotated tag | local and remote peeled target `b8e1e07...` |
+| Current process residue | `0` |
 
-Close and cleanup exact-SHA CI are mandatory after their respective publications.
+Cleanup exact-SHA CI remains mandatory after cleanup publication.
