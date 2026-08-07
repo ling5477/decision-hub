@@ -1,5 +1,40 @@
 # Decision Hub Archive Index
 
+## Terminal current authority — 2026-08-07 feedback ingest atomicity milestone final close
+
+~~~text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-MILESTONE-FINAL-CLOSE-RETRY-3
+Milestone: CLOSED / ACCEPTED / ARCHIVED / TAG_PENDING
+Implementation: 1c41a85e94a48ded74ce7a71e65b45f8d239a12b / PUBLISHED
+Implementation exact-SHA CI: 31184220520 / PASS / QUALITY 92884622294 + TESTCONTAINERS 92884622330
+Prior failed exact-SHA CI: 30823448218 / PRESERVED / READ_COMMITTED_TORN_STATE_READ / NOT INFRASTRUCTURE
+Security exact-diff review: PASS / SEALED SCAN 61a49a7f-ae4b-4d15-8a09-3791a100e331 / COMPLETE 9 OF 9 / 0 REPORTABLE FINDINGS / ACTIVE P0-P1 0/0
+Atomic boundary: UNIT_OF_WORK / SAME_DATASOURCE / PROPAGATION_REQUIRED / ALL_OR_NOTHING
+State read: ONE JDBC QUERY / ONE SQL STATEMENT / ONE POSTGRESQL STATEMENT SNAPSHOT
+Duplicate / JSON / correlation: VALIDATION_FIRST / STRICT_SINGLE_OBJECT_ROOT+EOF / EXACT
+Orphan / conflict / ambiguity: FAIL_CLOSED
+Safe retry / commit unknown: PASS / FAIL_CLOSED + NO_AUTOMATIC_RETRY
+Learning containment: PASS / INBOUND MUTABLE-STORE WRITES 0
+API / migration / schema / contracts / POM / workflow / NQ: UNCHANGED / NONE
+Archive: docs/gates/platform-hardening-feedback-ingest-atomicity/ / COMPLETE
+Archive sources / SHA-256: 4 OF 4 / VERIFIED / 0 MISSING / 0 UNEXPECTED / 0 HASH FAILURES
+Archive close commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUBLISHED
+Archive close exact-SHA CI: PENDING
+Close tag: dh-platform-hardening-feedback-ingest-atomicity-close / PENDING CLOSE CI
+Post-tag cleanup: PENDING / 4 CURRENT PROCESS SOURCES PRESENT
+Terminal factsources: 12 / 12 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+Formal capacity: NOT_EXECUTED / DEFERRED
+Production capacity / production ready: NOT_PROVEN / NO
+Next action: PUBLISH CLOSE COMMIT -> EXACT-SHA CI -> ANNOTATED TAG -> POST-TAG CLEANUP
+Next stage: DH-POST-FEEDBACK-INGEST-ATOMICITY-NEXT-STAGE-PLANNING / PLANNING ONLY
+Next-stage implementation: NOT AUTHORIZED
+ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是当前唯一 terminal authority；其后 publication blocker、security blocker、local implementation、work order 与 planning 区块均为历史时间线，不能授权新实现。
+
 ## Terminal current authority — 2026-08-01 feedback containment milestone final close
 
 ~~~text

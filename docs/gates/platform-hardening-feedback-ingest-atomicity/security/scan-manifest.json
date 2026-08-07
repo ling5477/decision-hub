@@ -1,0 +1,89 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "5031b714779a79810ea870741d6e3a3457b7202342f72d9d6d6c961022d3bb60"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "ba7f4d086f366d9cf7acd2e69c58dd556cdfc87c3e4d495be277bfbccf26ca44"
+      }
+    ],
+    "completedAt": "2026-08-07T14:41:39.077150Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "61a49a7f-ae4b-4d15-8a09-3791a100e331",
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.18"
+    },
+    "scope": {
+      "artifactsReviewed": [
+        "9 changed production source files in the immutable diff",
+        "14 exact-range threat-model, discovery, work-ledger, validation, and attack-path artifacts copied with SHA-256 equality",
+        "directly supporting repository, wiring, validation, transaction, integration, and architecture tests",
+        "GitHub Actions exact-SHA run 31184220520"
+      ],
+      "context": "Reviewed the exact range 16ecded2f3708d69e05afe5f2a4f621c823d8be3..1c41a85e94a48ded74ce7a71e65b45f8d239a12b. The review focused on transaction atomicity, validation ordering, strict JSON parsing, exact envelope-event correlation, single-statement READ COMMITTED snapshot semantics, rollback/retry behavior, and learning side-effect containment.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "Production-sized correlation_id query-plan and capacity evidence was not executed.",
+        "No new dynamic proof was run for the unchanged embedded textual-JSON duplicate-key behavior.",
+        "Formal production capacity remains not proven."
+      ],
+      "runtimeStatus": "Static source review plus existing exact-SHA CI evidence; no new runtime or production-capacity test was executed in this close task.",
+      "summary": "Immutable diff security review for the published feedback-ingest atomicity implementation.",
+      "validationMode": "Full-file static review of every changed production source file, candidate validation, and attack-path analysis."
+    },
+    "sealedAt": "2026-08-07T14:41:39.077150Z",
+    "startedAt": "2026-08-07T14:38:29.304731Z",
+    "status": "completed",
+    "target": {
+      "baseRevision": "16ecded2f3708d69e05afe5f2a4f621c823d8be3",
+      "displayName": "decision-hub",
+      "headRevision": "1c41a85e94a48ded74ce7a71e65b45f8d239a12b",
+      "kind": "git_diff",
+      "snapshotDigest": "codex-security-snapshot/v1:sha256:7f245c34fbccb210c617be71559cfe048261840e91958c4440102ec19d3f4bc8",
+      "targetId": "target_sha256_522e609f9f885c22d5c1c86229ccff71a58c5cac88233fe46babdb9897b2ae79"
+    },
+    "threatModel": {
+      "assets": [
+        "tenant-scoped feedback envelopes and events",
+        "idempotency and correlation integrity",
+        "database consistency and service availability",
+        "mutable learning stores that must remain unreachable from ingress"
+      ],
+      "assumptions": [
+        "configured authentication, HMAC, nonce, and rate-limit controls operate as reviewed",
+        "JDBC mode remains explicitly configured and uses the validated same datasource transaction manager"
+      ],
+      "attackerCapabilities": [
+        "submit syntactically valid or invalid authenticated feedback within an authorized tenant/source",
+        "repeat event identifiers, race requests, and craft JSON payload structure"
+      ],
+      "securityObjectives": [
+        "reject invalid input before duplicate resolution",
+        "bind envelope and event by exact correlation",
+        "read ingestion state from one PostgreSQL statement snapshot",
+        "persist envelope and event atomically or roll back",
+        "fail closed on orphan, conflict, ambiguity, and commit-unknown outcomes",
+        "prevent inbound feedback from mutating learning stores"
+      ],
+      "summary": "The reviewed ingress accepts authenticated, HMAC-bound, rate-limited NQ feedback. Untrusted fields include tenant-bound envelope metadata, event identifiers, and JSON payloads. Security objectives are tenant isolation, strict validation before duplicate decisions, exact envelope-event correlation, atomic all-or-nothing persistence, fail-closed ambiguity/orphan handling, and zero implicit learning-store mutation.",
+      "trustBoundaries": [
+        "NQ feedback ingress authentication/HMAC/rate-limit boundary",
+        "use-case validation and unit-of-work boundary",
+        "JDBC datasource/transaction boundary",
+        "learning-store containment boundary"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

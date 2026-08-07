@@ -1,0 +1,65 @@
+{
+  "completeness": "complete",
+  "deferred": [],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "diff",
+  "mode": "branch_diff",
+  "openQuestions": [],
+  "scanId": "61a49a7f-ae4b-4d15-8a09-3791a100e331",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_wiring-unit-of-work-and-learning-containment",
+      "label": "Wiring, unit of work, and learning containment",
+      "notes": "Same repository/unit-of-work instance, same datasource, PROPAGATION_REQUIRED, and no inbound mutable learning-store dependency or write path.",
+      "receiptRefs": [],
+      "riskArea": "Atomic transaction wiring and implicit learning side effects"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_jdbc-snapshot-and-exact-correlation",
+      "label": "JDBC snapshot and exact correlation",
+      "notes": "One JdbcTemplate query and one SQL statement snapshot; exact eventId correlation and fail-closed orphan/conflict/ambiguity semantics.",
+      "receiptRefs": [],
+      "riskArea": "READ COMMITTED torn reads, orphan ambiguity, and cross-tenant correlation"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_validation-and-strict-json",
+      "label": "Validation and strict JSON",
+      "notes": "Validation and canonicalization precede duplicate resolution; top-level JSON requires one object root, strict duplicate detection, and EOF.",
+      "receiptRefs": [],
+      "riskArea": "Duplicate shortcut bypass and parser ambiguity"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_in-memory-rollback-parity",
+      "label": "In-memory rollback parity",
+      "notes": "Synchronized unit-of-work snapshots and restores envelope, events, correlation index, and insertion order.",
+      "receiptRefs": [],
+      "riskArea": "Partial state, concurrent same-key handling, and correlation-index rollback"
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_correlation-lookup-index-candidate",
+      "label": "Correlation lookup index candidate",
+      "notes": "No dedicated correlation_id index exists, but no production-sized EXPLAIN, row-count, or service-impact evidence proves a security vulnerability; ingress is authenticated/rate-limited and JDBC is default-disabled. Retained as a known capacity limitation.",
+      "receiptRefs": [],
+      "riskArea": "Potential resource consumption as feedback-event volume grows"
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_embedded-textual-json-duplicate-key-candidate",
+      "label": "Embedded textual JSON duplicate-key candidate",
+      "notes": "The ordinary readTree helper behavior is unchanged from the base revision, and this diff neither introduced nor expanded the path; no disclosure, privilege, learning, or cross-tenant impact was proven.",
+      "receiptRefs": [],
+      "riskArea": "Potential forbidden-field scan ambiguity inside a JSON string"
+    }
+  ]
+}
