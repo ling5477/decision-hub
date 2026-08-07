@@ -1,5 +1,29 @@
 # Codex Project Instructions
 
+## Terminal current authority — 2026-08-08 Stage-QDR-10 implementation work order
+
+~~~text
+Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-IMPLEMENTATION-WORK-ORDER
+Work order: DONE / SCOPE FROZEN
+Next task only: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+Production / test / factsource allowlists: EXACT / CLOSED
+Trusted environment: VERIFIED FeedbackExecutionScope / EXPLICIT CALLER INPUT ONLY
+Environment inference / default DEV / Spring profile / repository inference: FORBIDDEN
+Feedback read: EXISTING PORT / 90 DAYS / MAX 100 / SINGLE PAGE / OVERFLOW FAIL_CLOSED
+Migration / API / write Repository: FORBIDDEN / FORBIDDEN / FORBIDDEN
+Implementation commit: ONE / AFTER ALL TESTS AND BOUNDARY SCANS PASS
+ALLOW_CONSOLIDATED_IMPLEMENTATION: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_NOW: NO
+ALLOW_CAPACITY / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+后续代理必须先读取
+`DH_STAGE_QDR_10_DECISION_FEEDBACK_EVIDENCE_CONSOLIDATION_IMPLEMENTATION_WORK_ORDER.md`，并严格按 exact
+allowlist 实施。任何 trusted environment、migration、API/Controller、write Repository 或 P0/P1 问题
+必须停止并进入对应 blocker，不得现场扩权。以下 planning instructions 已被本工单消费。
+
 ## Terminal current authority — 2026-08-08 post-feedback-ingest-atomicity next-stage planning
 
 ~~~text

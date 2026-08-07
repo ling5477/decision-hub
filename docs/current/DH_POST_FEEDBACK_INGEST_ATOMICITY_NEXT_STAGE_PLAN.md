@@ -1,5 +1,21 @@
 # DH Post-Feedback Ingest Atomicity Next-Stage Plan
 
+## 0. Work-order disposition — 2026-08-08
+
+```text
+Plan: CONSUMED BY IMPLEMENTATION WORK ORDER
+Work order: docs/current/DH_STAGE_QDR_10_DECISION_FEEDBACK_EVIDENCE_CONSOLIDATION_IMPLEMENTATION_WORK_ORDER.md
+Trusted environment source: FOUND / FeedbackExecutionScope
+Migration / API / write Repository: NONE / NONE / NONE
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+ALLOW_CONSOLIDATED_IMPLEMENTATION: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_NOW: NO
+```
+
+work order 已用真实类、V5/V6/V15 schema、historical query/adapter、认证根与 wiring 复核本计划，并冻结
+exact production/test/factsource allowlist、四态 completeness、single-page bounded read 与 B1-B4。后续以
+work order 为 implementation authority；本计划保留为选择依据，不得单独扩张实现范围。
+
 ## 1. Task classification
 
 ```text

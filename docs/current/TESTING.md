@@ -1,5 +1,24 @@
 # Decision Hub Testing
 
+## Terminal current authority — 2026-08-08 Stage-QDR-10 work-order validation
+
+~~~text
+Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-IMPLEMENTATION-WORK-ORDER
+Task type: WORK_ORDER_ONLY / DOCS_ONLY
+Baseline: 29aaeddefe226fbb3bc3bd3acc8aa032564d76f1
+Scope invariants: PASS / 3 OF 3
+Technical / archive diff: 0 / 0
+Quality: PASS / 19 OF 19 REACTOR
+Checkstyle / Spotless: 0 / PASS
+Full regression: NOT_RERUN / WORK_ORDER_ONLY
+Implementation test matrix: FROZEN / CORRELATION + COMPLETENESS + BOUNDED READ + SECURITY + POSTGRESQL + ARCHITECTURE
+Formal capacity / production capacity: NOT_EXECUTED / NOT_PROVEN
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+~~~
+
+本轮只运行 docs scope/diff 与 `mvn -B -ntp -Pquality validate`；不得把历史 CI 写成本轮完整测试。
+完整 implementation matrix 见 Stage-QDR-10 work order。以下 planning validation 为历史证据。
+
 ## Terminal current authority — 2026-08-08 post-feedback-ingest-atomicity next-stage planning
 
 ~~~text

@@ -1,5 +1,25 @@
 # Decision Hub Roadmap
 
+## Terminal current authority — 2026-08-08 Stage-QDR-10 implementation work order
+
+~~~text
+Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-IMPLEMENTATION-WORK-ORDER
+Work order: DONE / SCOPE FROZEN / DOCS ONLY
+Stage route: B1 CONTRACT -> B2 BOUNDED READ -> B3 AGGREGATE -> B4 WIRING/POSTGRESQL
+Implementation close: ONE CONSOLIDATED IMPLEMENTATION COMMIT
+Final close route: REVIEW -> PUBLICATION/CI -> ARCHIVE CLOSE -> SEPARATE TAG CLOSE -> CLEANUP
+Migration / API / write Repository: NONE / NONE / NONE
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+ALLOW_CONSOLIDATED_IMPLEMENTATION: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_NOW: NO
+ALLOW_CAPACITY / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+当前路线只进入 allowlisted consolidated implementation。capacity、reference-liveness、retention、learning、
+NQ runtime 与 Agent phase 均保持 deferred/forbidden；以下 planning route 已被本工单消费。
+
 ## Terminal current authority — 2026-08-08 post-feedback-ingest-atomicity next-stage planning
 
 ~~~text

@@ -1,5 +1,32 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-08-08 Stage-QDR-10 implementation work order
+
+~~~text
+Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-IMPLEMENTATION-WORK-ORDER
+Work order: DONE / SCOPE FROZEN / DOCS ONLY
+Planning commit: 29aaeddefe226fbb3bc3bd3acc8aa032564d76f1
+Selected stage: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION
+Trusted environment source: FOUND / VERIFIED FeedbackExecutionScope
+Decision correlation: TENANT + TRACE + REQUEST + DECISION + REQUIRED RUN SELECTOR
+Feedback correlation: TENANT + ENVIRONMENT + DECISION + TRACE + OBSERVATION/ATTRIBUTION IDENTITY
+Bounded feedback read: EXISTING / 90 DAYS / MAX 100 / SINGLE PAGE
+Completeness model: COMPLETE / PARTIAL / INCONSISTENT / NOT_FOUND
+Migration / API / write Repository: NONE / NONE / NONE
+Production implementation / tests: NOT EXECUTED / NOT RERUN
+Formal capacity / production capacity: NOT_EXECUTED / NOT_PROVEN
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+ALLOW_CONSOLIDATED_IMPLEMENTATION: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_NOW: NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是新的 primary work-order authority。任何 migration、API/Controller、write Repository、trusted
+environment 缺失或 P0/P1 都必须阻断 consolidated implementation。完整边界见工单；以下 planning 与
+更早区块均为历史时间线。
+
 ## Terminal current authority — 2026-08-08 post-feedback-ingest-atomicity next-stage planning
 
 ~~~text

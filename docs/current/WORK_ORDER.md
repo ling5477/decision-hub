@@ -1,5 +1,28 @@
 # Decision Hub 当前工单
 
+## Terminal current authority — 2026-08-08 Stage-QDR-10 evidence consolidation work order
+
+~~~text
+Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-IMPLEMENTATION-WORK-ORDER
+Work order: DONE / SCOPE FROZEN / DOCS ONLY
+Production allowlist: 5 NEW USECASE CONTRACT/SERVICE FILES + DecisionPipelineWiringConfig
+Test allowlist: 3 USECASE + 1 POSTGRESQL + 1 ARCHITECTURE + 1 WIRING
+Factsource allowlist: 9 EXACT PATHS
+Existing historical query/adapter: REUSE ONLY / NO MODIFICATION
+Migration / API / write Repository: NONE / NONE / NONE
+Trusted environment: FeedbackExecutionScope / CALLER SUPPLIED / NO INFERENCE
+Bounded read: ONE PAGE / MAX 100 / 90 DAYS / OVERFLOW FAIL_CLOSED
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+ALLOW_CONSOLIDATED_IMPLEMENTATION: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_NOW: NO
+ALLOW_CAPACITY / ALLOW_FEEDBACK_LEARNING / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_AGENT / ALLOW_LANGGRAPH: NO / NO / NO / NO
+ALLOW_PAPER / ALLOW_LIVE: NO / NO
+~~~
+
+唯一当前工单是 `DH_STAGE_QDR_10_DECISION_FEEDBACK_EVIDENCE_CONSOLIDATION_IMPLEMENTATION_WORK_ORDER.md`。
+下一任务只能按 exact allowlist 实施；出现 scope expansion 必须停止。以下旧工单与 planning 区块均为历史。
+
 ## Terminal current authority — 2026-08-08 post-feedback-ingest-atomicity next-stage planning
 
 ~~~text

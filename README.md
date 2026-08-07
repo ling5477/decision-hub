@@ -1,5 +1,32 @@
 # Decision Hub
 
+## Terminal current authority — 2026-08-08 Stage-QDR-10 implementation work order
+
+~~~text
+Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-IMPLEMENTATION-WORK-ORDER
+Work order: DONE / SCOPE FROZEN / DOCS ONLY
+Baseline / parent / origin: 29aaeddefe226fbb3bc3bd3acc8aa032564d76f1 / 4601eca969855d461b2cc1a0909a2a51c92269c0 / 4601eca969855d461b2cc1a0909a2a51c92269c0
+Selected stage: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION
+Trusted environment source: FOUND / VERIFIED FeedbackExecutionScope / CALLER SUPPLIED
+Correlation: TENANT + ENVIRONMENT + DECISION + TRACE / REQUEST + RUN DECISION-SIDE REQUIRED
+Bounded feedback read: EXISTING PORT / 90 DAYS / MAX 100 / SINGLE PAGE / STABLE ORDER
+Completeness: COMPLETE / PARTIAL / INCONSISTENT / NOT_FOUND
+Migration / API / write Repository: NONE / NONE / NONE
+Implementation allowlist: 6 PRODUCTION FILES / 6 TEST FILES / 9 FACTSOURCES
+Formal capacity / production capacity: NOT_EXECUTED / NOT_PROVEN
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+ALLOW_CONSOLIDATED_IMPLEMENTATION: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_NOW: NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是当前 work-order authority。完整 code reality、trusted environment provenance、精确 production/test/
+factsource allowlist、B1-B4、测试矩阵与 blocker 见
+`docs/current/DH_STAGE_QDR_10_DECISION_FEEDBACK_EVIDENCE_CONSOLIDATION_IMPLEMENTATION_WORK_ORDER.md`。
+本轮不授权技术实现；以下 next-stage planning 及更早区块均为历史时间线。
+
 ## Terminal current authority — 2026-08-08 post-feedback-ingest-atomicity next-stage planning
 
 ~~~text
