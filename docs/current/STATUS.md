@@ -1,5 +1,55 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-08-07 feedback ingest snapshot-consistent publication blocker fix
+
+~~~text
+Task: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-PUBLICATION-BLOCKER
+Task result: IMPLEMENTED / LOCAL_VALIDATED / PUBLICATION_PENDING
+Fix baseline / failed implementation HEAD: 0b686e8ec25b2383a0a84407871928c5097a31c4 / PRESERVED
+Failed exact-SHA CI: 30823448218 / TESTCONTAINERS FAILURE / NOT INFRASTRUCTURE
+Failed test: FeedbackIngestAtomicityFlywayPostgresTest.concurrentSameKeyProducesOneCompleteWinnerAndNoPartialRows
+Root cause: READ_COMMITTED_TORN_STATE_READ
+Fix: SINGLE_STATEMENT_INGESTION_STATE_SNAPSHOT
+JDBC state read: ONE QUERY INVOCATION / ONE SQL STATEMENT / ONE POSTGRESQL STATEMENT SNAPSHOT
+Envelope / exact event counts: RETURNED / AMBIGUOUS COUNT GREATER THAN ONE FAIL_CLOSED
+Exact correlation: TENANT + SOURCE + TYPE + TRACE/RUN + ENVELOPE EVENT ID
+READ COMMITTED / ON CONFLICT: PRESERVED / DO NOTHING + COMMITTED-WINNER READBACK
+False EVENT_ONLY / true orphan: ELIMINATED BY SNAPSHOT / FAIL_CLOSED PRESERVED
+Previous P1/P3 fixes: PRESERVED / VALIDATION ORDER + EXACT CORRELATION + STRICT SINGLE ROOT JSON
+Learning containment: UNCHANGED / INBOUND MUTABLE-STORE WRITES 0
+API / migration / schema / contracts / POM / workflow / NQ: UNCHANGED / NONE
+Scope invariants: PASS / 3 OF 3
+Repository state-query regression: PASS / ONE JDBC QUERY INVOCATION
+Deterministic conflict/readback: PASS / LATCH COORDINATED / NO SLEEP
+Concurrent same key: PASS / 8 WORKERS / 1 ACCEPTED + 7 DUPLICATE / 1 ENVELOPE + 1 EVENT
+True envelope-only / event-only / ambiguity / unrelated event: FAIL_CLOSED / PASS
+Targeted reactor: PASS / 15 OF 15 / POSTGRESQL TESTCONTAINERS
+Full regression: PASS / 19 OF 19 / 1293 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL / Flyway: 17.10 / V1-V15 / REAL TESTCONTAINERS / 0 SKIPPED
+Quality: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+Local manual security review: PASS / ACTIVE P0-P1 0 / UNAUTHORIZED BYPASS 0
+Codex Security exact-diff: PENDING / POST-COMMIT REQUIRED
+CodeRabbit: NOT_EXECUTED / CLI_NOT_INSTALLED / INSTALL_SCRIPT_BLOCKED_BY_POLICY
+Fix commit: THIS_DOCUMENT_COMMIT / LOCAL ONLY / NOT PUSHED
+Remote fix CI: PENDING
+Final close / archive / tag: NOT_EXECUTED / NOT AUTHORIZED / NOT AUTHORIZED
+Current factsources: 9 / 9 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+Production capacity / production ready: NOT_PROVEN / NO
+Next action after publication CI PASS: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-MILESTONE-FINAL-CLOSE-RETRY-3
+ALLOW_FINAL_CLOSE_RETRY: NO / PUBLICATION CI PENDING
+ALLOW_ARCHIVE_NOW / ALLOW_TAG_NOW: NO / NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_CAPACITY / ALLOW_NQ_RUNTIME: NO / NO / NO
+ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER / ALLOW_AGENT / ALLOW_LANGGRAPH: NO / NO / NO / NO
+ALLOW_PAPER / ALLOW_LIVE: NO / NO
+~~~
+
+本节是 publication-blocker fix 的当前 authority。失败 CI `30823448218` 与此前 final-close
+`BLOCKED` 历史必须保留；本轮只修复 READ COMMITTED 跨 statement snapshot 撕裂读取，并授权在
+post-commit Codex Security 复核通过后发布 fix 与等待 exact-SHA CI。不得据此执行 final close、
+archive、tag、capacity、feedback learning、NQ/runtime、真实 HTTP/provider、Agent/LangGraph、
+Paper 或 LIVE。
+
+
 ## Terminal current authority — 2026-08-03 feedback ingest strict JSON single-root security blocker retry
 
 ~~~text

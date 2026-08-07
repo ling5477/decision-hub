@@ -18,6 +18,7 @@ import com.guidinglight.decisionhub.domain.feedback.NqFeedbackEventType;
 import com.guidinglight.decisionhub.domain.feedback.FeedbackSource;
 import com.guidinglight.decisionhub.usecase.agent.feedback.NqFeedbackIngestionTransactionException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -198,6 +199,37 @@ class JdbcNqFeedbackEventRepositoryTest {
     }
   }
 
+  @Test
+  void findIngestionPersistenceUsesOneJdbcStateQueryInvocation() throws Exception {
+    final ResultSet resultSet = mock(ResultSet.class);
+    when(resultSet.getInt("envelope_count")).thenReturn(0);
+    when(resultSet.getInt("correlated_event_count")).thenReturn(0);
+    when(jdbcTemplate.query(
+            anyString(), any(RowMapper.class), eq("evt-snapshot"), eq("evt-snapshot")))
+        .thenAnswer(
+            invocation -> {
+              final RowMapper<?> mapper = invocation.getArgument(1);
+              return List.of(mapper.mapRow(resultSet, 0));
+            });
+
+    assertThat(
+            repository
+                .findIngestionPersistence(
+                    "evt-snapshot",
+                    "tenant-1",
+                    "trace-1",
+                    NqFeedbackEventType.PAPER_RUN_CREATED)
+                .state())
+        .isEqualTo(
+            com.guidinglight.decisionhub.usecase.agent.NqFeedbackEventRepository
+                .FeedbackIngestionPersistenceState.ABSENT);
+    assertThat(queryInvocations(jdbcTemplate)).isOne();
+    assertThat(captureQuerySql(jdbcTemplate))
+        .contains("with ingestion_rows as")
+        .contains("envelope_count")
+        .contains("correlated_event_count");
+  }
+
   private NqFeedbackEnvelope sampleEnvelope(final String eventId) {
     return NqFeedbackEnvelope.of(
         eventId,
@@ -240,6 +272,21 @@ class JdbcNqFeedbackEventRepositoryTest {
     return mockingDetails(template).getInvocations().stream()
         .filter(invocation -> "update".equals(invocation.getMethod().getName()))
         .count();
+  }
+
+  private static long queryInvocations(final JdbcTemplate template) {
+    return mockingDetails(template).getInvocations().stream()
+        .filter(invocation -> "query".equals(invocation.getMethod().getName()))
+        .count();
+  }
+
+  private static String captureQuerySql(final JdbcTemplate template) {
+    return mockingDetails(template).getInvocations().stream()
+        .filter(invocation -> "query".equals(invocation.getMethod().getName()))
+        .map(Invocation::getArguments)
+        .map(arguments -> (String) arguments[0])
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("expected JdbcTemplate.query(...)"));
   }
 
   private static Object captureLastUpdateArgument(final JdbcTemplate template) {

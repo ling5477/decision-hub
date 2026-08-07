@@ -66,11 +66,33 @@ public final class JdbcNqFeedbackEventRepository
           + " from dh_nq_feedback_events"
           + " where event_id = ?";
 
-  private static final String SELECT_CORRELATED_EVENT_SQL =
-      "select id, tenant_id, run_id, trace_id, source, event_type"
-          + " from dh_nq_feedback_events"
-          + " where correlation_id = ? and event_id is null"
-          + " order by id";
+  private static final String SELECT_INGESTION_PERSISTENCE_SQL =
+      "with ingestion_rows as ("
+          + " select * from dh_nq_feedback_events"
+          + " where event_id = ? or (correlation_id = ? and event_id is null)"
+          + ")"
+          + " select"
+          + " count(*) filter (where event_id is not null) as envelope_count,"
+          + " count(*) filter (where event_id is null) as correlated_event_count,"
+          + " max(event_id) filter (where event_id is not null) as envelope_event_id,"
+          + " max(event_type) filter (where event_id is not null) as envelope_event_type,"
+          + " max(occurred_at) filter (where event_id is not null) as envelope_occurred_at,"
+          + " max(source_job_id) filter (where event_id is not null) as envelope_source_job_id,"
+          + " max(trace_id) filter (where event_id is not null) as envelope_trace_id,"
+          + " max(request_id) filter (where event_id is not null) as envelope_request_id,"
+          + " max(correlation_id) filter (where event_id is not null)"
+          + " as envelope_correlation_id,"
+          + " max(schema_version) filter (where event_id is not null) as envelope_schema_version,"
+          + " max(payload_json::text) filter (where event_id is not null)"
+          + " as envelope_payload_json,"
+          + " max(received_at) filter (where event_id is not null) as envelope_received_at,"
+          + " max(tenant_id) filter (where event_id is null) as event_tenant_id,"
+          + " max(run_id) filter (where event_id is null) as event_run_id,"
+          + " max(trace_id) filter (where event_id is null) as event_trace_id,"
+          + " max(source) filter (where event_id is null) as event_source,"
+          + " max(event_type) filter (where event_id is null) as event_type,"
+          + " max(correlation_id) filter (where event_id is null) as event_correlation_id"
+          + " from ingestion_rows";
 
   private static final String ENVELOPE_VALIDATION_STATUS_VALID = "VALID";
   private static final String ENVELOPE_DEFAULT_STATUS = "RECEIVED";
@@ -247,40 +269,75 @@ public final class JdbcNqFeedbackEventRepository
       final String tenantId,
       final String traceId,
       final NqFeedbackEventType eventType) {
-    final Optional<NqFeedbackEnvelope> envelope = findEnvelopeByEventId(eventId);
-    final List<CorrelatedEvent> candidates =
+    final List<IngestionPersistenceSnapshot> rows =
         jdbcTemplate.query(
-            SELECT_CORRELATED_EVENT_SQL,
-            (rs, rowNum) ->
-                new CorrelatedEvent(
-                    rs.getString("tenant_id"),
-                    rs.getString("run_id"),
-                    rs.getString("trace_id"),
-                    FeedbackSource.valueOf(rs.getString("source")),
-                    rs.getString("event_type")),
+            SELECT_INGESTION_PERSISTENCE_SQL,
+            (rs, rowNum) -> {
+              final int envelopeCount = rs.getInt("envelope_count");
+              final int correlatedEventCount = rs.getInt("correlated_event_count");
+              final Optional<NqFeedbackEnvelope> envelope =
+                  envelopeCount == 1
+                      ? Optional.of(
+                          NqFeedbackEnvelope.of(
+                              rs.getString("envelope_event_id"),
+                              NqFeedbackEventType.valueOf(
+                                  rs.getString("envelope_event_type")),
+                              rs.getTimestamp("envelope_occurred_at").toInstant(),
+                              NqFeedbackEnvelope.SOURCE_SYSTEM_NEXUS_QUANT,
+                              rs.getString("envelope_source_job_id"),
+                              rs.getString("envelope_trace_id"),
+                              rs.getString("envelope_request_id"),
+                              rs.getString("envelope_correlation_id"),
+                              rs.getString("envelope_schema_version"),
+                              rs.getString("envelope_payload_json"),
+                              rs.getTimestamp("envelope_received_at") != null
+                                  ? rs.getTimestamp("envelope_received_at").toInstant()
+                                  : null))
+                      : Optional.empty();
+              final Optional<CorrelatedEvent> correlatedEvent =
+                  correlatedEventCount == 1
+                      ? Optional.of(
+                          new CorrelatedEvent(
+                              rs.getString("event_tenant_id"),
+                              rs.getString("event_run_id"),
+                              rs.getString("event_trace_id"),
+                              FeedbackSource.valueOf(rs.getString("event_source")),
+                              rs.getString("event_type"),
+                              rs.getString("event_correlation_id")))
+                      : Optional.empty();
+              return new IngestionPersistenceSnapshot(
+                  envelopeCount, correlatedEventCount, envelope, correlatedEvent);
+            },
+            eventId,
             eventId);
-    if (candidates.size() > 1) {
+    if (rows.size() != 1) {
+      throw persistenceFailure("feedback ingestion state query returned an invalid result", null);
+    }
+    final IngestionPersistenceSnapshot snapshot = rows.get(0);
+    final Optional<NqFeedbackEnvelope> envelope = snapshot.envelope();
+    if (snapshot.envelopeCount() > 1 || snapshot.correlatedEventCount() > 1) {
       return new FeedbackIngestionPersistence(
           FeedbackIngestionPersistenceState.AMBIGUOUS_CORRELATION, envelope);
     }
-    if (candidates.isEmpty()) {
+    if (snapshot.correlatedEventCount() == 0) {
       return new FeedbackIngestionPersistence(
-          envelope.isPresent()
+          snapshot.envelopeCount() == 1
               ? FeedbackIngestionPersistenceState.ENVELOPE_ONLY
               : FeedbackIngestionPersistenceState.ABSENT,
           envelope);
     }
-    if (envelope.isEmpty()) {
+    if (snapshot.envelopeCount() == 0) {
       return new FeedbackIngestionPersistence(
           FeedbackIngestionPersistenceState.EVENT_ONLY, Optional.empty());
     }
-    final CorrelatedEvent event = candidates.get(0);
+    final CorrelatedEvent event = snapshot.correlatedEvent().orElseThrow();
     final boolean exact =
         Objects.equals(tenantId, event.tenantId())
             && Objects.equals(traceId, event.traceId())
             && Objects.equals(traceId, event.runId())
             && eventType.name().equals(event.eventType())
-            && expectedSource(eventType) == event.source();
+            && expectedSource(eventType) == event.source()
+            && Objects.equals(eventId, event.correlationId());
     return new FeedbackIngestionPersistence(
         exact
             ? FeedbackIngestionPersistenceState.COMPLETE_MATCH
@@ -358,7 +415,18 @@ public final class JdbcNqFeedbackEventRepository
   }
 
   private record CorrelatedEvent(
-      String tenantId, String runId, String traceId, FeedbackSource source, String eventType) {}
+      String tenantId,
+      String runId,
+      String traceId,
+      FeedbackSource source,
+      String eventType,
+      String correlationId) {}
+
+  private record IngestionPersistenceSnapshot(
+      int envelopeCount,
+      int correlatedEventCount,
+      Optional<NqFeedbackEnvelope> envelope,
+      Optional<CorrelatedEvent> correlatedEvent) {}
 
   private record EventCorrelation(
       String envelopeEventId,

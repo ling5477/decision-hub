@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
@@ -301,6 +302,62 @@ class FeedbackIngestAtomicityFlywayPostgresTest {
   }
 
   @Test
+  void uncommittedWinnerThenConflictReadbackUsesOneCompleteStatementSnapshot() throws Exception {
+    final IngestionCommand command = command("evt-conflict-readback-pg");
+    final NqFeedbackEnvelope expectedEnvelope = envelope(command);
+    final CountDownLatch winnerRowsWritten = new CountDownLatch(1);
+    final CountDownLatch loserInsertStarted = new CountDownLatch(1);
+    final CountDownLatch allowWinnerCommit = new CountDownLatch(1);
+    final AtomicReference<NqFeedbackEventRepository.FeedbackIngestionPersistenceState>
+        loserInitialState = new AtomicReference<>();
+    final NqFeedbackEventRepository loserRepository =
+        new ConflictReadbackRepository(repository, loserInsertStarted, loserInitialState);
+    final ExecutorService executor = Executors.newFixedThreadPool(2);
+    try {
+      final Future<IngestionOutcome> winner =
+          executor.submit(
+              () ->
+                  repository.required(
+                      () -> {
+                        assertThat(repository.saveEnvelope(expectedEnvelope)).isTrue();
+                        repository.beginEventCorrelation(expectedEnvelope, TENANT);
+                        try {
+                          repository.append(event(expectedEnvelope, TENANT));
+                        } finally {
+                          repository.endEventCorrelation();
+                        }
+                        winnerRowsWritten.countDown();
+                        await(allowWinnerCommit, "winner commit barrier");
+                        return IngestionOutcome.ACCEPTED;
+                      }));
+      assertThat(winnerRowsWritten.await(10, TimeUnit.SECONDS)).isTrue();
+
+      final Future<IngestionOutcome> loser =
+          executor.submit(
+              () ->
+                  service(
+                          loserRepository,
+                          repository,
+                          appendRouter(loserRepository))
+                      .ingest(command)
+                      .getOutcome());
+      assertThat(loserInsertStarted.await(10, TimeUnit.SECONDS)).isTrue();
+      assertThat(loserInitialState.get())
+          .isEqualTo(
+              NqFeedbackEventRepository.FeedbackIngestionPersistenceState.ABSENT);
+
+      allowWinnerCommit.countDown();
+      assertThat(winner.get(20, TimeUnit.SECONDS)).isEqualTo(IngestionOutcome.ACCEPTED);
+      assertThat(loser.get(20, TimeUnit.SECONDS)).isEqualTo(IngestionOutcome.DUPLICATE);
+      assertCounts(command.getEventId(), 1, 1);
+    } finally {
+      allowWinnerCommit.countDown();
+      executor.shutdownNow();
+      assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+    }
+  }
+
+  @Test
   void concurrentConflictingSameEventIdHasOneCompleteWinnerAndConflictsAreNotDuplicates()
       throws Exception {
     final int workers = 8;
@@ -457,6 +514,17 @@ class FeedbackIngestAtomicityFlywayPostgresTest {
         envelope.getReceivedAt());
   }
 
+  private static void await(final CountDownLatch latch, final String description) {
+    try {
+      if (!latch.await(10, TimeUnit.SECONDS)) {
+        throw new IllegalStateException(description + " timed out");
+      }
+    } catch (InterruptedException interrupted) {
+      Thread.currentThread().interrupt();
+      throw new IllegalStateException(description + " interrupted", interrupted);
+    }
+  }
+
   private void assertCounts(
       final String eventId, final int expectedEnvelopes, final int expectedEvents) {
     assertThat(
@@ -556,6 +624,69 @@ class FeedbackIngestAtomicityFlywayPostgresTest {
         final String traceId,
         final NqFeedbackEventType eventType) {
       return delegate.findIngestionPersistence(eventId, tenantId, traceId, eventType);
+    }
+  }
+
+  private static final class ConflictReadbackRepository implements NqFeedbackEventRepository {
+    private final NqFeedbackEventRepository delegate;
+    private final CountDownLatch insertStarted;
+    private final AtomicReference<FeedbackIngestionPersistenceState> initialState;
+    private boolean initialRead = true;
+
+    private ConflictReadbackRepository(
+        final NqFeedbackEventRepository delegate,
+        final CountDownLatch insertStarted,
+        final AtomicReference<FeedbackIngestionPersistenceState> initialState) {
+      this.delegate = delegate;
+      this.insertStarted = insertStarted;
+      this.initialState = initialState;
+    }
+
+    @Override
+    public void append(final NqFeedbackEvent event) {
+      delegate.append(event);
+    }
+
+    @Override
+    public List<NqFeedbackEvent> listByRun(final String tenantId, final String runId) {
+      return delegate.listByRun(tenantId, runId);
+    }
+
+    @Override
+    public boolean saveEnvelope(final NqFeedbackEnvelope envelope) {
+      insertStarted.countDown();
+      return delegate.saveEnvelope(envelope);
+    }
+
+    @Override
+    public Optional<NqFeedbackEnvelope> findEnvelopeByEventId(final String eventId) {
+      return delegate.findEnvelopeByEventId(eventId);
+    }
+
+    @Override
+    public void beginEventCorrelation(
+        final NqFeedbackEnvelope envelope, final String tenantId) {
+      delegate.beginEventCorrelation(envelope, tenantId);
+    }
+
+    @Override
+    public void endEventCorrelation() {
+      delegate.endEventCorrelation();
+    }
+
+    @Override
+    public FeedbackIngestionPersistence findIngestionPersistence(
+        final String eventId,
+        final String tenantId,
+        final String traceId,
+        final NqFeedbackEventType eventType) {
+      final FeedbackIngestionPersistence persistence =
+          delegate.findIngestionPersistence(eventId, tenantId, traceId, eventType);
+      if (initialRead) {
+        initialRead = false;
+        initialState.set(persistence.state());
+      }
+      return persistence;
     }
   }
 }
