@@ -1,5 +1,32 @@
 # Decision Hub Testing
 
+## Terminal current authority — 2026-08-08 post-feedback-ingest-atomicity next-stage planning
+
+~~~text
+Task: DH-POST-FEEDBACK-INGEST-ATOMICITY-NEXT-STAGE-PLANNING
+Plan result: DONE / SCOPE FROZEN / DOCS ONLY
+Closed milestones: SIDE_EFFECT_CONTAINMENT + INGEST_ATOMICITY / CLOSED / ACCEPTED / ARCHIVED / TAGGED
+Planning baseline: 4601eca969855d461b2cc1a0909a2a51c92269c0
+Selected workstream: DECISION_FEEDBACK_EVIDENCE_CONSOLIDATION
+Selected stage: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION
+Selected stage scope: FROZEN / 4 BATCHES
+Planning quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Planning full tests: NOT_RERUN / PLANNING_ONLY
+Reused implementation / close / cleanup CI: 31184220520 / 31189681961 / 31190607480
+Reused tests / PostgreSQL: 1293 / 0 / 0 / 0 / PostgreSQL 17.10
+Formal capacity: NOT_EXECUTED / PRODUCTION_READINESS_GATE / DEFERRED
+Production capacity: NOT_PROVEN
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-IMPLEMENTATION-WORK-ORDER
+ALLOW_NEXT_STAGE_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_NEXT_STAGE_IMPLEMENTATION_NOW: NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本轮 docs-only boundary 与 `mvn -B -ntp -Pquality validate` 已通过；完整 regression 不重跑。Stage-QDR-10 的冻结
+test matrix 见 `DH_POST_FEEDBACK_INGEST_ATOMICITY_NEXT_STAGE_PLAN.md`，不得把复用 CI 写成本轮执行。
+
 ## Terminal current authority — 2026-08-07 feedback ingest atomicity milestone final close
 
 ~~~text

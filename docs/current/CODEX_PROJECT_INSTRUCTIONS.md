@@ -1,5 +1,33 @@
 # Codex Project Instructions
 
+## Terminal current authority — 2026-08-08 post-feedback-ingest-atomicity next-stage planning
+
+~~~text
+Task: DH-POST-FEEDBACK-INGEST-ATOMICITY-NEXT-STAGE-PLANNING
+Plan result: DONE / SCOPE FROZEN / DOCS ONLY
+Closed milestones: SIDE_EFFECT_CONTAINMENT + INGEST_ATOMICITY / CLOSED / ACCEPTED / ARCHIVED / TAGGED
+Planning baseline: 4601eca969855d461b2cc1a0909a2a51c92269c0
+Selected workstream: DECISION_FEEDBACK_EVIDENCE_CONSOLIDATION
+Selected stage: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION
+Selected stage type: DH_OWNED / INTERNAL_EVIDENCE_CONSOLIDATION / SECURITY_BOUNDARY_HARDENING
+Environment boundary: EXPLICIT_DEV_OR_TEST / NO_INFERENCE / FAIL_CLOSED
+Selected stage scope: FROZEN / 4 BATCHES
+Migration / API / write Repository impact: NONE / NONE / NONE
+Formal capacity: NOT_EXECUTED / PRODUCTION_READINESS_GATE / DEFERRED
+Production capacity: NOT_PROVEN
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-IMPLEMENTATION-WORK-ORDER
+ALLOW_NEXT_STAGE_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_NEXT_STAGE_IMPLEMENTATION_NOW: NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+后续代理只能先编写 Stage-QDR-10 implementation work order。不得从本 planning task 直接实现代码，
+不得推断 environment，不得新增 API/migration/write Repository，也不得恢复 learning、NQ、Provider、
+Agent/LangGraph、Paper 或 LIVE。完整冻结范围见
+`DH_POST_FEEDBACK_INGEST_ATOMICITY_NEXT_STAGE_PLAN.md`。
+
 ## Terminal current authority — 2026-08-07 feedback ingest atomicity milestone final close
 
 ~~~text

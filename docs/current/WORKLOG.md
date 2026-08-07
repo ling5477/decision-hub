@@ -1,5 +1,32 @@
 # Decision Hub Worklog
 
+## Terminal current authority — 2026-08-08 post-feedback-ingest-atomicity next-stage planning
+
+~~~text
+Task: DH-POST-FEEDBACK-INGEST-ATOMICITY-NEXT-STAGE-PLANNING
+Plan result: DONE / SCOPE FROZEN / DOCS ONLY
+Baseline verification: PASS / dev / 4601eca969855d461b2cc1a0909a2a51c92269c0 / AHEAD_BEHIND 0_0
+Milestone verification: SIDE_EFFECT_CONTAINMENT + INGEST_ATOMICITY / LOCAL_REMOTE_TAGS_VERIFIED
+Code reality review: A_THROUGH_H / COMPLETE
+Selected workstream: DECISION_FEEDBACK_EVIDENCE_CONSOLIDATION
+Selected stage: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION
+Selected stage scope: FROZEN / 4 BATCHES
+Technical implementation: NOT EXECUTED
+Formal capacity: NOT EXECUTED
+Planning quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Full regression: NOT RERUN / PLANNING_ONLY
+Production capacity: NOT PROVEN
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-IMPLEMENTATION-WORK-ORDER
+ALLOW_NEXT_STAGE_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_NEXT_STAGE_IMPLEMENTATION_NOW: NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本轮从当前代码重建 maturity 与 gap，不从历史 roadmap 自动恢复 deferred 能力。完整证据、候选矩阵和
+stage freeze 见 `DH_POST_FEEDBACK_INGEST_ATOMICITY_NEXT_STAGE_PLAN.md`。
+
 ## Terminal current authority — 2026-08-07 feedback ingest atomicity milestone final close
 
 ~~~text
