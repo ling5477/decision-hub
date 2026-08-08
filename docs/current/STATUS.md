@@ -1,5 +1,40 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation
+
+~~~text
+Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+Stage-QDR-10: IMPLEMENTED / LOCAL_ACCEPTED
+Implementation baseline: 87304e334787d778b10ebad1b1b7f17057f47322 / PUBLISHED / CI 31259505782 PASS
+Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Decision-feedback evidence consolidation: PASS
+Environment: EXPLICIT / TRUSTED FeedbackExecutionScope / NO INFERENCE
+Decision correlation: TENANT + TRACE + REQUEST + DECISION + RUN
+Feedback correlation: TENANT + ENVIRONMENT + DECISION + TRACE
+Bounded feedback read: 90D / MAX100 / SINGLE_PAGE / OVERFLOW_FAIL_CLOSED
+Completeness: COMPLETE / PARTIAL / INCONSISTENT / NOT_FOUND
+Data path: READ_ONLY / IMMUTABLE / DETERMINISTIC / NO_SIDE_EFFECT
+Learning containment: PASS / MUTABLE LEARNING-STORE WRITES 0
+Full regression: PASS / 19 OF 19 / 1317 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL / Flyway: 17.10 / REAL TESTCONTAINERS / V1-V15 / 3 OF 3 PASS
+Quality: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+External review: CODERABBIT TIMED_OUT / CODEX SECURITY NOT_EXECUTED
+Migration / API / write Repository: NONE / NONE / NONE
+Remote implementation CI: PENDING
+Stage final close: NOT_STARTED
+Formal capacity / production capacity: NOT_EXECUTED / NOT_PROVEN
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE
+ALLOW_STAGE_QDR_10_FINAL_CLOSE: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW: NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是 primary implementation authority。完整证据见 consolidated implementation record。CodeRabbit 超时
+不得写为 PASS；remote implementation CI、security review、archive、tag 与 final close 均未开始。
+以下 implementation work order 与 planning authority 已被消费，不能重新授权实现或扩大 scope。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 implementation work order
 
 ~~~text

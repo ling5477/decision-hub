@@ -1,5 +1,33 @@
 # Codex Project Instructions
 
+## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation
+
+~~~text
+Completed task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+Result: IMPLEMENTED / LOCAL_ACCEPTED
+Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Current technical tree: CONSOLIDATED READ-ONLY EVIDENCE PATH PRESENT
+Trusted environment: FeedbackExecutionScope / EXPLICIT CALLER INPUT ONLY / NO INFERENCE
+Bounded feedback: 90D / MAX100 / SINGLE_PAGE / OVERFLOW FAIL_CLOSED
+Completeness: COMPLETE / PARTIAL / INCONSISTENT / NOT_FOUND
+Migration / API / write Repository: NONE / NONE / NONE
+Regression / quality: PASS / 1317 TESTS 0/0/0 / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+Remote implementation CI: PENDING
+Stage final close: NOT_STARTED
+Next task only: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE
+ALLOW_STAGE_QDR_10_FINAL_CLOSE: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW: NO
+ALLOW_NEW_TECHNICAL_IMPLEMENTATION: NO
+ALLOW_CAPACITY / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+后续代理必须先读取 consolidated implementation record。下一任务只能 planning-first 冻结 final-close
+publication、exact-SHA CI、security/review、archive 与 tag 边界；不得从当前状态继续修改技术实现、
+直接 push、创建 tag、推断 environment、恢复 learning 或进入 capacity/NQ/HTTP/Provider/Agent/LangGraph。
+以下 implementation work-order instructions 已被消费。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 implementation work order
 
 ~~~text

@@ -43,6 +43,7 @@ import com.guidinglight.decisionhub.usecase.qdr.approval.ApprovalWriteBoundary;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketCommandService;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketRepository;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketService;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionFeedbackEvidenceService;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceAggregateService;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionPersistenceService;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionRepository;
@@ -312,6 +313,16 @@ public class DecisionPipelineWiringConfig {
                 gatewayCallPersistencePort,
                 new ProviderReadinessGuardService(),
                 new ObservabilityReportService());
+    }
+
+    /** 装配 Stage-QDR-10 internal-only decision/feedback consolidated read service。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public DecisionFeedbackEvidenceService decisionFeedbackEvidenceService(
+            final DecisionEvidenceAggregateService decisionEvidenceAggregateService,
+            final HistoricalFeedbackEvidenceReadService historicalFeedbackEvidenceReadService) {
+        return new DecisionFeedbackEvidenceService(
+                decisionEvidenceAggregateService, historicalFeedbackEvidenceReadService);
     }
 
     /** 装配冻结的 QDR6-CJSON-1 encoder；不注册为 HTTP ObjectMapper。 */

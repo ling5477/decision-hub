@@ -1,5 +1,35 @@
 # Decision Hub Testing
 
+## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation validation
+
+~~~text
+Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+Result: IMPLEMENTED / LOCAL_ACCEPTED
+Baseline exact-SHA CI: 31259505782 / PASS / 1293 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Targeted usecase: PASS / 17 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Targeted wiring + architecture: PASS / 6 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL acceptance: PASS / 3 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL / Flyway: 17.10 / REAL TESTCONTAINERS / V1-V15
+Module regression: PASS / 15 OF 15 REACTOR
+Full regression: PASS / 19 OF 19 REACTOR / 1317 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Scope invariants: PASS / 3 OF 3
+Technical allowlist: 12 EXPECTED / 0 UNEXPECTED / 0 MISSING
+Forbidden technical path diff: 0
+CodeRabbit: TIMED_OUT / 604 SECONDS / NO REVIEW RESULT
+Codex Security: NOT_EXECUTED / FINAL-CLOSE REVIEW NOT_STARTED
+Formal capacity / production capacity: NOT_EXECUTED / NOT_PROVEN
+Remote implementation CI: PENDING
+Stage final close: NOT_STARTED
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE
+ALLOW_IMPLEMENTATION_PUSH_NOW: NO
+~~~
+
+全量测试数按本轮 Surefire XML 时间范围 `2026-08-08 22:16:20` 至 `22:20:48` 汇总。历史
+`target/ci-diagnostics/run-29757352202` 中 2026-07-21 的 error 不属于本轮，未删除、未计入。
+首次模块回归因本地 120 秒命令上限退出 124；其遗留 Maven/Surefire 进程经精确命令行核验后终止，
+同一命令以 10 分钟上限重跑并通过。以下 work-order validation 已被本实现验证取代。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 work-order validation
 
 ~~~text

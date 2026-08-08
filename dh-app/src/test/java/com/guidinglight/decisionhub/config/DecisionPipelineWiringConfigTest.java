@@ -16,6 +16,7 @@ import com.guidinglight.decisionhub.usecase.qdr.approval.ApprovalWriteBoundary;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketCommandService;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketRepository;
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketService;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionFeedbackEvidenceService;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionPersistenceService;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionRepository;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackPersistenceTransactionBoundary;
@@ -70,6 +71,7 @@ final class DecisionPipelineWiringConfigTest {
                     assertThat(ctx).hasSingleBean(FeedbackAttributionPersistenceService.class);
                     assertThat(ctx).hasSingleBean(HistoricalFeedbackEvidenceQueryPort.class);
                     assertThat(ctx).hasSingleBean(HistoricalFeedbackEvidenceReadService.class);
+                    assertThat(ctx).hasSingleBean(DecisionFeedbackEvidenceService.class);
                     assertThat(ctx).hasSingleBean(DecisionProviderHealthEvaluator.class);
                     assertThat(ctx).hasSingleBean(DecisionProviderBudgetGuard.class);
                     assertThat(ctx).hasSingleBean(DecisionProviderLatencyRecorder.class);

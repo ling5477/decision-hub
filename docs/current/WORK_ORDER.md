@@ -1,5 +1,29 @@
 # Decision Hub 当前工单
 
+## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation
+
+~~~text
+Completed task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+Result: IMPLEMENTED / LOCAL_ACCEPTED
+Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Technical scope: EXACT / 6 PRODUCTION + 6 TEST FILES
+Factsource scope: EXACT / 9 FILES
+Validation: PASS / 1317 TESTS 0/0/0 / POSTGRESQL 17.10 / FLYWAY V1-V15 / QUALITY PASS
+Migration / API / write Repository: NONE / NONE / NONE
+Remote implementation CI: PENDING
+Stage final close: NOT_STARTED
+Next work order: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE
+ALLOW_STAGE_QDR_10_FINAL_CLOSE: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW: NO
+ALLOW_CAPACITY / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本地 implementation 已完成，当前唯一下一工单是独立 final close。final close 必须重新冻结 publication、
+exact-SHA CI、security/review、archive 与 tag discipline；本任务不得 push、tag 或继续技术实现。
+以下 implementation work order 已被消费。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 evidence consolidation work order
 
 ~~~text

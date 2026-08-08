@@ -1,5 +1,36 @@
 # Decision Hub Worklog
 
+## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation
+
+~~~text
+Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+Result: IMPLEMENTED / LOCAL_ACCEPTED
+Baseline publication: PASS / 87304e334787d778b10ebad1b1b7f17057f47322
+Baseline exact-SHA CI: 31259505782 / PASS / 1293 TESTS / POSTGRESQL 17.10
+Implementation: DONE / B1-B4 / LOCAL_ACCEPTED
+Trusted scope: FeedbackExecutionScope / EXPLICIT / NO INFERENCE
+Read path: DECISION + V15 FEEDBACK / 90D / MAX100 / SINGLE_PAGE / ZERO WRITE
+Completeness: COMPLETE / PARTIAL / INCONSISTENT / NOT_FOUND / FAIL_CLOSED
+Targeted tests: PASS / USECASE 17 + WIRING/ARCHITECTURE 6 + POSTGRESQL 3
+Full regression: PASS / 19 OF 19 / 1317 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Quality: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+CodeRabbit: CLI 0.6.5 / AUTHENTICATED / REVIEW TIMED_OUT 604S / NO RESULT
+Migration / API / write Repository / learning: NONE / NONE / NONE / NOT AUTHORIZED
+Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Remote implementation CI / final close: PENDING / NOT_STARTED
+Formal capacity / production capacity: NOT_EXECUTED / NOT_PROVEN
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE
+ALLOW_STAGE_QDR_10_FINAL_CLOSE: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW: NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本轮完成 6 个 production、6 个 test 与 9 个 current factsource 的 exact-scope implementation。首次模块
+回归由 120 秒 shell 上限中断，孤立进程经精确核验后终止并成功重跑；CodeRabbit 安装/认证完成，但
+uncommitted review 10 分钟无输出而超时，残留 review 进程已终止。未执行 push、tag、final close、
+capacity、security final-close review 或任何真实外部运行时。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 implementation work order
 
 ~~~text

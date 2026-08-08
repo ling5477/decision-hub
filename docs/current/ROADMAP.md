@@ -1,5 +1,31 @@
 # Decision Hub Roadmap
 
+## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation
+
+~~~text
+Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-CONSOLIDATED-IMPLEMENTATION
+Result: IMPLEMENTED / LOCAL_ACCEPTED
+Implementation route B1-B4: COMPLETE / LOCAL_ACCEPTED
+Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Trusted environment / correlation / bounded read / aggregate: PASS / PASS / PASS / PASS
+Regression / PostgreSQL / quality: PASS / PASS / PASS
+Migration / API / write Repository: NONE / NONE / NONE
+Remote implementation CI: PENDING
+Stage final close: NOT_STARTED
+Production capacity: NOT_PROVEN
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE
+Final close route: PUBLICATION + EXACT-SHA CI + SECURITY/REVIEW + ARCHIVE + SEPARATE TAG CLOSE + CLEANUP
+ALLOW_STAGE_QDR_10_FINAL_CLOSE: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW: NO
+ALLOW_CAPACITY / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+Stage-QDR-10 只前进到独立 final close；尚未 publication、exact-SHA implementation CI、archive 或 tag。
+capacity、reference-liveness、retention、learning、NQ runtime 与 Agent phase 均不因本实现恢复。
+以下 implementation work-order route 已完成并成为历史。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 implementation work order
 
 ~~~text
