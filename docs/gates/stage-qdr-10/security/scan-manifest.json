@@ -1,0 +1,94 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "635cd1ef1d4717365d4e27579d7e94d89681b8620bf8702e8cbf0b3fb8e3f9d6"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "8a51e415161f77573a3c2ed864aeb3753873a64f84e360f82883f327a2ed3b1c"
+      }
+    ],
+    "completedAt": "2026-08-09T05:06:58.140396Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "7a89a6be-98aa-41b8-bcc2-ab0c036f1682",
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.18"
+    },
+    "scope": {
+      "artifactsReviewed": [
+        "28 exact committed-range full-file receipts",
+        "Stage-QDR-10 production, unit, architecture, wiring and PostgreSQL acceptance sources",
+        "Original sealed scan and its manifest/coverage/findings/report relationship",
+        "Current authority and blocker-history documents",
+        "Forbidden technical-scope diff"
+      ],
+      "context": "Fresh committed-range scan at exact head d275b9e; head Git tree aee96dcbba36020c8c92ea48f455d2be90216a7c. The prior sealed working-tree scan matched only 18 of 28 d275b9e files; 10 authority documents differed, so it was retained only as historical evidence.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "Production/formal capacity was not executed and remains not proven.",
+        "CodeRabbit CLI is unavailable and produced no review result.",
+        "The old sealed working-tree scan is historical evidence only; this new scan supplies exact d275b9e committed-tree acceptance."
+      ],
+      "runtimeStatus": "Existing committed evidence reports 1326 tests, PostgreSQL 17.10/Flyway V1-V15 and quality PASS; this security pass was read-only and did not rerun Maven.",
+      "summary": "Cumulative Stage-QDR-10 implementation and security-remediation committed exact diff.",
+      "validationMode": "Diff-scoped 28/28 full-file review with static candidate validation, attack-path closure, PostgreSQL/Testcontainers acceptance evidence, and forbidden-scope diff checks."
+    },
+    "sealedAt": "2026-08-09T05:06:58.140396Z",
+    "startedAt": "2026-08-09T04:56:55.050673Z",
+    "status": "completed",
+    "target": {
+      "baseRevision": "87304e334787d778b10ebad1b1b7f17057f47322",
+      "displayName": "decision-hub",
+      "headRevision": "d275b9e30bb381bea8467286786add2c5b43e119",
+      "kind": "git_diff",
+      "snapshotDigest": "codex-security-snapshot/v1:sha256:1d74df0bc5da366ec7aad16a4841552de3d91d1cb5319d4e849096130ccb54eb",
+      "targetId": "target_sha256_522e609f9f885c22d5c1c86229ccff71a58c5cac88233fe46babdb9897b2ae79"
+    },
+    "threatModel": {
+      "assets": [
+        "Tenant-scoped decision and feedback evidence",
+        "Decision/request/run/audit/replay and persisted guard identities",
+        "Execution-scope environment provenance",
+        "Credentials, signatures, redacted provider material, and audit integrity",
+        "NQ and trading safety boundary"
+      ],
+      "assumptions": [
+        "FeedbackExecutionScope originates at the existing trusted caller boundary.",
+        "Current governance keeps real HTTP/provider, NQ mutation, Agent/LangGraph, Paper and LIVE unauthorized.",
+        "Production capacity and production readiness are not proven."
+      ],
+      "attackerCapabilities": [
+        "Submit malformed, replayed, cross-tenant, or cross-environment identifiers and feedback",
+        "Cause conflicting, ambiguous, oversized, or partially available evidence states",
+        "Attempt to exploit unsafe parsing, unbounded reads, or correlation gaps",
+        "Influence human task routing through stale lower-priority documentation"
+      ],
+      "securityObjectives": [
+        "Require caller environment, persisted decision origin, and feedback environment equality",
+        "Fail closed on missing, ambiguous, inconsistent, overflowed, unsafe, or storage-error evidence",
+        "Prevent rejected-evidence disclosure and implicit learning writes",
+        "Keep API/schema/migration/provider/NQ/Agent/LangGraph/Paper/LIVE boundaries unchanged",
+        "Keep secrets and raw privileged payloads out of logs and persistence"
+      ],
+      "summary": "Decision Hub is a tenant-scoped, fail-closed decision-support and evidence system. Its core objectives are exact tenant/environment provenance, bounded and transactionally coherent evidence, audit integrity, secret protection, and prevention of trading or mutable-learning side effects.",
+      "trustBoundaries": [
+        "External HTTP caller to dh-api authentication and validation",
+        "Signed NQ message to security and tenant/environment binding",
+        "Use-case reader/writer to JDBC/PostgreSQL persistence",
+        "Provider/model abstraction to disabled external-service boundary",
+        "Governance authority to privileged scheduler/learning/NQ/Agent/LIVE controls"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

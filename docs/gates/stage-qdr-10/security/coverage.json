@@ -1,0 +1,73 @@
+{
+  "completeness": "complete",
+  "deferred": [],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "diff",
+  "mode": "branch_diff",
+  "openQuestions": [],
+  "scanId": "7a89a6be-98aa-41b8-bcc2-ab0c036f1682",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_28-cumulative-exact-diff-files",
+      "label": "28 cumulative exact-diff files",
+      "notes": "All 28 changed production, test, and authority files have unique full-file completion receipts; deferred 0.",
+      "receiptRefs": [],
+      "riskArea": "Diff coverage"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_persisted-decision-environment-provenance",
+      "label": "Persisted decision environment provenance",
+      "notes": "One parameterized bounded query requires COMPLETED guard plus exact V5/V6 and core request/run chain; missing, ambiguity and errors fail closed.",
+      "receiptRefs": [],
+      "riskArea": "Cross-environment collision"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_caller-decision-and-feedback-environment-equality",
+      "label": "Caller, decision, and feedback environment equality",
+      "notes": "Positive DEV path passes; caller/decision or decision/feedback mismatch, missing and ambiguous provenance are unusable.",
+      "receiptRefs": [],
+      "riskArea": "Tenant/environment isolation"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_policy-qualified-bounded-completeness",
+      "label": "Policy-qualified bounded completeness",
+      "notes": "Aggregate carries from/to/max/policy/version/order/overflow; 100 without next page is allowed while hasNext or the 101st row fails closed.",
+      "receiptRefs": [],
+      "riskArea": "Silent truncation and completeness confusion"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_rejected-evidence-and-side-effect-containment",
+      "label": "Rejected-evidence and side-effect containment",
+      "notes": "Fail-closed states carry zero feedback; path is read-only and acceptance/architecture evidence shows no learning or mutable-store writes.",
+      "receiptRefs": [],
+      "riskArea": "Data disclosure and learning poisoning"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_api-schema-migration-and-runtime-boundaries",
+      "label": "API, schema, migration, and runtime boundaries",
+      "notes": "No API, migration, schema, contract, POM, workflow, NQ, HTTP/provider, Agent/LangGraph, Paper, LIVE, or trading mutation change is in the range.",
+      "receiptRefs": [],
+      "riskArea": "Unauthorized capability expansion"
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_pre-existing-lower-stale-authority-strings",
+      "label": "Pre-existing lower stale authority strings",
+      "notes": "Candidate CAND-S5-STALE-CURRENT-AUTHORITY-001 was present at baseline, explicitly superseded by new first authority, and has no automatic execution or runtime sink.",
+      "receiptRefs": [],
+      "riskArea": "Governance routing ambiguity"
+    }
+  ]
+}
