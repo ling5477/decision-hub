@@ -1,5 +1,49 @@
 # Decision Hub 当前工单
 
+## Terminal current authority — 2026-08-09 post-Stage-QDR-11 next-stage planning
+
+~~~text
+Task: DH-POST-STAGE-QDR-11-NEXT-STAGE-PLANNING
+Planning: DONE / ACCEPTED / DOCS_ONLY
+Baseline: dev / HEAD=origin-dev=6f0097c4a5b0eed354505d59c8a53a9f0f593557 / AHEAD_BEHIND 0_0 / CLEAN
+Stage-QDR-10 / Stage-QDR-11: CLOSED_ACCEPTED_ARCHIVED_TAGGED / CLOSED_ACCEPTED_ARCHIVED_TAGGED
+Stage-QDR-11 implementation / close / cleanup: 9b50fc7f51ebad3257aa77d1c2874d71385c81e9 / d02133a358cd5a5c1f0db25c471367cd40880d70 / 6f0097c4a5b0eed354505d59c8a53a9f0f593557
+Stage-QDR-11 tag: dh-stage-qdr-11-close / ANNOTATED / LOCAL+REMOTE VERIFIED / TARGET d02133a358cd5a5c1f0db25c471367cd40880d70
+Stage-QDR-11 archive / current residue: COMPLETE / 0
+Cleanup exact-SHA CI: 31314059545 / PASS / TESTCONTAINERS 93246323299 + QUALITY 93246323302
+Decision/evidence/acceptance chain: COMPLETE_FOR_CURRENT_INTERNAL_SCOPE / 0 REAL BREAKS / NO NEW ABSTRACTION
+Internal acceptance: DecisionFeedbackInternalAcceptanceService / R3 WIRED_INTERNAL / READ_ONLY / PRODUCTION CALLER 0
+Limited runtime: R5 DEV_TEST_ONLY / PROD DISABLED / PERSISTENT GUARDS + MEMORY + DEADLINE + BOUNDED QUEUE PRESENT
+Capacity harness / criteria: IMPLEMENTED_AND_TESTED / 15 MANDATORY / FROZEN
+Formal capacity / production capacity / production ready: NOT_EXECUTED / NOT_PROVEN / NO
+Selected workstream: PRODUCTION_CAPACITY_RESOURCE_SAFETY
+Selected next stage: DH-STAGE-QDR-12-FORMAL-CAPACITY-RESOURCE-SAFETY-ACCEPTANCE
+Stage type: PRODUCTION_READINESS_GATE
+Primary gap: CURRENT EXACT-SHA FORMAL CAPACITY_AND_RESOURCE_SAFETY VERDICT MISSING
+Batches: 4 / B1 WORK_ORDER_SCOPE / B2 ENVIRONMENT_ADMISSION / B3 FORMAL_15_SCENARIO / B4 EVIDENCE_SECURITY_FINAL_CLOSE
+Migration / API / Repository / contracts / POM / workflow: NONE / NONE / NONE / NONE / NONE / NONE
+Reference-liveness / retention / feedback evolution: DEFERRED / DEFERRED / DEFERRED
+NQ runtime / real HTTP / real provider: NOT_AUTHORIZED / NO / NO
+Agent / LangGraph / Paper / LIVE: NOT_AUTHORIZED / NO / NO / NO
+Production/test/harness/criteria write boundary for formal execution: NONE / NONE / READ_ONLY / READ_ONLY
+Scope invariants: PASS / 3 OF 3
+Planning terminal blocks / detailed plan / current conflicts: 8 OF 8 / 1 / 0
+Quality this task: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+Full tests this task: NOT_RERUN / PLANNING_ONLY
+Planning commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Next action: DH-STAGE-QDR-12-FORMAL-CAPACITY-RESOURCE-SAFETY-ACCEPTANCE-IMPLEMENTATION-WORK-ORDER
+ALLOW_NEXT_STAGE_IMPLEMENTATION_WORK_ORDER: YES / NEXT_TASK_ONLY
+ALLOW_NEXT_STAGE_IMPLEMENTATION_NOW / ALLOW_CAPACITY_EXECUTION_NOW: NO / NO
+ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING: NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是 Stage-QDR-11 cleanup exact-SHA CI 通过后的 planning-only current authority。下一任务只能生成所选
+formal capacity/resource-safety stage 的 implementation work order；本轮及下一任务均不执行 capacity，不得修改
+生产/测试/harness/criteria，也不得启动 NQ、HTTP/Provider、feedback learning、Agent/LangGraph、Paper/LIVE。
+
+
 ## Terminal current authority — 2026-08-09 Stage-QDR-11 final close and post-tag cleanup
 
 ~~~text
