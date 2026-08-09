@@ -1,5 +1,47 @@
 # Decision Hub
 
+## Terminal current authority — 2026-08-09 Stage-QDR-11 implementation work order
+
+~~~text
+Task: DH-STAGE-QDR-11-CONSOLIDATED-EVIDENCE-INTERNAL-ACCEPTANCE-IMPLEMENTATION-WORK-ORDER
+Work order: DONE / SCOPE CONTRACT FROZEN / DOCS ONLY
+Baseline verification: PASS / dev / 148e20054b7fc816b696f361bbeb407160bff546 / AHEAD_BEHIND 1_0
+Planning commit / origin-dev: 148e20054b7fc816b696f361bbeb407160bff546 / 86d6dfb8b7933eda1592963414d5b81ea4dc4605
+Stage-QDR-10: CLOSED / ACCEPTED / ARCHIVED / TAGGED / IMMUTABLE / NOT REOPENED
+Selected stage: DH-STAGE-QDR-11-CONSOLIDATED-EVIDENCE-INTERNAL-ACCEPTANCE
+Code reality: INSPECTED / EXISTING REPORT+SERVICE FOUND / PRODUCTION CALLER 0 / SPRING BEAN 0
+Existing acceptance model / status: DecisionEvidenceReplayInternalReport / InternalAcceptanceStatus 6 STATES
+Old input / new authority: DecisionEvidenceAggregate DIRECT INPUT RETIRED / DecisionFeedbackEvidenceAggregate ONLY
+Completeness mapping: COMPLETE_WITHIN_BOUNDS EVALUATE / PARTIAL_WITHIN_BOUNDS INCOMPLETE / INCONSISTENT INVALID / NOT_FOUND INCOMPLETE
+Bounded policy: PRESERVE FROM+TO+MAX+ID+VERSION+WINDOW+ORDER+OVERFLOW FAIL_CLOSED
+Internal consumer: DecisionFeedbackInternalAcceptanceService / READ_ONLY / TENANT+ENVIRONMENT BOUND
+Wiring: ONE EVIDENCE BEAN + ONE REPORT BEAN + ONE FACADE BEAN / NO DUAL PATH
+Implementation allowlists: PRODUCTION 4 / TEST 5 / FACTSOURCE 10 / FROZEN
+API / migration / schema / Repository-JDBC / NQ: NONE / NONE / NONE / NONE / NONE
+Technical implementation: NOT EXECUTED
+Scope invariants: PASS / 3 OF 3
+Current factsources / conflicts: PASS / 8 OF 8 / 1 BLOCK HASH / 0 CONFLICTS
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Full tests: NOT_RERUN / WORK_ORDER_ONLY
+Formal capacity / production capacity: NOT_EXECUTED / NOT_PROVEN
+Work-order commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Next action: DH-STAGE-QDR-11-CONSOLIDATED-EVIDENCE-INTERNAL-ACCEPTANCE-CONSOLIDATED-IMPLEMENTATION
+ALLOW_CONSOLIDATED_IMPLEMENTATION: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_NOW: NO / WORK_ORDER TASK ONLY
+ALLOW_CAPACITY / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是 Stage-QDR-11 implementation work order 完成后的唯一 current authority。下一任务只能按精确
+production/test/factsource allowlist 执行 consolidated implementation；不得在本轮或下一轮现场扩张
+API、migration/schema、Repository/JDBC、NQ、HTTP/Provider、learning、Agent/LangGraph、Paper/LIVE。
+完整合同见
+`docs/current/DH_STAGE_QDR_11_CONSOLIDATED_EVIDENCE_INTERNAL_ACCEPTANCE_IMPLEMENTATION_WORK_ORDER.md`。
+以下 post-Stage-QDR-10 planning authority 已被本工单消费，只保留为历史时间线。
+
+
+
 ## Terminal current authority — 2026-08-09 post-Stage-QDR-10 next-stage planning
 
 ~~~text

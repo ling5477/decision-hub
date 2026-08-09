@@ -1,5 +1,23 @@
 # DH Post-Stage-QDR-10 Next-Stage Plan
 
+## Work-order refinement — 2026-08-09
+
+Stage-QDR-11 的代码现实复核与 implementation work order 已冻结。`DecisionEvidenceReplayInternalReport`、
+`DecisionEvidenceReplayReportService`、`InternalAcceptanceStatus` 与 `InternalAcceptanceFinding` 原位复用；
+旧 `DecisionEvidenceAggregate` direct input 必须退役，`DecisionFeedbackEvidenceAggregate` 成为唯一 evidence
+authority。规划中 `PARTIAL_WITHIN_BOUNDS` “可进入其余 gates”的表述现收紧为最终状态固定
+`InternalAcceptanceStatus.INCOMPLETE`：允许生成脱敏 diagnostics，但不得静默或无条件 `ACCEPTED`。
+
+精确 production/test/factsource allowlist、failure taxonomy、report shape、internal facade、Spring wiring、
+PostgreSQL/security/regression matrix 与 scope blocker 见：
+
+```text
+docs/current/DH_STAGE_QDR_11_CONSOLIDATED_EVIDENCE_INTERNAL_ACCEPTANCE_IMPLEMENTATION_WORK_ORDER.md
+```
+
+本 refinement 不执行 implementation，不修改原候选选择、Stage-QDR-10 immutable close、API/DB/Repository/NQ
+边界或 production-capacity 结论。
+
 ## 1. Task classification
 
 ```text
