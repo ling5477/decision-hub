@@ -1,5 +1,42 @@
 # Decision Hub Roadmap
 
+## Terminal current authority — 2026-08-09 post-Stage-QDR-10 next-stage planning
+
+~~~text
+Task: DH-POST-STAGE-QDR-10-NEXT-STAGE-PLANNING
+Plan result: DONE / SCOPE FROZEN / DOCS ONLY
+Baseline verification: PASS / dev / 86d6dfb8b7933eda1592963414d5b81ea4dc4605 / AHEAD_BEHIND 0_0
+Stage-QDR-10: CLOSED / ACCEPTED / ARCHIVED / TAGGED / IMMUTABLE / NOT REOPENED
+Stage-QDR-10 original implementation / security remediation: 756db5bdb541f94713211848f52e2c223c956dae / d275b9e30bb381bea8467286786add2c5b43e119
+Stage-QDR-10 close tag / peeled target: dh-stage-qdr-10-close / 1b826e8f92cc11d2b6cbe283da550039d7522737 / LOCAL+REMOTE VERIFIED
+Stage-QDR-10 cleanup CI / residue: 31298387436 PASS / 0
+Code reality review: A_THROUGH_H / COMPLETE
+Selected workstream: CONSOLIDATED_EVIDENCE_INTERNAL_ACCEPTANCE
+Selected stage: DH-STAGE-QDR-11-CONSOLIDATED-EVIDENCE-INTERNAL-ACCEPTANCE
+Selected stage type: DH_OWNED / INTERNAL_ACCEPTANCE_INTEGRATION / SECURITY_BOUNDARY_HARDENING
+Selected stage scope: FROZEN / 4 BATCHES
+Single acceptance model / evidence authority: EXISTING INTERNAL REPORT / DECISION_FEEDBACK_EVIDENCE_AGGREGATE
+Technical implementation: NOT EXECUTED
+API / migration / schema / Repository / workflow / NQ: UNCHANGED / NONE
+Formal capacity: NOT_EXECUTED / PRODUCTION_READINESS_GATE / DEFERRED
+Planning quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Full regression: NOT RERUN / PLANNING_ONLY
+Production capacity / production ready: NOT_PROVEN / NO
+Planning commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Next action: DH-STAGE-QDR-11-CONSOLIDATED-EVIDENCE-INTERNAL-ACCEPTANCE-IMPLEMENTATION-WORK-ORDER
+ALLOW_NEXT_STAGE_IMPLEMENTATION_WORK_ORDER: YES
+ALLOW_NEXT_STAGE_IMPLEMENTATION_NOW: NO
+ALLOW_CAPACITY / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是本轮 planning 完成后的唯一 current authority。下一任务只能编写 Stage-QDR-11 implementation work order；
+不得直接实现、扩张 API/DB/Repository、恢复 learning、执行 capacity，或进入 NQ/HTTP/Provider/Agent/LangGraph/Paper/LIVE。
+完整候选矩阵、batch freeze 与测试边界见
+`docs/current/DH_POST_STAGE_QDR_10_NEXT_STAGE_PLAN.md`。
+
+
 ## Terminal current authority — 2026-08-09 Stage-QDR-10 final close and post-tag cleanup
 
 ~~~text
