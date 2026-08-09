@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`PASS / CLOSED / ACCEPTED / PUBLISHED / ARCHIVED / TAG_PENDING`
+`PASS / CLOSED / ACCEPTED / PUBLISHED / ARCHIVED / TAGGED`
 
 ## Accepted facts
 
@@ -16,11 +16,12 @@
 - decision environment provenance、caller/decision/feedback environment equality、bounded completeness 与 fail-closed disclosure 已闭环。
 - archive source copies `4/4` byte-identical，missing/unexpected/hash failures `0/0/0`。
 
-## Remaining close gates
+## Close and cleanup result
 
-- close commit exact-SHA CI 尚待该 commit 发布后验证。
-- annotated tag 只能在 close exact-SHA CI PASS 后创建。
-- current process source cleanup 只能在远端 peeled tag target 验证后执行。
+- Close commit `1b826e8...` 已发布，exact-SHA CI `31297913196` 的 Quality 与 Testcontainers jobs 均通过。
+- Annotated tag `dh-stage-qdr-10-close` 在本地和远端均 peeled 到 `1b826e8...`。
+- 4 个 current process sources 已按 manifest 清理，archive recovery copies 保留，residue `0`。
+- Cleanup commit 为 `THIS_DOCUMENT_COMMIT`；其 exact-SHA CI 是唯一剩余门禁。
 
 ## Non-blocking limitations
 

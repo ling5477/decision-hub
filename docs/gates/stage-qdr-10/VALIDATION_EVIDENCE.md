@@ -10,4 +10,8 @@
 - Source copies：4/4 byte-identical，missing/unexpected/hash failures 0/0/0。
 - Forbidden technical changes in final-close task：0。
 
-Pending：close exact-SHA CI、annotated tag verification、post-tag cleanup exact-SHA CI。
+- Close exact-SHA CI：`31297913196 / PASS`。
+- Annotated tag：`dh-stage-qdr-10-close / local+remote verified / target 1b826e8...`。
+- Post-tag cleanup：4 sources pruned / residue 0。
+
+Pending：cleanup exact-SHA CI only。

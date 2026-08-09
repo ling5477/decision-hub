@@ -10,3 +10,5 @@
 - Quality job：`93204385242 / success / Checkstyle 0 / Spotless PASS`
 
 该证据属于 implementation exact-SHA `d275b9e...`。close 与 cleanup commit 仍必须分别通过自己的 exact-SHA CI。
+
+Close exact-SHA CI `31297913196` 已通过：Quality `93205896872` 与 Testcontainers `93205896856` 均为 success。Cleanup exact-SHA CI 仍待 `THIS_DOCUMENT_COMMIT` 发布后验证。

@@ -1,5 +1,49 @@
 # CLAUDE（Claude 开发指引 - Decision Hub）
 
+## Terminal current authority — 2026-08-09 Stage-QDR-10 final close and post-tag cleanup
+
+~~~text
+Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE-RETRY-RESUME
+Stage-QDR-10: CLOSED / ACCEPTED / ARCHIVED / TAGGED
+Implementation: d275b9e30bb381bea8467286786add2c5b43e119 / PUBLISHED
+Implementation exact-SHA CI: 31297296670 / PASS / QUALITY 93204385242 + TESTCONTAINERS 93204385212
+Regression: 1326 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL / Flyway / quality: 17.10 / V1-V15 / 19 OF 19 + CHECKSTYLE 0 + SPOTLESS PASS
+Security exact-diff review: PASS / SEALED SCAN 7a89a6be-98aa-41b8-bcc2-ab0c036f1682 / EXACT COMMITTED TREE aee96dcbba36020c8c92ea48f455d2be90216a7c
+Security coverage / deferred / findings / active P0-P1: 28 OF 28 / 0 / 0 / 0-0
+Security snapshot: codex-security-snapshot/v1:sha256:1d74df0bc5da366ec7aad16a4841552de3d91d1cb5319d4e849096130ccb54eb
+Initial final-close / original findings: BLOCKED / 2 LOW-P3 / PRESERVED
+Historical failed scan: e17f3cfd-852f-4eb2-b5cf-b815dd749515 / FINALIZATION_FAILED / MISSING snapshotDigest / NOT_AUTHORITY / NOT_REUSED
+Decision environment provenance: PERSISTED / VERIFIED / FAIL_CLOSED
+Trusted caller / environment equality: FeedbackExecutionScope / CALLER = DECISION ORIGIN = FEEDBACK
+Decision correlation: TENANT + TRACE + REQUEST + DECISION + RUN
+Feedback correlation: TENANT + ENVIRONMENT + DECISION + TRACE
+Bounded feedback: 90D / MAX100 / SINGLE PAGE / OVERFLOW FAIL_CLOSED
+Completeness: COMPLETE_WITHIN_BOUNDS / PARTIAL_WITHIN_BOUNDS / INCONSISTENT / NOT_FOUND
+Data path / feedback learning: READ_ONLY / NOT AUTHORIZED
+API / migration / schema / contracts / POM / workflow / NQ: UNCHANGED / NONE
+Archive: docs/gates/stage-qdr-10/ / COMPLETE
+Archive sources / SHA-256: 4 OF 4 / VERIFIED / 0 MISSING / 0 UNEXPECTED / 0 HASH FAILURES
+Archive close commit: 1b826e8f92cc11d2b6cbe283da550039d7522737 / PUBLISHED
+Archive close exact-SHA CI: 31297913196 / PASS / QUALITY 93205896872 + TESTCONTAINERS 93205896856
+Close tag: dh-stage-qdr-10-close / ANNOTATED / LOCAL+REMOTE VERIFIED / TARGET 1b826e8f92cc11d2b6cbe283da550039d7522737
+Post-tag cleanup: COMPLETE / 4 CURRENT PROCESS SOURCES PRUNED / CURRENT RESIDUE 0
+Cleanup commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / CI_PENDING
+Terminal factsources: 12 / 12 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+Formal capacity: NOT_EXECUTED / DEFERRED
+Production capacity / production ready: NOT_PROVEN / NO
+Next action: VERIFY CLEANUP EXACT-SHA CI -> DH-POST-STAGE-QDR-10-NEXT-STAGE-PLANNING
+Next stage: DH-POST-STAGE-QDR-10-NEXT-STAGE-PLANNING / PLANNING ONLY / AFTER CLEANUP CI PASS
+Next-stage implementation: NOT AUTHORIZED
+ALLOW_NEXT_STAGE_PLANNING: YES / AFTER CLEANUP EXACT-SHA CI PASS ONLY
+ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是 post-tag cleanup 后唯一 terminal authority；其后 pre-tag、remediation、planning 与 blocker 区块均为历史时间线，不得授权下一阶段技术实现。
+
+
 ## Terminal current authority — 2026-08-09 Stage-QDR-10 archive close pending tag
 
 ~~~text
