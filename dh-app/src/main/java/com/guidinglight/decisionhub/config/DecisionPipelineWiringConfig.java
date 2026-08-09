@@ -47,6 +47,8 @@ import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionFeedbackEvidenc
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceAggregateService;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEnvironmentProvenanceQueryPort;
 import com.guidinglight.decisionhub.infra.jdbc.qdr.evidence.JdbcDecisionEnvironmentProvenanceQueryAdapter;
+import com.guidinglight.decisionhub.usecase.qdr.report.DecisionEvidenceReplayReportService;
+import com.guidinglight.decisionhub.usecase.qdr.report.DecisionFeedbackInternalAcceptanceService;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionPersistenceService;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionRepository;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackPersistenceTransactionBoundary;
@@ -336,6 +338,22 @@ public class DecisionPipelineWiringConfig {
                 decisionEvidenceAggregateService,
                 decisionEnvironmentProvenanceQueryPort,
                 historicalFeedbackEvidenceReadService);
+    }
+
+    /** 装配 Stage-QDR-11 既有 internal acceptance evaluator。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public DecisionEvidenceReplayReportService decisionEvidenceReplayReportService() {
+        return new DecisionEvidenceReplayReportService();
+    }
+
+    /** 装配 Stage-QDR-11 唯一 consolidated evidence internal facade。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public DecisionFeedbackInternalAcceptanceService decisionFeedbackInternalAcceptanceService(
+            final DecisionFeedbackEvidenceService evidenceService,
+            final DecisionEvidenceReplayReportService reportService) {
+        return new DecisionFeedbackInternalAcceptanceService(evidenceService, reportService);
     }
 
     /** 装配冻结的 QDR6-CJSON-1 encoder；不注册为 HTTP ObjectMapper。 */

@@ -1,10 +1,15 @@
 package com.guidinglight.decisionhub.usecase.qdr.report;
 
 import com.guidinglight.decisionhub.domain.qdr.replay.RegressionVerdict;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.BoundedEvidencePolicy;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceAggregate;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceCorrelation;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceFinding;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidencePolicy;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceStatus;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionFeedbackEvidenceAggregate;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionFeedbackEvidenceFinding;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.EvidenceCompleteness;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayObservabilityReport;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ProviderReadinessAcceptanceStatus;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ProviderReadinessDecision;
@@ -20,7 +25,6 @@ import com.guidinglight.decisionhub.usecase.qdr.replay.deterministic.ReplayRepro
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 /**
  * Stage-QDR-6 B4 evidence/replay report 的纯内存编排 service。
@@ -34,8 +38,7 @@ public final class DecisionEvidenceReplayReportService {
   /**
    * 聚合既有 structured results，并按冻结优先级计算 internal acceptance status。
    *
-   * @param correlation 调用方期望的 tenant-bound 四键 identity。
-   * @param evidence 已完成评估的 evidence aggregate。
+   * @param evidence 已完成 scope、provenance 与 bounds 校验的 consolidated evidence aggregate。
    * @param replay 已执行完成的 deterministic replay result。
    * @param regression 已生成的 regression read model。
    * @param readiness 已完成的 provider readiness evaluation。
@@ -43,53 +46,30 @@ public final class DecisionEvidenceReplayReportService {
    * @return 纯内存、不可授权外部行为的 internal report。
    */
   public DecisionEvidenceReplayInternalReport generate(
-      final DecisionEvidenceCorrelation correlation,
-      final DecisionEvidenceAggregate evidence,
+      final DecisionFeedbackEvidenceAggregate evidence,
       final DeterministicReplayResult replay,
       final RegressionReportView regression,
       final ProviderReadinessEvaluationResult readiness,
       final ModelGatewayObservabilityReport observability) {
-    return generateFromSources(
-        correlation,
-        () -> evidence,
-        () -> replay,
-        () -> regression,
-        () -> readiness,
-        () -> observability);
-  }
-
-  DecisionEvidenceReplayInternalReport generateFromSources(
-      final DecisionEvidenceCorrelation correlation,
-      final Supplier<DecisionEvidenceAggregate> evidenceSource,
-      final Supplier<DeterministicReplayResult> replaySource,
-      final Supplier<RegressionReportView> regressionSource,
-      final Supplier<ProviderReadinessEvaluationResult> readinessSource,
-      final Supplier<ModelGatewayObservabilityReport> observabilitySource) {
-    final DecisionEvidenceCorrelation checkedCorrelation =
-        Objects.requireNonNull(correlation, "correlation");
+    final DecisionFeedbackEvidenceAggregate checkedEvidence =
+        Objects.requireNonNull(evidence, "evidence");
     try {
       return assemble(
-          checkedCorrelation,
-          Objects.requireNonNull(evidenceSource, "evidenceSource").get(),
-          Objects.requireNonNull(replaySource, "replaySource").get(),
-          Objects.requireNonNull(regressionSource, "regressionSource").get(),
-          Objects.requireNonNull(readinessSource, "readinessSource").get(),
-          Objects.requireNonNull(observabilitySource, "observabilitySource").get());
+          checkedEvidence, replay, regression, readiness, observability);
     } catch (final RuntimeException error) {
-      return failedReport(checkedCorrelation);
+      return failedReport(checkedEvidence);
     }
   }
 
   private DecisionEvidenceReplayInternalReport assemble(
-      final DecisionEvidenceCorrelation correlation,
-      final DecisionEvidenceAggregate evidence,
+      final DecisionFeedbackEvidenceAggregate evidence,
       final DeterministicReplayResult replay,
       final RegressionReportView regression,
       final ProviderReadinessEvaluationResult readiness,
       final ModelGatewayObservabilityReport observability) {
     final List<InternalAcceptanceFinding> findings = new ArrayList<>();
     final boolean missingInput =
-        evidence == null || replay == null || regression == null || readiness == null || observability == null;
+        replay == null || regression == null || readiness == null || observability == null;
     if (missingInput) {
       findings.add(
           finding(
@@ -101,7 +81,7 @@ public final class DecisionEvidenceReplayReportService {
     }
 
     final boolean identityMismatch =
-        !identityMatches(correlation, evidence, replay, regression, readiness, observability);
+        !identityMatches(evidence, replay, regression, readiness, observability);
     if (identityMismatch) {
       findings.add(
           finding(
@@ -112,9 +92,7 @@ public final class DecisionEvidenceReplayReportService {
               "tenant or correlation identity does not match"));
     }
 
-    if (evidence != null) {
-      findings.addAll(evidenceFindings(evidence));
-    }
+    findings.addAll(evidenceFindings(evidence));
     if (replay != null) {
       findings.addAll(replayFindings(replay));
     }
@@ -137,11 +115,11 @@ public final class DecisionEvidenceReplayReportService {
 
     final InternalAcceptanceStatus status =
         status(evidence, replay, regression, readiness, observability, missingInput, identityMismatch);
-    return report(correlation, evidence, replay, regression, readiness, observability, status, findings);
+    return report(evidence, replay, regression, readiness, observability, status, findings);
   }
 
   private static InternalAcceptanceStatus status(
-      final DecisionEvidenceAggregate evidence,
+      final DecisionFeedbackEvidenceAggregate evidence,
       final DeterministicReplayResult replay,
       final RegressionReportView regression,
       final ProviderReadinessEvaluationResult readiness,
@@ -154,18 +132,26 @@ public final class DecisionEvidenceReplayReportService {
     if (missingInput) {
       return InternalAcceptanceStatus.INCOMPLETE;
     }
+    if (evidence.completeness() == EvidenceCompleteness.INCONSISTENT
+        || evidence.overflowDetected()) {
+      return InternalAcceptanceStatus.INVALID;
+    }
+    if (evidence.completeness() == EvidenceCompleteness.NOT_FOUND
+        || evidence.completeness() == EvidenceCompleteness.PARTIAL_WITHIN_BOUNDS) {
+      return InternalAcceptanceStatus.INCOMPLETE;
+    }
     if (replay.status() == ReplayReproducibilityStatus.EXECUTION_FAILED) {
       return InternalAcceptanceStatus.FAILED;
     }
-    if (evidence.status() == DecisionEvidenceStatus.INVALID
+    if (evidence.decisionEvidence().status() == DecisionEvidenceStatus.INVALID
         || replay.status() == ReplayReproducibilityStatus.INVALID_INPUT) {
       return InternalAcceptanceStatus.INVALID;
     }
     if (replay.status() == ReplayReproducibilityStatus.UNSUPPORTED_VERSION) {
       return InternalAcceptanceStatus.UNSUPPORTED;
     }
-    if (evidence.status() == DecisionEvidenceStatus.INCOMPLETE
-        || !evidence.missingMandatoryEvidence().isEmpty()
+    if (evidence.decisionEvidence().status() == DecisionEvidenceStatus.INCOMPLETE
+        || !evidence.decisionEvidence().missingMandatoryEvidence().isEmpty()
         || replay.status() == ReplayReproducibilityStatus.INCOMPLETE
         || regression.verdict() == RegressionVerdict.Status.SKIPPED
         || readiness.decision() == ProviderReadinessDecision.SKIPPED
@@ -184,16 +170,29 @@ public final class DecisionEvidenceReplayReportService {
   }
 
   private static boolean identityMatches(
-      final DecisionEvidenceCorrelation expected,
-      final DecisionEvidenceAggregate evidence,
+      final DecisionFeedbackEvidenceAggregate evidence,
       final DeterministicReplayResult replay,
       final RegressionReportView regression,
       final ProviderReadinessEvaluationResult readiness,
       final ModelGatewayObservabilityReport observability) {
-    if (evidence == null || replay == null || regression == null || readiness == null || observability == null) {
+    if (replay == null || regression == null || readiness == null || observability == null) {
       return true;
     }
-    return expected.matches(evidence.correlation())
+    final DecisionEvidenceCorrelation expected = evidence.decisionCorrelation();
+    final boolean provenanceMatches =
+        !evidence.decisionEnvironmentProvenance().isProven()
+            || evidence.decisionEnvironmentProvenance().environment()
+                == evidence.executionScope().environment();
+    final boolean replayRunMatches =
+        evidence.completeness() != EvidenceCompleteness.COMPLETE_WITHIN_BOUNDS
+                && evidence.completeness() != EvidenceCompleteness.PARTIAL_WITHIN_BOUNDS
+            || evidence.decisionEvidence().evidenceRefs().stream()
+                .filter(ref -> ref.evidenceType() == DecisionEvidencePolicy.EvidenceType.RUN)
+                .anyMatch(ref -> ref.refId().equals("v6-run:" + replay.decisionRunId()));
+    return evidence.executionScope().tenantId().equals(expected.tenantId())
+        && provenanceMatches
+        && replayRunMatches
+        && expected.matches(evidence.decisionEvidence().correlation())
         && expected.tenantId().equals(replay.tenantId())
         && expected.traceId().equals(replay.traceId())
         && expected.requestId().equals(replay.requestId())
@@ -213,8 +212,7 @@ public final class DecisionEvidenceReplayReportService {
   }
 
   private static DecisionEvidenceReplayInternalReport report(
-      final DecisionEvidenceCorrelation correlation,
-      final DecisionEvidenceAggregate evidence,
+      final DecisionFeedbackEvidenceAggregate evidence,
       final DeterministicReplayResult replay,
       final RegressionReportView regression,
       final ProviderReadinessEvaluationResult readiness,
@@ -222,10 +220,16 @@ public final class DecisionEvidenceReplayReportService {
       final InternalAcceptanceStatus status,
       final List<InternalAcceptanceFinding> findings) {
     return new DecisionEvidenceReplayInternalReport(
-        correlation,
-        evidence == null ? null : evidence.status(),
-        evidence == null ? List.of() : evidence.evidenceRefs().stream().map(ref -> ref.identity()).toList(),
-        evidence == null ? List.of() : evidence.missingMandatoryEvidence(),
+        evidence.executionScope(),
+        evidence.decisionCorrelation(),
+        evidence.completeness(),
+        evidence.boundedPolicy(),
+        evidence.overflowDetected(),
+        evidence.feedbackEvidence().size(),
+        evidenceAggregateRef(evidence),
+        evidence.decisionEvidence().status(),
+        evidence.decisionEvidence().evidenceRefs().stream().map(ref -> ref.identity()).toList(),
+        evidence.decisionEvidence().missingMandatoryEvidence(),
         replay == null ? null : replay.status(),
         replay == null ? List.of() : replay.differences(),
         replay == null ? null : replay.failureCode(),
@@ -241,12 +245,18 @@ public final class DecisionEvidenceReplayReportService {
   }
 
   private static DecisionEvidenceReplayInternalReport failedReport(
-      final DecisionEvidenceCorrelation correlation) {
+      final DecisionFeedbackEvidenceAggregate evidence) {
     return new DecisionEvidenceReplayInternalReport(
-        correlation,
-        null,
-        List.of(),
-        List.of(),
+        evidence.executionScope(),
+        evidence.decisionCorrelation(),
+        evidence.completeness(),
+        evidence.boundedPolicy(),
+        evidence.overflowDetected(),
+        evidence.feedbackEvidence().size(),
+        evidenceAggregateRef(evidence),
+        evidence.decisionEvidence().status(),
+        evidence.decisionEvidence().evidenceRefs().stream().map(ref -> ref.identity()).toList(),
+        evidence.decisionEvidence().missingMandatoryEvidence(),
         null,
         List.of(),
         null,
@@ -261,16 +271,25 @@ public final class DecisionEvidenceReplayReportService {
             finding(
                 InternalAcceptanceFinding.Source.INPUT_BOUNDARY,
                 InternalAcceptanceFinding.Severity.BLOCKER,
-                "REPORT_SOURCE_FAILED",
+                "ACCEPTANCE_EVALUATION_FAILED",
                 null,
-                "structured report source or conversion failed")),
+                "internal acceptance evaluation failed closed")),
         DecisionEvidenceReplayInternalReport.INTERNAL_ACCEPTANCE_ONLY);
   }
 
   private static List<InternalAcceptanceFinding> evidenceFindings(
-      final DecisionEvidenceAggregate aggregate) {
+      final DecisionFeedbackEvidenceAggregate aggregate) {
     final List<InternalAcceptanceFinding> mapped = new ArrayList<>();
-    for (DecisionEvidenceFinding source : aggregate.findings()) {
+    for (DecisionFeedbackEvidenceFinding source : aggregate.findings()) {
+      mapped.add(
+          finding(
+              InternalAcceptanceFinding.Source.EVIDENCE,
+              severity(source.severity()),
+              source.code().name(),
+              source.safeRef(),
+              source.summary()));
+    }
+    for (DecisionEvidenceFinding source : aggregate.decisionEvidence().findings()) {
       mapped.add(
           finding(
               InternalAcceptanceFinding.Source.EVIDENCE,
@@ -279,7 +298,7 @@ public final class DecisionEvidenceReplayReportService {
               source.safeRef(),
               source.message()));
     }
-    for (var missing : aggregate.missingMandatoryEvidence()) {
+    for (var missing : aggregate.decisionEvidence().missingMandatoryEvidence()) {
       mapped.add(
           finding(
               InternalAcceptanceFinding.Source.EVIDENCE,
@@ -289,6 +308,24 @@ public final class DecisionEvidenceReplayReportService {
               "mandatory evidence is missing"));
     }
     return mapped;
+  }
+
+  private static String evidenceAggregateRef(final DecisionFeedbackEvidenceAggregate evidence) {
+    final BoundedEvidencePolicy policy = evidence.boundedPolicy();
+    final DecisionEvidenceCorrelation correlation = evidence.decisionCorrelation();
+    return String.join(
+        ":",
+        "qdr11-evidence",
+        evidence.executionScope().tenantId(),
+        evidence.executionScope().environment().name(),
+        correlation.traceId(),
+        correlation.requestId(),
+        correlation.decisionId(),
+        policy.policyId(),
+        policy.policyVersion(),
+        policy.fromObservedAt().toString(),
+        policy.toObservedAt().toString(),
+        Integer.toString(policy.maxFeedbackItems()));
   }
 
   private static List<InternalAcceptanceFinding> replayFindings(
@@ -386,6 +423,16 @@ public final class DecisionEvidenceReplayReportService {
 
   private static InternalAcceptanceFinding.Severity severity(
       final DecisionEvidenceFinding.Severity severity) {
+    return switch (severity) {
+      case INFO -> InternalAcceptanceFinding.Severity.INFO;
+      case WARN -> InternalAcceptanceFinding.Severity.WARN;
+      case ERROR -> InternalAcceptanceFinding.Severity.ERROR;
+      case BLOCKER -> InternalAcceptanceFinding.Severity.BLOCKER;
+    };
+  }
+
+  private static InternalAcceptanceFinding.Severity severity(
+      final DecisionFeedbackEvidenceFinding.Severity severity) {
     return switch (severity) {
       case INFO -> InternalAcceptanceFinding.Severity.INFO;
       case WARN -> InternalAcceptanceFinding.Severity.WARN;

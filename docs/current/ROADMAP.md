@@ -1,5 +1,47 @@
 # Decision Hub Roadmap
 
+## Terminal current authority — 2026-08-09 Stage-QDR-11 consolidated implementation
+
+~~~text
+Task: DH-STAGE-QDR-11-CONSOLIDATED-EVIDENCE-INTERNAL-ACCEPTANCE-CONSOLIDATED-IMPLEMENTATION
+Stage-QDR-11: IMPLEMENTED / LOCAL_ACCEPTED / FINAL_CLOSE NOT_STARTED
+Implementation baseline: 9102c2f28bb0e470c51c09edaa20da9c7bbb32c2 / PUBLISHED / EXACT-SHA CI 31305548147 PASS
+Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Stage-QDR-10: CLOSED / ACCEPTED / ARCHIVED / TAGGED / IMMUTABLE / NOT REOPENED
+Evidence authority: DecisionFeedbackEvidenceAggregate / SINGLE
+Legacy direct acceptance: RETIRED / 0 PRODUCTION PATHS / 0 FALLBACKS
+Internal acceptance model: DecisionEvidenceReplayInternalReport / REUSED AND EVOLVED
+Completeness mapping: COMPLETE POLICY_QUALIFIED / PARTIAL INCOMPLETE / INCONSISTENT INVALID / NOT_FOUND INCOMPLETE
+Bounded policy: PRESERVED END_TO_END / FROM+TO+MAX+ID+VERSION+WINDOW+ORDER+OVERFLOW FAIL_CLOSED
+Correlation: TENANT + ENVIRONMENT + TRACE + REQUEST + DECISION + RUN / EXACT / FAIL_CLOSED
+Internal facade: DecisionFeedbackInternalAcceptanceService / WIRED / READ_ONLY / NO_SIDE_EFFECT
+Spring wiring: ONE EVIDENCE BEAN + ONE REPORT BEAN + ONE FACADE BEAN / DUAL AUTHORITY NONE
+Authorization boundary: ACCEPTED IS NOT PROVIDER OR NQ OR TRADING OR PAPER OR LIVE AUTHORIZATION
+API / migration / schema / Repository-JDBC / contracts / POM-workflow / NQ: NONE / NONE / NONE / NONE / NONE / NONE / NONE
+Feedback learning / HTTP-Provider / Agent-LangGraph / Paper-LIVE: NOT AUTHORIZED / NONE / NONE / NONE
+Regression: PASS / 19 OF 19 REACTOR / 1338 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL / Flyway: 17.10 REAL TESTCONTAINERS / V1-V15 FULL APPLY
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Security review: PASS / CUMULATIVE TECHNICAL DIFF / 0 REPORTABLE FINDINGS / ACTIVE P0-P1 0-0 / BYPASS 0
+CodeRabbit: NOT_EXECUTED / NETWORK_BLOCKED
+Scope invariants: PASS / 3 OF 3
+Current factsources / conflicts: PASS / 8 OF 8 / 1 BLOCK HASH / 0 CONFLICTS
+Remote implementation CI: PENDING
+Formal capacity / production capacity: NOT_EXECUTED / NOT_PROVEN
+Next action: DH-STAGE-QDR-11-CONSOLIDATED-EVIDENCE-INTERNAL-ACCEPTANCE-FINAL-CLOSE
+ALLOW_STAGE_QDR_11_FINAL_CLOSE: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW / ALLOW_TAG_NOW: NO / NO
+ALLOW_CAPACITY / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是 Stage-QDR-11 consolidated implementation 本地验收后的唯一 current authority。下一任务只能发布
+implementation commit、验证 exact-SHA CI 并执行独立 final close；本轮不得 push、tag、archive 或启动
+capacity、reference-liveness、retention、learning、NQ、HTTP/Provider、Agent/LangGraph、Paper/LIVE。
+以下 implementation work order 与更早区块均为历史时间线，不能覆盖本节或授权范围扩张。
+
+
 ## Terminal current authority — 2026-08-09 Stage-QDR-11 implementation work order
 
 ~~~text

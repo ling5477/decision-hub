@@ -1,5 +1,24 @@
 # DH Post-Stage-QDR-10 Next-Stage Plan
 
+## Stage-QDR-11 consolidated implementation handoff — 2026-08-09
+
+```text
+Stage-QDR-11: IMPLEMENTED / LOCAL_ACCEPTED / FINAL_CLOSE NOT_STARTED
+Evidence authority: DecisionFeedbackEvidenceAggregate / SINGLE
+Legacy direct acceptance: RETIRED
+Internal acceptance model: DecisionEvidenceReplayInternalReport / REUSED AND EVOLVED
+Completeness mapping: POLICY_QUALIFIED / FAIL_CLOSED
+Bounded policy: PRESERVED END_TO_END
+Internal facade: WIRED / READ_ONLY / NO_SIDE_EFFECT
+Dual authority: NONE
+Remote implementation CI: PENDING
+Production capacity: NOT_PROVEN
+Next action: DH-STAGE-QDR-11-CONSOLIDATED-EVIDENCE-INTERNAL-ACCEPTANCE-FINAL-CLOSE
+```
+
+本计划已由 Stage-QDR-11 consolidated implementation 消费。以下 candidate selection、work-order refinement
+与 planning validation 仅作为历史设计依据，不再授权新的实现或范围扩张。
+
 ## Work-order refinement — 2026-08-09
 
 Stage-QDR-11 的代码现实复核与 implementation work order 已冻结。`DecisionEvidenceReplayInternalReport`、

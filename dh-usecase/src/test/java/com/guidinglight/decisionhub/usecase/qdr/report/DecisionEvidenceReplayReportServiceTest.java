@@ -7,14 +7,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.guidinglight.decisionhub.domain.decision.DecisionEvidence;
 import com.guidinglight.decisionhub.domain.qdr.RiskLevel;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackStatus;
+import com.guidinglight.decisionhub.domain.qdr.feedback.ObservedDecisionOutcome;
+import com.guidinglight.decisionhub.domain.qdr.feedback.OutcomeSource;
 import com.guidinglight.decisionhub.domain.qdr.replay.RegressionSeverity;
 import com.guidinglight.decisionhub.domain.qdr.replay.RegressionVerdict;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.BoundedEvidencePolicy;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceAggregate;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceCorrelation;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceFinding;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidencePolicy;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceRef;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceStatus;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEnvironmentProvenance;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionFeedbackEvidenceAggregate;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionFeedbackEvidenceFinding;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionFeedbackEvidenceQuery;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.EvidenceCompleteness;
+import com.guidinglight.decisionhub.usecase.qdr.feedback.HistoricalFeedbackEvidenceView;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayObservabilityReport;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelGatewayObservabilitySummary;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ObservabilityReportCommand;
@@ -41,6 +53,7 @@ import com.guidinglight.decisionhub.usecase.qdr.replay.deterministic.ReplayDiffe
 import com.guidinglight.decisionhub.usecase.qdr.replay.deterministic.ReplayFailureCode;
 import com.guidinglight.decisionhub.usecase.qdr.replay.deterministic.ReplayReproducibilityStatus;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -63,7 +76,11 @@ class DecisionEvidenceReplayReportServiceTest {
   private static final String POLICY = "readiness-policy-v1";
   private static final String HASH_A = "a".repeat(64);
   private static final String HASH_B = "b".repeat(64);
+  private static final UUID RUN_ID = new UUID(0L, 2L);
   private static final Instant NOW = Instant.parse("2026-07-11T00:00:00Z");
+  private static final Instant FROM = NOW.minusSeconds(24L * 60 * 60);
+  private static final FeedbackExecutionScope EXECUTION_SCOPE =
+      new FeedbackExecutionScope(TENANT, FeedbackEnvironment.TEST);
   private static final DecisionEvidenceCorrelation CORRELATION =
       new DecisionEvidenceCorrelation(TENANT, TRACE, REQUEST, DECISION);
   private final DecisionEvidenceReplayReportService service =
@@ -76,6 +93,8 @@ class DecisionEvidenceReplayReportServiceTest {
         generate(completeEvidence(), reproducibleReplay(), regressionPass(), readiness, observability(readiness));
 
     assertEquals(InternalAcceptanceStatus.ACCEPTED, report.acceptanceStatus());
+    assertEquals(EvidenceCompleteness.COMPLETE_WITHIN_BOUNDS, report.evidenceCompleteness());
+    assertEquals(EXECUTION_SCOPE, report.executionScope());
     assertEquals(DecisionEvidenceStatus.COMPLETE, report.evidenceStatus());
     assertEquals(ReplayReproducibilityStatus.REPRODUCIBLE, report.replayStatus());
     assertEquals(RegressionVerdict.Status.PASS, report.regressionVerdict());
@@ -209,19 +228,101 @@ class DecisionEvidenceReplayReportServiceTest {
 
   @Test
   void sourceExceptionIsSanitizedAndFailed() {
-    final DecisionEvidenceReplayInternalReport report =
-        service.generateFromSources(
-            CORRELATION,
-            () -> {
-              throw new IllegalStateException("rawPrompt:payload-value");
-            },
-            this::reproducibleReplay,
-            this::regressionPass,
-            this::readyReadiness,
-            () -> observability(readyReadiness()));
+    final NullPointerException error =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                service.generate(
+                    null,
+                    reproducibleReplay(),
+                    regressionPass(),
+                    readyReadiness(),
+                    observability(readyReadiness())));
 
-    assertEquals(InternalAcceptanceStatus.FAILED, report.acceptanceStatus());
-    assertFalse(report.toString().contains("payload-value"));
+    assertFalse(error.toString().contains("payload-value"));
+  }
+
+  @Test
+  void completenessMappingIsPolicyQualifiedAndFailClosed() {
+    final ProviderReadinessEvaluationResult readiness = readyReadiness();
+
+    assertEquals(
+        InternalAcceptanceStatus.INCOMPLETE,
+        generate(
+                aggregate(EvidenceCompleteness.PARTIAL_WITHIN_BOUNDS, completeEvidence(), false),
+                reproducibleReplay(),
+                regressionPass(),
+                readiness,
+                observability(readiness))
+            .acceptanceStatus());
+    assertEquals(
+        InternalAcceptanceStatus.INVALID,
+        generate(
+                aggregate(EvidenceCompleteness.INCONSISTENT, invalidEvidence(), false),
+                reproducibleReplay(),
+                regressionPass(),
+                readiness,
+                observability(readiness))
+            .acceptanceStatus());
+    assertEquals(
+        InternalAcceptanceStatus.INCOMPLETE,
+        generate(
+                aggregate(EvidenceCompleteness.NOT_FOUND, incompleteEvidence(), false),
+                reproducibleReplay(),
+                regressionPass(),
+                readiness,
+                observability(readiness))
+            .acceptanceStatus());
+    assertEquals(
+        InternalAcceptanceStatus.INVALID,
+        generate(
+                aggregate(EvidenceCompleteness.INCONSISTENT, completeEvidence(), true),
+                reproducibleReplay(),
+                regressionPass(),
+                readiness,
+                observability(readiness))
+            .acceptanceStatus());
+  }
+
+  @Test
+  void replayRunMismatchIsInvalid() {
+    final ProviderReadinessEvaluationResult readiness = readyReadiness();
+
+    assertEquals(
+        InternalAcceptanceStatus.INVALID,
+        generate(
+                completeEvidence(),
+                reproducibleReplay(new UUID(0L, 3L)),
+                regressionPass(),
+                readiness,
+                observability(readiness))
+            .acceptanceStatus());
+  }
+
+  @Test
+  void reportPreservesCompleteBoundedPolicyAndDifferentBoundsRemainDistinct() {
+    final DecisionFeedbackEvidenceAggregate firstAggregate =
+        aggregate(EvidenceCompleteness.COMPLETE_WITHIN_BOUNDS, completeEvidence(), false);
+    final DecisionFeedbackEvidenceAggregate secondAggregate =
+        completeAggregate(query(FROM.plusSeconds(1), NOW, 99).boundedPolicy());
+    final ProviderReadinessEvaluationResult readiness = readyReadiness();
+
+    final DecisionEvidenceReplayInternalReport first =
+        generate(firstAggregate, reproducibleReplay(), regressionPass(), readiness, observability(readiness));
+    final DecisionEvidenceReplayInternalReport second =
+        generate(secondAggregate, reproducibleReplay(), regressionPass(), readiness, observability(readiness));
+
+    assertEquals(FROM, first.boundedPolicy().fromObservedAt());
+    assertEquals(NOW, first.boundedPolicy().toObservedAt());
+    assertEquals(100, first.boundedPolicy().maxFeedbackItems());
+    assertEquals(BoundedEvidencePolicy.POLICY_ID, first.boundedPolicy().policyId());
+    assertEquals(BoundedEvidencePolicy.POLICY_VERSION, first.boundedPolicy().policyVersion());
+    assertEquals(BoundedEvidencePolicy.TimeWindowSemantics.CLOSED_INTERVAL,
+        first.boundedPolicy().timeWindowSemantics());
+    assertEquals(BoundedEvidencePolicy.OverflowBehavior.FAIL_CLOSED,
+        first.boundedPolicy().overflowBehavior());
+    assertFalse(first.evidenceAggregateRef().equals(second.evidenceAggregateRef()));
+    assertFalse(first.equals(second));
   }
 
   @Test
@@ -323,11 +424,20 @@ class DecisionEvidenceReplayReportServiceTest {
       final RegressionReportView regression,
       final ProviderReadinessEvaluationResult readiness,
       final ModelGatewayObservabilityReport observability) {
-    return service.generate(CORRELATION, evidence, replay, regression, readiness, observability);
+    return generate(aggregateFor(evidence), replay, regression, readiness, observability);
+  }
+
+  private DecisionEvidenceReplayInternalReport generate(
+      final DecisionFeedbackEvidenceAggregate evidence,
+      final DeterministicReplayResult replay,
+      final RegressionReportView regression,
+      final ProviderReadinessEvaluationResult readiness,
+      final ModelGatewayObservabilityReport observability) {
+    return service.generate(evidence, replay, regression, readiness, observability);
   }
 
   private DecisionEvidenceAggregate completeEvidence() {
-    final DecisionEvidenceRef ref =
+    final DecisionEvidenceRef requestRef =
         new DecisionEvidenceRef(
             new DecisionEvidence("request-ref", "REQUEST", "structured request evidence"),
             CORRELATION,
@@ -337,13 +447,156 @@ class DecisionEvidenceReplayReportServiceTest {
             "V5",
             true,
             RedactionStatus.REDACTED);
+    final DecisionEvidenceRef runRef =
+        new DecisionEvidenceRef(
+            new DecisionEvidence(
+                "v6-run:" + RUN_ID, "RUN", "structured decision run evidence"),
+            CORRELATION,
+            DecisionEvidencePolicy.EvidenceType.RUN,
+            "v6-run:" + RUN_ID,
+            HASH_A,
+            "V6_RUN",
+            true,
+            RedactionStatus.REDACTED);
     return new DecisionEvidenceAggregate(
-        CORRELATION, List.of(ref), DecisionEvidenceStatus.COMPLETE, List.of(), List.of());
+        CORRELATION,
+        List.of(requestRef, runRef),
+        DecisionEvidenceStatus.COMPLETE,
+        List.of(),
+        List.of());
+  }
+
+  private DecisionEvidenceAggregate incompleteEvidence() {
+    return new DecisionEvidenceAggregate(
+        CORRELATION,
+        List.of(),
+        DecisionEvidenceStatus.INCOMPLETE,
+        List.of(),
+        List.of(DecisionEvidencePolicy.EvidenceType.REQUEST));
+  }
+
+  private DecisionEvidenceAggregate invalidEvidence() {
+    return new DecisionEvidenceAggregate(
+        CORRELATION,
+        List.of(),
+        DecisionEvidenceStatus.INVALID,
+        List.of(
+            new DecisionEvidenceFinding(
+                "EVIDENCE_INVALID",
+                DecisionEvidenceFinding.Severity.BLOCKER,
+                null,
+                null,
+                "evidence contract is invalid")),
+        List.of());
+  }
+
+  private DecisionFeedbackEvidenceAggregate aggregateFor(final DecisionEvidenceAggregate evidence) {
+    if (evidence.status() == DecisionEvidenceStatus.COMPLETE
+        && CORRELATION.matches(evidence.correlation())) {
+      return completeAggregate(query(FROM, NOW, 100).boundedPolicy(), evidence);
+    }
+    final EvidenceCompleteness completeness =
+        evidence.status() == DecisionEvidenceStatus.INCOMPLETE
+            ? EvidenceCompleteness.NOT_FOUND
+            : EvidenceCompleteness.INCONSISTENT;
+    return aggregate(completeness, evidence, false);
+  }
+
+  private DecisionFeedbackEvidenceAggregate aggregate(
+      final EvidenceCompleteness completeness,
+      final DecisionEvidenceAggregate evidence,
+      final boolean overflow) {
+    if (completeness == EvidenceCompleteness.COMPLETE_WITHIN_BOUNDS) {
+      return completeAggregate(query(FROM, NOW, 100).boundedPolicy(), evidence);
+    }
+    final List<DecisionFeedbackEvidenceFinding> findings =
+        completeness == EvidenceCompleteness.PARTIAL_WITHIN_BOUNDS
+            ? List.of(
+                new DecisionFeedbackEvidenceFinding(
+                    DecisionFeedbackEvidenceFinding.Code.OPTIONAL_FEEDBACK_ABSENT,
+                    DecisionFeedbackEvidenceFinding.Severity.INFO,
+                    DECISION,
+                    "optional feedback evidence is absent"))
+            : List.of(
+                new DecisionFeedbackEvidenceFinding(
+                    completeness == EvidenceCompleteness.NOT_FOUND
+                        ? DecisionFeedbackEvidenceFinding.Code.DECISION_ROOT_NOT_FOUND
+                        : overflow
+                            ? DecisionFeedbackEvidenceFinding.Code.FEEDBACK_RESULT_LIMIT_EXCEEDED
+                            : DecisionFeedbackEvidenceFinding.Code.DECISION_EVIDENCE_INVALID,
+                    DecisionFeedbackEvidenceFinding.Severity.BLOCKER,
+                    DECISION,
+                    "consolidated evidence failed closed"));
+    return new DecisionFeedbackEvidenceAggregate(
+        EXECUTION_SCOPE,
+        completeness == EvidenceCompleteness.PARTIAL_WITHIN_BOUNDS
+            ? DecisionEnvironmentProvenance.proven(FeedbackEnvironment.TEST, "guard-ref")
+            : DecisionEnvironmentProvenance.invalid(),
+        CORRELATION,
+        evidence,
+        List.of(),
+        query(FROM, NOW, 100).boundedPolicy(),
+        overflow,
+        completeness,
+        findings);
+  }
+
+  private DecisionFeedbackEvidenceAggregate completeAggregate(final BoundedEvidencePolicy policy) {
+    return completeAggregate(policy, completeEvidence());
+  }
+
+  private DecisionFeedbackEvidenceAggregate completeAggregate(
+      final BoundedEvidencePolicy policy, final DecisionEvidenceAggregate evidence) {
+    return new DecisionFeedbackEvidenceAggregate(
+        EXECUTION_SCOPE,
+        DecisionEnvironmentProvenance.proven(FeedbackEnvironment.TEST, "guard-ref"),
+        CORRELATION,
+        evidence,
+        List.of(feedbackEvidence()),
+        policy,
+        false,
+        EvidenceCompleteness.COMPLETE_WITHIN_BOUNDS,
+        List.of());
+  }
+
+  private HistoricalFeedbackEvidenceView feedbackEvidence() {
+    return new HistoricalFeedbackEvidenceView(
+        TENANT,
+        FeedbackEnvironment.TEST,
+        DECISION,
+        TRACE,
+        "observation-a",
+        "attribution-a",
+        NOW,
+        OutcomeSource.STRUCTURED_TEST_FIXTURE,
+        ObservedDecisionOutcome.SUCCEEDED,
+        NOW,
+        "feedback-policy",
+        "1",
+        FeedbackStatus.ATTRIBUTED,
+        BigDecimal.ONE,
+        List.of(),
+        List.of());
+  }
+
+  private DecisionFeedbackEvidenceQuery query(
+      final Instant from, final Instant to, final int maxItems) {
+    return new DecisionFeedbackEvidenceQuery(
+        EXECUTION_SCOPE, TRACE, REQUEST, DECISION, RUN_ID.toString(), from, to, maxItems);
   }
 
   private DeterministicReplayResult reproducibleReplay() {
+    return reproducibleReplay(RUN_ID);
+  }
+
+  private DeterministicReplayResult reproducibleReplay(final UUID decisionRunId) {
     return replay(
-        ReplayReproducibilityStatus.REPRODUCIBLE, List.of(), null, HASH_A, HASH_A);
+        ReplayReproducibilityStatus.REPRODUCIBLE,
+        List.of(),
+        null,
+        HASH_A,
+        HASH_A,
+        decisionRunId);
   }
 
   private DeterministicReplayResult differentReplay() {
@@ -371,13 +624,23 @@ class DecisionEvidenceReplayReportServiceTest {
       final ReplayFailureCode failure,
       final String baselineHash,
       final String replayHash) {
+    return replay(status, differences, failure, baselineHash, replayHash, RUN_ID);
+  }
+
+  private DeterministicReplayResult replay(
+      final ReplayReproducibilityStatus status,
+      final List<ReplayDifference> differences,
+      final ReplayFailureCode failure,
+      final String baselineHash,
+      final String replayHash,
+      final UUID decisionRunId) {
     return new DeterministicReplayResult(
         TENANT,
         "snapshot-a",
         TRACE,
         REQUEST,
         DECISION,
-        new UUID(0L, 2L),
+        decisionRunId,
         "QDR6-REPLAY-INPUT-1",
         "QDR6-CJSON-1",
         "QDR6-MOCK-REPLAY-1",

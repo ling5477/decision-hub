@@ -2,9 +2,12 @@ package com.guidinglight.decisionhub.usecase.qdr.report;
 
 import com.guidinglight.decisionhub.domain.qdr.replay.RegressionSeverity;
 import com.guidinglight.decisionhub.domain.qdr.replay.RegressionVerdict;
+import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.BoundedEvidencePolicy;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceCorrelation;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidencePolicy;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceStatus;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.EvidenceCompleteness;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ProviderReadinessAcceptanceStatus;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ProviderReadinessDecision;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ProviderReadinessStatus;
@@ -22,7 +25,13 @@ import java.util.Objects;
  * HTTP、NQ、Agent、LangGraph 或交易行为。所有 refs/findings/differences 均稳定排序。
  */
 public record DecisionEvidenceReplayInternalReport(
+    FeedbackExecutionScope executionScope,
     DecisionEvidenceCorrelation correlation,
+    EvidenceCompleteness evidenceCompleteness,
+    BoundedEvidencePolicy boundedPolicy,
+    boolean evidenceOverflowDetected,
+    int feedbackEvidenceCount,
+    String evidenceAggregateRef,
     DecisionEvidenceStatus evidenceStatus,
     List<String> evidenceRefs,
     List<DecisionEvidencePolicy.EvidenceType> missingMandatoryEvidence,
@@ -45,7 +54,18 @@ public record DecisionEvidenceReplayInternalReport(
 
   /** 校验状态不变量、复制集合并形成稳定顺序。 */
   public DecisionEvidenceReplayInternalReport {
+    executionScope = Objects.requireNonNull(executionScope, "executionScope");
     correlation = Objects.requireNonNull(correlation, "correlation");
+    evidenceCompleteness = Objects.requireNonNull(evidenceCompleteness, "evidenceCompleteness");
+    boundedPolicy = Objects.requireNonNull(boundedPolicy, "boundedPolicy");
+    if (feedbackEvidenceCount < 0 || feedbackEvidenceCount > boundedPolicy.maxFeedbackItems()) {
+      throw new IllegalArgumentException("feedbackEvidenceCount exceeds bounded policy");
+    }
+    evidenceAggregateRef =
+        InternalAcceptanceFinding.requireSafeText(evidenceAggregateRef, "evidenceAggregateRef");
+    if (!executionScope.tenantId().equals(correlation.tenantId())) {
+      throw new IllegalArgumentException("execution scope tenant must own report correlation");
+    }
     evidenceRefs = safeSortedTexts(evidenceRefs, "evidenceRefs");
     missingMandatoryEvidence =
         Objects.requireNonNullElse(missingMandatoryEvidence, List.<DecisionEvidencePolicy.EvidenceType>of())
@@ -64,6 +84,7 @@ public record DecisionEvidenceReplayInternalReport(
     findings =
         Objects.requireNonNullElse(findings, List.<InternalAcceptanceFinding>of()).stream()
             .map(value -> Objects.requireNonNull(value, "finding"))
+            .distinct()
             .sorted(InternalAcceptanceFinding.STABLE_ORDER)
             .toList();
     if (!INTERNAL_ACCEPTANCE_ONLY.equals(safetyDeclaration)) {
@@ -71,6 +92,9 @@ public record DecisionEvidenceReplayInternalReport(
     }
     validateAcceptedState(
         acceptanceStatus,
+        evidenceCompleteness,
+        boundedPolicy,
+        evidenceOverflowDetected,
         evidenceStatus,
         missingMandatoryEvidence,
         replayStatus,
@@ -92,6 +116,9 @@ public record DecisionEvidenceReplayInternalReport(
 
   private static void validateAcceptedState(
       final InternalAcceptanceStatus acceptanceStatus,
+      final EvidenceCompleteness evidenceCompleteness,
+      final BoundedEvidencePolicy boundedPolicy,
+      final boolean evidenceOverflowDetected,
       final DecisionEvidenceStatus evidenceStatus,
       final List<DecisionEvidencePolicy.EvidenceType> missingMandatoryEvidence,
       final ReplayReproducibilityStatus replayStatus,
@@ -104,7 +131,10 @@ public record DecisionEvidenceReplayInternalReport(
     if (acceptanceStatus != InternalAcceptanceStatus.ACCEPTED) {
       return;
     }
-    if (evidenceStatus != DecisionEvidenceStatus.COMPLETE
+    if (evidenceCompleteness != EvidenceCompleteness.COMPLETE_WITHIN_BOUNDS
+        || boundedPolicy.overflowBehavior() != BoundedEvidencePolicy.OverflowBehavior.FAIL_CLOSED
+        || evidenceOverflowDetected
+        || evidenceStatus != DecisionEvidenceStatus.COMPLETE
         || !missingMandatoryEvidence.isEmpty()
         || replayStatus != ReplayReproducibilityStatus.REPRODUCIBLE
         || !replayDifferences.isEmpty()

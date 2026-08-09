@@ -1,5 +1,30 @@
 # Stage-QDR-11 Consolidated Evidence Internal Acceptance Implementation Work Order
 
+## Consolidated implementation result — 2026-08-09
+
+```text
+Stage-QDR-11: IMPLEMENTED / LOCAL_ACCEPTED / FINAL_CLOSE NOT_STARTED
+Implementation baseline: 9102c2f28bb0e470c51c09edaa20da9c7bbb32c2
+Implementation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Evidence authority: DecisionFeedbackEvidenceAggregate / SINGLE
+Legacy direct acceptance: RETIRED
+Internal acceptance model: DecisionEvidenceReplayInternalReport / REUSED AND EVOLVED
+Completeness mapping: POLICY_QUALIFIED / FAIL_CLOSED
+Bounded policy: PRESERVED END_TO_END
+Internal facade: WIRED / READ_ONLY / NO_SIDE_EFFECT
+Dual authority: NONE
+Regression: PASS / 19 OF 19 REACTOR / 1338 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL / Flyway: 17.10 / V1-V15
+Quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+Security review: PASS / 0 REPORTABLE FINDINGS / ACTIVE P0-P1 0-0 / BYPASS 0
+Remote implementation CI: PENDING
+Production capacity: NOT_PROVEN
+Next action: DH-STAGE-QDR-11-CONSOLIDATED-EVIDENCE-INTERNAL-ACCEPTANCE-FINAL-CLOSE
+```
+
+本工单已由 consolidated implementation 消费。以下范围、设计与测试矩阵继续作为已实现变更的冻结合同和
+审查依据，但不授权 push、tag、archive、final close 实施或任何范围扩张。
+
 ## 1. Task classification and authority
 
 ```text
