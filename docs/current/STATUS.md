@@ -1,5 +1,37 @@
 # Decision Hub Status
 
+## Terminal current authority — 2026-08-09 Stage-QDR-10 evidence correlation security remediation
+
+~~~text
+Task: DH-STAGE-QDR-10-EVIDENCE-CORRELATION-SECURITY-BLOCKER
+Stage-QDR-10: IMPLEMENTED / LOCAL_SECURITY_REMEDIATED
+Implementation baseline / blocked implementation: 87304e334787d778b10ebad1b1b7f17057f47322 / 756db5bdb541f94713211848f52e2c223c956dae
+Remediation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Original final-close attempt: BLOCKED / HISTORY PRESERVED
+Original scan / findings: 69bf31bc-2e61-4853-b343-902b28c28d91 / 2 LOW-P3
+Decision environment provenance: FIXED / PERSISTED / EXACT / FAIL_CLOSED
+Bounded completeness: FIXED / POLICY-QUALIFIED STATES AND AGGREGATE BOUNDS
+Rejected feedback disclosure: CLOSED / FAIL-CLOSED STATES EXPOSE 0 ITEMS
+Full regression: PASS / 19 OF 19 / 1326 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL / Flyway: 17.10 / REAL TESTCONTAINERS / V1-V15 / 7 OF 7 PASS
+Quality: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+Codex Security remediation scan: PASS / SEALED 87304e3_worktree_20260809T111514 / COMPLETE / DEFERRED 0
+Active P0/P1 / reportable findings: 0/0 / 0
+CodeRabbit: CLI UNAVAILABLE / NO REVIEW RESULT
+API / migration / schema / learning: UNCHANGED / NONE / NONE / NOT AUTHORIZED
+Final close: RETRY PENDING / NOT EXECUTED
+Production capacity: NOT_PROVEN
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE-RETRY
+ALLOW_FINAL_CLOSE_RETRY: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW / ALLOW_TAG_NOW: NO / NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是 primary current authority。完整证据见 security blocker record。原 final-close `BLOCKED`
+历史不可删除；下一任务仅允许独立 final-close retry。以下 2026-08-08 implementation authority 已被取代。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation
 
 ~~~text

@@ -1,5 +1,26 @@
 # Decision Hub 当前工单
 
+## Terminal current authority — 2026-08-09 Stage-QDR-10 evidence correlation security blocker
+
+~~~text
+Completed task: DH-STAGE-QDR-10-EVIDENCE-CORRELATION-SECURITY-BLOCKER
+Result: IMPLEMENTED / LOCAL_SECURITY_REMEDIATED / NOT_PUSHED
+Original final-close attempt: BLOCKED / HISTORY PRESERVED
+Original findings: 2 LOW-P3 / FIXED 2 / REMAINING 0
+Validation: 1326 TESTS 0/0/0 / POSTGRESQL 17.10 V1-V15 7/7 / QUALITY PASS
+Codex Security: 87304e3_worktree_20260809T111514 / SEALED / COMPLETE / ACTIVE P0-P1 0-0 / REPORTABLE 0 / DEFERRED 0
+API / migration / schema / learning: UNCHANGED / NONE / NONE / NOT AUTHORIZED
+Next work order: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE-RETRY
+ALLOW_FINAL_CLOSE_RETRY: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW / ALLOW_TAG_NOW: NO / NO
+ALLOW_CAPACITY / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本工单只关闭 security blocker 的本地 remediation；当前唯一下一工单是独立 final-close retry。
+本任务不得 push、tag、final close 或继续技术实现。以下 2026-08-08 implementation work order 已消费。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation
 
 ~~~text

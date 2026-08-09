@@ -1,5 +1,27 @@
 # Decision Hub Roadmap
 
+## Terminal current authority — 2026-08-09 Stage-QDR-10 security-remediation route
+
+~~~text
+Current task: DH-STAGE-QDR-10-EVIDENCE-CORRELATION-SECURITY-BLOCKER / LOCAL_SECURITY_REMEDIATED
+Original final-close attempt: BLOCKED / HISTORY PRESERVED
+P3 environment provenance / bounded completeness: FIXED / FIXED
+Codex Security remediation scan: PASS / SEALED / 0 REPORTABLE / 0 DEFERRED
+Regression / PostgreSQL / quality: PASS 1326 TESTS / PASS / PASS
+Codex Security scan: 87304e3_worktree_20260809T111514 / COMPLETE
+Publication / remote exact-SHA CI / archive / tag: NOT_STARTED / NOT_STARTED / NOT_CREATED / ABSENT
+Production capacity: NOT_PROVEN
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE-RETRY
+ALLOW_FINAL_CLOSE_RETRY: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW / ALLOW_TAG_NOW: NO / NO
+ALLOW_CAPACITY / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+路线只前进到独立 final-close retry；本任务不执行 publication、archive 或 tag。以下 2026-08-08
+implementation route 为历史，不得重新授权技术实现。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation
 
 ~~~text

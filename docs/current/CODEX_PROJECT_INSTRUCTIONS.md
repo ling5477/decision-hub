@@ -1,5 +1,32 @@
 # Codex Project Instructions
 
+## Terminal current authority — 2026-08-09 Stage-QDR-10 evidence correlation security remediation
+
+~~~text
+Current task: DH-STAGE-QDR-10-EVIDENCE-CORRELATION-SECURITY-BLOCKER
+Result: IMPLEMENTED / LOCAL_SECURITY_REMEDIATED / NOT_PUSHED
+Original final-close attempt: BLOCKED / HISTORY PRESERVED
+Original scan / findings: 69bf31bc-2e61-4853-b343-902b28c28d91 / 2 LOW-P3
+Decision environment provenance / bounded completeness: FIXED / FIXED
+Rejected feedback disclosure: CLOSED / FAIL-CLOSED AGGREGATES EXPOSE 0 FEEDBACK
+Regression / quality: 1326 TESTS 0/0/0 / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+Codex Security remediation scan: PASS / SEALED 87304e3_worktree_20260809T111514 / FINDINGS 0
+CodeRabbit: CLI UNAVAILABLE / NO REVIEW RESULT
+API / migration / schema / learning / NQ: UNCHANGED / NONE / NONE / NOT AUTHORIZED / UNCHANGED
+Production capacity: NOT_PROVEN
+Next task only: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE-RETRY
+ALLOW_FINAL_CLOSE_RETRY: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW / ALLOW_TAG_NOW: NO / NO
+ALLOW_NEW_TECHNICAL_IMPLEMENTATION: NO
+ALLOW_CAPACITY / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+后续代理必须先读取 `DH_STAGE_QDR_10_EVIDENCE_CORRELATION_SECURITY_BLOCKER.md`。原 final-close
+`BLOCKED` 历史不可删除；下一任务只能执行独立 final-close retry discipline，不得从本记录直接 push、
+tag、恢复 learning 或扩展任何 runtime。以下 2026-08-08 implementation instructions 已成为历史。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation
 
 ~~~text

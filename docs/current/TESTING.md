@@ -1,5 +1,30 @@
 # Decision Hub Testing
 
+## Terminal current authority — 2026-08-09 Stage-QDR-10 security-remediation validation
+
+~~~text
+Task: DH-STAGE-QDR-10-EVIDENCE-CORRELATION-SECURITY-BLOCKER
+Original final-close attempt: BLOCKED / HISTORY PRESERVED
+Targeted PostgreSQL acceptance: PASS / 7 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Positive DEV provenance + DEV caller + DEV feedback: PASS / ZERO WRITES
+PostgreSQL / Flyway: 17.10 / REAL TESTCONTAINERS / V1-V15
+Full regression: PASS / 19 OF 19 REACTOR / 1326 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Codex Security remediation scan: PASS / SEALED 87304e3_worktree_20260809T111514
+Security coverage / deferred / active P0-P1 / reportable: COMPLETE / 0 / 0-0 / 0
+Original P3 environment provenance / bounded completeness: FIXED / FIXED
+Intermediate rejected-feedback candidate: FIXED BEFORE FINAL SNAPSHOT
+CodeRabbit: COMMAND NOT FOUND IN CURRENT SESSION / NO REVIEW RESULT
+API / migration / schema / POM / workflow diff: 0 / 0 / 0 / 0 / 0
+Learning-store production write diff: 0
+Production capacity: NOT_PROVEN
+Final close: RETRY PENDING / NOT EXECUTED
+~~~
+
+第一次定向 Maven 命令因 PowerShell 误解析 `-Dsurefire.failIfNoSpecifiedTests=false` 而在测试前退出 1；
+使用 stop-parsing 形式重跑通过。上述 1326 总数只统计各一级模块直接 Surefire XML，不包含
+`target/ci-diagnostics`。以下 2026-08-08 validation 为原 blocked implementation 历史。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation validation
 
 ~~~text

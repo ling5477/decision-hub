@@ -85,6 +85,17 @@ public record DecisionFeedbackEvidenceQuery(
         return decisionEvidenceQuery().correlation();
     }
 
+    /** Returns an exact persisted-origin lookup that deliberately carries no caller environment. */
+    public DecisionEnvironmentProvenanceQuery decisionEnvironmentProvenanceQuery() {
+        return new DecisionEnvironmentProvenanceQuery(
+                executionScope.tenantId(), traceId, requestId, decisionId, decisionRunId);
+    }
+
+    /** Preserves the caller-declared evidence bounds exactly in the aggregate result. */
+    public BoundedEvidencePolicy boundedPolicy() {
+        return BoundedEvidencePolicy.from(this);
+    }
+
     private static String requireIdentity(final String value, final String field) {
         if (value == null) {
             throw new IllegalArgumentException(field + " is required");

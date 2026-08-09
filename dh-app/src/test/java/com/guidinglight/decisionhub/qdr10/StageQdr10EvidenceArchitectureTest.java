@@ -4,6 +4,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceAggregateService;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEnvironmentProvenanceQueryPort;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionFeedbackEvidenceAggregate;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionFeedbackEvidenceFinding;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionFeedbackEvidenceQuery;
@@ -57,6 +58,7 @@ class StageQdr10EvidenceArchitectureTest {
                 .extracting(java.lang.reflect.Constructor::getParameterTypes)
                 .isEqualTo(new Class<?>[] {
                     DecisionEvidenceAggregateService.class,
+                    DecisionEnvironmentProvenanceQueryPort.class,
                     HistoricalFeedbackEvidenceReadService.class
                 });
     }
@@ -68,8 +70,8 @@ class StageQdr10EvidenceArchitectureTest {
         assertThat(DecisionFeedbackEvidenceFinding.class).matches(Class::isRecord);
         assertThat(EvidenceCompleteness.values())
                 .containsExactly(
-                        EvidenceCompleteness.COMPLETE,
-                        EvidenceCompleteness.PARTIAL,
+                        EvidenceCompleteness.COMPLETE_WITHIN_BOUNDS,
+                        EvidenceCompleteness.PARTIAL_WITHIN_BOUNDS,
                         EvidenceCompleteness.INCONSISTENT,
                         EvidenceCompleteness.NOT_FOUND);
 
@@ -97,7 +99,11 @@ class StageQdr10EvidenceArchitectureTest {
                 "DecisionFeedbackEvidenceAggregate.java",
                 "EvidenceCompleteness.java",
                 "DecisionFeedbackEvidenceFinding.java",
-                "DecisionFeedbackEvidenceService.java").stream()
+                "DecisionFeedbackEvidenceService.java",
+                "BoundedEvidencePolicy.java",
+                "DecisionEnvironmentProvenance.java",
+                "DecisionEnvironmentProvenanceQuery.java",
+                "DecisionEnvironmentProvenanceQueryPort.java").stream()
                 .map(PRODUCTION_PACKAGE::resolve)
                 .map(StageQdr10EvidenceArchitectureTest::read)
                 .toList());

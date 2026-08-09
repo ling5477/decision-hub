@@ -1,5 +1,31 @@
 # Decision Hub Worklog
 
+## Terminal current authority — 2026-08-09 Stage-QDR-10 security blocker remediation
+
+~~~text
+Task: DH-STAGE-QDR-10-EVIDENCE-CORRELATION-SECURITY-BLOCKER
+Result: LOCAL_SECURITY_REMEDIATED / TWO ORIGINAL LOW-P3 FIXED
+Environment provenance: PERSISTED GUARD+V5+V6 / EXACT / FAIL_CLOSED
+Bounded completeness: EXPLICIT POLICY / WITHIN_BOUNDS STATES / OVERFLOW FAIL_CLOSED
+Rejected feedback disclosure: CLOSED / INCONSISTENT+NOT_FOUND EMPTY
+Tests: PASS / 1326 / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL / Flyway: PASS / 17.10 / V1-V15 / 7 OF 7
+Quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+Codex Security: 87304e3_worktree_20260809T111514 / SEALED / COMPLETE / 0 FINDINGS / 0 DEFERRED
+CodeRabbit: CLI UNAVAILABLE / NO REVIEW RESULT
+API / migration / schema / learning / NQ: UNCHANGED / NONE / NONE / NOT AUTHORIZED / UNCHANGED
+Commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Original final-close attempt: BLOCKED / HISTORY PRESERVED
+Final close: RETRY PENDING / NOT EXECUTED
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE-RETRY
+ALLOW_FINAL_CLOSE_RETRY: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW / ALLOW_TAG_NOW: NO / NO
+~~~
+
+本轮没有执行 push、tag、final close、capacity 或任何真实外部 runtime。CodeRabbit 当前 session
+不可用，未形成 review 结果；Codex Security 为独立最终安全事实源。以下 2026-08-08 worklog 保留为
+原 blocked implementation 历史。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation
 
 ~~~text

@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 class DecisionFeedbackEvidenceServiceTest {
 
     private DecisionEvidenceAggregate decisionResult;
+    private DecisionEnvironmentProvenance provenanceResult;
     private HistoricalFeedbackEvidencePage feedbackResult;
     private boolean feedbackFailure;
     private int feedbackReads;
@@ -42,9 +43,11 @@ class DecisionFeedbackEvidenceServiceTest {
     void setUp() {
         query = DecisionFeedbackEvidenceTestFixtures.query(100);
         decisionResult = DecisionFeedbackEvidenceTestFixtures.completeDecision(query);
+        provenanceResult = DecisionEnvironmentProvenance.proven(FeedbackEnvironment.TEST, "guard-a");
         feedbackResult = HistoricalFeedbackEvidencePage.terminal(List.of());
         service = new DecisionFeedbackEvidenceService(
                 (requestedQuery, requestedPolicy) -> decisionResult,
+                requestedQuery -> provenanceResult,
                 requestedQuery -> {
                     feedbackReads++;
                     lastFeedbackQuery = requestedQuery;
@@ -66,7 +69,7 @@ class DecisionFeedbackEvidenceServiceTest {
         final DecisionFeedbackEvidenceAggregate left = service.aggregate(query);
         final DecisionFeedbackEvidenceAggregate right = service.aggregate(query);
 
-        assertEquals(EvidenceCompleteness.COMPLETE, left.completeness());
+        assertEquals(EvidenceCompleteness.COMPLETE_WITHIN_BOUNDS, left.completeness());
         assertEquals(List.of(newer, older), left.feedbackEvidence());
         assertEquals(left, right);
         assertEquals(2, feedbackReads);
@@ -74,6 +77,8 @@ class DecisionFeedbackEvidenceServiceTest {
         assertEquals(FeedbackEnvironment.TEST, lastFeedbackQuery.environment());
         assertEquals("decision-a", lastFeedbackQuery.decisionId());
         assertEquals("trace-a", lastFeedbackQuery.traceId());
+        assertEquals(query.boundedPolicy(), left.boundedPolicy());
+        assertEquals(FeedbackEnvironment.TEST, left.decisionEnvironmentProvenance().environment());
     }
 
     @Test
@@ -82,8 +87,8 @@ class DecisionFeedbackEvidenceServiceTest {
 
         final DecisionFeedbackEvidenceAggregate result = service.aggregate(query);
 
-        assertEquals(EvidenceCompleteness.PARTIAL, result.completeness());
-        assertTrue(result.isUsable());
+        assertEquals(EvidenceCompleteness.PARTIAL_WITHIN_BOUNDS, result.completeness());
+        assertTrue(result.isUsableWithinBounds());
         assertFinding(result, Code.OPTIONAL_FEEDBACK_ABSENT);
     }
 
@@ -95,7 +100,7 @@ class DecisionFeedbackEvidenceServiceTest {
         final DecisionFeedbackEvidenceAggregate result = service.aggregate(query);
 
         assertEquals(EvidenceCompleteness.NOT_FOUND, result.completeness());
-        assertFalse(result.isUsable());
+        assertFalse(result.isUsableWithinBounds());
         assertFinding(result, Code.DECISION_ROOT_NOT_FOUND);
         assertEquals(0, feedbackReads);
     }
@@ -157,6 +162,8 @@ class DecisionFeedbackEvidenceServiceTest {
 
         assertEquals(EvidenceCompleteness.INCONSISTENT, result.completeness());
         assertFinding(result, Code.FEEDBACK_RESULT_LIMIT_EXCEEDED);
+        assertTrue(result.overflowDetected());
+        assertTrue(result.feedbackEvidence().isEmpty());
         assertEquals(1, feedbackReads);
     }
 
@@ -178,6 +185,7 @@ class DecisionFeedbackEvidenceServiceTest {
         assertEquals(EvidenceCompleteness.INCONSISTENT, result.completeness());
         List.of(Code.TENANT_MISMATCH, Code.ENVIRONMENT_MISMATCH, Code.DECISION_MISMATCH, Code.TRACE_MISMATCH)
                 .forEach(code -> assertFinding(result, code));
+        assertTrue(result.feedbackEvidence().isEmpty());
     }
 
     @Test
@@ -193,6 +201,7 @@ class DecisionFeedbackEvidenceServiceTest {
         assertEquals(EvidenceCompleteness.INCONSISTENT, result.completeness());
         assertFinding(result, Code.FEEDBACK_IDENTITY_CONFLICT);
         assertFinding(result, Code.FEEDBACK_ORDER_INVALID);
+        assertTrue(result.feedbackEvidence().isEmpty());
     }
 
     @Test
@@ -212,6 +221,67 @@ class DecisionFeedbackEvidenceServiceTest {
 
         assertEquals(EvidenceCompleteness.INCONSISTENT, result.completeness());
         assertFinding(result, Code.UNSAFE_EVIDENCE_REJECTED);
+        assertTrue(result.feedbackEvidence().isEmpty());
+    }
+
+    @Test
+    void missingAmbiguousAndInvalidDecisionEnvironmentProvenanceFailClosed() {
+        provenanceResult = DecisionEnvironmentProvenance.missing();
+        DecisionFeedbackEvidenceAggregate result = service.aggregate(query);
+        assertFinding(result, Code.DECISION_ENVIRONMENT_PROVENANCE_MISSING);
+        assertEquals(0, feedbackReads);
+
+        provenanceResult = DecisionEnvironmentProvenance.ambiguous();
+        result = service.aggregate(query);
+        assertFinding(result, Code.DECISION_ENVIRONMENT_PROVENANCE_AMBIGUOUS);
+        assertEquals(0, feedbackReads);
+
+        provenanceResult = DecisionEnvironmentProvenance.invalid();
+        result = service.aggregate(query);
+        assertFinding(result, Code.DECISION_ENVIRONMENT_PROVENANCE_INVALID);
+        assertEquals(0, feedbackReads);
+    }
+
+    @Test
+    void callerAndPersistedDecisionEnvironmentMustMatchBeforeFeedbackRead() {
+        provenanceResult = DecisionEnvironmentProvenance.proven(FeedbackEnvironment.DEV, "guard-dev");
+
+        final DecisionFeedbackEvidenceAggregate result = service.aggregate(query);
+
+        assertEquals(EvidenceCompleteness.INCONSISTENT, result.completeness());
+        assertFinding(result, Code.ENVIRONMENT_MISMATCH);
+        assertTrue(result.feedbackEvidence().isEmpty());
+        assertEquals(0, feedbackReads);
+    }
+
+    @Test
+    void provenDevDecisionRejectsTestFeedbackReturnedByHostileReader() {
+        query = new DecisionFeedbackEvidenceQuery(
+                new FeedbackExecutionScope("tenant-a", FeedbackEnvironment.DEV),
+                query.traceId(),
+                query.requestId(),
+                query.decisionId(),
+                query.decisionRunId(),
+                query.fromObservedAt(),
+                query.toObservedAt(),
+                query.maxFeedbackItems());
+        decisionResult = DecisionFeedbackEvidenceTestFixtures.completeDecision(query);
+        provenanceResult = DecisionEnvironmentProvenance.proven(FeedbackEnvironment.DEV, "guard-dev");
+        feedbackResult = HistoricalFeedbackEvidencePage.terminal(List.of(
+                DecisionFeedbackEvidenceTestFixtures.feedback(
+                        "tenant-a",
+                        FeedbackEnvironment.TEST,
+                        "decision-a",
+                        "trace-a",
+                        "observation-1",
+                        "a".repeat(64),
+                        1,
+                        "evidence:item-1")));
+
+        final DecisionFeedbackEvidenceAggregate result = service.aggregate(query);
+
+        assertEquals(EvidenceCompleteness.INCONSISTENT, result.completeness());
+        assertFinding(result, Code.ENVIRONMENT_MISMATCH);
     }
 
     @Test

@@ -45,6 +45,8 @@ import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketRepo
 import com.guidinglight.decisionhub.usecase.qdr.approval.HumanApprovalPacketService;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionFeedbackEvidenceService;
 import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEvidenceAggregateService;
+import com.guidinglight.decisionhub.usecase.qdr.evidence.DecisionEnvironmentProvenanceQueryPort;
+import com.guidinglight.decisionhub.infra.jdbc.qdr.evidence.JdbcDecisionEnvironmentProvenanceQueryAdapter;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionPersistenceService;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackAttributionRepository;
 import com.guidinglight.decisionhub.usecase.qdr.feedback.FeedbackPersistenceTransactionBoundary;
@@ -318,11 +320,22 @@ public class DecisionPipelineWiringConfig {
     /** 装配 Stage-QDR-10 internal-only decision/feedback consolidated read service。 */
     @Bean
     @ConditionalOnMissingBean
+    public DecisionEnvironmentProvenanceQueryPort decisionEnvironmentProvenanceQueryPort(
+            final JdbcTemplate jdbcTemplate) {
+        return new JdbcDecisionEnvironmentProvenanceQueryAdapter(jdbcTemplate);
+    }
+
+    /** 装配 Stage-QDR-10 internal-only decision/feedback consolidated read service。 */
+    @Bean
+    @ConditionalOnMissingBean
     public DecisionFeedbackEvidenceService decisionFeedbackEvidenceService(
             final DecisionEvidenceAggregateService decisionEvidenceAggregateService,
+            final DecisionEnvironmentProvenanceQueryPort decisionEnvironmentProvenanceQueryPort,
             final HistoricalFeedbackEvidenceReadService historicalFeedbackEvidenceReadService) {
         return new DecisionFeedbackEvidenceService(
-                decisionEvidenceAggregateService, historicalFeedbackEvidenceReadService);
+                decisionEvidenceAggregateService,
+                decisionEnvironmentProvenanceQueryPort,
+                historicalFeedbackEvidenceReadService);
     }
 
     /** 装配冻结的 QDR6-CJSON-1 encoder；不注册为 HTTP ObjectMapper。 */

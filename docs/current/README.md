@@ -1,5 +1,30 @@
 # Decision Hub Current Docs
 
+## Terminal current authority — 2026-08-09 Stage-QDR-10 evidence correlation security remediation
+
+~~~text
+Task: DH-STAGE-QDR-10-EVIDENCE-CORRELATION-SECURITY-BLOCKER
+Result: IMPLEMENTED / LOCAL_SECURITY_REMEDIATED / NOT_PUSHED
+Original final-close attempt: BLOCKED / HISTORY PRESERVED
+Original security scan / findings: 69bf31bc-2e61-4853-b343-902b28c28d91 / 2 LOW-P3
+Decision provenance / bounded completeness / rejected feedback: FIXED / FIXED / CLOSED
+Regression / PostgreSQL / quality: 1326 TESTS 0/0/0 / PG17.10 V1-V15 7/7 / PASS
+Codex Security remediation scan: PASS / SEALED 87304e3_worktree_20260809T111514 / FINDINGS 0
+CodeRabbit: CLI UNAVAILABLE / NO REVIEW RESULT
+API / migration / schema / learning / NQ: UNCHANGED / NONE / NONE / NOT AUTHORIZED / UNCHANGED
+Production capacity: NOT_PROVEN
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE-RETRY
+ALLOW_FINAL_CLOSE_RETRY: YES / NEXT TASK ONLY
+ALLOW_IMPLEMENTATION_PUSH_NOW / ALLOW_TAG_NOW: NO / NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+当前安全 blocker 记录：`DH_STAGE_QDR_10_EVIDENCE_CORRELATION_SECURITY_BLOCKER.md`。原 final-close
+`BLOCKED` 历史继续保留；final-close retry 是独立下一任务，当前不得 push、tag 或 final close。以下
+2026-08-08 implementation authority 已被 remediation 取代。
+
 ## Terminal current authority — 2026-08-08 Stage-QDR-10 consolidated implementation
 
 ~~~text

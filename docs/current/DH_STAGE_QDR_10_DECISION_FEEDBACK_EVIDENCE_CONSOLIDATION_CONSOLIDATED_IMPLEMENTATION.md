@@ -1,5 +1,28 @@
 # Stage-QDR-10 Decision Feedback Evidence Consolidation — Consolidated Implementation
 
+## 0. Security blocker remediation authority
+
+```text
+Superseding task: DH-STAGE-QDR-10-EVIDENCE-CORRELATION-SECURITY-BLOCKER
+Original implementation: 756db5bdb541f94713211848f52e2c223c956dae / LOCAL_ONLY / SECURITY_BLOCKED
+Original final-close attempt: BLOCKED / HISTORY PRESERVED
+Original scan: 69bf31bc-2e61-4853-b343-902b28c28d91 / 2 LOW-P3
+Decision environment provenance: FIXED
+Bounded completeness semantics: FIXED
+Rejected feedback disclosure: CLOSED
+Final regression: PASS / 19 OF 19 / 1326 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL: 17.10 / FLYWAY V1-V15 / 7 OF 7 PASS
+Quality: PASS / CHECKSTYLE 0 / SPOTLESS PASS
+Codex Security remediation scan: PASS / SEALED 87304e3_worktree_20260809T111514 / FINDINGS 0
+CodeRabbit: CLI UNAVAILABLE IN CURRENT SESSION / NO REVIEW RESULT
+Remediation commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Final close: RETRY PENDING / NOT EXECUTED
+Next action: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE-RETRY
+```
+
+本节是当前 authority；下方 consolidated implementation 记录保留原 blocked implementation 的历史证据，
+不能覆盖本节。完整 remediation 见 `DH_STAGE_QDR_10_EVIDENCE_CORRELATION_SECURITY_BLOCKER.md`。
+
 ## 1. Task classification
 
 ```text
@@ -38,8 +61,9 @@ Scope invariants: PASS / 3 OF 3
 ### 3.1 Trusted query and correlation
 
 - `DecisionFeedbackEvidenceQuery` 只接受一个 `FeedbackExecutionScope`，不重复接受独立 tenant/environment。
-- environment 由 trusted caller 显式提供；不从 Spring profile、tenant、decision、trace、repository 命中、
-  latest feedback 或默认 `DEV` 推断。
+- caller environment 由 trusted caller 显式提供；decision origin environment 则由 completed persistent
+  guard 与 V5/V6 request/output/run 关系持久化证明。两者均不从 Spring profile、tenant、decision、
+  trace、repository 命中、latest feedback 或默认 `DEV` 推断。
 - decision correlation 固定为 `tenant + trace + request + decision + run`。
 - feedback correlation 固定为 `tenant + environment + decision + trace`；合法多观察由
   `observationId + attributionId` 区分。
@@ -47,21 +71,22 @@ Scope invariants: PASS / 3 OF 3
 
 ### 3.2 Bounded read and aggregate
 
-- consolidated service 只组合既有 `DecisionEvidenceAggregateService` 与
-  `HistoricalFeedbackEvidenceReadService`。
+- consolidated service 组合 `DecisionEvidenceAggregateService`、只读
+  `DecisionEnvironmentProvenanceQueryPort` 与 `HistoricalFeedbackEvidenceReadService`。
 - historical feedback 只读一次；`hasNext=true` 映射为
   `INCONSISTENT / FEEDBACK_RESULT_LIMIT_EXCEEDED`，不循环翻页、不静默截断。
 - aggregate 为 immutable、defensive-copy、stable-order、read-only；不保存 raw prompt、raw provider
   response、credential-like material 或交易/执行授权。
-- feedback 为空仅返回 `PARTIAL`；存在且一致返回 `COMPLETE`。
+- feedback 为空仅返回 `PARTIAL_WITHIN_BOUNDS`；存在且一致返回 `COMPLETE_WITHIN_BOUNDS`。
 - mandatory decision root 缺失返回 `NOT_FOUND`；scope、identity、order、duplicate、unsafe material、
   source failure 或 overflow 返回 `INCONSISTENT`。
-- `INCONSISTENT` / `NOT_FOUND` 必须携带 `ERROR` 或 `BLOCKER` finding，`isUsable=false`。
+- `INCONSISTENT` / `NOT_FOUND` 必须携带 `ERROR` 或 `BLOCKER` finding，且 feedback 明细必须为空；
+  consumer 只能使用 `isUsableWithinBounds()`。
 
 ### 3.3 Internal wiring and side-effect boundary
 
 - `DecisionPipelineWiringConfig` 新增 internal `DecisionFeedbackEvidenceService` bean。
-- production constructor 只依赖两个既有 read service；未新增 Controller、API、DTO、OpenAPI、migration、
+- production constructor 只依赖三个 read-only 边界；未新增 Controller、API、DTO、OpenAPI、migration、
   schema、write Repository、HTTP/Provider/NQ client、Agent/LangGraph 或 trading dependency。
 - consolidated path 的 DB writes、external side effects 与 learning mutations 均为 0。
 
@@ -75,6 +100,12 @@ dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/evidence/Decis
 dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/evidence/EvidenceCompleteness.java
 dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/evidence/DecisionFeedbackEvidenceFinding.java
 dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/evidence/DecisionFeedbackEvidenceService.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/evidence/BoundedEvidencePolicy.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/evidence/DecisionEnvironmentProvenance.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/evidence/DecisionEnvironmentProvenanceQuery.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/evidence/DecisionEnvironmentProvenanceQueryPort.java
+dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/guard/PersistentGuardIdentity.java
+dh-infra/src/main/java/com/guidinglight/decisionhub/infra/jdbc/qdr/evidence/JdbcDecisionEnvironmentProvenanceQueryAdapter.java
 dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java
 ```
 
@@ -106,18 +137,15 @@ docs/current/CODEX_PROJECT_INSTRUCTIONS.md
 ## 5. Validation evidence
 
 ```text
-Targeted usecase tests: PASS / 17 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-Targeted wiring + architecture tests: PASS / 6 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
-PostgreSQL acceptance: PASS / 3 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Targeted PostgreSQL acceptance: PASS / 7 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Positive DEV provenance + DEV caller + DEV feedback: PASS / ZERO WRITES
 PostgreSQL server: 17.10 / REAL TESTCONTAINERS EXECUTION
 Flyway: V1-V15 / APPLIED
-Module regression: PASS / 15 OF 15 REACTOR
 Full regression: PASS / 19 OF 19 REACTOR
-Full test total: 1317 / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+Full test total: 1326 / 0 FAILURES / 0 ERRORS / 0 SKIPPED
 Quality: PASS / 19 OF 19 REACTOR
 Checkstyle / Spotless: 0 / PASS
 git diff --check: PASS
-Technical allowlist before factsource sync: 12 EXPECTED / 0 UNEXPECTED / 0 MISSING
 Forbidden technical path diff before factsource sync: 0
 ```
 
@@ -129,10 +157,10 @@ PostgreSQL acceptance 覆盖 tenant/environment isolation、decision/trace corre
 ## 6. External review result
 
 ```text
-GitHub baseline verification: PASS
-Codex Security implementation review: NOT_EXECUTED / FINAL-CLOSE INDEPENDENT REVIEW NOT_STARTED
-CodeRabbit CLI: 0.6.5 / AUTHENTICATED
-CodeRabbit uncommitted review: TIMED_OUT / 604 SECONDS / NO NDJSON RESULT
+Codex Security remediation scan: PASS / SEALED 87304e3_worktree_20260809T111514 / 0 FINDINGS / 0 DEFERRED
+Original scan: 69bf31bc-2e61-4853-b343-902b28c28d91 / 2 LOW-P3 / FIXED
+CodeRabbit current session: CLI UNAVAILABLE / NO REVIEW RESULT
+CodeRabbit prior implementation attempt: TIMED_OUT / 604 SECONDS / NO NDJSON RESULT
 CodeRabbit issues: UNKNOWN / NO RESULT
 ```
 
@@ -163,9 +191,9 @@ Production capacity: NOT_PROVEN
 
 ## 8. Risks
 
-- trusted environment provenance 依赖调用方传入已经认证产生的 `FeedbackExecutionScope`；service 不自行认证。
-- legacy V5/V6 decision persistence 没有 environment 列；本 stage 通过 trusted caller scope 与严格 decision
-  identity 组合保持 fail-closed，但不声称补齐持久化 environment。
+- caller environment 仍依赖调用方传入已经认证产生的 `FeedbackExecutionScope`；service 不自行认证。
+- legacy decision row 没有 environment 列；本 remediation 复用 completed persistent guard 与 V5/V6
+  request/output/run 链证明 origin environment。缺失、冲突或无法证明时均 fail-closed。
 - 超过调用方 `maxFeedbackItems` 的 correlated feedback 统一 fail-closed；不提供自动分页或降级。
 - CodeRabbit 本轮超时，未形成外部 AI review 结果；final close 需重新评估 review gate。
 - formal capacity 未执行，production capacity 与 production readiness 均未证明。

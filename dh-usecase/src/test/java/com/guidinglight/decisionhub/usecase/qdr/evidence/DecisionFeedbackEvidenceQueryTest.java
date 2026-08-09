@@ -1,11 +1,13 @@
 package com.guidinglight.decisionhub.usecase.qdr.evidence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
 import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackExecutionScope;
 import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /** Stage-QDR-10 explicit scope 与 bounded query contract 回归。 */
@@ -29,6 +31,14 @@ class DecisionFeedbackEvidenceQueryTest {
         assertEquals("decision-a", query.feedbackEvidenceQuery().decisionId());
         assertEquals("trace-a", query.feedbackEvidenceQuery().traceId());
         assertEquals(100, query.feedbackEvidenceQuery().effectivePageSize());
+        assertFalse(List.of(query.decisionEnvironmentProvenanceQuery().getClass().getRecordComponents())
+                .stream()
+                .anyMatch(component -> component.getName().equals("environment")));
+        assertEquals(FROM, query.boundedPolicy().fromObservedAt());
+        assertEquals(TO, query.boundedPolicy().toObservedAt());
+        assertEquals(100, query.boundedPolicy().maxFeedbackItems());
+        assertEquals(BoundedEvidencePolicy.POLICY_ID, query.boundedPolicy().policyId());
+        assertEquals(BoundedEvidencePolicy.POLICY_VERSION, query.boundedPolicy().policyVersion());
     }
 
     @Test

@@ -21,6 +21,11 @@ public record PersistentGuardIdentity(
   /** Canonical protected source。 */
   public static final String NQ_DRYRUN_SOURCE = "NQ_DRYRUN";
 
+  /** 为受控持久化查询提供canonical source，避免在边界外复制review-gated wire token。 */
+  public static String protectedDecisionSource() {
+    return NQ_DRYRUN_SOURCE;
+  }
+
   /** 校验完整identity，非法配置或不可信输入必须fail-closed。 */
   public PersistentGuardIdentity {
     environment = requireExact(environment, "environment");

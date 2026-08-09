@@ -34,15 +34,22 @@ public final class DecisionFeedbackEvidenceService {
 
     private final BiFunction<DecisionEvidenceQuery, DecisionEvidencePolicy, DecisionEvidenceAggregate>
             decisionEvidenceReader;
+    private final Function<DecisionEnvironmentProvenanceQuery, DecisionEnvironmentProvenance>
+            decisionEnvironmentProvenanceReader;
     private final Function<HistoricalFeedbackEvidenceQuery, HistoricalFeedbackEvidencePage>
             feedbackEvidenceReader;
 
     /** 创建只依赖现有只读 service 的 consolidated reader。 */
     public DecisionFeedbackEvidenceService(
             final DecisionEvidenceAggregateService decisionEvidenceService,
+            final DecisionEnvironmentProvenanceQueryPort decisionEnvironmentProvenanceQueryPort,
             final HistoricalFeedbackEvidenceReadService feedbackEvidenceService) {
         this(
                 Objects.requireNonNull(decisionEvidenceService, "decisionEvidenceService")::aggregate,
+                Objects.requireNonNull(
+                                decisionEnvironmentProvenanceQueryPort,
+                                "decisionEnvironmentProvenanceQueryPort")
+                        ::find,
                 Objects.requireNonNull(feedbackEvidenceService, "feedbackEvidenceService")::read);
     }
 
@@ -50,10 +57,14 @@ public final class DecisionFeedbackEvidenceService {
     DecisionFeedbackEvidenceService(
             final BiFunction<DecisionEvidenceQuery, DecisionEvidencePolicy, DecisionEvidenceAggregate>
                     decisionEvidenceReader,
+            final Function<DecisionEnvironmentProvenanceQuery, DecisionEnvironmentProvenance>
+                    decisionEnvironmentProvenanceReader,
             final Function<HistoricalFeedbackEvidenceQuery, HistoricalFeedbackEvidencePage>
                     feedbackEvidenceReader) {
         this.decisionEvidenceReader =
                 Objects.requireNonNull(decisionEvidenceReader, "decisionEvidenceReader");
+        this.decisionEnvironmentProvenanceReader = Objects.requireNonNull(
+                decisionEnvironmentProvenanceReader, "decisionEnvironmentProvenanceReader");
         this.feedbackEvidenceReader =
                 Objects.requireNonNull(feedbackEvidenceReader, "feedbackEvidenceReader");
     }
@@ -75,6 +86,20 @@ public final class DecisionFeedbackEvidenceService {
             return result(query, decisionEvidence, List.of(), completeness, decisionFindings);
         }
 
+        final DecisionEnvironmentProvenance provenance = readDecisionEnvironmentProvenance(query);
+        final List<DecisionFeedbackEvidenceFinding> provenanceFindings =
+                validateDecisionEnvironmentProvenance(query, provenance);
+        if (!provenanceFindings.isEmpty()) {
+            return result(
+                    query,
+                    provenance,
+                    decisionEvidence,
+                    List.of(),
+                    false,
+                    EvidenceCompleteness.INCONSISTENT,
+                    provenanceFindings);
+        }
+
         final HistoricalFeedbackEvidencePage page;
         try {
             page = Objects.requireNonNull(
@@ -83,8 +108,10 @@ public final class DecisionFeedbackEvidenceService {
         } catch (final RuntimeException error) {
             return result(
                     query,
+                    provenance,
                     decisionEvidence,
                     List.of(),
+                    false,
                     EvidenceCompleteness.INCONSISTENT,
                     List.of(blocker(
                             Code.FEEDBACK_SOURCE_FAILED,
@@ -98,17 +125,21 @@ public final class DecisionFeedbackEvidenceService {
         if (!feedbackFindings.isEmpty()) {
             return result(
                     query,
+                    provenance,
                     decisionEvidence,
-                    feedback,
+                    List.of(),
+                    page.hasNext(),
                     EvidenceCompleteness.INCONSISTENT,
                     feedbackFindings);
         }
         if (feedback.isEmpty()) {
             return result(
                     query,
+                    provenance,
                     decisionEvidence,
                     feedback,
-                    EvidenceCompleteness.PARTIAL,
+                    false,
+                    EvidenceCompleteness.PARTIAL_WITHIN_BOUNDS,
                     List.of(new DecisionFeedbackEvidenceFinding(
                             Code.OPTIONAL_FEEDBACK_ABSENT,
                             Severity.INFO,
@@ -117,10 +148,54 @@ public final class DecisionFeedbackEvidenceService {
         }
         return result(
                 query,
+                provenance,
                 decisionEvidence,
                 feedback,
-                EvidenceCompleteness.COMPLETE,
+                false,
+                EvidenceCompleteness.COMPLETE_WITHIN_BOUNDS,
                 List.of());
+    }
+
+    private DecisionEnvironmentProvenance readDecisionEnvironmentProvenance(
+            final DecisionFeedbackEvidenceQuery query) {
+        try {
+            return Objects.requireNonNull(
+                    decisionEnvironmentProvenanceReader.apply(
+                            query.decisionEnvironmentProvenanceQuery()),
+                    "decision environment provenance");
+        } catch (final RuntimeException error) {
+            return DecisionEnvironmentProvenance.invalid();
+        }
+    }
+
+    private static List<DecisionFeedbackEvidenceFinding> validateDecisionEnvironmentProvenance(
+            final DecisionFeedbackEvidenceQuery query,
+            final DecisionEnvironmentProvenance provenance) {
+        if (provenance.status() == DecisionEnvironmentProvenance.Status.MISSING) {
+            return List.of(blocker(
+                    Code.DECISION_ENVIRONMENT_PROVENANCE_MISSING,
+                    query.decisionId(),
+                    "decision origin environment provenance 不存在"));
+        }
+        if (provenance.status() == DecisionEnvironmentProvenance.Status.AMBIGUOUS) {
+            return List.of(blocker(
+                    Code.DECISION_ENVIRONMENT_PROVENANCE_AMBIGUOUS,
+                    query.decisionId(),
+                    "decision origin environment provenance 存在歧义"));
+        }
+        if (!provenance.isProven()) {
+            return List.of(blocker(
+                    Code.DECISION_ENVIRONMENT_PROVENANCE_INVALID,
+                    query.decisionId(),
+                    "decision origin environment provenance 无法验证"));
+        }
+        if (provenance.environment() != query.executionScope().environment()) {
+            return List.of(blocker(
+                    Code.ENVIRONMENT_MISMATCH,
+                    query.decisionId(),
+                    "caller environment 与 decision origin environment 不一致"));
+        }
+        return List.of();
     }
 
     private DecisionEvidenceAggregate readDecisionEvidence(
@@ -318,11 +393,32 @@ public final class DecisionFeedbackEvidenceService {
             final List<HistoricalFeedbackEvidenceView> feedback,
             final EvidenceCompleteness completeness,
             final List<DecisionFeedbackEvidenceFinding> findings) {
+        return result(
+                query,
+                DecisionEnvironmentProvenance.notEvaluated(),
+                decisionEvidence,
+                feedback,
+                false,
+                completeness,
+                findings);
+    }
+
+    private static DecisionFeedbackEvidenceAggregate result(
+            final DecisionFeedbackEvidenceQuery query,
+            final DecisionEnvironmentProvenance provenance,
+            final DecisionEvidenceAggregate decisionEvidence,
+            final List<HistoricalFeedbackEvidenceView> feedback,
+            final boolean overflowDetected,
+            final EvidenceCompleteness completeness,
+            final List<DecisionFeedbackEvidenceFinding> findings) {
         return new DecisionFeedbackEvidenceAggregate(
                 query.executionScope(),
+                provenance,
                 query.decisionCorrelation(),
                 decisionEvidence,
                 feedback,
+                query.boundedPolicy(),
+                overflowDetected,
                 completeness,
                 findings);
     }
