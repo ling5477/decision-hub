@@ -1,0 +1,9 @@
+{"path":"dh-app/src/main/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfig.java","area":"diff"}
+{"path":"dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/report/DecisionEvidenceReplayInternalReport.java","area":"diff"}
+{"path":"dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/report/DecisionEvidenceReplayReportService.java","area":"diff"}
+{"path":"dh-usecase/src/main/java/com/guidinglight/decisionhub/usecase/qdr/report/DecisionFeedbackInternalAcceptanceService.java","area":"direct_support_addback","preview":"Untracked production facade omitted by git-diff rank generator; security-critical single aggregate/report path."}
+{"path":"dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/report/DecisionEvidenceReplayReportServiceTest.java","area":"direct_support_addback","preview":"Changed security-boundary tests for completeness, bounds, correlation and authorization."}
+{"path":"dh-usecase/src/test/java/com/guidinglight/decisionhub/usecase/qdr/report/DecisionFeedbackInternalAcceptanceServiceTest.java","area":"direct_support_addback","preview":"Untracked facade tests for single call, no fallback/retry and sanitized failure."}
+{"path":"dh-app/src/test/java/com/guidinglight/decisionhub/config/DecisionPipelineWiringConfigTest.java","area":"direct_support_addback","preview":"Changed Spring uniqueness test."}
+{"path":"dh-app/src/test/java/com/guidinglight/decisionhub/qdr11/StageQdr11InternalAcceptanceArchitectureTest.java","area":"direct_support_addback","preview":"Untracked architecture guard for forbidden dependencies and dual authority."}
+{"path":"dh-app/src/test/java/com/guidinglight/decisionhub/DecisionFeedbackInternalAcceptanceFlywayPostgresTest.java","area":"direct_support_addback","preview":"Untracked real PostgreSQL acceptance test; includes corrected replay decisionRunId fixture."}

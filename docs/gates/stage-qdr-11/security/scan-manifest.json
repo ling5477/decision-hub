@@ -1,0 +1,101 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "bcfff54d6217909c76f24fbb31f2ddc579252e72f6286ebe5738c4898e809444"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "0174da05f4ec7a591375dc695034af11d3059f1fc340cd2ad3f9ea7d166012e2"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/work_ledger.jsonl",
+        "sha256": "a0e1d3c777c02d96cbdabbce7ea9dc148d9de1e26f468767040224b67e0544ca"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/03_coverage/reviewed_surfaces.md",
+        "sha256": "16e2b214106f4124fe6c168e9d16129c10ce278c4eea0128d417acc59ae9f615"
+      }
+    ],
+    "completedAt": "2026-08-09T10:53:16.229486Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "c911d3a1-e60a-4284-a18f-ebbe6db52018",
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.18"
+    },
+    "scope": {
+      "artifactsReviewed": [
+        "artifacts/01_context/threat_model.md",
+        "artifacts/02_discovery/deep_review_input.jsonl",
+        "artifacts/02_discovery/work_ledger.jsonl",
+        "artifacts/02_discovery/finding_discovery_report.md",
+        "artifacts/03_coverage/reviewed_surfaces.md"
+      ],
+      "context": "Single evidence authority, completeness and bounded-policy propagation, tenant/environment/request/trace/decision/RUN isolation, internal facade, unique Spring wiring, authorization boundary, corrected PostgreSQL RUN fixture, zero side effects, and governance-only factsource synchronization.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "The internal facade has no public or scheduled caller; production capacity was not evaluated.",
+        "The QDR-11 PostgreSQL test mocks nested decision aggregation; exact RUN enforcement is independently covered by production comparison and a mismatch-to-INVALID unit test."
+      ],
+      "runtimeStatus": "Affected-module regression PASS; full 19-module regression PASS with 1338 tests and 0 failures/errors/skipped; PostgreSQL 17.10 with Flyway V1-V15; quality PASS with Checkstyle 0 and Spotless PASS.",
+      "summary": "Final exact-working-tree Stage-QDR-11 consolidated evidence internal acceptance review.",
+      "validationMode": "exact working-tree digest plus 9 full-file SHA-256 receipts, governance diff review, targeted and full regression"
+    },
+    "sealedAt": "2026-08-09T10:53:16.229486Z",
+    "startedAt": "2026-08-09T10:42:57.403419Z",
+    "status": "completed",
+    "target": {
+      "baseRevision": "9102c2f28bb0e470c51c09edaa20da9c7bbb32c2",
+      "displayName": "decision-hub",
+      "headRevision": "9102c2f28bb0e470c51c09edaa20da9c7bbb32c2",
+      "kind": "git_diff",
+      "snapshotDigest": "codex-security-snapshot/v1:sha256:3c499b40232176c7a74b40ea0b0c7a0f6ebbe89283eac6fe548aca093c30eb3f",
+      "targetId": "target_sha256_522e609f9f885c22d5c1c86229ccff71a58c5cac88233fe46babdb9897b2ae79"
+    },
+    "threatModel": {
+      "assets": [
+        "tenant-scoped decision and feedback evidence",
+        "decision/replay/audit correlation integrity",
+        "bounded evidence policy",
+        "persistence and audit integrity",
+        "external Provider/NexusQuant authorization boundary"
+      ],
+      "assumptions": [
+        "no public or scheduled caller exists for the internal facade",
+        "PostgreSQL and trusted caller identity are authentic",
+        "production credentials are not stored in the repository"
+      ],
+      "attackerCapabilities": [
+        "submit malformed or cross-scope identifiers at exposed entrypoints",
+        "replay or mix correlation identities if controls permit",
+        "attempt to reinterpret internal status as authorization"
+      ],
+      "securityObjectives": [
+        "fail closed on incomplete inconsistent overflow or cross-scope evidence",
+        "preserve exact bounded policy",
+        "keep one evidence authority and one Spring path",
+        "prevent external authorization and side effects"
+      ],
+      "summary": "Decision Hub is a tenant- and environment-isolated Java decision system. Internal evidence and acceptance results remain read-only and cannot create Provider, NexusQuant, trading, Paper, or LIVE authorization.",
+      "trustBoundaries": [
+        "external caller to application",
+        "tenant and environment scope",
+        "usecase/domain to PostgreSQL",
+        "feedback ingest to learning stores",
+        "internal evidence to external runtime"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

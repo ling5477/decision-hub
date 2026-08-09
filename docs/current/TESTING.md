@@ -1,5 +1,49 @@
 # Decision Hub Testing
 
+## Terminal current authority — 2026-08-09 Stage-QDR-11 archive close pending tag
+
+~~~text
+Task: DH-STAGE-QDR-11-CONSOLIDATED-EVIDENCE-INTERNAL-ACCEPTANCE-FINAL-CLOSE
+Stage-QDR-11: CLOSED / ACCEPTED / PUBLISHED / ARCHIVED / TAG_PENDING
+Implementation: 9b50fc7f51ebad3257aa77d1c2874d71385c81e9 / PUBLISHED
+Implementation exact-SHA CI: 31312337732 / PASS / QUALITY 93241931481 + TESTCONTAINERS 93241931499
+Regression: 1338 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL / Flyway / quality: 17.10 / V1-V15 / 19 OF 19 + CHECKSTYLE 0 + SPOTLESS PASS
+Security exact-diff review: PASS / SEALED SCAN c911d3a1-e60a-4284-a18f-ebbe6db52018 / EXACT COMMITTED TREE 9b50fc7f51ebad3257aa77d1c2874d71385c81e9
+Security coverage / technical / governance: COMPLETE / 9 OF 9 / 10 OF 10
+Security findings / active P0-P1 / unauthorized bypass: 0 / 0-0 / 0
+Security snapshot: codex-security-snapshot/v1:sha256:3c499b40232176c7a74b40ea0b0c7a0f6ebbe89283eac6fe548aca093c30eb3f
+Evidence authority: DecisionFeedbackEvidenceAggregate / SINGLE
+Legacy direct acceptance: RETIRED / 0 PRODUCTION PATHS / 0 FALLBACKS
+Internal acceptance model: DecisionEvidenceReplayInternalReport / REUSED
+Internal facade: DecisionFeedbackInternalAcceptanceService / WIRED / READ_ONLY
+Completeness: POLICY_QUALIFIED / FAIL_CLOSED
+Bounded policy: PRESERVED END_TO_END / OVERFLOW FAIL_CLOSED
+Correlation: TENANT + ENVIRONMENT + TRACE + REQUEST + DECISION + RUN / EXACT
+Dual authority / acceptance authorization: NONE / NONE
+Data path / feedback learning: READ_ONLY / NOT AUTHORIZED
+API / migration / schema / Repository / contracts / POM / workflow / NQ: NONE / NONE / NONE / NONE / NONE / NONE / NONE / NONE
+Archive: docs/gates/stage-qdr-11/ / COMPLETE
+Archive sources / SHA-256: 2 OF 2 / VERIFIED / 0 MISSING / 0 UNEXPECTED / 0 HASH FAILURES
+Archive security artifacts / SHA-256: 10 OF 10 / VERIFIED / 0 MISSING / 0 HASH FAILURES
+Archive close commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / CI_PENDING
+Close tag: dh-stage-qdr-11-close / PENDING
+Post-tag cleanup: PENDING / 2 CURRENT PROCESS SOURCES
+Terminal factsources: 12 / 12 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+Formal capacity: NOT_EXECUTED / DEFERRED
+Production capacity / production ready: NOT_PROVEN / NO
+Next action: PUBLISH CLOSE COMMIT -> VERIFY CLOSE EXACT-SHA CI -> CREATE+VERIFY ANNOTATED TAG -> POST-TAG CURRENT CLEANUP
+Next-stage planning: NOT AUTHORIZED UNTIL TAG AND CLEANUP COMPLETE
+Next-stage implementation: NOT AUTHORIZED
+ALLOW_TAG: YES / AFTER CLOSE EXACT-SHA CI PASS ONLY
+ALLOW_REFERENCE_LIVENESS / ALLOW_RETENTION / ALLOW_FEEDBACK_LEARNING / ALLOW_CAPACITY: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
+~~~
+
+本节是 tag 前唯一 terminal authority；其后 implementation、work order、planning 与更早区块均为历史时间线，不能授权新实现。
+
+
 ## Terminal current authority — 2026-08-09 Stage-QDR-11 consolidated implementation
 
 ~~~text

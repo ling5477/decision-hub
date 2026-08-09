@@ -1,0 +1,57 @@
+{
+  "completeness": "complete",
+  "deferred": [],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "diff",
+  "mode": "working_tree",
+  "openQuestions": [],
+  "scanId": "c911d3a1-e60a-4284-a18f-ebbe6db52018",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_consolidated-acceptance-production-chain",
+      "label": "Consolidated acceptance production chain",
+      "notes": "Four production files reviewed at current SHA-256; mismatch and unusable evidence fail closed.",
+      "receiptRefs": [
+        "artifacts/02_discovery/work_ledger.jsonl"
+      ],
+      "riskArea": "single authority, completeness, bounds, tenant/environment/request/trace/decision/RUN correlation"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_spring-wiring",
+      "label": "Spring wiring",
+      "notes": "One consolidated evidence service, one evaluator and one facade; no legacy competing path.",
+      "receiptRefs": [
+        "artifacts/02_discovery/work_ledger.jsonl"
+      ],
+      "riskArea": "duplicate bean or bypass path"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_security-boundary-tests",
+      "label": "Security-boundary tests",
+      "notes": "Five tests reviewed at current SHA-256; affected and full suites passed.",
+      "receiptRefs": [
+        "artifacts/02_discovery/work_ledger.jsonl"
+      ],
+      "riskArea": "isolation, authorization misuse, zero side effects, PostgreSQL RUN fixture"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_governance-factsources",
+      "label": "Governance factsources",
+      "notes": "Ten allowlisted documentation diffs reviewed; current blocks synchronized and push/tag/capacity/runtime expansions remain unauthorized.",
+      "receiptRefs": [
+        "artifacts/03_coverage/reviewed_surfaces.md"
+      ],
+      "riskArea": "unauthorized capability or publication expansion"
+    }
+  ]
+}
