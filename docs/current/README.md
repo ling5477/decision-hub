@@ -1,5 +1,45 @@
 # Decision Hub Current Docs
 
+## Terminal current authority — 2026-08-09 Stage-QDR-12 formal capacity work order
+
+~~~text
+Task: DH-STAGE-QDR-12-FORMAL-CAPACITY-RESOURCE-SAFETY-ACCEPTANCE-IMPLEMENTATION-WORK-ORDER
+Work order: DONE / DOCS_ONLY / FORMAL_EXECUTION_BLOCKED
+Baseline: dev / HEAD 7023dc345e67a7c5f504911591d760e1f670fda7 / PARENT+LOCAL_ORIGIN_DEV 6f0097c4a5b0eed354505d59c8a53a9f0f593557 / AHEAD_BEHIND 1_0 / CLEAN
+Stage-QDR-10 / Stage-QDR-11: CLOSED_ACCEPTED_ARCHIVED_TAGGED / CLOSED_ACCEPTED_ARCHIVED_TAGGED
+Formal capacity / production capacity / production ready: NOT_EXECUTED / NOT_PROVEN / NO
+Harness entry: qdr7-capacity-acceptance / Qdr7CapacityAcceptanceIT / PowerShell preflight+finalizer
+Mandatory scenario identities: VERIFIED / 15
+Threshold reality: 41 NUMERIC LEAVES / 36 USED / 94 EXECUTION COMPARISONS / 5 RESOURCE LEAVES UNENFORCED
+Correctness invariants: 12 / ZERO_TOLERANCE
+Historical formal blocker path: cached postgres:17 missing -> PREFLIGHT EXIT10 -> 0_OF_15 + 0_OF_94
+Capacity harness: GAP_FOUND / STAGE_QDR_12_CAPACITY_HARNESS_GAP_BLOCKED
+Resource gaps: MEMORY SAMPLING+GATES / QUEUE DEPTH / BACKPRESSURE / RUNTIME DEADLINE+TIMEOUT / INPUT MEMORY CAP
+Qualification gaps: TESTCONTAINERS VIABILITY / DOCKER STORAGE / DISK+FILESYSTEM / CLOCK_NTP / NETWORK_POLICY / CREDENTIAL_ABSENCE / BACKGROUND_LOAD
+Artifact gaps: CANDIDATE_TREE / PROFILE+SET HASHES / ENVIRONMENT HASH / HARNESS HASH / EXECUTION MANIFEST / INVENTORY / FINAL VERDICT
+Exact-SHA / single-attempt / four-state verdict / no-side-effect contracts: FROZEN IN WORK ORDER
+Mandatory scenario set / threshold set / qualified environment / artifact contract: BLOCKED / BLOCKED / BLOCKED / BLOCKED
+Verdict taxonomy: PASS_WITHIN_FROZEN_PROFILE / FAIL / BLOCKED / INVALID
+Production/test/API/migration/schema/Repository/contracts/POM/workflow/NQ change: NONE
+Formal capacity benchmark: NOT_RUN
+Quality this task: PASS / 19 OF 19 / CHECKSTYLE 0 / SPOTLESS PASS
+Full tests this task: NOT_RERUN / WORK_ORDER_ONLY
+Work-order terminal blocks: 8 OF 8 / IDENTICAL SHA-256 / 0 CONFLICTS
+Scope invariants: PASS / 3 OF 3
+Work-order commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / PUSH_NO / TAG_NO
+Next action: DH-STAGE-QDR-12-CAPACITY-HARNESS-BLOCKER
+ALLOW_FORMAL_CAPACITY_EXECUTION / ALLOW_FORMAL_CAPACITY_EXECUTION_NOW: NO / NO
+ALLOW_PRODUCTION_READY_DECLARATION: NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO / NO
+~~~
+
+本节是 Stage-QDR-12 work-order code reality audit 后的 current authority。15 个 scenario 身份已核实，但
+formal resource-safety、qualified environment 与 artifact binding 存在代码合同缺口；下一任务只能处理精确
+capacity harness blocker，修复与独立 review 完成前不得执行 formal capacity。
+
+当前详细工单：[Stage-QDR-12 formal capacity / resource safety acceptance work order](DH_STAGE_QDR_12_FORMAL_CAPACITY_RESOURCE_SAFETY_ACCEPTANCE_IMPLEMENTATION_WORK_ORDER.md)。
+
 ## Terminal current authority — 2026-08-09 post-Stage-QDR-11 next-stage planning
 
 ~~~text

@@ -1,5 +1,27 @@
 # DH Post-Stage-QDR-11 下一阶段规划
 
+## Stage-QDR-12 work-order code reality correction（2026-08-09）
+
+后续 `DH-STAGE-QDR-12-FORMAL-CAPACITY-RESOURCE-SAFETY-ACCEPTANCE-IMPLEMENTATION-WORK-ORDER`
+已完成 code-first 复核，并对本规划中的 `15 mandatory / 94 thresholds / harness ready` 简写作如下收窄：
+
+```text
+mandatory scenario identities: 15 / VERIFIED
+numeric threshold leaves: 41 DECLARED
+numeric threshold leaves used by formal addThreshold path: 36
+comparison executions expected by current harness: 94
+declared resource thresholds not enforced: 5
+resource safety gaps: MEMORY + QUEUE DEPTH + BACKPRESSURE + RUNTIME DEADLINE/TIMEOUT + INPUT MEMORY CAP
+qualified environment gaps: TESTCONTAINERS VIABILITY + DISK/FILESYSTEM + CLOCK/NTP + NETWORK/CREDENTIAL/BACKGROUND LOAD
+artifact binding gaps: TREE + PROFILE/SET/ENVIRONMENT/HARNESS HASHES + EXECUTION MANIFEST + INVENTORY + FINAL VERDICT
+formal execution: BLOCKED / STAGE_QDR_12_CAPACITY_HARNESS_GAP_BLOCKED
+next action: DH-STAGE-QDR-12-CAPACITY-HARNESS-BLOCKER
+```
+
+因此本规划的 workstream 选择保持有效，但原 B2/B3 不得直接执行。必须先由独立授权 blocker task
+关闭上述 harness/qualification/artifact gaps，并完成独立 review；此前 `FORMAL_CAPACITY=NOT_EXECUTED`、
+`PRODUCTION_CAPACITY=NOT_PROVEN`、`PRODUCTION_READY=NO`。
+
 ## 1. 任务分类与授权
 
 ```text
