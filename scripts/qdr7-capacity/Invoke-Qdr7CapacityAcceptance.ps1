@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('Preflight', 'Finalize', 'ContractTest', 'RuntimeBlockedContractTest', 'PartialFinalizerContractTest')]
+    [ValidateSet('Preflight', 'Finalize', 'ContractTest', 'RuntimeBlockedContractTest', 'PartialFinalizerContractTest', 'FormalPacketGateContractTest', 'ManifestContractTest')]
     [string]$Phase,
 
     [Parameter(Mandatory = $true)]
@@ -41,6 +41,20 @@ $StopMarker = Join-Path $EvidenceRoot 'sampler.stop'
 $Utf8NoBom = New-Object Text.UTF8Encoding($false)
 $ResolvedPowerShellIdentity = [ordered]@{ name = 'UNRESOLVED'; pathSha256 = $null }
 $ImplementationValidationEnabled = $ImplementationValidation -eq 'true'
+$HarnessVersion = 'qdr12-capacity-harness-1'
+$EvidenceBinding = [ordered]@{
+    attemptId = $RunId
+    candidateSha = ('0' * 40)
+    candidateTree = ('0' * 40)
+    profileId = 'qdr7-capacity-acceptance'
+    profileVersion = $CriteriaVersion
+    scenarioSetHash = ('0' * 64)
+    thresholdSetHash = ('0' * 64)
+    environmentManifestHash = ('0' * 64)
+    harnessVersion = $HarnessVersion
+    harnessHash = ('0' * 64)
+    generatedAt = [DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffZ', [Globalization.CultureInfo]::InvariantCulture)
+}
 
 function Get-UtcTimestamp {
     return [DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffZ', [Globalization.CultureInfo]::InvariantCulture)
@@ -102,7 +116,28 @@ function New-Artifact {
         unitSystem = $UnitSystem
         missingValues = @()
         criteriaVersion = $CriteriaVersion
+        attemptId = $EvidenceBinding.attemptId
+        candidateSha = $EvidenceBinding.candidateSha
+        candidateTree = $EvidenceBinding.candidateTree
+        profileId = $EvidenceBinding.profileId
+        profileVersion = $EvidenceBinding.profileVersion
+        scenarioSetHash = $EvidenceBinding.scenarioSetHash
+        thresholdSetHash = $EvidenceBinding.thresholdSetHash
+        environmentManifestHash = $EvidenceBinding.environmentManifestHash
+        harnessVersion = $EvidenceBinding.harnessVersion
+        harnessHash = $EvidenceBinding.harnessHash
+        generatedAt = $EvidenceBinding.generatedAt
     }
+}
+
+function Get-ExecutionMode {
+    if ($ImplementationValidationEnabled) {
+        return 'IMPLEMENTATION_VALIDATION'
+    }
+    if ($QualificationOnlyEnabled) {
+        return 'QUALIFICATION'
+    }
+    return 'FORMAL'
 }
 
 function Set-ObjectProperty {
@@ -238,6 +273,18 @@ function Get-NormalizedScenarioLedger {
     }
 
     $existingRows = @($artifact.scenarios)
+    $integrityFindings = New-Object Collections.Generic.List[string]
+    $knownScenarioIds = @($scenarioRegistry.fixedOrder | ForEach-Object { [string]$_ })
+    foreach ($scenarioId in $knownScenarioIds) {
+        if (@($existingRows | Where-Object { $_.scenarioId -eq $scenarioId }).Count -gt 1) {
+            $integrityFindings.Add("SCENARIO_CARDINALITY_INVALID:$scenarioId")
+        }
+    }
+    foreach ($row in $existingRows) {
+        if ([string]$row.scenarioId -notin $knownScenarioIds) {
+            $integrityFindings.Add("ORPHAN_SCENARIO_RESULT:$($row.scenarioId)")
+        }
+    }
     $normalizedRows = New-Object Collections.Generic.List[object]
     foreach ($scenarioId in $scenarioRegistry.fixedOrder) {
         $row = @($existingRows | Where-Object { $_.scenarioId -eq $scenarioId } | Select-Object -First 1)
@@ -289,6 +336,7 @@ function Get-NormalizedScenarioLedger {
         blockedScenarioCount = $blockedCount
         notStartedScenarioCount = $notStartedCount
         executedScenarioCount = $partialCount + $completedCount
+        integrityFindings = $integrityFindings.ToArray()
     }
 }
 
@@ -321,8 +369,10 @@ function Write-MissingScenarioArtifacts {
             $threshold.passedCount = 0
             $threshold.failedCount = 0
             $threshold.blockedCount = 0
-            $threshold.notEvaluatedCount = 94
-            $threshold.notEvaluatedThresholds = 94
+            $threshold.coveredThresholdLeaves = 0
+            $threshold.declaredThresholdLeaves = 41
+            $threshold.notEvaluatedCount = 99
+            $threshold.notEvaluatedThresholds = 99
             $threshold.reason = $(if ($QualificationOnlyEnabled) { 'QUALIFICATION_SCENARIO_NOT_EXECUTED' } else { 'FORMAL_SCENARIO_NOT_EXECUTED' })
             $threshold.missingValues = @('scenarioMeasurements')
             Write-JsonFile -Path $path -Value $threshold
@@ -409,6 +459,96 @@ function Get-FreeLoopbackPort {
     }
 }
 
+function Get-HarnessHash {
+    $paths = @(
+        'scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1',
+        'scripts/qdr7-capacity/Watch-Qdr7CapacityResources.ps1',
+        'config/qdr7-capacity/qdr7-capacity-artifact-registry.json',
+        'config/qdr7-capacity/qdr7-capacity-artifacts.schema.json',
+        'config/qdr7-capacity/qdr7-capacity-environment-admission.json',
+        'config/qdr7-capacity/qdr7-capacity-scenario-registry.json',
+        'config/qdr7-capacity/qdr7-capacity-threshold-consumers.json',
+        'config/qdr7-capacity/qdr7-capacity-thresholds.json',
+        'dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityAcceptanceIT.java',
+        'dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityArtifactSupport.java',
+        'dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityEnvironmentAdmission.java',
+        'dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityEvidenceFinalizer.java',
+        'dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityResourceEvidence.java',
+        'dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityRuntimeSafetyProbe.java'
+    )
+    $rows = New-Object Collections.Generic.List[string]
+    foreach ($relative in $paths) {
+        $path = Join-Path $ProjectRoot $relative
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+            throw "harness hash input missing: $relative"
+        }
+        $rows.Add("$relative=$(Get-Sha256 -Path $path)")
+    }
+    return Get-Sha256Text -Value (($rows -join "`n") + "`n")
+}
+
+function Get-AdvertisedDevSha {
+    $result = Invoke-NativeCommand -Executable 'git' -Arguments @('-C', $ProjectRoot, 'ls-remote', '--heads', 'origin', 'refs/heads/dev')
+    if ($result.exitCode -ne 0) {
+        return ''
+    }
+    $match = [regex]::Match($result.text, '^(?<sha>[a-f0-9]{40})\s+')
+    return $(if ($match.Success) { $match.Groups['sha'].Value } else { '' })
+}
+
+function Set-EvidenceBinding {
+    param(
+        [string]$CandidateSha,
+        [string]$CandidateTree,
+        [string]$ProfileId,
+        [string]$ProfileVersion,
+        [string]$ScenarioSetHash,
+        [string]$ThresholdSetHash,
+        [string]$EnvironmentManifestHash,
+        [string]$HarnessHash
+    )
+    $EvidenceBinding.attemptId = $RunId
+    $EvidenceBinding.candidateSha = $CandidateSha
+    $EvidenceBinding.candidateTree = $CandidateTree
+    $EvidenceBinding.profileId = $ProfileId
+    $EvidenceBinding.profileVersion = $ProfileVersion
+    $EvidenceBinding.scenarioSetHash = $ScenarioSetHash
+    $EvidenceBinding.thresholdSetHash = $ThresholdSetHash
+    $EvidenceBinding.environmentManifestHash = $EnvironmentManifestHash
+    $EvidenceBinding.harnessVersion = $HarnessVersion
+    $EvidenceBinding.harnessHash = $HarnessHash
+    $EvidenceBinding.generatedAt = Get-UtcTimestamp
+}
+
+function Add-BindingToObject {
+    param([object]$Target)
+    foreach ($field in $EvidenceBinding.Keys) {
+        Set-ObjectProperty -Target $Target -Name $field -Value $EvidenceBinding[$field]
+    }
+}
+
+function Write-ExecutionManifest {
+    param(
+        [string]$CommitSha,
+        [string]$OriginSha,
+        [string]$AdvertisedSha,
+        [string]$StartedAt,
+        [string]$FinishedAt,
+        [string]$Status
+    )
+    $manifest = New-Artifact -Scenario 'capacity-execution-manifest' -Status $Status -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt $FinishedAt
+    $manifest.originSha = $OriginSha
+    $manifest.advertisedSha = $AdvertisedSha
+    $manifest.formalCapacityExecuted = $false
+    $manifest.formalPacketPrepared = (Get-ExecutionMode) -eq 'FORMAL'
+    $manifest.executionMode = Get-ExecutionMode
+    $manifest.scenarioDispatchState = 'PENDING'
+    $manifest.expectedMandatoryScenarios = 15
+    $manifest.expectedThresholdLeaves = 41
+    $manifest.expectedThresholdComparisons = 99
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'capacity-execution-manifest.json') -Value $manifest
+}
+
 function Get-ProcessParentId {
     param([int]$ProcessId)
     $process = Get-CimInstance Win32_Process -Filter "ProcessId=$ProcessId"
@@ -493,7 +633,8 @@ function Write-BlockedPreflight {
     Set-SummaryContract -Summary $summary -StartedAt $StartedAt -CompletedAt $finished -Status 'BLOCKED' -InternalExitCode 10 -MandatoryScenarioCount ([int]$scenarioRegistry.mandatoryCount) -ExecutedScenarioCount 0 -CorrectnessVerdict 'BLOCKED' -ThresholdVerdict 'BLOCKED' -RegressionVerdict 'BLOCKED' -QualityVerdict 'BLOCKED' -ArtifactVerdict 'PASS' -SecretVerdict 'PASS' -TeardownVerdict 'PASS' -ReasonCode 'ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED'
     Set-SummaryScenarioCounts -Summary $summary -Ledger $ledger
     Set-ObjectProperty -Target $summary -Name 'capacityAcceptanceExecuted' -Value $false
-    Set-ObjectProperty -Target $summary -Name 'formalAcceptanceVerdict' -Value $(if ($QualificationOnlyEnabled) { 'NOT_EVALUATED' } else { 'BLOCKED' })
+    $nonFormalMode = $ImplementationValidationEnabled -or $QualificationOnlyEnabled
+    Set-ObjectProperty -Target $summary -Name 'formalAcceptanceVerdict' -Value $(if ($nonFormalMode) { 'NOT_EVALUATED' } else { 'BLOCKED' })
     Set-ObjectProperty -Target $summary -Name 'qualificationVerdict' -Value $(if ($QualificationOnlyEnabled) { 'BLOCKED' } else { 'NOT_EVALUATED' })
     Write-JsonFile -Path (Join-Path $EvidenceRoot 'capacity-acceptance-summary.json') -Value $summary
     Write-Utf8File -Path (Join-Path $EvidenceRoot 'harness-exit-code.txt') -Content "10`n"
@@ -512,6 +653,8 @@ function Write-BlockedPreflight {
         Write-Utf8File -Path (Join-Path $EvidenceRoot 'harness-exit-code.txt') -Content "90`n"
     }
     Write-JsonFile -Path (Join-Path $EvidenceRoot 'capacity-acceptance-summary.json') -Value $summary
+    Write-ArtifactInventory -CommitSha $CommitSha -StartedAt $StartedAt
+    Write-CapacityFinalVerdict -CommitSha $CommitSha -StartedAt $StartedAt -Verdict $(if ($nonFormalMode) { 'NOT_EVALUATED' } else { 'BLOCKED' }) -ReasonCode 'ENVIRONMENT_CAPACITY_PREFLIGHT_BLOCKED' -IntegrityFindings @()
     Write-Manifest
 }
 
@@ -553,6 +696,9 @@ function Invoke-Preflight {
 
         $branch = Get-GitValue -Arguments @('branch', '--show-current')
         $commitSha = Get-GitValue -Arguments @('rev-parse', 'HEAD')
+        $candidateTree = Get-GitValue -Arguments @('rev-parse', 'HEAD^{tree}')
+        $originSha = Get-GitValue -Arguments @('rev-parse', 'origin/dev')
+        $advertisedSha = Get-AdvertisedDevSha
         $trackedChanges = @(Get-GitPathList -Arguments @('diff', '--name-only'))
         $untrackedChanges = @(Get-GitPathList -Arguments @('ls-files', '--others', '--exclude-standard'))
         $statusPaths = @(
@@ -564,6 +710,9 @@ function Invoke-Preflight {
         $staged = $stagedPaths -join "`n"
         Add-Check 'git-branch' 'dev' $branch ($branch -eq 'dev')
         Add-Check 'git-head' '40-character SHA-1' $commitSha ($commitSha -match '^[a-f0-9]{40}$')
+        Add-Check 'git-tree' '40-character tree SHA-1' $candidateTree ($candidateTree -match '^[a-f0-9]{40}$')
+        Add-Check 'git-origin-binding' $commitSha $originSha ($originSha -eq $commitSha)
+        Add-Check 'git-advertised-binding' $commitSha $advertisedSha ($advertisedSha -eq $commitSha)
         $writeScopeEnabled = $ImplementationValidationEnabled -or $QualificationOnlyEnabled
         $writeScopeValid = $writeScopeEnabled -and @($statusPaths | Where-Object { -not (Test-ImplementationValidationPath -Path $_) }).Count -eq 0
         $worktreeValid = [string]::IsNullOrWhiteSpace($status) -or $writeScopeValid
@@ -575,11 +724,17 @@ function Invoke-Preflight {
 
         $criteriaPath = Join-Path $ConfigRoot 'qdr7-capacity-thresholds.json'
         $criteria = Read-JsonFile -Path $criteriaPath
+        $admissionPath = Join-Path $ConfigRoot 'qdr7-capacity-environment-admission.json'
+        $admission = Read-JsonFile -Path $admissionPath
         $sourcePath = Join-Path $ProjectRoot $criteria.sourceDocument
         $criteriaHash = Get-Sha256 -Path $sourcePath
+        $scenarioSetHash = Get-Sha256 -Path (Join-Path $ConfigRoot 'qdr7-capacity-scenario-registry.json')
+        $thresholdSetHash = Get-Sha256 -Path $criteriaPath
+        $harnessHash = Get-HarnessHash
+        Set-EvidenceBinding -CandidateSha $commitSha -CandidateTree $candidateTree -ProfileId ([string]$admission.profileId) -ProfileVersion ([string]$admission.profileVersion) -ScenarioSetHash $scenarioSetHash -ThresholdSetHash $thresholdSetHash -EnvironmentManifestHash ('0' * 64) -HarnessHash $harnessHash
         Add-Check 'criteria-version' $CriteriaVersion ([string]$criteria.criteriaVersion) ($criteria.criteriaVersion -eq $CriteriaVersion)
         Add-Check 'criteria-source-hash' ([string]$criteria.sourceDocumentSha256) $criteriaHash ($criteriaHash -eq $criteria.sourceDocumentSha256)
-        foreach ($contract in @('qdr7-capacity-artifacts.schema.json', 'qdr7-capacity-artifact-registry.json', 'qdr7-capacity-scenario-registry.json', 'qdr7-capacity-exit-codes.json', 'qdr7-capacity-secret-patterns.json')) {
+        foreach ($contract in @('qdr7-capacity-artifacts.schema.json', 'qdr7-capacity-artifact-registry.json', 'qdr7-capacity-scenario-registry.json', 'qdr7-capacity-threshold-consumers.json', 'qdr7-capacity-environment-admission.json', 'qdr7-capacity-exit-codes.json', 'qdr7-capacity-secret-patterns.json')) {
             $contractPath = Join-Path $ConfigRoot $contract
             $contractValid = $false
             try {
@@ -610,8 +765,8 @@ function Invoke-Preflight {
         $logicalCpu = [int](($cpu | Measure-Object -Property NumberOfLogicalProcessors -Sum).Sum)
         $availableMemoryBytes = [long]$os.FreePhysicalMemory * 1024L
         Add-Check 'os-family' 'Windows 11 x64' "$($os.Caption) / $env:PROCESSOR_ARCHITECTURE" (($os.Caption -match 'Windows 11') -and ($env:PROCESSOR_ARCHITECTURE -eq 'AMD64'))
-        Add-Check 'logical-cpu' '>=16' ([string]$logicalCpu) ($logicalCpu -ge 16)
-        Add-Check 'available-memory' '>=17179869184 bytes' ([string]$availableMemoryBytes) ($availableMemoryBytes -ge 17179869184L)
+        Add-Check 'logical-cpu' ">=$($admission.minimumLogicalCpu)" ([string]$logicalCpu) ($logicalCpu -ge [int]$admission.minimumLogicalCpu)
+        Add-Check 'available-memory' ">=$($admission.minimumAvailableMemoryBytes) bytes" ([string]$availableMemoryBytes) ($availableMemoryBytes -ge [long]$admission.minimumAvailableMemoryBytes)
 
         $dockerVersionResult = Invoke-NativeCommand -Executable 'docker' -Arguments @('version', '--format', '{{.Server.Version}}')
         $dockerVersion = $dockerVersionResult.text
@@ -620,9 +775,31 @@ function Invoke-Preflight {
         $dockerMemoryText = $dockerMemoryResult.text
         $dockerMemory = 0L
         [long]::TryParse($dockerMemoryText, [ref]$dockerMemory) | Out-Null
-        Add-Check 'docker-memory' '>=17179869184 bytes' ([string]$dockerMemory) ($dockerMemoryResult.exitCode -eq 0 -and $dockerMemory -ge 17179869184L)
-        $imageInspect = Invoke-NativeCommand -Executable 'docker' -Arguments @('image', 'inspect', 'postgres:17')
-        Add-Check 'postgres-image' 'cached postgres:17' $(if ($imageInspect.exitCode -eq 0) { 'cached' } else { 'missing' }) ($imageInspect.exitCode -eq 0)
+        Add-Check 'docker-memory' ">=$($admission.minimumDockerMemoryBytes) bytes" ([string]$dockerMemory) ($dockerMemoryResult.exitCode -eq 0 -and $dockerMemory -ge [long]$admission.minimumDockerMemoryBytes)
+        $postgresImageReference = [string]$admission.postgresImage
+        $imageInspect = Invoke-NativeCommand -Executable 'docker' -Arguments @('image', 'inspect', $postgresImageReference)
+        Add-Check 'postgres-image' "cached $postgresImageReference" $(if ($imageInspect.exitCode -eq 0) { 'cached' } else { 'missing' }) ($imageInspect.exitCode -eq 0)
+        $imageIdentity = Invoke-NativeCommand -Executable 'docker' -Arguments @('image', 'inspect', '--format', '{{.Id}}', $postgresImageReference)
+        $imageRepoDigestResult = Invoke-NativeCommand -Executable 'docker' -Arguments @('image', 'inspect', '--format', '{{json .RepoDigests}}', $postgresImageReference)
+        $imageRepoDigests = @()
+        if ($imageRepoDigestResult.exitCode -eq 0) {
+            try {
+                $imageRepoDigests = @($imageRepoDigestResult.text | ConvertFrom-Json)
+            }
+            catch {
+                $imageRepoDigests = @()
+            }
+        }
+        $expectedImageId = $postgresImageReference.Substring($postgresImageReference.IndexOf('@') + 1)
+        $repoDigestJsonContainsReference =
+            $imageRepoDigestResult.exitCode -eq 0 -and
+            $imageRepoDigestResult.text -match [regex]::Escape('"' + $postgresImageReference + '"')
+        $postgresImageDigestVerified =
+            $imageInspect.exitCode -eq 0 -and
+            $imageIdentity.text -eq $expectedImageId -and
+            $repoDigestJsonContainsReference
+        Add-Check 'postgres-image-digest' $postgresImageReference ($imageIdentity.text) $postgresImageDigestVerified
+        $dockerStorage = Invoke-NativeCommand -Executable 'docker' -Arguments @('info', '--format', '{{.Driver}}')
 
         $containerName = "dh-qdr7-capacity-$RunId"
         $volumeName = "dh-qdr7-capacity-$RunId"
@@ -633,13 +810,109 @@ function Invoke-Preflight {
         $port = Get-FreeLoopbackPort
         Add-Check 'loopback-port' 'available dynamic loopback port' ([string]$port) ($port -gt 0)
 
-        if ($blockers.Count -gt 0) {
-            Write-BlockedPreflight -CommitSha $commitSha -StartedAt $started -Checks $checks.ToArray() -Blockers $blockers.ToArray()
+        $drive = New-Object IO.DriveInfo([IO.Path]::GetPathRoot($ProjectRoot))
+        $driveLetter = $drive.Name.TrimEnd('\').TrimEnd(':')
+        $volume = Get-Volume -DriveLetter $driveLetter
+        $filesystemType = [string]$volume.FileSystemType
+        $diskFreeBytes = [long]$drive.AvailableFreeSpace
+        Add-Check 'disk-free' ">=$($admission.minimumDiskFreeBytes) bytes" ([string]$diskFreeBytes) ($diskFreeBytes -ge [long]$admission.minimumDiskFreeBytes)
+        Add-Check 'filesystem-type' ($admission.requiredFilesystemTypes -join ',') $filesystemType ($filesystemType -in @($admission.requiredFilesystemTypes))
+
+        $cpuSamples = New-Object Collections.Generic.List[double]
+        for ($sample = 0; $sample -lt [int]$admission.backgroundObservationSeconds; $sample++) {
+            $cpuLoad = [double](Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average
+            $cpuSamples.Add($cpuLoad)
+            if ($sample -lt ([int]$admission.backgroundObservationSeconds - 1)) {
+                Start-Sleep -Milliseconds ([int]$admission.backgroundSampleIntervalMilliseconds)
+            }
+        }
+        $backgroundAverageCpu = [double]($cpuSamples | Measure-Object -Average).Average
+        $backgroundPeakCpu = [double]($cpuSamples | Measure-Object -Maximum).Maximum
+        Add-Check 'background-average-cpu' "<=$($admission.maximumBackgroundAverageCpuPercent)%" ([string]$backgroundAverageCpu) ($backgroundAverageCpu -le [double]$admission.maximumBackgroundAverageCpuPercent)
+        Add-Check 'background-peak-cpu' "<=$($admission.maximumBackgroundPeakCpuPercent)%" ([string]$backgroundPeakCpu) ($backgroundPeakCpu -le [double]$admission.maximumBackgroundPeakCpuPercent)
+
+        $timeService = Get-Service -Name W32Time -ErrorAction SilentlyContinue
+        $timeStatus = Invoke-NativeCommand -Executable 'w32tm.exe' -Arguments @('/query', '/status', '/verbose')
+        $offsetMatch = [regex]::Match($timeStatus.text, '(?:Phase Offset|相位偏移)\s*:\s*(?<seconds>[+-]?\d+(?:\.\d+)?)s', [Text.RegularExpressions.RegexOptions]::IgnoreCase)
+        $clockOffsetMilliseconds = [double]::MaxValue
+        if ($offsetMatch.Success) {
+            $clockOffsetMilliseconds = [Math]::Abs([double]::Parse($offsetMatch.Groups['seconds'].Value, [Globalization.CultureInfo]::InvariantCulture) * 1000.0)
+        }
+        $clockSynchronized = $null -ne $timeService -and $timeService.Status -eq 'Running' -and $timeStatus.exitCode -eq 0 -and $offsetMatch.Success
+        Add-Check 'clock-synchronized' 'W32Time running with measurable phase offset' $(if ($clockSynchronized) { "offset=$clockOffsetMilliseconds ms" } else { 'not synchronized or offset unavailable' }) $clockSynchronized
+        Add-Check 'clock-offset' "<=$($admission.maximumClockOffsetMilliseconds) ms" ([string]$clockOffsetMilliseconds) ($clockOffsetMilliseconds -le [double]$admission.maximumClockOffsetMilliseconds)
+
+        $credentialVariablesPresent = @($admission.credentialEnvironmentVariableNames | Where-Object { -not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable([string]$_)) } | ForEach-Object { [string]$_ })
+        $proxyVariablesPresent = @($admission.proxyEnvironmentVariableNames | Where-Object { -not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable([string]$_)) } | ForEach-Object { [string]$_ })
+        Add-Check 'credential-environment' 'no named credential variables present' ($credentialVariablesPresent -join ',') ($credentialVariablesPresent.Count -eq 0)
+        Add-Check 'proxy-environment' 'no external proxy variables present' ($proxyVariablesPresent -join ',') ($proxyVariablesPresent.Count -eq 0)
+        $networkIsolation = Get-NetworkIsolationSnapshot -AllowedPatterns @($admission.allowedActiveNetworkAdapterNamePatterns)
+        Add-Check 'network-isolation' ([string]$admission.networkPolicyEvidenceType) $(if ($networkIsolation.networkIsolationVerified) { 'verified' } else { 'unverified' }) $networkIsolation.networkIsolationVerified
+
+        $environmentManifest = New-Artifact -Scenario 'capacity-environment-manifest' -Status 'NOT_QUALIFIED' -CommitSha $commitSha -StartedAt $started -FinishedAt (Get-UtcTimestamp)
+        $environmentManifest.originSha = $originSha
+        $environmentManifest.advertisedSha = $advertisedSha
+        $environmentManifest.worktreeClean = [string]::IsNullOrWhiteSpace($status)
+        $environmentManifest.stagedEmpty = [string]::IsNullOrWhiteSpace($staged)
+        $environmentManifest.untrackedTechnicalCount = @($untrackedChanges).Count
+        $environmentManifest.javaMajor = $(if ($javaVersion -match '^(?<major>\d+)') { [int]$Matches.major } else { 0 })
+        $environmentManifest.mavenVersion = $mavenVersion
+        $environmentManifest.powerShellPathHash = $ResolvedPowerShellIdentity.pathSha256
+        $environmentManifest.dockerDaemonAvailable = $dockerVersionResult.exitCode -eq 0
+        $environmentManifest.dockerHealthy = $dockerVersionResult.exitCode -eq 0 -and $dockerMemoryResult.exitCode -eq 0
+        $environmentManifest.dockerStorageDriver = $dockerStorage.text
+        $environmentManifest.dockerMemoryBytes = $dockerMemory
+        $environmentManifest.minimumDockerMemoryBytes = [long]$admission.minimumDockerMemoryBytes
+        $environmentManifest.postgresImageAvailable = $imageInspect.exitCode -eq 0
+        $environmentManifest.postgresImageId = $imageIdentity.text
+        $environmentManifest.postgresImageReference = $postgresImageReference
+        $environmentManifest.postgresImageDigestVerified = $postgresImageDigestVerified
+        $environmentManifest.postgresExecutedImageId = ''
+        $environmentManifest.testcontainersViable = $false
+        $environmentManifest.postgresMajor = 0
+        $environmentManifest.logicalCpu = $logicalCpu
+        $environmentManifest.minimumLogicalCpu = [int]$admission.minimumLogicalCpu
+        $environmentManifest.availableMemoryBytes = $availableMemoryBytes
+        $environmentManifest.minimumAvailableMemoryBytes = [long]$admission.minimumAvailableMemoryBytes
+        $environmentManifest.diskFreeBytes = $diskFreeBytes
+        $environmentManifest.filesystemWritable = $true
+        $environmentManifest.filesystemType = $filesystemType
+        $environmentManifest.clockSynchronized = $clockSynchronized
+        $environmentManifest.clockOffsetMilliseconds = $clockOffsetMilliseconds
+        $environmentManifest.loopbackPortAvailable = $port -gt 0
+        $environmentManifest.networkPolicy = $(if ($networkIsolation.networkIsolationVerified) { [string]$admission.networkPolicy } else { 'UNVERIFIED' })
+        $environmentManifest.networkPolicyEvidenceType = [string]$admission.networkPolicyEvidenceType
+        $environmentManifest.networkIsolationVerified = [bool]$networkIsolation.networkIsolationVerified
+        $environmentManifest.disallowedNetworkAdapterCount = [int]$networkIsolation.disallowedNetworkAdapterCount
+        $environmentManifest.activeNetworkAdapterSetHash = [string]$networkIsolation.activeNetworkAdapterSetHash
+        $environmentManifest.credentialVariablesPresent = $credentialVariablesPresent
+        $environmentManifest.proxyVariablesPresent = $proxyVariablesPresent
+        $environmentManifest.backgroundAverageCpuPercent = $backgroundAverageCpu
+        $environmentManifest.backgroundPeakCpuPercent = $backgroundPeakCpu
+        $environmentManifest.attemptContainerAbsent = $containerInspect.exitCode -ne 0
+        $environmentManifest.attemptVolumeAbsent = $volumeInspect.exitCode -ne 0
+        $environmentManifestHash = Get-EnvironmentManifestContentHash -Manifest $environmentManifest
+        Set-EvidenceBinding -CandidateSha $commitSha -CandidateTree $candidateTree -ProfileId ([string]$admission.profileId) -ProfileVersion ([string]$admission.profileVersion) -ScenarioSetHash $scenarioSetHash -ThresholdSetHash $thresholdSetHash -EnvironmentManifestHash $environmentManifestHash -HarnessHash $harnessHash
+        Add-BindingToObject -Target $environmentManifest
+        Write-JsonFile -Path (Join-Path $EvidenceRoot 'capacity-environment-manifest.json') -Value $environmentManifest
+        Write-ExecutionManifest -CommitSha $commitSha -OriginSha $originSha -AdvertisedSha $advertisedSha -StartedAt $started -FinishedAt (Get-UtcTimestamp) -Status 'PASS'
+
+        $executionBlockers = @($blockers)
+        if ($ImplementationValidationEnabled) {
+            $executionBlockers = @(
+                $executionBlockers | Where-Object {
+                    $_ -notin @('clock-synchronized', 'clock-offset', 'network-isolation')
+                }
+            )
+        }
+        if ($executionBlockers.Count -gt 0) {
+            Write-BlockedPreflight -CommitSha $commitSha -StartedAt $started -Checks $checks.ToArray() -Blockers $executionBlockers
             exit 10
         }
 
         $finished = Get-UtcTimestamp
-        $environment = New-Artifact -Scenario 'environment' -Status 'PASS' -CommitSha $commitSha -StartedAt $started -FinishedAt $finished
+        $preflightStatus = $(if ($ImplementationValidationEnabled) { 'NOT_FORMAL' } else { 'PASS' })
+        $environment = New-Artifact -Scenario 'environment' -Status $preflightStatus -CommitSha $commitSha -StartedAt $started -FinishedAt $finished
         $environment.os = [ordered]@{ caption = $os.Caption; version = $os.Version; architecture = $env:PROCESSOR_ARCHITECTURE }
         $environment.logicalCpu = $logicalCpu
         $environment.availableMemoryBytes = $availableMemoryBytes
@@ -648,16 +921,16 @@ function Invoke-Preflight {
         $environment.mavenVersion = $mavenVersion
         $environment.dockerVersion = $dockerVersion
         $environment.dockerMemoryBytes = $dockerMemory
-        $environment.postgresImage = 'postgres:17'
+        $environment.postgresImage = $postgresImageReference
         $environment.testcontainersVersion = '1.20.4'
         $environment.criteriaSourceSha256 = $criteriaHash
         $environment.powerShellExecutable = $ResolvedPowerShellIdentity
         Write-JsonFile -Path (Join-Path $EvidenceRoot 'environment.json') -Value $environment
 
-        $preflight = New-Artifact -Scenario 'environment-preflight' -Status 'PASS' -CommitSha $commitSha -StartedAt $started -FinishedAt $finished
+        $preflight = New-Artifact -Scenario 'environment-preflight' -Status $preflightStatus -CommitSha $commitSha -StartedAt $started -FinishedAt $finished
         $preflight.checks = $checks.ToArray()
-        $preflight.blockerCode = $null
-        $preflight.blockers = @()
+        $preflight.blockerCode = $(if ($ImplementationValidationEnabled -and $blockers.Count -gt 0) { 'IMPLEMENTATION_VALIDATION_FORMAL_ENVIRONMENT_NOT_QUALIFIED' } else { $null })
+        $preflight.blockers = $(if ($ImplementationValidationEnabled) { $blockers.ToArray() } else { @() })
         Write-JsonFile -Path (Join-Path $EvidenceRoot 'preflight.json') -Value $preflight
 
         $mavenPid = Get-ProcessParentId -ProcessId $PID
@@ -674,6 +947,8 @@ function Invoke-Preflight {
         $registry.containerOwnership = 'JUNIT_TESTCONTAINERS'
         $registry.implementationValidation = $ImplementationValidationEnabled
         $registry.qualificationOnly = $QualificationOnlyEnabled
+        $registry.postgresImageId = $imageIdentity.text
+        $registry.postgresImageReference = $postgresImageReference
         $registry.teardown = [ordered]@{ sampler = 'PENDING'; container = 'PENDING'; volume = 'PENDING'; residual = 'PENDING' }
         Write-JsonFile -Path $RegistryPath -Value $registry
 
@@ -804,12 +1079,12 @@ function Test-CommonJsonArtifact {
     param([string]$Path, [string]$CommitSha)
     try {
         $artifact = Read-JsonFile -Path $Path
-        foreach ($field in @('schemaVersion', 'runId', 'commitSha', 'scenario', 'status', 'startedAtUtc', 'finishedAtUtc', 'durationMs', 'seed', 'unitSystem', 'missingValues', 'criteriaVersion')) {
+        foreach ($field in @('schemaVersion', 'runId', 'commitSha', 'scenario', 'status', 'startedAtUtc', 'finishedAtUtc', 'durationMs', 'seed', 'unitSystem', 'missingValues', 'criteriaVersion', 'attemptId', 'candidateSha', 'candidateTree', 'profileId', 'profileVersion', 'scenarioSetHash', 'thresholdSetHash', 'environmentManifestHash', 'harnessVersion', 'harnessHash', 'generatedAt')) {
             if ($null -eq $artifact.PSObject.Properties[$field]) {
                 return $false
             }
         }
-        return ($artifact.schemaVersion -eq $SchemaVersion -and $artifact.runId -eq $RunId -and $artifact.commitSha -eq $CommitSha -and $artifact.criteriaVersion -eq $CriteriaVersion -and $artifact.seed -eq 7 -and @('PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'NOT_FORMAL') -contains $artifact.status)
+        return ($artifact.schemaVersion -eq $SchemaVersion -and $artifact.runId -eq $RunId -and $artifact.commitSha -eq $CommitSha -and $artifact.criteriaVersion -eq $CriteriaVersion -and $artifact.seed -eq 7 -and @('PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'NOT_FORMAL', 'QUALIFIED', 'NOT_QUALIFIED') -contains $artifact.status)
     }
     catch {
         return $false
@@ -928,18 +1203,669 @@ function Get-ManifestMismatchCount {
         return 1
     }
     $mismatches = 0
+    $manifestNames = New-Object Collections.Generic.List[string]
+    $uniqueNames = New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal)
     foreach ($line in Get-Content -LiteralPath $manifestPath) {
         $parts = $line -split '  ', 2
-        if ($parts.Count -ne 2) {
+        if ($parts.Count -ne 2 -or $parts[0] -notmatch '^[a-f0-9]{64}$') {
             $mismatches++
             continue
         }
+        $name = [string]$parts[1]
+        if ([string]::IsNullOrWhiteSpace($name) -or [IO.Path]::IsPathRooted($name) -or [IO.Path]::GetFileName($name) -ne $name -or $name -eq 'sha256-manifest.txt') {
+            $mismatches++
+            continue
+        }
+        $manifestNames.Add($name)
+        if (-not $uniqueNames.Add($name)) {
+            $mismatches++
+        }
         $target = [IO.Path]::GetFullPath((Join-Path $EvidenceRoot $parts[1]))
-        if (-not $target.StartsWith($EvidenceRoot, [StringComparison]::OrdinalIgnoreCase) -or -not (Test-Path -LiteralPath $target -PathType Leaf) -or (Get-Sha256 -Path $target) -ne $parts[0]) {
+        if (-not (Test-Path -LiteralPath $target -PathType Leaf) -or (Get-Sha256 -Path $target) -ne $parts[0]) {
             $mismatches++
         }
     }
+    $sortedManifestNames = New-Object Collections.Generic.List[string]
+    foreach ($name in $manifestNames) { $sortedManifestNames.Add($name) }
+    $sortedManifestNames.Sort([StringComparer]::Ordinal)
+    for ($index = 0; $index -lt $manifestNames.Count; $index++) {
+        if ($manifestNames[$index] -cne $sortedManifestNames[$index]) {
+            $mismatches++
+            break
+        }
+    }
+    $currentNames = New-Object Collections.Generic.List[string]
+    foreach ($file in @(Get-ChildItem -LiteralPath $EvidenceRoot -File | Where-Object { $_.FullName -ne $manifestPath })) {
+        $currentNames.Add($file.Name)
+    }
+    if (-not $uniqueNames.SetEquals($currentNames)) {
+        $mismatches++
+    }
     return $mismatches
+}
+
+function Invoke-ManifestContractTest {
+    if ($RunId -notmatch '^[0-9]{8}T[0-9]{6}Z$' -or $Seed -ne 7 -or -not $EvidenceRoot.StartsWith($EvidenceBase, [StringComparison]::OrdinalIgnoreCase)) {
+        exit 10
+    }
+    [IO.Directory]::CreateDirectory($EvidenceRoot) | Out-Null
+    foreach ($name in @('a.txt', 'b.txt', 'c.txt', 'sha256-manifest.txt')) {
+        [IO.File]::Delete((Join-Path $EvidenceRoot $name))
+    }
+    Write-Utf8File -Path (Join-Path $EvidenceRoot 'a.txt') -Content "a`n"
+    Write-Utf8File -Path (Join-Path $EvidenceRoot 'b.txt') -Content "b`n"
+    Write-Manifest
+    if ((Get-ManifestMismatchCount) -ne 0) { exit 1 }
+
+    $manifestPath = Join-Path $EvidenceRoot 'sha256-manifest.txt'
+    $original = @(Get-Content -LiteralPath $manifestPath)
+    Write-Utf8File -Path $manifestPath -Content ($original[0] + "`n")
+    if ((Get-ManifestMismatchCount) -eq 0) { exit 2 }
+
+    Write-Utf8File -Path $manifestPath -Content (($original[0], $original[0], $original[1] -join "`n") + "`n")
+    if ((Get-ManifestMismatchCount) -eq 0) { exit 3 }
+
+    Write-Manifest
+    Write-Utf8File -Path (Join-Path $EvidenceRoot 'c.txt') -Content "c`n"
+    if ((Get-ManifestMismatchCount) -eq 0) { exit 4 }
+
+    Write-Output 'QDR7_CAPACITY_MANIFEST_CONTRACT=PASS'
+    exit 0
+}
+
+function Get-EnvironmentManifestContentHash {
+    param([object]$Manifest)
+    $hashSource = $Manifest | ConvertTo-Json -Depth 30 -Compress | ConvertFrom-Json
+    $hashSource.PSObject.Properties.Remove('environmentManifestHash')
+    return Get-Sha256Text -Value ($hashSource | ConvertTo-Json -Depth 30 -Compress)
+}
+
+function Get-NetworkIsolationSnapshot {
+    param([string[]]$AllowedPatterns)
+    $activeAdapters = @()
+    $disallowed = @()
+    $inspectionAvailable = $false
+    try {
+        if ($null -eq (Get-Command -Name 'Get-NetAdapter' -ErrorAction SilentlyContinue)) {
+            throw 'Get-NetAdapter unavailable'
+        }
+        $activeAdapters = @(Get-NetAdapter -IncludeHidden -ErrorAction Stop | Where-Object { $_.Status -eq 'Up' })
+        foreach ($adapter in $activeAdapters) {
+            $allowed = $false
+            foreach ($pattern in $AllowedPatterns) {
+                if ([string]$adapter.Name -match $pattern -or [string]$adapter.InterfaceDescription -match $pattern) {
+                    $allowed = $true
+                    break
+                }
+            }
+            if (-not $allowed) {
+                $disallowed += $adapter
+            }
+        }
+        $inspectionAvailable = $true
+    }
+    catch {
+        $activeAdapters = @()
+        $disallowed = @()
+    }
+    $adapterFacts = @($activeAdapters | ForEach-Object { "$($_.ifIndex)|$($_.Name)|$($_.InterfaceDescription)" } | Sort-Object)
+    return [ordered]@{
+        networkIsolationVerified = $inspectionAvailable -and $disallowed.Count -eq 0
+        disallowedNetworkAdapterCount = $(if ($inspectionAvailable) { $disallowed.Count } else { -1 })
+        activeNetworkAdapterSetHash = Get-Sha256Text -Value ($adapterFacts | ConvertTo-Json -Compress)
+    }
+}
+
+function Write-ArtifactInventory {
+    param([string]$CommitSha, [string]$StartedAt)
+    $excluded = @(
+        'artifact-inventory.json',
+        'capacity-final-verdict.json',
+        'capacity-acceptance-summary.json',
+        'harness-exit-code.txt',
+        'sha256-manifest.txt'
+    )
+    $rows = New-Object Collections.Generic.List[object]
+    foreach ($file in @(Get-ChildItem -LiteralPath $EvidenceRoot -File | Where-Object { $_.Name -notin $excluded } | Sort-Object -Property Name)) {
+        $rows.Add([ordered]@{
+            path = $file.Name
+            sha256 = Get-Sha256 -Path $file.FullName
+            bytes = [long]$file.Length
+        })
+    }
+    $artifact = New-Artifact -Scenario 'artifact-inventory' -Status 'PASS' -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt (Get-UtcTimestamp)
+    $artifact.artifacts = $rows.ToArray()
+    $artifact.artifactCount = $rows.Count
+    $artifact.excludedDerivedArtifacts = $excluded
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'artifact-inventory.json') -Value $artifact
+}
+
+function Write-CapacityFinalVerdict {
+    param(
+        [string]$CommitSha,
+        [string]$StartedAt,
+        [string]$Verdict,
+        [string]$ReasonCode,
+        [string[]]$IntegrityFindings
+    )
+    $status = $(if ($Verdict -eq 'PASS_WITHIN_FROZEN_PROFILE') { 'PASS' } elseif ($Verdict -eq 'INVALID') { 'INVALID' } elseif ($Verdict -eq 'FAIL') { 'FAIL' } else { 'BLOCKED' })
+    $artifact = New-Artifact -Scenario 'capacity-final-verdict' -Status $status -CommitSha $CommitSha -StartedAt $StartedAt -FinishedAt (Get-UtcTimestamp)
+    $artifact.verdict = $Verdict
+    $artifact.reasonCode = $ReasonCode
+    $artifact.integrityFindings = $IntegrityFindings
+    $artifact.formalCapacityExecuted = ($Verdict -eq 'PASS_WITHIN_FROZEN_PROFILE' -and (Get-ExecutionMode) -eq 'FORMAL')
+    $artifact.expectedMandatoryScenarios = 15
+    $artifact.expectedThresholdLeaves = 41
+    $artifact.expectedThresholdComparisons = 99
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'capacity-final-verdict.json') -Value $artifact
+}
+
+function Get-ThresholdValueByPath {
+    param([object]$ThresholdProfile, [string]$ThresholdPath)
+    $current = $ThresholdProfile
+    foreach ($segment in $ThresholdPath.Split('.')) {
+        $property = $current.PSObject.Properties[$segment]
+        if ($null -eq $property) {
+            throw "threshold path not found: $ThresholdPath"
+        }
+        $current = $property.Value
+    }
+    return [decimal]$current
+}
+
+function Get-ThresholdSemanticExpectation {
+    param([object]$Consumer, [object]$ThresholdProfile)
+    $path = [string]$Consumer.thresholdPath
+    $operator = '<='
+    $unit = 'milliseconds'
+    $sourceArtifact = ''
+    $artifactField = ''
+    switch ([string]$Consumer.scenario) {
+        'rate-matrix' {
+            $operator = $(if ($path.EndsWith('.throughputMin')) { '>=' } else { '<=' })
+            $unit = $(if ($path.EndsWith('.throughputMin')) { 'operations/second' } else { 'milliseconds' })
+            $sourceArtifact = 'rate-summary.json'
+            $field = $(
+                if ($path.EndsWith('.throughputMin')) { 'throughput' }
+                elseif ($path.EndsWith('.p50MaxMs')) { 'p50Ms' }
+                elseif ($path.EndsWith('.p95MaxMs')) { 'p95Ms' }
+                elseif ($path.EndsWith('.p99MaxMs')) { 'p99Ms' }
+                elseif ($path.EndsWith('.latencyMaxMs')) { 'maxMs' }
+                else { throw "unsupported rate threshold: $path" }
+            )
+            $artifactField = "rate-summary.json#rounds[concurrency,round].$field"
+        }
+        'tenant-scoped-cleanup' {
+            $sourceArtifact = 'cleanup-summary.json'
+            $artifactField = 'cleanup-summary.json#scales[scale].durationMs'
+        }
+        'postgres-same-pool-recovery' {
+            $sourceArtifact = 'recovery-timeline.csv'
+            $field = $(
+                if ($path.EndsWith('.database')) { 'databaseReadyMs' }
+                elseif ($path.EndsWith('.hikari')) { 'hikariReadyMs' }
+                elseif ($path.EndsWith('.request')) { 'requestReadyMs' }
+                elseif ($path.EndsWith('.samplingGap')) { 'samplingGapMs' }
+                else { throw "unsupported recovery threshold: $path" }
+            )
+            $artifactField = "recovery-timeline.csv#rows[round].$field"
+        }
+        'postgres-hikari-contention' {
+            $unit = $(if ($path.EndsWith('.acquireMs')) { 'milliseconds' } else { 'count' })
+            $sourceArtifact = 'postgres-hikari-series.csv'
+            $field = $(
+                if ($path.EndsWith('.hikariPending')) { 'hikariPending' }
+                elseif ($path.EndsWith('.acquireMs')) { 'acquireMs' }
+                elseif ($path.EndsWith('.postgresWaiting')) { 'postgresWaiting' }
+                elseif ($path.EndsWith('.postgresLockWaiting')) { 'postgresLockWaiting' }
+                else { throw "unsupported contention threshold: $path" }
+            )
+            $artifactField = "postgres-hikari-series.csv#max($field)"
+        }
+        'full-regression' {
+            $operator = $(if ($path.EndsWith('.minimumFreeMemoryBytes')) { '>=' } else { '<=' })
+            $unit = $(if ($path.EndsWith('.durationMs')) { 'milliseconds' } else { 'bytes' })
+            $sourceArtifact = 'resource-summary.json'
+            $field = @{
+                'numericThresholds.regressionMax.durationMs' = 'durationMs'
+                'numericThresholds.regressionMax.mavenWorkingSetBytes' = 'mavenPeakWorkingSetBytes'
+                'numericThresholds.regressionMax.surefireWorkingSetBytes' = 'surefirePeakAggregateWorkingSetBytes'
+                'numericThresholds.regressionMax.dockerMemoryBytes' = 'dockerPeakMemoryBytes'
+                'numericThresholds.regressionMax.minimumFreeMemoryBytes' = 'minimumHostAvailableBytes'
+            }[$path]
+            if ([string]::IsNullOrWhiteSpace([string]$field)) { throw "unsupported regression threshold: $path" }
+            $artifactField = "resource-summary.json#$field"
+        }
+        default { throw "threshold consumer scenario unsupported: $($Consumer.scenario)" }
+    }
+    return [ordered]@{
+        operator = $operator
+        threshold = Get-ThresholdValueByPath -ThresholdProfile $ThresholdProfile -ThresholdPath $path
+        unit = $unit
+        sourceArtifact = $sourceArtifact
+        artifactField = $artifactField
+    }
+}
+
+function Test-ThresholdSemanticRow {
+    param([object]$Row, [object]$Expectation, [string]$ThresholdPath, [decimal]$SourceObserved)
+    $findings = New-Object Collections.Generic.List[string]
+    if ([string]$Row.operator -ne [string]$Expectation.operator) {
+        $findings.Add("THRESHOLD_OPERATOR_MISMATCH:$ThresholdPath")
+    }
+    $thresholdValid = $true
+    try {
+        $actualThreshold = [decimal]$Row.threshold
+        if ($actualThreshold -ne [decimal]$Expectation.threshold) {
+            $findings.Add("THRESHOLD_VALUE_MISMATCH:$ThresholdPath")
+        }
+    }
+    catch {
+        $thresholdValid = $false
+        $findings.Add("THRESHOLD_VALUE_MISMATCH:$ThresholdPath")
+    }
+    if ([string]$Row.sourceArtifact -ne [string]$Expectation.sourceArtifact) {
+        $findings.Add("THRESHOLD_SOURCE_ARTIFACT_MISMATCH:$ThresholdPath")
+    }
+    if ([string]$Row.unit -ne [string]$Expectation.unit) {
+        $findings.Add("THRESHOLD_UNIT_MISMATCH:$ThresholdPath")
+    }
+    $observedValid = $true
+    try {
+        $observedDouble = [double]$Row.observed
+        $observedValid = -not [double]::IsNaN($observedDouble) -and -not [double]::IsInfinity($observedDouble)
+        $observed = [decimal]$observedDouble
+    }
+    catch {
+        $observedValid = $false
+    }
+    if (-not $observedValid) {
+        $findings.Add("THRESHOLD_OBSERVED_INVALID:$ThresholdPath")
+    }
+    elseif ($observed -ne $SourceObserved) {
+        $findings.Add("THRESHOLD_SOURCE_OBSERVED_MISMATCH:$ThresholdPath")
+    }
+    if ($observedValid -and $thresholdValid -and $findings.Count -eq 0) {
+        $comparisonPassed = $(if ($Expectation.operator -eq '>=') { $observed -ge [decimal]$Expectation.threshold } else { $observed -le [decimal]$Expectation.threshold })
+        $expectedStatus = $(if ($comparisonPassed) { 'PASS' } else { 'FAIL' })
+        if ([string]$Row.status -ne $expectedStatus) {
+            $findings.Add("THRESHOLD_STATUS_SEMANTICS_MISMATCH:$ThresholdPath")
+        }
+    }
+    return $findings.ToArray()
+}
+
+function Get-StrictJsonDecimal {
+    param([object]$Value)
+    if ($null -eq $Value -or $Value -is [bool] -or $Value -is [string]) {
+        throw 'JSON source metric is not numeric'
+    }
+    $asDouble = [double]$Value
+    if ([double]::IsNaN($asDouble) -or [double]::IsInfinity($asDouble)) {
+        throw 'JSON source metric is not finite'
+    }
+    return [decimal]$Value
+}
+
+function Get-ThresholdObservedFromSource {
+    param([object]$Row, [object]$Consumer, [object]$Expectation)
+    $path = Join-Path $EvidenceRoot ([string]$Expectation.sourceArtifact)
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+        throw "threshold source artifact missing: $($Expectation.sourceArtifact)"
+    }
+    $criterionId = [string]$Row.criterionId
+    $thresholdPath = [string]$Consumer.thresholdPath
+    switch ([string]$Consumer.scenario) {
+        'rate-matrix' {
+            if ($criterionId -notmatch '^rate\.c(?<concurrency>[0-9]+)\.r(?<round>[0-9]+)\.(?<metric>throughput|p50|p95|p99|max)$') {
+                throw 'rate criterion id invalid'
+            }
+            $criterionConcurrency = [int]$Matches['concurrency']
+            $criterionRound = [int]$Matches['round']
+            $criterionMetric = [string]$Matches['metric']
+            if ($thresholdPath -notmatch '^numericThresholds\.rate\.(?<thresholdConcurrency>[0-9]+)\.' -or [int]$Matches['thresholdConcurrency'] -ne $criterionConcurrency) {
+                throw 'rate criterion threshold binding mismatch'
+            }
+            $source = Read-JsonFile -Path $path
+            $rows = @($source.rounds | Where-Object { [int]$_.concurrency -eq $criterionConcurrency -and [int]$_.round -eq $criterionRound })
+            if ($rows.Count -ne 1) { throw 'rate source row cardinality invalid' }
+            $field = @{ throughput = 'throughput'; p50 = 'p50Ms'; p95 = 'p95Ms'; p99 = 'p99Ms'; max = 'maxMs' }[$criterionMetric]
+            return Get-StrictJsonDecimal -Value $rows[0].$field
+        }
+        'tenant-scoped-cleanup' {
+            if ($criterionId -notmatch '^cleanup\.(?<scale>[0-9]+)\.duration$' -or -not $thresholdPath.EndsWith(".$($Matches['scale'])")) {
+                throw 'cleanup criterion threshold binding mismatch'
+            }
+            $source = Read-JsonFile -Path $path
+            $rows = @($source.scales | Where-Object { [int]$_.scale -eq [int]$Matches['scale'] })
+            if ($rows.Count -ne 1) { throw 'cleanup source row cardinality invalid' }
+            return Get-StrictJsonDecimal -Value $rows[0].durationMs
+        }
+        'postgres-same-pool-recovery' {
+            if ($criterionId -notmatch '^recovery\.(?<metric>database|hikari|request|samplingGap)\.r(?<round>[0-9]+)$') {
+                throw 'recovery criterion id invalid'
+            }
+            $expectedSuffix = @{ database = '.database'; hikari = '.hikari'; request = '.request'; samplingGap = '.samplingGap' }[$Matches['metric']]
+            if (-not $thresholdPath.EndsWith($expectedSuffix)) { throw 'recovery criterion threshold binding mismatch' }
+            $rows = @(Import-Csv -LiteralPath $path | Where-Object { [int]$_.round -eq [int]$Matches['round'] })
+            if ($rows.Count -ne 1) { throw 'recovery source row cardinality invalid' }
+            $field = @{ database = 'databaseReadyMs'; hikari = 'hikariReadyMs'; request = 'requestReadyMs'; samplingGap = 'samplingGapMs' }[$Matches['metric']]
+            return [decimal]$rows[0].$field
+        }
+        'postgres-hikari-contention' {
+            if ($criterionId -notmatch '^contention\.(?<metric>hikariPending|acquire|postgresWaiting|lockWaiting)$') {
+                throw 'contention criterion id invalid'
+            }
+            $expectedSuffix = @{ hikariPending = '.hikariPending'; acquire = '.acquireMs'; postgresWaiting = '.postgresWaiting'; lockWaiting = '.postgresLockWaiting' }[$Matches['metric']]
+            if (-not $thresholdPath.EndsWith($expectedSuffix)) { throw 'contention criterion threshold binding mismatch' }
+            $field = @{ hikariPending = 'hikariPending'; acquire = 'acquireMs'; postgresWaiting = 'postgresWaiting'; lockWaiting = 'postgresLockWaiting' }[$Matches['metric']]
+            $values = @(Import-Csv -LiteralPath $path | ForEach-Object { [decimal]$_.$field })
+            if ($values.Count -eq 0) { throw 'contention source has no rows' }
+            return [decimal](($values | Measure-Object -Maximum).Maximum)
+        }
+        'full-regression' {
+            $expectedCriterion = @{
+                'numericThresholds.regressionMax.durationMs' = 'regression.duration'
+                'numericThresholds.regressionMax.mavenWorkingSetBytes' = 'regression.mavenWorkingSet'
+                'numericThresholds.regressionMax.surefireWorkingSetBytes' = 'regression.surefireWorkingSet'
+                'numericThresholds.regressionMax.dockerMemoryBytes' = 'regression.dockerMemory'
+                'numericThresholds.regressionMax.minimumFreeMemoryBytes' = 'regression.minimumFreeMemory'
+            }[$thresholdPath]
+            if ($criterionId -ne $expectedCriterion) { throw 'regression criterion threshold binding mismatch' }
+            $source = Read-JsonFile -Path $path
+            $field = ([string]$Expectation.artifactField).Substring(([string]$Expectation.artifactField).IndexOf('#') + 1)
+            return Get-StrictJsonDecimal -Value $source.$field
+        }
+        default { throw "threshold source scenario unsupported: $($Consumer.scenario)" }
+    }
+}
+
+function Test-FormalEvidencePacket {
+    param([string]$CommitSha)
+    $findings = New-Object Collections.Generic.List[string]
+    $executionPath = Join-Path $EvidenceRoot 'capacity-execution-manifest.json'
+    if (-not (Test-Path -LiteralPath $executionPath -PathType Leaf)) {
+        return @('EXECUTION_MANIFEST_MISSING')
+    }
+    $execution = Read-JsonFile -Path $executionPath
+    $bindingFields = @('attemptId', 'candidateSha', 'candidateTree', 'profileId', 'profileVersion', 'scenarioSetHash', 'thresholdSetHash', 'environmentManifestHash', 'harnessVersion', 'harnessHash')
+    $artifactRegistry = Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-artifact-registry.json')
+    foreach ($name in @($artifactRegistry.mandatory | Where-Object { $_.EndsWith('.json') })) {
+        $path = Join-Path $EvidenceRoot $name
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+            $findings.Add("BINDING_ARTIFACT_MISSING:$name")
+            continue
+        }
+        $artifact = Read-JsonFile -Path $path
+        foreach ($field in $bindingFields) {
+            if ([string]$artifact.$field -ne [string]$execution.$field) {
+                $findings.Add("BINDING_MISMATCH:${name}:$field")
+            }
+        }
+    }
+    $environmentManifest = Read-JsonFile -Path (Join-Path $EvidenceRoot 'capacity-environment-manifest.json')
+    try {
+        if ((Get-EnvironmentManifestContentHash -Manifest $environmentManifest) -ne [string]$execution.environmentManifestHash) {
+            $findings.Add('ENVIRONMENT_MANIFEST_HASH_MISMATCH')
+        }
+    }
+    catch {
+        $findings.Add('ENVIRONMENT_MANIFEST_HASH_UNREADABLE')
+    }
+    $currentHead = Get-GitValue -Arguments @('rev-parse', 'HEAD')
+    $currentTree = Get-GitValue -Arguments @('rev-parse', 'HEAD^{tree}')
+    if ($execution.candidateSha -ne $currentHead -or $CommitSha -ne $currentHead) {
+        $findings.Add('FINALIZER_HEAD_MISMATCH')
+    }
+    if ($execution.candidateTree -ne $currentTree) {
+        $findings.Add('FINALIZER_TREE_MISMATCH')
+    }
+    $trackedChanges = @(Get-GitPathList -Arguments @('diff', '--name-only'))
+    $untrackedChanges = @(Get-GitPathList -Arguments @('ls-files', '--others', '--exclude-standard'))
+    if (@($trackedChanges + $untrackedChanges | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count -gt 0) {
+        $findings.Add('FINALIZER_WORKTREE_DIRTY')
+    }
+    $stagedChanges = @(Get-GitPathList -Arguments @('diff', '--cached', '--name-only'))
+    if (@($stagedChanges | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count -gt 0) {
+        $findings.Add('FINALIZER_STAGED_DIRTY')
+    }
+    if ((Get-Sha256 -Path (Join-Path $ConfigRoot 'qdr7-capacity-scenario-registry.json')) -ne [string]$execution.scenarioSetHash) {
+        $findings.Add('FINALIZER_SCENARIO_SET_HASH_MISMATCH')
+    }
+    if ((Get-Sha256 -Path (Join-Path $ConfigRoot 'qdr7-capacity-thresholds.json')) -ne [string]$execution.thresholdSetHash) {
+        $findings.Add('FINALIZER_THRESHOLD_SET_HASH_MISMATCH')
+    }
+    if ((Get-HarnessHash) -ne [string]$execution.harnessHash) {
+        $findings.Add('FINALIZER_HARNESS_HASH_MISMATCH')
+    }
+    if ($execution.candidateSha -ne $CommitSha -or $execution.candidateTree -ne $currentTree -or $execution.profileId -ne 'qdr7-capacity-acceptance' -or $execution.profileVersion -ne $CriteriaVersion) {
+        $findings.Add('CANDIDATE_OR_PROFILE_BINDING_MISMATCH')
+    }
+
+    $scenarioRegistry = Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-scenario-registry.json')
+    $ledger = Read-JsonFile -Path (Join-Path $EvidenceRoot 'scenario-ledger.json')
+    foreach ($scenarioId in $scenarioRegistry.fixedOrder) {
+        if (@($ledger.scenarios | Where-Object { $_.scenarioId -eq $scenarioId }).Count -ne 1) {
+            $findings.Add("SCENARIO_CARDINALITY_INVALID:$scenarioId")
+        }
+    }
+    $scenarioIds = @($ledger.scenarios | ForEach-Object { [string]$_.scenarioId })
+    if (@($scenarioIds | Sort-Object -Unique).Count -ne @($scenarioIds).Count) {
+        $findings.Add('DUPLICATE_SCENARIO_RESULT')
+    }
+
+    $consumerMatrix = Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-threshold-consumers.json')
+    $thresholdProfile = Read-JsonFile -Path (Join-Path $ConfigRoot 'qdr7-capacity-thresholds.json')
+    $threshold = Read-JsonFile -Path (Join-Path $EvidenceRoot 'threshold-comparison.json')
+    foreach ($consumer in $consumerMatrix.consumers) {
+        $rows = @($threshold.comparisons | Where-Object { $_.thresholdPath -eq $consumer.thresholdPath })
+        if ($rows.Count -ne [int]$consumer.expectedExecutions) {
+            $findings.Add("THRESHOLD_EXECUTION_COUNT_MISMATCH:$($consumer.thresholdPath)")
+        }
+        try {
+            $expectation = Get-ThresholdSemanticExpectation -Consumer $consumer -ThresholdProfile $thresholdProfile
+            if ([string]$consumer.artifactField -ne [string]$expectation.artifactField) {
+                $findings.Add("THRESHOLD_ARTIFACT_FIELD_MISMATCH:$($consumer.thresholdPath)")
+            }
+            if ([string]$expectation.sourceArtifact -notin @($artifactRegistry.mandatory)) {
+                $findings.Add("THRESHOLD_SOURCE_ARTIFACT_UNSEALED:$($consumer.thresholdPath)")
+            }
+            foreach ($row in $rows) {
+                try {
+                    $sourceObserved = Get-ThresholdObservedFromSource -Row $row -Consumer $consumer -Expectation $expectation
+                }
+                catch {
+                    $findings.Add("THRESHOLD_SOURCE_OBSERVED_UNREADABLE:$($consumer.thresholdPath):$($row.criterionId)")
+                    continue
+                }
+                foreach ($finding in @(Test-ThresholdSemanticRow -Row $row -Expectation $expectation -ThresholdPath ([string]$consumer.thresholdPath) -SourceObserved $sourceObserved)) {
+                    $findings.Add([string]$finding)
+                }
+            }
+        }
+        catch {
+            $findings.Add("THRESHOLD_EXPECTATION_UNREADABLE:$($consumer.thresholdPath)")
+        }
+    }
+    $knownPaths = @($consumerMatrix.consumers | ForEach-Object { [string]$_.thresholdPath })
+    foreach ($row in $threshold.comparisons) {
+        if ([string]$row.thresholdPath -notin $knownPaths) {
+            $findings.Add("ORPHAN_THRESHOLD:$($row.thresholdPath)")
+        }
+    }
+    $criterionIds = @($threshold.comparisons | ForEach-Object { [string]$_.criterionId })
+    if (@($criterionIds | Sort-Object -Unique).Count -ne @($criterionIds).Count) {
+        $findings.Add('DUPLICATE_THRESHOLD_RESULT')
+    }
+    if (@($threshold.comparisons).Count -ne 99 -or @($knownPaths | Sort-Object -Unique).Count -ne 41) {
+        $findings.Add('THRESHOLD_SET_INCOMPLETE')
+    }
+    foreach ($finding in @(Get-ThresholdAggregateFindings -Threshold $threshold)) {
+        $findings.Add([string]$finding)
+    }
+
+    $samplerCompletionPath = Join-Path $EvidenceRoot 'resource-sampler-completion.json'
+    if (-not (Test-Path -LiteralPath $samplerCompletionPath -PathType Leaf)) {
+        $findings.Add('RESOURCE_SAMPLER_COMPLETION_INVALID')
+    }
+    else {
+        try {
+            $samplerCompletion = Read-JsonFile -Path $samplerCompletionPath
+            if ($samplerCompletion.schemaVersion -ne 'qdr7-capacity-resource-sampler-completion-2' -or
+                $samplerCompletion.status -ne 'COMPLETED' -or
+                $samplerCompletion.runId -ne $RunId -or
+                $samplerCompletion.commitSha -ne $currentHead -or
+                [long]$samplerCompletion.elapsedMs -le 0L -or
+                [int]$samplerCompletion.jvmRowCount -le 0 -or
+                [int]$samplerCompletion.dockerRowCount -le 0 -or
+                [int]$samplerCompletion.mavenRowCount -le 0 -or
+                [int]$samplerCompletion.surefireRowCount -le 0 -or
+                [int]$samplerCompletion.fullRegressionMavenSampleCount -lt 2 -or
+                [int]$samplerCompletion.fullRegressionSurefireSampleCount -lt 2 -or
+                [long]$samplerCompletion.jvmLastElapsedMs -le 0L -or
+                [long]$samplerCompletion.dockerLastElapsedMs -le 0L -or
+                [int]$samplerCompletion.jvmCriticalMissingCount -ne 0 -or
+                [int]$samplerCompletion.dockerCriticalMissingCount -ne 0) {
+                $findings.Add('RESOURCE_SAMPLER_COMPLETION_INVALID')
+            }
+            $jvmSeriesHash = Get-Sha256 -Path (Join-Path $EvidenceRoot 'jvm-series.csv')
+            $dockerSeriesHash = Get-Sha256 -Path (Join-Path $EvidenceRoot 'docker-series.csv')
+            if ([string]$samplerCompletion.jvmSeriesSha256 -ne $jvmSeriesHash -or
+                [string]$samplerCompletion.dockerSeriesSha256 -ne $dockerSeriesHash) {
+                $findings.Add('RESOURCE_SAMPLER_RAW_HASH_MISMATCH')
+            }
+            $resourceSummary = Read-JsonFile -Path (Join-Path $EvidenceRoot 'resource-summary.json')
+            if ([string]$resourceSummary.jvmSeriesSha256 -ne $jvmSeriesHash -or
+                [string]$resourceSummary.dockerSeriesSha256 -ne $dockerSeriesHash -or
+                [string]$resourceSummary.samplerCompletionSchemaVersion -ne [string]$samplerCompletion.schemaVersion -or
+                [long]$resourceSummary.samplerJvmLastElapsedMs -ne [long]$samplerCompletion.jvmLastElapsedMs -or
+                [long]$resourceSummary.samplerDockerLastElapsedMs -ne [long]$samplerCompletion.dockerLastElapsedMs) {
+                $findings.Add('RESOURCE_SUMMARY_RAW_BINDING_MISMATCH')
+            }
+        }
+        catch {
+            $findings.Add('RESOURCE_SAMPLER_COMPLETION_INVALID')
+        }
+    }
+
+    $inventory = Read-JsonFile -Path (Join-Path $EvidenceRoot 'artifact-inventory.json')
+    $inventoryPaths = @($inventory.artifacts | ForEach-Object { [string]$_.path })
+    if (@($inventoryPaths | Sort-Object -Unique).Count -ne @($inventoryPaths).Count) {
+        $findings.Add('DUPLICATE_ARTIFACT_INVENTORY_ENTRY')
+    }
+    foreach ($row in $inventory.artifacts) {
+        $path = [IO.Path]::GetFullPath((Join-Path $EvidenceRoot ([string]$row.path)))
+        if (-not $path.StartsWith($EvidenceRoot, [StringComparison]::OrdinalIgnoreCase) -or -not (Test-Path -LiteralPath $path -PathType Leaf) -or (Get-Sha256 -Path $path) -ne [string]$row.sha256) {
+            $findings.Add("ARTIFACT_INVENTORY_HASH_MISMATCH:$($row.path)")
+        }
+    }
+    return $findings.ToArray()
+}
+
+function Test-FormalPacketPreparationGate {
+    param([object]$ExecutionManifest)
+    if ($null -eq $ExecutionManifest.PSObject.Properties['formalPacketPrepared']) {
+        return @('FORMAL_PACKET_PREPARED_MISSING')
+    }
+    if ($ExecutionManifest.formalPacketPrepared -isnot [bool]) {
+        return @('FORMAL_PACKET_PREPARED_TYPE_INVALID')
+    }
+    if ($ExecutionManifest.formalPacketPrepared -ne $true) {
+        return @('FORMAL_PACKET_NOT_PREPARED')
+    }
+    return @()
+}
+
+function Invoke-FormalPacketGateContractTest {
+    $missing = [pscustomobject]@{}
+    $falseValue = [pscustomobject]@{ formalPacketPrepared = $false }
+    $wrongType = [pscustomobject]@{ formalPacketPrepared = 'true' }
+    $trueValue = [pscustomobject]@{ formalPacketPrepared = $true }
+    if (@(Test-FormalPacketPreparationGate -ExecutionManifest $missing) -notcontains 'FORMAL_PACKET_PREPARED_MISSING' -or
+        @(Test-FormalPacketPreparationGate -ExecutionManifest $falseValue) -notcontains 'FORMAL_PACKET_NOT_PREPARED' -or
+        @(Test-FormalPacketPreparationGate -ExecutionManifest $wrongType) -notcontains 'FORMAL_PACKET_PREPARED_TYPE_INVALID' -or
+        @(Test-FormalPacketPreparationGate -ExecutionManifest $trueValue).Count -ne 0) {
+        Write-Error 'formal packet gate contract failed'
+        exit 80
+    }
+    [IO.Directory]::CreateDirectory($EvidenceRoot) | Out-Null
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'rate-summary.json') -Value ([ordered]@{ rounds = @([ordered]@{ concurrency = 1; round = 1; throughput = 12.5; p50Ms = 2; p95Ms = 3; p99Ms = 4; maxMs = 5 }) })
+    $rateConsumer = [pscustomobject]@{ scenario = 'rate-matrix'; thresholdPath = 'numericThresholds.rate.1.throughputMin' }
+    $rateExpectation = [pscustomobject]@{ sourceArtifact = 'rate-summary.json'; artifactField = 'rate-summary.json#rounds[concurrency,round].throughput' }
+    $rateRow = [pscustomobject]@{ criterionId = 'rate.c1.r1.throughput' }
+    if ((Get-ThresholdObservedFromSource -Row $rateRow -Consumer $rateConsumer -Expectation $rateExpectation) -ne [decimal]12.5) {
+        Write-Error 'rate source binding contract failed'
+        exit 80
+    }
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'cleanup-summary.json') -Value ([ordered]@{ scales = @([ordered]@{ scale = 10; durationMs = 21 }) })
+    $cleanupObserved = Get-ThresholdObservedFromSource -Row ([pscustomobject]@{ criterionId = 'cleanup.10.duration' }) -Consumer ([pscustomobject]@{ scenario = 'tenant-scoped-cleanup'; thresholdPath = 'numericThresholds.cleanupMaxMs.10' }) -Expectation ([pscustomobject]@{ sourceArtifact = 'cleanup-summary.json'; artifactField = 'cleanup-summary.json#scales[scale].durationMs' })
+    Write-Utf8File -Path (Join-Path $EvidenceRoot 'recovery-timeline.csv') -Content "round,databaseReadyMs,hikariReadyMs,requestReadyMs,samplingGapMs`n1,31,32,33,34`n"
+    $recoveryObserved = Get-ThresholdObservedFromSource -Row ([pscustomobject]@{ criterionId = 'recovery.database.r1' }) -Consumer ([pscustomobject]@{ scenario = 'postgres-same-pool-recovery'; thresholdPath = 'numericThresholds.recoveryMaxMs.database' }) -Expectation ([pscustomobject]@{ sourceArtifact = 'recovery-timeline.csv'; artifactField = 'recovery-timeline.csv#rows[round].databaseReadyMs' })
+    Write-Utf8File -Path (Join-Path $EvidenceRoot 'postgres-hikari-series.csv') -Content "hikariPending,acquireMs,postgresWaiting,postgresLockWaiting`n1,10,2,0`n3,20,1,1`n"
+    $contentionObserved = Get-ThresholdObservedFromSource -Row ([pscustomobject]@{ criterionId = 'contention.hikariPending' }) -Consumer ([pscustomobject]@{ scenario = 'postgres-hikari-contention'; thresholdPath = 'numericThresholds.contentionMax.hikariPending' }) -Expectation ([pscustomobject]@{ sourceArtifact = 'postgres-hikari-series.csv'; artifactField = 'postgres-hikari-series.csv#max(hikariPending)' })
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'resource-summary.json') -Value ([ordered]@{ durationMs = 41 })
+    $resourceObserved = Get-ThresholdObservedFromSource -Row ([pscustomobject]@{ criterionId = 'regression.duration' }) -Consumer ([pscustomobject]@{ scenario = 'full-regression'; thresholdPath = 'numericThresholds.regressionMax.durationMs' }) -Expectation ([pscustomobject]@{ sourceArtifact = 'resource-summary.json'; artifactField = 'resource-summary.json#durationMs' })
+    if ($cleanupObserved -ne 21 -or $recoveryObserved -ne 31 -or $contentionObserved -ne 3 -or $resourceObserved -ne 41) {
+        Write-Error 'threshold source binding contract failed'
+        exit 80
+    }
+    Write-JsonFile -Path (Join-Path $EvidenceRoot 'resource-summary.json') -Value ([ordered]@{ durationMs = '41' })
+    $nonnumericRejected = $false
+    try {
+        [void](Get-ThresholdObservedFromSource -Row ([pscustomobject]@{ criterionId = 'regression.duration' }) -Consumer ([pscustomobject]@{ scenario = 'full-regression'; thresholdPath = 'numericThresholds.regressionMax.durationMs' }) -Expectation ([pscustomobject]@{ sourceArtifact = 'resource-summary.json'; artifactField = 'resource-summary.json#durationMs' }))
+    }
+    catch {
+        $nonnumericRejected = $true
+    }
+    if (-not $nonnumericRejected) {
+        Write-Error 'nonnumeric source metric was accepted'
+        exit 80
+    }
+    exit 0
+}
+
+function Get-ThresholdAggregateFindings {
+    param([object]$Threshold, [bool]$AllowNotRun = $false)
+    $findings = New-Object Collections.Generic.List[string]
+    $rows = @((Get-ObjectPropertyValue -Target $Threshold -Name 'comparisons' -DefaultValue @()))
+    $passed = @($rows | Where-Object { $_.status -eq 'PASS' }).Count
+    $failed = @($rows | Where-Object { $_.status -eq 'FAIL' }).Count
+    $blocked = @($rows | Where-Object { $_.status -eq 'BLOCKED' }).Count
+    $unknown = @($rows | Where-Object { $_.status -notin @('PASS', 'FAIL', 'BLOCKED') }).Count
+    if ($unknown -gt 0) {
+        $findings.Add('THRESHOLD_ROW_STATUS_INVALID')
+    }
+    $comparisonCount = [int](Get-ObjectPropertyValue -Target $Threshold -Name 'comparisonCount' -DefaultValue -1)
+    $comparisonsExecuted = [int](Get-ObjectPropertyValue -Target $Threshold -Name 'comparisonsExecuted' -DefaultValue -1)
+    $passedCount = [int](Get-ObjectPropertyValue -Target $Threshold -Name 'passedCount' -DefaultValue -1)
+    $failedCount = [int](Get-ObjectPropertyValue -Target $Threshold -Name 'failedCount' -DefaultValue -1)
+    $blockedCount = [int](Get-ObjectPropertyValue -Target $Threshold -Name 'blockedCount' -DefaultValue -1)
+    $notEvaluatedCount = [int](Get-ObjectPropertyValue -Target $Threshold -Name 'notEvaluatedCount' -DefaultValue -1)
+    if ($comparisonCount -ne $rows.Count -or
+        $comparisonsExecuted -ne $rows.Count -or
+        $passedCount -ne $passed -or
+        $failedCount -ne $failed -or
+        $blockedCount -ne $blocked -or
+        $notEvaluatedCount -lt 0) {
+        $findings.Add('THRESHOLD_STATUS_AGGREGATE_MISMATCH')
+    }
+    $notRunContract = $AllowNotRun -and
+        $rows.Count -eq 0 -and
+        $comparisonCount -eq 0 -and
+        $comparisonsExecuted -eq 0 -and
+        $passedCount -eq 0 -and
+        $failedCount -eq 0 -and
+        $blockedCount -eq 0 -and
+        $notEvaluatedCount -eq 99 -and
+        [int](Get-ObjectPropertyValue -Target $Threshold -Name 'notEvaluatedThresholds' -DefaultValue -1) -eq 99 -and
+        [int](Get-ObjectPropertyValue -Target $Threshold -Name 'declaredThresholdLeaves' -DefaultValue -1) -eq 41 -and
+        [string](Get-ObjectPropertyValue -Target $Threshold -Name 'reason' -DefaultValue '') -eq 'FORMAL_SCENARIO_NOT_EXECUTED'
+    $expectedStatus = $(if ($notRunContract) { 'NOT_RUN' } elseif ($failed -gt 0) { 'FAIL' } elseif ($blocked -gt 0 -or $notEvaluatedCount -ne 0) { 'BLOCKED' } else { 'PASS' })
+    $recordedStatus = [string](Get-ObjectPropertyValue -Target $Threshold -Name 'status' -DefaultValue '')
+    if ($recordedStatus -ne $expectedStatus) {
+        $findings.Add('THRESHOLD_TOP_LEVEL_STATUS_MISMATCH')
+    }
+    return $findings.ToArray()
 }
 
 function Get-ObjectPropertyValue {
@@ -967,6 +1893,9 @@ function Get-StatusForExitCode {
     param([int]$ExitCode)
     if ($ExitCode -eq 0) {
         return 'PASS'
+    }
+    if ($ExitCode -eq 80) {
+        return 'INVALID'
     }
     if ($ExitCode -in @(40, 50, 60, 70, 90)) {
         return 'FAIL'
@@ -1068,8 +1997,8 @@ function Invoke-PartialFinalizerContractTest {
     $threshold.passedCount = 5
     $threshold.failedCount = 0
     $threshold.blockedCount = 0
-    $threshold.notEvaluatedCount = 89
-    $threshold.notEvaluatedThresholds = 89
+    $threshold.notEvaluatedCount = 94
+    $threshold.notEvaluatedThresholds = 94
     $threshold.reason = 'PARTIAL_THRESHOLD_EVIDENCE'
     Write-JsonFile -Path (Join-Path $EvidenceRoot 'threshold-comparison.json') -Value $threshold
     Write-Utf8File -Path (Join-Path $EvidenceRoot 'commands.txt') -Content "1 | $started | . | partial finalizer contract | STARTED`n"
@@ -1082,6 +2011,21 @@ function Invoke-Finalize {
     }
     $registry = Read-JsonFile -Path $RegistryPath
     $commitSha = [string]$registry.commitSha
+    $modeBindingFindings = New-Object Collections.Generic.List[string]
+    $recordedImplementationValidation = [bool](Get-ObjectPropertyValue -Target $registry -Name 'implementationValidation' -DefaultValue $false)
+    $recordedQualificationOnly = [bool](Get-ObjectPropertyValue -Target $registry -Name 'qualificationOnly' -DefaultValue $false)
+    $recordedMode = $(if ($recordedImplementationValidation) { 'IMPLEMENTATION_VALIDATION' } elseif ($recordedQualificationOnly) { 'QUALIFICATION' } else { 'FORMAL' })
+    if (($recordedImplementationValidation -and $recordedQualificationOnly) -or $recordedMode -ne (Get-ExecutionMode)) {
+        $modeBindingFindings.Add('EXECUTION_MODE_BINDING_MISMATCH')
+    }
+    $recordedExecutionPath = Join-Path $EvidenceRoot 'capacity-execution-manifest.json'
+    if (Test-Path -LiteralPath $recordedExecutionPath -PathType Leaf) {
+        $recordedExecution = Read-JsonFile -Path $recordedExecutionPath
+        Set-EvidenceBinding -CandidateSha ([string]$recordedExecution.candidateSha) -CandidateTree ([string]$recordedExecution.candidateTree) -ProfileId ([string]$recordedExecution.profileId) -ProfileVersion ([string]$recordedExecution.profileVersion) -ScenarioSetHash ([string]$recordedExecution.scenarioSetHash) -ThresholdSetHash ([string]$recordedExecution.thresholdSetHash) -EnvironmentManifestHash ([string]$recordedExecution.environmentManifestHash) -HarnessHash ([string]$recordedExecution.harnessHash)
+        if ([string](Get-ObjectPropertyValue -Target $recordedExecution -Name 'executionMode' -DefaultValue '') -ne $recordedMode) {
+            $modeBindingFindings.Add('EXECUTION_MANIFEST_MODE_MISMATCH')
+        }
+    }
     $teardownFindings = New-Object Collections.Generic.List[string]
     try {
         foreach ($finding in @(Stop-RegisteredResources -Registry $registry -CommitSha $commitSha)) {
@@ -1182,7 +2126,7 @@ function Invoke-Finalize {
     $firstBlocker = @($ledger['scenarios'] | Where-Object { $_.verdict -ne 'PASS' } | ForEach-Object { "$($_.scenarioId):$($_.reasonCode)" } | Select-Object -First 1)
     Set-ObjectProperty -Target $summary -Name 'firstBlocker' -Value $(if ($firstBlocker.Count -eq 0) { $null } else { $firstBlocker[0] })
     Set-ObjectProperty -Target $summary -Name 'capacityAcceptanceExecuted' -Value (-not $ImplementationValidationEnabled -and -not $QualificationOnlyEnabled -and $baseExit -eq 0 -and $allScenariosPassed)
-    Set-ObjectProperty -Target $summary -Name 'formalAcceptanceVerdict' -Value $(if ($ImplementationValidationEnabled -or $QualificationOnlyEnabled) { 'NOT_EVALUATED' } elseif ($baseExit -eq 0) { 'PASS' } else { Get-StatusForExitCode -ExitCode $baseExit })
+    Set-ObjectProperty -Target $summary -Name 'formalAcceptanceVerdict' -Value $(if ($ImplementationValidationEnabled -or $QualificationOnlyEnabled) { 'NOT_EVALUATED' } elseif ($baseExit -eq 0) { 'PASS_WITHIN_FROZEN_PROFILE' } else { Get-StatusForExitCode -ExitCode $baseExit })
     Set-ObjectProperty -Target $summary -Name 'qualificationVerdict' -Value $(if (-not $QualificationOnlyEnabled) { 'NOT_EVALUATED' } elseif ($baseExit -eq 0) { 'PASS' } else { Get-StatusForExitCode -ExitCode $baseExit })
     Set-ObjectProperty -Target $summary -Name 'artifactValidationFindings' -Value @()
     Set-ObjectProperty -Target $summary -Name 'secretFindingCount' -Value 0
@@ -1193,7 +2137,15 @@ function Invoke-Finalize {
     Write-Utf8File -Path $exitPath -Content "$baseExit`n"
 
     $secretFindings = Invoke-SecretScan -CommitSha $commitSha
+    Write-ArtifactInventory -CommitSha $commitSha -StartedAt $startedAt
+    Write-CapacityFinalVerdict -CommitSha $commitSha -StartedAt $startedAt -Verdict 'BLOCKED' -ReasonCode 'FINALIZER_PENDING' -IntegrityFindings @()
     $findings = New-Object Collections.Generic.List[string]
+    foreach ($finding in @($modeBindingFindings)) {
+        $findings.Add([string]$finding)
+    }
+    foreach ($finding in @($ledger['integrityFindings'])) {
+        $findings.Add([string]$finding)
+    }
     foreach ($finding in $teardownFindings) {
         $findings.Add([string]$finding)
     }
@@ -1231,7 +2183,10 @@ function Invoke-Finalize {
         if ($null -ne $threshold.PSObject.Properties['comparisons'] -and ([int]$threshold.comparisonCount -ne @($threshold.comparisons).Count -or [int]$threshold.comparisonsExecuted -ne @($threshold.comparisons).Count)) {
             $findings.Add('THRESHOLD_COMPARISON_COUNT_MISMATCH')
         }
-        if ($baseExit -eq 0 -and -not $implementationValidationPassed -and ($threshold.status -ne 'PASS' -or [int]$threshold.comparisonCount -ne 94 -or [int]$threshold.notEvaluatedCount -ne 0)) {
+        foreach ($finding in @(Get-ThresholdAggregateFindings -Threshold $threshold -AllowNotRun $implementationValidationPassed)) {
+            $findings.Add([string]$finding)
+        }
+        if ($baseExit -eq 0 -and -not $implementationValidationPassed -and ($threshold.status -ne 'PASS' -or [int]$threshold.comparisonCount -ne 99 -or [int]$threshold.notEvaluatedCount -ne 0 -or [int]$threshold.coveredThresholdLeaves -ne 41)) {
             $findings.Add('THRESHOLD_COMPLETE_CONTRACT_INVALID')
         }
     }
@@ -1239,6 +2194,15 @@ function Invoke-Finalize {
     if ($QualificationOnlyEnabled -and $baseExit -eq 0) {
         if ($summary.status -ne 'NOT_FORMAL' -or $summary.reasonCode -ne 'QUALIFICATION_ONLY' -or $summary.capacityAcceptanceExecuted -ne $false -or $summary.formalAcceptanceVerdict -ne 'NOT_EVALUATED' -or $summary.qualificationVerdict -ne 'PASS') {
             $findings.Add('QUALIFICATION_SUMMARY_CONTRACT_INVALID')
+        }
+    }
+    $executionManifest = Read-JsonFile -Path (Join-Path $EvidenceRoot 'capacity-execution-manifest.json')
+    if ($Phase -eq 'Finalize' -and (Get-ExecutionMode) -eq 'FORMAL') {
+        foreach ($finding in @(Test-FormalPacketPreparationGate -ExecutionManifest $executionManifest)) {
+            $findings.Add([string]$finding)
+        }
+        foreach ($finding in @(Test-FormalEvidencePacket -CommitSha $commitSha)) {
+            $findings.Add([string]$finding)
         }
     }
 
@@ -1256,13 +2220,21 @@ function Invoke-Finalize {
     Set-SummaryContract -Summary $summary -StartedAt $startedAt -CompletedAt (Get-UtcTimestamp) -Status $finalStatus -InternalExitCode $finalExit -MandatoryScenarioCount $mandatoryCount -ExecutedScenarioCount ([int]$ledger['executedScenarioCount']) -CorrectnessVerdict $correctnessVerdict -ThresholdVerdict $thresholdVerdict -RegressionVerdict $regressionVerdict -QualityVerdict $qualityVerdict -ArtifactVerdict $(if ($findings.Count -eq 0) { 'PASS' } else { 'BLOCKED' }) -SecretVerdict $(if ($secretFindings -eq 0) { 'PASS' } else { 'FAIL' }) -TeardownVerdict $teardownVerdict -ReasonCode $reasonCode
     Set-SummaryScenarioCounts -Summary $summary -Ledger $ledger
     Set-ObjectProperty -Target $summary -Name 'capacityAcceptanceExecuted' -Value (-not $ImplementationValidationEnabled -and -not $QualificationOnlyEnabled -and $finalExit -eq 0 -and $allScenariosPassed)
-    Set-ObjectProperty -Target $summary -Name 'formalAcceptanceVerdict' -Value $(if ($ImplementationValidationEnabled -or $QualificationOnlyEnabled) { 'NOT_EVALUATED' } elseif ($finalExit -eq 0) { 'PASS' } else { Get-StatusForExitCode -ExitCode $finalExit })
+    Set-ObjectProperty -Target $summary -Name 'formalAcceptanceVerdict' -Value $(if ($ImplementationValidationEnabled -or $QualificationOnlyEnabled) { 'NOT_EVALUATED' } elseif ($finalExit -eq 0) { 'PASS_WITHIN_FROZEN_PROFILE' } else { Get-StatusForExitCode -ExitCode $finalExit })
     Set-ObjectProperty -Target $summary -Name 'qualificationVerdict' -Value $(if (-not $QualificationOnlyEnabled) { 'NOT_EVALUATED' } elseif ($finalExit -eq 0) { 'PASS' } else { Get-StatusForExitCode -ExitCode $finalExit })
     Set-ObjectProperty -Target $summary -Name 'artifactValidationFindings' -Value $findings.ToArray()
     Set-ObjectProperty -Target $summary -Name 'secretFindingCount' -Value $secretFindings
     $summary.finishedAtUtc = $summary.completedAt
     Write-JsonFile -Path $summaryPath -Value $summary
     Write-Utf8File -Path $exitPath -Content "$finalExit`n"
+    $packetVerdict = $(
+        if ($ImplementationValidationEnabled -or $QualificationOnlyEnabled) { 'NOT_EVALUATED' }
+        elseif ($finalExit -eq 80) { 'INVALID' }
+        elseif ($finalExit -eq 0) { 'PASS_WITHIN_FROZEN_PROFILE' }
+        elseif ($finalExit -in @(40, 50, 60, 70, 90)) { 'FAIL' }
+        else { 'BLOCKED' }
+    )
+    Write-CapacityFinalVerdict -CommitSha $commitSha -StartedAt $startedAt -Verdict $packetVerdict -ReasonCode $reasonCode -IntegrityFindings $findings.ToArray()
     Write-Manifest
 
     $manifestMismatches = Get-ManifestMismatchCount
@@ -1271,9 +2243,12 @@ function Invoke-Finalize {
         $summary.artifactVerdict = 'BLOCKED'
         $summary.internalExitCode = 80
         $summary.exitCode = 80
-        $summary.status = 'BLOCKED'
-        $summary.finalStatus = 'BLOCKED'
+        $summary.status = 'INVALID'
+        $summary.finalStatus = 'INVALID'
         $summary.reasonCode = 'ARTIFACT_VALIDATION_BLOCKED'
+        if (-not $ImplementationValidationEnabled -and -not $QualificationOnlyEnabled) {
+            $summary.formalAcceptanceVerdict = 'INVALID'
+        }
         if ($QualificationOnlyEnabled) {
             $summary.qualificationVerdict = 'BLOCKED'
         }
@@ -1282,6 +2257,7 @@ function Invoke-Finalize {
         $summary.finishedAtUtc = $summary.completedAt
         Write-JsonFile -Path $summaryPath -Value $summary
         Write-Utf8File -Path $exitPath -Content "80`n"
+        Write-CapacityFinalVerdict -CommitSha $commitSha -StartedAt $startedAt -Verdict 'INVALID' -ReasonCode 'ARTIFACT_VALIDATION_BLOCKED' -IntegrityFindings @($summary.artifactValidationFindings)
         Write-Manifest
         $manifestMismatches = Get-ManifestMismatchCount
     }
@@ -1302,6 +2278,12 @@ elseif ($Phase -eq 'RuntimeBlockedContractTest') {
 }
 elseif ($Phase -eq 'PartialFinalizerContractTest') {
     Invoke-PartialFinalizerContractTest
+}
+elseif ($Phase -eq 'FormalPacketGateContractTest') {
+    Invoke-FormalPacketGateContractTest
+}
+elseif ($Phase -eq 'ManifestContractTest') {
+    Invoke-ManifestContractTest
 }
 else {
     if ($RunId -notmatch '^[0-9]{8}T[0-9]{6}Z$' -or $Seed -ne 7 -or -not $EvidenceRoot.StartsWith($EvidenceBase, [StringComparison]::OrdinalIgnoreCase)) {

@@ -10,9 +10,11 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -31,23 +33,42 @@ final class Qdr7CapacityArtifactSupport {
           "durationMs",
           "seed",
           "unitSystem",
-          "missingValues");
+          "missingValues",
+          "attemptId",
+          "candidateSha",
+          "candidateTree",
+          "profileId",
+          "profileVersion",
+          "scenarioSetHash",
+          "thresholdSetHash",
+          "environmentManifestHash",
+          "harnessVersion",
+          "harnessHash",
+          "generatedAt");
   private static final List<String> VALID_STATUSES =
-      List.of("PASS", "FAIL", "BLOCKED", "NOT_RUN", "NOT_FORMAL");
+      List.of(
+          "PASS",
+          "FAIL",
+          "BLOCKED",
+          "NOT_RUN",
+          "NOT_FORMAL",
+          "QUALIFIED",
+          "NOT_QUALIFIED",
+          "INVALID");
 
   private Qdr7CapacityArtifactSupport() {}
 
   /**
    * 读取 Maven 子进程日志并保留 ASCII 合同标记。
    *
-   * <p>Windows Maven 输出可能混入当前控制台代码页字节，不能假设整份日志都是 UTF-8。这里使用单字节映射，避免本地化日志导致
-   * {@code BUILD SUCCESS} 等 ASCII 标记解析失败；原始日志文件不会被改写。
+   * <p>Windows Maven 输出可能混入当前控制台代码页字节，不能假设整份日志都是 UTF-8。这里使用单字节映射，避免本地化日志导致 {@code BUILD SUCCESS} 等
+   * ASCII 标记解析失败；原始日志文件不会被改写。
    */
   static String readAsciiCompatibleLog(final Path path) throws IOException {
     return Files.readString(path, StandardCharsets.ISO_8859_1);
   }
 
-  static void writeJson(final Path path, final Map<String, ?> value, final ObjectMapper mapper)
+  static void writeJson(final Path path, final Object value, final ObjectMapper mapper)
       throws IOException {
     Files.createDirectories(path.getParent());
     mapper.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), value);
@@ -197,10 +218,28 @@ final class Qdr7CapacityArtifactSupport {
               .filter(parts -> parts.length == 2)
               .map(parts -> parts[1])
               .toList();
+      final Set<String> uniquePaths = new HashSet<>();
+      for (final String path : pathsInManifest) {
+        if (!uniquePaths.add(path)) {
+          findings.add("MANIFEST_DUPLICATE_PATH:" + path);
+        }
+      }
       final List<String> sortedPaths = new ArrayList<>(pathsInManifest);
       sortedPaths.sort(Comparator.naturalOrder());
       if (!pathsInManifest.equals(sortedPaths)) {
         findings.add("MANIFEST_ORDER_MISMATCH");
+      }
+      final Set<String> currentPaths;
+      try (Stream<Path> paths = Files.walk(evidenceRoot)) {
+        currentPaths =
+            paths
+                .filter(Files::isRegularFile)
+                .filter(path -> !path.equals(manifest))
+                .map(path -> toRelativePath(evidenceRoot, path))
+                .collect(java.util.stream.Collectors.toSet());
+      }
+      if (!uniquePaths.equals(currentPaths)) {
+        findings.add("MANIFEST_PATH_SET_MISMATCH");
       }
       for (final String line : lines) {
         final String[] parts = line.split("  ", 2);

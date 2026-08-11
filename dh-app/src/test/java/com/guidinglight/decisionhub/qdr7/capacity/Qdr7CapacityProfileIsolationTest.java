@@ -55,8 +55,8 @@ class Qdr7CapacityProfileIsolationTest {
         Qdr7CapacityContracts.loadCriteria(root, new ObjectMapper());
 
     assertThat(formalHarness)
-        .contains("mavenCommand(List.of(\"-B\", \"-ntp\", \"test\"))")
-        .contains("mavenCommand(List.of(\"-B\", \"-ntp\", \"-Pquality\"")
+        .contains("mavenCommand(List.of(\"-o\", \"-B\", \"-ntp\", \"test\"))")
+        .contains("mavenCommand(List.of(\"-o\", \"-B\", \"-ntp\", \"-Pquality\"")
         .contains("new HarnessDriver(\"full-regression\", this::fullRegression)")
         .contains("new HarnessDriver(\"quality-gate\", this::qualityGate)");
     assertThat(criteria.root().path("scenarioRegistry")).hasSize(15);

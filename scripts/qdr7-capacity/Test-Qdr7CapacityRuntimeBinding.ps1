@@ -32,6 +32,11 @@ function Invoke-PartialFinalizerContract {
     return $LASTEXITCODE
 }
 
+function Invoke-FormalPacketGateContract {
+    & $CurrentExecutable -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $EntryPoint -Phase FormalPacketGateContractTest -RunId 20260715T150000Z -Seed 7 -ProjectRoot $ProjectRoot -PowerShellExecutable $CurrentExecutableName -ImplementationValidation false -QualificationOnly false
+    return $LASTEXITCODE
+}
+
 function Get-UniqueRunId {
     param([bool]$QualificationOnly = $false)
     $candidate = [DateTime]::UtcNow
@@ -127,7 +132,7 @@ function Assert-BlockedArtifactContract {
     Assert-Equal 'BLOCKED' $threshold.status 'blocked threshold status'
     Assert-Equal $ExpectedThresholdReason $threshold.reason 'blocked threshold reason'
     Assert-Equal 0 @($threshold.comparisons).Count 'blocked threshold comparison count'
-    Assert-Equal 94 ([int]$threshold.notEvaluatedCount) 'blocked not-evaluated threshold count'
+    Assert-Equal 99 ([int]$threshold.notEvaluatedCount) 'blocked not-evaluated threshold count'
     foreach ($field in @('startedAtUtc', 'finishedAtUtc')) {
         Assert-Rfc3339UtcJsonField -Json $thresholdRaw -Field $field -Contract 'blocked threshold timestamp'
     }
@@ -188,7 +193,7 @@ function Assert-PartialFinalizerContract {
     $threshold = Get-Content -Raw -LiteralPath (Join-Path $PartialRoot 'threshold-comparison.json') | ConvertFrom-Json
     Assert-Equal 5 @($threshold.comparisons).Count 'partial comparisons preserved'
     Assert-Equal 5 ([int]$threshold.passedCount) 'partial passed comparisons preserved'
-    Assert-Equal 89 ([int]$threshold.notEvaluatedCount) 'partial not-evaluated comparisons'
+    Assert-Equal 94 ([int]$threshold.notEvaluatedCount) 'partial not-evaluated comparisons'
 }
 
 $validRunId = '20260715T150000Z'
@@ -219,6 +224,7 @@ $partialRunId = Get-UniqueRunId
 Assert-Equal 100 (Invoke-PartialFinalizerContract -RunId $partialRunId) 'partial finalizer classification'
 $partialRoot = Join-Path $ProjectRoot "target\qdr7-capacity-acceptance\$partialRunId"
 Assert-PartialFinalizerContract -PartialRoot $partialRoot -ExpectedRunId $partialRunId
+Assert-Equal 0 (Invoke-FormalPacketGateContract) 'formal packet strict gate'
 
 Write-Output 'QDR7_CAPACITY_RUNTIME_BINDING_CONTRACT=PASS'
 Write-Output "POWERSHELL_EXECUTABLE_NAME=$CurrentExecutableName"

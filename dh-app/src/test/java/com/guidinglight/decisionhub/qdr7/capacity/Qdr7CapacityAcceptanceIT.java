@@ -11,6 +11,9 @@ import com.guidinglight.decisionhub.domain.qdr.feedback.FeedbackEnvironment;
 import com.guidinglight.decisionhub.security.StaticTokenVerifier;
 import com.guidinglight.decisionhub.security.nq.HmacNqDryRunAuthenticator;
 import com.guidinglight.decisionhub.security.nq.NqDryRunAuthRequest;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunRuntimeProperties;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.DecisionDryRunService;
+import com.guidinglight.decisionhub.usecase.decision.dryrun.LimitedDryRunRuntimePolicy;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.MockModelProvider;
 import com.guidinglight.decisionhub.usecase.qdr.gateway.ModelProviderPort;
 import com.guidinglight.decisionhub.usecase.qdr.guard.GuardCleanupCommand;
@@ -70,10 +73,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -137,6 +141,9 @@ class Qdr7CapacityAcceptanceIT {
       Boolean.parseBoolean(System.getProperty("qdr7.qualificationOnly", "false"));
   private static final Path EVIDENCE_ROOT = evidenceRoot();
   private static final JsonNode RESOURCE_REGISTRY = readResourceRegistry();
+  private static final JsonNode ENVIRONMENT_REQUIREMENTS = readEnvironmentRequirements();
+  private static final String POSTGRES_IMAGE =
+      ENVIRONMENT_REQUIREMENTS.path("postgresImage").asText();
   private static final int DATABASE_PORT = RESOURCE_REGISTRY.path("loopbackPort").asInt();
   private static final String CONTAINER_NAME = RESOURCE_REGISTRY.path("containerName").asText();
   private static final String VOLUME_NAME = RESOURCE_REGISTRY.path("volumeName").asText();
@@ -147,7 +154,7 @@ class Qdr7CapacityAcceptanceIT {
   private static final String COMMIT_SHA = RESOURCE_REGISTRY.path("commitSha").asText();
   private static final boolean IMPLEMENTATION_VALIDATION =
       Boolean.parseBoolean(System.getProperty("qdr7.implementationValidation", "false"));
-  private static final int EXPECTED_THRESHOLD_COMPARISONS = 94;
+  private static final int EXPECTED_THRESHOLD_COMPARISONS = 99;
   private static final Instant HARNESS_STARTED = Instant.now();
   private static final List<Map<String, Object>> THRESHOLD_RESULTS =
       Collections.synchronizedList(new ArrayList<>());
@@ -218,6 +225,17 @@ class Qdr7CapacityAcceptanceIT {
 
   @Autowired private GuardTransactionBoundary transactions;
 
+  @Autowired private LimitedDryRunRuntimePolicy runtimePolicy;
+
+  @Autowired private HmacNqDryRunAuthenticator dryRunAuthenticator;
+
+  @Autowired private DecisionDryRunService decisionDryRunService;
+
+  @Autowired private DecisionDryRunRuntimeProperties runtimeProperties;
+
+  @Value("${decisionhub.integration1.runtime.max-payload-bytes:65536}")
+  private long transportPayloadCap;
+
   private final HttpClient httpClient =
       HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
 
@@ -234,7 +252,7 @@ class Qdr7CapacityAcceptanceIT {
   @Order(0)
   @EnabledIfSystemProperty(named = "qdr7.implementationValidation", matches = "true")
   void validatesLifecycleBeforeMandatoryScenarioDispatch()
-      throws IOException, SQLException, InterruptedException {
+      throws IOException, SQLException, InterruptedException, ExecutionException {
     runContext =
         Qdr7CapacityContracts.parseRunContext(
             RUN_ID, String.valueOf(SEED), PROJECT_ROOT, COMMIT_SHA, false);
@@ -265,6 +283,7 @@ class Qdr7CapacityAcceptanceIT {
     restartProbe.values().put("measurementsCaptured", 0);
     restartProbe.values().put("comparisonsExecuted", 0);
     springContextRestart(restartProbe);
+    runRuntimeSafetyProbe(HARNESS_STARTED);
     writeImplementationValidationArtifact();
   }
 
@@ -278,6 +297,7 @@ class Qdr7CapacityAcceptanceIT {
     criteria = Qdr7CapacityContracts.loadCriteria(PROJECT_ROOT, objectMapper);
     Files.createDirectories(EVIDENCE_ROOT);
     assertThat(modelProvider).isExactlyInstanceOf(MockModelProvider.class);
+    qualifyEnvironmentBeforeScenarioDispatch();
 
     final List<HarnessDriver> drivers = drivers();
     assertThat(Qdr7CapacityContracts.ScenarioRegistry.validate(drivers)).isEmpty();
@@ -301,6 +321,12 @@ class Qdr7CapacityAcceptanceIT {
   private static void startPostgresBeforeSpringPropertyResolution() {
     try {
       POSTGRES.start();
+      if (!POSTGRES
+          .getContainerInfo()
+          .getImageId()
+          .equals(RESOURCE_REGISTRY.path("postgresImageId").asText())) {
+        throw new IllegalStateException("QDR7_CAPACITY_POSTGRES_IMAGE_IDENTITY_MISMATCH");
+      }
       ensurePostgresReadyForPropertyResolution();
     } catch (final RuntimeException startupFailure) {
       throw new IllegalStateException(
@@ -339,6 +365,19 @@ class Qdr7CapacityAcceptanceIT {
         new HarnessDriver("post-recovery-concurrency", this::postRecoveryConcurrency),
         new HarnessDriver("full-regression", this::fullRegression),
         new HarnessDriver("quality-gate", this::qualityGate));
+  }
+
+  private void qualifyEnvironmentBeforeScenarioDispatch() throws IOException {
+    final Qdr7CapacityEnvironmentAdmission.Evaluation evaluation =
+        Qdr7CapacityEnvironmentAdmission.runPostgresSmokeAndQualify(
+            EVIDENCE_ROOT.resolve("capacity-environment-manifest.json"),
+            EVIDENCE_ROOT.resolve("resource-registry.json"),
+            PROJECT_ROOT.resolve("config/qdr7-capacity/qdr7-capacity-environment-admission.json"),
+            objectMapper);
+    if (!"QUALIFIED".equals(evaluation.status())) {
+      throw new IllegalStateException(
+          "STAGE_QDR_12_ENVIRONMENT_NOT_QUALIFIED:" + evaluation.blockers());
+    }
   }
 
   private static HarnessDriver driver(final List<HarnessDriver> drivers, final String scenarioId) {
@@ -436,9 +475,7 @@ class Qdr7CapacityAcceptanceIT {
     final int passed = scenarioVerdictCount(Qdr7CapacityContracts.ScenarioVerdict.PASS);
     final Map<String, Object> artifact =
         artifact("scenario-ledger", HARNESS_STARTED, Instant.now());
-    artifact.put(
-        "status",
-        failed > 0 ? "FAIL" : blocked > 0 || passed < 15 ? "BLOCKED" : "PASS");
+    artifact.put("status", failed > 0 ? "FAIL" : blocked > 0 || passed < 15 ? "BLOCKED" : "PASS");
     artifact.put("scenarios", List.copyOf(SCENARIO_LEDGER));
     writeJson("scenario-ledger.json", artifact);
   }
@@ -458,9 +495,11 @@ class Qdr7CapacityAcceptanceIT {
   private void completeRound(
       final Qdr7CapacityContracts.ScenarioExecution execution, final int measurements) {
     execution.values().put("roundsCompleted", counter(execution, "roundsCompleted") + 1);
-    execution.values().put(
-        "measurementsCaptured",
-        counter(execution, "measurementsCaptured") + Math.max(0, measurements));
+    execution
+        .values()
+        .put(
+            "measurementsCaptured",
+            counter(execution, "measurementsCaptured") + Math.max(0, measurements));
     persistExecutionProgress(execution);
   }
 
@@ -474,8 +513,7 @@ class Qdr7CapacityAcceptanceIT {
   }
 
   private static void copyExecutionCounters(
-      final Qdr7CapacityContracts.ScenarioExecution execution,
-      final Map<String, Object> ledger) {
+      final Qdr7CapacityContracts.ScenarioExecution execution, final Map<String, Object> ledger) {
     for (final String field :
         List.of(
             "roundsRequired",
@@ -537,8 +575,7 @@ class Qdr7CapacityAcceptanceIT {
         .contains(Qdr7CapacityContracts.SemanticExit.NUMERIC_THRESHOLD_FAILED)) {
       return "NUMERIC_THRESHOLD_FAILED";
     }
-    if (failure instanceof SQLException
-        || failure.getClass().getSimpleName().contains("Store")) {
+    if (failure instanceof SQLException || failure.getClass().getSimpleName().contains("Store")) {
       return "SCENARIO_LOCAL_DATABASE_FAILURE";
     }
     return failure instanceof AssertionError
@@ -574,7 +611,8 @@ class Qdr7CapacityAcceptanceIT {
           "tenant-scoped-cleanup",
           "postgres-same-pool-recovery",
           "spring-context-restart",
-          "postgres-persistent-volume-restart" -> 3;
+          "postgres-persistent-volume-restart" ->
+          3;
       default -> 1;
     };
   }
@@ -588,8 +626,7 @@ class Qdr7CapacityAcceptanceIT {
           List.of("tenant-isolation.json");
       case "nonce-race" -> List.of("nonce-race.json");
       case "idempotency-lifecycle" -> List.of("idempotency-lifecycle.json");
-      case "tenant-scoped-cleanup" ->
-          List.of("cleanup-timeline.csv", "cleanup-summary.json");
+      case "tenant-scoped-cleanup" -> List.of("cleanup-timeline.csv", "cleanup-summary.json");
       case "postgres-hikari-contention" ->
           List.of("postgres-hikari-series.csv", "postgres-hikari-summary.json");
       case "postgres-same-pool-recovery" ->
@@ -598,8 +635,7 @@ class Qdr7CapacityAcceptanceIT {
           List.of("restart-results.json");
       case "post-recovery-concurrency" ->
           List.of("recovery-timeline.csv", "post-recovery-summary.json");
-      case "full-regression" ->
-          List.of("full-regression.log", "full-regression-summary.json");
+      case "full-regression" -> List.of("full-regression.log", "full-regression-summary.json");
       case "quality-gate" -> List.of("quality.log", "quality-summary.json");
       default -> List.of();
     };
@@ -624,7 +660,30 @@ class Qdr7CapacityAcceptanceIT {
     artifact.put("localhostOnly", true);
     artifact.put("mockProvider", true);
     writeJson("actual-wiring.json", artifact);
-    completeRound(execution, 13);
+    runRuntimeSafetyProbe(started);
+    completeRound(execution, 16);
+  }
+
+  private void runRuntimeSafetyProbe(final Instant started) throws ExecutionException {
+    final Map<String, Object> runtimeSafety;
+    try {
+      runtimeSafety =
+          Qdr7CapacityRuntimeSafetyProbe.runBound(
+              runtimePolicy,
+              dryRunAuthenticator,
+              decisionDryRunService,
+              runtimeProperties,
+              transportPayloadCap,
+              TENANT,
+              SOURCE,
+              RUN_ID);
+    } catch (final Exception failure) {
+      throw new ExecutionException("runtime resource-safety probe failed", failure);
+    }
+    final Map<String, Object> runtimeSafetyArtifact =
+        artifact("runtime-resource-safety", started, Instant.now());
+    runtimeSafetyArtifact.putAll(runtimeSafety);
+    writeJson("runtime-resource-safety.json", runtimeSafetyArtifact);
   }
 
   private void rateMatrix(final Qdr7CapacityContracts.ScenarioExecution execution)
@@ -684,7 +743,7 @@ class Qdr7CapacityAcceptanceIT {
         summary.put("p99Ms", statistics.p99());
         summary.put("maxMs", statistics.max());
         summaries.add(summary);
-        compareRateThresholds(concurrency, statistics);
+        compareRateThresholds(concurrency, round, statistics);
         completeRound(execution, 100);
       }
     }
@@ -707,35 +766,40 @@ class Qdr7CapacityAcceptanceIT {
   }
 
   private void compareRateThresholds(
-      final int concurrency, final Qdr7CapacityContracts.Statistics statistics) {
+      final int concurrency, final int round, final Qdr7CapacityContracts.Statistics statistics) {
     final JsonNode threshold =
         criteria.root().path("numericThresholds").path("rate").path(String.valueOf(concurrency));
     addThreshold(
-        "rate.c" + concurrency + ".throughput",
+        "numericThresholds.rate." + concurrency + ".throughputMin",
+        "rate.c" + concurrency + ".r" + round + ".throughput",
         statistics.throughput(),
         ">=",
         threshold.path("throughputMin").asDouble(),
-        "requests/second");
+        "operations/second");
     addThreshold(
-        "rate.c" + concurrency + ".p50",
+        "numericThresholds.rate." + concurrency + ".p50MaxMs",
+        "rate.c" + concurrency + ".r" + round + ".p50",
         statistics.p50(),
         "<=",
         threshold.path("p50MaxMs").asDouble(),
         "milliseconds");
     addThreshold(
-        "rate.c" + concurrency + ".p95",
+        "numericThresholds.rate." + concurrency + ".p95MaxMs",
+        "rate.c" + concurrency + ".r" + round + ".p95",
         statistics.p95(),
         "<=",
         threshold.path("p95MaxMs").asDouble(),
         "milliseconds");
     addThreshold(
-        "rate.c" + concurrency + ".p99",
+        "numericThresholds.rate." + concurrency + ".p99MaxMs",
+        "rate.c" + concurrency + ".r" + round + ".p99",
         statistics.p99(),
         "<=",
         threshold.path("p99MaxMs").asDouble(),
         "milliseconds");
     addThreshold(
-        "rate.c" + concurrency + ".max",
+        "numericThresholds.rate." + concurrency + ".latencyMaxMs",
+        "rate.c" + concurrency + ".r" + round + ".max",
         statistics.max(),
         "<=",
         threshold.path("latencyMaxMs").asDouble(),
@@ -1068,8 +1132,7 @@ class Qdr7CapacityAcceptanceIT {
                                 null))))
         .isInstanceOf(RuntimeException.class);
 
-    final PersistentGuardIdentity crossEnvironmentIdentity =
-        identity("staging", fixtureTenant);
+    final PersistentGuardIdentity crossEnvironmentIdentity = identity("staging", fixtureTenant);
     final IdempotencyRecordView crossEnvironmentInProgress =
         admitAndStart(
             crossEnvironmentIdentity,
@@ -1232,6 +1295,7 @@ class Qdr7CapacityAcceptanceIT {
               "protectedRows", protectedRows,
               "finalEligibleBacklog", 0));
       addThreshold(
+          "numericThresholds.cleanupMaxMs." + scale,
           "cleanup." + scale + ".duration",
           durationMs,
           "<=",
@@ -1335,10 +1399,34 @@ class Qdr7CapacityAcceptanceIT {
     assertThat(maximumWaiting).isLessThanOrEqualTo(7);
     assertThat(maximumLockWaiting).isLessThanOrEqualTo(4);
     assertThat(postgreSqlDeadlocks()).isZero();
-    addThreshold("contention.hikariPending", maximumPending, "<=", 17, "count");
-    addThreshold("contention.acquire", maximumAcquireMs, "<=", 3800, "milliseconds");
-    addThreshold("contention.postgresWaiting", maximumWaiting, "<=", 7, "count");
-    addThreshold("contention.lockWaiting", maximumLockWaiting, "<=", 4, "count");
+    addThreshold(
+        "numericThresholds.contentionMax.hikariPending",
+        "contention.hikariPending",
+        maximumPending,
+        "<=",
+        17,
+        "count");
+    addThreshold(
+        "numericThresholds.contentionMax.acquireMs",
+        "contention.acquire",
+        maximumAcquireMs,
+        "<=",
+        3800,
+        "milliseconds");
+    addThreshold(
+        "numericThresholds.contentionMax.postgresWaiting",
+        "contention.postgresWaiting",
+        maximumWaiting,
+        "<=",
+        7,
+        "count");
+    addThreshold(
+        "numericThresholds.contentionMax.postgresLockWaiting",
+        "contention.lockWaiting",
+        maximumLockWaiting,
+        "<=",
+        4,
+        "count");
     execution.values().put("maximumPending", maximumPending);
     final Map<String, Object> artifact =
         artifact("postgres-hikari-contention", started, Instant.now());
@@ -1373,10 +1461,7 @@ class Qdr7CapacityAcceptanceIT {
     assertStructuredSuccess(send(anchor));
     final String rollbackRequestId =
         seedRolledBackState(
-            transactions,
-            idempotencyGuard,
-            identity(TENANT),
-            "qdr7-same-pool-rollback-" + RUN_ID);
+            transactions, idempotencyGuard, identity(TENANT), "qdr7-same-pool-rollback-" + RUN_ID);
     final String checksumBefore = canonicalPromptChecksum();
     final int dataSourceIdentity = System.identityHashCode(dataSource);
     final int poolIdentity = System.identityHashCode(hikariPool());
@@ -1445,10 +1530,34 @@ class Qdr7CapacityAcceptanceIT {
               Qdr7CapacityContracts.sha256(CONTAINER_NAME),
               "volumeNameHash",
               Qdr7CapacityContracts.sha256(VOLUME_NAME)));
-      addThreshold("recovery.database.r" + round, databaseReadyMs, "<=", 800, "milliseconds");
-      addThreshold("recovery.hikari.r" + round, hikariReadyMs, "<=", 5800, "milliseconds");
-      addThreshold("recovery.request.r" + round, requestReadyMs, "<=", 5800, "milliseconds");
-      addThreshold("recovery.samplingGap.r" + round, samplingGap, "<=", 1400, "milliseconds");
+      addThreshold(
+          "numericThresholds.recoveryMaxMs.database",
+          "recovery.database.r" + round,
+          databaseReadyMs,
+          "<=",
+          800,
+          "milliseconds");
+      addThreshold(
+          "numericThresholds.recoveryMaxMs.hikari",
+          "recovery.hikari.r" + round,
+          hikariReadyMs,
+          "<=",
+          5800,
+          "milliseconds");
+      addThreshold(
+          "numericThresholds.recoveryMaxMs.request",
+          "recovery.request.r" + round,
+          requestReadyMs,
+          "<=",
+          5800,
+          "milliseconds");
+      addThreshold(
+          "numericThresholds.recoveryMaxMs.samplingGap",
+          "recovery.samplingGap.r" + round,
+          samplingGap,
+          "<=",
+          1400,
+          "milliseconds");
       completeRound(execution, 4);
     }
     final Map<String, Object> artifact =
@@ -1482,14 +1591,16 @@ class Qdr7CapacityAcceptanceIT {
         assertThat(recovered.recordId()).isEqualTo(seeded.requiredState().recordId());
         assertThat(recovered.requestHash()).isEqualTo(seeded.requiredState().requestHash());
         assertThat(recovered.state()).isEqualTo("COMPLETED");
-        assertThat(canonicalPromptChecksum(restartedJdbc, tenant)).isEqualTo(seeded.promptChecksum());
+        assertThat(canonicalPromptChecksum(restartedJdbc, tenant))
+            .isEqualTo(seeded.promptChecksum());
         assertThat(
                 restartedJdbc.queryForObject(
                     "select count(*) from dh_nq_replay_nonce where replay_key=?",
                     Integer.class,
                     seeded.replayKey()))
             .isEqualTo(1);
-        assertThat(idempotencyRowCount(restartedJdbc, seeded.identity(), seeded.rollbackRequestId()))
+        assertThat(
+                idempotencyRowCount(restartedJdbc, seeded.identity(), seeded.rollbackRequestId()))
             .isZero();
         assertThat(identityHash(contextB)).isNotEqualTo(seeded.contextIdentityHash());
         assertThat(identityHash(restartedDataSource)).isNotEqualTo(seeded.dataSourceIdentityHash());
@@ -1646,13 +1757,15 @@ class Qdr7CapacityAcceptanceIT {
     properties.put(
         "spring.datasource.hikari.pool-name",
         "qdr7-context-r" + round + "-" + contextName + "-" + RUN_ID);
-    properties.put("decisionhub.security.api.token-sha256", StaticTokenVerifier.sha256Hex(TEST_TOKEN));
+    properties.put(
+        "decisionhub.security.api.token-sha256", StaticTokenVerifier.sha256Hex(TEST_TOKEN));
     properties.put("decisionhub.security.api.tenant-id", tenant);
     properties.put("decisionhub.integration1.runtime.enabled", true);
     properties.put("decisionhub.integration1.runtime.production-enabled", false);
     properties.put("decisionhub.integration1.runtime.kill-switch-enabled", false);
     properties.put("decisionhub.integration1.runtime.allowed-sources", SOURCE);
-    properties.put("decisionhub.integration1.runtime.allowed-tenant-source-pairs", tenant + ":" + SOURCE);
+    properties.put(
+        "decisionhub.integration1.runtime.allowed-tenant-source-pairs", tenant + ":" + SOURCE);
     properties.put("decisionhub.integration1.runtime.guard.environment", "test");
     properties.put("decisionhub.integration1.runtime.guard.rate-window-seconds", 3600);
     properties.put("decisionhub.integration1.runtime.guard.rate-limit-value", 100000);
@@ -1758,6 +1871,10 @@ class Qdr7CapacityAcceptanceIT {
     final Instant started = Instant.now();
     beginRound(execution);
     final Instant regressionStarted = Instant.now();
+    Files.writeString(
+        EVIDENCE_ROOT.resolve("resource-sampling-phase.txt"),
+        "FULL_REGRESSION\n",
+        StandardCharsets.UTF_8);
     final Path log = EVIDENCE_ROOT.resolve("full-regression.log");
     final Process process =
         new ProcessBuilder(fullRegressionCommand())
@@ -1771,6 +1888,13 @@ class Qdr7CapacityAcceptanceIT {
       process.waitFor(30, TimeUnit.SECONDS);
     }
     final int exitCode = finished ? process.exitValue() : 60;
+    final long regressionDurationMs = Duration.between(regressionStarted, Instant.now()).toMillis();
+    Files.writeString(
+        EVIDENCE_ROOT.resolve("resource-sampling-phase.txt"),
+        "POST_REGRESSION\n",
+        StandardCharsets.UTF_8);
+    Thread.sleep(1200L);
+    final JsonNode samplerCompletion = stopSamplerAndAwaitCompletion();
     final String regressionLog = Qdr7CapacityArtifactSupport.readAsciiCompatibleLog(log);
     final List<Path> reports = new ArrayList<>();
     try (var paths = Files.walk(PROJECT_ROOT)) {
@@ -1803,7 +1927,8 @@ class Qdr7CapacityAcceptanceIT {
       skipped += xmlAttribute(xml, "skipped");
     }
     final long reactorSuccess =
-        regressionLog.lines()
+        regressionLog
+            .lines()
             .filter(line -> line.startsWith("[INFO] "))
             .filter(line -> line.contains(" SUCCESS ["))
             .count();
@@ -1827,6 +1952,65 @@ class Qdr7CapacityAcceptanceIT {
     artifact.put("testcontainersMandatoryReports", testcontainersReports);
     artifact.put("testcontainersExecuted", testcontainersReports == 2 && skipped == 0);
     writeJson("full-regression-summary.json", artifact);
+    final Qdr7CapacityResourceEvidence.Snapshot resources =
+        Qdr7CapacityResourceEvidence.read(
+            EVIDENCE_ROOT,
+            regressionDurationMs,
+            new Qdr7CapacityResourceEvidence.Binding(RUN_ID, COMMIT_SHA));
+    final Map<String, Object> resourceArtifact =
+        artifact("full-regression-resources", regressionStarted, Instant.now());
+    resourceArtifact.putAll(resources.fields());
+    assertThat(samplerCompletion.path("jvmSeriesSha256").asText())
+        .isEqualTo(resources.jvmSeriesSha256());
+    assertThat(samplerCompletion.path("dockerSeriesSha256").asText())
+        .isEqualTo(resources.dockerSeriesSha256());
+    assertThat(samplerCompletion.path("fullRegressionMavenSampleCount").asInt()).isGreaterThan(1);
+    assertThat(samplerCompletion.path("fullRegressionSurefireSampleCount").asInt())
+        .isGreaterThan(1);
+    resourceArtifact.put(
+        "samplerCompletionSchemaVersion", samplerCompletion.path("schemaVersion").asText());
+    resourceArtifact.put(
+        "samplerJvmLastElapsedMs", samplerCompletion.path("jvmLastElapsedMs").asLong());
+    resourceArtifact.put(
+        "samplerDockerLastElapsedMs", samplerCompletion.path("dockerLastElapsedMs").asLong());
+    writeJson("resource-summary.json", resourceArtifact);
+    final JsonNode regressionThresholds =
+        criteria.root().path("numericThresholds").path("regressionMax");
+    addThreshold(
+        "numericThresholds.regressionMax.durationMs",
+        "regression.duration",
+        resources.durationMs(),
+        "<=",
+        regressionThresholds.path("durationMs").asDouble(),
+        "milliseconds");
+    addThreshold(
+        "numericThresholds.regressionMax.mavenWorkingSetBytes",
+        "regression.mavenWorkingSet",
+        resources.mavenPeakWorkingSetBytes(),
+        "<=",
+        regressionThresholds.path("mavenWorkingSetBytes").asDouble(),
+        "bytes");
+    addThreshold(
+        "numericThresholds.regressionMax.surefireWorkingSetBytes",
+        "regression.surefireWorkingSet",
+        resources.surefirePeakAggregateWorkingSetBytes(),
+        "<=",
+        regressionThresholds.path("surefireWorkingSetBytes").asDouble(),
+        "bytes");
+    addThreshold(
+        "numericThresholds.regressionMax.dockerMemoryBytes",
+        "regression.dockerMemory",
+        resources.dockerPeakMemoryBytes(),
+        "<=",
+        regressionThresholds.path("dockerMemoryBytes").asDouble(),
+        "bytes");
+    addThreshold(
+        "numericThresholds.regressionMax.minimumFreeMemoryBytes",
+        "regression.minimumFreeMemory",
+        resources.minimumHostAvailableBytes(),
+        ">=",
+        regressionThresholds.path("minimumFreeMemoryBytes").asDouble(),
+        "bytes");
     execution.values().put("tests", tests);
     completeRound(execution, Math.toIntExact(Math.min(Integer.MAX_VALUE, tests)));
     assertThat(exitCode).as("independent mvn test exit").isZero();
@@ -1891,10 +2075,12 @@ class Qdr7CapacityAcceptanceIT {
     }
     artifact.put("results", RESTART_RESULTS);
     artifact.put("springContextRoundsRequired", 3);
-    artifact.put("springContextRoundsStarted", scenarioCounter("spring-context-restart", "roundsStarted"));
+    artifact.put(
+        "springContextRoundsStarted", scenarioCounter("spring-context-restart", "roundsStarted"));
     artifact.put("springContextRoundsCompleted", springCompleted);
     artifact.put("samePoolRoundsRequired", 3);
-    artifact.put("samePoolRoundsStarted", scenarioCounter("postgres-same-pool-recovery", "roundsStarted"));
+    artifact.put(
+        "samePoolRoundsStarted", scenarioCounter("postgres-same-pool-recovery", "roundsStarted"));
     artifact.put("samePoolRoundsCompleted", samePoolCompleted);
     artifact.put("postgresPersistentVolumeRoundsRequired", 3);
     artifact.put(
@@ -1916,18 +2102,18 @@ class Qdr7CapacityAcceptanceIT {
         THRESHOLD_RESULTS.stream().filter(row -> "FAIL".equals(row.get("status"))).count();
     final long blocked =
         THRESHOLD_RESULTS.stream().filter(row -> "BLOCKED".equals(row.get("status"))).count();
-    final int notEvaluated =
-        Math.max(0, EXPECTED_THRESHOLD_COMPARISONS - THRESHOLD_RESULTS.size());
+    final int notEvaluated = Math.max(0, EXPECTED_THRESHOLD_COMPARISONS - THRESHOLD_RESULTS.size());
     final Map<String, Object> artifact =
         artifact("threshold-comparison", HARNESS_STARTED, Instant.now());
     artifact.put(
-        "status",
-        failed > 0
-            ? "FAIL"
-            : blocked > 0 || notEvaluated > 0 ? "BLOCKED" : "PASS");
+        "status", failed > 0 ? "FAIL" : blocked > 0 || notEvaluated > 0 ? "BLOCKED" : "PASS");
     artifact.put("comparisonCount", THRESHOLD_RESULTS.size());
     artifact.put("comparisonsExecuted", THRESHOLD_RESULTS.size());
     artifact.put("comparisons", THRESHOLD_RESULTS);
+    artifact.put(
+        "coveredThresholdLeaves",
+        THRESHOLD_RESULTS.stream().map(row -> row.get("thresholdPath")).distinct().count());
+    artifact.put("declaredThresholdLeaves", 41);
     artifact.put("passedCount", passed);
     artifact.put("failedCount", failed);
     artifact.put("blockedCount", blocked);
@@ -1951,9 +2137,7 @@ class Qdr7CapacityAcceptanceIT {
     final boolean allPassed = completed == 15 && passed == 15;
     final int exitCode = selectScenarioExitCode(allPassed);
     final String resultStatus =
-        allPassed
-            ? (QUALIFICATION_ONLY ? "NOT_FORMAL" : "PASS")
-            : failed > 0 ? "FAIL" : "BLOCKED";
+        allPassed ? (QUALIFICATION_ONLY ? "NOT_FORMAL" : "PASS") : failed > 0 ? "FAIL" : "BLOCKED";
     final Map<String, Object> artifact =
         artifact("capacity-acceptance", HARNESS_STARTED, Instant.now());
     artifact.put("status", resultStatus);
@@ -2007,7 +2191,9 @@ class Qdr7CapacityAcceptanceIT {
     artifact.put("capacityAcceptanceExecuted", allPassed && !QUALIFICATION_ONLY);
     artifact.put(
         "formalAcceptanceVerdict",
-        QUALIFICATION_ONLY ? "NOT_EVALUATED" : allPassed ? "PASS" : resultStatus);
+        QUALIFICATION_ONLY
+            ? "NOT_EVALUATED"
+            : allPassed ? "PASS_WITHIN_FROZEN_PROFILE" : resultStatus);
     artifact.put(
         "qualificationVerdict",
         QUALIFICATION_ONLY ? (allPassed ? "PASS" : resultStatus) : "NOT_EVALUATED");
@@ -2169,7 +2355,8 @@ class Qdr7CapacityAcceptanceIT {
   private static String seedCanonicalPromptVersion(
       final JdbcTemplate targetJdbc, final String tenant, final int round) {
     final UUID templateId =
-        UUID.nameUUIDFromBytes(("qdr7-context-template-" + tenant).getBytes(StandardCharsets.UTF_8));
+        UUID.nameUUIDFromBytes(
+            ("qdr7-context-template-" + tenant).getBytes(StandardCharsets.UTF_8));
     final UUID versionId =
         UUID.nameUUIDFromBytes(("qdr7-context-version-" + tenant).getBytes(StandardCharsets.UTF_8));
     final String templateHash =
@@ -2414,8 +2601,7 @@ class Qdr7CapacityAcceptanceIT {
           activeExecution == null
               ? "lifecycle"
               : String.valueOf(activeExecution.values().get("scenarioId"));
-      final String requestId =
-          "qdr7-" + RUN_ID + "-" + activeScenario + "-" + suffix;
+      final String requestId = "qdr7-" + RUN_ID + "-" + activeScenario + "-" + suffix;
       final String traceId = "trace-" + Qdr7CapacityContracts.sha256(requestId).substring(0, 24);
       final String nonce = fixedNonce == null ? "nonce-" + requestId : fixedNonce;
       final Instant now = Instant.now();
@@ -2644,8 +2830,26 @@ class Qdr7CapacityAcceptanceIT {
 
   private Map<String, Object> artifact(
       final String scenario, final Instant started, final Instant finished) {
-    return Qdr7CapacityContracts.commonArtifact(
-        runContext, scenario, Qdr7CapacityContracts.HarnessStatus.PASS, started, finished);
+    final Map<String, Object> artifact =
+        Qdr7CapacityContracts.commonArtifact(
+            runContext, scenario, Qdr7CapacityContracts.HarnessStatus.PASS, started, finished);
+    final JsonNode evidenceBinding = readExecutionManifest();
+    for (final String field :
+        List.of(
+            "attemptId",
+            "candidateSha",
+            "candidateTree",
+            "profileId",
+            "profileVersion",
+            "scenarioSetHash",
+            "thresholdSetHash",
+            "environmentManifestHash",
+            "harnessVersion",
+            "harnessHash",
+            "generatedAt")) {
+      artifact.put(field, evidenceBinding.path(field).asText());
+    }
+    return artifact;
   }
 
   private void writeJson(final String name, final Map<String, ?> value) {
@@ -2657,6 +2861,7 @@ class Qdr7CapacityAcceptanceIT {
   }
 
   private void addThreshold(
+      final String thresholdPath,
       final String id,
       final double observed,
       final String operator,
@@ -2671,6 +2876,7 @@ class Qdr7CapacityAcceptanceIT {
             unit,
             unit);
     final Map<String, Object> row = new LinkedHashMap<>();
+    row.put("thresholdPath", thresholdPath);
     row.put("criterionId", id);
     row.put("sourceArtifact", sourceArtifact(id));
     row.put("observed", observed);
@@ -2681,12 +2887,11 @@ class Qdr7CapacityAcceptanceIT {
     row.put("reason", result.reason());
     THRESHOLD_RESULTS.add(row);
     if (activeExecution != null) {
-      activeExecution.values().put(
-          "comparisonsExecuted", counter(activeExecution, "comparisonsExecuted") + 1);
+      activeExecution
+          .values()
+          .put("comparisonsExecuted", counter(activeExecution, "comparisonsExecuted") + 1);
       if (result.status() == Qdr7CapacityContracts.HarnessStatus.FAIL) {
-        activeExecution
-            .findings()
-            .add(Qdr7CapacityContracts.SemanticExit.NUMERIC_THRESHOLD_FAILED);
+        activeExecution.findings().add(Qdr7CapacityContracts.SemanticExit.NUMERIC_THRESHOLD_FAILED);
       } else if (result.status() == Qdr7CapacityContracts.HarnessStatus.BLOCKED) {
         activeExecution
             .findings()
@@ -2707,6 +2912,9 @@ class Qdr7CapacityAcceptanceIT {
   }
 
   private static String sourceArtifact(final String criterionId) {
+    if (criterionId.startsWith("regression.")) {
+      return "resource-summary.json";
+    }
     if (criterionId.startsWith("rate.")) {
       return "rate-summary.json";
     }
@@ -2754,24 +2962,24 @@ class Qdr7CapacityAcceptanceIT {
 
   /** 使用当前Maven runtime执行独立quality gate；Windows批处理必须经cmd.exe。 */
   private static List<String> qualityCommand() {
-    return mavenCommand(List.of("-B", "-ntp", "-Pquality", "-DskipTests", "validate"));
+    return mavenCommand(List.of("-o", "-B", "-ntp", "-Pquality", "-DskipTests", "validate"));
   }
 
   /** full-regression在scenario内独立执行，失败由ledger记录后仍继续quality与finalizer。 */
   private static List<String> fullRegressionCommand() {
-    return mavenCommand(List.of("-B", "-ntp", "test"));
+    return mavenCommand(List.of("-o", "-B", "-ntp", "test"));
   }
 
   private static List<String> mavenCommand(final List<String> arguments) {
-    final boolean windows = System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
+    final boolean windows =
+        System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
     final Path executable = mavenExecutable(windows);
     if (windows) {
       final String executableToken =
           executable.isAbsolute()
               ? "\"" + executable.toAbsolutePath().normalize() + "\""
               : executable.toString();
-      final String command =
-          "\"" + executableToken + " " + String.join(" ", arguments) + "\"";
+      final String command = "\"" + executableToken + " " + String.join(" ", arguments) + "\"";
       return List.of("cmd.exe", "/d", "/s", "/c", command);
     }
     final List<String> command = new ArrayList<>();
@@ -2818,6 +3026,54 @@ class Qdr7CapacityAcceptanceIT {
                   .toFile());
     } catch (final IOException failure) {
       throw new IllegalStateException("resource registry is unavailable", failure);
+    }
+  }
+
+  private JsonNode stopSamplerAndAwaitCompletion() throws IOException, InterruptedException {
+    Files.writeString(
+        EVIDENCE_ROOT.resolve("sampler.stop"),
+        "stop\n",
+        StandardCharsets.UTF_8,
+        java.nio.file.StandardOpenOption.CREATE,
+        java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
+    final Path completionPath = EVIDENCE_ROOT.resolve("resource-sampler-completion.json");
+    final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(20);
+    while (System.nanoTime() < deadline) {
+      if (Files.isRegularFile(completionPath)) {
+        final JsonNode completion = objectMapper.readTree(completionPath.toFile());
+        if (!"COMPLETED".equals(completion.path("status").asText())) {
+          throw new IllegalStateException("resource sampler did not complete successfully");
+        }
+        if (!RUN_ID.equals(completion.path("runId").asText())
+            || !COMMIT_SHA.equals(completion.path("commitSha").asText())) {
+          throw new IllegalStateException("resource sampler completion binding mismatch");
+        }
+        return completion;
+      }
+      Thread.sleep(100L);
+    }
+    throw new IllegalStateException("resource sampler completion timed out");
+  }
+
+  private static JsonNode readEnvironmentRequirements() {
+    try {
+      return new ObjectMapper()
+          .readTree(
+              PROJECT_ROOT
+                  .resolve("config/qdr7-capacity/qdr7-capacity-environment-admission.json")
+                  .toFile());
+    } catch (final IOException failure) {
+      throw new IllegalStateException(
+          "environment admission requirements are unavailable", failure);
+    }
+  }
+
+  private static JsonNode readExecutionManifest() {
+    try {
+      return new ObjectMapper()
+          .readTree(evidenceRoot().resolve("capacity-execution-manifest.json").toFile());
+    } catch (final IOException failure) {
+      throw new IllegalStateException("cannot read capacity execution manifest", failure);
     }
   }
 
@@ -2896,7 +3152,7 @@ class Qdr7CapacityAcceptanceIT {
   private static final class FixedPortPostgreSqlContainer
       extends PostgreSQLContainer<FixedPortPostgreSqlContainer> {
     private FixedPortPostgreSqlContainer(final int hostPort) {
-      super(DockerImageName.parse("postgres:17"));
+      super(DockerImageName.parse(POSTGRES_IMAGE));
       addFixedExposedPort(hostPort, PostgreSQLContainer.POSTGRESQL_PORT);
     }
 

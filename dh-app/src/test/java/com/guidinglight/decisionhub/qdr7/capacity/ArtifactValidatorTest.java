@@ -33,6 +33,7 @@ class ArtifactValidatorTest {
             Qdr7CapacityContracts.HarnessStatus.PASS,
             Instant.parse("2026-07-15T12:00:00Z"),
             Instant.parse("2026-07-15T12:00:01Z"));
+    addBinding(artifact);
     final Path valid = context.evidenceRoot().resolve("valid.json");
     Qdr7CapacityArtifactSupport.writeJson(valid, artifact, mapper);
 
@@ -126,6 +127,29 @@ class ArtifactValidatorTest {
   }
 
   @Test
+  void manifestRejectsOmittedDuplicateAndUnexpectedFiles() throws IOException {
+    Files.writeString(temporaryDirectory.resolve("a.txt"), "a", StandardCharsets.UTF_8);
+    Files.writeString(temporaryDirectory.resolve("b.txt"), "b", StandardCharsets.UTF_8);
+    Qdr7CapacityArtifactSupport.writeManifest(temporaryDirectory);
+    final Path manifest = temporaryDirectory.resolve("sha256-manifest.txt");
+    final List<String> original = Files.readAllLines(manifest, StandardCharsets.UTF_8);
+
+    Files.write(manifest, List.of(original.get(0)), StandardCharsets.UTF_8);
+    assertThat(Qdr7CapacityArtifactSupport.validateManifest(temporaryDirectory).findings())
+        .contains("MANIFEST_PATH_SET_MISMATCH");
+
+    Files.write(
+        manifest, List.of(original.get(0), original.get(0), original.get(1)), StandardCharsets.UTF_8);
+    assertThat(Qdr7CapacityArtifactSupport.validateManifest(temporaryDirectory).findings())
+        .contains("MANIFEST_DUPLICATE_PATH:a.txt");
+
+    Qdr7CapacityArtifactSupport.writeManifest(temporaryDirectory);
+    Files.writeString(temporaryDirectory.resolve("c.txt"), "c", StandardCharsets.UTF_8);
+    assertThat(Qdr7CapacityArtifactSupport.validateManifest(temporaryDirectory).findings())
+        .contains("MANIFEST_PATH_SET_MISMATCH");
+  }
+
+  @Test
   void mandatoryRegistryRejectsMissingArtifactAndPathTraversal() throws IOException {
     Files.writeString(temporaryDirectory.resolve("present.json"), "{}", StandardCharsets.UTF_8);
 
@@ -202,7 +226,22 @@ class ArtifactValidatorTest {
         .containsExactly("NOT_STARTED", "STARTED", "PARTIAL", "COMPLETED");
     assertThat(schema.path("properties").path("verdict").path("enum"))
         .extracting(JsonNode::asText)
-        .containsExactly("NOT_EVALUATED", "PASS", "FAIL", "BLOCKED");
+        .containsExactly(
+            "NOT_EVALUATED", "PASS_WITHIN_FROZEN_PROFILE", "PASS", "FAIL", "BLOCKED", "INVALID");
+  }
+
+  private static void addBinding(final Map<String, Object> artifact) {
+    artifact.put("attemptId", RUN_ID);
+    artifact.put("candidateSha", COMMIT);
+    artifact.put("candidateTree", COMMIT);
+    artifact.put("profileId", "qdr7-capacity-acceptance");
+    artifact.put("profileVersion", Qdr7CapacityContracts.CRITERIA_VERSION);
+    artifact.put("scenarioSetHash", "b".repeat(64));
+    artifact.put("thresholdSetHash", "c".repeat(64));
+    artifact.put("environmentManifestHash", "d".repeat(64));
+    artifact.put("harnessVersion", "qdr12-capacity-harness-1");
+    artifact.put("harnessHash", "e".repeat(64));
+    artifact.put("generatedAt", "2026-07-15T12:00:01.000Z");
   }
 
   private static Path repositoryRoot() {

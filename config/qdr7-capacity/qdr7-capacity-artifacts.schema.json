@@ -15,19 +15,41 @@
     "seed",
     "unitSystem",
     "missingValues"
+    ,"attemptId"
+    ,"candidateSha"
+    ,"candidateTree"
+    ,"profileId"
+    ,"profileVersion"
+    ,"scenarioSetHash"
+    ,"thresholdSetHash"
+    ,"environmentManifestHash"
+    ,"harnessVersion"
+    ,"harnessHash"
+    ,"generatedAt"
   ],
   "properties": {
     "schemaVersion": {"const": "qdr7-capacity-1"},
     "runId": {"type": "string", "pattern": "^[0-9]{8}T[0-9]{6}Z$"},
     "commitSha": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
     "scenario": {"type": "string", "minLength": 1},
-    "status": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN", "NOT_FORMAL"]},
+    "status": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN", "NOT_FORMAL", "QUALIFIED", "NOT_QUALIFIED", "INVALID"]},
     "startedAtUtc": {"type": "string", "format": "date-time"},
     "finishedAtUtc": {"type": "string", "format": "date-time"},
     "durationMs": {"type": "integer", "minimum": 0},
     "seed": {"const": 7},
     "unitSystem": {"const": "milliseconds-bytes-requestsPerSecond-percent-rfc3339-utc"},
     "missingValues": {"type": "array", "items": {"type": "string"}},
+    "attemptId": {"type": "string", "pattern": "^[0-9]{8}T[0-9]{6}Z$"},
+    "candidateSha": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+    "candidateTree": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+    "profileId": {"const": "qdr7-capacity-acceptance"},
+    "profileVersion": {"const": "qdr7-capacity-criteria-1"},
+    "scenarioSetHash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "thresholdSetHash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "environmentManifestHash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "harnessVersion": {"type": "string", "minLength": 1},
+    "harnessHash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "generatedAt": {"type": "string", "format": "date-time"},
     "criteriaVersion": {"const": "qdr7-capacity-criteria-1"},
     "startedAt": {"type": "string", "format": "date-time"},
     "completedAt": {"type": "string", "format": "date-time"},
@@ -50,10 +72,10 @@
     "teardownVerdict": {"enum": ["PASS", "BLOCKED"]},
     "reasonCode": {"type": "string", "minLength": 1},
     "capacityAcceptanceExecuted": {"type": "boolean"},
-    "formalAcceptanceVerdict": {"enum": ["NOT_EVALUATED", "PASS", "FAIL", "BLOCKED"]},
+    "formalAcceptanceVerdict": {"enum": ["NOT_EVALUATED", "PASS_WITHIN_FROZEN_PROFILE", "FAIL", "BLOCKED", "INVALID"]},
     "qualificationVerdict": {"enum": ["NOT_EVALUATED", "PASS", "FAIL", "BLOCKED"]},
     "executionState": {"enum": ["NOT_STARTED", "STARTED", "PARTIAL", "COMPLETED"]},
-    "verdict": {"enum": ["NOT_EVALUATED", "PASS", "FAIL", "BLOCKED"]},
+    "verdict": {"enum": ["NOT_EVALUATED", "PASS_WITHIN_FROZEN_PROFILE", "PASS", "FAIL", "BLOCKED", "INVALID"]},
     "roundsRequired": {"type": "integer", "minimum": 0},
     "roundsStarted": {"type": "integer", "minimum": 0},
     "roundsCompleted": {"type": "integer", "minimum": 0},

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "qdr7-capacity-environment-admission-1",
+  "profileId": "qdr7-capacity-acceptance",
+  "profileVersion": "qdr7-capacity-criteria-1",
+  "minimumLogicalCpu": 16,
+  "minimumAvailableMemoryBytes": 17179869184,
+  "minimumDockerMemoryBytes": 17179869184,
+  "minimumDiskFreeBytes": 21474836480,
+  "maximumClockOffsetMilliseconds": 1000,
+  "backgroundObservationSeconds": 5,
+  "backgroundSampleIntervalMilliseconds": 1000,
+  "maximumBackgroundAverageCpuPercent": 50,
+  "maximumBackgroundPeakCpuPercent": 80,
+  "requiredFilesystemTypes": ["NTFS", "ReFS"],
+  "requiredDockerStorageDrivers": ["overlayfs", "windowsfilter"],
+  "credentialEnvironmentVariableNames": [
+    "OPENAI_API_KEY",
+    "AZURE_OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "NQ_API_KEY",
+    "NQ_API_SECRET",
+    "EXCHANGE_API_KEY",
+    "EXCHANGE_API_SECRET"
+  ],
+  "proxyEnvironmentVariableNames": [
+    "HTTP_PROXY",
+    "HTTPS_PROXY",
+    "ALL_PROXY"
+  ],
+  "networkPolicy": "LOOPBACK_AND_LOCAL_DOCKER_ONLY",
+  "networkPolicyEvidenceType": "WINDOWS_ACTIVE_ADAPTER_ALLOWLIST_V1",
+  "allowedActiveNetworkAdapterNamePatterns": [
+    "^DockerNAT$",
+    "^vEthernet \\(Docker Desktop.*\\)$",
+    "^vEthernet \\(WSL.*\\)$"
+  ],
+  "postgresImage": "postgres@sha256:5c855ad7b85e68e48a62f34662853f38b57c1c1d80f3a927ab58034fd6d31c5e",
+  "postgresMajor": 17,
+  "testcontainersVersion": "1.20.4"
+}

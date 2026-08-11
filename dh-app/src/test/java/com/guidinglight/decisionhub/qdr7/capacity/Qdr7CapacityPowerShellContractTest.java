@@ -39,6 +39,17 @@ class Qdr7CapacityPowerShellContractTest {
   }
 
   @Test
+  void manifestContractRejectsOmissionDuplicateAndPostManifestFile()
+      throws IOException, InterruptedException {
+    final Path root = repositoryRoot();
+    final Path script = root.resolve("scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1");
+
+    for (final String executable : requiredPowerShellExecutables()) {
+      assertThat(invokeManifestContract(executable, script, root)).isZero();
+    }
+  }
+
+  @Test
   void selectsRequiredPowerShellExecutablesByOperatingSystem() {
     assertThat(requiredPowerShellExecutables("Windows 11"))
         .containsExactly("powershell.exe", "pwsh.exe");
@@ -145,13 +156,25 @@ class Qdr7CapacityPowerShellContractTest {
         .contains("'dh-bom/pom.xml'")
         .contains("$stagedWriteScopeValid")
         .contains("qualification write allowlist only")
-        .contains("empty or harness write allowlist only");
+        .contains("empty or harness write allowlist only")
+        .contains(
+            "$executionBlockers",
+            "'IMPLEMENTATION_VALIDATION_FORMAL_ENVIRONMENT_NOT_QUALIFIED'",
+            "$_ -notin @('clock-synchronized', 'clock-offset', 'network-isolation')")
+        .contains("$imageIdentity.text -eq $expectedImageId")
+        .contains("$repoDigestJsonContainsReference")
+        .contains(
+            "Get-ThresholdAggregateFindings -Threshold $threshold -AllowNotRun"
+                + " $implementationValidationPassed",
+            "$notEvaluatedCount -eq 99",
+            "'FORMAL_SCENARIO_NOT_EXECUTED'");
     assertThat(formalIt)
         .contains("IMPLEMENTATION_VALIDATION_ONLY")
         .contains("tenantIsolationStartupProbe", "contextRestartStartupProbe")
         .contains("nonceDriverStartupProbe")
+        .contains("runRuntimeSafetyProbe(HARNESS_STARTED)")
         .contains("new ProcessBuilder(fullRegressionCommand())")
-        .contains("mavenCommand(List.of(\"-B\", \"-ntp\", \"test\"))")
+        .contains("mavenCommand(List.of(\"-o\", \"-B\", \"-ntp\", \"test\"))")
         .contains(
             "@EnabledIfSystemProperty(named = \"qdr7.implementationValidation\", matches = \"true\")")
         .contains(
@@ -177,6 +200,8 @@ class Qdr7CapacityPowerShellContractTest {
     assertThat(script)
         .contains("qdr7-capacity-qualification")
         .contains("QUALIFICATION_ONLY")
+        .contains("$nonFormalMode = $ImplementationValidationEnabled -or $QualificationOnlyEnabled")
+        .contains("if ($nonFormalMode) { 'NOT_EVALUATED' } else { 'BLOCKED' }")
         .contains("HARNESS_INTERRUPTED_AFTER_SCENARIO_START")
         .contains("Get-NormalizedScenarioLedger")
         .contains("Set-SummaryScenarioCounts")
@@ -186,7 +211,7 @@ class Qdr7CapacityPowerShellContractTest {
         .contains("QualificationOnly 'true'")
         .contains("partial comparisons preserved")
         .contains("started to partial normalization")
-            .contains("qualification formal verdict isolation");
+        .contains("qualification formal verdict isolation");
   }
 
   @Test
@@ -206,6 +231,190 @@ class Qdr7CapacityPowerShellContractTest {
         .contains("seedCanonicalPromptVersion(contextJdbc, tenant, round)")
         .contains("System.getenv(\"MAVEN_HOME\")")
         .contains("PROJECT_ROOT.resolve(windows ? \"mvnw.cmd\" : \"mvnw\")");
+  }
+
+  @Test
+  void formalEvidenceBindingAdmissionAndFinalizerRemainFailClosed() throws IOException {
+    final Path root = repositoryRoot();
+    final String script =
+        Files.readString(root.resolve("scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1"));
+    final String formalIt =
+        Files.readString(
+            root.resolve(
+                "dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityAcceptanceIT.java"));
+
+    final int admission = formalIt.indexOf("qualifyEnvironmentBeforeScenarioDispatch();");
+    final int dispatch = formalIt.indexOf("for (final HarnessDriver driver : drivers)");
+    assertThat(admission).isGreaterThanOrEqualTo(0).isLessThan(dispatch);
+    assertThat(formalIt)
+        .contains("Qdr7CapacityEnvironmentAdmission.runPostgresSmokeAndQualify(")
+        .contains("EXPECTED_THRESHOLD_COMPARISONS = 99")
+        .contains("artifact.put(\"declaredThresholdLeaves\", 41)")
+        .contains("assertThat(dispatchers).hasSize(15)")
+        .contains("\"scenarioSetHash\"", "\"thresholdSetHash\"", "\"environmentManifestHash\"");
+
+    assertThat(script)
+        .contains("capacity-environment-manifest.json", "capacity-execution-manifest.json")
+        .contains(
+            "$bindingFields = @('attemptId', 'candidateSha', 'candidateTree', 'profileId',"
+                + " 'profileVersion', 'scenarioSetHash', 'thresholdSetHash',"
+                + " 'environmentManifestHash', 'harnessVersion', 'harnessHash')")
+        .contains(
+            "$manifest.expectedMandatoryScenarios = 15",
+            "$manifest.expectedThresholdLeaves = 41",
+            "$manifest.expectedThresholdComparisons = 99")
+        .contains("artifact-inventory.json", "capacity-final-verdict.json")
+        .contains("$findings.Add('THRESHOLD_SET_INCOMPLETE')")
+        .contains(
+            "$manifest.executionMode = Get-ExecutionMode",
+            "$manifest.formalPacketPrepared = (Get-ExecutionMode) -eq 'FORMAL'",
+            "$modeBindingFindings.Add('EXECUTION_MODE_BINDING_MISMATCH')",
+            "$modeBindingFindings.Add('EXECUTION_MANIFEST_MODE_MISMATCH')")
+        .contains(
+            "$integrityFindings.Add(\"SCENARIO_CARDINALITY_INVALID:$scenarioId\")",
+            "$integrityFindings.Add(\"ORPHAN_SCENARIO_RESULT:$($row.scenarioId)\")")
+        .contains(
+            "$findings.Add('THRESHOLD_STATUS_AGGREGATE_MISMATCH')",
+            "$findings.Add('THRESHOLD_TOP_LEVEL_STATUS_MISMATCH')",
+            "Get-ObjectPropertyValue -Target $Threshold -Name 'comparisons' -DefaultValue @()",
+            "Get-ObjectPropertyValue -Target $Threshold -Name 'status' -DefaultValue ''")
+        .contains("$findings.Add(\"BINDING_MISMATCH:${name}:$field\")")
+        .contains("ENVIRONMENT_MANIFEST_HASH_MISMATCH")
+        .contains("$artifactRegistry.mandatory")
+        .contains("$finalExit = 80", "elseif ($finalExit -eq 80) { 'INVALID' }");
+  }
+
+  @Test
+  void finalizerRebindsCurrentTreeInputsThresholdSemanticsAndSamplerCompletion()
+      throws IOException {
+    final Path root = repositoryRoot();
+    final String script =
+        Files.readString(root.resolve("scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1"));
+    final String watcher =
+        Files.readString(root.resolve("scripts/qdr7-capacity/Watch-Qdr7CapacityResources.ps1"));
+
+    assertThat(script)
+        .contains(
+            "FINALIZER_HEAD_MISMATCH",
+            "FINALIZER_WORKTREE_DIRTY",
+            "FINALIZER_STAGED_DIRTY",
+            "FINALIZER_SCENARIO_SET_HASH_MISMATCH",
+            "FINALIZER_THRESHOLD_SET_HASH_MISMATCH",
+            "FINALIZER_HARNESS_HASH_MISMATCH",
+            "THRESHOLD_OPERATOR_MISMATCH",
+            "THRESHOLD_VALUE_MISMATCH",
+            "THRESHOLD_SOURCE_ARTIFACT_MISMATCH",
+            "THRESHOLD_SOURCE_OBSERVED_MISMATCH",
+            "THRESHOLD_STATUS_SEMANTICS_MISMATCH",
+            "RESOURCE_SAMPLER_COMPLETION_INVALID",
+            "RESOURCE_SAMPLER_RAW_HASH_MISMATCH",
+            "RESOURCE_SUMMARY_RAW_BINDING_MISMATCH");
+    assertThat(script)
+        .contains(
+            "if ($Phase -eq 'Finalize' -and (Get-ExecutionMode) -eq 'FORMAL')",
+            "Test-FormalPacketPreparationGate",
+            "FORMAL_PACKET_PREPARED_MISSING",
+            "FORMAL_PACKET_PREPARED_TYPE_INVALID",
+            "FORMAL_PACKET_NOT_PREPARED");
+    assertThat(watcher)
+        .contains(
+            "resource-sampler-completion.json",
+            "COMPLETED",
+            "jvmSeriesSha256",
+            "dockerSeriesSha256");
+  }
+
+  @Test
+  void acceptanceUsesSpringRuntimeBeansAndFactsourcesDoNotSelfAttestSecurityPass()
+      throws IOException {
+    final Path root = repositoryRoot();
+    final String formalIt =
+        Files.readString(
+            root.resolve(
+                "dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityAcceptanceIT.java"));
+    assertThat(formalIt)
+        .contains(
+            "@Autowired private LimitedDryRunRuntimePolicy runtimePolicy",
+            "@Autowired private HmacNqDryRunAuthenticator dryRunAuthenticator",
+            "@Autowired private DecisionDryRunService decisionDryRunService",
+            "@Autowired private DecisionDryRunRuntimeProperties runtimeProperties")
+        .doesNotContain("Qdr7CapacityRuntimeSafetyProbe.run()");
+
+    for (final String path :
+        List.of(
+            "README.md",
+            "docs/current/README.md",
+            "docs/current/STATUS.md",
+            "docs/current/WORK_ORDER.md",
+            "docs/current/ROADMAP.md",
+            "docs/current/TESTING.md",
+            "docs/current/WORKLOG.md",
+            "docs/current/CODEX_PROJECT_INSTRUCTIONS.md",
+            "docs/current/DH_POST_STAGE_QDR_11_NEXT_STAGE_PLAN.md",
+            "docs/current/DH_STAGE_QDR_12_FORMAL_CAPACITY_RESOURCE_SAFETY_ACCEPTANCE_IMPLEMENTATION_WORK_ORDER.md")) {
+      final String factsource = Files.readString(root.resolve(path));
+      final int nextAuthority = factsource.indexOf("## Terminal current authority", 40);
+      final String currentAuthority =
+          nextAuthority < 0 ? factsource : factsource.substring(0, nextAuthority);
+      if (currentAuthority.contains("CURRENT TREE NOT YET SEALED")) {
+        assertThat(currentAuthority)
+            .as(path)
+            .doesNotContain(
+                "HARNESS_REMEDIATED / LOCAL_ACCEPTED",
+                "安全 exact-diff 已通过",
+                "SYNCHRONIZED / 0 CURRENT CONFLICTS");
+      }
+    }
+  }
+
+  @Test
+  void resourceWatcherDeclaresStableByteBasedCsvContracts() throws IOException {
+    final String watcher =
+        Files.readString(
+            repositoryRoot().resolve("scripts/qdr7-capacity/Watch-Qdr7CapacityResources.ps1"));
+
+    assertThat(watcher)
+        .contains(
+            "schemaVersion,runId,commitSha,scenario,timestampUtc,elapsedMs,phase,processRole,pid,parentPidHash,cpuPercent,heapUsedBytes,heapCommittedBytes,heapMaxBytes,nonHeapBytes,nativeMemoryBytes,workingSetBytes,threadCount,missingReason")
+        .contains(
+            "schemaVersion,runId,commitSha,scenario,timestampUtc,elapsedMs,phase,containerHash,cpuPercent,memoryBytes,hostAvailableBytes,missingReason")
+        .contains("ConvertTo-ByteCount", "FreePhysicalMemory * 1024L")
+        .contains("REQUIRED_JVM_PROCESS_UNAVAILABLE", "DOCKER_OR_HOST_MEMORY_UNAVAILABLE")
+        .doesNotContain("sampler failure => metric=0");
+  }
+
+  @Test
+  void environmentAdmissionUsesObservedIsolationPinnedPostgresAndOfflineMaven() throws IOException {
+    final Path root = repositoryRoot();
+    final String script =
+        Files.readString(root.resolve("scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1"));
+    final String formalIt =
+        Files.readString(
+            root.resolve(
+                "dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityAcceptanceIT.java"));
+    final String admission =
+        Files.readString(
+            root.resolve(
+                "dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityEnvironmentAdmission.java"));
+    final String admissionConfig =
+        Files.readString(
+            root.resolve("config/qdr7-capacity/qdr7-capacity-environment-admission.json"));
+
+    assertThat(script)
+        .contains("Get-NetAdapter")
+        .contains("networkIsolationVerified")
+        .contains("disallowedNetworkAdapterCount")
+        .contains("postgresImageDigestVerified")
+        .doesNotContain("'postgres:17'");
+    assertThat(formalIt)
+        .contains("DockerImageName.parse(POSTGRES_IMAGE)")
+        .contains("ENVIRONMENT_REQUIREMENTS.path(\"postgresImage\")")
+        .contains("List.of(\"-o\", \"-B\", \"-ntp\", \"test\")");
+    assertThat(admissionConfig).contains("postgres@sha256:");
+    assertThat(admission)
+        .contains("NETWORK_ISOLATION_UNVERIFIED")
+        .contains("POSTGRES_IMAGE_DIGEST_MISMATCH")
+        .contains("requirements.path(\"postgresImage\")");
   }
 
   @Test
@@ -298,6 +507,41 @@ class Qdr7CapacityPowerShellContractTest {
         .withFailMessage("PowerShell binding contract timed out: %s", output)
         .isTrue();
     assertThat(output).contains("QDR7_CAPACITY_RUNTIME_BINDING_CONTRACT=PASS");
+    return process.exitValue();
+  }
+
+  private static int invokeManifestContract(
+      final String executable, final Path script, final Path root)
+      throws IOException, InterruptedException {
+    final Process process =
+        new ProcessBuilder(
+                executable,
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                script.toString(),
+                "-Phase",
+                "ManifestContractTest",
+                "-RunId",
+                "20991231T235959Z",
+                "-Seed",
+                "7",
+                "-ProjectRoot",
+                root.toString(),
+                "-PowerShellExecutable",
+                executable)
+            .redirectErrorStream(true)
+            .start();
+    final boolean finished =
+        process.waitFor(Duration.ofSeconds(20).toMillis(), TimeUnit.MILLISECONDS);
+    final String output =
+        new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+    assertThat(finished)
+        .withFailMessage("PowerShell manifest contract timed out: %s", output)
+        .isTrue();
+    assertThat(output).contains("QDR7_CAPACITY_MANIFEST_CONTRACT=PASS");
     return process.exitValue();
   }
 
