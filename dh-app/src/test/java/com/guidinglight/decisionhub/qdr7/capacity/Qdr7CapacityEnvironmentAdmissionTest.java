@@ -72,6 +72,10 @@ class Qdr7CapacityEnvironmentAdmissionTest {
         requirements,
         "POSTGRES_EXPECTED_IMAGE_MISMATCH");
     assertBlocked(
+        valid.deepCopy().put("postgresImageIdentityDomain", "SHA256_DIGEST_UNRESOLVED_DOMAIN"),
+        requirements,
+        "POSTGRES_IMAGE_IDENTITY_DOMAIN_AMBIGUOUS");
+    assertBlocked(
         valid.deepCopy().remove("postgresExecutedImageId"),
         requirements,
         "POSTGRES_EXECUTED_IMAGE_OBSERVATION_INVALID");
@@ -226,6 +230,11 @@ class Qdr7CapacityEnvironmentAdmissionTest {
     assertThat(qualified.path("postgresExpectedCanonicalImageId").asText())
         .isEqualTo(qualified.path("postgresExecutedImageId").asText())
         .matches("^sha256:[a-f0-9]{64}$");
+    assertThat(qualified.path("postgresImageId").asText())
+        .isEqualTo(qualified.path("postgresExpectedCanonicalImageId").asText());
+    assertThat(qualified.path("postgresExpectedRepoDigests"))
+        .contains(requirements(mapper).path("postgresImage"));
+    assertThat(qualified.path("postgresImageDigestVerified").asBoolean()).isTrue();
     assertThat(qualified.path("postgresExecutedImageReference").asText()).isNotBlank();
     final JsonNode diagnostics = qualified.path("postgresImageIdentityDiagnostics");
     assertThat(diagnostics.path("requiredImageReference").asText())
@@ -271,6 +280,9 @@ class Qdr7CapacityEnvironmentAdmissionTest {
         .isEqualTo(POSTGRES_IMAGE_ID);
     assertThat(rejected.path("postgresExecutedImageId").asText())
         .isEqualTo(DIFFERENT_IMAGE_ID);
+    assertThat(rejected.path("postgresImageIdentityDomain").asText())
+        .isEqualTo("CONFIG_IMAGE_ID");
+    assertThat(rejected.path("postgresImageDigestVerified").asBoolean()).isTrue();
   }
 
   private static void assertBlocked(
@@ -300,6 +312,7 @@ class Qdr7CapacityEnvironmentAdmissionTest {
     snapshot.put("minimumDockerMemoryBytes", 16L * 1024L * 1024L * 1024L);
     snapshot.put("postgresImageAvailable", true);
     snapshot.put("postgresImageId", POSTGRES_IMAGE_ID);
+    snapshot.put("postgresImageIdentityDomain", "CONFIG_IMAGE_ID");
     snapshot.put(
         "postgresImageReference",
         "postgres@sha256:5c855ad7b85e68e48a62f34662853f38b57c1c1d80f3a927ab58034fd6d31c5e");

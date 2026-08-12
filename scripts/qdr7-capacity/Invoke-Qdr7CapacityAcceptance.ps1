@@ -866,6 +866,7 @@ function Invoke-Preflight {
         $environmentManifest.minimumDockerMemoryBytes = [long]$admission.minimumDockerMemoryBytes
         $environmentManifest.postgresImageAvailable = $imageInspect.exitCode -eq 0
         $environmentManifest.postgresImageId = $expectedImageId
+        $environmentManifest.postgresImageIdentityDomain = $(if ($expectedImageId -match '^sha256:[a-f0-9]{64}$') { 'CONFIG_IMAGE_ID' } else { 'UNAVAILABLE' })
         $environmentManifest.postgresExpectedCanonicalImageId = $expectedImageId
         $environmentManifest.postgresExpectedRepoDigests = @($imageRepoDigests)
         $environmentManifest.postgresImageReference = $postgresImageReference

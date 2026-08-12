@@ -163,6 +163,16 @@ final class Qdr7CapacityEnvironmentAdmission {
     final String postgresImageId =
         requiredText(
             snapshot, "postgresImageId", "POSTGRES_IMAGE_ID_OBSERVATION_INVALID", blockers);
+    require(
+        "CONFIG_IMAGE_ID"
+            .equals(
+                requiredText(
+                    snapshot,
+                    "postgresImageIdentityDomain",
+                    "POSTGRES_IMAGE_IDENTITY_DOMAIN_OBSERVATION_INVALID",
+                    blockers)),
+        "POSTGRES_IMAGE_IDENTITY_DOMAIN_AMBIGUOUS",
+        blockers);
     final String expectedCanonicalImageId =
         requiredText(
             snapshot,
@@ -473,10 +483,21 @@ final class Qdr7CapacityEnvironmentAdmission {
       containerDiagnostics.put("containerImmutableImageField", nullToEmpty(containerInfo.getImageId()));
       putInspection(diagnostics.putObject("expectedImageInspection"), expectedInspection);
       putInspection(diagnostics.putObject("executedImageInspection"), executedInspection);
+      manifest.put("postgresImageAvailable", expectedInspection.inspectionFailure().isBlank());
+      manifest.put("postgresImageId", expectedInspection.canonicalConfigImageId());
+      manifest.put(
+          "postgresImageIdentityDomain",
+          expectedInspection.canonicalConfigImageId().isBlank()
+              ? "UNAVAILABLE"
+              : "CONFIG_IMAGE_ID");
       manifest.put("postgresExecutedImageReference", executedImageReference);
       manifest.put(
           "postgresExpectedCanonicalImageId",
           expectedInspection.canonicalConfigImageId());
+      manifest.putPOJO("postgresExpectedRepoDigests", expectedInspection.repoDigests());
+      manifest.put(
+          "postgresImageDigestVerified",
+          expectedInspection.repoDigests().contains(requiredImageReference));
       manifest.put("postgresExecutedImageId", executedInspection.canonicalConfigImageId());
       putComparison(diagnostics, expectedInspection, executedInspection);
       try (var connection =
@@ -495,7 +516,12 @@ final class Qdr7CapacityEnvironmentAdmission {
     } catch (final RuntimeException | java.sql.SQLException failure) {
       manifest.put("testcontainersViable", false);
       manifest.put("postgresMajor", 0);
+      manifest.put("postgresImageAvailable", false);
+      manifest.put("postgresImageId", "");
+      manifest.put("postgresImageIdentityDomain", "UNAVAILABLE");
+      manifest.put("postgresImageDigestVerified", false);
       manifest.put("postgresExpectedCanonicalImageId", "");
+      manifest.putPOJO("postgresExpectedRepoDigests", List.of());
       manifest.put("postgresExecutedImageReference", "");
       manifest.put("postgresExecutedImageId", "");
       manifest.put("testcontainersFailure", failure.getClass().getSimpleName());
@@ -851,10 +877,10 @@ final class Qdr7CapacityEnvironmentAdmission {
       return new ImageInspection(
           reference,
           nullToEmpty(canonicalId),
-          List.of(),
+          identityKind(reference).equals("REPO_DIGEST_REFERENCE") ? List.of(reference) : List.of(),
           List.of(),
           canonicalImageId(canonicalId),
-          "SYNTHETIC_TEST_INSPECTOR");
+          "");
     }
 
     private static ImageInspection failure(final String reference, final String failure) {
