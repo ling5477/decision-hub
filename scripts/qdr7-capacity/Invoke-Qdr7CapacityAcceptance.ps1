@@ -790,14 +790,15 @@ function Invoke-Preflight {
                 $imageRepoDigests = @()
             }
         }
-        $expectedImageId = $postgresImageReference.Substring($postgresImageReference.IndexOf('@') + 1)
-        $repoDigestJsonContainsReference =
+        $expectedImageId = $imageIdentity.text.Trim()
+        $repoDigestSetContainsReference =
             $imageRepoDigestResult.exitCode -eq 0 -and
-            $imageRepoDigestResult.text -match [regex]::Escape('"' + $postgresImageReference + '"')
+            @($imageRepoDigests) -contains $postgresImageReference
         $postgresImageDigestVerified =
             $imageInspect.exitCode -eq 0 -and
-            $imageIdentity.text -eq $expectedImageId -and
-            $repoDigestJsonContainsReference
+            $imageIdentity.exitCode -eq 0 -and
+            $expectedImageId -match '^sha256:[a-f0-9]{64}$' -and
+            $repoDigestSetContainsReference
         Add-Check 'postgres-image-digest' $postgresImageReference ($imageIdentity.text) $postgresImageDigestVerified
         $dockerStorage = Invoke-NativeCommand -Executable 'docker' -Arguments @('info', '--format', '{{.Driver}}')
 
@@ -864,9 +865,12 @@ function Invoke-Preflight {
         $environmentManifest.dockerMemoryBytes = $dockerMemory
         $environmentManifest.minimumDockerMemoryBytes = [long]$admission.minimumDockerMemoryBytes
         $environmentManifest.postgresImageAvailable = $imageInspect.exitCode -eq 0
-        $environmentManifest.postgresImageId = $imageIdentity.text
+        $environmentManifest.postgresImageId = $expectedImageId
+        $environmentManifest.postgresExpectedCanonicalImageId = $expectedImageId
+        $environmentManifest.postgresExpectedRepoDigests = @($imageRepoDigests)
         $environmentManifest.postgresImageReference = $postgresImageReference
         $environmentManifest.postgresImageDigestVerified = $postgresImageDigestVerified
+        $environmentManifest.postgresExecutedImageReference = ''
         $environmentManifest.postgresExecutedImageId = ''
         $environmentManifest.testcontainersViable = $false
         $environmentManifest.postgresMajor = 0
@@ -947,7 +951,7 @@ function Invoke-Preflight {
         $registry.containerOwnership = 'JUNIT_TESTCONTAINERS'
         $registry.implementationValidation = $ImplementationValidationEnabled
         $registry.qualificationOnly = $QualificationOnlyEnabled
-        $registry.postgresImageId = $imageIdentity.text
+        $registry.postgresImageId = $expectedImageId
         $registry.postgresImageReference = $postgresImageReference
         $registry.teardown = [ordered]@{ sampler = 'PENDING'; container = 'PENDING'; volume = 'PENDING'; residual = 'PENDING' }
         Write-JsonFile -Path $RegistryPath -Value $registry

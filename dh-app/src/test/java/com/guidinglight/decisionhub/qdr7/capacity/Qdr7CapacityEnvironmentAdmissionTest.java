@@ -17,6 +17,7 @@ class Qdr7CapacityEnvironmentAdmissionTest {
   private static final String HASH = "b".repeat(64);
   private static final String POSTGRES_IMAGE_ID =
       "sha256:5c855ad7b85e68e48a62f34662853f38b57c1c1d80f3a927ab58034fd6d31c5e";
+  private static final String DIFFERENT_IMAGE_ID = "sha256:" + "c".repeat(64);
 
   @TempDir Path temporaryDirectory;
 
@@ -59,6 +60,26 @@ class Qdr7CapacityEnvironmentAdmissionTest {
         requirements,
         "POSTGRES_IMAGE_DIGEST_MISMATCH");
     assertBlocked(
+        valid.deepCopy().put("postgresExecutedImageId", DIFFERENT_IMAGE_ID),
+        requirements,
+        "POSTGRES_EXECUTED_IMAGE_MISMATCH");
+    assertBlocked(
+        valid.deepCopy().remove("postgresExpectedCanonicalImageId"),
+        requirements,
+        "POSTGRES_EXPECTED_IMAGE_OBSERVATION_INVALID");
+    assertBlocked(
+        valid.deepCopy().put("postgresExpectedCanonicalImageId", "sha256:abc"),
+        requirements,
+        "POSTGRES_EXPECTED_IMAGE_MISMATCH");
+    assertBlocked(
+        valid.deepCopy().remove("postgresExecutedImageId"),
+        requirements,
+        "POSTGRES_EXECUTED_IMAGE_OBSERVATION_INVALID");
+    assertBlocked(
+        valid.deepCopy().put("postgresExecutedImageId", "sha256:abc"),
+        requirements,
+        "POSTGRES_EXECUTED_IMAGE_MISMATCH");
+    assertBlocked(
         valid.deepCopy().put("postgresImageReference", "postgres:17"),
         requirements,
         "POSTGRES_IMAGE_REFERENCE_MISMATCH");
@@ -90,6 +111,60 @@ class Qdr7CapacityEnvironmentAdmissionTest {
         valid,
         requirements.deepCopy().put("minimumDockerMemoryBytes", 64L * 1024L * 1024L * 1024L),
         "DOCKER_MEMORY_INSUFFICIENT");
+  }
+
+  @Test
+  void canonicalImageIdentityIsStrictContentAddressedAndFailClosed() {
+    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageId(POSTGRES_IMAGE_ID))
+        .isEqualTo(POSTGRES_IMAGE_ID);
+    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageId(POSTGRES_IMAGE_ID.substring(7)))
+        .isEqualTo(POSTGRES_IMAGE_ID);
+    assertThat(
+            Qdr7CapacityEnvironmentAdmission.canonicalImageId(
+                "  " + POSTGRES_IMAGE_ID + "  "))
+        .isEqualTo(POSTGRES_IMAGE_ID);
+    assertThat(
+            Qdr7CapacityEnvironmentAdmission.canonicalImageIdsMatch(
+                POSTGRES_IMAGE_ID, POSTGRES_IMAGE_ID.substring(7)))
+        .isTrue();
+    assertThat(
+            Qdr7CapacityEnvironmentAdmission.canonicalImageIdsMatch(
+                POSTGRES_IMAGE_ID, DIFFERENT_IMAGE_ID))
+        .isFalse();
+    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageId("sha256:abc")).isEmpty();
+    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageId("postgres:17")).isEmpty();
+    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageId("SHA256:" + "a".repeat(64)))
+        .isEmpty();
+    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageId(" ")).isEmpty();
+  }
+
+  @Test
+  void authoritativeDockerResolutionRejectsTagMutationAndInspectFailure() {
+    final String expected =
+        Qdr7CapacityEnvironmentAdmission.resolveCanonicalImageId(
+            "postgres:17", ignored -> POSTGRES_IMAGE_ID);
+    final String executedSameContent =
+        Qdr7CapacityEnvironmentAdmission.resolveCanonicalImageId(
+            "sha256:runtime-display", ignored -> POSTGRES_IMAGE_ID.substring(7));
+    final String sameTagMutated =
+        Qdr7CapacityEnvironmentAdmission.resolveCanonicalImageId(
+            "postgres:17", ignored -> DIFFERENT_IMAGE_ID);
+
+    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageIdsMatch(expected, executedSameContent))
+        .isTrue();
+    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageIdsMatch(expected, sameTagMutated))
+        .isFalse();
+    assertThat(
+            Qdr7CapacityEnvironmentAdmission.resolveCanonicalImageId(
+                "postgres:17", ignored -> null))
+        .isEmpty();
+    assertThat(
+            Qdr7CapacityEnvironmentAdmission.resolveCanonicalImageId(
+                "postgres:17",
+                ignored -> {
+                  throw new IllegalStateException("inspect unavailable");
+                }))
+        .isEmpty();
   }
 
   @Test
@@ -148,9 +223,44 @@ class Qdr7CapacityEnvironmentAdmissionTest {
     final JsonNode qualified = mapper.readTree(environment.toFile());
     assertThat(qualified.path("testcontainersViable").asBoolean()).isTrue();
     assertThat(qualified.path("postgresMajor").asInt()).isEqualTo(17);
+    assertThat(qualified.path("postgresExpectedCanonicalImageId").asText())
+        .isEqualTo(qualified.path("postgresExecutedImageId").asText())
+        .matches("^sha256:[a-f0-9]{64}$");
+    assertThat(qualified.path("postgresExecutedImageReference").asText()).isNotBlank();
     assertThat(qualified.path("environmentManifestHash").asText()).matches("^[a-f0-9]{64}$");
     assertThat(mapper.readTree(registry.toFile()).path("environmentManifestHash").asText())
         .isEqualTo(qualified.path("environmentManifestHash").asText());
+  }
+
+  @Test
+  void dedicatedPostgresSmokeRejectsDifferentExecutedImmutableIdentity() throws IOException {
+    final ObjectMapper mapper = new ObjectMapper();
+    final Path environment = temporaryDirectory.resolve("negative-capacity-environment.json");
+    final Path registry = temporaryDirectory.resolve("negative-resource-registry.json");
+    final Path requirements = temporaryDirectory.resolve("negative-environment-admission.json");
+    mapper.writeValue(environment.toFile(), validSnapshot(mapper));
+    mapper.writeValue(
+        registry.toFile(), mapper.createObjectNode().put("runId", "20260809T000001Z"));
+    Files.copy(
+        repositoryRoot().resolve("config/qdr7-capacity/qdr7-capacity-environment-admission.json"),
+        requirements);
+
+    final Qdr7CapacityEnvironmentAdmission.Evaluation evaluation =
+        Qdr7CapacityEnvironmentAdmission.runPostgresSmokeAndQualify(
+            environment,
+            registry,
+            requirements,
+            mapper,
+            reference ->
+                reference.startsWith("postgres@") ? POSTGRES_IMAGE_ID : DIFFERENT_IMAGE_ID);
+
+    assertThat(evaluation.status()).isEqualTo("NOT_QUALIFIED");
+    assertThat(evaluation.blockers()).contains("POSTGRES_EXECUTED_IMAGE_MISMATCH");
+    final JsonNode rejected = mapper.readTree(environment.toFile());
+    assertThat(rejected.path("postgresExpectedCanonicalImageId").asText())
+        .isEqualTo(POSTGRES_IMAGE_ID);
+    assertThat(rejected.path("postgresExecutedImageId").asText())
+        .isEqualTo(DIFFERENT_IMAGE_ID);
   }
 
   private static void assertBlocked(
@@ -184,6 +294,7 @@ class Qdr7CapacityEnvironmentAdmissionTest {
         "postgresImageReference",
         "postgres@sha256:5c855ad7b85e68e48a62f34662853f38b57c1c1d80f3a927ab58034fd6d31c5e");
     snapshot.put("postgresImageDigestVerified", true);
+    snapshot.put("postgresExpectedCanonicalImageId", POSTGRES_IMAGE_ID);
     snapshot.put("postgresExecutedImageId", POSTGRES_IMAGE_ID);
     snapshot.put("testcontainersViable", true);
     snapshot.put("postgresMajor", 17);

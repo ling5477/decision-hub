@@ -1,5 +1,42 @@
 # Decision Hub Testing
 
+## Terminal current authority — 2026-08-12 Stage-QDR-12 PostgreSQL image identity harness fix
+
+~~~text
+Task: DH-STAGE-QDR-12-HARNESS-FIX-CI-BLOCKER
+Stage-QDR-12: HARNESS_REMEDIATED / PUBLISHED_CI_PENDING
+Fix baseline / origin-dev: 86f3d879fe3da1cc91eec4d196e68fee15cb46a2 / SAME
+Fix commit: THIS_DOCUMENT_COMMIT / LOCAL_ONLY / NOT_PUSHED
+Failed exact-SHA CI: 31589666200 / FAILED / PRESERVED / 1373 TESTS / 1 FAILURE
+Root cause: POSTGRES_IMAGE_IDENTITY_REPRESENTATION_MISMATCH
+PostgreSQL image identity: CANONICAL_CONTENT_IDENTITY / FULL SHA256 CONFIG ID / EXACT
+Required repo digest: EXACT REPODIGESTS MEMBERSHIP / TAG_ONLY TRUST NONE
+Expected / executed identity: AUTHORITATIVE DOCKER INSPECT / CANONICAL / EXACT MATCH
+Blank / malformed / inspect failure / mismatch: FAIL_CLOSED / NOT_QUALIFIED
+Environment admission / capacity harness: PASS / READY_FOR_FORMAL_EXECUTION
+Targeted regression: PASS / 24 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED / REAL POSTGRESQL 17
+Full regression: PASS / 19 OF 19 REACTOR / 1376 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL / Flyway: 17.10 REAL TESTCONTAINERS / V1-V15 FULL APPLY
+Quality: PASS / 19 OF 19 REACTOR / CHECKSTYLE 0 / SPOTLESS PASS
+Security exact-diff: PASS / SEALED SCAN ed3afd89-45a0-4e79-8cfa-d314ca76b893 / 5 OF 5 / 0 REPORTABLE / 0 DEFERRED
+Security snapshot: codex-security-snapshot/v1:sha256:4a0e9a5863430d6dd3ea18e08afcd6201184f8d78e4388494e0f0bfd084c0675
+CodeRabbit: NOT_EXECUTED / CLI UNAVAILABLE / UNKNOWN REMOTE INSTALL SCRIPT REJECTED
+Threshold / scenario / profile / runtime semantics: NONE / NONE / NONE / NONE
+API / migration / schema / Repository / contracts / POM / workflow / NQ: NONE / NONE / NONE / NONE / NONE / NONE / NONE / NONE
+Current factsources: 10 OF 10 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+Formal capacity / formal verdict / formal attempt count: NOT_EXECUTED / NONE / 0
+Production capacity / production ready: NOT_PROVEN / NO
+Next action: COMMIT FIX -> PUSH ORIGIN DEV -> VERIFY FIX EXACT-SHA CI
+ALLOW_FIX_COMMIT / ALLOW_PUSH / ALLOW_EXACT_SHA_CI: YES / YES_AFTER_LOCAL_VALIDATION_AND_SECURITY_PASS / YES
+ALLOW_FORMAL_CAPACITY_EXECUTION / ALLOW_FORMAL_CAPACITY_EXECUTION_NOW / ALLOW_TAG: NO / NO / NO
+ALLOW_PRODUCTION_READY_DECLARATION: NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO / NO
+~~~
+
+本节是 PostgreSQL image identity 跨 Docker/Testcontainers 表示差异修复后的唯一 current authority。
+本任务仅允许发布修复并验证 exact-SHA CI；formal capacity、qualification、tag 与 final close 均未授权。
+
 ## Terminal current authority — 2026-08-11 Stage-QDR-12 capacity harness remediation
 
 ~~~text

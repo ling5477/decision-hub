@@ -13,6 +13,8 @@ import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.function.Function;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -160,9 +162,19 @@ final class Qdr7CapacityEnvironmentAdmission {
     final String postgresImageId =
         requiredText(
             snapshot, "postgresImageId", "POSTGRES_IMAGE_ID_OBSERVATION_INVALID", blockers);
+    final String expectedCanonicalImageId =
+        requiredText(
+            snapshot,
+            "postgresExpectedCanonicalImageId",
+            "POSTGRES_EXPECTED_IMAGE_OBSERVATION_INVALID",
+            blockers);
     require(
-        postgresImageId.matches("^sha256:[a-f0-9]{64}$"),
+        !canonicalImageId(postgresImageId).isBlank(),
         "POSTGRES_IMAGE_IDENTITY_MISSING",
+        blockers);
+    require(
+        canonicalImageIdsMatch(postgresImageId, expectedCanonicalImageId),
+        "POSTGRES_EXPECTED_IMAGE_MISMATCH",
         blockers);
     final String requiredPostgresImage =
         requiredText(
@@ -186,13 +198,14 @@ final class Qdr7CapacityEnvironmentAdmission {
             blockers),
         "POSTGRES_IMAGE_DIGEST_MISMATCH",
         blockers);
+    final String executedImageId =
+        requiredText(
+            snapshot,
+            "postgresExecutedImageId",
+            "POSTGRES_EXECUTED_IMAGE_OBSERVATION_INVALID",
+            blockers);
     require(
-        postgresImageId.equals(
-            requiredText(
-                snapshot,
-                "postgresExecutedImageId",
-                "POSTGRES_EXECUTED_IMAGE_OBSERVATION_INVALID",
-                blockers)),
+        canonicalImageIdsMatch(expectedCanonicalImageId, executedImageId),
         "POSTGRES_EXECUTED_IMAGE_MISMATCH",
         blockers);
     require(
@@ -393,6 +406,21 @@ final class Qdr7CapacityEnvironmentAdmission {
       final Path requirementsPath,
       final ObjectMapper mapper)
       throws IOException {
+    return runPostgresSmokeAndQualify(
+        environmentManifestPath,
+        registryPath,
+        requirementsPath,
+        mapper,
+        Qdr7CapacityEnvironmentAdmission::inspectCanonicalImageId);
+  }
+
+  static Evaluation runPostgresSmokeAndQualify(
+      final Path environmentManifestPath,
+      final Path registryPath,
+      final Path requirementsPath,
+      final ObjectMapper mapper,
+      final Function<String, String> canonicalImageResolver)
+      throws IOException {
     final ObjectNode manifest = (ObjectNode) mapper.readTree(environmentManifestPath.toFile());
     final ObjectNode registry = (ObjectNode) mapper.readTree(registryPath.toFile());
     final JsonNode requirements = mapper.readTree(requirementsPath.toFile());
@@ -404,7 +432,12 @@ final class Qdr7CapacityEnvironmentAdmission {
             .withUsername("qdr12_admission")
             .withPassword("qdr12-admission-test-only")) {
       smoke.start();
-      manifest.put("postgresExecutedImageId", smoke.getContainerInfo().getImageId());
+      final String executedImageReference = smoke.getContainerInfo().getImageId();
+      manifest.put("postgresExecutedImageReference", executedImageReference);
+      manifest.put(
+          "postgresExpectedCanonicalImageId",
+          canonicalImageResolver.apply(requirements.path("postgresImage").asText()));
+      manifest.put("postgresExecutedImageId", canonicalImageResolver.apply(executedImageReference));
       try (var connection =
               DriverManager.getConnection(
                   smoke.getJdbcUrl(), smoke.getUsername(), smoke.getPassword());
@@ -421,6 +454,8 @@ final class Qdr7CapacityEnvironmentAdmission {
     } catch (final RuntimeException | java.sql.SQLException failure) {
       manifest.put("testcontainersViable", false);
       manifest.put("postgresMajor", 0);
+      manifest.put("postgresExpectedCanonicalImageId", "");
+      manifest.put("postgresExecutedImageReference", "");
       manifest.put("postgresExecutedImageId", "");
       manifest.put("testcontainersFailure", failure.getClass().getSimpleName());
     }
@@ -438,6 +473,45 @@ final class Qdr7CapacityEnvironmentAdmission {
     Qdr7CapacityArtifactSupport.writeJson(registryPath, registry, mapper);
     propagateEnvironmentHash(environmentManifestPath.getParent(), manifestHash, mapper);
     return evaluation;
+  }
+
+  /** Resolve a Docker reference to the daemon's immutable image config digest. */
+  static String inspectCanonicalImageId(final String imageReference) {
+    return resolveCanonicalImageId(
+        imageReference,
+        reference ->
+            DockerClientFactory.instance()
+                .client()
+                .inspectImageCmd(reference)
+                .exec()
+                .getId());
+  }
+
+  static String resolveCanonicalImageId(
+      final String imageReference, final Function<String, String> authoritativeInspector) {
+    if (imageReference == null || imageReference.isBlank() || authoritativeInspector == null) {
+      return "";
+    }
+    try {
+      return canonicalImageId(authoritativeInspector.apply(imageReference.trim()));
+    } catch (final RuntimeException inspectionFailure) {
+      return "";
+    }
+  }
+
+  static String canonicalImageId(final String imageId) {
+    if (imageId == null) {
+      return "";
+    }
+    final String trimmed = imageId.trim();
+    final String hex = trimmed.startsWith("sha256:") ? trimmed.substring(7) : trimmed;
+    return hex.matches("^[a-f0-9]{64}$") ? "sha256:" + hex : "";
+  }
+
+  static boolean canonicalImageIdsMatch(final String expected, final String executed) {
+    final String canonicalExpected = canonicalImageId(expected);
+    final String canonicalExecuted = canonicalImageId(executed);
+    return !canonicalExpected.isBlank() && canonicalExpected.equals(canonicalExecuted);
   }
 
   private static void propagateEnvironmentHash(

@@ -161,8 +161,9 @@ class Qdr7CapacityPowerShellContractTest {
             "$executionBlockers",
             "'IMPLEMENTATION_VALIDATION_FORMAL_ENVIRONMENT_NOT_QUALIFIED'",
             "$_ -notin @('clock-synchronized', 'clock-offset', 'network-isolation')")
-        .contains("$imageIdentity.text -eq $expectedImageId")
-        .contains("$repoDigestJsonContainsReference")
+        .contains("$expectedImageId = $imageIdentity.text.Trim()")
+        .contains("$expectedImageId -match '^sha256:[a-f0-9]{64}$'")
+        .contains("@($imageRepoDigests) -contains $postgresImageReference")
         .contains(
             "Get-ThresholdAggregateFindings -Threshold $threshold -AllowNotRun"
                 + " $implementationValidationPassed",

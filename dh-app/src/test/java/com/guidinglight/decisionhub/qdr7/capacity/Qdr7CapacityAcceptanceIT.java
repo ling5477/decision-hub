@@ -321,10 +321,11 @@ class Qdr7CapacityAcceptanceIT {
   private static void startPostgresBeforeSpringPropertyResolution() {
     try {
       POSTGRES.start();
-      if (!POSTGRES
-          .getContainerInfo()
-          .getImageId()
-          .equals(RESOURCE_REGISTRY.path("postgresImageId").asText())) {
+      final String executedCanonicalImageId =
+          Qdr7CapacityEnvironmentAdmission.inspectCanonicalImageId(
+              POSTGRES.getContainerInfo().getImageId());
+      if (!Qdr7CapacityEnvironmentAdmission.canonicalImageIdsMatch(
+          RESOURCE_REGISTRY.path("postgresImageId").asText(), executedCanonicalImageId)) {
         throw new IllegalStateException("QDR7_CAPACITY_POSTGRES_IMAGE_IDENTITY_MISMATCH");
       }
       ensurePostgresReadyForPropertyResolution();
