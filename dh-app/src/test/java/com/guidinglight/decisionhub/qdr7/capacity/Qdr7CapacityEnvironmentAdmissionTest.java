@@ -227,6 +227,16 @@ class Qdr7CapacityEnvironmentAdmissionTest {
         .isEqualTo(qualified.path("postgresExecutedImageId").asText())
         .matches("^sha256:[a-f0-9]{64}$");
     assertThat(qualified.path("postgresExecutedImageReference").asText()).isNotBlank();
+    final JsonNode diagnostics = qualified.path("postgresImageIdentityDiagnostics");
+    assertThat(diagnostics.path("requiredImageReference").asText())
+        .isEqualTo(requirements(mapper).path("postgresImage").asText());
+    assertThat(diagnostics.path("pinnedIdentityKind").asText())
+        .isEqualTo("REPO_DIGEST_REFERENCE");
+    assertThat(diagnostics.path("comparison").path("selectedIdentityDomain").asText())
+        .isEqualTo("CONFIG_IMAGE_ID");
+    assertThat(diagnostics.path("comparison").path("matchResult").asBoolean()).isTrue();
+    assertThat(diagnostics.path("admission").path("blockerCount").asInt()).isZero();
+    assertThat(diagnostics.path("admission").path("blockers")).isEmpty();
     assertThat(qualified.path("environmentManifestHash").asText()).matches("^[a-f0-9]{64}$");
     assertThat(mapper.readTree(registry.toFile()).path("environmentManifestHash").asText())
         .isEqualTo(qualified.path("environmentManifestHash").asText());

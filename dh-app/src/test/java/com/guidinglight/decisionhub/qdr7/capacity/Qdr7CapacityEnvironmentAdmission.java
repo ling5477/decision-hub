@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.dockerjava.api.command.InspectImageResponse;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -406,12 +407,12 @@ final class Qdr7CapacityEnvironmentAdmission {
       final Path requirementsPath,
       final ObjectMapper mapper)
       throws IOException {
-    return runPostgresSmokeAndQualify(
+    return runPostgresSmokeAndQualifyWithInspector(
         environmentManifestPath,
         registryPath,
         requirementsPath,
         mapper,
-        Qdr7CapacityEnvironmentAdmission::inspectCanonicalImageId);
+        Qdr7CapacityEnvironmentAdmission::inspectImage);
   }
 
   static Evaluation runPostgresSmokeAndQualify(
@@ -421,23 +422,63 @@ final class Qdr7CapacityEnvironmentAdmission {
       final ObjectMapper mapper,
       final Function<String, String> canonicalImageResolver)
       throws IOException {
+    return runPostgresSmokeAndQualifyWithInspector(
+        environmentManifestPath,
+        registryPath,
+        requirementsPath,
+        mapper,
+        reference ->
+            ImageInspection.synthetic(reference, canonicalImageResolver.apply(reference)));
+  }
+
+  private static Evaluation runPostgresSmokeAndQualifyWithInspector(
+      final Path environmentManifestPath,
+      final Path registryPath,
+      final Path requirementsPath,
+      final ObjectMapper mapper,
+      final ImageInspector imageInspector)
+      throws IOException {
     final ObjectNode manifest = (ObjectNode) mapper.readTree(environmentManifestPath.toFile());
     final ObjectNode registry = (ObjectNode) mapper.readTree(registryPath.toFile());
     final JsonNode requirements = mapper.readTree(requirementsPath.toFile());
+    final String requiredImageReference = requirements.path("postgresImage").asText();
+    final ObjectNode diagnostics = manifest.putObject("postgresImageIdentityDiagnostics");
+    diagnostics.put("requiredImageReference", requiredImageReference);
+    diagnostics.put("configuredIdentityRaw", manifest.path("postgresImageId").asText());
+    diagnostics.put(
+        "configuredIdentityKind", identityKind(manifest.path("postgresImageId").asText()));
+    diagnostics.put("pinnedIdentityRaw", requiredImageReference);
+    diagnostics.put("pinnedIdentityKind", identityKind(requiredImageReference));
+    putInspection(
+        diagnostics.putObject("preStartExpectedInspection"),
+        imageInspector.inspect(requiredImageReference));
     String postgresVersion = "";
     try (PostgreSQLContainer<?> smoke =
         new PostgreSQLContainer<>(
-                DockerImageName.parse(requirements.path("postgresImage").asText()))
+                DockerImageName.parse(requiredImageReference))
             .withDatabaseName("qdr12_environment_admission")
             .withUsername("qdr12_admission")
             .withPassword("qdr12-admission-test-only")) {
       smoke.start();
-      final String executedImageReference = smoke.getContainerInfo().getImageId();
+      final var containerInfo = smoke.getContainerInfo();
+      final String executedImageReference = containerInfo.getImageId();
+      final String containerConfiguredImage =
+          containerInfo.getConfig() == null ? "" : containerInfo.getConfig().getImage();
+      final ImageInspection expectedInspection = imageInspector.inspect(requiredImageReference);
+      final ImageInspection executedInspection = imageInspector.inspect(executedImageReference);
+      final ObjectNode containerDiagnostics = diagnostics.putObject("container");
+      containerDiagnostics.put("testcontainersImageReference", smoke.getDockerImageName());
+      containerDiagnostics.put("containerConfiguredImage", nullToEmpty(containerConfiguredImage));
+      containerDiagnostics.put("containerReportedImageIdentity", nullToEmpty(executedImageReference));
+      containerDiagnostics.put("containerImmutableImageField", nullToEmpty(containerInfo.getImageId()));
+      putInspection(diagnostics.putObject("expectedImageInspection"), expectedInspection);
+      putInspection(diagnostics.putObject("executedImageInspection"), executedInspection);
       manifest.put("postgresExecutedImageReference", executedImageReference);
       manifest.put(
           "postgresExpectedCanonicalImageId",
-          canonicalImageResolver.apply(requirements.path("postgresImage").asText()));
-      manifest.put("postgresExecutedImageId", canonicalImageResolver.apply(executedImageReference));
+          expectedInspection.canonicalConfigImageId());
+      manifest.put("postgresExecutedImageId", executedInspection.canonicalConfigImageId());
+      putComparison(diagnostics, expectedInspection, executedInspection);
       try (var connection =
               DriverManager.getConnection(
                   smoke.getJdbcUrl(), smoke.getUsername(), smoke.getPassword());
@@ -458,11 +499,18 @@ final class Qdr7CapacityEnvironmentAdmission {
       manifest.put("postgresExecutedImageReference", "");
       manifest.put("postgresExecutedImageId", "");
       manifest.put("testcontainersFailure", failure.getClass().getSimpleName());
+      diagnostics.put("smokeFailure", failure.getClass().getSimpleName());
     }
     final Evaluation evaluation = evaluate(manifest, requirements);
     manifest.put("status", evaluation.status());
     final ArrayNode blockers = manifest.putArray("blockers");
     evaluation.blockers().forEach(blockers::add);
+    final ObjectNode admissionDiagnostics = diagnostics.putObject("admission");
+    admissionDiagnostics.put("finalStatus", evaluation.status());
+    admissionDiagnostics.put("blockerCount", evaluation.blockers().size());
+    final ArrayNode diagnosticBlockers = admissionDiagnostics.putArray("blockers");
+    evaluation.blockers().forEach(diagnosticBlockers::add);
+    System.out.println("QDR12_IMAGE_IDENTITY_DIAGNOSTICS=" + mapper.writeValueAsString(diagnostics));
     manifest.put(
         "postgresVersionMajorEvidence", postgresVersion.isBlank() ? "NOT_CAPTURED" : "17.x");
     manifest.remove("environmentManifestHash");
@@ -477,14 +525,82 @@ final class Qdr7CapacityEnvironmentAdmission {
 
   /** Resolve a Docker reference to the daemon's immutable image config digest. */
   static String inspectCanonicalImageId(final String imageReference) {
-    return resolveCanonicalImageId(
-        imageReference,
-        reference ->
-            DockerClientFactory.instance()
-                .client()
-                .inspectImageCmd(reference)
-                .exec()
-                .getId());
+    return inspectImage(imageReference).canonicalConfigImageId();
+  }
+
+  private static ImageInspection inspectImage(final String imageReference) {
+    if (imageReference == null || imageReference.isBlank()) {
+      return ImageInspection.failure(imageReference, "EMPTY_REFERENCE");
+    }
+    try {
+      final InspectImageResponse inspected =
+          DockerClientFactory.instance()
+              .client()
+              .inspectImageCmd(imageReference.trim())
+              .exec();
+      return new ImageInspection(
+          imageReference,
+          nullToEmpty(inspected.getId()),
+          inspected.getRepoDigests() == null ? List.of() : List.copyOf(inspected.getRepoDigests()),
+          inspected.getRepoTags() == null ? List.of() : List.copyOf(inspected.getRepoTags()),
+          canonicalImageId(inspected.getId()),
+          "");
+    } catch (final RuntimeException inspectionFailure) {
+      return ImageInspection.failure(imageReference, inspectionFailure.getClass().getSimpleName());
+    }
+  }
+
+  private static void putInspection(final ObjectNode target, final ImageInspection inspection) {
+    target.put("reference", nullToEmpty(inspection.reference()));
+    target.put("inspectIdRaw", inspection.inspectIdRaw());
+    target.put(
+        "inspectIdKind",
+        canonicalImageId(inspection.inspectIdRaw()).isBlank()
+            ? identityKind(inspection.inspectIdRaw())
+            : "CONFIG_IMAGE_ID");
+    target.put("canonicalConfigImageId", inspection.canonicalConfigImageId());
+    target.put(
+        "resolvedIdentityKind",
+        inspection.canonicalConfigImageId().isBlank() ? "UNAVAILABLE" : "CONFIG_IMAGE_ID");
+    target.putPOJO("repoDigests", inspection.repoDigests());
+    target.putPOJO("repoTags", inspection.repoTags());
+    target.put("inspectionFailure", inspection.inspectionFailure());
+  }
+
+  private static void putComparison(
+      final ObjectNode diagnostics,
+      final ImageInspection expected,
+      final ImageInspection executed) {
+    final ObjectNode comparison = diagnostics.putObject("comparison");
+    comparison.put("selectedIdentityDomain", "CONFIG_IMAGE_ID");
+    comparison.put("expectedRawValue", expected.inspectIdRaw());
+    comparison.put("expectedCanonicalValue", expected.canonicalConfigImageId());
+    comparison.put("executedRawValue", executed.inspectIdRaw());
+    comparison.put("executedCanonicalValue", executed.canonicalConfigImageId());
+    comparison.put(
+        "matchResult",
+        canonicalImageIdsMatch(
+            expected.canonicalConfigImageId(), executed.canonicalConfigImageId()));
+  }
+
+  private static String identityKind(final String identity) {
+    if (identity == null || identity.isBlank()) {
+      return "UNAVAILABLE";
+    }
+    if (identity.matches("^[^@\\s]+@sha256:[a-f0-9]{64}$")) {
+      return "REPO_DIGEST_REFERENCE";
+    }
+    if (identity.matches("^sha256:[a-f0-9]{64}$")) {
+      return "SHA256_DIGEST_UNRESOLVED_DOMAIN";
+    }
+    if (identity.contains(":")) {
+      return "MUTABLE_OR_DISPLAY_REFERENCE";
+    }
+    return "UNKNOWN";
+  }
+
+  private static String nullToEmpty(final String value) {
+    return value == null ? "" : value;
   }
 
   static String resolveCanonicalImageId(
@@ -717,4 +833,32 @@ final class Qdr7CapacityEnvironmentAdmission {
   }
 
   record Evaluation(String status, List<String> blockers) {}
+
+  @FunctionalInterface
+  private interface ImageInspector {
+    ImageInspection inspect(String reference);
+  }
+
+  private record ImageInspection(
+      String reference,
+      String inspectIdRaw,
+      List<String> repoDigests,
+      List<String> repoTags,
+      String canonicalConfigImageId,
+      String inspectionFailure) {
+
+    private static ImageInspection synthetic(final String reference, final String canonicalId) {
+      return new ImageInspection(
+          reference,
+          nullToEmpty(canonicalId),
+          List.of(),
+          List.of(),
+          canonicalImageId(canonicalId),
+          "SYNTHETIC_TEST_INSPECTOR");
+    }
+
+    private static ImageInspection failure(final String reference, final String failure) {
+      return new ImageInspection(reference, "", List.of(), List.of(), "", failure);
+    }
+  }
 }
