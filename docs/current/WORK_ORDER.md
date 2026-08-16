@@ -1,5 +1,53 @@
 # Decision Hub 当前工单
 
+## Terminal current authority — 2026-08-16 Stage-QDR-12 harness fix remote acceptance factsource publication
+
+~~~text
+Task: DH-STAGE-QDR-12-HARNESS-FIX-REMOTE-ACCEPTANCE-FACTSOURCE-PUBLICATION
+Stage-QDR-12: HARNESS_REMEDIATED / REMOTE_ACCEPTED
+Fix baseline: ac7464eb384970f761c2e8f001005d5627516901
+Diagnostic commit: 1a1340f210c85c12862e5e84dc7175d5e14d4c47 / PUBLISHED / CI 31604787114 FAILED / PRESERVED
+Harness fix SHA: f1f4ceb1ccb9ad0acc90e21bbee08ef87338ced4 / PUBLISHED
+Harness implementation SHA: f1f4ceb1ccb9ad0acc90e21bbee08ef87338ced4 / TECHNICAL_TREE
+Harness fix exact-SHA CI: 31611940493 / PASS / QUALITY 94165183616 PASS + TESTCONTAINERS 94165183649 PASS
+Failure history: 31589666200 FAILED / 31597592517 FAILED / PRESERVED
+Regression: 1376 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED
+PostgreSQL: 17.10
+Positive PostgreSQL smoke: Qdr7CapacityEnvironmentAdmissionTest 7 OF 7 / ORIGINAL POSITIVE CASE PASS / 0 SKIPPED
+PowerShell contracts / mandatory Testcontainers: 17 OF 17 PASS / NON-SKIP ASSERTION PASS
+PostgreSQL image identity: CONFIG_IMAGE_ID / IMMUTABLE / EXACT_MATCH / FULL LOWERCASE SHA256
+Required RepoDigest: EXACT PINNED MEMBERSHIP / INDEPENDENT
+Tag-only / truncated / cross-domain trust: ABSENT / ABSENT / ABSENT
+Blank / malformed / unavailable / inspect failure / mismatch / ambiguity: FAIL_CLOSED / NOT_QUALIFIED
+Linux Docker parity: PASS
+Environment admission harness: REMOTE_ACCEPTED
+Security exact-diff: REUSED PASS / SEALED SCAN 6c288ea0-dc52-4ee3-b175-390e39d1fbe5 / NO NEW SCAN / TECHNICAL TREE f1f4ceb1ccb9ad0acc90e21bbee08ef87338ced4
+Security range: ac7464eb384970f761c2e8f001005d5627516901..f1f4ceb1ccb9ad0acc90e21bbee08ef87338ced4
+Security coverage / findings / deferred / active P0-P1: COMPLETE 3 OF 3 / 0 / 0 / 0-0
+Security snapshot: codex-security-snapshot/v1:sha256:1d74df0bc5da366ec7aad16a4841552de3d91d1cb5319d4e849096130ccb54eb
+Historical failed security scan: 63de7803-eaba-4584-81c5-f0d862fe7ade / FINALIZATION_FAILED / NOT_AUTHORITY
+Secret diagnostic leaks / qualification bypass: 0 / 0
+Threshold / scenario / profile diff: 0 / 0 / 0
+Runtime semantics change: NONE
+Technical diff / API / migration / schema / Repository / contracts / POM / workflow / NQ: 0 / NONE / NONE / NONE / NONE / NONE / NONE / NONE / NONE
+Current authority factsources: 10 / 10 / SYNCHRONIZED / 0 CURRENT CONFLICTS
+Factsource policy / archive index change required: NO / NO
+Scope invariants: 3 OF 3 / PASS
+Formal candidate repository SHA: THIS_DOCUMENT_COMMIT / BIND AFTER PUBLICATION EXACT-SHA CI
+Capacity harness: READY_FOR_FORMAL_EXECUTION
+Formal capacity / formal verdict / formal attempt count: NOT_EXECUTED / NONE / 0
+Production capacity / production ready: NOT_PROVEN / NO
+Next action: DH-STAGE-QDR-12-FORMAL-CAPACITY-RESOURCE-SAFETY-ACCEPTANCE-CONSOLIDATED-EXECUTION / SEPARATE TASK
+ALLOW_FORMAL_CAPACITY_EXECUTION: YES / NEXT_TASK_ONLY
+ALLOW_FORMAL_CAPACITY_EXECUTION_NOW / ALLOW_TAG / ALLOW_FINAL_CLOSE: NO / NO / NO
+ALLOW_THRESHOLD_CHANGE / ALLOW_SCENARIO_CHANGE / ALLOW_PROFILE_CHANGE: NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO / NO
+~~~
+
+本节是 harness fix remote acceptance 的唯一 terminal authority；其后 local、diagnostic、失败 CI 与更早区块均为历史时间线。publication commit 通过自身 exact-SHA CI 后成为后续 formal run 的完整仓库基线，技术实现仍单独绑定 harness implementation SHA。当前仅允许下一独立任务执行 formal capacity；本任务未执行 formal capacity、未创建 attempt、未授权 tag 或 final close。
+
+
 ## Terminal current authority — 2026-08-12 Stage-QDR-12 PostgreSQL image identity harness fix
 
 ~~~text
