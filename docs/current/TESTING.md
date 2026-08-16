@@ -1,5 +1,58 @@
 # Decision Hub Testing
 
+## Terminal current authority — 2026-08-16 Stage-QDR-12 PostgreSQL image identity contract remote acceptance
+
+~~~text
+Task: DH-STAGE-QDR-12-POSTGRES-IMAGE-IDENTITY-CONTRACT-BLOCKER
+Stage-QDR-12: POSTGRES_IDENTITY_CONTRACT_REMEDIATED / REMOTE_ACCEPTED
+Technical baseline: 0954c841cb1177fb2e143088a4a6b4144e8fa1ee
+Technical commit: 7e1e428ae480ea3082b2db91356092d39bf121f9 / PUBLISHED
+Technical exact-SHA CI: 31936705459 / PASS / QUALITY 95139666902 PASS + TESTCONTAINERS 95139666801 PASS
+Regression: 1379 TESTS / 0 FAILURES / 0 ERRORS / 0 SKIPPED / 208 REPORTS
+Targeted identity / PowerShell contracts: 9 OF 9 + 18 OF 18 / PASS / 0 SKIPPED
+PostgreSQL / Flyway: 17.10 LOCAL REAL TESTCONTAINERS / V1-V15
+Positive PostgreSQL smoke: ORIGINAL POSITIVE CASE PASS / MANDATORY / 0 SKIPPED
+Negative executed identity smoke: POSTGRES_EXECUTED_PLATFORM_MISMATCH / NOT_QUALIFIED / PASS
+Linux Docker parity / mandatory non-skip: PASS / PASS
+PostgreSQL identity contract: POSTGRES_IMAGE_IDENTITY_CONTRACT_V2 / DOMAIN_EXPLICIT
+Required reference domain: OCI_INDEX_DIGEST
+Required index: sha256:5c855ad7b85e68e48a62f34662853f38b57c1c1d80f3a927ab58034fd6d31c5e
+Target platform: linux/amd64
+Platform manifest: sha256:9c1534cbf839ec70409508a874f4c02bf4739de2f32f77efe080eef1cfd34bf4 / EXACT
+Platform config: sha256:07f76768a0c956d6e9bddbcdb3c2be7fd9fd45ee6174a26873f8219fccbad65d / EXACT
+RepoDigest membership: EXACT PINNED MEMBERSHIP / INDEPENDENT / MANDATORY
+Local / executed identity: BACKEND-AWARE / EXPLICIT DOMAIN + DIGEST + MEDIA TYPE / IMMUTABLY BOUND
+Cross-domain / tag-only / truncated trust: FORBIDDEN / ABSENT / ABSENT
+Unknown / malformed / unavailable / mismatch / ambiguity: FAIL_CLOSED / NOT_QUALIFIED
+V1 fields: DEPRECATED_NOT_USED_FOR_V2_DECISION
+Preserved qualification: 20260816T041040Z / NOT_QUALIFIED / V1 / UNCHANGED
+Preserved qualification blockers: postgres-image-digest + clock-synchronized + clock-offset + network-isolation
+Environment qualification: NOT_RERUN / 0 NEW RUNS
+Formal capacity / formal verdict / formal attempt count: NOT_EXECUTED / NONE / 0
+Formal scenarios / threshold comparisons: 0 / 0
+Security exact-diff: PASS / SEALED SCAN d74fcbdc-fe44-4938-8644-869aa486969d / EXACT TECHNICAL TREE 7e1e428ae480ea3082b2db91356092d39bf121f9
+Security range: 0954c841cb1177fb2e143088a4a6b4144e8fa1ee..7e1e428ae480ea3082b2db91356092d39bf121f9
+Security coverage / findings / deferred / active P0-P1: COMPLETE 6 OF 6 / 0 / 0 / 0-0
+Security snapshot: codex-security-snapshot/v1:sha256:e7c4954509167f3e16b2d42eab746e8430968ba4e56ebc106637943473cf6875
+Qualification bypass / secret diagnostic leaks: 0 / 0
+CodeRabbit: NOT_EXECUTED / TOOL_BLOCKED / CLI NOT INSTALLED
+Threshold / scenario / profile diff: 0 / 0 / 0
+API / migration / schema / Repository / contracts / POM / workflow / NQ: NONE / NONE / NONE / NONE / NONE / NONE / NONE / NONE
+Technical files / current factsources: 6 / 10 OF 10 SYNCHRONIZED
+Scope invariants: 3 OF 3 / PASS
+Authority publication commit: THIS_DOCUMENT_COMMIT / SELF-BIND AFTER PUBLICATION EXACT-SHA CI PASS
+Capacity harness: READY_FOR_ENVIRONMENT_REQUALIFICATION
+Production capacity / production ready: NOT_PROVEN / NO
+Next action: DH-STAGE-QDR-12-QUALIFIED-ENVIRONMENT-BLOCKER-RESUME / SEPARATE TASK
+ALLOW_ENVIRONMENT_REQUALIFICATION: YES / NEXT_TASK_ONLY
+ALLOW_ENVIRONMENT_REQUALIFICATION_NOW / ALLOW_FORMAL_CAPACITY_EXECUTION / ALLOW_TAG / ALLOW_FINAL_CLOSE: NO / NO / NO / NO
+ALLOW_THRESHOLD_CHANGE / ALLOW_SCENARIO_CHANGE / ALLOW_PROFILE_CHANGE: NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO / NO
+~~~
+
+本节是 PostgreSQL image identity contract remediation 的唯一 terminal authority；其后 harness fix、qualification blocker 与更早区块均为历史时间线。V1 qualification `20260816T041040Z` 保持 `NOT_QUALIFIED`，未被 V2 静默重解释。本节仅在该文档提交发布且自身 exact-SHA CI PASS 后生效；当前允许的下一步仅是另起任务恢复 environment requalification，不授权本任务运行 qualification、formal capacity、tag 或 final close。
+
 ## Terminal current authority — 2026-08-16 Stage-QDR-12 harness fix remote acceptance factsource publication
 
 ~~~text
