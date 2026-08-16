@@ -161,9 +161,12 @@ class Qdr7CapacityPowerShellContractTest {
             "$executionBlockers",
             "'IMPLEMENTATION_VALIDATION_FORMAL_ENVIRONMENT_NOT_QUALIFIED'",
             "$_ -notin @('clock-synchronized', 'clock-offset', 'network-isolation')")
-        .contains("$expectedImageId = $imageIdentity.text.Trim()")
-        .contains("$expectedImageId -match '^sha256:[a-f0-9]{64}$'")
-        .contains("@($imageRepoDigests) -contains $postgresImageReference")
+        .contains("Resolve-PostgresImageIdentityContract")
+        .contains("POSTGRES_IMAGE_IDENTITY_CONTRACT_V2")
+        .contains("LOCAL_OCI_ARCHIVE")
+        .contains("POSTGRES_PLATFORM_AMBIGUOUS")
+        .contains("POSTGRES_REPO_DIGEST_MEMBERSHIP_MISSING")
+        .doesNotContain("$expectedImageId -match '^sha256:[a-f0-9]{64}$'")
         .contains(
             "Get-ThresholdAggregateFindings -Threshold $threshold -AllowNotRun"
                 + " $implementationValidationPassed",
@@ -181,6 +184,76 @@ class Qdr7CapacityPowerShellContractTest {
         .contains(
             "@DisabledIfSystemProperty(named = \"qdr7.implementationValidation\", matches = \"true\")")
         .contains("artifact.put(\"executedScenarioCount\", 0)");
+  }
+
+  @Test
+  void postgresIdentityV2KeepsPowerShellAndJavaDomainsAndBlockersInParity()
+      throws IOException {
+    final Path root = repositoryRoot();
+    final String script =
+        Files.readString(root.resolve("scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1"));
+    final String admission =
+        Files.readString(
+            root.resolve(
+                "dh-app/src/test/java/com/guidinglight/decisionhub/qdr7/capacity/Qdr7CapacityEnvironmentAdmission.java"));
+    final String contract =
+        Files.readString(
+            root.resolve("config/qdr7-capacity/qdr7-capacity-environment-admission.json"));
+
+    for (final String field :
+        List.of(
+            "identityContractId",
+            "identityContractVersion",
+            "requiredImageReference",
+            "requiredIndexDigest",
+            "requiredIndexMediaType",
+            "targetPlatform",
+            "expectedPlatformManifestDigest",
+            "expectedPlatformConfigDigest",
+            "repoDigestMembership",
+            "localObservedIdentity",
+            "executedObservedIdentity",
+            "immutableBindingResult",
+            "identityBlockers")) {
+      assertThat(script).as(field).contains(field);
+      assertThat(admission).as(field).contains(field);
+    }
+    for (final String blocker :
+        List.of(
+            "POSTGRES_INDEX_DIGEST_INVALID",
+            "POSTGRES_INDEX_MEDIA_TYPE_INVALID",
+            "POSTGRES_PLATFORM_NOT_FOUND",
+            "POSTGRES_PLATFORM_AMBIGUOUS",
+            "POSTGRES_PLATFORM_MANIFEST_MISMATCH",
+            "POSTGRES_CONFIG_DIGEST_MISMATCH",
+            "POSTGRES_REPO_DIGEST_MEMBERSHIP_MISSING",
+            "POSTGRES_LOCAL_IDENTITY_UNKNOWN",
+            "POSTGRES_EXECUTED_IDENTITY_UNKNOWN",
+            "POSTGRES_EXECUTED_PLATFORM_MISMATCH",
+            "POSTGRES_IDENTITY_DOMAIN_MISMATCH",
+            "POSTGRES_IDENTITY_RESOLUTION_FAILED")) {
+      assertThat(script).as(blocker).contains(blocker);
+      assertThat(admission).as(blocker).contains(blocker);
+    }
+    assertThat(contract)
+        .contains("POSTGRES_IMAGE_IDENTITY_CONTRACT_V2")
+        .contains("application/vnd.oci.image.index.v1+json")
+        .contains("application/vnd.oci.image.manifest.v1+json")
+        .contains("DEPRECATED_NOT_USED_FOR_V2_DECISION");
+    assertThat(script)
+        .contains("function Test-ImageIdentityEquality")
+        .contains("$LeftKind -eq $RightKind")
+        .contains("$LeftMediaType -eq $RightMediaType")
+        .contains("Invoke-NativeCommandWithTimeout")
+        .contains("'manifest', 'inspect', '--verbose', $requiredReference")
+        .contains("PINNED_REGISTRY_DESCRIPTOR_AND_LOCAL_DOCKER_ARCHIVE_CONFIG")
+        .contains("$resolvedManifestDigest = $remoteManifestDigest")
+        .doesNotContain("$resolvedManifestDigest = $expectedManifestDigest")
+        .doesNotContain("$LeftDigest -eq $RightDigest -and $LeftKind -ne $RightKind");
+    assertThat(admission)
+        .contains("OCI_INDEX_DIGEST", "PLATFORM_MANIFEST_DIGEST", "CONFIG_DIGEST")
+        .contains("left.kind() == right.kind()")
+        .doesNotContain("canonicalImageIdsMatch", "canonicalImageId(");
   }
 
   @Test
@@ -409,13 +482,17 @@ class Qdr7CapacityPowerShellContractTest {
         .doesNotContain("'postgres:17'");
     assertThat(formalIt)
         .contains("DockerImageName.parse(POSTGRES_IMAGE)")
-        .contains("ENVIRONMENT_REQUIREMENTS.path(\"postgresImage\")")
+        .contains("ENVIRONMENT_REQUIREMENTS.path(\"requiredImageReference\")")
+        .contains("inspectStartedContainerIdentity")
         .contains("List.of(\"-o\", \"-B\", \"-ntp\", \"test\")");
-    assertThat(admissionConfig).contains("postgres@sha256:");
+    assertThat(admissionConfig)
+        .contains("POSTGRES_IMAGE_IDENTITY_CONTRACT_V2")
+        .contains("postgres@sha256:");
     assertThat(admission)
         .contains("NETWORK_ISOLATION_UNVERIFIED")
-        .contains("POSTGRES_IMAGE_DIGEST_MISMATCH")
-        .contains("requirements.path(\"postgresImage\")");
+        .contains("POSTGRES_INDEX_DIGEST_INVALID")
+        .contains("evaluatePostgresIdentityV2")
+        .contains("\"requiredIndexDigest\"");
   }
 
   @Test

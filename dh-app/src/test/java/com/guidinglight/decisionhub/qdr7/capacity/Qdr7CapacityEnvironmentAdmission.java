@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.dockerjava.api.command.InspectImageResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
@@ -14,8 +14,7 @@ import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
-import java.util.function.Function;
-import org.testcontainers.DockerClientFactory;
+import java.util.concurrent.TimeUnit;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -152,73 +151,7 @@ final class Qdr7CapacityEnvironmentAdmission {
         "DOCKER_MEMORY_OBSERVATION_INVALID",
         "DOCKER_MEMORY_INSUFFICIENT",
         blockers);
-    require(
-        requiredBoolean(
-            snapshot,
-            "postgresImageAvailable",
-            "POSTGRES_IMAGE_AVAILABILITY_OBSERVATION_INVALID",
-            blockers),
-        "POSTGRES_IMAGE_UNAVAILABLE",
-        blockers);
-    final String postgresImageId =
-        requiredText(
-            snapshot, "postgresImageId", "POSTGRES_IMAGE_ID_OBSERVATION_INVALID", blockers);
-    require(
-        "CONFIG_IMAGE_ID"
-            .equals(
-                requiredText(
-                    snapshot,
-                    "postgresImageIdentityDomain",
-                    "POSTGRES_IMAGE_IDENTITY_DOMAIN_OBSERVATION_INVALID",
-                    blockers)),
-        "POSTGRES_IMAGE_IDENTITY_DOMAIN_AMBIGUOUS",
-        blockers);
-    final String expectedCanonicalImageId =
-        requiredText(
-            snapshot,
-            "postgresExpectedCanonicalImageId",
-            "POSTGRES_EXPECTED_IMAGE_OBSERVATION_INVALID",
-            blockers);
-    require(
-        !canonicalImageId(postgresImageId).isBlank(),
-        "POSTGRES_IMAGE_IDENTITY_MISSING",
-        blockers);
-    require(
-        canonicalImageIdsMatch(postgresImageId, expectedCanonicalImageId),
-        "POSTGRES_EXPECTED_IMAGE_MISMATCH",
-        blockers);
-    final String requiredPostgresImage =
-        requiredText(
-            requirements, "postgresImage", "POSTGRES_IMAGE_REQUIREMENT_INVALID", blockers);
-    final String observedPostgresImage =
-        requiredText(
-            snapshot,
-            "postgresImageReference",
-            "POSTGRES_IMAGE_REFERENCE_OBSERVATION_INVALID",
-            blockers);
-    require(
-        requiredPostgresImage.matches("^postgres@sha256:[a-f0-9]{64}$")
-            && requiredPostgresImage.equals(observedPostgresImage),
-        "POSTGRES_IMAGE_REFERENCE_MISMATCH",
-        blockers);
-    require(
-        requiredBoolean(
-            snapshot,
-            "postgresImageDigestVerified",
-            "POSTGRES_IMAGE_DIGEST_OBSERVATION_INVALID",
-            blockers),
-        "POSTGRES_IMAGE_DIGEST_MISMATCH",
-        blockers);
-    final String executedImageId =
-        requiredText(
-            snapshot,
-            "postgresExecutedImageId",
-            "POSTGRES_EXECUTED_IMAGE_OBSERVATION_INVALID",
-            blockers);
-    require(
-        canonicalImageIdsMatch(expectedCanonicalImageId, executedImageId),
-        "POSTGRES_EXECUTED_IMAGE_MISMATCH",
-        blockers);
+    evaluatePostgresIdentityV2(snapshot, requirements, blockers);
     require(
         requiredBoolean(
             snapshot,
@@ -411,6 +344,327 @@ final class Qdr7CapacityEnvironmentAdmission {
     return new Evaluation(blockers.isEmpty() ? QUALIFIED : NOT_QUALIFIED, List.copyOf(blockers));
   }
 
+  private static void evaluatePostgresIdentityV2(
+      final JsonNode snapshot, final JsonNode requirements, final List<String> blockers) {
+    require(
+        requiredBoolean(
+            snapshot,
+            "postgresImageAvailable",
+            "POSTGRES_IMAGE_AVAILABILITY_OBSERVATION_INVALID",
+            blockers),
+        "POSTGRES_IMAGE_UNAVAILABLE",
+        blockers);
+    final String contractId =
+        requiredText(
+            requirements,
+            "identityContractId",
+            "POSTGRES_IDENTITY_DOMAIN_MISMATCH",
+            blockers);
+    final JsonNode requiredVersion = requirements.path("identityContractVersion");
+    final boolean contractVersionValid =
+        requiredVersion.isIntegralNumber() && requiredVersion.asInt() == 2;
+    require(
+        "POSTGRES_IMAGE_IDENTITY_CONTRACT_V2".equals(contractId) && contractVersionValid,
+        "POSTGRES_IDENTITY_DOMAIN_MISMATCH",
+        blockers);
+    require(
+        contractId.equals(
+                requiredText(
+                    snapshot,
+                    "identityContractId",
+                    "POSTGRES_IDENTITY_DOMAIN_MISMATCH",
+                    blockers))
+            && snapshot.path("identityContractVersion").isIntegralNumber()
+            && snapshot.path("identityContractVersion").asInt() == 2,
+        "POSTGRES_IDENTITY_DOMAIN_MISMATCH",
+        blockers);
+
+    final String requiredReference =
+        requiredText(
+            requirements,
+            "requiredImageReference",
+            "POSTGRES_INDEX_DIGEST_INVALID",
+            blockers);
+    final String requiredIndexDigest =
+        requiredText(
+            requirements,
+            "requiredIndexDigest",
+            "POSTGRES_INDEX_DIGEST_INVALID",
+            blockers);
+    final String requiredIndexMediaType =
+        requiredText(
+            requirements,
+            "requiredIndexMediaType",
+            "POSTGRES_INDEX_MEDIA_TYPE_INVALID",
+            blockers);
+    require(
+        digest(requiredIndexDigest) && requiredReference.equals("postgres@" + requiredIndexDigest),
+        "POSTGRES_INDEX_DIGEST_INVALID",
+        blockers);
+    require(
+        "application/vnd.oci.image.index.v1+json".equals(requiredIndexMediaType),
+        "POSTGRES_INDEX_MEDIA_TYPE_INVALID",
+        blockers);
+    require(
+        requiredReference.equals(
+                requiredText(
+                    snapshot,
+                    "requiredImageReference",
+                    "POSTGRES_INDEX_DIGEST_INVALID",
+                    blockers))
+            && requiredIndexDigest.equals(
+                requiredText(
+                    snapshot,
+                    "requiredIndexDigest",
+                    "POSTGRES_INDEX_DIGEST_INVALID",
+                    blockers))
+            && requiredIndexMediaType.equals(
+                requiredText(
+                    snapshot,
+                    "requiredIndexMediaType",
+                    "POSTGRES_INDEX_MEDIA_TYPE_INVALID",
+                    blockers)),
+        "POSTGRES_INDEX_DIGEST_INVALID",
+        blockers);
+
+    final JsonNode requiredPlatform = requirements.path("targetPlatform");
+    final String targetOs =
+        requiredText(
+            requiredPlatform, "os", "POSTGRES_PLATFORM_NOT_FOUND", blockers);
+    final String targetArchitecture =
+        requiredText(
+            requiredPlatform, "architecture", "POSTGRES_PLATFORM_NOT_FOUND", blockers);
+    final JsonNode variantNode = requiredPlatform.path("variant");
+    final String targetVariant = variantNode.isTextual() ? variantNode.textValue() : null;
+    require(
+        "linux".equals(targetOs)
+            && "amd64".equals(targetArchitecture)
+            && "".equals(targetVariant),
+        "POSTGRES_PLATFORM_NOT_FOUND",
+        blockers);
+    final JsonNode observedPlatform = snapshot.path("targetPlatform");
+    require(
+        observedPlatform.isObject()
+            && targetOs.equals(observedPlatform.path("os").asText())
+            && targetArchitecture.equals(observedPlatform.path("architecture").asText())
+            && targetVariant != null
+            && targetVariant.equals(observedPlatform.path("variant").asText(null)),
+        "POSTGRES_PLATFORM_NOT_FOUND",
+        blockers);
+
+    final String expectedManifestDigest =
+        requiredText(
+            requirements,
+            "expectedPlatformManifestDigest",
+            "POSTGRES_PLATFORM_MANIFEST_MISMATCH",
+            blockers);
+    final String expectedManifestMediaType =
+        requiredText(
+            requirements,
+            "expectedPlatformManifestMediaType",
+            "POSTGRES_PLATFORM_MANIFEST_MISMATCH",
+            blockers);
+    final String expectedConfigDigest =
+        requiredText(
+            requirements,
+            "expectedPlatformConfigDigest",
+            "POSTGRES_CONFIG_DIGEST_MISMATCH",
+            blockers);
+    require(
+        digest(expectedManifestDigest)
+            && "application/vnd.oci.image.manifest.v1+json".equals(expectedManifestMediaType)
+            && expectedManifestDigest.equals(
+                requiredText(
+                    snapshot,
+                    "resolvedPlatformManifestDigest",
+                    "POSTGRES_PLATFORM_MANIFEST_MISMATCH",
+                    blockers))
+            && expectedManifestMediaType.equals(
+                requiredText(
+                    snapshot,
+                    "resolvedPlatformManifestMediaType",
+                    "POSTGRES_PLATFORM_MANIFEST_MISMATCH",
+                    blockers)),
+        "POSTGRES_PLATFORM_MANIFEST_MISMATCH",
+        blockers);
+    require(
+        digest(expectedConfigDigest)
+            && expectedConfigDigest.equals(
+                requiredText(
+                    snapshot,
+                    "resolvedPlatformConfigDigest",
+                    "POSTGRES_CONFIG_DIGEST_MISMATCH",
+                    blockers)),
+        "POSTGRES_CONFIG_DIGEST_MISMATCH",
+        blockers);
+    require(
+        "PASS"
+            .equals(
+                requiredText(
+                    snapshot,
+                    "repoDigestMembership",
+                    "POSTGRES_REPO_DIGEST_MEMBERSHIP_MISSING",
+                    blockers)),
+        "POSTGRES_REPO_DIGEST_MEMBERSHIP_MISSING",
+        blockers);
+
+    final ImageIdentity localIdentity =
+        readIdentity(
+            snapshot.path("localObservedIdentity"),
+            "POSTGRES_LOCAL_IDENTITY_UNKNOWN",
+            blockers);
+    final boolean localIndex =
+        localIdentity.kind() == ImageIdentityKind.OCI_INDEX_DIGEST
+            && requiredIndexDigest.equals(localIdentity.digest())
+            && requiredIndexMediaType.equals(localIdentity.mediaType());
+    final boolean localConfig =
+        localIdentity.kind() == ImageIdentityKind.CONFIG_DIGEST
+            && expectedConfigDigest.equals(localIdentity.digest())
+            && "application/vnd.oci.image.config.v1+json".equals(localIdentity.mediaType());
+    require(localIndex || localConfig, "POSTGRES_LOCAL_IDENTITY_UNKNOWN", blockers);
+
+    final ImageIdentity executedIdentity =
+        readIdentity(
+            snapshot.path("executedObservedIdentity"),
+            "POSTGRES_EXECUTED_IDENTITY_UNKNOWN",
+            blockers);
+    final boolean executedManifest =
+        executedIdentity.kind() == ImageIdentityKind.PLATFORM_MANIFEST_DIGEST
+            && expectedManifestDigest.equals(executedIdentity.digest())
+            && expectedManifestMediaType.equals(executedIdentity.mediaType());
+    final boolean executedConfig =
+        executedIdentity.kind() == ImageIdentityKind.CONFIG_DIGEST
+            && expectedConfigDigest.equals(executedIdentity.digest())
+            && "application/vnd.oci.image.config.v1+json".equals(executedIdentity.mediaType());
+    if (executedIdentity.kind() == ImageIdentityKind.UNKNOWN) {
+      blockers.add("POSTGRES_EXECUTED_IDENTITY_UNKNOWN");
+    } else {
+      require(
+          executedManifest || executedConfig,
+          "POSTGRES_EXECUTED_PLATFORM_MISMATCH",
+          blockers);
+    }
+    if (executedManifest) {
+      require(
+          expectedManifestDigest.equals(
+              requiredText(
+                  snapshot,
+                  "executedPlatformManifestDigest",
+                  "POSTGRES_EXECUTED_PLATFORM_MISMATCH",
+                  blockers)),
+          "POSTGRES_EXECUTED_PLATFORM_MISMATCH",
+          blockers);
+    }
+    require(
+        expectedConfigDigest.equals(
+            requiredText(
+                snapshot,
+                "executedConfigDigest",
+                "POSTGRES_CONFIG_DIGEST_MISMATCH",
+                blockers)),
+        "POSTGRES_CONFIG_DIGEST_MISMATCH",
+        blockers);
+    require(
+        "PASS"
+            .equals(
+                requiredText(
+                    snapshot,
+                    "immutableBindingResult",
+                    "POSTGRES_EXECUTED_PLATFORM_MISMATCH",
+                    blockers)),
+        "POSTGRES_EXECUTED_PLATFORM_MISMATCH",
+        blockers);
+    final JsonNode identityBlockers = snapshot.path("identityBlockers");
+    if (!identityBlockers.isArray() || !identityBlockers.isEmpty()) {
+      blockers.add("POSTGRES_IDENTITY_RESOLUTION_FAILED");
+    }
+  }
+
+  static boolean identitiesMatch(final ImageIdentity left, final ImageIdentity right) {
+    return left != null
+        && right != null
+        && left.kind() != ImageIdentityKind.UNKNOWN
+        && left.kind() == right.kind()
+        && digest(left.digest())
+        && left.digest().equals(right.digest())
+        && left.mediaType() != null
+        && left.mediaType().equals(right.mediaType());
+  }
+
+  static DescriptorResolution resolvePlatformDescriptor(
+      final JsonNode index, final JsonNode requirements) {
+    if (!requirements.path("requiredIndexMediaType").asText().equals(index.path("mediaType").asText())) {
+      return DescriptorResolution.failure("POSTGRES_INDEX_MEDIA_TYPE_INVALID");
+    }
+    final JsonNode target = requirements.path("targetPlatform");
+    final List<JsonNode> eligible = new ArrayList<>();
+    final JsonNode manifests = index.path("manifests");
+    if (!manifests.isArray()) {
+      return DescriptorResolution.failure("POSTGRES_IDENTITY_RESOLUTION_FAILED");
+    }
+    for (final JsonNode descriptor : manifests) {
+      final JsonNode platform = descriptor.path("platform");
+      if (target.path("os").asText().equals(platform.path("os").asText())
+          && target.path("architecture").asText().equals(platform.path("architecture").asText())
+          && target.path("variant").asText().equals(platform.path("variant").asText())) {
+        eligible.add(descriptor);
+      }
+    }
+    if (eligible.isEmpty()) {
+      return DescriptorResolution.failure("POSTGRES_PLATFORM_NOT_FOUND");
+    }
+    if (eligible.size() != 1) {
+      return DescriptorResolution.failure("POSTGRES_PLATFORM_AMBIGUOUS");
+    }
+    final JsonNode selected = eligible.getFirst();
+    final String digestValue = selected.path("digest").asText();
+    final String mediaType = selected.path("mediaType").asText();
+    if (!requirements.path("expectedPlatformManifestDigest").asText().equals(digestValue)
+        || !requirements.path("expectedPlatformManifestMediaType").asText().equals(mediaType)) {
+      return DescriptorResolution.failure("POSTGRES_PLATFORM_MANIFEST_MISMATCH");
+    }
+    return new DescriptorResolution(digestValue, mediaType, "");
+  }
+
+  static ConfigResolution resolveConfigDescriptor(
+      final JsonNode platformManifest, final JsonNode requirements) {
+    if (!requirements
+        .path("expectedPlatformManifestMediaType")
+        .asText()
+        .equals(platformManifest.path("mediaType").asText())) {
+      return ConfigResolution.failure("POSTGRES_PLATFORM_MANIFEST_MISMATCH");
+    }
+    final JsonNode config = platformManifest.path("config");
+    final String digestValue = config.path("digest").asText();
+    if (!"application/vnd.oci.image.config.v1+json".equals(config.path("mediaType").asText())
+        || !requirements.path("expectedPlatformConfigDigest").asText().equals(digestValue)) {
+      return ConfigResolution.failure("POSTGRES_CONFIG_DIGEST_MISMATCH");
+    }
+    return new ConfigResolution(digestValue, config.path("mediaType").asText(), "");
+  }
+
+  private static ImageIdentity readIdentity(
+      final JsonNode value, final String blocker, final List<String> blockers) {
+    if (!value.isObject()) {
+      blockers.add(blocker);
+      return ImageIdentity.unknown();
+    }
+    final ImageIdentityKind kind;
+    try {
+      kind = ImageIdentityKind.valueOf(value.path("kind").asText("UNKNOWN"));
+    } catch (final IllegalArgumentException invalidKind) {
+      blockers.add(blocker);
+      return ImageIdentity.unknown();
+    }
+    final String observedDigest = value.path("digest").asText();
+    final String mediaType = value.path("mediaType").asText();
+    if (kind == ImageIdentityKind.UNKNOWN || !digest(observedDigest) || mediaType.isBlank()) {
+      blockers.add(blocker);
+      return ImageIdentity.unknown();
+    }
+    return new ImageIdentity(kind, observedDigest, mediaType);
+  }
+
   static Evaluation runPostgresSmokeAndQualify(
       final Path environmentManifestPath,
       final Path registryPath,
@@ -422,7 +676,7 @@ final class Qdr7CapacityEnvironmentAdmission {
         registryPath,
         requirementsPath,
         mapper,
-        Qdr7CapacityEnvironmentAdmission::inspectImage);
+        Qdr7CapacityEnvironmentAdmission::inspectExecutedIdentity);
   }
 
   static Evaluation runPostgresSmokeAndQualify(
@@ -430,15 +684,14 @@ final class Qdr7CapacityEnvironmentAdmission {
       final Path registryPath,
       final Path requirementsPath,
       final ObjectMapper mapper,
-      final Function<String, String> canonicalImageResolver)
+      final ExecutedIdentityInspector executedIdentityInspector)
       throws IOException {
     return runPostgresSmokeAndQualifyWithInspector(
         environmentManifestPath,
         registryPath,
         requirementsPath,
         mapper,
-        reference ->
-            ImageInspection.synthetic(reference, canonicalImageResolver.apply(reference)));
+        executedIdentityInspector);
   }
 
   private static Evaluation runPostgresSmokeAndQualifyWithInspector(
@@ -446,22 +699,24 @@ final class Qdr7CapacityEnvironmentAdmission {
       final Path registryPath,
       final Path requirementsPath,
       final ObjectMapper mapper,
-      final ImageInspector imageInspector)
+      final ExecutedIdentityInspector executedIdentityInspector)
       throws IOException {
     final ObjectNode manifest = (ObjectNode) mapper.readTree(environmentManifestPath.toFile());
     final ObjectNode registry = (ObjectNode) mapper.readTree(registryPath.toFile());
     final JsonNode requirements = mapper.readTree(requirementsPath.toFile());
-    final String requiredImageReference = requirements.path("postgresImage").asText();
+    final String requiredImageReference = requirements.path("requiredImageReference").asText();
     final ObjectNode diagnostics = manifest.putObject("postgresImageIdentityDiagnostics");
     diagnostics.put("requiredImageReference", requiredImageReference);
-    diagnostics.put("configuredIdentityRaw", manifest.path("postgresImageId").asText());
-    diagnostics.put(
-        "configuredIdentityKind", identityKind(manifest.path("postgresImageId").asText()));
-    diagnostics.put("pinnedIdentityRaw", requiredImageReference);
-    diagnostics.put("pinnedIdentityKind", identityKind(requiredImageReference));
-    putInspection(
-        diagnostics.putObject("preStartExpectedInspection"),
-        imageInspector.inspect(requiredImageReference));
+    diagnostics.put("identityContractId", requirements.path("identityContractId").asText());
+    diagnostics.put("identityContractVersion", requirements.path("identityContractVersion").asInt());
+    diagnostics.set("localObservedIdentity", manifest.path("localObservedIdentity").deepCopy());
+    final List<String> identityFindings = new ArrayList<>();
+    final JsonNode existingIdentityFindings = manifest.path("identityBlockers");
+    if (existingIdentityFindings.isArray()) {
+      existingIdentityFindings.forEach(node -> identityFindings.add(node.asText()));
+    } else {
+      identityFindings.add("POSTGRES_IDENTITY_RESOLUTION_FAILED");
+    }
     String postgresVersion = "";
     try (PostgreSQLContainer<?> smoke =
         new PostgreSQLContainer<>(
@@ -474,32 +729,35 @@ final class Qdr7CapacityEnvironmentAdmission {
       final String executedImageReference = containerInfo.getImageId();
       final String containerConfiguredImage =
           containerInfo.getConfig() == null ? "" : containerInfo.getConfig().getImage();
-      final ImageInspection expectedInspection = imageInspector.inspect(requiredImageReference);
-      final ImageInspection executedInspection = imageInspector.inspect(executedImageReference);
+      final ExecutedIdentityProof executedProof =
+          executedIdentityInspector.inspect(
+              smoke.getContainerId(), executedImageReference, manifest, requirements, mapper);
       final ObjectNode containerDiagnostics = diagnostics.putObject("container");
       containerDiagnostics.put("testcontainersImageReference", smoke.getDockerImageName());
       containerDiagnostics.put("containerConfiguredImage", nullToEmpty(containerConfiguredImage));
       containerDiagnostics.put("containerReportedImageIdentity", nullToEmpty(executedImageReference));
       containerDiagnostics.put("containerImmutableImageField", nullToEmpty(containerInfo.getImageId()));
-      putInspection(diagnostics.putObject("expectedImageInspection"), expectedInspection);
-      putInspection(diagnostics.putObject("executedImageInspection"), executedInspection);
-      manifest.put("postgresImageAvailable", expectedInspection.inspectionFailure().isBlank());
-      manifest.put("postgresImageId", expectedInspection.canonicalConfigImageId());
-      manifest.put(
-          "postgresImageIdentityDomain",
-          expectedInspection.canonicalConfigImageId().isBlank()
-              ? "UNAVAILABLE"
-              : "CONFIG_IMAGE_ID");
+      putExecutedProof(diagnostics.putObject("executedIdentityProof"), executedProof);
+      putIdentity(manifest.putObject("executedObservedIdentity"), executedProof.identity());
+      manifest.put("executedPlatformManifestDigest", executedProof.platformManifestDigest());
+      manifest.put("executedConfigDigest", executedProof.configDigest());
+      manifest.put("immutableBindingResult", executedProof.passed() ? "PASS" : "FAIL");
+      if (!executedProof.passed()) {
+        identityFindings.add(executedProof.blocker());
+      }
+      final ArrayNode identityBlockers = manifest.putArray("identityBlockers");
+      identityFindings.stream().distinct().forEach(identityBlockers::add);
       manifest.put("postgresExecutedImageReference", executedImageReference);
       manifest.put(
           "postgresExpectedCanonicalImageId",
-          expectedInspection.canonicalConfigImageId());
-      manifest.putPOJO("postgresExpectedRepoDigests", expectedInspection.repoDigests());
+          requirements.path("expectedPlatformConfigDigest").asText());
       manifest.put(
           "postgresImageDigestVerified",
-          expectedInspection.repoDigests().contains(requiredImageReference));
-      manifest.put("postgresExecutedImageId", executedInspection.canonicalConfigImageId());
-      putComparison(diagnostics, expectedInspection, executedInspection);
+          "PASS".equals(manifest.path("repoDigestMembership").asText()));
+      manifest.put("postgresExecutedImageId", executedProof.identity().digest());
+      manifest.putObject("legacyPostgresIdentityFields")
+          .put("status", "DEPRECATED_NOT_USED_FOR_V2_DECISION")
+          .put("decisionContract", "POSTGRES_IMAGE_IDENTITY_CONTRACT_V2");
       try (var connection =
               DriverManager.getConnection(
                   smoke.getJdbcUrl(), smoke.getUsername(), smoke.getPassword());
@@ -513,17 +771,18 @@ final class Qdr7CapacityEnvironmentAdmission {
       manifest.put("testcontainersViable", true);
       manifest.put("postgresMajor", Integer.parseInt(postgresVersion) / 10000);
       manifest.put("testcontainersContainerRemoved", true);
-    } catch (final RuntimeException | java.sql.SQLException failure) {
+    } catch (final RuntimeException | java.sql.SQLException | IOException failure) {
       manifest.put("testcontainersViable", false);
       manifest.put("postgresMajor", 0);
-      manifest.put("postgresImageAvailable", false);
-      manifest.put("postgresImageId", "");
-      manifest.put("postgresImageIdentityDomain", "UNAVAILABLE");
-      manifest.put("postgresImageDigestVerified", false);
-      manifest.put("postgresExpectedCanonicalImageId", "");
-      manifest.putPOJO("postgresExpectedRepoDigests", List.of());
       manifest.put("postgresExecutedImageReference", "");
       manifest.put("postgresExecutedImageId", "");
+      putIdentity(manifest.putObject("executedObservedIdentity"), ImageIdentity.unknown());
+      manifest.put("executedPlatformManifestDigest", "");
+      manifest.put("executedConfigDigest", "");
+      manifest.put("immutableBindingResult", "FAIL");
+      identityFindings.add("POSTGRES_EXECUTED_IDENTITY_UNKNOWN");
+      final ArrayNode identityBlockers = manifest.putArray("identityBlockers");
+      identityFindings.stream().distinct().forEach(identityBlockers::add);
       manifest.put("testcontainersFailure", failure.getClass().getSimpleName());
       diagnostics.put("smokeFailure", failure.getClass().getSimpleName());
     }
@@ -549,111 +808,119 @@ final class Qdr7CapacityEnvironmentAdmission {
     return evaluation;
   }
 
-  /** Resolve a Docker reference to the daemon's immutable image config digest. */
-  static String inspectCanonicalImageId(final String imageReference) {
-    return inspectImage(imageReference).canonicalConfigImageId();
+  static ExecutedIdentityProof inspectStartedContainerIdentity(
+      final String containerId,
+      final String reportedImageId,
+      final JsonNode localIdentityEvidence,
+      final JsonNode requirements,
+      final ObjectMapper mapper)
+      throws IOException {
+    return inspectExecutedIdentity(
+        containerId, reportedImageId, localIdentityEvidence, requirements, mapper);
   }
 
-  private static ImageInspection inspectImage(final String imageReference) {
-    if (imageReference == null || imageReference.isBlank()) {
-      return ImageInspection.failure(imageReference, "EMPTY_REFERENCE");
-    }
+  private static ExecutedIdentityProof inspectExecutedIdentity(
+      final String containerId,
+      final String reportedImageId,
+      final JsonNode manifest,
+      final JsonNode requirements,
+      final ObjectMapper mapper)
+      throws IOException {
+    final String expectedManifest = requirements.path("expectedPlatformManifestDigest").asText();
+    final String expectedManifestMediaType =
+        requirements.path("expectedPlatformManifestMediaType").asText();
+    final String expectedConfig = requirements.path("expectedPlatformConfigDigest").asText();
+    final JsonNode target = requirements.path("targetPlatform");
     try {
-      final InspectImageResponse inspected =
-          DockerClientFactory.instance()
-              .client()
-              .inspectImageCmd(imageReference.trim())
-              .exec();
-      return new ImageInspection(
-          imageReference,
-          nullToEmpty(inspected.getId()),
-          inspected.getRepoDigests() == null ? List.of() : List.copyOf(inspected.getRepoDigests()),
-          inspected.getRepoTags() == null ? List.of() : List.copyOf(inspected.getRepoTags()),
-          canonicalImageId(inspected.getId()),
-          "");
+      final NativeResult descriptorResult =
+          invokeNative(
+              List.of(
+                  "docker",
+                  "container",
+                  "inspect",
+                  "--format",
+                  "{{json .ImageManifestDescriptor}}",
+                  containerId));
+      if (descriptorResult.exitCode() == 0
+          && !descriptorResult.output().isBlank()
+          && !"null".equals(descriptorResult.output())
+          && !"<no value>".equals(descriptorResult.output())) {
+        final JsonNode descriptor = mapper.readTree(descriptorResult.output());
+        final ImageIdentity identity =
+            new ImageIdentity(
+                ImageIdentityKind.PLATFORM_MANIFEST_DIGEST,
+                descriptor.path("digest").asText(),
+                descriptor.path("mediaType").asText());
+        final JsonNode platform = descriptor.path("platform");
+        final boolean passed =
+            expectedManifest.equals(identity.digest())
+                && expectedManifestMediaType.equals(identity.mediaType())
+                && target.path("os").asText().equals(platform.path("os").asText())
+                && target.path("architecture").asText().equals(platform.path("architecture").asText())
+                && target.path("variant").asText().equals(platform.path("variant").asText());
+        return new ExecutedIdentityProof(
+            identity,
+            identity.digest(),
+            expectedConfig,
+            "PATH_B_PLATFORM_MANIFEST_DESCRIPTOR",
+            passed ? "" : "POSTGRES_EXECUTED_PLATFORM_MISMATCH");
+      }
+      final JsonNode localIdentity = manifest.path("localObservedIdentity");
+      if (ImageIdentityKind.CONFIG_DIGEST.name().equals(localIdentity.path("kind").asText())
+          && expectedConfig.equals(localIdentity.path("digest").asText())
+          && expectedConfig.equals(reportedImageId)) {
+        return new ExecutedIdentityProof(
+            new ImageIdentity(
+                ImageIdentityKind.CONFIG_DIGEST,
+                reportedImageId,
+                "application/vnd.oci.image.config.v1+json"),
+            "",
+            expectedConfig,
+            "PATH_A_EXECUTED_CONFIG_DIGEST",
+            "");
+      }
+      return ExecutedIdentityProof.failure("POSTGRES_EXECUTED_IDENTITY_UNKNOWN");
     } catch (final RuntimeException inspectionFailure) {
-      return ImageInspection.failure(imageReference, inspectionFailure.getClass().getSimpleName());
+      return ExecutedIdentityProof.failure("POSTGRES_IDENTITY_RESOLUTION_FAILED");
     }
   }
 
-  private static void putInspection(final ObjectNode target, final ImageInspection inspection) {
-    target.put("reference", nullToEmpty(inspection.reference()));
-    target.put("inspectIdRaw", inspection.inspectIdRaw());
-    target.put(
-        "inspectIdKind",
-        canonicalImageId(inspection.inspectIdRaw()).isBlank()
-            ? identityKind(inspection.inspectIdRaw())
-            : "CONFIG_IMAGE_ID");
-    target.put("canonicalConfigImageId", inspection.canonicalConfigImageId());
-    target.put(
-        "resolvedIdentityKind",
-        inspection.canonicalConfigImageId().isBlank() ? "UNAVAILABLE" : "CONFIG_IMAGE_ID");
-    target.putPOJO("repoDigests", inspection.repoDigests());
-    target.putPOJO("repoTags", inspection.repoTags());
-    target.put("inspectionFailure", inspection.inspectionFailure());
+  private static NativeResult invokeNative(final List<String> command) throws IOException {
+    final Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+    final boolean finished;
+    try {
+      finished = process.waitFor(30, TimeUnit.SECONDS);
+    } catch (final InterruptedException interrupted) {
+      Thread.currentThread().interrupt();
+      throw new IOException("Docker identity inspection interrupted", interrupted);
+    }
+    if (!finished) {
+      process.destroyForcibly();
+      return new NativeResult(-1, "");
+    }
+    return new NativeResult(
+        process.exitValue(),
+        new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8).trim());
   }
 
-  private static void putComparison(
-      final ObjectNode diagnostics,
-      final ImageInspection expected,
-      final ImageInspection executed) {
-    final ObjectNode comparison = diagnostics.putObject("comparison");
-    comparison.put("selectedIdentityDomain", "CONFIG_IMAGE_ID");
-    comparison.put("expectedRawValue", expected.inspectIdRaw());
-    comparison.put("expectedCanonicalValue", expected.canonicalConfigImageId());
-    comparison.put("executedRawValue", executed.inspectIdRaw());
-    comparison.put("executedCanonicalValue", executed.canonicalConfigImageId());
-    comparison.put(
-        "matchResult",
-        canonicalImageIdsMatch(
-            expected.canonicalConfigImageId(), executed.canonicalConfigImageId()));
+  private static void putIdentity(final ObjectNode target, final ImageIdentity identity) {
+    target.put("digest", identity.digest());
+    target.put("kind", identity.kind().name());
+    target.put("mediaType", identity.mediaType());
   }
 
-  private static String identityKind(final String identity) {
-    if (identity == null || identity.isBlank()) {
-      return "UNAVAILABLE";
-    }
-    if (identity.matches("^[^@\\s]+@sha256:[a-f0-9]{64}$")) {
-      return "REPO_DIGEST_REFERENCE";
-    }
-    if (identity.matches("^sha256:[a-f0-9]{64}$")) {
-      return "SHA256_DIGEST_UNRESOLVED_DOMAIN";
-    }
-    if (identity.contains(":")) {
-      return "MUTABLE_OR_DISPLAY_REFERENCE";
-    }
-    return "UNKNOWN";
+  private static void putExecutedProof(
+      final ObjectNode target, final ExecutedIdentityProof proof) {
+    putIdentity(target.putObject("identity"), proof.identity());
+    target.put("platformManifestDigest", proof.platformManifestDigest());
+    target.put("configDigest", proof.configDigest());
+    target.put("proofPath", proof.proofPath());
+    target.put("result", proof.passed() ? "PASS" : "FAIL");
+    target.put("blocker", proof.blocker());
   }
 
   private static String nullToEmpty(final String value) {
     return value == null ? "" : value;
-  }
-
-  static String resolveCanonicalImageId(
-      final String imageReference, final Function<String, String> authoritativeInspector) {
-    if (imageReference == null || imageReference.isBlank() || authoritativeInspector == null) {
-      return "";
-    }
-    try {
-      return canonicalImageId(authoritativeInspector.apply(imageReference.trim()));
-    } catch (final RuntimeException inspectionFailure) {
-      return "";
-    }
-  }
-
-  static String canonicalImageId(final String imageId) {
-    if (imageId == null) {
-      return "";
-    }
-    final String trimmed = imageId.trim();
-    final String hex = trimmed.startsWith("sha256:") ? trimmed.substring(7) : trimmed;
-    return hex.matches("^[a-f0-9]{64}$") ? "sha256:" + hex : "";
-  }
-
-  static boolean canonicalImageIdsMatch(final String expected, final String executed) {
-    final String canonicalExpected = canonicalImageId(expected);
-    final String canonicalExecuted = canonicalImageId(executed);
-    return !canonicalExpected.isBlank() && canonicalExpected.equals(canonicalExecuted);
   }
 
   private static void propagateEnvironmentHash(
@@ -749,6 +1016,10 @@ final class Qdr7CapacityEnvironmentAdmission {
 
   private static boolean sha256(final String value) {
     return value != null && value.matches("^[a-f0-9]{64}$");
+  }
+
+  private static boolean digest(final String value) {
+    return value != null && value.matches("^sha256:[a-f0-9]{64}$");
   }
 
   private static long positiveIntegralRequirement(
@@ -861,30 +1132,65 @@ final class Qdr7CapacityEnvironmentAdmission {
   record Evaluation(String status, List<String> blockers) {}
 
   @FunctionalInterface
-  private interface ImageInspector {
-    ImageInspection inspect(String reference);
+  interface ExecutedIdentityInspector {
+    ExecutedIdentityProof inspect(
+        String containerId,
+        String reportedImageId,
+        JsonNode manifest,
+        JsonNode requirements,
+        ObjectMapper mapper)
+        throws IOException;
   }
 
-  private record ImageInspection(
-      String reference,
-      String inspectIdRaw,
-      List<String> repoDigests,
-      List<String> repoTags,
-      String canonicalConfigImageId,
-      String inspectionFailure) {
+  enum ImageIdentityKind {
+    OCI_INDEX_DIGEST,
+    PLATFORM_MANIFEST_DIGEST,
+    CONFIG_DIGEST,
+    REPO_DIGEST,
+    UNKNOWN
+  }
 
-    private static ImageInspection synthetic(final String reference, final String canonicalId) {
-      return new ImageInspection(
-          reference,
-          nullToEmpty(canonicalId),
-          identityKind(reference).equals("REPO_DIGEST_REFERENCE") ? List.of(reference) : List.of(),
-          List.of(),
-          canonicalImageId(canonicalId),
-          "");
-    }
-
-    private static ImageInspection failure(final String reference, final String failure) {
-      return new ImageInspection(reference, "", List.of(), List.of(), "", failure);
+  record ImageIdentity(ImageIdentityKind kind, String digest, String mediaType) {
+    private static ImageIdentity unknown() {
+      return new ImageIdentity(ImageIdentityKind.UNKNOWN, "", "");
     }
   }
+
+  record ExecutedIdentityProof(
+      ImageIdentity identity,
+      String platformManifestDigest,
+      String configDigest,
+      String proofPath,
+      String blocker) {
+
+    boolean passed() {
+      return blocker == null || blocker.isBlank();
+    }
+
+    static ExecutedIdentityProof failure(final String blocker) {
+      return new ExecutedIdentityProof(ImageIdentity.unknown(), "", "", "UNRESOLVED", blocker);
+    }
+  }
+
+  record DescriptorResolution(String digest, String mediaType, String blocker) {
+    static DescriptorResolution failure(final String blocker) {
+      return new DescriptorResolution("", "", blocker);
+    }
+
+    boolean passed() {
+      return blocker.isBlank();
+    }
+  }
+
+  record ConfigResolution(String digest, String mediaType, String blocker) {
+    static ConfigResolution failure(final String blocker) {
+      return new ConfigResolution("", "", blocker);
+    }
+
+    boolean passed() {
+      return blocker.isBlank();
+    }
+  }
+
+  private record NativeResult(int exitCode, String output) {}
 }

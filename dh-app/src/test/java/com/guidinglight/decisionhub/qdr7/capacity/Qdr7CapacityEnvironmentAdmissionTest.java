@@ -15,9 +15,18 @@ class Qdr7CapacityEnvironmentAdmissionTest {
 
   private static final String SHA = "a".repeat(40);
   private static final String HASH = "b".repeat(64);
-  private static final String POSTGRES_IMAGE_ID =
+  private static final String INDEX_DIGEST =
       "sha256:5c855ad7b85e68e48a62f34662853f38b57c1c1d80f3a927ab58034fd6d31c5e";
-  private static final String DIFFERENT_IMAGE_ID = "sha256:" + "c".repeat(64);
+  private static final String PLATFORM_MANIFEST_DIGEST =
+      "sha256:9c1534cbf839ec70409508a874f4c02bf4739de2f32f77efe080eef1cfd34bf4";
+  private static final String CONFIG_DIGEST =
+      "sha256:07f76768a0c956d6e9bddbcdb3c2be7fd9fd45ee6174a26873f8219fccbad65d";
+  private static final String DIFFERENT_DIGEST = "sha256:" + "c".repeat(64);
+  private static final String REQUIRED_REFERENCE = "postgres@" + INDEX_DIGEST;
+  private static final String INDEX_MEDIA_TYPE = "application/vnd.oci.image.index.v1+json";
+  private static final String MANIFEST_MEDIA_TYPE =
+      "application/vnd.oci.image.manifest.v1+json";
+  private static final String CONFIG_MEDIA_TYPE = "application/vnd.oci.image.config.v1+json";
 
   @TempDir Path temporaryDirectory;
 
@@ -56,37 +65,47 @@ class Qdr7CapacityEnvironmentAdmissionTest {
         requirements,
         "NETWORK_ADAPTER_OUTSIDE_ALLOWLIST");
     assertBlocked(
-        valid.deepCopy().put("postgresImageDigestVerified", false),
+        valid.deepCopy().put("repoDigestMembership", "FAIL"),
         requirements,
-        "POSTGRES_IMAGE_DIGEST_MISMATCH");
+        "POSTGRES_REPO_DIGEST_MEMBERSHIP_MISSING");
+    final ObjectNode wrongExecutedDomain = valid.deepCopy();
+    wrongExecutedDomain
+        .withObject("executedObservedIdentity")
+        .put("kind", "CONFIG_DIGEST")
+        .put("digest", PLATFORM_MANIFEST_DIGEST)
+        .put("mediaType", CONFIG_MEDIA_TYPE);
     assertBlocked(
-        valid.deepCopy().put("postgresExecutedImageId", DIFFERENT_IMAGE_ID),
+        wrongExecutedDomain,
         requirements,
-        "POSTGRES_EXECUTED_IMAGE_MISMATCH");
+        "POSTGRES_EXECUTED_PLATFORM_MISMATCH");
     assertBlocked(
-        valid.deepCopy().remove("postgresExpectedCanonicalImageId"),
+        valid.deepCopy().remove("requiredIndexDigest"),
         requirements,
-        "POSTGRES_EXPECTED_IMAGE_OBSERVATION_INVALID");
+        "POSTGRES_INDEX_DIGEST_INVALID");
     assertBlocked(
-        valid.deepCopy().put("postgresExpectedCanonicalImageId", "sha256:abc"),
+        valid.deepCopy().put("resolvedPlatformManifestDigest", DIFFERENT_DIGEST),
         requirements,
-        "POSTGRES_EXPECTED_IMAGE_MISMATCH");
+        "POSTGRES_PLATFORM_MANIFEST_MISMATCH");
     assertBlocked(
-        valid.deepCopy().put("postgresImageIdentityDomain", "SHA256_DIGEST_UNRESOLVED_DOMAIN"),
+        valid.deepCopy().put("resolvedPlatformConfigDigest", DIFFERENT_DIGEST),
         requirements,
-        "POSTGRES_IMAGE_IDENTITY_DOMAIN_AMBIGUOUS");
+        "POSTGRES_CONFIG_DIGEST_MISMATCH");
+    final ObjectNode unknownLocal = valid.deepCopy();
+    unknownLocal.withObject("localObservedIdentity").put("kind", "UNKNOWN");
     assertBlocked(
-        valid.deepCopy().remove("postgresExecutedImageId"),
+        unknownLocal,
         requirements,
-        "POSTGRES_EXECUTED_IMAGE_OBSERVATION_INVALID");
+        "POSTGRES_LOCAL_IDENTITY_UNKNOWN");
+    final ObjectNode unknownExecuted = valid.deepCopy();
+    unknownExecuted.withObject("executedObservedIdentity").put("kind", "UNKNOWN");
     assertBlocked(
-        valid.deepCopy().put("postgresExecutedImageId", "sha256:abc"),
+        unknownExecuted,
         requirements,
-        "POSTGRES_EXECUTED_IMAGE_MISMATCH");
+        "POSTGRES_EXECUTED_IDENTITY_UNKNOWN");
     assertBlocked(
-        valid.deepCopy().put("postgresImageReference", "postgres:17"),
+        valid.deepCopy().put("requiredImageReference", "postgres:17"),
         requirements,
-        "POSTGRES_IMAGE_REFERENCE_MISMATCH");
+        "POSTGRES_INDEX_DIGEST_INVALID");
     final ObjectNode credential = valid.deepCopy();
     credential.withArray("credentialVariablesPresent").add("OPENAI_API_KEY");
     assertBlocked(credential, requirements, "CREDENTIAL_ENVIRONMENT_PRESENT");
@@ -118,57 +137,109 @@ class Qdr7CapacityEnvironmentAdmissionTest {
   }
 
   @Test
-  void canonicalImageIdentityIsStrictContentAddressedAndFailClosed() {
-    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageId(POSTGRES_IMAGE_ID))
-        .isEqualTo(POSTGRES_IMAGE_ID);
-    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageId(POSTGRES_IMAGE_ID.substring(7)))
-        .isEqualTo(POSTGRES_IMAGE_ID);
-    assertThat(
-            Qdr7CapacityEnvironmentAdmission.canonicalImageId(
-                "  " + POSTGRES_IMAGE_ID + "  "))
-        .isEqualTo(POSTGRES_IMAGE_ID);
-    assertThat(
-            Qdr7CapacityEnvironmentAdmission.canonicalImageIdsMatch(
-                POSTGRES_IMAGE_ID, POSTGRES_IMAGE_ID.substring(7)))
-        .isTrue();
-    assertThat(
-            Qdr7CapacityEnvironmentAdmission.canonicalImageIdsMatch(
-                POSTGRES_IMAGE_ID, DIFFERENT_IMAGE_ID))
+  void identityEqualityRequiresTheSameExplicitDomain() {
+    final var index =
+        new Qdr7CapacityEnvironmentAdmission.ImageIdentity(
+            Qdr7CapacityEnvironmentAdmission.ImageIdentityKind.OCI_INDEX_DIGEST,
+            INDEX_DIGEST,
+            INDEX_MEDIA_TYPE);
+    final var sameIndex =
+        new Qdr7CapacityEnvironmentAdmission.ImageIdentity(
+            Qdr7CapacityEnvironmentAdmission.ImageIdentityKind.OCI_INDEX_DIGEST,
+            INDEX_DIGEST,
+            INDEX_MEDIA_TYPE);
+    final var sameValueDifferentDomain =
+        new Qdr7CapacityEnvironmentAdmission.ImageIdentity(
+            Qdr7CapacityEnvironmentAdmission.ImageIdentityKind.CONFIG_DIGEST,
+            INDEX_DIGEST,
+            CONFIG_MEDIA_TYPE);
+    final var sameDomainAndValueDifferentMediaType =
+        new Qdr7CapacityEnvironmentAdmission.ImageIdentity(
+            Qdr7CapacityEnvironmentAdmission.ImageIdentityKind.OCI_INDEX_DIGEST,
+            INDEX_DIGEST,
+            MANIFEST_MEDIA_TYPE);
+
+    assertThat(Qdr7CapacityEnvironmentAdmission.identitiesMatch(index, sameIndex)).isTrue();
+    assertThat(Qdr7CapacityEnvironmentAdmission.identitiesMatch(index, sameValueDifferentDomain))
         .isFalse();
-    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageId("sha256:abc")).isEmpty();
-    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageId("postgres:17")).isEmpty();
-    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageId("SHA256:" + "a".repeat(64)))
-        .isEmpty();
-    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageId(" ")).isEmpty();
+    assertThat(
+            Qdr7CapacityEnvironmentAdmission.identitiesMatch(
+                index, sameDomainAndValueDifferentMediaType))
+        .isFalse();
   }
 
   @Test
-  void authoritativeDockerResolutionRejectsTagMutationAndInspectFailure() {
-    final String expected =
-        Qdr7CapacityEnvironmentAdmission.resolveCanonicalImageId(
-            "postgres:17", ignored -> POSTGRES_IMAGE_ID);
-    final String executedSameContent =
-        Qdr7CapacityEnvironmentAdmission.resolveCanonicalImageId(
-            "sha256:runtime-display", ignored -> POSTGRES_IMAGE_ID.substring(7));
-    final String sameTagMutated =
-        Qdr7CapacityEnvironmentAdmission.resolveCanonicalImageId(
-            "postgres:17", ignored -> DIFFERENT_IMAGE_ID);
+  void ociIndexResolutionIsExactUnambiguousAndFailClosed() throws IOException {
+    final ObjectMapper mapper = new ObjectMapper();
+    final JsonNode requirements = requirements(mapper);
+    final ObjectNode validIndex = mapper.createObjectNode();
+    validIndex.put("mediaType", INDEX_MEDIA_TYPE);
+    final ObjectNode descriptor = validIndex.putArray("manifests").addObject();
+    descriptor.put("mediaType", MANIFEST_MEDIA_TYPE);
+    descriptor.put("digest", PLATFORM_MANIFEST_DIGEST);
+    descriptor.putObject("platform").put("os", "linux").put("architecture", "amd64").put("variant", "");
 
-    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageIdsMatch(expected, executedSameContent))
+    assertThat(
+            Qdr7CapacityEnvironmentAdmission.resolvePlatformDescriptor(validIndex, requirements)
+                .passed())
         .isTrue();
-    assertThat(Qdr7CapacityEnvironmentAdmission.canonicalImageIdsMatch(expected, sameTagMutated))
-        .isFalse();
+
+    final ObjectNode missing = validIndex.deepCopy();
+    ((ObjectNode) missing.path("manifests").get(0).path("platform")).put("architecture", "arm64");
     assertThat(
-            Qdr7CapacityEnvironmentAdmission.resolveCanonicalImageId(
-                "postgres:17", ignored -> null))
-        .isEmpty();
+            Qdr7CapacityEnvironmentAdmission.resolvePlatformDescriptor(missing, requirements)
+                .blocker())
+        .isEqualTo("POSTGRES_PLATFORM_NOT_FOUND");
+
+    final ObjectNode ambiguous = validIndex.deepCopy();
+    ambiguous.withArray("manifests").add(descriptor.deepCopy());
     assertThat(
-            Qdr7CapacityEnvironmentAdmission.resolveCanonicalImageId(
-                "postgres:17",
-                ignored -> {
-                  throw new IllegalStateException("inspect unavailable");
-                }))
-        .isEmpty();
+            Qdr7CapacityEnvironmentAdmission.resolvePlatformDescriptor(ambiguous, requirements)
+                .blocker())
+        .isEqualTo("POSTGRES_PLATFORM_AMBIGUOUS");
+
+    final ObjectNode wrongDigest = validIndex.deepCopy();
+    ((ObjectNode) wrongDigest.path("manifests").get(0)).put("digest", DIFFERENT_DIGEST);
+    assertThat(
+            Qdr7CapacityEnvironmentAdmission.resolvePlatformDescriptor(wrongDigest, requirements)
+                .blocker())
+        .isEqualTo("POSTGRES_PLATFORM_MANIFEST_MISMATCH");
+
+    final ObjectNode unsupported = validIndex.deepCopy();
+    unsupported.put("mediaType", "application/octet-stream");
+    assertThat(
+            Qdr7CapacityEnvironmentAdmission.resolvePlatformDescriptor(unsupported, requirements)
+                .blocker())
+        .isEqualTo("POSTGRES_INDEX_MEDIA_TYPE_INVALID");
+  }
+
+  @Test
+  void platformManifestConfigResolutionRejectsWrongDigestAndMediaType() throws IOException {
+    final ObjectMapper mapper = new ObjectMapper();
+    final JsonNode requirements = requirements(mapper);
+    final ObjectNode manifest = mapper.createObjectNode();
+    manifest.put("mediaType", MANIFEST_MEDIA_TYPE);
+    manifest
+        .putObject("config")
+        .put("mediaType", CONFIG_MEDIA_TYPE)
+        .put("digest", CONFIG_DIGEST);
+
+    assertThat(
+            Qdr7CapacityEnvironmentAdmission.resolveConfigDescriptor(manifest, requirements)
+                .passed())
+        .isTrue();
+    final ObjectNode wrongDigest = manifest.deepCopy();
+    ((ObjectNode) wrongDigest.path("config")).put("digest", DIFFERENT_DIGEST);
+    assertThat(
+            Qdr7CapacityEnvironmentAdmission.resolveConfigDescriptor(wrongDigest, requirements)
+                .blocker())
+        .isEqualTo("POSTGRES_CONFIG_DIGEST_MISMATCH");
+    final ObjectNode wrongMedia = manifest.deepCopy();
+    ((ObjectNode) wrongMedia.path("config")).put("mediaType", "application/octet-stream");
+    assertThat(
+            Qdr7CapacityEnvironmentAdmission.resolveConfigDescriptor(wrongMedia, requirements)
+                .blocker())
+        .isEqualTo("POSTGRES_CONFIG_DIGEST_MISMATCH");
   }
 
   @Test
@@ -204,6 +275,20 @@ class Qdr7CapacityEnvironmentAdmissionTest {
   }
 
   @Test
+  void deprecatedV1FieldsCannotInfluenceTheV2Verdict() throws IOException {
+    final ObjectMapper mapper = new ObjectMapper();
+    final ObjectNode snapshot = validSnapshot(mapper);
+    snapshot.put("postgresImageId", DIFFERENT_DIGEST);
+    snapshot.put("postgresImageIdentityDomain", "CONFIG_IMAGE_ID");
+    snapshot.put("postgresExpectedCanonicalImageId", DIFFERENT_DIGEST);
+    snapshot.put("postgresExecutedImageId", DIFFERENT_DIGEST);
+    snapshot.put("postgresImageDigestVerified", false);
+
+    assertThat(Qdr7CapacityEnvironmentAdmission.evaluate(snapshot, requirements(mapper)).status())
+        .isEqualTo("QUALIFIED");
+  }
+
+  @Test
   void dedicatedTestcontainersPostgres17SmokeQualifiesAndBindsManifest() throws IOException {
     final ObjectMapper mapper = new ObjectMapper();
     final Path environment = temporaryDirectory.resolve("capacity-environment-manifest.json");
@@ -227,23 +312,24 @@ class Qdr7CapacityEnvironmentAdmissionTest {
     final JsonNode qualified = mapper.readTree(environment.toFile());
     assertThat(qualified.path("testcontainersViable").asBoolean()).isTrue();
     assertThat(qualified.path("postgresMajor").asInt()).isEqualTo(17);
-    assertThat(qualified.path("postgresExpectedCanonicalImageId").asText())
-        .isEqualTo(qualified.path("postgresExecutedImageId").asText())
-        .matches("^sha256:[a-f0-9]{64}$");
-    assertThat(qualified.path("postgresImageId").asText())
-        .isEqualTo(qualified.path("postgresExpectedCanonicalImageId").asText());
-    assertThat(qualified.path("postgresExpectedRepoDigests"))
-        .contains(requirements(mapper).path("postgresImage"));
-    assertThat(qualified.path("postgresImageDigestVerified").asBoolean()).isTrue();
+    assertThat(qualified.path("identityContractId").asText())
+        .isEqualTo("POSTGRES_IMAGE_IDENTITY_CONTRACT_V2");
+    assertThat(qualified.path("resolvedPlatformManifestDigest").asText())
+        .isEqualTo(PLATFORM_MANIFEST_DIGEST);
+    assertThat(qualified.path("resolvedPlatformConfigDigest").asText())
+        .isEqualTo(CONFIG_DIGEST);
+    assertThat(qualified.path("repoDigestMembership").asText()).isEqualTo("PASS");
+    assertThat(qualified.path("executedObservedIdentity").path("kind").asText())
+        .isIn("PLATFORM_MANIFEST_DIGEST", "CONFIG_DIGEST");
+    assertThat(qualified.path("executedConfigDigest").asText()).isEqualTo(CONFIG_DIGEST);
+    assertThat(qualified.path("immutableBindingResult").asText()).isEqualTo("PASS");
+    assertThat(qualified.path("identityBlockers")).isEmpty();
     assertThat(qualified.path("postgresExecutedImageReference").asText()).isNotBlank();
     final JsonNode diagnostics = qualified.path("postgresImageIdentityDiagnostics");
     assertThat(diagnostics.path("requiredImageReference").asText())
-        .isEqualTo(requirements(mapper).path("postgresImage").asText());
-    assertThat(diagnostics.path("pinnedIdentityKind").asText())
-        .isEqualTo("REPO_DIGEST_REFERENCE");
-    assertThat(diagnostics.path("comparison").path("selectedIdentityDomain").asText())
-        .isEqualTo("CONFIG_IMAGE_ID");
-    assertThat(diagnostics.path("comparison").path("matchResult").asBoolean()).isTrue();
+        .isEqualTo(REQUIRED_REFERENCE);
+    assertThat(diagnostics.path("executedIdentityProof").path("result").asText())
+        .isEqualTo("PASS");
     assertThat(diagnostics.path("admission").path("blockerCount").asInt()).isZero();
     assertThat(diagnostics.path("admission").path("blockers")).isEmpty();
     assertThat(qualified.path("environmentManifestHash").asText()).matches("^[a-f0-9]{64}$");
@@ -270,19 +356,24 @@ class Qdr7CapacityEnvironmentAdmissionTest {
             registry,
             requirements,
             mapper,
-            reference ->
-                reference.startsWith("postgres@") ? POSTGRES_IMAGE_ID : DIFFERENT_IMAGE_ID);
+            (containerId, reportedImageId, manifest, contract, objectMapper) ->
+                new Qdr7CapacityEnvironmentAdmission.ExecutedIdentityProof(
+                    new Qdr7CapacityEnvironmentAdmission.ImageIdentity(
+                        Qdr7CapacityEnvironmentAdmission.ImageIdentityKind.CONFIG_DIGEST,
+                        DIFFERENT_DIGEST,
+                        CONFIG_MEDIA_TYPE),
+                    "",
+                    DIFFERENT_DIGEST,
+                    "NEGATIVE_TEST",
+                    "POSTGRES_EXECUTED_PLATFORM_MISMATCH"));
 
     assertThat(evaluation.status()).isEqualTo("NOT_QUALIFIED");
-    assertThat(evaluation.blockers()).contains("POSTGRES_EXECUTED_IMAGE_MISMATCH");
+    assertThat(evaluation.blockers()).contains("POSTGRES_EXECUTED_PLATFORM_MISMATCH");
     final JsonNode rejected = mapper.readTree(environment.toFile());
-    assertThat(rejected.path("postgresExpectedCanonicalImageId").asText())
-        .isEqualTo(POSTGRES_IMAGE_ID);
-    assertThat(rejected.path("postgresExecutedImageId").asText())
-        .isEqualTo(DIFFERENT_IMAGE_ID);
-    assertThat(rejected.path("postgresImageIdentityDomain").asText())
-        .isEqualTo("CONFIG_IMAGE_ID");
-    assertThat(rejected.path("postgresImageDigestVerified").asBoolean()).isTrue();
+    assertThat(rejected.path("executedObservedIdentity").path("digest").asText())
+        .isEqualTo(DIFFERENT_DIGEST);
+    assertThat(rejected.path("immutableBindingResult").asText()).isEqualTo("FAIL");
+    assertThat(rejected.path("repoDigestMembership").asText()).isEqualTo("PASS");
   }
 
   private static void assertBlocked(
@@ -311,14 +402,45 @@ class Qdr7CapacityEnvironmentAdmissionTest {
     snapshot.put("dockerMemoryBytes", 24L * 1024L * 1024L * 1024L);
     snapshot.put("minimumDockerMemoryBytes", 16L * 1024L * 1024L * 1024L);
     snapshot.put("postgresImageAvailable", true);
-    snapshot.put("postgresImageId", POSTGRES_IMAGE_ID);
-    snapshot.put("postgresImageIdentityDomain", "CONFIG_IMAGE_ID");
-    snapshot.put(
-        "postgresImageReference",
-        "postgres@sha256:5c855ad7b85e68e48a62f34662853f38b57c1c1d80f3a927ab58034fd6d31c5e");
+    snapshot.put("identityContractId", "POSTGRES_IMAGE_IDENTITY_CONTRACT_V2");
+    snapshot.put("identityContractVersion", 2);
+    snapshot.put("requiredImageReference", REQUIRED_REFERENCE);
+    snapshot.put("requiredIndexDigest", INDEX_DIGEST);
+    snapshot.put("requiredIndexMediaType", INDEX_MEDIA_TYPE);
+    snapshot
+        .putObject("targetPlatform")
+        .put("os", "linux")
+        .put("architecture", "amd64")
+        .put("variant", "");
+    snapshot.put("resolvedPlatformManifestDigest", PLATFORM_MANIFEST_DIGEST);
+    snapshot.put("resolvedPlatformManifestMediaType", MANIFEST_MEDIA_TYPE);
+    snapshot.put("resolvedPlatformConfigDigest", CONFIG_DIGEST);
+    snapshot.put("repoDigestMembership", "PASS");
+    snapshot
+        .putObject("localObservedIdentity")
+        .put("kind", "CONFIG_DIGEST")
+        .put("digest", CONFIG_DIGEST)
+        .put("mediaType", CONFIG_MEDIA_TYPE);
+    snapshot
+        .putObject("executedObservedIdentity")
+        .put("kind", "PLATFORM_MANIFEST_DIGEST")
+        .put("digest", PLATFORM_MANIFEST_DIGEST)
+        .put("mediaType", MANIFEST_MEDIA_TYPE);
+    snapshot.put("executedPlatformManifestDigest", PLATFORM_MANIFEST_DIGEST);
+    snapshot.put("executedConfigDigest", CONFIG_DIGEST);
+    snapshot.put("immutableBindingResult", "PASS");
+    snapshot.putArray("identityBlockers");
+    snapshot.put("postgresImageId", CONFIG_DIGEST);
+    snapshot.put("postgresImageIdentityDomain", "CONFIG_DIGEST");
+    snapshot.put("postgresImageReference", REQUIRED_REFERENCE);
     snapshot.put("postgresImageDigestVerified", true);
-    snapshot.put("postgresExpectedCanonicalImageId", POSTGRES_IMAGE_ID);
-    snapshot.put("postgresExecutedImageId", POSTGRES_IMAGE_ID);
+    snapshot.put("postgresExpectedCanonicalImageId", CONFIG_DIGEST);
+    snapshot.put("postgresExecutedImageId", PLATFORM_MANIFEST_DIGEST);
+    snapshot.putArray("postgresExpectedRepoDigests").add(REQUIRED_REFERENCE);
+    snapshot
+        .putObject("legacyPostgresIdentityFields")
+        .put("status", "DEPRECATED_NOT_USED_FOR_V2_DECISION")
+        .put("decisionContract", "POSTGRES_IMAGE_IDENTITY_CONTRACT_V2");
     snapshot.put("testcontainersViable", true);
     snapshot.put("postgresMajor", 17);
     snapshot.put("logicalCpu", 32);

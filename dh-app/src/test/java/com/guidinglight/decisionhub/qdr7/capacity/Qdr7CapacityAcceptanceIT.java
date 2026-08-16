@@ -143,7 +143,7 @@ class Qdr7CapacityAcceptanceIT {
   private static final JsonNode RESOURCE_REGISTRY = readResourceRegistry();
   private static final JsonNode ENVIRONMENT_REQUIREMENTS = readEnvironmentRequirements();
   private static final String POSTGRES_IMAGE =
-      ENVIRONMENT_REQUIREMENTS.path("postgresImage").asText();
+      ENVIRONMENT_REQUIREMENTS.path("requiredImageReference").asText();
   private static final int DATABASE_PORT = RESOURCE_REGISTRY.path("loopbackPort").asInt();
   private static final String CONTAINER_NAME = RESOURCE_REGISTRY.path("containerName").asText();
   private static final String VOLUME_NAME = RESOURCE_REGISTRY.path("volumeName").asText();
@@ -321,15 +321,18 @@ class Qdr7CapacityAcceptanceIT {
   private static void startPostgresBeforeSpringPropertyResolution() {
     try {
       POSTGRES.start();
-      final String executedCanonicalImageId =
-          Qdr7CapacityEnvironmentAdmission.inspectCanonicalImageId(
-              POSTGRES.getContainerInfo().getImageId());
-      if (!Qdr7CapacityEnvironmentAdmission.canonicalImageIdsMatch(
-          RESOURCE_REGISTRY.path("postgresImageId").asText(), executedCanonicalImageId)) {
+      final Qdr7CapacityEnvironmentAdmission.ExecutedIdentityProof executedIdentity =
+          Qdr7CapacityEnvironmentAdmission.inspectStartedContainerIdentity(
+              POSTGRES.getContainerId(),
+              POSTGRES.getContainerInfo().getImageId(),
+              RESOURCE_REGISTRY,
+              ENVIRONMENT_REQUIREMENTS,
+              new ObjectMapper());
+      if (!executedIdentity.passed()) {
         throw new IllegalStateException("QDR7_CAPACITY_POSTGRES_IMAGE_IDENTITY_MISMATCH");
       }
       ensurePostgresReadyForPropertyResolution();
-    } catch (final RuntimeException startupFailure) {
+    } catch (final RuntimeException | IOException startupFailure) {
       throw new IllegalStateException(
           "QDR7_CAPACITY_POSTGRES_STARTUP_BLOCKED: container was not ready before property resolution",
           startupFailure);

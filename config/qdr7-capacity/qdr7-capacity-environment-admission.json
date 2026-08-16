@@ -34,7 +34,22 @@
     "^vEthernet \\(Docker Desktop.*\\)$",
     "^vEthernet \\(WSL.*\\)$"
   ],
+  "identityContractId": "POSTGRES_IMAGE_IDENTITY_CONTRACT_V2",
+  "identityContractVersion": 2,
+  "requiredImageReference": "postgres@sha256:5c855ad7b85e68e48a62f34662853f38b57c1c1d80f3a927ab58034fd6d31c5e",
+  "requiredIndexDigest": "sha256:5c855ad7b85e68e48a62f34662853f38b57c1c1d80f3a927ab58034fd6d31c5e",
+  "requiredIndexMediaType": "application/vnd.oci.image.index.v1+json",
+  "targetPlatform": {
+    "os": "linux",
+    "architecture": "amd64",
+    "variant": ""
+  },
+  "expectedPlatformManifestDigest": "sha256:9c1534cbf839ec70409508a874f4c02bf4739de2f32f77efe080eef1cfd34bf4",
+  "expectedPlatformManifestMediaType": "application/vnd.oci.image.manifest.v1+json",
+  "expectedPlatformConfigDigest": "sha256:07f76768a0c956d6e9bddbcdb3c2be7fd9fd45ee6174a26873f8219fccbad65d",
+  "requiredRepoDigestMembership": true,
   "postgresImage": "postgres@sha256:5c855ad7b85e68e48a62f34662853f38b57c1c1d80f3a927ab58034fd6d31c5e",
+  "legacyPostgresImageFieldStatus": "DEPRECATED_NOT_USED_FOR_V2_DECISION",
   "postgresMajor": 17,
   "testcontainersVersion": "1.20.4"
 }

@@ -459,6 +459,45 @@ function Get-FreeLoopbackPort {
     }
 }
 
+function Invoke-NativeCommandWithTimeout {
+    param(
+        [string]$Executable,
+        [string[]]$Arguments,
+        [string]$WorkingDirectory,
+        [int]$TimeoutSeconds
+    )
+    $stdoutPath = Join-Path $WorkingDirectory ('native-' + [Guid]::NewGuid().ToString('N') + '.stdout')
+    $stderrPath = Join-Path $WorkingDirectory ('native-' + [Guid]::NewGuid().ToString('N') + '.stderr')
+    $process = $null
+    try {
+        $process = Start-Process -FilePath $Executable -ArgumentList $Arguments -PassThru -NoNewWindow -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+        if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+            $process.Kill()
+            $process.WaitForExit()
+            return [ordered]@{ exitCode = -1; text = ''; timedOut = $true }
+        }
+        # Refresh the Process object after redirected streams have reached EOF.
+        $process.WaitForExit()
+        $stdout = $(if (Test-Path -LiteralPath $stdoutPath -PathType Leaf) { [IO.File]::ReadAllText($stdoutPath, $Utf8NoBom) } else { '' })
+        $stderr = $(if (Test-Path -LiteralPath $stderrPath -PathType Leaf) { [IO.File]::ReadAllText($stderrPath, $Utf8NoBom) } else { '' })
+        return [ordered]@{
+            exitCode = $process.ExitCode
+            text = (($stdout + $(if ([string]::IsNullOrWhiteSpace($stderr)) { '' } else { "`n$stderr" })).Trim())
+            timedOut = $false
+        }
+    }
+    finally {
+        if ($null -ne $process) {
+            $process.Dispose()
+        }
+        foreach ($path in @($stdoutPath, $stderrPath)) {
+            if (Test-Path -LiteralPath $path -PathType Leaf) {
+                Remove-Item -LiteralPath $path -Force
+            }
+        }
+    }
+}
+
 function Get-HarnessHash {
     $paths = @(
         'scripts/qdr7-capacity/Invoke-Qdr7CapacityAcceptance.ps1',
@@ -658,6 +697,329 @@ function Write-BlockedPreflight {
     Write-Manifest
 }
 
+function Test-FullSha256Digest {
+    param([string]$Value)
+    return -not [string]::IsNullOrWhiteSpace($Value) -and $Value -match '^sha256:[a-f0-9]{64}$'
+}
+
+function Get-DigestHex {
+    param([string]$Value)
+    if (-not (Test-FullSha256Digest -Value $Value)) {
+        return ''
+    }
+    return $Value.Substring(7)
+}
+
+function Test-ImageIdentityEquality {
+    param(
+        [string]$LeftKind,
+        [string]$LeftDigest,
+        [string]$LeftMediaType,
+        [string]$RightKind,
+        [string]$RightDigest,
+        [string]$RightMediaType
+    )
+    $knownKinds = @('OCI_INDEX_DIGEST', 'PLATFORM_MANIFEST_DIGEST', 'CONFIG_DIGEST', 'REPO_DIGEST')
+    return $LeftKind -in $knownKinds -and
+        $RightKind -in $knownKinds -and
+        $LeftKind -eq $RightKind -and
+        (Test-FullSha256Digest -Value $LeftDigest) -and
+        $LeftDigest -eq $RightDigest -and
+        -not [string]::IsNullOrWhiteSpace($LeftMediaType) -and
+        $LeftMediaType -eq $RightMediaType
+}
+
+$PostgresIdentityBlockerTaxonomy = @(
+    'POSTGRES_INDEX_DIGEST_INVALID',
+    'POSTGRES_INDEX_MEDIA_TYPE_INVALID',
+    'POSTGRES_PLATFORM_NOT_FOUND',
+    'POSTGRES_PLATFORM_AMBIGUOUS',
+    'POSTGRES_PLATFORM_MANIFEST_MISMATCH',
+    'POSTGRES_CONFIG_DIGEST_MISMATCH',
+    'POSTGRES_REPO_DIGEST_MEMBERSHIP_MISSING',
+    'POSTGRES_LOCAL_IDENTITY_UNKNOWN',
+    'POSTGRES_EXECUTED_IDENTITY_UNKNOWN',
+    'POSTGRES_EXECUTED_PLATFORM_MISMATCH',
+    'POSTGRES_IDENTITY_DOMAIN_MISMATCH',
+    'POSTGRES_IDENTITY_RESOLUTION_FAILED'
+)
+
+function Resolve-PostgresImageIdentityContract {
+    param([object]$Admission)
+
+    $blockers = New-Object Collections.Generic.List[string]
+    function Add-IdentityBlocker {
+        param([string]$Code)
+        if ($Code -notin $PostgresIdentityBlockerTaxonomy) {
+            throw "unknown PostgreSQL image identity blocker: $Code"
+        }
+        if (-not $blockers.Contains($Code)) {
+            $blockers.Add($Code)
+        }
+    }
+
+    $requiredReference = [string]$Admission.requiredImageReference
+    $requiredIndexDigest = [string]$Admission.requiredIndexDigest
+    $requiredIndexMediaType = [string]$Admission.requiredIndexMediaType
+    $expectedManifestDigest = [string]$Admission.expectedPlatformManifestDigest
+    $expectedManifestMediaType = [string]$Admission.expectedPlatformManifestMediaType
+    $expectedConfigDigest = [string]$Admission.expectedPlatformConfigDigest
+    $targetOs = [string]$Admission.targetPlatform.os
+    $targetArchitecture = [string]$Admission.targetPlatform.architecture
+    $targetVariant = [string]$Admission.targetPlatform.variant
+    $repoDigests = @()
+    $localObservedDigest = ''
+    $localObservedKind = 'UNKNOWN'
+    $localObservedMediaType = ''
+    $resolvedManifestDigest = ''
+    $resolvedManifestMediaType = ''
+    $resolvedConfigDigest = ''
+    $resolutionSource = 'UNRESOLVED'
+
+    if ([string]$Admission.identityContractId -ne 'POSTGRES_IMAGE_IDENTITY_CONTRACT_V2' -or [int]$Admission.identityContractVersion -ne 2) {
+        Add-IdentityBlocker 'POSTGRES_IDENTITY_DOMAIN_MISMATCH'
+    }
+    if (-not (Test-FullSha256Digest -Value $requiredIndexDigest) -or $requiredReference -ne "postgres@$requiredIndexDigest") {
+        Add-IdentityBlocker 'POSTGRES_INDEX_DIGEST_INVALID'
+    }
+    if ($requiredIndexMediaType -ne 'application/vnd.oci.image.index.v1+json') {
+        Add-IdentityBlocker 'POSTGRES_INDEX_MEDIA_TYPE_INVALID'
+    }
+    if (-not (Test-FullSha256Digest -Value $expectedManifestDigest) -or $expectedManifestMediaType -ne 'application/vnd.oci.image.manifest.v1+json') {
+        Add-IdentityBlocker 'POSTGRES_PLATFORM_MANIFEST_MISMATCH'
+    }
+    if (-not (Test-FullSha256Digest -Value $expectedConfigDigest)) {
+        Add-IdentityBlocker 'POSTGRES_CONFIG_DIGEST_MISMATCH'
+    }
+    if ($targetOs -ne 'linux' -or $targetArchitecture -ne 'amd64' -or $targetVariant -ne '') {
+        Add-IdentityBlocker 'POSTGRES_PLATFORM_NOT_FOUND'
+    }
+
+    $identityRoot = [IO.Path]::GetFullPath((Join-Path $EvidenceRoot ('.postgres-identity-' + [Guid]::NewGuid().ToString('N'))))
+    $expectedIdentityPrefix = [IO.Path]::GetFullPath($EvidenceRoot) + [IO.Path]::DirectorySeparatorChar
+    if (-not $identityRoot.StartsWith($expectedIdentityPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'postgres identity temporary path escaped the evidence root'
+    }
+    $archivePath = Join-Path $identityRoot 'image.tar'
+    $extractRoot = Join-Path $identityRoot 'extract'
+
+    try {
+        [IO.Directory]::CreateDirectory($extractRoot) | Out-Null
+        $rootInspectResult = Invoke-NativeCommand -Executable 'docker' -Arguments @('image', 'inspect', '--format', '{{json .}}', $requiredReference)
+        if ($rootInspectResult.exitCode -ne 0) {
+            Add-IdentityBlocker 'POSTGRES_IDENTITY_RESOLUTION_FAILED'
+        }
+        else {
+            $rootInspect = $rootInspectResult.text | ConvertFrom-Json
+            $repoDigests = @($rootInspect.RepoDigests | ForEach-Object { [string]$_ })
+            $localObservedDigest = [string]$rootInspect.Id
+            if ($null -ne $rootInspect.Descriptor) {
+                $localObservedMediaType = [string]$rootInspect.Descriptor.mediaType
+                if (Test-ImageIdentityEquality -LeftKind 'OCI_INDEX_DIGEST' -LeftDigest ([string]$rootInspect.Descriptor.digest) -LeftMediaType $localObservedMediaType -RightKind 'OCI_INDEX_DIGEST' -RightDigest $requiredIndexDigest -RightMediaType $requiredIndexMediaType) {
+                    $localObservedDigest = [string]$rootInspect.Descriptor.digest
+                    $localObservedKind = 'OCI_INDEX_DIGEST'
+                }
+                else {
+                    Add-IdentityBlocker 'POSTGRES_IDENTITY_DOMAIN_MISMATCH'
+                }
+            }
+        }
+
+        if (-not (@($repoDigests) -contains $requiredReference)) {
+            Add-IdentityBlocker 'POSTGRES_REPO_DIGEST_MEMBERSHIP_MISSING'
+        }
+
+        $saveResult = Invoke-NativeCommand -Executable 'docker' -Arguments @('image', 'save', '--output', $archivePath, $requiredReference)
+        if ($saveResult.exitCode -ne 0 -or -not (Test-Path -LiteralPath $archivePath -PathType Leaf)) {
+            Add-IdentityBlocker 'POSTGRES_IDENTITY_RESOLUTION_FAILED'
+        }
+        else {
+            $archiveListResult = Invoke-NativeCommand -Executable 'tar' -Arguments @('-tf', $archivePath)
+            if ($archiveListResult.exitCode -ne 0) {
+                Add-IdentityBlocker 'POSTGRES_IDENTITY_RESOLUTION_FAILED'
+            }
+            else {
+                $archiveEntries = @($archiveListResult.text -split "`r?`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+                $indexBlobEntry = 'blobs/sha256/' + (Get-DigestHex -Value $requiredIndexDigest)
+                if ($archiveEntries -contains 'index.json' -and $archiveEntries -contains $indexBlobEntry) {
+                    $extractIndex = Invoke-NativeCommand -Executable 'tar' -Arguments @('-xf', $archivePath, '-C', $extractRoot, $indexBlobEntry)
+                    $indexBlobPath = Join-Path $extractRoot ($indexBlobEntry -replace '/', [IO.Path]::DirectorySeparatorChar)
+                    if ($extractIndex.exitCode -ne 0 -or -not (Test-Path -LiteralPath $indexBlobPath -PathType Leaf) -or (Get-Sha256 -Path $indexBlobPath) -ne (Get-DigestHex -Value $requiredIndexDigest)) {
+                        Add-IdentityBlocker 'POSTGRES_INDEX_DIGEST_INVALID'
+                    }
+                    else {
+                        $indexDocument = Read-JsonFile -Path $indexBlobPath
+                        if ([string]$indexDocument.mediaType -ne $requiredIndexMediaType) {
+                            Add-IdentityBlocker 'POSTGRES_INDEX_MEDIA_TYPE_INVALID'
+                        }
+                        $eligible = @($indexDocument.manifests | Where-Object {
+                            [string]$_.platform.os -eq $targetOs -and
+                            [string]$_.platform.architecture -eq $targetArchitecture -and
+                            [string]$_.platform.variant -eq $targetVariant
+                        })
+                        if ($eligible.Count -eq 0) {
+                            Add-IdentityBlocker 'POSTGRES_PLATFORM_NOT_FOUND'
+                        }
+                        elseif ($eligible.Count -ne 1) {
+                            Add-IdentityBlocker 'POSTGRES_PLATFORM_AMBIGUOUS'
+                        }
+                        else {
+                            $platformDescriptor = $eligible[0]
+                            $resolvedManifestDigest = [string]$platformDescriptor.digest
+                            $resolvedManifestMediaType = [string]$platformDescriptor.mediaType
+                            if ($resolvedManifestDigest -ne $expectedManifestDigest -or $resolvedManifestMediaType -ne $expectedManifestMediaType) {
+                                Add-IdentityBlocker 'POSTGRES_PLATFORM_MANIFEST_MISMATCH'
+                            }
+                            $manifestBlobEntry = 'blobs/sha256/' + (Get-DigestHex -Value $resolvedManifestDigest)
+                            $extractManifest = Invoke-NativeCommand -Executable 'tar' -Arguments @('-xf', $archivePath, '-C', $extractRoot, $manifestBlobEntry)
+                            $manifestBlobPath = Join-Path $extractRoot ($manifestBlobEntry -replace '/', [IO.Path]::DirectorySeparatorChar)
+                            if ($extractManifest.exitCode -ne 0 -or -not (Test-Path -LiteralPath $manifestBlobPath -PathType Leaf) -or (Get-Sha256 -Path $manifestBlobPath) -ne (Get-DigestHex -Value $resolvedManifestDigest)) {
+                                Add-IdentityBlocker 'POSTGRES_PLATFORM_MANIFEST_MISMATCH'
+                            }
+                            else {
+                                $manifestDocument = Read-JsonFile -Path $manifestBlobPath
+                                if ([string]$manifestDocument.mediaType -ne $expectedManifestMediaType -or [string]$manifestDocument.config.mediaType -ne 'application/vnd.oci.image.config.v1+json') {
+                                    Add-IdentityBlocker 'POSTGRES_PLATFORM_MANIFEST_MISMATCH'
+                                }
+                                $resolvedConfigDigest = [string]$manifestDocument.config.digest
+                                if ($resolvedConfigDigest -ne $expectedConfigDigest) {
+                                    Add-IdentityBlocker 'POSTGRES_CONFIG_DIGEST_MISMATCH'
+                                }
+                                $configBlobEntry = 'blobs/sha256/' + (Get-DigestHex -Value $resolvedConfigDigest)
+                                $extractConfig = Invoke-NativeCommand -Executable 'tar' -Arguments @('-xf', $archivePath, '-C', $extractRoot, $configBlobEntry)
+                                $configBlobPath = Join-Path $extractRoot ($configBlobEntry -replace '/', [IO.Path]::DirectorySeparatorChar)
+                                if ($extractConfig.exitCode -ne 0 -or -not (Test-Path -LiteralPath $configBlobPath -PathType Leaf) -or (Get-Sha256 -Path $configBlobPath) -ne (Get-DigestHex -Value $resolvedConfigDigest)) {
+                                    Add-IdentityBlocker 'POSTGRES_CONFIG_DIGEST_MISMATCH'
+                                }
+                                else {
+                                    $configDocument = Read-JsonFile -Path $configBlobPath
+                                    if ([string]$configDocument.os -ne $targetOs -or [string]$configDocument.architecture -ne $targetArchitecture) {
+                                        Add-IdentityBlocker 'POSTGRES_CONFIG_DIGEST_MISMATCH'
+                                    }
+                                }
+                                $resolutionSource = 'LOCAL_OCI_ARCHIVE'
+                            }
+                        }
+                    }
+                }
+                elseif ($archiveEntries -contains 'manifest.json') {
+                    $extractManifestIndex = Invoke-NativeCommand -Executable 'tar' -Arguments @('-xf', $archivePath, '-C', $extractRoot, 'manifest.json')
+                    $manifestIndexPath = Join-Path $extractRoot 'manifest.json'
+                    if ($extractManifestIndex.exitCode -ne 0 -or -not (Test-Path -LiteralPath $manifestIndexPath -PathType Leaf)) {
+                        Add-IdentityBlocker 'POSTGRES_IDENTITY_RESOLUTION_FAILED'
+                    }
+                    else {
+                        $dockerArchiveManifest = @(Read-JsonFile -Path $manifestIndexPath)
+                        if ($dockerArchiveManifest.Count -ne 1) {
+                            Add-IdentityBlocker 'POSTGRES_PLATFORM_AMBIGUOUS'
+                        }
+                        else {
+                            $configEntry = [string]$dockerArchiveManifest[0].Config
+                            if ($configEntry -notmatch '^(?:blobs/sha256/)?(?<digest>[a-f0-9]{64})(?:\.json)?$') {
+                                Add-IdentityBlocker 'POSTGRES_CONFIG_DIGEST_MISMATCH'
+                            }
+                            else {
+                                $resolvedConfigDigest = 'sha256:' + $Matches.digest
+                                $extractConfig = Invoke-NativeCommand -Executable 'tar' -Arguments @('-xf', $archivePath, '-C', $extractRoot, $configEntry)
+                                $configBlobPath = Join-Path $extractRoot ($configEntry -replace '/', [IO.Path]::DirectorySeparatorChar)
+                                if ($extractConfig.exitCode -ne 0 -or -not (Test-Path -LiteralPath $configBlobPath -PathType Leaf) -or (Get-Sha256 -Path $configBlobPath) -ne $Matches.digest -or $resolvedConfigDigest -ne $expectedConfigDigest) {
+                                    Add-IdentityBlocker 'POSTGRES_CONFIG_DIGEST_MISMATCH'
+                                }
+                                else {
+                                    $configDocument = Read-JsonFile -Path $configBlobPath
+                                    if ([string]$configDocument.os -ne $targetOs -or [string]$configDocument.architecture -ne $targetArchitecture) {
+                                        Add-IdentityBlocker 'POSTGRES_CONFIG_DIGEST_MISMATCH'
+                                    }
+                                }
+                                $remoteManifestResult = Invoke-NativeCommandWithTimeout -Executable 'docker' -Arguments @('manifest', 'inspect', '--verbose', $requiredReference) -WorkingDirectory $identityRoot -TimeoutSeconds 60
+                                if ($remoteManifestResult.timedOut -or $remoteManifestResult.exitCode -ne 0 -or [string]::IsNullOrWhiteSpace($remoteManifestResult.text)) {
+                                    Add-IdentityBlocker 'POSTGRES_IDENTITY_RESOLUTION_FAILED'
+                                }
+                                else {
+                                    $remoteManifestRecords = @($remoteManifestResult.text | ConvertFrom-Json)
+                                    $eligibleRemoteManifests = @($remoteManifestRecords | Where-Object {
+                                        [string]$_.Descriptor.platform.os -eq $targetOs -and
+                                        [string]$_.Descriptor.platform.architecture -eq $targetArchitecture -and
+                                        [string]$_.Descriptor.platform.variant -eq $targetVariant
+                                    })
+                                    if ($eligibleRemoteManifests.Count -eq 0) {
+                                        Add-IdentityBlocker 'POSTGRES_PLATFORM_NOT_FOUND'
+                                    }
+                                    elseif ($eligibleRemoteManifests.Count -ne 1) {
+                                        Add-IdentityBlocker 'POSTGRES_PLATFORM_AMBIGUOUS'
+                                    }
+                                    else {
+                                        $remoteManifest = $eligibleRemoteManifests[0]
+                                        $remoteManifestDigest = [string]$remoteManifest.Descriptor.digest
+                                        $remoteManifestMediaType = [string]$remoteManifest.Descriptor.mediaType
+                                        $remoteConfigDigest = [string]$remoteManifest.OCIManifest.config.digest
+                                        $remoteConfigMediaType = [string]$remoteManifest.OCIManifest.config.mediaType
+                                        if ($remoteManifestDigest -ne $expectedManifestDigest -or
+                                            $remoteManifestMediaType -ne $expectedManifestMediaType -or
+                                            [string]$remoteManifest.OCIManifest.mediaType -ne $expectedManifestMediaType) {
+                                            Add-IdentityBlocker 'POSTGRES_PLATFORM_MANIFEST_MISMATCH'
+                                        }
+                                        elseif ($remoteConfigDigest -ne $expectedConfigDigest -or
+                                            $remoteConfigMediaType -ne 'application/vnd.oci.image.config.v1+json' -or
+                                            $remoteConfigDigest -ne $resolvedConfigDigest) {
+                                            Add-IdentityBlocker 'POSTGRES_CONFIG_DIGEST_MISMATCH'
+                                        }
+                                        else {
+                                            $resolvedManifestDigest = $remoteManifestDigest
+                                            $resolvedManifestMediaType = $remoteManifestMediaType
+                                        }
+                                    }
+                                }
+                                if ($localObservedDigest -eq $expectedConfigDigest) {
+                                    $localObservedKind = 'CONFIG_DIGEST'
+                                    $localObservedMediaType = 'application/vnd.oci.image.config.v1+json'
+                                }
+                                else {
+                                    Add-IdentityBlocker 'POSTGRES_LOCAL_IDENTITY_UNKNOWN'
+                                }
+                                $resolutionSource = 'PINNED_REGISTRY_DESCRIPTOR_AND_LOCAL_DOCKER_ARCHIVE_CONFIG'
+                            }
+                        }
+                    }
+                }
+                else {
+                    Add-IdentityBlocker 'POSTGRES_IDENTITY_RESOLUTION_FAILED'
+                }
+            }
+        }
+    }
+    catch {
+        Add-IdentityBlocker 'POSTGRES_IDENTITY_RESOLUTION_FAILED'
+    }
+    finally {
+        if (Test-Path -LiteralPath $identityRoot) {
+            Remove-Item -LiteralPath $identityRoot -Recurse -Force
+        }
+    }
+
+    if ($localObservedKind -eq 'UNKNOWN') {
+        Add-IdentityBlocker 'POSTGRES_LOCAL_IDENTITY_UNKNOWN'
+    }
+
+    return [ordered]@{
+        identityContractId = [string]$Admission.identityContractId
+        identityContractVersion = [int]$Admission.identityContractVersion
+        requiredImageReference = $requiredReference
+        requiredIndexDigest = $requiredIndexDigest
+        requiredIndexMediaType = $requiredIndexMediaType
+        targetPlatform = [ordered]@{ os = $targetOs; architecture = $targetArchitecture; variant = $targetVariant }
+        resolvedPlatformManifestDigest = $resolvedManifestDigest
+        resolvedPlatformManifestMediaType = $resolvedManifestMediaType
+        resolvedPlatformConfigDigest = $resolvedConfigDigest
+        repoDigests = @($repoDigests)
+        repoDigestMembership = $(if (@($repoDigests) -contains $requiredReference) { 'PASS' } else { 'FAIL' })
+        localObservedIdentity = [ordered]@{ digest = $localObservedDigest; kind = $localObservedKind; mediaType = $localObservedMediaType }
+        resolutionSource = $resolutionSource
+        blockers = $blockers.ToArray()
+        passed = $blockers.Count -eq 0
+    }
+}
+
 function Invoke-Preflight {
     $started = Get-UtcTimestamp
     if (-not $EvidenceRoot.StartsWith($EvidenceBase, [StringComparison]::OrdinalIgnoreCase)) {
@@ -776,30 +1138,22 @@ function Invoke-Preflight {
         $dockerMemory = 0L
         [long]::TryParse($dockerMemoryText, [ref]$dockerMemory) | Out-Null
         Add-Check 'docker-memory' ">=$($admission.minimumDockerMemoryBytes) bytes" ([string]$dockerMemory) ($dockerMemoryResult.exitCode -eq 0 -and $dockerMemory -ge [long]$admission.minimumDockerMemoryBytes)
-        $postgresImageReference = [string]$admission.postgresImage
-        $imageInspect = Invoke-NativeCommand -Executable 'docker' -Arguments @('image', 'inspect', $postgresImageReference)
-        Add-Check 'postgres-image' "cached $postgresImageReference" $(if ($imageInspect.exitCode -eq 0) { 'cached' } else { 'missing' }) ($imageInspect.exitCode -eq 0)
-        $imageIdentity = Invoke-NativeCommand -Executable 'docker' -Arguments @('image', 'inspect', '--format', '{{.Id}}', $postgresImageReference)
-        $imageRepoDigestResult = Invoke-NativeCommand -Executable 'docker' -Arguments @('image', 'inspect', '--format', '{{json .RepoDigests}}', $postgresImageReference)
-        $imageRepoDigests = @()
-        if ($imageRepoDigestResult.exitCode -eq 0) {
-            try {
-                $imageRepoDigests = @($imageRepoDigestResult.text | ConvertFrom-Json)
-            }
-            catch {
-                $imageRepoDigests = @()
+        $postgresIdentity = Resolve-PostgresImageIdentityContract -Admission $admission
+        $postgresImageReference = [string]$postgresIdentity.requiredImageReference
+        $expectedImageId = [string]$postgresIdentity.resolvedPlatformConfigDigest
+        $imageRepoDigests = @($postgresIdentity.repoDigests)
+        $postgresImageDigestVerified = [string]$postgresIdentity.repoDigestMembership -eq 'PASS'
+        $checks.Add([ordered]@{
+            id = 'postgres-image-identity-v2'
+            expected = 'explicit index -> platform manifest -> config + RepoDigest binding'
+            actual = $(if ($postgresIdentity.passed) { [string]$postgresIdentity.resolutionSource } else { @($postgresIdentity.blockers) -join ',' })
+            status = $(if ($postgresIdentity.passed) { 'PASS' } else { 'BLOCKED' })
+        })
+        foreach ($identityBlocker in @($postgresIdentity.blockers)) {
+            if (-not $blockers.Contains([string]$identityBlocker)) {
+                $blockers.Add([string]$identityBlocker)
             }
         }
-        $expectedImageId = $imageIdentity.text.Trim()
-        $repoDigestSetContainsReference =
-            $imageRepoDigestResult.exitCode -eq 0 -and
-            @($imageRepoDigests) -contains $postgresImageReference
-        $postgresImageDigestVerified =
-            $imageInspect.exitCode -eq 0 -and
-            $imageIdentity.exitCode -eq 0 -and
-            $expectedImageId -match '^sha256:[a-f0-9]{64}$' -and
-            $repoDigestSetContainsReference
-        Add-Check 'postgres-image-digest' $postgresImageReference ($imageIdentity.text) $postgresImageDigestVerified
         $dockerStorage = Invoke-NativeCommand -Executable 'docker' -Arguments @('info', '--format', '{{.Driver}}')
 
         $containerName = "dh-qdr7-capacity-$RunId"
@@ -864,15 +1218,33 @@ function Invoke-Preflight {
         $environmentManifest.dockerStorageDriver = $dockerStorage.text
         $environmentManifest.dockerMemoryBytes = $dockerMemory
         $environmentManifest.minimumDockerMemoryBytes = [long]$admission.minimumDockerMemoryBytes
-        $environmentManifest.postgresImageAvailable = $imageInspect.exitCode -eq 0
-        $environmentManifest.postgresImageId = $expectedImageId
-        $environmentManifest.postgresImageIdentityDomain = $(if ($expectedImageId -match '^sha256:[a-f0-9]{64}$') { 'CONFIG_IMAGE_ID' } else { 'UNAVAILABLE' })
+        $environmentManifest.identityContractId = [string]$postgresIdentity.identityContractId
+        $environmentManifest.identityContractVersion = [int]$postgresIdentity.identityContractVersion
+        $environmentManifest.requiredImageReference = [string]$postgresIdentity.requiredImageReference
+        $environmentManifest.requiredIndexDigest = [string]$postgresIdentity.requiredIndexDigest
+        $environmentManifest.requiredIndexMediaType = [string]$postgresIdentity.requiredIndexMediaType
+        $environmentManifest.targetPlatform = $postgresIdentity.targetPlatform
+        $environmentManifest.resolvedPlatformManifestDigest = [string]$postgresIdentity.resolvedPlatformManifestDigest
+        $environmentManifest.resolvedPlatformManifestMediaType = [string]$postgresIdentity.resolvedPlatformManifestMediaType
+        $environmentManifest.resolvedPlatformConfigDigest = [string]$postgresIdentity.resolvedPlatformConfigDigest
+        $environmentManifest.repoDigestMembership = [string]$postgresIdentity.repoDigestMembership
+        $environmentManifest.localObservedIdentity = $postgresIdentity.localObservedIdentity
+        $environmentManifest.executedObservedIdentity = [ordered]@{ digest = ''; kind = 'UNKNOWN'; mediaType = '' }
+        $environmentManifest.executedPlatformManifestDigest = ''
+        $environmentManifest.executedConfigDigest = ''
+        $environmentManifest.immutableBindingResult = 'PENDING_EXECUTED_IDENTITY'
+        $environmentManifest.identityBlockers = @($postgresIdentity.blockers)
+        $environmentManifest.identityResolutionSource = [string]$postgresIdentity.resolutionSource
+        $environmentManifest.postgresImageAvailable = [bool]$postgresIdentity.passed
+        $environmentManifest.postgresImageId = [string]$postgresIdentity.localObservedIdentity.digest
+        $environmentManifest.postgresImageIdentityDomain = [string]$postgresIdentity.localObservedIdentity.kind
         $environmentManifest.postgresExpectedCanonicalImageId = $expectedImageId
         $environmentManifest.postgresExpectedRepoDigests = @($imageRepoDigests)
         $environmentManifest.postgresImageReference = $postgresImageReference
         $environmentManifest.postgresImageDigestVerified = $postgresImageDigestVerified
         $environmentManifest.postgresExecutedImageReference = ''
         $environmentManifest.postgresExecutedImageId = ''
+        $environmentManifest.legacyPostgresIdentityFields = [ordered]@{ status = 'DEPRECATED_NOT_USED_FOR_V2_DECISION'; decisionContract = 'POSTGRES_IMAGE_IDENTITY_CONTRACT_V2' }
         $environmentManifest.testcontainersViable = $false
         $environmentManifest.postgresMajor = 0
         $environmentManifest.logicalCpu = $logicalCpu
@@ -954,6 +1326,12 @@ function Invoke-Preflight {
         $registry.qualificationOnly = $QualificationOnlyEnabled
         $registry.postgresImageId = $expectedImageId
         $registry.postgresImageReference = $postgresImageReference
+        $registry.identityContractId = [string]$postgresIdentity.identityContractId
+        $registry.identityContractVersion = [int]$postgresIdentity.identityContractVersion
+        $registry.expectedPlatformManifestDigest = [string]$postgresIdentity.resolvedPlatformManifestDigest
+        $registry.expectedPlatformConfigDigest = [string]$postgresIdentity.resolvedPlatformConfigDigest
+        $registry.localObservedIdentity = $postgresIdentity.localObservedIdentity
+        $registry.identityResolutionSource = [string]$postgresIdentity.resolutionSource
         $registry.teardown = [ordered]@{ sampler = 'PENDING'; container = 'PENDING'; volume = 'PENDING'; residual = 'PENDING' }
         Write-JsonFile -Path $RegistryPath -Value $registry
 
