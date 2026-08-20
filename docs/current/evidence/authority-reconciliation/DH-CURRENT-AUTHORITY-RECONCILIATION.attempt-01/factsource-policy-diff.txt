@@ -1,0 +1,11 @@
+file=docs/current/FACTSOURCE_POLICY.md
+change_type=FORWARD_ONLY_AUTHORITY_SCOPE_REMEDIATION
+added_current_heading=Stage-QDR-12 PostgreSQL image identity contract remote acceptance
+primary_authority_reference=docs/current/STATUS.md + docs/current/WORK_ORDER.md
+precedence=STATUS_WORK_ORDER > CURRENT_STAGE_AUTHORITY > GOVERNANCE_POLICY > HISTORICAL_EVIDENCE
+historical_terminal_headings_scoped=12
+stage_qdr_11_headings_scoped=2
+unscoped_stage_qdr_11_terminal_claims_after=0
+historical_blocks_deleted=0
+historical_facts_rewritten=0
+status_work_order_modified=0

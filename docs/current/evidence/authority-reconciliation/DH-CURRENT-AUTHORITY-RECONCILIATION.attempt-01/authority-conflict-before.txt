@@ -1,0 +1,9 @@
+conflict=CONFIRMED
+status_heading=Terminal current authority / Stage-QDR-12 / 2026-08-16
+work_order_heading=Terminal current authority / Stage-QDR-12 / 2026-08-16
+agents_claude_root_readme_current_readme_codex_instructions=Stage-QDR-12
+factsource_policy_heading_before=Terminal current authority / Stage-QDR-11 / 2026-08-09
+factsource_policy_claim_before=唯一 terminal authority
+disposition=STALE / SUPERSEDED CURRENT-AUTHORITY CLAIM
+explicit_user_decision=Stage-QDR-12 remains current; Stage-QDR-11 becomes historical/superseded
+broad_conflict_outside_factsource_policy=NO

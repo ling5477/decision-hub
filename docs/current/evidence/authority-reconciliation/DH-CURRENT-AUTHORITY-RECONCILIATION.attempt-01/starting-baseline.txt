@@ -1,0 +1,13 @@
+task=DH-CURRENT-AUTHORITY-RECONCILIATION
+repository=decision-hub
+branch=dev
+head=c2cf74c608d0ce488a50c23212532efb80203022
+origin_dev=c2cf74c608d0ce488a50c23212532efb80203022
+ahead=0
+behind=0
+unresolved_conflicts=0
+unfinished_merge_rebase_cherry_pick=0
+starting_dirty_provenance=PREVIOUS_JAVA_GOVERNANCE_WORK_ONLY
+current_authority_primary=docs/current/STATUS.md + docs/current/WORK_ORDER.md
+authorized_current_stage=Stage-QDR-12
+write_scope=docs/current/FACTSOURCE_POLICY.md + this evidence attempt

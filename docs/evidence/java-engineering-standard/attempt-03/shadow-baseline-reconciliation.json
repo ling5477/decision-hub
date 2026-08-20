@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "ruleset_version": "huangshan-platform-2.0.0",
+  "scanner_version": "2.0.0-powershell-lexical",
+  "previous_baseline_head": "e2cb1ff966eb611f05d3703893fab002ea6142b4",
+  "current_baseline_head": "c2cf74c608d0ce488a50c23212532efb80203022",
+  "previous_count": 9,
+  "current_count": 11,
+  "persisted_count": 9,
+  "resolved_count": 0,
+  "previous_baseline_finding_count": 9,
+  "ruleset_expansion_count": 0,
+  "upstream_sync_count": 2,
+  "current_task_count": 0,
+  "upstream_sync_by_rule": {
+    "JAVA-COMMON-SQL-001": 1,
+    "JAVA-RAW-THREAD": 1
+  },
+  "configuration_sha256": "2afa49bb4f514c6a898908597d6ae2faa03a0ae616f2a45330aaef549021e93a",
+  "baseline_sha256": "fc41395992c185f99e5ab9f9bbfc4d6451b864d528a27c0c4bab15136594cb03",
+  "java_files_modified_by_task": 0
+}

@@ -1,0 +1,10 @@
+authorized_current_stage=Stage-QDR-12
+factsource_policy_current_stage=Stage-QDR-12
+factsource_policy_current_terminal_heading_count=1
+factsource_policy_historical_terminal_heading_count=12
+unscoped_current_stage_qdr_11_terminal_claims=0
+current_authority_conflict_count=0
+status_modified=NO
+work_order_modified=NO
+other_entry_or_execution_guidance_modified=NO
+result=PASS / CURRENT_AUTHORITY_CONSISTENT

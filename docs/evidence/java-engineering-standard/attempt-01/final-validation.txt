@@ -1,0 +1,21 @@
+governance_checker=PASS
+source_rule_count=308
+mapping_catalog_rule_count=22
+documented_project_rule_count=66
+exception_count=0
+shadow_scan=VIOLATION_FOUND / BASELINE=9 / NEW=0
+shadow_determinism=PASS / RUN1_HASH_EQUALS_RUN2_HASH
+architecture_scope=PASS / CURRENT_MODULE_AND_ARCHUNIT_FACTS_DRIVEN
+full_maven_test=BUILD_SUCCESS / 1101 TESTS / 0 FAILURES / 0 ERRORS / 59 SKIPPED
+docker_testcontainers=UNAVAILABLE / POSTGRESQL_CONTAINER_TESTS_SKIPPED
+quality_validate=BUILD_SUCCESS / CHECKSTYLE_0_VIOLATIONS / SPOTLESS_PASS
+git_diff_check=PASS
+allowlist_verification=PASS
+symlink_verification=PASS
+secret_scan=PASS
+absolute_path_scan=PASS
+json_schema_parse=PASS
+generic_yaml_parser=NOT_RUN / BUNDLED_PYTHON_HAS_NO_PYYAML
+project_schema_checker=PASS
+remote_ci=REMOTE_CI_NOT_RUN
+decision=IMPLEMENTED / PENDING_INDEPENDENT_REVIEW

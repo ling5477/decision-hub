@@ -1,0 +1,16 @@
+merge_state=PASS / COMPLETE
+head_origin_dev=PASS / c2cf74c608d0ce488a50c23212532efb80203022
+explicit_authority_decision=APPLIED / STAGE_QDR_12_CURRENT
+factsource_policy_remediation=PASS
+stage_qdr_11_history_preserved=PASS
+current_terminal_authority_count=1
+unscoped_stage_qdr_11_terminal_claims=0
+current_conflict_count=0
+status_work_order_diff=EMPTY
+business_java_pom_migration_contract_api_diff=EMPTY
+router_java_standard_shadow_diff=EMPTY_FOR_THIS_TASK
+git_diff_check=PASS
+allowlist=PASS / FACTSOURCE_POLICY + 7 EVIDENCE FILES
+absolute_path_secret_scan=PASS
+remote_ci=NOT_RUN / DOCS_ONLY_LOCAL_RECONCILIATION
+decision=IMPLEMENTED / PENDING_INDEPENDENT_REVIEW

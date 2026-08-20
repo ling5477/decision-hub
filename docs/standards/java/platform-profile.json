@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "repository": "DecisionHub",
+  "detected_at_utc": "2026-08-20T05:05:23Z",
+  "detection_sources": [
+    "pom.xml",
+    "dh-bom/pom.xml",
+    "dh-app/pom.xml",
+    ".github/workflows/ci.yml",
+    "ops/docker-compose.yml",
+    "mvn help:evaluate",
+    "mvn dependency:tree",
+    "java -version",
+    "mvn -version"
+  ],
+  "java": {
+    "runtime": "21.0.8",
+    "vendor": "Oracle Corporation",
+    "compiler_release": 21,
+    "ci_version": 21,
+    "application_runtime_image": null,
+    "preview_enabled": false,
+    "virtual_threads_enabled": false,
+    "status": "CONSISTENT"
+  },
+  "maven": {
+    "version": "3.9.12",
+    "execution_source": "SYSTEM_MAVEN",
+    "wrapper_status": "UNUSABLE_INVALID_WRAPPER_JAR"
+  },
+  "spring": {
+    "boot": "3.5.10",
+    "framework": "6.2.15",
+    "security": null,
+    "data": "3.5.8",
+    "status": "CONSISTENT"
+  },
+  "testing": {
+    "junit_jupiter": "5.12.2",
+    "mockito": "5.17.0",
+    "mockito_bean_style": "NONE_DETECTED",
+    "archunit": "1.3.0",
+    "testcontainers": "1.20.4"
+  },
+  "database": {
+    "postgresql_driver": "42.7.9",
+    "flyway": "11.7.2",
+    "local_compose_image": "postgres:17",
+    "testcontainers_image": "postgres:17"
+  },
+  "jakarta_usage": {
+    "persistence_imports": 8,
+    "validation_imports": 9,
+    "servlet_imports": 25,
+    "annotation_imports": 0,
+    "legacy_migrated_javax_imports": 0
+  },
+  "authority_conflicts": []
+}

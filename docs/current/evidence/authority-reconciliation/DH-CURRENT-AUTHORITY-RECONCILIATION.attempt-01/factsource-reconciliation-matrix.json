@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "authorized_current_stage": "Stage-QDR-12",
+  "rows": [
+    {"file":"docs/current/STATUS.md","declared_current_stage":"Stage-QDR-12","declared_terminal_authority":true,"historical_or_superseded":false,"conflict_before":false,"conflict_after":false},
+    {"file":"docs/current/WORK_ORDER.md","declared_current_stage":"Stage-QDR-12","declared_terminal_authority":true,"historical_or_superseded":false,"conflict_before":false,"conflict_after":false},
+    {"file":"AGENTS.md","declared_current_stage":"Stage-QDR-12","declared_terminal_authority":true,"historical_or_superseded":false,"conflict_before":false,"conflict_after":false},
+    {"file":"CLAUDE.md","declared_current_stage":"Stage-QDR-12","declared_terminal_authority":true,"historical_or_superseded":false,"conflict_before":false,"conflict_after":false},
+    {"file":"README.md","declared_current_stage":"Stage-QDR-12","declared_terminal_authority":true,"historical_or_superseded":false,"conflict_before":false,"conflict_after":false},
+    {"file":"docs/current/README.md","declared_current_stage":"Stage-QDR-12","declared_terminal_authority":true,"historical_or_superseded":false,"conflict_before":false,"conflict_after":false},
+    {"file":"docs/current/CODEX_PROJECT_INSTRUCTIONS.md","declared_current_stage":"Stage-QDR-12","declared_terminal_authority":true,"historical_or_superseded":false,"conflict_before":false,"conflict_after":false},
+    {"file":"docs/current/FACTSOURCE_POLICY.md","declared_current_stage":"Stage-QDR-12","declared_terminal_authority":true,"historical_or_superseded":false,"conflict_before":true,"conflict_after":false,"historical_stage_qdr_11_preserved":true}
+  ],
+  "stage_qdr_12_consistent_files": 8,
+  "current_conflict_count_before": 1,
+  "current_conflict_count_after": 0
+}

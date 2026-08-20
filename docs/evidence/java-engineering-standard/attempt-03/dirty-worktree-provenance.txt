@@ -1,0 +1,30 @@
+PREVIOUS_JAVA_STANDARD_ATTEMPT_01:
+  .github/workflows/ci.yml
+  AGENTS.md
+  docs/evidence/java-engineering-standard/attempt-01/**
+  artifacts/java-shadow/shadow-report.json
+
+HUANGSHAN_UPGRADE_ATTEMPT_02:
+  .agents/skills/dh-java-engineering-standard/SKILL.md
+  docs/evidence/java-engineering-standard/attempt-02/**
+  docs/standards/java/** existing before current task, except current-task paths listed below
+  scripts/java-standard/** existing before current task, except current-task paths listed below
+  artifacts/java-shadow/huangshan-shadow-report.json
+
+AUTHORITY_RECONCILIATION:
+  docs/current/FACTSOURCE_POLICY.md
+  docs/current/evidence/authority-reconciliation/**
+
+CURRENT_TASK:
+  .agents/skills/nq-dh-workflow-router/SKILL.md
+  docs/standards/java/README.md
+  docs/standards/java/source-history.json
+  docs/standards/java/history/alibaba-songshan-rule-mapping.yaml
+  docs/standards/java/shadow-baseline.json
+  scripts/java-standard/invoke-java-shadow-scan.ps1
+  scripts/java-standard/verify-java-engineering-standard.ps1
+  artifacts/java-shadow/current-dev-shadow-report.json
+  docs/evidence/java-engineering-standard/attempt-03/**
+
+UNKNOWN:
+  none
