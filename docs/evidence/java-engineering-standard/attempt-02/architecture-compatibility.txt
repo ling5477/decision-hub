@@ -1,0 +1,10 @@
+architecture_sources=AGENTS.md + current Authority + module POM + dh-app ArchitectureTest
+dh_domain=DOMAIN_CONTRACT_AND_STATE
+dh_usecase=APPLICATION_PORT_AND_DETERMINISTIC_POLICY
+dh_api=HTTP_DTO_SECURITY_BOUNDARY
+dh_infra=JDBC_FLYWAY_REPOSITORY_TRANSACTION
+dh_app=COMPOSITION_ROOT
+domain_invariants=ATOMICITY_APPEND_ONLY_FORWARD_ONLY_IDENTITY_IDEMPOTENCY_SCHEMA_FAIL_CLOSED_SNAPSHOT_CHECKSUM_EVIDENCE_PRESERVED
+service_impl_ceremony=REJECTED
+business_java_changed=0
+compatibility=PASS

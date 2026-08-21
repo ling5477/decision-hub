@@ -1,0 +1,11 @@
+current_external_reference=Alibaba Java Development Manual Huangshan 1.7.1
+current_mapping=docs/standards/java/alibaba-huangshan-rule-mapping.yaml
+current_mapping_sha256=962d292b8be907388f024d13724080ecacfe485f9822f085245303064ba419a9
+current_mapping_count=1
+songshan_status=SUPERSEDED / HISTORY_ONLY
+songshan_history_path=docs/standards/java/history/alibaba-songshan-rule-mapping.yaml
+songshan_history_sha256=b246db0a3119b1d10c43b8ca876fcd3c7e6dea7b7b9c3d8563e590f08edaa0aa
+songshan_root_level_file=ABSENT
+lineage_preserved=YES
+attempt_01_attempt_02_paths_rewritten=NO
+result=PASS

@@ -1,0 +1,13 @@
+workflow=.github/workflows/ci.yml
+java_shadow_job_count=1
+java_shadow_name_count=1
+scanner_invocation_count=1
+continue_on_error_true_count=0
+missing_report_policy=ERROR
+violation_found=NON_BLOCKING
+configuration_and_execution_failures=BLOCKING
+upstream_job_semantics_modified_by_task=NO
+duplicate_shadow_job=NO
+actionlint=NOT_INSTALLED
+structural_yaml_check=PASS / JOBS_ROOT_1 / SHADOW_JOB_1 / STRICT_REPORT_1
+remote_ci=NOT_RUN

@@ -1,6 +1,26 @@
 # Decision Hub Factsource Policy
 
-## Terminal current authority — 2026-08-09 Stage-QDR-11 final close and post-tag cleanup
+## Terminal current authority — 2026-08-16 Stage-QDR-12 PostgreSQL image identity contract remote acceptance
+
+~~~text
+Authority status: CURRENT / POLICY_ALIGNED
+Current stage: Stage-QDR-12
+Current task: DH-STAGE-QDR-12-POSTGRES-IMAGE-IDENTITY-CONTRACT-BLOCKER
+Current stage status: POSTGRES_IDENTITY_CONTRACT_REMEDIATED / REMOTE_ACCEPTED
+Primary current-state authority: docs/current/STATUS.md + docs/current/WORK_ORDER.md
+Current next action: DH-STAGE-QDR-12-QUALIFIED-ENVIRONMENT-BLOCKER-RESUME / SEPARATE TASK
+Production capacity / production ready: NOT_PROVEN / NO
+ALLOW_ENVIRONMENT_REQUALIFICATION: YES / NEXT_TASK_ONLY
+ALLOW_ENVIRONMENT_REQUALIFICATION_NOW / ALLOW_FORMAL_CAPACITY_EXECUTION / ALLOW_TAG / ALLOW_FINAL_CLOSE: NO / NO / NO / NO
+ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
+ALLOW_FEEDBACK_LEARNING / ALLOW_AGENT_PHASE / ALLOW_LANGGRAPH_RUNTIME / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO / NO
+~~~
+
+本节是当前唯一未限定历史作用域的 terminal policy authority。当前状态和下一动作仍只由 `docs/current/STATUS.md` 与 `docs/current/WORK_ORDER.md` 决定；本 policy 不覆盖主权威。事实源优先级固定为：current `STATUS.md` / `WORK_ORDER.md` > current stage-specific authority > current governance policy > historical close/evidence records。
+
+以下所有 Stage-QDR-11 及更早 terminal/current 区块均是其各自时间点的历史事实，已被本 Stage-QDR-12 current authority supersede；它们不得授权回退 current stage、恢复已消费任务或覆盖当前边界。
+
+## Historical / Superseded terminal authority — 2026-08-09 Stage-QDR-11 final close and post-tag cleanup
 
 ~~~text
 Task: DH-STAGE-QDR-11-CONSOLIDATED-EVIDENCE-INTERNAL-ACCEPTANCE-FINAL-CLOSE
@@ -43,10 +63,10 @@ ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ~~~
 
-本节是 post-tag cleanup 后唯一 terminal authority；其后 pre-tag、implementation、work order、planning 与更早区块均为历史时间线，不得授权下一阶段技术实现。
+在该历史阶段，本节曾是 post-tag cleanup 后的 terminal authority；现已被 Stage-QDR-12 current authority supersede。其后 pre-tag、implementation、work order、planning 与更早区块均为历史时间线，不得授权当前技术实现。
 
 
-## Terminal current authority — 2026-08-09 Stage-QDR-11 archive close pending tag
+## Historical / Superseded terminal authority — 2026-08-09 Stage-QDR-11 archive close pending tag
 
 ~~~text
 Task: DH-STAGE-QDR-11-CONSOLIDATED-EVIDENCE-INTERNAL-ACCEPTANCE-FINAL-CLOSE
@@ -87,10 +107,10 @@ ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ~~~
 
-本节是 tag 前唯一 terminal authority；其后 implementation、work order、planning 与更早区块均为历史时间线，不能授权新实现。
+在该历史阶段，本节曾是 tag 前 terminal authority；现已被后续 Stage-QDR-11 close 及 Stage-QDR-12 current authority supersede。其后 implementation、work order、planning 与更早区块均为历史时间线，不能授权当前实现。
 
 
-## Terminal current authority — 2026-08-09 Stage-QDR-10 final close and post-tag cleanup
+## Historical / Superseded terminal authority — 2026-08-09 Stage-QDR-10 final close and post-tag cleanup
 
 ~~~text
 Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE-RETRY-RESUME
@@ -131,10 +151,10 @@ ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ~~~
 
-本节是 post-tag cleanup 后唯一 terminal authority；其后 pre-tag、remediation、planning 与 blocker 区块均为历史时间线，不得授权下一阶段技术实现。
+在该历史阶段，本节曾是 post-tag cleanup 后的 terminal authority；现已被后续 Stage authorities supersede。其后 pre-tag、remediation、planning 与 blocker 区块均为历史时间线，不得授权当前技术实现。
 
 
-## Terminal current authority — 2026-08-09 Stage-QDR-10 archive close pending tag
+## Historical / Superseded terminal authority — 2026-08-09 Stage-QDR-10 archive close pending tag
 
 ~~~text
 Task: DH-STAGE-QDR-10-DECISION-FEEDBACK-EVIDENCE-CONSOLIDATION-FINAL-CLOSE-RETRY-RESUME
@@ -173,10 +193,10 @@ ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ~~~
 
-本节是 tag 前唯一 terminal authority；其后所有旧 current authority、remediation、planning 与 blocker 区块均为历史时间线，不能授权新实现。
+在该历史阶段，本节曾是 tag 前 terminal authority；现已被后续 Stage authorities supersede。其后所有旧 current authority、remediation、planning 与 blocker 区块均为历史时间线，不能授权当前实现。
 
 
-## Terminal current authority — 2026-08-07 feedback ingest atomicity milestone final close
+## Historical / Superseded terminal authority — 2026-08-07 feedback ingest atomicity milestone final close
 
 ~~~text
 Task: DH-PLATFORM-HARDENING-FEEDBACK-INGEST-ATOMICITY-MILESTONE-FINAL-CLOSE-RETRY-3
@@ -209,9 +229,9 @@ ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / NO / NO
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ~~~
 
-本节是当前唯一 terminal authority；其后 publication blocker、security blocker、local implementation、work order 与 planning 区块均为历史时间线，不能授权新实现。
+在该历史阶段，本节曾是 terminal authority；现已被后续 Stage authorities supersede。其后 publication blocker、security blocker、local implementation、work order 与 planning 区块均为历史时间线，不能授权当前实现。
 
-## Terminal current authority — 2026-08-01 feedback containment milestone final close
+## Historical / Superseded terminal authority — 2026-08-01 feedback containment milestone final close
 
 ~~~text
 Task: DH-PLATFORM-HARDENING-FEEDBACK-SIDE-EFFECT-CONTAINMENT-MILESTONE-FINAL-CLOSE
@@ -245,7 +265,7 @@ ALLOW_CAPACITY / ALLOW_NQ_RUNTIME / ALLOW_REAL_HTTP / ALLOW_REAL_PROVIDER: NO / 
 ALLOW_AGENT / ALLOW_LANGGRAPH / ALLOW_PAPER / ALLOW_LIVE: NO / NO / NO / NO
 ~~~
 
-本节是 post-tag cleanup 后唯一 terminal authority。其后的 pre-tag、local-implementation、Stage-QDR-9 及
+在该历史阶段，本节曾是 post-tag cleanup 后的 terminal authority，现已被后续 Stage authorities supersede。其后的 pre-tag、local-implementation、Stage-QDR-9 及
 更早区块均为历史时间线，不得覆盖本节或授权任何技术实现。下一阶段只能另起 planning-first 任务。
 
 
@@ -316,7 +336,7 @@ NO NEW SCOPE ERRATUM CHAIN
 7. 事实优先级保持为实际代码/命令与经授权 operational evidence 高于 current docs；schema、
    fixture、CI 和 commit publication 不得冒充真实 deployment/data evidence。
 
-## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 legacy persistent identity blocker
+## Historical / Superseded terminal authority — 2026-07-30 Stage-QDR-9 B4 legacy persistent identity blocker
 
 ~~~text
 Design baseline / parent: aab84e896595bbd8b3f5e99e8b2880ca28f8e7a4 / 9249bf78a2eaace4c59aedff788e37e083b72b3b
@@ -360,7 +380,7 @@ ALLOW_IDENTITY_REPLAY_IMPLEMENTATION: NO
 ALLOW_V16_IMPLEMENTATION / ALLOW_B4_MILESTONE_REVIEW_RETRY / ALLOW_B4_PUBLICATION / ALLOW_B5_IMPLEMENTATION: NO / NO / NO / NO
 ~~~
 
-## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 audit environment forward migration scope design
+## Historical / Superseded terminal authority — 2026-07-30 Stage-QDR-9 B4 audit environment forward migration scope design
 
 ~~~text
 Design baseline / origin/dev / advertised SHA: b0ff11e4057077ad7e0fe91d691116f069dc744e / FRESHLY VERIFIED
@@ -409,7 +429,7 @@ ALLOW_IDENTITY_REPLAY_IMPLEMENTATION: NO
 ALLOW_V16_IMPLEMENTATION / ALLOW_B4_MILESTONE_REVIEW_RETRY / ALLOW_B4_PUBLICATION / ALLOW_B5_IMPLEMENTATION: NO / NO / NO / NO
 ~~~
 
-## Terminal current authority — 2026-07-30 Stage-QDR-9 B4 upstream contract remote containment
+## Historical / Superseded terminal authority — 2026-07-30 Stage-QDR-9 B4 upstream contract remote containment
 
 ~~~text
 Containment baseline / published implementation: 549ed5a3224ce3ce375452dcf57629c73e3101d0
@@ -447,7 +467,7 @@ ALLOW_IDENTITY_AND_REPLAY_SCOPE_DESIGN: YES / AFTER CONTAINMENT PUBLICATION AND 
 ALLOW_V16_IMPLEMENTATION / ALLOW_B4_MILESTONE_REVIEW_RETRY / ALLOW_B4_PUBLICATION / ALLOW_B5_IMPLEMENTATION: NO / NO / NO / NO
 ~~~
 
-## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 persistent guard compatibility scope retry
+## Historical / Superseded terminal authority — 2026-07-27 Stage-QDR-9 B4 persistent guard compatibility scope retry
 
 ~~~text
 Scope-blocker retry baseline / starting HEAD: 675430a8a8e6cceaab75bb72c1fc1bf64af2da46
@@ -481,7 +501,7 @@ ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION_RETRY: YES / CURRENT TASK PART B ONLY
 ALLOW_V16_IMPLEMENTATION / ALLOW_B4_MILESTONE_REVIEW_RETRY / ALLOW_B4_PUBLICATION / ALLOW_B5_IMPLEMENTATION: NO / NO / NO / NO
 ~~~
 
-## Terminal current authority — 2026-07-27 Stage-QDR-9 B4 upstream contract scope retry
+## Historical / Superseded terminal authority — 2026-07-27 Stage-QDR-9 B4 upstream contract scope retry
 
 ~~~text
 Scope-retry baseline / starting HEAD: 75c2449972c4b6f15689144478f31c0b7edf8126
@@ -525,7 +545,7 @@ ALLOW_UPSTREAM_CONTRACT_IMPLEMENTATION_RETRY: YES / NEXT TASK ONLY
 ALLOW_V16_IMPLEMENTATION_RETRY: NO
 ~~~
 
-## Terminal current authority — 2026-07-26 Stage-QDR-9 B4 producer environment contract scope design
+## Historical / Superseded terminal authority — 2026-07-26 Stage-QDR-9 B4 producer environment contract scope design
 
 ~~~text
 Implementation baseline / HEAD / origin/dev / advertised SHA: 7624bccba9b865d4b687057f41b96799cb9ba8e3
@@ -1166,7 +1186,7 @@ ALLOW_PAPER: NO
 ALLOW_LIVE: NO
 ```
 
-本节为唯一 active current state。B3 milestone 已关闭，但 B2 formal capacity 仍为 deferred；后续只允许 `DH-STAGE-QDR-7-NEXT-PHASE-PLAN-AND-WORK-ORDER-FREEZE`，不得直接实施或恢复任何已消费任务。
+在该历史阶段，本节曾是唯一 active state。B3 milestone 已关闭，但 B2 formal capacity 当时仍为 deferred；该历史 next action 已被后续 Stage authorities 消费，不得直接实施或恢复。
 
 ### Historical B3 implementation local acceptance — consumed by final close
 
@@ -1217,7 +1237,7 @@ LIVE: DISABLED
 CURRENT_FACTSOURCE_CONSISTENCY: PASS / 14 OF 14 / 0 CONFLICTS
 ```
 
-本节以上述 terminal block 为唯一 active current state。最后一次 formal 不得重跑；旧 B2 与 pre-final 状态只保留为历史证据。B3 implementation 已在冻结 scope 内完成并本地接受，但不得描述为 production ready、Integration-1 runtime accepted 或 capacity accepted。B3 final close 只能在 exact commit 推送并通过 exact-SHA 远端 test + quality CI 后执行。
+在该历史阶段，本节以上述 terminal block 为 active state。最后一次 formal 不得重跑；旧 B2 与 pre-final 状态只保留为历史证据。B3 implementation 已在冻结 scope 内完成并本地接受，但不得描述为 production ready、Integration-1 runtime accepted 或 capacity accepted。该历史 final-close 条件已由后续 Stage authorities 消费，不得覆盖当前 Stage-QDR-12。
 
 ### Historical pre-final snapshot — consumed by final Retry-4
 

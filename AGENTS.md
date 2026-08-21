@@ -1806,7 +1806,7 @@ docs/current/FACTSOURCE_POLICY.md
 
 ### 13.1 Active skills（唯一默认启用集合）
 
-当前 active skills 仅允许以下 10 个：
+当前 active skills 仅允许以下 11 个：
 
 1. `nq-dh-workflow-router`
 2. `dh-docs-writer`
@@ -1818,6 +1818,7 @@ docs/current/FACTSOURCE_POLICY.md
 8. `java-backend-regression-tests`
 9. `db-schema-migration-review`
 10. `python-ops-tooling`
+11. `dh-java-engineering-standard`
 
 使用原则：
 
@@ -1825,6 +1826,7 @@ docs/current/FACTSOURCE_POLICY.md
 - `dh-docs-writer` 是 DH 文档治理主 skill；docs/current、Gate/Phase/Stage planning、work order、acceptance/freeze/close review、WORKLOG/TESTING/STATUS/ROADMAP/API 同步、DH/NQ 集成文档同步、Decision Pipeline MVP 文档规划和 docs/gates 归档任务必须使用它。
 - 只选择与本轮任务直接相关的 skill，不要一次性激活所有 skills。
 - 一个任务最多一个主 skill；其他 skill 只能作为补充，并说明为什么需要。
+- 新增、修改、审查或重构 Java / Spring Boot / JDBC / transaction / concurrency / logging / exception / Maven Java dependency / Java test / Checkstyle / PMD / SpotBugs / ArchUnit 时，加载 `dh-java-engineering-standard`；纯前端、纯 Python、无 Java 的 docs/Authority/read-only/Git 任务不自动触发。
 - 如果 skill 路由与当前 Gate 边界、安全边界、技术栈边界冲突，优先遵守 Gate / Freeze / Work Order / 安全 / 技术栈规则。
 - 不得用 skill 名义绕过禁止项：不接 AI/DH、不接真实 provider、不接 NQ RealClient、不触碰 LIVE 交易、不新增未要求的 API / migration / 业务能力。
 

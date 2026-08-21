@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "previous_ruleset_version": "songshan-shadow-1.0.0",
+  "current_ruleset_version": "huangshan-platform-2.0.0",
+  "scanner_version": "2.0.0-powershell-lexical",
+  "scanner_mode": "JAVA_LEXICAL_STRUCTURE_AWARE",
+  "previous_count": 9,
+  "current_count": 9,
+  "existing_baseline_count": 9,
+  "ruleset_expansion_count": 0,
+  "new_code_count": 0,
+  "ruleset_expansion_by_rule": {},
+  "configuration_sha256": "76f5ae1e8cada191c69c1d39ad2e0305d4262d1b56778dea8bd7cac04725c4fe",
+  "report_sha256_run_1": "ab7934f7c31bc41115e4b1f2f09f338387479b612db3fe968f0395cb6e5d0ac3",
+  "report_sha256_run_2": "ab7934f7c31bc41115e4b1f2f09f338387479b612db3fe968f0395cb6e5d0ac3",
+  "deterministic": true,
+  "shadow_non_blocking": true
+}

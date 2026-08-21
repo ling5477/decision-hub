@@ -81,6 +81,37 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  java-engineering-shadow:
+    name: Java engineering standard Shadow
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate Java governance configuration
+        shell: pwsh
+        run: ./scripts/java-standard/verify-java-engineering-standard.ps1
+
+      - name: Run Java engineering Shadow checker
+        shell: pwsh
+        run: ./scripts/java-standard/invoke-java-shadow-scan.ps1 -OutputPath artifacts/java-shadow/shadow-report.json
+
+      - name: Upload Java Shadow report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-engineering-shadow-report
+          path: artifacts/java-shadow/shadow-report.json
+          if-no-files-found: error
+          retention-days: 14
+
   quality:
     name: Quality
     runs-on: ubuntu-latest

@@ -1,0 +1,13 @@
+modules=dh-bom,dh-common,dh-observability,dh-domain,dh-usecase,dh-ledger,dh-providers,dh-memory,dh-knowledge,dh-infra,dh-security,dh-connector,dh-eval,dh-scheduler,dh-config,dh-sdk,dh-api,dh-app
+dh_domain_main_java=155
+dh_usecase_main_java=431
+dh_api_main_java=24
+dh_infra_main_java=41
+dh_app_main_java=11
+provider_connector_security_memory_eval_scheduler_owners=EXPLICIT / EXISTING MODULES
+feedback_evidence_runtime_capacity_packages=DISCOVERED / COVERED BY EXISTING OWNER MODEL
+architecture_overlay_changed=NO
+architecture_overlay_sha256=7a5eab1f92107c310ffef66a7aa14e7d4e20345ccfd6c6225e809b207192572b
+domain_invariants=ATOMICITY_APPEND_ONLY_FORWARD_ONLY_IDENTITY_IDEMPOTENCY_SCHEMA_FAIL_CLOSED_TRANSACTION_SNAPSHOT_CHECKSUM_EVIDENCE_PRESERVED
+business_java_changed=0
+result=PASS

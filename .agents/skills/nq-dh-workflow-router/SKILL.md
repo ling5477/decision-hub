@@ -1,6 +1,6 @@
 ---
 name: nq-dh-workflow-router
-description: Decision Hub and NexusQuant workflow router. Use before every DH/NQ Codex task to classify task type, select allowed plugins, restrict scope, enforce output format, and preserve DH/NQ safety boundaries, especially documentation, code analysis, code change, security audit, agent API, integration planning, product design, and presentation work.
+description: Decision Hub and NexusQuant workflow router. Use before every DH/NQ Codex task to detect the repository, read current Authority, classify the task, compose domain/security and repository-specific Java Engineering skills, restrict scope, and preserve safety boundaries.
 ---
 
 # NQ DH Workflow Router
@@ -87,6 +87,79 @@ PRESENTATION         Presentations + Documents + Canva
 ```
 
 Plugin selection does not grant permission to connect external systems, read secrets, access databases, or mutate NQ/DH production state. Use local files first unless the user explicitly authorizes a connector workflow and it is within the current gate.
+
+## Repository Detection And Java Engineering Route
+
+Resolve the repository from `git rev-parse --show-toplevel` and repository-owned Authority files before selecting a Java skill. Do not infer the repository from a task name, historical path, branch name, or model memory.
+
+Fail closed when a Java-scoped task cannot resolve exactly one supported repository:
+
+```text
+FAIL_CLOSED / REPOSITORY_UNRESOLVED
+```
+
+Load the repository-specific Java Engineering skill when the task adds, modifies, reviews, debugs, refactors, or validates any of these scopes:
+
+```text
+Java source
+Spring Boot / Spring Framework / Spring MVC / Spring Security / Spring Data
+JDBC / transaction / Repository / Service / Controller / Adapter / Port / SPI
+concurrency / executor / thread / async / logging / exception handling
+Maven Java dependencies
+JUnit / Mockito / ArchUnit / Checkstyle / Spotless / PMD / SpotBugs
+Java refactoring / Java review
+```
+
+Repository routes:
+
+```text
+repository = decision-hub AND Java scope exists
+  -> dh-java-engineering-standard
+
+repository = nexus-quant AND Java scope exists
+  -> nq-java-engineering-standard
+```
+
+Do not load a Java Engineering skill for a pure documentation, React/TypeScript-only, Python-only, Authority-only, read-only acceptance, or Git-only task that does not modify or review Java/Maven-Java behavior.
+
+## Skill Composition, Order And Precedence
+
+Execution order is fixed:
+
+```text
+1. nq-dh-workflow-router
+2. repository detection
+3. current Authority / Gate / Stage / task boundary
+4. task-specific domain, security, review, migration, API, or documentation skill when applicable
+5. repository-specific Java Engineering skill when Java scope exists
+6. implementation or review
+7. validation
+```
+
+Skills compose rather than compete. For example, a Decision Hub Java security review loads the security/review skill first and `dh-java-engineering-standard` second. A pure WORKLOG append or React/TypeScript-only task does not load the Java skill.
+
+Precedence is fixed:
+
+```text
+Authority / Gate / Stage
+> repository domain invariants
+> repository-specific Java Engineering skill
+> adapted Huangshan rules
+> formatting preference
+```
+
+The Java Engineering skill cannot grant permission, override Authority, Gate/Stage, contracts, Schema, state machines, runtime modes, exchange/provider boundaries, or real integration. The Router records only when to load which skill, ordering, precedence, and fail-closed behavior; it does not duplicate Java, Spring, Huangshan, financial, atomicity, or implementation rules.
+
+Recursive routing is forbidden:
+
+```text
+dh-java-engineering-standard -> nq-dh-workflow-router
+nq-java-engineering-standard -> nq-dh-workflow-router
+
+RECURSIVE_ROUTING_REJECTED
+```
+
+Once the Router has selected a Java Engineering skill for the current task, that skill must not re-enter the Router.
 
 ## Stage Naming Route
 

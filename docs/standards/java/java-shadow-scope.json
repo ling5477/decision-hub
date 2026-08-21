@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "repository": "DecisionHub",
+  "architecture_sources": [
+    "AGENTS.md",
+    "docs/current/STATUS.md",
+    "dh-app/src/test/java/com/guidinglight/decisionhub/ArchitectureTest.java"
+  ],
+  "production_source_roots": [
+    "dh-api",
+    "dh-app",
+    "dh-common",
+    "dh-config",
+    "dh-connector",
+    "dh-domain",
+    "dh-eval",
+    "dh-infra",
+    "dh-knowledge",
+    "dh-ledger",
+    "dh-memory",
+    "dh-observability",
+    "dh-providers",
+    "dh-scheduler",
+    "dh-sdk",
+    "dh-security",
+    "dh-usecase"
+  ],
+  "production_source_marker": "/src/main/java/",
+  "test_source_marker": "/src/test/java/",
+  "scanner_mode": "JAVA_LEXICAL_STRUCTURE_AWARE",
+  "time_restricted_prefixes": [
+    "dh-api/src/main/java/",
+    "dh-domain/src/main/java/",
+    "dh-usecase/src/main/java/"
+  ],
+  "infrastructure_time_boundary_prefixes": [
+    "dh-app/src/main/java/",
+    "dh-common/src/main/java/",
+    "dh-config/src/main/java/",
+    "dh-connector/src/main/java/",
+    "dh-infra/src/main/java/",
+    "dh-observability/src/main/java/",
+    "dh-providers/src/main/java/",
+    "dh-scheduler/src/main/java/",
+    "dh-security/src/main/java/"
+  ],
+  "excluded_segments": [
+    "target",
+    "build",
+    "node_modules",
+    "vendor",
+    "generated",
+    "generated-sources"
+  ],
+  "architecture_notes": [
+    "dh-domain and dh-usecase own domain and application semantics",
+    "dh-infra owns JDBC and persistence adapters",
+    "dh-app is the composition root and may construct explicit Clock boundaries",
+    "the existing TimeProvider is a project time abstraction and is not treated as a raw system-time call",
+    "tests remain governed by Checkstyle, Spotless, ArchUnit and contract/integration tests rather than the production Shadow baseline"
+  ]
+}

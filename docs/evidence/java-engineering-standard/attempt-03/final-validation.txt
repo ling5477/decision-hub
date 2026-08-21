@@ -1,0 +1,13 @@
+reconciliation=IMPLEMENTED
+repository_validation=CURRENT_DEV_REGRESSION_BLOCKED
+router_integration=PASS
+java_standard_reconciliation=PASS
+current_task_java_findings=0
+java_pom_migration_contract_authority_diff=EMPTY
+attempt_01_immutability=PASS / NO_WRITE_TARGETED / STARTING_TREE_SHA256_LOCKED
+attempt_02_immutability=PASS / NO_WRITE_TARGETED / STARTING_TREE_SHA256_LOCKED
+authority_reconciliation_immutability=PASS / NO_WRITE_TARGETED / STARTING_TREE_SHA256_LOCKED
+git_diff_check=PASS
+changed_file_allowlist=PASS / 21 CURRENT_TASK_FILES / 0 FORBIDDEN_PATHS
+secret_absolute_path_symlink=PASS / 0 CREDENTIAL_LITERALS / 0 ABSOLUTE_PATHS / 0 SYMLINKS
+final_decision=RECONCILIATION_IMPLEMENTED / REPOSITORY_BLOCKED_BY_CURRENT_DEV_VALIDATION_REGRESSION

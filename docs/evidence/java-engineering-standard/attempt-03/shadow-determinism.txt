@@ -1,0 +1,6 @@
+report=artifacts/java-shadow/current-dev-shadow-report.json
+run_1_sha256=f395b47d7e8bf4891a89b9bf0f6653912f7f89b949801cff02717a4cff748a24
+run_2_sha256=f395b47d7e8bf4891a89b9bf0f6653912f7f89b949801cff02717a4cff748a24
+hash_equal=true
+current_task_findings=0
+result=PASS / DETERMINISTIC

@@ -1,0 +1,7 @@
+.github/workflows/ci.yml
+AGENTS.md
+.agents/skills/dh-java-engineering-standard/**
+docs/standards/java/**
+scripts/java-standard/**
+docs/evidence/java-engineering-standard/attempt-01/**
+artifacts/java-shadow/shadow-report.json
